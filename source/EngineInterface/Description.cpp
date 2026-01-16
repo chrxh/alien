@@ -117,11 +117,7 @@ InjectorDescription::InjectorDescription() {}
 
 CellType CellDescription::getCellType() const
 {
-    if (std::holds_alternative<StructureDescription>(_cellType)) {
-        return CellType_Structure;
-    } else if (std::holds_alternative<FreeCellDescription>(_cellType)) {
-        return CellType_Free;
-    } else if (std::holds_alternative<BaseDescription>(_cellType)) {
+    if (std::holds_alternative<BaseDescription>(_cellType)) {
         return CellType_Base;
     } else if (std::holds_alternative<DepotDescription>(_cellType)) {
         return CellType_Depot;
@@ -198,6 +194,16 @@ ObjectType ObjectDescription::getObjectType() const
         return ObjectType_Cell;
     }
     CHECK(false);
+}
+
+FreeCellDescription& ObjectDescription::getFreeCellRef()
+{
+    return std::get<FreeCellDescription>(_type);
+}
+
+FreeCellDescription const& ObjectDescription::getFreeCellRef() const
+{
+    return std::get<FreeCellDescription>(_type);
 }
 
 CellDescription& ObjectDescription::getCellRef()
@@ -349,9 +355,13 @@ void Description::assignNewIds()
             }
         }
         {
-            auto insertionResult = creatureIdToOldToNewObjectId[object.getCellRef()._creatureId].insert({oldId, newId});
+            std::optional<uint64_t> creatureId = std::nullopt;
+            if (object.getObjectType() == ObjectType_Cell) {
+                creatureId = object.getCellRef()._creatureId;
+            }
+            auto insertionResult = creatureIdToOldToNewObjectId[creatureId].insert({oldId, newId});
             if (!insertionResult.second) {
-                creatureIdToNonUniqueCellIds[object.getCellRef()._creatureId].insert(oldId);
+                creatureIdToNonUniqueCellIds[creatureId].insert(oldId);
             }
         }
 
@@ -395,13 +405,17 @@ void Description::assignNewIds()
     };
 
     for (auto& object : _objects) {
-        for (auto& connection : object._connections) {
-            connection._objectId = findNewObjectId(object.getCellRef()._creatureId, connection._objectId);
+        std::optional<uint64_t> creatureId = std::nullopt;
+        if (object.getObjectType() == ObjectType_Cell) {
+            creatureId = object.getCellRef()._creatureId;
         }
-        if (object.getCellRef().getCellType() == CellType_Constructor) {
+        for (auto& connection : object._connections) {
+            connection._objectId = findNewObjectId(creatureId, connection._objectId);
+        }
+        if (object.getObjectType() == ObjectType_Cell && object.getCellRef().getCellType() == CellType_Constructor) {
             auto& constructor = std::get<ConstructorDescription>(object.getCellRef()._cellType);
             if (constructor._lastConstructedCellId.has_value()) {
-                constructor._lastConstructedCellId = findNewObjectId(object.getCellRef()._creatureId, constructor._lastConstructedCellId.value());
+                constructor._lastConstructedCellId = findNewObjectId(creatureId, constructor._lastConstructedCellId.value());
             }
         }
     }
@@ -420,6 +434,9 @@ void Description::assignNewIds()
 
     // Assign new creatureIds to cells
     for (auto& object : _objects) {
+        if (object.getObjectType() != ObjectType_Cell) {
+            continue;
+        }
         if (object.getCellRef()._creatureId.has_value()) {
             CHECK(!nonUniqueCreatureIds.contains(object.getCellRef()._creatureId.value()));
             auto findResult = oldToNewCreatureId.find(object.getCellRef()._creatureId.value());
@@ -497,13 +514,21 @@ size_t Description::getNumObjects() const
 
 size_t Description::getNumObjectsWithoutCreature() const
 {
-    return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) { return !object.getCellRef()._creatureId.has_value(); });
+    return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) {
+        if (object.getObjectType() != ObjectType_Cell) {
+            return true;  // Structure and FreeCell objects don't have creatures
+        }
+        return !object.getCellRef()._creatureId.has_value();
+    });
 }
 
 std::vector<ObjectDescription> Description::getObjectsForCreature(uint64_t creatureId) const
 {
     std::vector<ObjectDescription> result;
     for (auto const& object : _objects) {
+        if (object.getObjectType() != ObjectType_Cell) {
+            continue;
+        }
         if (object.getCellRef()._creatureId.has_value() && object.getCellRef()._creatureId.value() == creatureId) {
             result.push_back(object);
         }

@@ -63,12 +63,12 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
         if (reconnectorMode == ReconnectorMode_Structure) {
             // Connect to structure cells only
-            if (otherObject->typeData.cell.cellType != CellType_Structure) {
+            if (otherObject->type != ObjectType_Structure) {
                 return;
             }
         } else if (reconnectorMode == ReconnectorMode_FreeCell) {
             // Connect to free cells only
-            if (otherObject->typeData.cell.cellType != CellType_Free) {
+            if (otherObject->type != ObjectType_FreeCell) {
                 return;
             }
 
@@ -161,7 +161,7 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
         auto connectedObject = object->connections[i].object;
         bool shouldRemove = false;
 
-        if (connectedObject->typeData.cell.cellType == CellType_Structure || connectedObject->typeData.cell.cellType == CellType_Free) {
+        if (connectedObject->type == ObjectType_Structure || connectedObject->type == ObjectType_FreeCell) {
             shouldRemove = true;
         }
         if (!object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {

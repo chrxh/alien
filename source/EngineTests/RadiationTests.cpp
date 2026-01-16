@@ -55,7 +55,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(StructureDescription())));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
 
@@ -100,7 +100,7 @@ TEST_F(RadiationTests, freeCells_shouldRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(FreeCellDescription())));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(FreeCellDescription()));
 
     _simulationFacade->setSimulationData(data);
 
@@ -145,7 +145,7 @@ TEST_F(RadiationTests, fixedStructureObject_shouldNotRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(StructureDescription())));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
 

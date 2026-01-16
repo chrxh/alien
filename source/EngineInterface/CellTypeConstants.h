@@ -47,8 +47,6 @@ enum CellType_
 namespace Const
 {
     std::vector<std::string> const CellTypeStrings = {
-        "Structure",
-        "Free",
         "Base",
         "Depot",
         "Constructor",
@@ -63,6 +61,11 @@ namespace Const
         "Digestor",
         "Memory",
         "Communicator"};
+
+    std::vector<std::string> const ObjectTypeStrings = {
+        "Structure",
+        "Free Cell",
+        "Cell"};
 }
 
 using CellTypeGenome = int;

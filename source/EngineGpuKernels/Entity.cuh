@@ -459,7 +459,14 @@ struct Structure
 };
 
 struct FreeCell
-{};
+{
+    float rawEnergy;
+
+    // Additional rendering data
+    CellEvent event;
+    uint8_t eventCounter;
+    float2 eventPos;
+};
 
 struct Cell
 {
@@ -497,10 +504,9 @@ struct Cell
     uint8_t eventCounter;
     float2 eventPos;
 
-    __device__ __inline__ bool isSameCreature(Cell* otherObject)
+    __device__ __inline__ bool isSameCreature(Cell* otherCell)
     {
-        return (otherObject->creature != nullptr && this->creature != nullptr && otherObject->creature->id == this->creature->id)
-            || (otherObject->creature == nullptr && this->creature == nullptr);
+        return otherCell->creature->id == this->creature->id;
     }
 
     __device__ __inline__ float getEnergy() const

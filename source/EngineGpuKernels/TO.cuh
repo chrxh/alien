@@ -394,7 +394,9 @@ struct StructureTO
 {};
 
 struct FreeCellTO
-{};
+{
+    float rawEnergy;
+};
 
 struct CellTO
 {
@@ -406,7 +408,6 @@ struct CellTO
     CellState cellState;
 
     // Creature/Genome data
-    bool belongToCreature;
     uint64_t creatureIndex;
     uint16_t nodeIndex;
     uint16_t parentNodeIndex;

@@ -8,8 +8,6 @@
 std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactory::getAllCellParameters() const
 {
     return {
-        CellParameter{CellType_Structure},
-        CellParameter{CellType_Free},
         CellParameter{CellType_Base},
         CellParameter{CellType_Depot},
         CellParameter{CellType_Constructor},
@@ -67,7 +65,7 @@ ObjectDescription DescriptionTestDataFactory::createNonDefaultObjectDescription(
                           .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
                           .cellType(cellTypeDesc));
 
-    if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
+    if (true) {
         NeuralNetworkDescription defaultNn;
         NeuralNetworkDescription nn;
         nn.weight(2, 1, 0.7f);
@@ -601,10 +599,6 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     auto memoryMode = std::holds_alternative<MemoryModeWrapper>(cellParameter.mode) ? std::get<MemoryModeWrapper>(cellParameter.mode).value : MemoryMode_SignalDelay;
 
     switch (type) {
-    case CellType_Structure:
-        return StructureDescription();
-    case CellType_Free:
-        return FreeCellDescription();
     case CellType_Base:
         return BaseDescription();
     case CellType_Depot:

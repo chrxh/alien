@@ -767,20 +767,22 @@ namespace
     auto constexpr Id_Creature_FrontAngleId = 5;
     auto constexpr Id_Creature_GenomeId = 6;
 
-    auto constexpr Id_Cell_UsableEnergy = 1;
-    auto constexpr Id_Cell_RawEnergy = 20;
-    auto constexpr Id_Cell_Age = 7;
-    auto constexpr Id_Cell_CellState = 8;
-    auto constexpr Id_Cell_ActivationTime = 9;
-    auto constexpr Id_Cell_CellTriggered = 10;
-    auto constexpr Id_Cell_NodeIndex = 12;
-    auto constexpr Id_Cell_ParentNodeIndex = 13;
-    auto constexpr Id_Cell_GeneIndex = 14;
-    auto constexpr Id_Cell_SignalState = 15;
-    auto constexpr Id_Cell_AngleToFront = 16;
-    auto constexpr Id_Cell_FrontAngleId = 18;
-    auto constexpr Id_Cell_IsFrontAngleRefCell = 19;
-    auto constexpr Id_Cell_CreatureId = 21;
+    auto constexpr Id_FreeCell_RawEnergy = 0;
+
+    auto constexpr Id_Cell_UsableEnergy = 0;
+    auto constexpr Id_Cell_RawEnergy = 1;
+    auto constexpr Id_Cell_Age = 2;
+    auto constexpr Id_Cell_CellState = 3;
+    auto constexpr Id_Cell_ActivationTime = 4;
+    auto constexpr Id_Cell_CellTriggered = 5;
+    auto constexpr Id_Cell_NodeIndex = 6;
+    auto constexpr Id_Cell_ParentNodeIndex = 7;
+    auto constexpr Id_Cell_GeneIndex = 8;
+    auto constexpr Id_Cell_SignalState = 9;
+    auto constexpr Id_Cell_AngleToFront = 10;
+    auto constexpr Id_Cell_FrontAngleId = 11;
+    auto constexpr Id_Cell_IsFrontAngleRefCell = 12;
+    auto constexpr Id_Cell_CreatureId = 13;
 
     auto constexpr Id_Object_Id = 0;
     auto constexpr Id_Object_Pos = 2;
@@ -1440,6 +1442,25 @@ namespace cereal
         ar(data._mode);
     }
     SPLIT_SERIALIZATION(CommunicatorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, StructureDescription& data)
+    {
+        StructureDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(StructureDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, FreeCellDescription& data)
+    {
+        FreeCellDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_FreeCell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(FreeCellDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellDescription& data)

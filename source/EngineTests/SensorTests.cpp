@@ -60,11 +60,11 @@ protected:
             }
         } else if (mode == SensorMode_DetectFreeCell) {
             for (int i = 0; i < count; ++i) {
-                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(CellDescription().cellType(FreeCellDescription())));
+                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(FreeCellDescription()));
             }
         } else if (mode == SensorMode_DetectStructure) {
             for (int i = 0; i < count; ++i) {
-                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(CellDescription().cellType(StructureDescription())));
+                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(StructureDescription()));
             }
         } else if (mode == SensorMode_DetectCreature) {
             data.add(createLargeCreature(startPos, count), assignNewIds);
@@ -408,7 +408,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
 
     // Add structure cells between sensor and target (to block the ray)
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 50.0f}).type(CellDescription().cellType(StructureDescription())));
+        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 50.0f}).type(StructureDescription()));
     }
 
     // Add target behind the structure cells
@@ -433,7 +433,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
 
     // Add structure cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 5.0f}).type(CellDescription().cellType(StructureDescription())));
+        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 5.0f}).type(StructureDescription()));
     }
 
     // Add target behind the structure cells
@@ -458,7 +458,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
 
     // Add structure cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 150.0f}).type(CellDescription().cellType(StructureDescription())));
+        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 150.0f}).type(StructureDescription()));
     }
 
     // Add target at different angle (not blocking)
@@ -768,7 +768,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     // Add structure cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 30; ++i) {
-        actualData._objects.emplace_back(ObjectDescription().id(50 + i).pos({85.0f + i, 70.0f}).type(CellDescription().cellType(StructureDescription())));
+        actualData._objects.emplace_back(ObjectDescription().id(50 + i).pos({85.0f + i, 70.0f}).type(StructureDescription()));
     }
     _simulationFacade->setSimulationData(actualData);
 
@@ -843,7 +843,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
     data.addConnection(1, 2);
 
     // Add just a few free cells
-    data._objects.emplace_back(ObjectDescription().id(100).pos({100.0f, 50.0f}).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
+    data._objects.emplace_back(ObjectDescription().id(100).pos({100.0f, 50.0f}).type(FreeCellDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -862,12 +862,12 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
 
     // Add free cells with wrong color (color 0) closer
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
+        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(FreeCellDescription()));
     }
 
     // Add free cells with correct color (color 1) farther but still in range
     for (int i = 0; i < 8; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
+        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(FreeCellDescription()));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1142,7 +1142,7 @@ TEST_F(SensorTests, detectCreature_ignoreStructureObjects)
     // Add structure cells (should be ignored)
     for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
-            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(CellDescription().cellType(StructureDescription())));
+            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(StructureDescription()));
         }
     }
 
@@ -1166,7 +1166,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
     // Add free cells (should be ignored)
     for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
-            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(CellDescription().cellType(FreeCellDescription())));
+            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(FreeCellDescription()));
         }
     }
 

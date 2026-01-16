@@ -464,6 +464,8 @@ struct StructureDescription
 struct FreeCellDescription
 {
     auto operator<=>(FreeCellDescription const&) const = default;
+
+    MEMBER(FreeCellDescription, float, rawEnergy, 100.0f);
 };
 
 struct CellDescription
@@ -524,6 +526,8 @@ struct ObjectDescription
 
     ObjectType getObjectType() const;
 
+    FreeCellDescription& getFreeCellRef();
+    FreeCellDescription const& getFreeCellRef() const;
     CellDescription& getCellRef();
     CellDescription const& getCellRef() const;
 

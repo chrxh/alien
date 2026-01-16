@@ -99,9 +99,9 @@ __inline__ __device__ void ObjectProcessor::fillDensityMap(SimulationData& data)
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto object = data.entities.objects.at(index);
-        if (object->typeData.cell.cellType == CellType_Free) {
+        if (object->type == ObjectType_FreeCell) {
             data.preprocessedSimulationData.densityMap.addFreeCell(object);
-        } else if (object->typeData.cell.cellType == CellType_Structure) {
+        } else if (object->type == ObjectType_Structure) {
             data.preprocessedSimulationData.densityMap.addStructureObject(object);
         }
     }
@@ -684,7 +684,7 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
                     }
                 }
             }
-            if (object->typeData.cell.cellType == CellType_Free || object->typeData.cell.cellType == CellType_Structure) {
+            if (object->type == ObjectType_FreeCell || object->type == ObjectType_Structure) {
                 cellState = origCellState;
             }
         }
@@ -778,22 +778,22 @@ __inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& d
             continue;
         }
         for (int index = 0; index < object->numConnections; ++index) {
-            auto connectingCell = object->connections[index].object;
-            if (connectingCell->fixed) {
+            auto connectedObject = object->connections[index].object;
+            if (connectedObject->fixed) {
                 continue;
             }
-            auto posDelta = object->pos - connectingCell->pos;
+            auto posDelta = object->pos - connectedObject->pos;
             auto distance = Math::length(posDelta);
             if (distance > NEAR_ZERO) {
                 auto direction = posDelta / distance;
-                auto velDelta = object->vel - connectingCell->vel;
+                auto velDelta = object->vel - connectedObject->vel;
                 auto velDelta_part = Math::dot(velDelta, direction);
 
                 auto delta = direction * innerFriction * velDelta_part;
                 atomicAdd(&object->vel.x, -delta.x * 0.5f);
                 atomicAdd(&object->vel.y, -delta.y * 0.5f);
-                atomicAdd(&connectingCell->vel.x, delta.x * 0.5f);
-                atomicAdd(&connectingCell->vel.y, delta.y * 0.5f);
+                atomicAdd(&connectedObject->vel.x, delta.x * 0.5f);
+                atomicAdd(&connectedObject->vel.y, delta.y * 0.5f);
             }
         }
     }
@@ -825,7 +825,7 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
         if (object->fixed) {
             continue;
         }
-        if (object->typeData.cell.cellType == CellType_Structure) {
+        if (object->type == ObjectType_Structure) {
             continue;
         }
         if (data.primaryNumberGen.random() < cudaSimulationParameters.radiationProbability) {
@@ -896,7 +896,7 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[object->color];
-        if (cudaSimulationParameters.cellAgeLimiterToggle.value && object->typeData.cell.cellType != CellType_Free && object->typeData.cell.cellType != CellType_Structure
+        if (cudaSimulationParameters.cellAgeLimiterToggle.value && object->type != ObjectType_FreeCell && object->type != ObjectType_Structure
             && object->typeData.cell.cellTriggered == CellTriggered_No && object->typeData.cell.cellState == CellState_Ready && object->typeData.cell.activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < object->numConnections; ++i) {
@@ -911,7 +911,7 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
                 cellMaxAge = toInt(cellInactiveMaxAge);
             }
         }
-        if (cudaSimulationParameters.cellAgeLimiterToggle.value && object->typeData.cell.cellType == CellType_Free) {
+        if (cudaSimulationParameters.cellAgeLimiterToggle.value && object->type == ObjectType_FreeCell) {
             cellMaxAge = cudaSimulationParameters.freeCellMaxAge.value[object->color];
         }
         if (cellMaxAge > 0 && object->typeData.cell.age > cellMaxAge) {
@@ -965,6 +965,9 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
+            continue;
+        }
         if (object->numConnections == 0) {
             continue;
         }
@@ -973,6 +976,10 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
         //}
         auto i = *data.timestep % object->numConnections;
         auto& connectedObject = object->connections[i].object;
+        // Skip if connected object is not a Cell
+        if (connectedObject->type == ObjectType_Structure || connectedObject->type == ObjectType_FreeCell) {
+            continue;
+        }
 
         // Flow of usable energy
         {

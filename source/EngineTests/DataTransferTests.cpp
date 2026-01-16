@@ -139,7 +139,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
-    auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).cellType(BaseDescription()));
+    auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDescription().cellType(BaseDescription())));
 
 
     auto data = Description().addCreature(hexagon._objects, CreatureDescription(), GenomeDescription().genes({

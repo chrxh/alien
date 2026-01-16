@@ -62,7 +62,7 @@ TEST_F(ReconnectorTests, structureMode_connectToStructure)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDescription());
 
     // Add structure cell within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(StructureDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -97,7 +97,7 @@ TEST_F(ReconnectorTests, structureMode_outOfRange)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDescription());
 
     // Add structure cell outside range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({100.0f - range - 0.1f, 100.0f}).type(CellDescription().cellType(StructureDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({100.0f - range - 0.1f, 100.0f}).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -118,7 +118,7 @@ TEST_F(ReconnectorTests, freeCellMode_connectToFreeCell)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription());
 
     // Add free cell within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(FreeCellDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -152,7 +152,7 @@ TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription().restrictToColor(1));
 
     // Add free cell with matching color
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(1).type(CellDescription().cellType(FreeCellDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(1).type(FreeCellDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -167,7 +167,7 @@ TEST_F(ReconnectorTests, freeCellMode_colorRestriction_failed)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription().restrictToColor(1));
 
     // Add free cell with non-matching color
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(0).type(CellDescription().cellType(FreeCellDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(0).type(FreeCellDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -229,7 +229,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreFreeCells)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectCreatureDescription());
 
     // Add free cell within range (not part of a creature)
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(FreeCellDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -447,7 +447,7 @@ TEST_F(ReconnectorTests, removeConnections_removeStructureConnection)
     auto data = createReconnectorWithNegativeSignal({100.0f, 100.0f}, ReconnectCreatureDescription());
 
     // Add structure cell and connect it to reconnector
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(StructureDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(StructureDescription()));
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
@@ -468,7 +468,7 @@ TEST_F(ReconnectorTests, removeConnections_removeFreeObjectConnection)
     auto data = createReconnectorWithNegativeSignal({100.0f, 100.0f}, ReconnectCreatureDescription());
 
     // Add free cell and connect it to reconnector
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(FreeCellDescription()));
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
@@ -549,7 +549,7 @@ TEST_F(ReconnectorTests, noTrigger_noAction)
     data.addConnection(1, 2);
 
     // Add structure cell within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(StructureDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Run several timesteps without trigger
@@ -565,8 +565,8 @@ TEST_F(ReconnectorTests, connectsToClosest)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDescription());
 
     // Add two structure cells, one closer than the other
-    data._objects.emplace_back(ObjectDescription().id(10).pos({98.0f, 100.0f}).type(CellDescription().cellType(StructureDescription())));
-    data._objects.emplace_back(ObjectDescription().id(11).pos({99.0f, 100.0f}).type(CellDescription().cellType(StructureDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({98.0f, 100.0f}).type(StructureDescription()));
+    data._objects.emplace_back(ObjectDescription().id(11).pos({99.0f, 100.0f}).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -583,7 +583,7 @@ TEST_F(ReconnectorTests, skipAlreadyConnected)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDescription());
 
     // Add structure cell within range and already connected
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(StructureDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(StructureDescription()));
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
@@ -601,7 +601,7 @@ TEST_F(ReconnectorTests, skipAlreadyConnected)
 TEST_F(ReconnectorTests, energyConservation)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDescription());
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(StructureDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(StructureDescription()));
 
     auto originalEnergy = getEnergy(data);
 
@@ -633,7 +633,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     data.addConnection(1, 4);
 
     // Add target creature below (ray to target is blocked by connection 3-4)
-    data._objects.emplace_back(ObjectDescription().id(10).pos({100.0f, 100.0f - (range - 1.0f)}).type(CellDescription().cellType(StructureDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({100.0f, 100.0f - (range - 1.0f)}).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

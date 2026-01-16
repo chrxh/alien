@@ -355,7 +355,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             auto otherObject = data.objectMap.getFirst(scanPos);
             while (otherObject != nullptr) {
                 // Check if this cell is part of a creature (not structure or free object)
-                if (otherObject->typeData.cell.cellType != CellType_Structure && otherObject->typeData.cell.cellType != CellType_Free && !object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
+                if (otherObject->type != ObjectType_Structure && otherObject->type != ObjectType_FreeCell && !object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                     bool matches = true;
 
                     if (restrictToColor != 255 && otherObject->color != restrictToColor) {

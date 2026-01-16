@@ -12,8 +12,6 @@ using namespace std::string_literals;
 namespace Const
 {
     std::vector const CellTypeStrings = {
-        "Structure"s,
-        "Free"s,
         "Base"s,
         "Depot"s,
         "Constructor"s,
@@ -30,8 +28,6 @@ namespace Const
         "Communicator"s};
 
     std::map<CellType, std::string> const CellTypeToStringMap = {
-        {CellType_Structure, "Structure"},
-        {CellType_Free, "Free"},
         {CellType_Base, "Base"},
         {CellType_Depot, "Depot"},
         {CellType_Constructor, "Constructor"},
@@ -46,5 +42,11 @@ namespace Const
         {CellType_Digestor, "Digestor"},
         {CellType_Memory, "Memory"},
         {CellType_Communicator, "Communicator"},
+    };
+
+    std::map<ObjectType, std::string> const ObjectTypeToStringMap = {
+        {ObjectType_Structure, "Structure"},
+        {ObjectType_FreeCell, "Free Cell"},
+        {ObjectType_Cell, "Cell"},
     };
 }
