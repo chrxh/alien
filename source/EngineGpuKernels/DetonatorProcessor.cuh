@@ -6,7 +6,7 @@
 #include "ObjectConnectionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "Entity.cuh"
-#include "EnergyParticleProcessor.cuh"
+#include "EnergyProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
@@ -48,14 +48,14 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
             object->eventCounter = 10;
             detonator.countdown = 0;
             statistics.incNumDetonations(object->color);
-            data.cellMap.executeForEach(object->pos, cudaSimulationParameters.detonatorRadius.value[object->color], object->detached, [&](Object* const& otherCell) {
+            data.objectMap.executeForEach(object->pos, cudaSimulationParameters.detonatorRadius.value[object->color], object->detached, [&](Object* const& otherCell) {
                 if (otherCell == object) {
                     return;
                 }
                 if (otherCell->fixed) {
                     return;
                 }
-                auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - object->pos);
+                auto delta = data.objectMap.getCorrectedDirection(otherCell->pos - object->pos);
                 auto lengthSquared = Math::lengthSquared(delta);
                 if (lengthSquared > NEAR_ZERO) {
                     auto force = delta / lengthSquared * cudaSimulationParameters.detonatorRadius.value[object->color] * 2;

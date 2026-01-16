@@ -160,7 +160,7 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
 
     // Particles
     for (int i = 0; i < *to.numEnergyParticles; ++i) {
-        result._energyParticles.emplace_back(createEnergyDescription(to, i));
+        result._energies.emplace_back(createEnergyDescription(to, i));
     }
 
     return result;
@@ -193,7 +193,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
     for (auto const& object : description._objects) {
         setConnections(cellTOs, object, cellIndexTOById);
     }
-    for (auto const& energyParticle : description._energyParticles) {
+    for (auto const& energyParticle : description._energies) {
         addParticle(particleTOs, energyParticle);
     }
 
@@ -261,8 +261,8 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
     for (int i = 0; i < cellTO.numConnections; ++i) {
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
-        if (connectionTO.cellIndex != VALUE_NOT_SET_UINT64) {
-            connection._objectId = to.objects[connectionTO.cellIndex].id;
+        if (connectionTO.objectIndex != VALUE_NOT_SET_UINT64) {
+            connection._objectId = to.objects[connectionTO.objectIndex].id;
         } else {
             connections.clear();
             break;
@@ -1468,7 +1468,7 @@ void DescriptionConverterService::setConnections(
     auto& cellTO = cellTOs.at(cellIndexByIds.at(cellToAdd._id));
     float angleOffset = 0;
     for (ConnectionDescription const& connection : cellToAdd._connections) {
-        cellTO.connections[index].cellIndex = cellIndexByIds.at(connection._objectId);
+        cellTO.connections[index].objectIndex = cellIndexByIds.at(connection._objectId);
         cellTO.connections[index].distance = connection._distance;
         cellTO.connections[index].angleFromPrevious = connection._angleFromPrevious + angleOffset;
         ++index;

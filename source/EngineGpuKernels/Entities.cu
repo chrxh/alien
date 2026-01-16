@@ -4,19 +4,19 @@
 void Entities::init()
 {
     objects.init();
-    energyParticles.init();
+    energies.init();
     heap.init();
 }
 
 void Entities::free()
 {
     objects.free();
-    energyParticles.free();
+    energies.free();
     heap.free();
 }
 
 __device__ void Entities::saveNumEntries()
 {
     objects.saveNumEntries();
-    energyParticles.saveNumEntries();
+    energies.saveNumEntries();
 }

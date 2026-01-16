@@ -9,7 +9,7 @@
 struct Entities
 {
     Array<Object*> objects;
-    Array<Energy*> energyParticles;
+    Array<Energy*> energies;
 
     Heap heap;
 

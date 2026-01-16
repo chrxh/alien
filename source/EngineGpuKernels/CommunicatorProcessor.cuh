@@ -130,10 +130,10 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         }
 
         float2 scanPos = {senderPos.x + static_cast<float>(dx), senderPos.y + static_cast<float>(dy)};
-        data.cellMap.correctPosition(scanPos);
+        data.objectMap.correctPosition(scanPos);
 
         // Check all cells at this position (including overlapping cells)
-        auto otherCell = data.cellMap.getFirst(scanPos);
+        auto otherCell = data.objectMap.getFirst(scanPos);
         while (otherCell != nullptr) {
             if (isMatch(otherCell)) {
                 tryTransmitSignal(data, object, otherCell, newNumTimesSent);

@@ -21,7 +21,7 @@ struct EnergyTO
 
 struct ConnectionTO
 {
-    uint64_t cellIndex;  // May be invalid
+    uint64_t objectIndex;  // May be invalid
 
     float distance;
     float angleFromPrevious;

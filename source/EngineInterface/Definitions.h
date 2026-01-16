@@ -50,7 +50,7 @@ class _GeometryBuffers;
 using GeometryBuffers = std::shared_ptr<_GeometryBuffers>;
 
 struct NumRenderObjects;
-struct CellVertexData;
-struct EnergyParticleVertexData;
+struct ObjectVertexData;
+struct EnergyVertexData;
 
 struct ParametersFilter;

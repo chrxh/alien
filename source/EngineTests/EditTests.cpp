@@ -78,7 +78,7 @@ TEST_F(EditTests, getSelectionShallowData_selectCreatures)
 
 TEST_F(EditTests, getSelectionShallowData_selectParticles)
 {
-    auto data = Description().energyParticles({
+    auto data = Description().energies({
         EnergyDescription().id(1).pos({50, 50}).energy(10.0f),
         EnergyDescription().id(2).pos({51, 50}).energy(10.0f),
         EnergyDescription().id(3).pos({70, 50}).energy(10.0f),
@@ -101,7 +101,7 @@ TEST_F(EditTests, getSelectionShallowData_selectMixed)
                         ObjectDescription().id(1).pos({50, 50}),
                         ObjectDescription().id(2).pos({51, 50}),
                     })
-                    .energyParticles({
+                    .energies({
                         EnergyDescription().id(3).pos({52, 50}).energy(10.0f),
                     })
                     .addCreature({

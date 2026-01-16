@@ -52,7 +52,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
     auto calcResultingAcceleration = [&](float2 const& pos) {
         for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
             if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
-                accelerations[i] = calcAcceleration(data.cellMap, pos, i);
+                accelerations[i] = calcAcceleration(data.objectMap, pos, i);
             } else {
                 accelerations[i] = float2{0, 0};
             }
@@ -72,7 +72,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
         }
     }
     {
-        auto& particles = data.entities.energyParticles;
+        auto& particles = data.entities.energies;
         auto partition = calcSystemThreadPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& particle = particles.at(index);

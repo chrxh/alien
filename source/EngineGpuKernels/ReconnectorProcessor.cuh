@@ -6,7 +6,7 @@
 #include "ObjectConnectionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "Entity.cuh"
-#include "EnergyParticleProcessor.cuh"
+#include "EnergyProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
@@ -54,7 +54,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
     Object* closestCell = nullptr;
     float closestDistance = 0;
-    data.cellMap.executeForEach(object->pos, cudaSimulationParameters.reconnectorRadius.value[object->color], object->detached, [&](Object* const& otherCell) {
+    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.reconnectorRadius.value[object->color], object->detached, [&](Object* const& otherCell) {
 
         // Skip if already connected or too closely connected
         if (ObjectConnectionProcessor::isConnectedConnected(object, otherCell)) {
@@ -127,7 +127,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             return;
         }
 
-        auto distance = data.cellMap.getDistance(object->pos, otherCell->pos);
+        auto distance = data.objectMap.getDistance(object->pos, otherCell->pos);
         if (!closestCell || distance < closestDistance) {
             closestCell = otherCell;
             closestDistance = distance;

@@ -137,7 +137,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
         lookupResult = 0xffffffffffffffff;
         seedAngle = data.primaryNumberGen.random(360.0f);
 
-        data.cellMap.getMatchingCells(
+        data.objectMap.getMatchingCells(
             nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, object->pos, 4.0f, object->detached, [&](Object* const& otherCell) {
                 return object->isSameCreature(otherCell);
             });
@@ -173,7 +173,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
         for (float distance = seedDistance; distance <= endRadius; distance += ScanStep) {
             auto delta = Math::unitVectorOfAngle(angle) * distance;
             auto scanPos = object->pos + delta;
-            data.cellMap.correctPosition(scanPos);
+            data.objectMap.correctPosition(scanPos);
 
             if (distance > startRadius) {
                 uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
@@ -209,7 +209,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             statistics.incNumSensorMatches(object->color);
 
             auto matchPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
-            data.cellMap.correctPosition(matchPos);
+            data.objectMap.correctPosition(matchPos);
 
             // No relocation for structures 
             if (object->cellTypeData.sensor.mode != SensorMode_DetectStructure) {
@@ -270,7 +270,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             auto const& densityMap = data.preprocessedSimulationData.densityMap;
             for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
                 auto scanDistance = toFloat(index) * ScanStep;
-                auto scanPos = data.cellMap.getCorrectedPosition(object->pos + direction * scanDistance);
+                auto scanPos = data.objectMap.getCorrectedPosition(object->pos + direction * scanDistance);
                 if (densityMap.getStructureDensity(scanPos) > 0) {
                     lookupResult = 0xffffffffffffffff;
                     break;
@@ -318,7 +318,7 @@ __inline__ __device__ uint64_t
 SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const& scanPos, float absAngle, float distance, ScanType scanType)
 {
     if (scanType == ScanType::RelocateLastMatch) {
-        auto delta = data.cellMap.getCorrectedDirection(scanPos - object->pos);
+        auto delta = data.objectMap.getCorrectedDirection(scanPos - object->pos);
         distance = Math::length(delta);
         absAngle = Math::angleOfVector(delta);
     }
@@ -352,7 +352,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             auto const& restrictToColor = object->cellTypeData.sensor.modeData.detectCreature.restrictToColor;
             auto const& restrictToLineage = object->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
 
-            auto otherCell = data.cellMap.getFirst(scanPos);
+            auto otherCell = data.objectMap.getFirst(scanPos);
             while (otherCell != nullptr) {
                 // Check if this cell is part of a creature (not structure or free object)
                 if (otherCell->cellType != CellType_Structure && otherCell->cellType != CellType_Free && !object->isSameCreature(otherCell)) {
@@ -396,7 +396,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
         // Else: ScanType::Relocation
         } else {
             auto& sensor = object->cellTypeData.sensor;
-            auto otherCell = data.cellMap.getFirst(scanPos);
+            auto otherCell = data.objectMap.getFirst(scanPos);
             while (otherCell != nullptr) {
                 if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == sensor.lastMatch.creatureId) {
                     uint16_t creatureIdPart = static_cast<uint16_t>(otherCell->creature->id & 0xffff);

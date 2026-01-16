@@ -788,7 +788,7 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpu const& sizeDelta)
     }
 
     auto cellArraySize = _cudaSimulationData->entities.objects.getCapacity_host();
-    auto particleArraySize = _cudaSimulationData->entities.energyParticles.getCapacity_host();
+    auto particleArraySize = _cudaSimulationData->entities.energies.getCapacity_host();
     auto auxiliaryDataSize = _cudaSimulationData->entities.heap.getCapacity_host();
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());

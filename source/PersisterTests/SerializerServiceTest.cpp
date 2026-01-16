@@ -34,7 +34,7 @@ protected:
 TEST_F(SerializerServiceTests, singleParticle)
 {
     Description data;
-    data._energyParticles.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
+    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
 
     testSerializationAndDeserialization(data);
 }

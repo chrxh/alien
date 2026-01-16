@@ -244,7 +244,7 @@ void CreatorWindow::createParticle()
 {
     auto energyParticle = EnergyDescription().pos(getRandomPos()).energy(_energy);
     Description description;
-    description._energyParticles.emplace_back(energyParticle);
+    description._energies.emplace_back(energyParticle);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 

@@ -44,7 +44,7 @@ void DataAccessKernelsService::getData(
     KERNEL_CALL(cudaPrepareCreaturesAndGenomesForConversionToTO, rectUpperLeft, rectLowerRight, data);
     KERNEL_CALL(cudaGetGenomeData, rectUpperLeft, rectLowerRight, data, to);
     KERNEL_CALL(cudaGetCreatureData, rectUpperLeft, rectLowerRight, data, to);
-    KERNEL_CALL(cudaGetCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, to);
+    KERNEL_CALL(cudaGetObjectDataWithoutConnections, rectUpperLeft, rectLowerRight, data, to);
     KERNEL_CALL(cudaResolveConnections, data, to);
     KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, data, to);
 }
@@ -55,9 +55,9 @@ void DataAccessKernelsService::getSelectedData(CudaSettings const& gpuSettings, 
     KERNEL_CALL(cudaPrepareSelectedCreaturesForConversionToTO, includeClusters, data);
     KERNEL_CALL(cudaGetSelectedGenomeData, data, includeClusters, to);
     KERNEL_CALL(cudaGetSelectedCreatureData, data, includeClusters, to);
-    KERNEL_CALL(cudaGetSelectedCellDataWithoutConnections, data, includeClusters, to);
+    KERNEL_CALL(cudaGetSelectedObjectDataWithoutConnections, data, includeClusters, to);
     KERNEL_CALL(cudaResolveConnections, data, to);
-    KERNEL_CALL(cudaGetSelectedParticleData, data, to);
+    KERNEL_CALL(cudaGetSelectedEnergyData, data, to);
 }
 
 void DataAccessKernelsService::getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TO const& to)
@@ -66,9 +66,9 @@ void DataAccessKernelsService::getInspectedData(CudaSettings const& gpuSettings,
     KERNEL_CALL(cudaPrepareCreaturesAndGenomesForConversionToTO, entityIds, data);
     KERNEL_CALL(cudaGetGenomeData, entityIds, data, to);
     KERNEL_CALL(cudaGetCreatureData, entityIds, data, to);
-    KERNEL_CALL(cudaGetInspectedCellDataWithoutConnections, entityIds, data, to);
+    KERNEL_CALL(cudaGetInspectedObjectDataWithoutConnections, entityIds, data, to);
     KERNEL_CALL(cudaResolveConnections, data, to);
-    KERNEL_CALL(cudaGetInspectedParticleData, entityIds, data, to);
+    KERNEL_CALL(cudaGetInspectedEnergyData, entityIds, data, to);
 }
 
 void DataAccessKernelsService::getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TO const& to)

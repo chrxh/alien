@@ -53,7 +53,7 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
 
     NumRenderObjects result;
     result.objects = data.entities.objects.getNumEntries_host();
-    result.energyParticles = data.entities.energyParticles.getNumEntries_host();
+    result.energies = data.entities.energies.getNumEntries_host();
 
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects);
@@ -106,14 +106,14 @@ void GeometryKernelsService::extractObjectData(
     if (useInterop) {
         // Interop mode: use CUDA-OpenGL interoperability
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
-        CellVertexData* mappedCellBuffer;
+        ObjectVertexData* mappedCellBuffer;
         size_t bufferSize;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedCellBuffer), &bufferSize, renderingData.vertexBuffer));
         KERNEL_CALL(cudaExtractCellData, data, mappedCellBuffer);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.energyParticleBuffer));
-        EnergyParticleVertexData* mappedEnergyParticleBuffer;
+        EnergyVertexData* mappedEnergyParticleBuffer;
         size_t energyParticleBufferSize;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedEnergyParticleBuffer), &energyParticleBufferSize, renderingData.energyParticleBuffer));
@@ -130,7 +130,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedObjectBuffer));
-        getObjectVertexData* mappedSelectedObjectBuffer;
+        SelectedObjectVertexData* mappedSelectedObjectBuffer;
         size_t selectedObjectBufferSize;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedSelectedObjectBuffer), &selectedObjectBufferSize, renderingData.selectedObjectBuffer));
@@ -184,9 +184,9 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
     } else {
         // No-interop mode: extract to device buffers
-        KERNEL_CALL(cudaExtractCellData, data, renderingData.deviceCellBuffer);
+        KERNEL_CALL(cudaExtractCellData, data, renderingData.deviceObjectBuffer);
 
-        KERNEL_CALL(cudaExtractEnergyParticleData, data, renderingData.deviceEnergyParticleBuffer);
+        KERNEL_CALL(cudaExtractEnergyParticleData, data, renderingData.deviceEnergyBuffer);
 
         setValueToDevice(_numLocations, static_cast<uint64_t>(0));
         KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);

@@ -9,8 +9,8 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     entities.init();
     tempEntities.init();
     preprocessedSimulationData.init(worldSize);
-    cellMap.init(worldSize);
-    particleMap.init(worldSize);
+    objectMap.init(worldSize);
+    energyMap.init(worldSize);
 
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, timestep);
@@ -41,31 +41,31 @@ namespace
 bool SimulationData::shouldResize(ArraySizesForGpu const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArray, sizeDelta.particleArray);
-    return entities.objects.shouldResize_host(cellArraySizeResult) || entities.energyParticles.shouldResize_host(particleArraySizeResult)
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.objectArray, sizeDelta.energyArray);
+    return entities.objects.shouldResize_host(cellArraySizeResult) || entities.energies.shouldResize_host(particleArraySizeResult)
         || entities.heap.shouldResize_host(sizeDelta.heap);
 }
 
 void SimulationData::resizeTempObjects(ArraySizesForGpu const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.objectArray, size.energyArray);
 
     resizeTargetIntern(entities.objects, tempEntities.objects, cellArraySizeResult);
-    resizeTargetIntern(entities.energyParticles, tempEntities.energyParticles, particleArraySizeResult);
+    resizeTargetIntern(entities.energies, tempEntities.energies, particleArraySizeResult);
     resizeTargetIntern(entities.heap, tempEntities.heap, size.heap);
 }
 
 void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.objectArray, size.energyArray);
 
     entities.objects.resize(cellArraySizeResult);
-    entities.energyParticles.resize(particleArraySizeResult);
+    entities.energies.resize(particleArraySizeResult);
     entities.heap.resize(size.heap);
     tempEntities.objects.resize(cellArraySizeResult);
-    tempEntities.energyParticles.resize(particleArraySizeResult);
+    tempEntities.energies.resize(particleArraySizeResult);
     tempEntities.heap.resize(size.heap);
 
     resizeAuxiliaryData();
@@ -74,7 +74,7 @@ void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
 void SimulationData::resizeObjectsByMatchingTempObjects()
 {
     entities.objects.resize(tempEntities.objects.getCapacity_host());
-    entities.energyParticles.resize(tempEntities.energyParticles.getCapacity_host());
+    entities.energies.resize(tempEntities.energies.getCapacity_host());
     entities.heap.resize(tempEntities.heap.getCapacity_host());
 
     resizeAuxiliaryData();
@@ -90,8 +90,8 @@ void SimulationData::free()
     entities.free();
     tempEntities.free();
     preprocessedSimulationData.free();
-    cellMap.free();
-    particleMap.free();
+    objectMap.free();
+    energyMap.free();
     primaryNumberGen.free();
     secondaryNumberGen.free();
     processMemory.free();
@@ -107,9 +107,9 @@ void SimulationData::free()
 void SimulationData::resizeAuxiliaryData()
 {
     auto estimatedMaxActiveCells = entities.objects.getCapacity_host();
-    cellMap.resize(estimatedMaxActiveCells);
-    auto estimatedMaxActiveParticles = entities.energyParticles.getCapacity_host();
-    particleMap.resize(estimatedMaxActiveParticles);
+    objectMap.resize(estimatedMaxActiveCells);
+    auto estimatedMaxActiveParticles = entities.energies.getCapacity_host();
+    energyMap.resize(estimatedMaxActiveParticles);
 
     auto upperBoundDynamicMemory =
         (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristic

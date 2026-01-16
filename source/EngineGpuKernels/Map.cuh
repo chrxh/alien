@@ -68,7 +68,7 @@ class BasicMap : public BaseMap
 public:
 };
 
-class CellMap : public BaseMap
+class ObjectMap : public BaseMap
 {
 public:
     __host__ __inline__ void init(int2 const& size)
@@ -206,7 +206,7 @@ private:
     Array<int> _mapEntries;
 };
 
-class ParticleMap : public BaseMap
+class EnergyMap : public BaseMap
 {
 public:
     __host__ __inline__ void init(int2 const& size)

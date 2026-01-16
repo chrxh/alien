@@ -80,22 +80,22 @@ void CudaGeometryBuffers::allocateBuffersForNoInterop(NumRenderObjects const& nu
 
     // Allocate or reallocate cell buffer
     auto requiredCellCapacity = std::max(numObjects.objects * 2, static_cast<uint64_t>(100000));
-    if (numObjects.objects >= deviceCellBufferCapacity) {
-        if (deviceCellBuffer != nullptr) {
-            memoryManager.freeMemory(deviceCellBuffer);
+    if (numObjects.objects >= deviceObjectBufferCapacity) {
+        if (deviceObjectBuffer != nullptr) {
+            memoryManager.freeMemory(deviceObjectBuffer);
         }
-        memoryManager.acquireMemory(requiredCellCapacity, deviceCellBuffer);
-        deviceCellBufferCapacity = requiredCellCapacity;
+        memoryManager.acquireMemory(requiredCellCapacity, deviceObjectBuffer);
+        deviceObjectBufferCapacity = requiredCellCapacity;
     }
 
     // Allocate or reallocate energy particle buffer
-    auto requiredEnergyParticleCapacity = std::max(numObjects.energyParticles * 2, static_cast<uint64_t>(100000));
-    if (numObjects.energyParticles >= deviceEnergyParticleBufferCapacity) {
-        if (deviceEnergyParticleBuffer != nullptr) {
-            memoryManager.freeMemory(deviceEnergyParticleBuffer);
+    auto requiredEnergyParticleCapacity = std::max(numObjects.energies * 2, static_cast<uint64_t>(100000));
+    if (numObjects.energies >= deviceEnergyBufferCapacity) {
+        if (deviceEnergyBuffer != nullptr) {
+            memoryManager.freeMemory(deviceEnergyBuffer);
         }
-        memoryManager.acquireMemory(requiredEnergyParticleCapacity, deviceEnergyParticleBuffer);
-        deviceEnergyParticleBufferCapacity = requiredEnergyParticleCapacity;
+        memoryManager.acquireMemory(requiredEnergyParticleCapacity, deviceEnergyBuffer);
+        deviceEnergyBufferCapacity = requiredEnergyParticleCapacity;
     }
 
     // Allocate or reallocate location buffer
@@ -173,8 +173,8 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
 
-    memoryManager.freeMemory(deviceCellBuffer);
-    memoryManager.freeMemory(deviceEnergyParticleBuffer);
+    memoryManager.freeMemory(deviceObjectBuffer);
+    memoryManager.freeMemory(deviceEnergyBuffer);
     memoryManager.freeMemory(deviceLocationBuffer);
     memoryManager.freeMemory(deviceSelectedObjectBuffer);
     memoryManager.freeMemory(deviceLineIndexBuffer);
@@ -187,15 +187,15 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
 void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects)
 {
     if (numObjects.objects > 0) {
-        std::vector<CellVertexData> hostCellBuffer(numObjects.objects);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostCellBuffer.data(), deviceCellBuffer, numObjects.objects * sizeof(CellVertexData), cudaMemcpyDeviceToHost));
+        std::vector<ObjectVertexData> hostCellBuffer(numObjects.objects);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostCellBuffer.data(), deviceObjectBuffer, numObjects.objects * sizeof(ObjectVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setCellData(hostCellBuffer.data(), numObjects.objects);
     }
 
-    if (numObjects.energyParticles > 0) {
-        std::vector<EnergyParticleVertexData> hostEnergyParticleBuffer(numObjects.energyParticles);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostEnergyParticleBuffer.data(), deviceEnergyParticleBuffer, numObjects.energyParticles * sizeof(EnergyParticleVertexData), cudaMemcpyDeviceToHost));
-        geometryBuffers->setEnergyParticleData(hostEnergyParticleBuffer.data(), numObjects.energyParticles);
+    if (numObjects.energies > 0) {
+        std::vector<EnergyVertexData> hostEnergyParticleBuffer(numObjects.energies);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostEnergyParticleBuffer.data(), deviceEnergyBuffer, numObjects.energies * sizeof(EnergyVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->setEnergyParticleData(hostEnergyParticleBuffer.data(), numObjects.energies);
     }
 
     if (numObjects.locations > 0) {
@@ -205,8 +205,8 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
     }
 
     if (numObjects.selectedObjects > 0) {
-        std::vector<getObjectVertexData> hostSelectedObjectBuffer(numObjects.selectedObjects);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedObjectBuffer.data(), deviceSelectedObjectBuffer, numObjects.selectedObjects * sizeof(getObjectVertexData), cudaMemcpyDeviceToHost));
+        std::vector<SelectedObjectVertexData> hostSelectedObjectBuffer(numObjects.selectedObjects);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedObjectBuffer.data(), deviceSelectedObjectBuffer, numObjects.selectedObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setSelectedObjectData(hostSelectedObjectBuffer.data(), numObjects.selectedObjects);
     }
 

@@ -2,7 +2,7 @@
 
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data)
 {
-    data.tempEntities.energyParticles.reset();
+    data.tempEntities.energies.reset();
     data.tempEntities.objects.reset();
 }
 
@@ -98,13 +98,13 @@ __global__ void cudaCleanupDependentCellData(Array<Object*> cells, Heap newHeap)
 
 __global__ void cudaCleanupMaps(SimulationData data)
 {
-    data.cellMap.cleanup_system();
-    data.particleMap.cleanup_system();
+    data.objectMap.cleanup_system();
+    data.energyMap.cleanup_system();
 }
 
 __global__ void cudaSwapPointerArrays(SimulationData data)
 {
-    data.entities.energyParticles.swapContent(data.tempEntities.energyParticles);
+    data.entities.energies.swapContent(data.tempEntities.energies);
     data.entities.objects.swapContent(data.tempEntities.objects);
 }
 

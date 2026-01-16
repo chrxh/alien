@@ -29,7 +29,7 @@ protected:
 TEST_F(DataTransferTests, singleParticle)
 {
     Description data;
-    data._energyParticles.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
+    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -155,7 +155,7 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 
 TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
-    auto data = Description().objects({ObjectDescription().id(0), ObjectDescription().id(1)}).energyParticles({EnergyDescription().id(2), EnergyDescription().id(3)});
+    auto data = Description().objects({ObjectDescription().id(0), ObjectDescription().id(1)}).energies({EnergyDescription().id(2), EnergyDescription().id(3)});
     data.addCreature({ObjectDescription().id(5)}, CreatureDescription().id(4), GenomeDescription());
     data.addCreature({ObjectDescription().id(6)}, CreatureDescription().id(5), GenomeDescription());
 
@@ -181,11 +181,11 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
     EXPECT_EQ(expectedCreatureIds, actualCreatureIds);
 
     std::unordered_set<uint64_t> expectedParticleIds;
-    for (auto const& energyParticle : data._energyParticles) {
+    for (auto const& energyParticle : data._energies) {
         expectedParticleIds.insert(energyParticle._id);
     }
     std::unordered_set<uint64_t> actualParticleIds;
-    for (auto const& energyParticle : actualData._energyParticles) {
+    for (auto const& energyParticle : actualData._energies) {
         actualParticleIds.insert(energyParticle._id);
     }
     EXPECT_EQ(expectedParticleIds, actualParticleIds);
@@ -193,7 +193,7 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 
 TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
-    auto data = Description().objects({ObjectDescription().id(0), ObjectDescription().id(1)}).energyParticles({EnergyDescription().id(2), EnergyDescription().id(3)});
+    auto data = Description().objects({ObjectDescription().id(0), ObjectDescription().id(1)}).energies({EnergyDescription().id(2), EnergyDescription().id(3)});
     data.addCreature({ObjectDescription().id(5)}, CreatureDescription().id(4), GenomeDescription());
     data.addCreature({ObjectDescription().id(6)}, CreatureDescription().id(5), GenomeDescription());
 
@@ -213,7 +213,7 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
     EXPECT_EQ(2 * 2, actualCreatureIds.size());
 
     std::unordered_set<uint64_t> actualParticleIds;
-    for (auto const& energyParticle : actualData._energyParticles) {
+    for (auto const& energyParticle : actualData._energies) {
         actualParticleIds.insert(energyParticle._id);
     }
     EXPECT_EQ(2 * 2, actualParticleIds.size());
@@ -344,7 +344,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_objects)
 TEST_F(DataTransferTests, adaptIdGenerator_energyParticles)
 {
     auto constexpr HighId = 1000000;
-    auto data = Description().energyParticles({EnergyDescription().id(HighId)});
+    auto data = Description().energies({EnergyDescription().id(HighId)});
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});

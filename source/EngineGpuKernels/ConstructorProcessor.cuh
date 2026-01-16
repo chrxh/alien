@@ -450,7 +450,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     ConstructionData const& constructionData)
 {
     auto const& lastCell = constructionData.lastConstructionCell;
-    auto posDelta = data.cellMap.getCorrectedDirection(lastCell->pos - hostCell->pos);
+    auto posDelta = data.objectMap.getCorrectedDirection(lastCell->pos - hostCell->pos);
     auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
 
     auto desiredDistance = constructionData.gene->connectionDistance;
@@ -561,8 +561,8 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         // Sort surrounding cells by distance from newCell
         bubbleSort(cellsToConnect, numCellsToConnect, [&](auto const& object1, auto const& object2) {
-            auto dist1 = data.cellMap.getDistance(object1->pos, newCellPos);
-            auto dist2 = data.cellMap.getDistance(object2->pos, newCellPos);
+            auto dist1 = data.objectMap.getDistance(object1->pos, newCellPos);
+            auto dist2 = data.objectMap.getDistance(object2->pos, newCellPos);
             return dist1 < dist2;
         });
 
@@ -643,7 +643,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
 
     Object* nearCells[MAX_CELL_BONDS * 4];
     int numNearCells;
-    data.cellMap.getMatchingCells(
+    data.objectMap.getMatchingCells(
         nearCells,
         MAX_CELL_BONDS * 4,
         numNearCells,
@@ -671,7 +671,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
         Math::rotateQuarterClockwise(n);
 
         // assemble surrounding cell candidates
-        data.cellMap.getMatchingCells(
+        data.objectMap.getMatchingCells(
             otherCellCandidates,
             MAX_CELL_BONDS * 2,
             numOtherCellCandidates,
@@ -687,7 +687,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
 
                 // discard cells that are not on the correct side
                 if (abs(angleFromPrevious1 - angleFromPrevious2) > NEAR_ZERO) {
-                    auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - lastConstructionCell->pos);
+                    auto delta = data.objectMap.getCorrectedDirection(otherCell->pos - lastConstructionCell->pos);
                     if (angleFromPrevious2 < angleFromPrevious1) {
                         if (Math::dot(delta, n) < 0) {
                             return false;
@@ -702,7 +702,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                 return true;
             });
     } else {
-        data.cellMap.getMatchingCells(
+        data.objectMap.getMatchingCells(
             otherCellCandidates,
             MAX_CELL_BONDS * 2,
             numOtherCellCandidates,
@@ -749,7 +749,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                 }
             }
             if (!crossingLinks) {
-                auto delta = data.cellMap.getCorrectedDirection(newCellPos - otherCell->pos);
+                auto delta = data.objectMap.getCorrectedDirection(newCellPos - otherCell->pos);
                 if (ObjectConnectionProcessor::hasAngleSpace(data, otherCell, Math::angleOfVector(delta), constructionData.gene->angleAlignment)) {
                     result[numResultCells++] = otherCell;
                 }
@@ -772,7 +772,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
 {
     auto& constructor = hostCell->cellTypeData.constructor;
 
-    data.cellMap.correctPosition(posOfNewCell);
+    data.objectMap.correctPosition(posOfNewCell);
 
     EntityFactory factory;
     factory.init(&data);

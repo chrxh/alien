@@ -69,7 +69,7 @@ double IntegrationTestFramework::getEnergy(Description const& data) const
     for (auto const& object : data._objects) {
         result += object._usableEnergy + object._rawEnergy + getDepotEnergy(object);
     }
-    for (auto const& energyParticle : data._energyParticles) {
+    for (auto const& energyParticle : data._energies) {
         result += energyParticle._energy;
     }
     return result;

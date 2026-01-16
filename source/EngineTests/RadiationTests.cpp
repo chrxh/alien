@@ -41,7 +41,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Verify no particles were created (no radiation emitted)
-    EXPECT_EQ(0, actualData._energyParticles.size());
+    EXPECT_EQ(0, actualData._energies.size());
 
     // Verify the fixed cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());
@@ -65,7 +65,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Verify no particles were created (no radiation emitted)
-    EXPECT_EQ(0, actualData._energyParticles.size());
+    EXPECT_EQ(0, actualData._energies.size());
 
     // Verify the structure cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());
@@ -88,7 +88,7 @@ TEST_F(RadiationTests, baseCells_shouldRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // With high radiation rate, energy particles should have been created
-    EXPECT_FALSE(actualData._energyParticles.empty());
+    EXPECT_FALSE(actualData._energies.empty());
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -110,7 +110,7 @@ TEST_F(RadiationTests, freeCells_shouldRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // With high radiation rate, energy particles should have been created
-    EXPECT_FALSE(actualData._energyParticles.empty());
+    EXPECT_FALSE(actualData._energies.empty());
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -132,7 +132,7 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // With high radiation rate, energy particles should have been created
-    EXPECT_FALSE(actualData._energyParticles.empty());
+    EXPECT_FALSE(actualData._energies.empty());
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -155,7 +155,7 @@ TEST_F(RadiationTests, fixedStructureCells_shouldNotRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Verify no particles were created (no radiation emitted)
-    EXPECT_EQ(0, actualData._energyParticles.size());
+    EXPECT_EQ(0, actualData._energies.size());
 
     // Verify the cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());

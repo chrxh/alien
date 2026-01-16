@@ -9,11 +9,9 @@ add_library(Shaders INTERFACE
     BlurHorizontalVS.h
     BlurVerticalFS.h
     BlurVerticalVS.h
-    CellFS.h
     CellTypeOverlayFS.h
     CellTypeOverlayGS.h
     CellTypeOverlayVS.h
-    CellVS.h
     DeNoiseFS.h
     DeNoiseVS.h
     DetonationEventFS.h
@@ -41,6 +39,8 @@ add_library(Shaders INTERFACE
     MetaballsVS.h
     ModuloCopyFS.h
     ModuloCopyVS.h
+    ObjectFS.h
+    ObjectVS.h
     SelectedConnectionFS.h
     SelectedConnectionGS.h
     SelectedConnectionVS.h

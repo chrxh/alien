@@ -179,10 +179,10 @@ void DescriptionEditService::duplicate(Description& description, IntVector2D con
                 object._pos = RealVector2D{object._pos.x + incX, object._pos.y + incY};
                 result._objects.emplace_back(object);
             }
-            for (auto energyParticle : clone._energyParticles) {
+            for (auto energyParticle : clone._energies) {
                 auto origPos = energyParticle._pos;
                 energyParticle._pos = RealVector2D{origPos.x + incX, origPos.y + incY};
-                result._energyParticles.emplace_back(energyParticle);
+                result._energies.emplace_back(energyParticle);
             }
             result._genomes.insert(result._genomes.end(), clone._genomes.begin(), clone._genomes.end());
         }
@@ -521,12 +521,12 @@ void DescriptionEditService::setCenter(Description& description, RealVector2D co
 RealVector2D DescriptionEditService::calcCenter(Description const& description) const
 {
     RealVector2D result;
-    auto numEntities = description._objects.size() + description._energyParticles.size();
+    auto numEntities = description._objects.size() + description._energies.size();
     for (auto const& object : description._objects) {
         result += object._pos;
     }
 
-    for (auto const& energyParticle : description._energyParticles) {
+    for (auto const& energyParticle : description._energies) {
         result += energyParticle._pos;
     }
     result /= numEntities;
@@ -539,7 +539,7 @@ void DescriptionEditService::shift(Description& description, RealVector2D const&
         object._pos += delta;
     }
 
-    for (auto& energyParticle : description._energyParticles) {
+    for (auto& energyParticle : description._energies) {
         energyParticle._pos += delta;
     }
 }
@@ -557,7 +557,7 @@ void DescriptionEditService::rotate(Description& description, float angle) const
     for (auto& object : description._objects) {
         rotate(object._pos);
     }
-    for (auto& energyParticle : description._energyParticles) {
+    for (auto& energyParticle : description._energies) {
         rotate(energyParticle._pos);
     }
 }
@@ -573,7 +573,7 @@ void DescriptionEditService::accelerate(Description& description, RealVector2D c
     for (auto& object : description._objects) {
         accelerate(object._pos, object._vel);
     }
-    for (auto& energyParticle : description._energyParticles) {
+    for (auto& energyParticle : description._energies) {
         accelerate(energyParticle._pos, energyParticle._vel);
     }
 }
@@ -713,7 +713,7 @@ RealVector2D DescriptionEditService::getPos(ExtendedCellOrEnergyDescription cons
 std::vector<ExtendedCellOrEnergyDescription> DescriptionEditService::getObjects(Description const& description) const
 {
     std::vector<ExtendedCellOrEnergyDescription> result;
-    for (auto const& energyParticle : description._energyParticles) {
+    for (auto const& energyParticle : description._energies) {
         result.emplace_back(energyParticle);
     }
 

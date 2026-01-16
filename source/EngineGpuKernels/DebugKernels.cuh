@@ -3,7 +3,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "EnergyParticleProcessor.cuh"
+#include "EnergyProcessor.cuh"
 #include "SimulationData.cuh"
 
 

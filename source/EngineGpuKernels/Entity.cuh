@@ -14,7 +14,7 @@ struct Energy
     float2 vel;
     uint8_t color;
     float energy;
-    Object* lastAbsorbedCell;  //could be invalid
+    Object* lastAbsorbedObject;  //could be invalid
 
     // Editing data
     uint8_t selected;  //0 = no, 1 = selected

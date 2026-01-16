@@ -312,7 +312,7 @@ void _EnergyParticleRenderStep::execute(ExecutionParameters parameters)
 
     // Draw energy particles
     glBindVertexArray(parameters._geometryBuffers->getVaoForEnergyParticles());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().energyParticles));
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().energies));
 
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);

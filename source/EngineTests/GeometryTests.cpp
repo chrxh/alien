@@ -48,7 +48,7 @@ TEST_F(GeometryTests, copyBuffers_emptySim)
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(0u, numObjects.objects);
-    EXPECT_EQ(0u, numObjects.energyParticles);
+    EXPECT_EQ(0u, numObjects.energies);
     EXPECT_EQ(0u, numObjects.lineIndices);
     EXPECT_EQ(0u, numObjects.triangleIndices);
 }
@@ -68,7 +68,7 @@ TEST_F(GeometryTests, copyBuffers_objects)
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.objects);
-    EXPECT_EQ(0u, numObjects.energyParticles);
+    EXPECT_EQ(0u, numObjects.energies);
 
     // Verify buffer entries
     auto cellData = geometryBuffers->getCellData();
@@ -77,7 +77,7 @@ TEST_F(GeometryTests, copyBuffers_objects)
 
 TEST_F(GeometryTests, copyBuffers_energyParticles)
 {
-    auto data = Description().energyParticles({
+    auto data = Description().energies({
         EnergyDescription().id(1).pos({100.0f, 100.0f}).energy(10.0f),
         EnergyDescription().id(2).pos({101.0f, 100.0f}).energy(10.0f),
         EnergyDescription().id(3).pos({102.0f, 100.0f}).energy(10.0f),
@@ -90,7 +90,7 @@ TEST_F(GeometryTests, copyBuffers_energyParticles)
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
-    EXPECT_EQ(4u, numObjects.energyParticles);
+    EXPECT_EQ(4u, numObjects.energies);
 
     // Verify buffer entries
     auto particleData = geometryBuffers->getEnergyParticleData();
@@ -187,7 +187,7 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
                         ObjectDescription().id(1).pos({100.0f, 100.0f}),
                         ObjectDescription().id(2).pos({101.0f, 100.0f}),
                     })
-                    .energyParticles({
+                    .energies({
                         EnergyDescription().id(3).pos({200.0f, 200.0f}).energy(10.0f),
                         EnergyDescription().id(4).pos({201.0f, 200.0f}).energy(10.0f),
                         EnergyDescription().id(5).pos({202.0f, 200.0f}).energy(10.0f),
@@ -200,7 +200,7 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.objects);
-    EXPECT_EQ(3u, numObjects.energyParticles);
+    EXPECT_EQ(3u, numObjects.energies);
 
     // Verify buffer entries
     auto particleData = geometryBuffers->getEnergyParticleData();

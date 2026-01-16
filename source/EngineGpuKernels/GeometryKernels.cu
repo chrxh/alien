@@ -30,9 +30,9 @@ __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 vis
         }
     }
     {
-        auto const& partition = calcSystemThreadPartition(data.entities.energyParticles.getNumEntries());
+        auto const& partition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            auto const& particle = data.entities.energyParticles.at(index);
+            auto const& particle = data.entities.energies.at(index);
             correctPositionForRendering(particle->pos, visibleTopLeft, data.worldSize);
         }
     }
@@ -78,7 +78,7 @@ namespace
     }
 }
 
-__global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData)
+__global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objectData)
 {
     // Process cells - each cell goes to its index position
     auto const& cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
@@ -250,12 +250,12 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     }
 }
 
-__global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticleVertexData* energyParticleData)
+__global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyVertexData* energyParticleData)
 {
     // Process energy particles - each particle goes to its index position
-    auto const& particlePartition = calcSystemThreadPartition(data.entities.energyParticles.getNumEntries());
+    auto const& particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
-        auto const& particle = data.entities.energyParticles.at(index);
+        auto const& particle = data.entities.energies.at(index);
         if (!particle) {
             continue;
         }
@@ -382,7 +382,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void cudaExtractSelectedObjectData(SimulationData data, getObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
+__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
 {
     // Process selected cells
     auto const& cells = data.entities.objects;
@@ -424,7 +424,7 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, getObjectVert
     }
 
     // Process selected energy particles
-    auto const& particles = data.entities.energyParticles;
+    auto const& particles = data.entities.energies;
     auto numEnergyParticles = particles.getNumEntries();
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numEnergyParticles; index += blockDim.x * gridDim.x) {

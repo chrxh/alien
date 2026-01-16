@@ -31,7 +31,7 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
         }
     }
     {
-        auto& particles = data.entities.energyParticles;
+        auto& particles = data.entities.energies;
         auto const partition = calcSystemThreadPartition(particles.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {

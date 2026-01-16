@@ -7,7 +7,7 @@
 #include "ConstantMemory.cuh"
 #include "Entity.cuh"
 #include "ParameterCalculator.cuh"
-#include "EnergyParticleProcessor.cuh"
+#include "EnergyProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
@@ -50,7 +50,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         auto const& attackerMode = object->cellTypeData.attacker.mode;
 
         auto sumEnergyToTransfer = 0.0f;
-        data.cellMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherCell) {
+        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherCell) {
 
             if (attackerMode == AttackerMode_FreeCell) {
                 if (otherCell->cellType != CellType_Free) {
@@ -176,7 +176,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         // Radiation
         if (attackerEnergyCost > 0) {
-            EnergyParticleProcessor::radiate(data, object, attackerEnergyCost);
+            EnergyProcessor::radiate(data, object, attackerEnergyCost);
         }
 
         // Output (signal is already present since attacker can only be manually triggered)

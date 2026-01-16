@@ -12,7 +12,7 @@
 #include "MemoryProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "NeuronProcessor.cuh"
-#include "EnergyParticleProcessor.cuh"
+#include "EnergyProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "SignalProcessor.cuh"
@@ -20,8 +20,8 @@
 
 __global__ void cudaNextTimestep_prepare(SimulationData data)
 {
-    data.cellMap.reset();
-    data.particleMap.reset();
+    data.objectMap.reset();
+    data.energyMap.reset();
     data.processMemory.reset();
 
     // Heuristics
@@ -41,7 +41,7 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
 __global__ void cudaNextTimestep_physics_init(SimulationData data)
 {
     ObjectProcessor::init(data);
-    EnergyParticleProcessor::calcActiveSources(data);
+    EnergyProcessor::calcActiveSources(data);
 }
 
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
@@ -55,18 +55,18 @@ __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
     ObjectProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
     ObjectProcessor::fillDensityMap(data);
-    EnergyParticleProcessor::fillDensityMap(data);
+    EnergyProcessor::fillDensityMap(data);
 
-    EnergyParticleProcessor::updateMap(data);
+    EnergyProcessor::updateMap(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data)
 {
     ObjectProcessor::calcCollisions_reconnectCells_correctOverlap(data);
     ObjectProcessor::fillDensityMap(data);
-    EnergyParticleProcessor::fillDensityMap(data);
+    EnergyProcessor::fillDensityMap(data);
 
-    EnergyParticleProcessor::updateMap(data);
+    EnergyProcessor::updateMap(data);
 }
 
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
@@ -74,8 +74,8 @@ __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
     ObjectProcessor::checkForces(data);
     ObjectProcessor::applyForces(data);
 
-    EnergyParticleProcessor::movement(data);
-    EnergyParticleProcessor::collision(data);
+    EnergyProcessor::movement(data);
+    EnergyProcessor::collision(data);
 }
 
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)
@@ -83,7 +83,7 @@ __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData dat
     ObjectProcessor::verletPositionUpdate(data);
     ObjectProcessor::checkConnections(data);
 
-    EnergyParticleProcessor::splitting(data);
+    EnergyProcessor::splitting(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles)
@@ -229,7 +229,7 @@ __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData da
 
 __global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData data)
 {
-    EnergyParticleProcessor::transformation(data);
+    EnergyProcessor::transformation(data);
 }
 
 __global__ void cudaNextTimestep_incTimestep(SimulationData data)

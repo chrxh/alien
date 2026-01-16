@@ -16,7 +16,7 @@
 #include "EntityFactory.cuh"
 #include "ParameterCalculator.cuh"
 #include "Physics.cuh"
-#include "EnergyParticleProcessor.cuh"
+#include "EnergyProcessor.cuh"
 #include "TO.cuh"
 
 namespace cg = cooperative_groups;
@@ -86,7 +86,7 @@ __inline__ __device__ void ObjectProcessor::updateMap(SimulationData& data)
 {
     auto const partition = calcBlockPartition(data.entities.objects.getNumEntries());
     Object** cellPointers = &data.entities.objects.at(partition.startIndex);
-    data.cellMap.set_block(partition.numElements(), cellPointers);
+    data.objectMap.set_block(partition.numElements(), cellPointers);
 }
 
 __inline__ __device__ void ObjectProcessor::clearDensityMap(SimulationData& data)
@@ -188,14 +188,14 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         float localDensity = 0;
 
         int2 scanPos{cellPosInt.x + (toInt(block.thread_rank()) % scanLength), cellPosInt.y + (toInt(block.thread_rank()) / scanLength)};
-        data.cellMap.correctPosition(scanPos);
-        auto otherCell = data.cellMap.getFirst(scanPos);
+        data.objectMap.correctPosition(scanPos);
+        auto otherCell = data.objectMap.getFirst(scanPos);
         for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
             if (!otherCell) {
                 break;
             }
             auto posDelta = object->pos - otherCell->pos;
-            data.cellMap.correctDirection(posDelta);
+            data.objectMap.correctDirection(posDelta);
             auto adaptedDistance = Math::length(posDelta);
             auto origDistance = adaptedDistance;
             if (object->isSameCreature(otherCell) && (object->numConnections < 3 || otherCell->numConnections < 3)) {
@@ -290,7 +290,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 float closestFixedCellDistance;
                 for (int i = 0; i < numFixedCells; ++i) {
                     auto const& fixedCell = fixedCells[i];
-                    auto distance = data.cellMap.getDistance(object->pos, fixedCell->pos);
+                    auto distance = data.objectMap.getDistance(object->pos, fixedCell->pos);
                     if (!closestFixedCell || distance < closestFixedCellDistance) {
                         closestFixedCell = fixedCell;
                         closestFixedCellDistance = distance;
@@ -299,15 +299,15 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
                 float2 r{0, 0};
                 if (closestFixedCell->numConnections <= 1) {
-                    r = data.cellMap.getCorrectedDirection(object->pos - closestFixedCell->pos);
+                    r = data.objectMap.getCorrectedDirection(object->pos - closestFixedCell->pos);
                 } else {
-                    auto angleToCell = Math::angleOfVector(data.cellMap.getCorrectedDirection(object->pos - closestFixedCell->pos));
+                    auto angleToCell = Math::angleOfVector(data.objectMap.getCorrectedDirection(object->pos - closestFixedCell->pos));
                     auto numConnections = closestFixedCell->numConnections;
                     for (int i = 0; i < numConnections; ++i) {
                         auto otherCell1 = closestFixedCell->connections[i].object;
                         auto otherCell2 = closestFixedCell->connections[(i + 1) % numConnections].object;
-                        auto angleToOtherCell1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell1->pos - closestFixedCell->pos));
-                        auto angleToOtherCell2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell2->pos - closestFixedCell->pos));
+                        auto angleToOtherCell1 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherCell1->pos - closestFixedCell->pos));
+                        auto angleToOtherCell2 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherCell2->pos - closestFixedCell->pos));
                         if (Math::isAngleInBetween(angleToOtherCell1, angleToOtherCell2, angleToCell)) {
                             r = otherCell2->pos - otherCell1->pos;
                             Math::rotateQuarterCounterClockwise(r);
@@ -340,13 +340,13 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = cells.at(index);
-        data.cellMap.executeForEach(object->pos, cudaSimulationParameters.maxCollisionDistance.value, object->detached, [&](auto const& otherCell) {
+        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.maxCollisionDistance.value, object->detached, [&](auto const& otherCell) {
             if (otherCell == object) {
                 return;
             }
 
             auto posDelta = object->pos - otherCell->pos;
-            data.cellMap.correctDirection(posDelta);
+            data.objectMap.correctDirection(posDelta);
 
             auto distance = Math::length(posDelta);
 
@@ -454,7 +454,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
         }
         float2 force{0, 0};
         float2 prevDisplacement = object->connections[object->numConnections - 1].object->pos - object->pos;
-        data.cellMap.correctDirection(prevDisplacement);
+        data.objectMap.correctDirection(prevDisplacement);
         auto cellStiffnessSquared = object->stiffness * object->stiffness;
 
         auto numConnections = object->numConnections;
@@ -463,7 +463,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
             auto connectedCellStiffnessSquared = connectedCell->stiffness * connectedCell->stiffness;
 
             auto displacement = connectedCell->pos - object->pos;
-            data.cellMap.correctDirection(displacement);
+            data.objectMap.correctDirection(displacement);
 
             auto actualDistance = Math::length(displacement);
             auto bondDistance = object->connections[i].distance;
@@ -527,7 +527,7 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
             auto connectedCell = object->connections[i].object;
 
             auto displacement = connectedCell->pos - object->pos;
-            data.cellMap.correctDirection(displacement);
+            data.objectMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
             if (actualDistance > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
                 scheduleForDestruction = true;
@@ -552,11 +552,11 @@ __inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData&
         auto& object = cells.at(index);
         if (object->fixed) {
             object->pos += object->vel * cudaSimulationParameters.timestepSize.value;
-            data.cellMap.correctPosition(object->pos);
+            data.objectMap.correctPosition(object->pos);
         } else {
             object->pos += object->vel * cudaSimulationParameters.timestepSize.value
                 + object->shared1 * cudaSimulationParameters.timestepSize.value * cudaSimulationParameters.timestepSize.value / 2;
-            data.cellMap.correctPosition(object->pos);
+            data.objectMap.correctPosition(object->pos);
             object->shared2 = object->shared1;  //forces
             object->shared1 = {0, 0};
         }
@@ -855,9 +855,9 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
                     + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
                 float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f
                     - particleVel;  // minus particleVel because particle will still be moved in current time step
-                data.cellMap.correctPosition(particlePos);
+                data.objectMap.correctPosition(particlePos);
 
-                EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiation1 + radiation2);
+                EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiation1 + radiation2);
 
                 object->usableEnergy -= radiation1;
                 object->rawEnergy -= radiation2;

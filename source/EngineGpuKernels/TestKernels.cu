@@ -71,8 +71,8 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1
     }
 
     if (object1 != nullptr && object2 != nullptr) {
-        data.cellMap.reset();
-        data.particleMap.reset();
+        data.objectMap.reset();
+        data.energyMap.reset();
         data.processMemory.reset();
 
         // Heuristics

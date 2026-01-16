@@ -239,14 +239,14 @@ CreatureDescription CreatureDescription::id(uint64_t id)
 void Description::clear()
 {
     _objects.clear();
-    _energyParticles.clear();
+    _energies.clear();
     _creatures.clear();
     _genomes.clear();
 }
 
 bool Description::isEmpty() const
 {
-    return _objects.empty() && _energyParticles.empty();
+    return _objects.empty() && _energies.empty();
 }
 
 Description& Description::add(Description&& other, bool assignNewIds /*= true*/)
@@ -255,7 +255,7 @@ Description& Description::add(Description&& other, bool assignNewIds /*= true*/)
         other.assignNewIds();
     }
     _objects.insert(_objects.end(), other._objects.begin(), other._objects.end());
-    _energyParticles.insert(_energyParticles.end(), other._energyParticles.begin(), other._energyParticles.end());
+    _energies.insert(_energies.end(), other._energies.begin(), other._energies.end());
     _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
     _genomes.insert(_genomes.end(), other._genomes.begin(), other._genomes.end());
     return *this;
@@ -288,10 +288,10 @@ bool Description::hasUniqueIds() const
     }
 
     std::unordered_set<uint64_t> particleIds;
-    for (auto const& energyParticle : _energyParticles) {
+    for (auto const& energyParticle : _energies) {
         particleIds.insert(energyParticle._id);
     }
-    if (particleIds.size() != _energyParticles.size()) {
+    if (particleIds.size() != _energies.size()) {
         return false;
     }
     return true;
@@ -440,7 +440,7 @@ void Description::assignNewIds()
     }
 
     // Assign new particle ids
-    for (auto& energyParticle : _energyParticles) {
+    for (auto& energyParticle : _energies) {
         energyParticle._id = NumberGenerator::get().createId();
     }
 }

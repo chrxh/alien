@@ -56,7 +56,7 @@ protected:
     {
         if (mode == SensorMode_DetectEnergy) {
             for (int i = 0; i < count; ++i) {
-                data._energyParticles.emplace_back(EnergyDescription().pos({startPos.x + i, startPos.y}).energy(10.0f));
+                data._energies.emplace_back(EnergyDescription().pos({startPos.x + i, startPos.y}).energy(10.0f));
             }
         } else if (mode == SensorMode_DetectFreeCell) {
             for (int i = 0; i < count; ++i) {
@@ -884,7 +884,7 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
     data.addConnection(1, 2);
 
     // Add a particle with low energy
-    data._energyParticles.emplace_back(EnergyDescription().id(100).pos({100.0f, 50.0f}).energy(1.0f));
+    data._energies.emplace_back(EnergyDescription().id(100).pos({100.0f, 50.0f}).energy(1.0f));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

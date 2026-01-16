@@ -41,8 +41,8 @@ bool TestHelper::compare(Description left, Description right)
 {
     std::sort(left._objects.begin(), left._objects.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._objects.begin(), right._objects.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(left._energyParticles.begin(), left._energyParticles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._energyParticles.begin(), right._energyParticles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(left._energies.begin(), left._energies.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._energies.begin(), right._energies.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._creatures.begin(), left._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._genomes.begin(), left._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });

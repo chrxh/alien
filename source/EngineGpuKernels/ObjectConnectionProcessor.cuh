@@ -5,7 +5,7 @@
 #include "Definitions.cuh"
 #include "EntityFactory.cuh"
 #include "ParameterCalculator.cuh"
-#include "EnergyParticleProcessor.cuh"
+#include "EnergyProcessor.cuh"
 #include "SimulationData.cuh"
 
 class ObjectConnectionProcessor
@@ -130,8 +130,8 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteConnectionPa
 __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteCell(SimulationData& data, uint64_t const& cellIndex)
 {
     StructuralOperation operation;
-    operation.type = StructuralOperation::Type::DelCell;
-    operation.data.delCell.cellIndex = cellIndex;
+    operation.type = StructuralOperation::Type::DelObject;
+    operation.data.delObject.cellIndex = cellIndex;
     data.structuralOperations.tryAddEntry(operation);
 }
 
@@ -153,13 +153,13 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteCellOperation
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
-        if (StructuralOperation::Type::DelCell == operation.type) {
-            auto cellIndex = operation.data.delCell.cellIndex;
+        if (StructuralOperation::Type::DelObject == operation.type) {
+            auto cellIndex = operation.data.delObject.cellIndex;
 
             Object* empty = nullptr;
             auto origCell = alienAtomicExch(&data.entities.objects.at(cellIndex), empty);
             if (origCell) {
-                EnergyParticleProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->getEnergy());
+                EnergyProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->getEnergy());
 
                 for (int i = 0; i < origCell->numConnections; ++i) {
                     StructuralOperation operation;
@@ -223,7 +223,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnections(
     ConstructorAngleAlignment angleAlignment)
 {
     auto posDelta = object2->pos - object1->pos;
-    data.cellMap.correctDirection(posDelta);
+    data.objectMap.correctDirection(posDelta);
 
     ObjectConnection origConnections[MAX_CELL_BONDS];
     int origNumConnection = object1->numConnections;
@@ -317,7 +317,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     // *****
     if (1 == object1->numConnections) {
         auto connectedCellDelta = object1->connections[0].object->pos - object1->pos;
-        data.cellMap.correctDirection(connectedCellDelta);
+        data.objectMap.correctDirection(connectedCellDelta);
         auto prevAngle = Math::angleOfVector(connectedCellDelta);
         auto angleDiff = Math::subtractAngle(newAngle, prevAngle);
         if (0 != desiredAngleOnCell1) {
@@ -351,8 +351,8 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     float nextAngle = 0;
     for (; index < object1->numConnections; ++index) {
         auto prevIndex = (index + object1->numConnections - 1) % object1->numConnections;
-        prevAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(object1->connections[prevIndex].object->pos - object1->pos));
-        nextAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(object1->connections[index].object->pos - object1->pos));
+        prevAngle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object1->connections[prevIndex].object->pos - object1->pos));
+        nextAngle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object1->connections[index].object->pos - object1->pos));
         if (Math::isAngleInBetween(prevAngle, nextAngle, newAngle) || prevIndex == index) {
             break;
         }
@@ -468,7 +468,7 @@ __inline__ __device__ bool
 ObjectConnectionProcessor::existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached)
 {
     auto result = false;
-    data.cellMap.executeForEach(pos2, radius, detached, [&](auto const& nearCell) {
+    data.objectMap.executeForEach(pos2, radius, detached, [&](auto const& nearCell) {
         if (!nearCell->tryLock()) {
             return;
         }
@@ -522,8 +522,8 @@ __inline__ __device__ bool ObjectConnectionProcessor::hasAngleSpace(SimulationDa
     float nextAngle;
     for (; index < object->numConnections; ++index) {
         auto prevIndex = (index + object->numConnections - 1) % object->numConnections;
-        prevAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(object->connections[prevIndex].object->pos - object->pos));
-        nextAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(object->connections[index].object->pos - object->pos));
+        prevAngle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object->connections[prevIndex].object->pos - object->pos));
+        nextAngle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object->connections[index].object->pos - object->pos));
         if (Math::isAngleInBetween(prevAngle, nextAngle, angle) || prevIndex == index) {
             auto const angleUnit = 360.0f / toFloat(angleAlignment + 1);
             return object->connections[index].angleFromPrevious > angleUnit + NEAR_ZERO;
@@ -566,7 +566,7 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
         return ReferenceAndActualAngle{0, data.primaryNumberGen.random() * 360};
     }
     auto displacement = object->connections[0].object->pos - object->pos;
-    data.cellMap.correctDirection(displacement);
+    data.objectMap.correctDirection(displacement);
     auto angle = Math::angleOfVector(displacement);
     int index = 0;
     float largestAngleGap = 0;
@@ -624,7 +624,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(Si
 __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Object* object, Object* otherCell)
 {
     auto result = false;
-    data.cellMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](Object* nearCell) {
+    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](Object* nearCell) {
         if (result) {
             return;
         }

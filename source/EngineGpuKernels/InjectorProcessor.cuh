@@ -34,7 +34,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
         Object* injectedCell = nullptr;
         int numDefenders = 0;
-        data.cellMap.executeForEach(object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached, [&](auto const& otherCell) {
+        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached, [&](auto const& otherCell) {
             if (injectedCell != nullptr) {
                 return;
             }
@@ -78,7 +78,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             object->signal.channels[Channels::InjectorSuccess] = 1;
 
             if (injectorEnergyCost > 0) {
-                EnergyParticleProcessor::radiate(data, object, injectorEnergyCost);
+                EnergyProcessor::radiate(data, object, injectorEnergyCost);
             }
         }
 

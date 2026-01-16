@@ -563,7 +563,7 @@ struct Description
     auto operator<=>(Description const&) const = default;
 
     MEMBER(Description, std::vector<ObjectDescription>, objects, {});
-    MEMBER(Description, std::vector<EnergyDescription>, energyParticles, {});
+    MEMBER(Description, std::vector<EnergyDescription>, energies, {});
     MEMBER(Description, std::vector<CreatureDescription>, creatures, {});
     MEMBER(Description, std::vector<GenomeDescription>, genomes, {});
 

@@ -449,14 +449,14 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     if (crawling.initialDistance == VALUE_NOT_SET_FLOAT) {
         crawling.initialDistance = object->connections[0].distance;
         crawling.forward = true;
-        crawling.lastActualDistance = data.cellMap.getDistance(object->connections[0].object->pos, object->pos);
+        crawling.lastActualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
         crawling.impulseAlreadyApplied = true;
     }
 
     // Process auto crawling
     if (SignalProcessor::isAutoTriggered(data, object, AutoTriggerInterval)) {
 
-        auto actualDistance = data.cellMap.getDistance(object->connections[0].object->pos, object->pos);
+        auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
         auto activation = crawling.activation * toFloat(crawling.activationCountdown) / cudaSimulationParameters.muscleActivationCountdown;
 
         // Change crawling direction
@@ -500,7 +500,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
                 }
                 auto direction = calcAverageDirection(data, object);
 
-                auto front = Math::rotateClockwise(data.cellMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->frontAngle);
+                auto front = Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->frontAngle);
                 if (Math::dot(front, direction) > 0) {
                     direction *= -1.0f;
                 }
@@ -535,7 +535,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     // Initialization
     if (crawling.initialDistance == VALUE_NOT_SET_FLOAT) {
         crawling.initialDistance = object->connections[0].distance;
-        crawling.lastActualDistance = data.cellMap.getDistance(object->connections[0].object->pos, object->pos);
+        crawling.lastActualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
         crawling.lastDistanceDelta = 0;
         crawling.impulseAlreadyApplied = true;
     }
@@ -543,7 +543,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     // Process manual crawling
     if (SignalProcessor::isManuallyTriggered(data, object)) {
 
-        auto actualDistance = data.cellMap.getDistance(object->connections[0].object->pos, object->pos);
+        auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
         auto activation = max(-1.0f, min(1.0f, object->signal.channels[Channels::CellTypeActivation]));
 
         // Calc min and max distance
@@ -583,7 +583,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
                 }
                 auto direction = calcAverageDirection(data, object);
 
-                auto front = Math::rotateClockwise(data.cellMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->frontAngle);
+                auto front = Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->frontAngle);
                 if (Math::dot(front, direction) > 0) {
                     direction *= -1.0f;
                 }
@@ -643,7 +643,7 @@ __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object
 {
     auto cellTypeMuscleEnergyCost = cudaSimulationParameters.muscleEnergyCost.value[object->color];
     if (cellTypeMuscleEnergyCost > 0) {
-        EnergyParticleProcessor::radiate(data, object, cellTypeMuscleEnergyCost);
+        EnergyProcessor::radiate(data, object, cellTypeMuscleEnergyCost);
     }
 }
 
@@ -688,7 +688,7 @@ __inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationDat
 
     float2 result{0, 0};
     for (int i = 0; i < chainLength - 1; ++i) {
-        result += Math::getNormalized(data.cellMap.getCorrectedDirection(chain[i]->pos - chain[i + 1]->pos));
+        result += Math::getNormalized(data.objectMap.getCorrectedDirection(chain[i]->pos - chain[i + 1]->pos));
     }
     result /= toFloat(chainLength);
     return result;

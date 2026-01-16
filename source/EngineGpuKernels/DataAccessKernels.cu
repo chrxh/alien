@@ -297,7 +297,7 @@ namespace
         object->tempValue.as_uint64 = cellTOIndex;
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectingCell = object->connections[i].object;
-            cellTO.connections[i].cellIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
+            cellTO.connections[i].objectIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
             cellTO.connections[i].distance = object->connections[i].distance;
             cellTO.connections[i].angleFromPrevious = object->connections[i].angleFromPrevious;
         }
@@ -509,7 +509,7 @@ __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLe
             continue;
         }
         auto pos = object->pos;
-        data.cellMap.correctPosition(pos);
+        data.objectMap.correctPosition(pos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             object->creature->creatureIndex = VALUE_NOT_SET_UINT64;
             object->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
@@ -566,7 +566,7 @@ __global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, 
     }
 }
 
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, TO to)
+__global__ void cudaGetSelectedObjectDataWithoutConnections(SimulationData data, bool includeClusters, TO to)
 {
     auto const& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
@@ -582,12 +582,12 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
     }
 }
 
-__global__ void cudaGetSelectedParticleData(SimulationData data, TO access)
+__global__ void cudaGetSelectedEnergyData(SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartition(data.entities.energyParticles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
-        auto const& particle = data.entities.energyParticles.at(particleIndex);
+        auto const& particle = data.entities.energies.at(particleIndex);
         if (particle->selected == 0) {
             continue;
         }
@@ -596,7 +596,7 @@ __global__ void cudaGetSelectedParticleData(SimulationData data, TO access)
     }
 }
 
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO to)
+__global__ void cudaGetInspectedObjectDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO to)
 {
     auto const& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
@@ -627,12 +627,12 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
     }
 }
 
-__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, TO access)
+__global__ void cudaGetInspectedEnergyData(InspectedEntityIds ids, SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartition(data.entities.energyParticles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
-        auto const& particle = data.entities.energyParticles.at(particleIndex);
+        auto const& particle = data.entities.energies.at(particleIndex);
         bool found = false;
         for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
             if (ids.values[i] == Const::MaxInspectedObjects_Break) {
@@ -676,14 +676,14 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
         }
     }
     {
-        auto const& particles = data.entities.energyParticles;
+        auto const& particles = data.entities.energies;
         auto const partition = calcSystemThreadPartition(particles.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& particle = particles.at(index);
 
             auto pos = particle->pos;
-            data.particleMap.correctPosition(pos);
+            data.energyMap.correctPosition(pos);
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
@@ -706,7 +706,7 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
         auto& object = cells.at(index);
 
         auto pos = object->pos;
-        data.cellMap.correctPosition(pos);
+        data.objectMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
@@ -776,7 +776,7 @@ __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, Sim
         auto& object = cells.at(index);
 
         auto pos = object->pos;
-        data.cellMap.correctPosition(pos);
+        data.objectMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
@@ -856,7 +856,7 @@ __global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data
 }
 
 // tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
+__global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     auto const& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
@@ -866,7 +866,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
         auto& object = cells.at(index);
 
         auto pos = object->pos;
-        data.cellMap.correctPosition(pos);
+        data.objectMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             object->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
@@ -884,20 +884,20 @@ __global__ void cudaResolveConnections(SimulationData data, TO to)
         auto& cellTO = to.objects[index];
 
         for (int i = 0; i < cellTO.numConnections; ++i) {
-            auto const cellIndex = cellTO.connections[i].cellIndex;
-            cellTO.connections[i].cellIndex = data.entities.heap.atType<Object>(cellIndex).tempValue.as_uint64;
+            auto const cellIndex = cellTO.connections[i].objectIndex;
+            cellTO.connections[i].objectIndex = data.entities.heap.atType<Object>(cellIndex).tempValue.as_uint64;
         }
     }
 }
 
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartition(data.entities.energyParticles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
-        auto const& particle = data.entities.energyParticles.at(particleIndex);
+        auto const& particle = data.entities.energies.at(particleIndex);
         auto pos = particle->pos;
-        data.particleMap.correctPosition(pos);
+        data.energyMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
@@ -957,7 +957,7 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Obj
 
     auto cellPartition = calcSystemThreadPartition(*to.numObjects);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
-        auto object = factory.createCellFromTO(to, index, *cellArray);
+        auto object = factory.createObjectFromTO(to, index, *cellArray);
         if (selectNewData) {
             object->selected = 1;
         }
@@ -1010,7 +1010,7 @@ __global__ void cudaSaveNumEntries(SimulationData data)
 __global__ void cudaClearData(SimulationData data)
 {
     data.entities.objects.reset();
-    data.entities.energyParticles.reset();
+    data.entities.energies.reset();
     data.entities.heap.reset();
 }
 
@@ -1030,7 +1030,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step1(SimulationData data)
 __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, ArraySizesForTO* arraySizes)
 {
     auto const& cells = data.entities.objects;
-    auto const& particles = data.entities.energyParticles;
+    auto const& particles = data.entities.energies;
 
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         arraySizes->objects = cells.getNumEntries();
@@ -1082,8 +1082,8 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
 __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arraySizes)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        arraySizes->cellArray = *to.numObjects;
-        arraySizes->particleArray = *to.numEnergyParticles;
+        arraySizes->objectArray = *to.numObjects;
+        arraySizes->energyArray = *to.numEnergyParticles;
         alienAtomicAdd64(
             &arraySizes->heap,
             *to.numObjects * (sizeof(Object) + GpuMemoryAlignmentBytes) + *to.numEnergyParticles * (sizeof(Energy) + GpuMemoryAlignmentBytes)

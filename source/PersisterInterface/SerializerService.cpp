@@ -1507,7 +1507,7 @@ namespace cereal
     template <class Archive>
     void serialize(Archive& ar, Description& description)
     {
-        ar(description._objects, description._energyParticles, description._creatures, description._genomes);
+        ar(description._objects, description._energies, description._creatures, description._genomes);
     }
 }
 

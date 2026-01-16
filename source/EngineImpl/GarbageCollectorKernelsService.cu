@@ -17,7 +17,7 @@ void GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& gp
     KERNEL_CALL(cudaCleanupMaps, data);
 
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
-    KERNEL_CALL(cudaCleanupPointerArray<Energy*>, data.entities.energyParticles, data.tempEntities.energyParticles);
+    KERNEL_CALL(cudaCleanupPointerArray<Energy*>, data.entities.energies, data.tempEntities.energies);
     KERNEL_CALL(cudaCleanupPointerArray<Object*>, data.entities.objects, data.tempEntities.objects);
     KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
 
@@ -25,7 +25,7 @@ void GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& gp
     cudaDeviceSynchronize();
     if (copyToHost(_cudaBool)) {
         KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
-        KERNEL_CALL(cudaCleanupParticles, data.entities.energyParticles, data.tempEntities.heap);
+        KERNEL_CALL(cudaCleanupParticles, data.entities.energies, data.tempEntities.heap);
         KERNEL_CALL(cudaPrepareCleanupCreaturesAndGenomes, data.entities.objects);
         KERNEL_CALL(cudaCleanupGenomesStep1, data.entities.objects, data.tempEntities.heap);
         KERNEL_CALL(cudacudaCleanupGenomesStep2, data.entities.objects, data.tempEntities.heap);
@@ -46,12 +46,12 @@ void GarbageCollectorKernelsService::cleanupAfterTimestepForPreview(CudaSettings
 void GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
-    KERNEL_CALL(cudaCleanupPointerArray<Energy*>, data.entities.energyParticles, data.tempEntities.energyParticles);
+    KERNEL_CALL(cudaCleanupPointerArray<Energy*>, data.entities.energies, data.tempEntities.energies);
     KERNEL_CALL(cudaCleanupPointerArray<Object*>, data.entities.objects, data.tempEntities.objects);
     KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
 
     KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
-    KERNEL_CALL(cudaCleanupParticles, data.entities.energyParticles, data.tempEntities.heap);
+    KERNEL_CALL(cudaCleanupParticles, data.entities.energies, data.tempEntities.heap);
     KERNEL_CALL(cudaPrepareCleanupCreaturesAndGenomes, data.entities.objects);
     KERNEL_CALL(cudaCleanupGenomesStep1, data.entities.objects, data.tempEntities.heap);
     KERNEL_CALL(cudacudaCleanupGenomesStep2, data.entities.objects, data.tempEntities.heap);
@@ -66,11 +66,11 @@ void GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings c
 void GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
-    KERNEL_CALL(cudaCleanupPointerArray<Energy*>, data.entities.energyParticles, data.tempEntities.energyParticles);
+    KERNEL_CALL(cudaCleanupPointerArray<Energy*>, data.entities.energies, data.tempEntities.energies);
     KERNEL_CALL(cudaCleanupPointerArray<Object*>, data.entities.objects, data.tempEntities.objects);
 
     KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
-    KERNEL_CALL(cudaCleanupParticles, data.tempEntities.energyParticles, data.tempEntities.heap);
+    KERNEL_CALL(cudaCleanupParticles, data.tempEntities.energies, data.tempEntities.heap);
     KERNEL_CALL(cudaPrepareCleanupCreaturesAndGenomes, data.entities.objects);
     KERNEL_CALL(cudaCleanupGenomesStep1, data.entities.objects, data.tempEntities.heap);
     KERNEL_CALL(cudacudaCleanupGenomesStep2, data.entities.objects, data.tempEntities.heap);

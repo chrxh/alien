@@ -15,7 +15,7 @@ struct DelConnectionOperation
     Object* connectedObject;
 };
 
-struct DelCellOperation
+struct DelObjectOperation
 {
     uint64_t cellIndex;
 };
@@ -24,7 +24,7 @@ union StructureOperationData
 {
     AddConnectionPairOperation addConnection;
     DelConnectionOperation delConnection;
-    DelCellOperation delCell;
+    DelObjectOperation delObject;
 };
 
 struct StructuralOperation
@@ -33,7 +33,7 @@ struct StructuralOperation
     {
         AddConnectionPair,
         DelConnection,
-        DelCell,
+        DelObject,
     };
     Type type;
     StructureOperationData data;

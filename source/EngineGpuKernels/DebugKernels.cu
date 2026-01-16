@@ -59,7 +59,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 }
 
                 auto displacement = connectingCell->pos - object->pos;
-                data.cellMap.correctDirection(displacement);
+                data.objectMap.correctDirection(displacement);
                 auto actualDistance = Math::length(displacement);
                 if (actualDistance > 14) {
                     printf("distance too large at %d\n", location);
@@ -79,10 +79,10 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
 
 __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int location)
 {
-    auto partition = calcSystemThreadPartition(data.entities.energyParticles.getNumEntries());
+    auto partition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
-        if (auto& particle = data.entities.energyParticles.at(particleIndex)) {
+        if (auto& particle = data.entities.energies.at(particleIndex)) {
             if (reinterpret_cast<uint64_t>(particle) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
                 || reinterpret_cast<uint64_t>(particle) + sizeof(Energy)
                     >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
