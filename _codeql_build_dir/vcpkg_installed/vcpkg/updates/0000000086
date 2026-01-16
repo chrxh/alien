@@ -1,0 +1,8 @@
+Package: boost-winapi
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-headers, boost-predef
+Architecture: x64-linux
+Multi-Arch: same
+Abi: e09a3544315640e04f20fcc95cd6b872ca6116d13c0f80555c2287533ad1e8df
+Description: Boost winapi module
+Status: install ok half-installed

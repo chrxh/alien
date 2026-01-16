@@ -1,0 +1,8 @@
+Package: boost-move
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-headers
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 3ff9f0bab3aeeadc1658a2ba1c66b3a91072e6f8e0199a8ce4bddfc805ac5541
+Description: Boost move module
+Status: install ok half-installed
