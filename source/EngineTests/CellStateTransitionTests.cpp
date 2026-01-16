@@ -35,7 +35,7 @@ public:
     CellTypeDescription getCellTypeDescription(CellType cellType)
     {
         if (cellType == CellType_Structure) {
-            return StructureObjectDescription();
+            return StructureDescription();
         } else if (cellType == CellType_Free) {
             return FreeCellDescription();
         } else {

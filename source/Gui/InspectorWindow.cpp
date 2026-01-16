@@ -293,7 +293,7 @@ void _InspectorWindow::processCellTypeTab(ObjectDescription& object)
                         type)) {
                     switch (type) {
                     case CellType_Structure: {
-                        object.getCellRef()._cellType = StructureObjectDescription();
+                        object.getCellRef()._cellType = StructureDescription();
                     } break;
                     case CellType_Free: {
                         object.getCellRef()._cellType = FreeCellDescription();

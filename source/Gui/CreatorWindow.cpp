@@ -227,7 +227,7 @@ CreatorWindow::CreatorWindow()
 
 void CreatorWindow::createCell()
 {
-    auto object = ObjectDescription().pos(getRandomPos()).stiffness(_stiffness).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).sticky(_makeSticky).type(CellDescription().cellType(StructureObjectDescription()).usableEnergy(_energy));
+    auto object = ObjectDescription().pos(getRandomPos()).stiffness(_stiffness).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).sticky(_makeSticky).type(CellDescription().cellType(StructureDescription()).usableEnergy(_energy));
     Description description;
     description._objects.emplace_back(object);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
@@ -248,7 +248,7 @@ void CreatorWindow::createRectangle()
     }
 
     auto description = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
-                                                                    .cellType(StructureObjectDescription())
+                                                                    .cellType(StructureDescription())
                                                                     .width(_rectHorizontalCells)
                                                                     .height(_rectVerticalCells)
                                                                     .cellDistance(_cellDistance)
@@ -268,7 +268,7 @@ void CreatorWindow::createHexagon()
         return;
     }
     Description description = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
-                                                                          .cellType(StructureObjectDescription())
+                                                                          .cellType(StructureDescription())
                                                                           .layers(_layers)
                                                                           .cellDistance(_cellDistance)
                                                                           .usableEnergy(_energy)
@@ -300,7 +300,7 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            description._objects.emplace_back(ObjectDescription().id(NumberGenerator::get().createId()).stiffness(_stiffness).sticky(_makeSticky).pos(relPos).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).type(CellDescription().cellType(StructureObjectDescription()).usableEnergy(_energy)));
+            description._objects.emplace_back(ObjectDescription().id(NumberGenerator::get().createId()).stiffness(_stiffness).sticky(_makeSticky).pos(relPos).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).type(CellDescription().cellType(StructureDescription()).usableEnergy(_energy)));
         }
     }
 

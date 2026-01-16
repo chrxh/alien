@@ -55,7 +55,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(StructureObjectDescription())));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(StructureDescription())));
 
     _simulationFacade->setSimulationData(data);
 
@@ -138,14 +138,14 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(RadiationTests, fixedStructureCells_shouldNotRadiate)
+TEST_F(RadiationTests, fixedStructureObject_shouldNotRadiate)
 {
     // Test that a cell that is both fixed AND a structure cell does not radiate
     auto initialEnergy = 200.0f;
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(StructureObjectDescription())));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(StructureDescription())));
 
     _simulationFacade->setSimulationData(data);
 

@@ -288,7 +288,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
 
     switch (objectTO.typeData.cell.cellType) {
     case CellType_Structure: {
-        StructureObjectDescription base;
+        StructureDescription base;
         cellDesc._cellType = base;
     } break;
     case CellType_Free: {

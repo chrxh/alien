@@ -21,9 +21,9 @@ struct ConnectionDescription
     MEMBER(ConnectionDescription, float, angleFromPrevious, 0.0f);
 };
 
-struct StructureObjectDescription
+struct StructureDescription
 {
-    auto operator<=>(StructureObjectDescription const&) const = default;
+    auto operator<=>(StructureDescription const&) const = default;
 };
 
 struct FreeCellDescription
@@ -433,7 +433,7 @@ struct CommunicatorDescription
 };
 
 using CellTypeDescription = std::variant<
-    StructureObjectDescription,
+    StructureDescription,
     FreeCellDescription,
     BaseDescription,
     DepotDescription,

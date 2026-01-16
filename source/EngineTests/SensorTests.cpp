@@ -64,7 +64,7 @@ protected:
             }
         } else if (mode == SensorMode_DetectStructure) {
             for (int i = 0; i < count; ++i) {
-                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(CellDescription().cellType(StructureObjectDescription())));
+                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(CellDescription().cellType(StructureDescription())));
             }
         } else if (mode == SensorMode_DetectCreature) {
             data.add(createLargeCreature(startPos, count), assignNewIds);
@@ -398,7 +398,7 @@ TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureCells)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObjects)
 {
     auto data = Description().objects({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
@@ -408,7 +408,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureCells)
 
     // Add structure cells between sensor and target (to block the ray)
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 50.0f}).type(CellDescription().cellType(StructureObjectDescription())));
+        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 50.0f}).type(CellDescription().cellType(StructureDescription())));
     }
 
     // Add target behind the structure cells
@@ -423,7 +423,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureCells)
     EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCells_behind)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObjects_behind)
 {
     auto data = Description().objects({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
@@ -433,7 +433,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCel
 
     // Add structure cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 5.0f}).type(CellDescription().cellType(StructureObjectDescription())));
+        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 5.0f}).type(CellDescription().cellType(StructureDescription())));
     }
 
     // Add target behind the structure cells
@@ -448,7 +448,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCel
     EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCells_differentAngle)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObjects_differentAngle)
 {
     auto data = Description().objects({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
@@ -458,7 +458,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCel
 
     // Add structure cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 150.0f}).type(CellDescription().cellType(StructureObjectDescription())));
+        data._objects.emplace_back(ObjectDescription().id(50 + i).pos({95.0f + i, 150.0f}).type(CellDescription().cellType(StructureDescription())));
     }
 
     // Add target at different angle (not blocking)
@@ -768,7 +768,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     // Add structure cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 30; ++i) {
-        actualData._objects.emplace_back(ObjectDescription().id(50 + i).pos({85.0f + i, 70.0f}).type(CellDescription().cellType(StructureObjectDescription())));
+        actualData._objects.emplace_back(ObjectDescription().id(50 + i).pos({85.0f + i, 70.0f}).type(CellDescription().cellType(StructureDescription())));
     }
     _simulationFacade->setSimulationData(actualData);
 
@@ -1131,7 +1131,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
     EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
-TEST_F(SensorTests, detectCreature_ignoreStructureCells)
+TEST_F(SensorTests, detectCreature_ignoreStructureObjects)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription()))),
@@ -1142,7 +1142,7 @@ TEST_F(SensorTests, detectCreature_ignoreStructureCells)
     // Add structure cells (should be ignored)
     for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
-            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(CellDescription().cellType(StructureObjectDescription())));
+            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(CellDescription().cellType(StructureDescription())));
         }
     }
 

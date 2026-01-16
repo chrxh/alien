@@ -602,7 +602,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
 
     switch (type) {
     case CellType_Structure:
-        return StructureObjectDescription();
+        return StructureDescription();
     case CellType_Free:
         return FreeCellDescription();
     case CellType_Base:

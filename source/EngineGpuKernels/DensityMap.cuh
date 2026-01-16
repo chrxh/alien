@@ -89,7 +89,7 @@ public:
         }
     }
 
-    __device__ __inline__ void addStructureCell(Object* object)
+    __device__ __inline__ void addStructureObject(Object* object)
     {
         auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
