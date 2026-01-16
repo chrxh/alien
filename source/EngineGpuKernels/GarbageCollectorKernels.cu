@@ -14,15 +14,15 @@ __global__ void cudaPrepareHeapForCleanup(SimulationData data)
 __global__ void cudaCleanupCellsStep1(Array<Object*> objects, Heap newHeap)
 {
     // Assumes that cellPointers are already cleaned up
-    auto cellPartition = calcSystemThreadPartition(objects.getNumEntries());
+    auto objectPartition = calcSystemThreadPartition(objects.getNumEntries());
 
-    int numCellsToCopy = cellPartition.numElements();
+    int numCellsToCopy = objectPartition.numElements();
     if (numCellsToCopy > 0) {
         auto newCells = newHeap.getTypedSubArray<Object>(numCellsToCopy);
         auto newHeapStart = newHeap.getArray();
 
         int newCellIndex = 0;
-        for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+        for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
             auto& object = objects.at(index);
             auto newCell = &newCells[newCellIndex];
             *newCell = *object;
@@ -137,9 +137,9 @@ __global__ void cudaCleanupParticles(Array<Energy*> particlePointers, Heap newHe
 
 __global__ void cudaPrepareCleanupCreaturesAndGenomes(Array<Object*> cells)
 {
-    auto cellPartition = calcSystemThreadPartition(cells.getNumEntries());
+    auto objectPartition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
         if (object->typeData.cell.creature) {
             object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
@@ -150,9 +150,9 @@ __global__ void cudaPrepareCleanupCreaturesAndGenomes(Array<Object*> cells)
 
 __global__ void cudaCleanupGenomesStep1(Array<Object*> cells, Heap newHeap)
 {
-    auto cellPartition = calcSystemThreadPartition(cells.getNumEntries());
+    auto objectPartition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
 
         if (object->typeData.cell.creature) {
@@ -203,9 +203,9 @@ __global__ void cudaCleanupGenomesStep1(Array<Object*> cells, Heap newHeap)
 
 __global__ void cudacudaCleanupGenomesStep2(Array<Object*> cells, Heap newHeap)
 {
-    auto cellPartition = calcSystemThreadPartition(cells.getNumEntries());
+    auto objectPartition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
         if (object->typeData.cell.creature) {
             object->typeData.cell.creature->genome = &newHeap.atType<Genome>(object->typeData.cell.creature->genome->genomeIndex);
@@ -215,9 +215,9 @@ __global__ void cudacudaCleanupGenomesStep2(Array<Object*> cells, Heap newHeap)
 
 __global__ void cudaCleanupCreaturesStep1(Array<Object*> cells, Heap newHeap)
 {
-    auto cellPartition = calcSystemThreadPartition(cells.getNumEntries());
+    auto objectPartition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
 
         if (object->typeData.cell.creature) {
@@ -238,9 +238,9 @@ __global__ void cudaCleanupCreaturesStep1(Array<Object*> cells, Heap newHeap)
 
 __global__ void cudaCleanupCreaturesStep2(Array<Object*> cells, Heap newHeap)
 {
-    auto cellPartition = calcSystemThreadPartition(cells.getNumEntries());
+    auto objectPartition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
         auto const& creature = object->typeData.cell.creature;
         if (creature) {

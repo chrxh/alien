@@ -81,8 +81,8 @@ namespace
 __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objectData)
 {
     // Process cells - each cell goes to its index position
-    auto const& cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    auto const& objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
 
         int isInTriangleOrQuad = 0;
@@ -103,14 +103,14 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
                 auto prevBackIndex = backIndices[prevIndex];
 
                 // Triangle?
-                if (prevConnectedCell->getConnectedCell(prevBackIndex - 1) == connectedCell) {
+                if (prevConnectedCell->getConnectedObject(prevBackIndex - 1) == connectedCell) {
                     isInTriangleOrQuad = 1;
                     break;
                 }
 
                 // Rectangle?
-                auto fourthCellCandidate1 = connectedCell->getConnectedCell(backIndex + 1);
-                auto fourthCellCandidate2 = prevConnectedCell->getConnectedCell(prevBackIndex - 1);
+                auto fourthCellCandidate1 = connectedCell->getConnectedObject(backIndex + 1);
+                auto fourthCellCandidate2 = prevConnectedCell->getConnectedObject(prevBackIndex - 1);
                 if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
                     && connectedCell != prevConnectedCell) {
                     isInTriangleOrQuad = 1;
@@ -230,15 +230,15 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             auto prevBackIndex = backIndices[prevIndex];
 
             // Triangle?
-            if (prevConnectedCell->getConnectedCell(prevBackIndex - 1) == connectedCell) {
+            if (prevConnectedCell->getConnectedObject(prevBackIndex - 1) == connectedCell) {
                 if (object->id < connectedCell->id && object->id < prevConnectedCell->id) {
                     addTriangle(object, index, prevConnectedCell, connectedCell);
                 }
             }
 
             // Rectangle?
-            auto fourthCellCandidate1 = connectedCell->getConnectedCell(backIndex + 1);
-            auto fourthCellCandidate2 = prevConnectedCell->getConnectedCell(prevBackIndex - 1);
+            auto fourthCellCandidate1 = connectedCell->getConnectedObject(backIndex + 1);
+            auto fourthCellCandidate2 = prevConnectedCell->getConnectedObject(prevBackIndex - 1);
             if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
                 && connectedCell != prevConnectedCell) {
                 if (object->id < connectedCell->id && object->id < prevConnectedCell->id && object->id < fourthCellCandidate2->id) {

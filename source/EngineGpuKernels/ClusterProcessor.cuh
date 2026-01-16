@@ -45,17 +45,17 @@ __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto currentCell = objects.at(index);
+        auto currentObject = objects.at(index);
 
         //heuristics to cover connected cells
         for (int i = 0; i < 30; ++i) {
             bool found = false;
-            for (int j = 0; j < currentCell->numConnections; ++j) {
-                auto candidateCell = currentCell->connections[j].object;
-                auto cellTag = currentCell->typeData.cell.clusterIndex;
-                auto origTag = atomicMin(&candidateCell->typeData.cell.clusterIndex, cellTag);
+            for (int j = 0; j < currentObject->numConnections; ++j) {
+                auto candidateObject = currentObject->connections[j].object;
+                auto cellTag = currentObject->typeData.cell.clusterIndex;
+                auto origTag = atomicMin(&candidateObject->typeData.cell.clusterIndex, cellTag);
                 if (cellTag < origTag) {
-                    currentCell = candidateCell;
+                    currentObject = candidateObject;
                     found = true;
                     break;
                 }

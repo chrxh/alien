@@ -661,13 +661,13 @@ __inline__ __device__ void MuscleProcessor::getChain(Object** chain, int& chainL
     chainLength = 2;
 
     for (int i = 1; i < MaxChainLength - 1; ++i) {
-        auto const& currentCell = chain[i];
-        if (currentCell->numConnections != 2) {
+        auto const& currentObject = chain[i];
+        if (currentObject->numConnections != 2) {
             break;
         }
         auto foundNextCell = false;
-        for (int j = 0; j < currentCell->numConnections; ++j) {
-            auto const& connectedCell = currentCell->connections[j].object;
+        for (int j = 0; j < currentObject->numConnections; ++j) {
+            auto const& connectedCell = currentObject->connections[j].object;
             if (connectedCell != chain[i - 1]) {
                 chain[i + 1] = connectedCell;
                 foundNextCell = true;

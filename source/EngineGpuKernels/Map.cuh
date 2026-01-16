@@ -119,7 +119,7 @@ public:
                     break;
                 }
                 slotCell = reinterpret_cast<Object*>(atomicCAS(
-                    reinterpret_cast<unsigned long long int*>(&slotCell->nextCell),
+                    reinterpret_cast<unsigned long long int*>(&slotCell->nextObject),
                     reinterpret_cast<unsigned long long int>(nullptr),
                     reinterpret_cast<unsigned long long int>(object)));
             }
@@ -162,7 +162,7 @@ public:
                         cells[numCells] = slotCell;
                         ++numCells;
                     }
-                    slotCell = slotCell->nextCell;
+                    slotCell = slotCell->nextObject;
                 }
             }
         }
@@ -186,7 +186,7 @@ public:
                     if (Math::length(slotCell->pos - pos) <= radius && detached + slotCell->detached != 1) {
                         execFunc(slotCell);
                     }
-                    slotCell = slotCell->nextCell;
+                    slotCell = slotCell->nextObject;
                 }
             }
         }

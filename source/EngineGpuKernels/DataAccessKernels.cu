@@ -955,8 +955,8 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Obj
         }
     }
 
-    auto cellPartition = calcSystemThreadPartition(*to.numObjects);
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    auto objectPartition = calcSystemThreadPartition(*to.numObjects);
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto object = factory.createObjectFromTO(to, index, *cellArray);
         if (selectNewData) {
             object->selected = 1;

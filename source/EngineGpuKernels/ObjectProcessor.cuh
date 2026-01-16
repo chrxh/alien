@@ -77,7 +77,7 @@ __inline__ __device__ void ObjectProcessor::init(SimulationData& data)
         auto& object = objects.at(index);
 
         object->shared1 = {0, 0};
-        object->nextCell = nullptr;
+        object->nextObject = nullptr;
         object->tempValue.as_uint64 = 0;
     }
 }
@@ -258,7 +258,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     }
                 }
             }
-            otherObject = otherObject->nextCell;
+            otherObject = otherObject->nextObject;
         }
 
         // Warp-level reduction followed by atomic accumulation across warps

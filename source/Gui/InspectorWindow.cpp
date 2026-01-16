@@ -518,7 +518,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         //                    .tooltip(Const::GenomeCurrentConcatenationTooltip),
         //                desc._currentConcatenation);
         //            AlienGui::InputInt(
-        //                AlienGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
+        //                AlienGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentObjectTooltip),
         //                desc._currentNodeIndex);
         //        }
         //        ImGui::TreePop();

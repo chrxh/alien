@@ -390,7 +390,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                         return pack(distance, absAngle, density, creatureIdPart);
                     }
                 }
-                otherObject = otherObject->nextCell;
+                otherObject = otherObject->nextObject;
             }
 
         // Else: ScanType::Relocation
@@ -403,7 +403,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                     float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numObjects);
                     return pack(distance, absAngle, density, creatureIdPart);
                 }
-                otherObject = otherObject->nextCell;
+                otherObject = otherObject->nextObject;
             }
         }
     }

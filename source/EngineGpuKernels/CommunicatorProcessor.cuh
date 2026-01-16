@@ -138,7 +138,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
             if (isMatch(otherObject)) {
                 tryTransmitSignal(data, object, otherObject, newNumTimesSent);
             }
-            otherObject = otherObject->nextCell;
+            otherObject = otherObject->nextObject;
         }
     }
 }

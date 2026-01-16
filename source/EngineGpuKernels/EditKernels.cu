@@ -2,8 +2,8 @@
 
 __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters)
 {
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if ((0 != object->selected && includeClusters) || (1 == object->selected && !includeClusters)) {
             object->color = color;
@@ -297,8 +297,8 @@ __global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCell
 
 __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data)
 {
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, updateData.considerClusters)) {
             object->pos = object->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
@@ -320,8 +320,8 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
 
 __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters)
 {
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, includeClusters)) {
             object->vel = velocity;
@@ -339,8 +339,8 @@ __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity
 
 __global__ void cudaMakeSticky(SimulationData data, bool includeClusters)
 {
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, includeClusters)) {
             object->sticky = true;
@@ -350,8 +350,8 @@ __global__ void cudaMakeSticky(SimulationData data, bool includeClusters)
 
 __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
 {
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, includeClusters)) {
             object->sticky = false;
@@ -361,8 +361,8 @@ __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
 
 __global__ void cudaSetBarrier(SimulationData data, bool value, bool includeClusters)
 {
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, includeClusters)) {
             object->fixed = value;
@@ -489,9 +489,9 @@ __global__ void cudaResetSelectionResult(SelectionResult result)
 
 __global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex)
 {
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
             atomicMin(minCellPosYAndIndex, (static_cast<unsigned long long int>(abs(object->pos.y)) << 32) | static_cast<unsigned long long int>(index));
@@ -501,9 +501,9 @@ __global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long l
 
 __global__ void cudaGetSelectionShallowData_step1(SimulationData data)
 {
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected && object->typeData.cell.creature != nullptr) {
             object->typeData.cell.creature->creatureIndex = 0;
@@ -515,9 +515,9 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCe
 {
     float2 refPos = refCellIndex != 0xffffffff ? data.entities.objects.at(refCellIndex)->pos : float2{0, 0};
 
-    auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
+    for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
             result.collectCell(object, refPos, data.objectMap);

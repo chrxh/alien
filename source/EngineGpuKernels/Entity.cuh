@@ -536,7 +536,7 @@ struct Object
     TempValue tempValue;
 
     float density;
-    Object* nextCell;                   // Linked list for finding all overlapping cells
+    Object* nextObject;                   // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
     float2 shared1;                   // Variable with different meanings depending on context
     float2 shared2;
@@ -562,7 +562,7 @@ struct Object
     }
 
     __device__ __inline__ ObjectConnection& getConnection(int index) { return connections[(index + numConnections) % numConnections]; }
-    __device__ __inline__ Object* getConnectedCell(int index) { return connections[(index + numConnections) % numConnections].object; }
+    __device__ __inline__ Object* getConnectedObject(int index) { return connections[(index + numConnections) % numConnections].object; }
     __device__ __inline__ void increaseAngle(int index, float increment) {
         auto& angle1 = getConnection(index).angleFromPrevious;
         auto& angle2 = getConnection(index + 1).angleFromPrevious;

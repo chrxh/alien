@@ -2385,8 +2385,8 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
         if (i > 0 && i < n - 1) {
             auto const& object = actualData.getObjectRef(createdCellIds.at(i));
             auto prevCellId = createdCellIds.at(i - 1);
-            auto nextCellId = createdCellIds.at(i + 1);
-            auto angle = object.getAngleSpan(prevCellId, nextCellId);
+            auto nextObjectId = createdCellIds.at(i + 1);
+            auto angle = object.getAngleSpan(prevCellId, nextObjectId);
             angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
             EXPECT_EQ(shapeResult.angle, angle);
             int numPrevConnections = 0;
@@ -2411,8 +2411,8 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     {
         auto const& object = actualData.getObjectRef(createdCellIds.back());
         auto prevCellId = createdCellIds.at(n - 2);
-        auto nextCellId = 1;  // = id of hostCell
-        auto angle = object.getAngleSpan(prevCellId, nextCellId);
+        auto nextObjectId = 1;  // = id of hostCell
+        auto angle = object.getAngleSpan(prevCellId, nextObjectId);
         angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
         EXPECT_EQ(LastAngle, angle);
     }

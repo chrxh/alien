@@ -95,7 +95,7 @@ private:
     // Else:
     //  No angle correction
     //
-    __inline__ __device__ static void correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* cell3);
+    __inline__ __device__ static void correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* object3);
 };
 
 /************************************************************************/
@@ -147,15 +147,15 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //    int numTaggedCells = 1;
 //    int currentTaggedCellIndex = 0;
 //    do {
-//        auto currentCell = taggedCells[currentTaggedCellIndex];
+//        auto currentObject = taggedCells[currentTaggedCellIndex];
 //
 //        if ((numTaggedCells + 1) % QueueLength != currentTaggedCellIndex) {
-//            for (int i = 0, j = currentCell->numConnections; i < j; ++i) {
-//                auto& nextCell = currentCell->connections[i].object;
-//                if (nextCell->creatureId == object->typeData.cell.creatureId) {
-//                    auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tempValue, toInt(tagBit)));
+//            for (int i = 0, j = currentObject->numConnections; i < j; ++i) {
+//                auto& nextObject = currentObject->connections[i].object;
+//                if (nextObject->creatureId == object->typeData.cell.creatureId) {
+//                    auto origTagBit = static_cast<uint32_t>(atomicOr(&nextObject->tempValue, toInt(tagBit)));
 //                    if ((origTagBit & tagBit) == 0) {
-//                        taggedCells[numTaggedCells] = nextCell;
+//                        taggedCells[numTaggedCells] = nextObject;
 //                        numTaggedCells = (numTaggedCells + 1) % QueueLength;
 //                        ++actualCells;
 //                    }
@@ -614,10 +614,10 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         // Adapt angles on other connected cells
         for (int i = lastCellIndex; (i + n) % n != (hostCellIndex + 1) % n && (i + n) % n != hostCellIndex; --i) {
-            correctAnglesByInnerAngleSum(newCell->getConnectedCell(i), newCell, newCell->getConnectedCell(i - 1));
+            correctAnglesByInnerAngleSum(newCell->getConnectedObject(i), newCell, newCell->getConnectedObject(i - 1));
         }
         for (int i = lastCellIndex + 1; i % n != hostCellIndex; ++i) {
-            correctAnglesByInnerAngleSum(newCell->getConnectedCell(i - 1), newCell, newCell->getConnectedCell(i));
+            correctAnglesByInnerAngleSum(newCell->getConnectedObject(i - 1), newCell, newCell->getConnectedObject(i));
         }
     }
 
@@ -899,96 +899,96 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Objec
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* cell3)
+__inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* object3)
 {
-    // Check if cell3 connects back to object1 (directly or via further cells, not through object2)
+    // Check if object3 connects back to object1 (directly or via further objects, not through object2)
     // to form a closed polygon
 
     // Determine traversal direction to find minimal polygon
-    // Find indices of object1 and cell3 in object2's connections (which are sorted clockwise)
-    int cell1IndexInCell2 = object2->getConnectionIndex(object1);
-    int cell3IndexInCell2 = object2->getConnectionIndex(cell3);
+    // Find indices of object1 and object3 in object2's connections (which are sorted clockwise)
+    int object1IndexInObject2 = object2->getConnectionIndex(object1);
+    int object3IndexInObject2 = object2->getConnectionIndex(object3);
 
-    // Determine if we go clockwise or counter-clockwise from cell3 to find object1
-    // The polygon is: object1 -> object2 -> cell3 -> ... -> object1
-    // From object2's perspective, we go clockwise from object1 to cell3
-    // So from cell3, we should continue in a consistent direction to find object1
-    bool goClockwiseFromCell3;
-    if (cell3IndexInCell2 == (cell1IndexInCell2 + 1) % object2->numConnections) {
-        // cell3 is clockwise from object1 in object2's connections
-        goClockwiseFromCell3 = true;
+    // Determine if we go clockwise or counter-clockwise from object3 to find object1
+    // The polygon is: object1 -> object2 -> object3 -> ... -> object1
+    // From object2's perspective, we go clockwise from object1 to object3
+    // So from object3, we should continue in a consistent direction to find object1
+    bool goClockwiseFromObject3;
+    if (object3IndexInObject2 == (object1IndexInObject2 + 1) % object2->numConnections) {
+        // object3 is clockwise from object1 in object2's connections
+        goClockwiseFromObject3 = true;
     } else {
-        // cell3 is counter-clockwise from object1 (wrapped around)
-        goClockwiseFromCell3 = false;
+        // object3 is counter-clockwise from object1 (wrapped around)
+        goClockwiseFromObject3 = false;
     }
 
-    // Find the minimal path from cell3 to object1 (not going through object2)
-    Object* currentCell = cell3;
-    Object* previousCell = object2;
-    int numIntermediateCells = 0;
+    // Find the minimal path from object3 to object1 (not going through object2)
+    Object* currentObject = object3;
+    Object* previousObject = object2;
+    int numIntermediateObjects = 0;
     bool foundPolygon = false;
-    Object* cell4 = nullptr;  // The next cell after cell3 in the polygon
+    Object* object4 = nullptr;  // The next object after object3 in the polygon
 
-    // Find object2's index in cell3's connections to determine traversal direction
-    int cell2IndexInCell3 = cell3->getConnectionIndex(object2);
+    // Find object2's index in object3's connections to determine traversal direction
+    int object2IndexInObject3 = object3->getConnectionIndex(object2);
 
     constexpr int maxPolygonSize = 50;
     float currentAngleSum = 0.0f;
     for (int step = 0; step < maxPolygonSize; ++step) {
-        Object* nextCell = nullptr;
+        Object* nextObject = nullptr;
 
         if (step == 0) {
-            int startIndex = goClockwiseFromCell3 ? cell2IndexInCell3 + 1 : cell2IndexInCell3 - 1;
+            int startIndex = goClockwiseFromObject3 ? object2IndexInObject3 + 1 : object2IndexInObject3 - 1;
 
-            for (int i = 0; i < cell3->numConnections; ++i) {
-                int index = goClockwiseFromCell3 ? startIndex + i : startIndex - i;
+            for (int i = 0; i < object3->numConnections; ++i) {
+                int index = goClockwiseFromObject3 ? startIndex + i : startIndex - i;
 
-                Object* candidate = cell3->getConnectedCell(index);
+                Object* candidate = object3->getConnectedObject(index);
                 if (candidate == object1) {
-                    nextCell = candidate;
+                    nextObject = candidate;
                     foundPolygon = true;
                     break;
                 } else if (candidate != object2) {
-                    nextCell = candidate;
-                    cell4 = candidate;
+                    nextObject = candidate;
+                    object4 = candidate;
                     break;
                 }
             }
         } else {
-            // Subsequent steps: find next cell that's not the previous one
-            int prevIndex = currentCell->getConnectionIndex(previousCell);
+            // Subsequent steps: find next object that's not the previous one
+            int prevIndex = currentObject->getConnectionIndex(previousObject);
 
             // Continue in the same general direction
-            for (int i = 1; i < currentCell->numConnections; ++i) {
-                int index = goClockwiseFromCell3 ? prevIndex + i : prevIndex - i;
+            for (int i = 1; i < currentObject->numConnections; ++i) {
+                int index = goClockwiseFromObject3 ? prevIndex + i : prevIndex - i;
 
-                Object* candidate = currentCell->getConnectedCell(index);
+                Object* candidate = currentObject->getConnectedObject(index);
                 if (candidate == object1) {
-                    nextCell = candidate;
+                    nextObject = candidate;
                     foundPolygon = true;
                     break;
                 } else if (candidate != object2) {
-                    nextCell = candidate;
+                    nextObject = candidate;
                     break;
                 }
             }
         }
 
         if (step > 0) {
-            if (!goClockwiseFromCell3) {
-                currentAngleSum += currentCell->getAngelSpan(nextCell, previousCell);
+            if (!goClockwiseFromObject3) {
+                currentAngleSum += currentObject->getAngelSpan(nextObject, previousObject);
             } else {
-                currentAngleSum += currentCell->getAngelSpan(previousCell, nextCell);
+                currentAngleSum += currentObject->getAngelSpan(previousObject, nextObject);
             }
         }
 
-        if (foundPolygon || nextCell == nullptr) {
+        if (foundPolygon || nextObject == nullptr) {
             break;
         }
 
-        previousCell = currentCell;
-        currentCell = nextCell;
-        numIntermediateCells++;
+        previousObject = currentObject;
+        currentObject = nextObject;
+        numIntermediateObjects++;
     }
 
     if (!foundPolygon) {
@@ -996,35 +996,35 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ob
         return;
     }
 
-    // If cell4 is still null, it means cell3 connects directly to object1
-    if (cell4 == nullptr) {
-        cell4 = object1;
+    // If object4 is still null, it means object3 connects directly to object1
+    if (object4 == nullptr) {
+        object4 = object1;
     }
 
     // Number of vertices in the polygon
-    int numVertices = 3 + numIntermediateCells;  // object1, object2, cell3, + intermediate cells
+    int numVertices = 3 + numIntermediateObjects;  // object1, object2, object3, + intermediate objects
 
     // Calculate expected inner angle sum for an n-sided polygon: (n - 2) * 180 degrees
     float expectedAngleSum = (numVertices - 2) * 180.0f;
 
-    Object* lastCellBeforeCell1 = currentCell;  // This is the last cell we visited before reaching object1
-    if (!goClockwiseFromCell3) {
-        currentAngleSum += object1->getAngelSpan(object2, lastCellBeforeCell1);
-        currentAngleSum += object2->getAngelSpan(cell3, object1);
-        currentAngleSum += cell3->getAngelSpan(cell4, object2);
+    Object* lastObjectBeforeObject1 = currentObject;  // This is the last object we visited before reaching object1
+    if (!goClockwiseFromObject3) {
+        currentAngleSum += object1->getAngelSpan(object2, lastObjectBeforeObject1);
+        currentAngleSum += object2->getAngelSpan(object3, object1);
+        currentAngleSum += object3->getAngelSpan(object4, object2);
     } else {
-        currentAngleSum += object1->getAngelSpan(lastCellBeforeCell1, object2);
-        currentAngleSum += object2->getAngelSpan(object1, cell3);
-        currentAngleSum += cell3->getAngelSpan(object2, cell4);
+        currentAngleSum += object1->getAngelSpan(lastObjectBeforeObject1, object2);
+        currentAngleSum += object2->getAngelSpan(object1, object3);
+        currentAngleSum += object3->getAngelSpan(object2, object4);
     }
 
     float angleCorrection = expectedAngleSum - currentAngleSum;
 
-    int cell2Index = cell3->getConnectionIndex(object2);
+    int object2Index = object3->getConnectionIndex(object2);
 
-    if (!goClockwiseFromCell3) {
-        cell3->increaseAngle(cell2Index, angleCorrection);
+    if (!goClockwiseFromObject3) {
+        object3->increaseAngle(object2Index, angleCorrection);
     } else {
-        cell3->increaseAngle(cell2Index, -angleCorrection);
+        object3->increaseAngle(object2Index, -angleCorrection);
     }
 }
