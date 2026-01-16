@@ -1,0 +1,8 @@
+Package: boost-thread
+Version: 1.90.0
+Depends: boost-assert, boost-atomic, boost-bind, boost-chrono, boost-cmake, boost-concept-check, boost-config, boost-container, boost-container-hash, boost-core, boost-date-time, boost-exception, boost-function, boost-headers, boost-io, boost-move, boost-optional, boost-predef, boost-preprocessor, boost-smart-ptr, boost-static-assert, boost-system, boost-throw-exception, boost-tuple, boost-type-traits, boost-utility, boost-winapi
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 45d30f7964a4c5e2f78d802b4747c334652f17b0d12a6c09f4d41e539321b1f3
+Description: Boost thread module
+Status: install ok installed

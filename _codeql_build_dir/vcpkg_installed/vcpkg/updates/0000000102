@@ -1,0 +1,8 @@
+Package: boost-date-time
+Version: 1.90.0
+Depends: boost-algorithm, boost-assert, boost-cmake, boost-config, boost-core, boost-headers, boost-io, boost-lexical-cast, boost-numeric-conversion, boost-range, boost-smart-ptr, boost-static-assert, boost-throw-exception, boost-tokenizer, boost-type-traits, boost-utility, boost-winapi
+Architecture: x64-linux
+Multi-Arch: same
+Abi: abfde2ccdbffb4c49d572073df127e5dc8f0d49d6c5fc94cf9f9b7db20dab981
+Description: Boost date_time module
+Status: install ok half-installed

@@ -1,0 +1,8 @@
+Package: boost-ratio
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-headers
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 252362e9c9382e970a8846a3660c53b07480efc2ae7224a722ea7d1c2581a800
+Description: Boost ratio module
+Status: install ok half-installed
