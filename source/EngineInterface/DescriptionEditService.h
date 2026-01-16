@@ -106,10 +106,10 @@ public:
     void randomizeCountdowns(Description& description, int minValue, int maxValue) const;
     void randomizeLineageIds(Description& description) const;
 
-    uint64_t getId(ExtendedCellOrEnergyDescription const& entity) const;
-    RealVector2D getPos(ExtendedCellOrEnergyDescription const& entity) const;
-    std::vector<ExtendedCellOrEnergyDescription> getObjects(Description const& description) const;
-    std::vector<ExtendedCellOrEnergyDescription> getCellsForCreatureRepresentatives(Description const& description) const;
+    uint64_t getId(ExtendedObjectOrEnergyDescription const& entity) const;
+    RealVector2D getPos(ExtendedObjectOrEnergyDescription const& entity) const;
+    std::vector<ExtendedObjectOrEnergyDescription> getObjects(Description const& description) const;
+    std::vector<ExtendedObjectOrEnergyDescription> getCellsForCreatureRepresentatives(Description const& description) const;
 
     void setCenter(Description& collection, RealVector2D const& center) const;
     RealVector2D calcCenter(Description const& collection) const;

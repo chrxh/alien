@@ -85,8 +85,8 @@ public:
     unsigned int getVaoForSelectedConnections() const { return _vaoForSelectedConnections; }
     unsigned int getVaoForAttackEvents() const { return _vaoForAttackEvents; }
     unsigned int getVaoForDetonationEvents() const { return _vaoForDetonationEvents; }
-    unsigned int getVboForCells() const { return _vboForCells; }
-    unsigned int getVboForEnergyParticles() const { return _vboForEnergyParticles; }
+    unsigned int getVboForObjects() const { return _vboForObjects; }
+    unsigned int getVboForEnergies() const { return _vboForEnergies; }
     unsigned int getVboForLocations() const { return _vboForLocations; }
     unsigned int getVboForSelectedObjects() const { return _vboForSelectedObjects; }
     unsigned int getVboForSelectedConnections() const { return _vboForSelectedConnections; }
@@ -130,8 +130,8 @@ private:
     unsigned int _vaoForSelectedConnections = 0;
     unsigned int _vaoForAttackEvents = 0;
     unsigned int _vaoForDetonationEvents = 0;
-    unsigned int _vboForCells = 0;
-    unsigned int _vboForEnergyParticles = 0;
+    unsigned int _vboForObjects = 0;
+    unsigned int _vboForEnergies = 0;
     unsigned int _vboForLocations = 0;
     unsigned int _vboForSelectedObjects = 0;
     unsigned int _vboForSelectedConnections = 0;

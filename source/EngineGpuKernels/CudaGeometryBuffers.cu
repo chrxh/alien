@@ -31,12 +31,12 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
     if (vertexBuffer != nullptr) {
         unregisterBufferResource(vertexBuffer);
     }
-    vertexBuffer = registerBufferResource(buffers->getVboForCells());
+    vertexBuffer = registerBufferResource(buffers->getVboForObjects());
 
     if (energyParticleBuffer != nullptr) {
         unregisterBufferResource(energyParticleBuffer);
     }
-    energyParticleBuffer = registerBufferResource(buffers->getVboForEnergyParticles());
+    energyParticleBuffer = registerBufferResource(buffers->getVboForEnergies());
 
     if (locationBuffer != nullptr) {
         unregisterBufferResource(locationBuffer);

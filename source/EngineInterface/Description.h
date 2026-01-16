@@ -611,4 +611,4 @@ struct ExtendedObjectDescription
     std::optional<uint64_t> creatureId;
     std::optional<GenomeDescription> genome;
 };
-using ExtendedCellOrEnergyDescription = std::variant<ExtendedObjectDescription, EnergyDescription>;
+using ExtendedObjectOrEnergyDescription = std::variant<ExtendedObjectDescription, EnergyDescription>;

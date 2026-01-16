@@ -46,31 +46,31 @@ namespace
         uint32_t result;
         switch (calcMod(colorCode, MAX_COLORS)) {
         case 0: {
-            result = Const::IndividualCellColor1;
+            result = Const::IndividualObjectColor1;
             break;
         }
         case 1: {
-            result = Const::IndividualCellColor2;
+            result = Const::IndividualObjectColor2;
             break;
         }
         case 2: {
-            result = Const::IndividualCellColor3;
+            result = Const::IndividualObjectColor3;
             break;
         }
         case 3: {
-            result = Const::IndividualCellColor4;
+            result = Const::IndividualObjectColor4;
             break;
         }
         case 4: {
-            result = Const::IndividualCellColor5;
+            result = Const::IndividualObjectColor5;
             break;
         }
         case 5: {
-            result = Const::IndividualCellColor6;
+            result = Const::IndividualObjectColor6;
             break;
         }
         case 6: {
-            result = Const::IndividualCellColor7;
+            result = Const::IndividualObjectColor7;
             break;
         }
         }

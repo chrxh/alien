@@ -49,13 +49,13 @@ namespace
             return Color{h, s, v};
         };
         if (cellColors.empty()) {
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor1));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor2));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor3));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor4));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor5));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor6));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor7));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor1));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor2));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor3));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor4));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor5));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor6));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor7));
         }
 
         std::optional<int> bestMatchIndex;

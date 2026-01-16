@@ -193,9 +193,9 @@ void DescriptionEditService::duplicate(Description& description, IntVector2D con
 
 namespace
 {
-    std::vector<int> getCellIndicesWithinRadius(
+    std::vector<int> getObjectIndicesWithinRadius(
         Description const& description,
-        std::unordered_map<int, std::unordered_map<int, std::vector<int>>> const& cellIndicesBySlot,
+        std::unordered_map<int, std::unordered_map<int, std::vector<int>>> const& objectIndicesBySlot,
         RealVector2D const& pos,
         float radius)
     {
@@ -204,9 +204,9 @@ namespace
         IntVector2D lowerRightIntPos{toInt(pos.x + radius + 0.5f), toInt(pos.y + radius + 0.5f)};
         for (int x = upperLeftIntPos.x; x <= lowerRightIntPos.x; ++x) {
             for (int y = upperLeftIntPos.y; y <= lowerRightIntPos.y; ++y) {
-                if (cellIndicesBySlot.find(x) != cellIndicesBySlot.end()) {
-                    if (cellIndicesBySlot.at(x).find(y) != cellIndicesBySlot.at(x).end()) {
-                        for (auto const& objectIndex : cellIndicesBySlot.at(x).at(y)) {
+                if (objectIndicesBySlot.find(x) != objectIndicesBySlot.end()) {
+                    if (objectIndicesBySlot.at(x).find(y) != objectIndicesBySlot.at(x).end()) {
+                        for (auto const& objectIndex : objectIndicesBySlot.at(x).at(y)) {
                             auto const& object = description._objects.at(objectIndex);
                             if (Math::length(object._pos - pos) <= radius) {
                                 result.emplace_back(objectIndex);
@@ -391,7 +391,7 @@ void DescriptionEditService::reconnectCells(Description& description, float maxD
     std::unordered_map<uint64_t, int> objectIdToIndex;
     auto cache = description.createCache();
     for (auto& object : description._objects) {
-        auto nearbyCellIndices = getCellIndicesWithinRadius(description, cellIndicesBySlot, object._pos, maxDistance);
+        auto nearbyCellIndices = getObjectIndicesWithinRadius(description, cellIndicesBySlot, object._pos, maxDistance);
         for (auto const& nearbyCellIndex : nearbyCellIndices) {
             auto const& nearbyCell = description._objects.at(nearbyCellIndex);
             if (object._id != nearbyCell._id && object._connections.size() < MAX_CELL_BONDS && nearbyCell._connections.size() < MAX_CELL_BONDS
@@ -694,7 +694,7 @@ bool DescriptionEditService::isCellPresent(
     return false;
 }
 
-uint64_t DescriptionEditService::getId(ExtendedCellOrEnergyDescription const& entity) const
+uint64_t DescriptionEditService::getId(ExtendedObjectOrEnergyDescription const& entity) const
 {
     if (std::holds_alternative<ExtendedObjectDescription>(entity)) {
         return std::get<ExtendedObjectDescription>(entity).object._id;
@@ -702,7 +702,7 @@ uint64_t DescriptionEditService::getId(ExtendedCellOrEnergyDescription const& en
     return std::get<EnergyDescription>(entity)._id;
 }
 
-RealVector2D DescriptionEditService::getPos(ExtendedCellOrEnergyDescription const& entity) const
+RealVector2D DescriptionEditService::getPos(ExtendedObjectOrEnergyDescription const& entity) const
 {
     if (std::holds_alternative<ExtendedObjectDescription>(entity)) {
         return std::get<ExtendedObjectDescription>(entity).object._pos;
@@ -710,9 +710,9 @@ RealVector2D DescriptionEditService::getPos(ExtendedCellOrEnergyDescription cons
     return std::get<EnergyDescription>(entity)._pos;
 }
 
-std::vector<ExtendedCellOrEnergyDescription> DescriptionEditService::getObjects(Description const& description) const
+std::vector<ExtendedObjectOrEnergyDescription> DescriptionEditService::getObjects(Description const& description) const
 {
-    std::vector<ExtendedCellOrEnergyDescription> result;
+    std::vector<ExtendedObjectOrEnergyDescription> result;
     for (auto const& energyParticle : description._energies) {
         result.emplace_back(energyParticle);
     }
@@ -742,7 +742,7 @@ std::vector<ExtendedCellOrEnergyDescription> DescriptionEditService::getObjects(
     return result;
 }
 
-std::vector<ExtendedCellOrEnergyDescription> DescriptionEditService::getCellsForCreatureRepresentatives(Description const& description) const
+std::vector<ExtendedObjectOrEnergyDescription> DescriptionEditService::getCellsForCreatureRepresentatives(Description const& description) const
 {
     return {};
 }

@@ -91,14 +91,14 @@ void EditorController::onInspectSelectedGenomes()
     onInspectObjects(constructors, true);
 }
 
-bool EditorController::onInspectObjects(std::vector<ExtendedCellOrEnergyDescription> const& entities, bool selectGenomeTab)
+bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDescription> const& entities, bool selectGenomeTab)
 {
     if (entities.empty()) {
         return true;
     }
 
     // Filter entities if cells are selected
-    std::vector<ExtendedCellOrEnergyDescription> filteredEntities;
+    std::vector<ExtendedObjectOrEnergyDescription> filteredEntities;
     auto areCellsSelected = false;
     for (auto const& cellOrParticle : entities) {
         if (std::holds_alternative<ExtendedObjectDescription>(cellOrParticle)) {
@@ -127,7 +127,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedCellOrEnergyDescript
         inspectedIds.insert(DescriptionEditService::get().getId(entity));
     }
 
-    std::vector<ExtendedCellOrEnergyDescription> newEntities;
+    std::vector<ExtendedObjectOrEnergyDescription> newEntities;
     for (auto const& entity : filteredEntities) {
         if (origInspectedIds.find(DescriptionEditService::get().getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
@@ -213,7 +213,7 @@ void EditorController::processInspectorWindows()
 
     //inspector windows closed?
     std::vector<InspectorWindow> inspectorWindows;
-    std::vector<ExtendedCellOrEnergyDescription> inspectedEntities;
+    std::vector<ExtendedObjectOrEnergyDescription> inspectedEntities;
     for (auto const& inspectorWindow : _inspectorWindows) {
         if (!inspectorWindow->isClosed()) {
             inspectorWindows.emplace_back(inspectorWindow);

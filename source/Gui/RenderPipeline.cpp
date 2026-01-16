@@ -17,7 +17,7 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
 {
     {
         auto vao = _geometryBuffers->getVaoForPointsAndLines();
-        auto vbo = _geometryBuffers->getVboForCells();
+        auto vbo = _geometryBuffers->getVboForObjects();
         auto ebo = _geometryBuffers->getEboForLines();
 
         glBindVertexArray(vao);
@@ -41,7 +41,7 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
     }
     {
         auto vao = _geometryBuffers->getVaoForTriangles();
-        auto vbo = _geometryBuffers->getVboForCells();
+        auto vbo = _geometryBuffers->getVboForObjects();
         auto ebo = _geometryBuffers->getEboForTriangles();
 
         glBindVertexArray(vao);
@@ -65,7 +65,7 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
     }
     {
         auto vao = _geometryBuffers->getVaoForEnergyParticles();
-        auto vbo = _geometryBuffers->getVboForEnergyParticles();
+        auto vbo = _geometryBuffers->getVboForEnergies();
 
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);

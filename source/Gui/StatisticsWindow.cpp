@@ -206,7 +206,7 @@ void StatisticsWindow::processHistogramsTab()
         auto const width = 1.0f / MAX_COLORS;
         for (int i = 0; i < MAX_COLORS; ++i) {
             float h, s, v;
-            AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[i], h, s, v);
+            AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[i], h, s, v);
             ImPlot::PushStyleColor(ImPlotCol_Fill, (ImVec4)ImColor::HSV(h, s /** 3 / 4*/, v /** 3 / 4*/, ImGui::GetStyle().Alpha));
             ImPlot::PlotBars((" ##" + std::to_string(i)).c_str(), histogramData->numCellsByColorBySlot[i], MAX_HISTOGRAM_SLOTS, width, width * i);
             ImPlot::PopStyleColor(1);
@@ -646,7 +646,7 @@ void StatisticsWindow::plotByColorIntern(
         setPlotScale();
         for (int i = 0; i < MAX_COLORS; ++i) {
             ImGui::PushID(i);
-            auto colorRaw = Const::IndividualCellColors[i];
+            auto colorRaw = Const::IndividualObjectColors[i];
             ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
 
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
@@ -697,7 +697,7 @@ void StatisticsWindow::plotForColorIntern(
         setPlotScale();
 
         float h, s, v;
-        AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[colorIndex], h, s, v);
+        AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[colorIndex], h, s, v);
         auto color = static_cast<ImVec4>(ImColor::HSV(h, s, v));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::Annotation(
