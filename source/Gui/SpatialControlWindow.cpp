@@ -132,7 +132,7 @@ void SpatialControlWindow::processCenterOnSelection()
 {
     if (_centerSelection && _SimulationFacade::get()->isSimulationRunning()) {
         auto shallowData = _SimulationFacade::get()->getSelectionShallowData();
-        if (shallowData.numCells > 0 || shallowData.numParticles > 0) {
+        if (shallowData.numObjects > 0 || shallowData.numEnergyParticles > 0) {
             Viewport::get().setCenterInWorldPos({shallowData.centerPosX, shallowData.centerPosY});
         }
     }

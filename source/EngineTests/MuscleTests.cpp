@@ -68,10 +68,10 @@ protected:
 
 TEST_F(MuscleTests, noFrontAngle)
 {
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
-        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(MuscleDescription().mode(AutoBendingDescription())),
-        CellDescription().id(3).pos({12.0f, 10.0f}),
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).cellType(MuscleDescription().mode(AutoBendingDescription())),
+        ObjectDescription().id(3).pos({12.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -80,9 +80,9 @@ TEST_F(MuscleTests, noFrontAngle)
     _simulationFacade->calcTimesteps(50);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = actualData.getCellRef(2);
+    auto actualMuscleCell = actualData.getObjectRef(2);
 
-    ASSERT_EQ(3, actualData._cells.size());
+    ASSERT_EQ(3, actualData._objects.size());
     EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(0)._angleFromPrevious));
 }
 
@@ -143,18 +143,18 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
     auto [side, channel0, channel1] = GetParam();
 
     Description data;
-    std::vector<CellDescription> cellsToAdd = {
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
-        CellDescription()
+    std::vector<ObjectDescription> cellsToAdd = {
+        ObjectDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
+        ObjectDescription()
             .id(2)
             .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
             .frontAngle(side == Side::Left ? 90.0f : -90.0f)
             .cellType(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4)),
-        CellDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
-        CellDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
+        ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+        ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
     };
-    data._cells.insert(data._cells.end(), cellsToAdd.begin(), cellsToAdd.end());
+    data._objects.insert(data._objects.end(), cellsToAdd.begin(), cellsToAdd.end());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 4);
@@ -167,12 +167,12 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        ASSERT_EQ(4, actualData._cells.size());
+        ASSERT_EQ(4, actualData._objects.size());
 
-        auto actualCell1 = actualData.getCellRef(1);
-        auto actualMuscleCell = actualData.getCellRef(2);
-        auto actualCell3 = actualData.getCellRef(3);
-        auto actualCell4 = actualData.getCellRef(4);
+        auto actualCell1 = actualData.getObjectRef(1);
+        auto actualMuscleCell = actualData.getObjectRef(2);
+        auto actualCell3 = actualData.getObjectRef(3);
+        auto actualCell4 = actualData.getObjectRef(4);
 
 
         EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
@@ -219,11 +219,11 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     auto [side, channel0, channel1] = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
-        CellDescription().id(3).pos({10.0f, 12.0f}),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}),
+        ObjectDescription().id(2).pos({10.0f, 11.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
+        ObjectDescription().id(3).pos({10.0f, 12.0f}),
+        ObjectDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .frontAngle(side == Side::Left ? -90.0f : 90.0f)
@@ -242,12 +242,12 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = actualData.getCellRef(4);
-        auto actualCell1 = actualData.getCellRef(1);
-        auto actualCell2 = actualData.getCellRef(2);
-        auto actualCell3 = actualData.getCellRef(3);
+        auto actualMuscleCell = actualData.getObjectRef(4);
+        auto actualCell1 = actualData.getObjectRef(1);
+        auto actualCell2 = actualData.getObjectRef(2);
+        auto actualCell3 = actualData.getObjectRef(3);
 
-        ASSERT_EQ(4, actualData._cells.size());
+        ASSERT_EQ(4, actualData._objects.size());
 
         EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(0)._distance));
@@ -307,16 +307,16 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
+        ObjectDescription()
             .id(2)
             .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
             .frontAngle(side == Side::Left ? 90.0f : -90.0f)
             .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
-        CellDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
-        CellDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
+        ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+        ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -333,12 +333,12 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
         calcTimesteps(10, detailedPreview);
 
         auto actualData = getSimulationData(detailedPreview);
-        ASSERT_EQ(4, actualData._cells.size());
+        ASSERT_EQ(4, actualData._objects.size());
 
-        auto actualCell1 = actualData.getCellRef(1);
-        auto actualMuscleCell = actualData.getCellRef(2);
-        auto actualCell3 = actualData.getCellRef(3);
-        auto actualCell4 = actualData.getCellRef(4);
+        auto actualCell1 = actualData.getObjectRef(1);
+        auto actualMuscleCell = actualData.getObjectRef(2);
+        auto actualCell3 = actualData.getObjectRef(3);
+        auto actualCell4 = actualData.getObjectRef(4);
 
         EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
@@ -404,11 +404,11 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
-        CellDescription().id(3).pos({10.0f, 12.0f}),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}),
+        ObjectDescription().id(2).pos({10.0f, 11.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
+        ObjectDescription().id(3).pos({10.0f, 12.0f}),
+        ObjectDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .frontAngle(side == Side::Left ? -90.0f : 90.0f)
@@ -430,12 +430,12 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = actualData.getCellRef(4);
-        auto actualCell1 = actualData.getCellRef(1);
-        auto actualCell2 = actualData.getCellRef(2);
-        auto actualCell3 = actualData.getCellRef(3);
+        auto actualMuscleCell = actualData.getObjectRef(4);
+        auto actualCell1 = actualData.getObjectRef(1);
+        auto actualCell2 = actualData.getObjectRef(2);
+        auto actualCell3 = actualData.getObjectRef(3);
 
-        ASSERT_EQ(4, actualData._cells.size());
+        ASSERT_EQ(4, actualData._objects.size());
 
         EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(0)._distance));
@@ -521,16 +521,16 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto [side, targetAngle] = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(10)),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        ObjectDescription()
             .id(2)
             .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
             .frontAngle(side == Side::Left ? 90.0f : -90.0f)
             .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
-        CellDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
-        CellDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
+        ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+        ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -542,11 +542,11 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(4, actualData._cells.size());
-    auto actualCell1 = actualData.getCellRef(1);
-    auto actualMuscleCell = actualData.getCellRef(2);
-    auto actualCell3 = actualData.getCellRef(3);
-    auto actualCell4 = actualData.getCellRef(4);
+    ASSERT_EQ(4, actualData._objects.size());
+    auto actualCell1 = actualData.getObjectRef(1);
+    auto actualMuscleCell = actualData.getObjectRef(2);
+    auto actualCell3 = actualData.getObjectRef(3);
+    auto actualCell4 = actualData.getObjectRef(4);
 
     EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
@@ -573,11 +573,11 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     auto [side, targetAngle] = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellType(GeneratorDescription().autoTriggerInterval(10)),
-        CellDescription().id(3).pos({10.0f, 12.0f}),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}),
+        ObjectDescription().id(2).pos({10.0f, 11.0f}).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        ObjectDescription().id(3).pos({10.0f, 12.0f}),
+        ObjectDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .frontAngle(side == Side::Left ? -90.0f : 90.0f)
@@ -593,12 +593,12 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
     _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = actualData.getCellRef(4);
-    auto actualCell1 = actualData.getCellRef(1);
-    auto actualCell2 = actualData.getCellRef(2);
-    auto actualCell3 = actualData.getCellRef(3);
+    auto actualMuscleCell = actualData.getObjectRef(4);
+    auto actualCell1 = actualData.getObjectRef(1);
+    auto actualCell2 = actualData.getObjectRef(2);
+    auto actualCell3 = actualData.getObjectRef(3);
 
-    ASSERT_EQ(4, actualData._cells.size());
+    ASSERT_EQ(4, actualData._objects.size());
 
     EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
     EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(0)._distance));
@@ -629,15 +629,15 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        ObjectDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .frontAngle(180.0f)
             .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
-        CellDescription().id(3).pos({12.0f, 10.0f}).frontAngle(180.0f),
+        ObjectDescription().id(3).pos({12.0f, 10.0f}).frontAngle(180.0f),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -650,11 +650,11 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = actualData.getCellRef(2);
-        auto actualCell1 = actualData.getCellRef(1);
-        auto actualCell3 = actualData.getCellRef(3);
+        auto actualMuscleCell = actualData.getObjectRef(2);
+        auto actualCell1 = actualData.getObjectRef(1);
+        auto actualCell3 = actualData.getObjectRef(3);
 
-        ASSERT_EQ(3, actualData._cells.size());
+        ASSERT_EQ(3, actualData._objects.size());
 
         EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(0)._angleFromPrevious));
         EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(1)._angleFromPrevious));
@@ -695,9 +695,9 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        ObjectDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .frontAngle(180.0f)
@@ -714,10 +714,10 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = actualData.getCellRef(2);
-        auto actualCell1 = actualData.getCellRef(1);
+        auto actualMuscleCell = actualData.getObjectRef(2);
+        auto actualCell1 = actualData.getObjectRef(1);
 
-        ASSERT_EQ(2, actualData._cells.size());
+        ASSERT_EQ(2, actualData._objects.size());
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
         EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
@@ -762,15 +762,15 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        ObjectDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .frontAngle(180.0f)
             .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
-        CellDescription().id(3).pos({12.0f, 10.0f}).frontAngle(180.0f),
+        ObjectDescription().id(3).pos({12.0f, 10.0f}).frontAngle(180.0f),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -783,10 +783,10 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = actualData.getCellRef(2);
-        auto actualCell1 = actualData.getCellRef(1);
+        auto actualMuscleCell = actualData.getObjectRef(2);
+        auto actualCell1 = actualData.getObjectRef(1);
 
-        ASSERT_EQ(3, actualData._cells.size());
+        ASSERT_EQ(3, actualData._objects.size());
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
         EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
@@ -813,9 +813,9 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        ObjectDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .frontAngle(180.0f)
@@ -832,10 +832,10 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = actualData.getCellRef(2);
-        auto actualCell1 = actualData.getCellRef(1);
+        auto actualMuscleCell = actualData.getObjectRef(2);
+        auto actualCell1 = actualData.getObjectRef(1);
 
-        ASSERT_EQ(2, actualData._cells.size());
+        ASSERT_EQ(2, actualData._objects.size());
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
         EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
@@ -880,15 +880,15 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     auto constexpr AnglePrecision = 1.0f;
     auto [channel0, channel1] = GetParam();
 
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
-        CellDescription()
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
+        ObjectDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .frontAngle(0.0f)
             .cellType(MuscleDescription().mode(DirectMovementDescription()))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 2)),
-        CellDescription().id(3).pos({12.0f, 10.0f}),
+        ObjectDescription().id(3).pos({12.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -898,11 +898,11 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     _simulationFacade->calcTimesteps(3);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData._cells.size());
+    ASSERT_EQ(3, actualData._objects.size());
 
-    auto actualCell1 = actualData.getCellRef(1);
-    auto actualCell2 = actualData.getCellRef(2);
-    auto actualCell3 = actualData.getCellRef(3);
+    auto actualCell1 = actualData.getObjectRef(1);
+    auto actualCell2 = actualData.getObjectRef(2);
+    auto actualCell3 = actualData.getObjectRef(3);
 
     ASSERT_EQ(1, actualCell1._connections.size());
     ASSERT_EQ(2, actualCell2._connections.size());

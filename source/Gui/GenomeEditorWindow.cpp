@@ -307,7 +307,7 @@ void GenomeEditorWindow::onCreateSeed()
 
     Description seed;
     seed.addCreature(
-        {CellDescription()
+        {ObjectDescription()
              .pos(pos)
              .stiffness(1.0f)
              .color(EditorModel::get().getDefaultColorCode())

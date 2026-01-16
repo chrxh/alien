@@ -29,8 +29,8 @@ protected:
     Description createAttackerWithIncomingSignal(RealVector2D const& attackerPos, float attackerRawEnergy = 0.0f, int attackerColor = 0)
     {
         auto data = Description().addCreature({
-            CellDescription().id(1).pos(attackerPos).color(attackerColor).cellType(AttackerDescription().mode(AttackCreatureDescription())).rawEnergy(attackerRawEnergy),
-            CellDescription().id(2).pos({attackerPos.x + 1.0f, attackerPos.y}).color(attackerColor).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+            ObjectDescription().id(1).pos(attackerPos).color(attackerColor).cellType(AttackerDescription().mode(AttackCreatureDescription())).rawEnergy(attackerRawEnergy),
+            ObjectDescription().id(2).pos({attackerPos.x + 1.0f, attackerPos.y}).color(attackerColor).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
         }, CreatureDescription().id(1));
         data.addConnection(1, 2);
         return data;
@@ -40,8 +40,8 @@ protected:
     Description createTargetCreature(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f, bool fixed = false)
     {
         auto data = Description().addCreature({
-            CellDescription().id(100).pos(pos).color(color).usableEnergy(usableEnergy).fixed(fixed),
-            CellDescription().id(101).pos({pos.x + 1.0f, pos.y}).color(color).usableEnergy(usableEnergy).fixed(fixed),
+            ObjectDescription().id(100).pos(pos).color(color).usableEnergy(usableEnergy).fixed(fixed),
+            ObjectDescription().id(101).pos({pos.x + 1.0f, pos.y}).color(color).usableEnergy(usableEnergy).fixed(fixed),
         }, CreatureDescription().id(creatureId));
         data.addConnection(100, 101);
         return data;
@@ -59,15 +59,15 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
 
     // Add target creature within attack radius
     data.add(createTargetCreature({100.0f, 103.0f}), false);
-    auto& origTarget = data.getCellRef(100);
+    auto& origTarget = data.getObjectRef(100);
     origTarget.rawEnergy(100.0f);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttacker = actualData.getCellRef(1);
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualAttacker = actualData.getObjectRef(1);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Attacker should attack because rawEnergy is below threshold
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -86,14 +86,14 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
     // Add target creature within attack radius
     data.add(createTargetCreature({100.0f, 103.0f}), false);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttacker = actualData.getCellRef(1);
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualAttacker = actualData.getObjectRef(1);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Attacker should NOT attack because rawEnergy is above threshold
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -112,14 +112,14 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
     // Add target creature outside attack radius
     data.add(createTargetCreature({100.0f, 100.0f + _parameters.attackerRadius.value[0] + 0.01f}), false);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttacker = actualData.getCellRef(1);
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualAttacker = actualData.getObjectRef(1);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Attacker should NOT attack because rawEnergy is above threshold
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -142,7 +142,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Attack should happen at full strength
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -157,13 +157,13 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
     auto data = createAttackerWithIncomingSignal({100.0f, 100.0f}, 0.0f, 0);  // Color 0 attacker
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);       // Color 1 target
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // No attack should happen because color matrix is zero
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -178,7 +178,7 @@ TEST_F(AttackerTests, outputSignal_noTarget)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttacker = actualData.getCellRef(1);
+    auto actualAttacker = actualData.getObjectRef(1);
 
     // Attacker may have signal from generator but AttackerSuccess should be 0
     if (actualAttacker._signalState == SignalState_Active) {
@@ -194,24 +194,24 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
 {
     // Create a single creature with attacker and potential targets
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({100.0f, 103.0f}).usableEnergy(100.0f),  // Same creature, in attack range
-        CellDescription().id(4).pos({100.5f, 103.0f}).usableEnergy(100.0f),  // Same creature, in attack range
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(3).pos({100.0f, 103.0f}).usableEnergy(100.0f),  // Same creature, in attack range
+        ObjectDescription().id(4).pos({100.5f, 103.0f}).usableEnergy(100.0f),  // Same creature, in attack range
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(3, 4);
 
-    auto origCell3 = data.getCellRef(3);
-    auto origCell4 = data.getCellRef(4);
+    auto origCell3 = data.getObjectRef(3);
+    auto origCell4 = data.getObjectRef(4);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell3 = actualData.getCellRef(3);
-    auto actualCell4 = actualData.getCellRef(4);
+    auto actualCell3 = actualData.getObjectRef(3);
+    auto actualCell4 = actualData.getObjectRef(4);
 
     // Own creature cells should NOT be attacked
     EXPECT_TRUE(approxCompare(origCell3._usableEnergy, actualCell3._usableEnergy));
@@ -230,18 +230,18 @@ TEST_F(AttackerTests, noAttackOnOffspring)
 
     // Create offspring creature with ancestorId pointing to parent
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({100.5f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(101).pos({100.5f, 103.0f}).usableEnergy(100.0f),
     }, CreatureDescription().id(2).ancestorId(parentId));
     data.addConnection(100, 101);
 
-    auto origCell = data.getCellRef(100);
+    auto origCell = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getCellRef(100);
+    auto actualCell = actualData.getObjectRef(100);
 
     // Offspring cells should NOT be attacked
     EXPECT_TRUE(approxCompare(origCell._usableEnergy, actualCell._usableEnergy));
@@ -254,8 +254,8 @@ TEST_F(AttackerTests, attackOnNonOffspring)
 
     // Create unrelated creature (no ancestorId relationship)
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({100.5f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(101).pos({100.5f, 103.0f}).usableEnergy(100.0f),
     }, CreatureDescription().id(2).ancestorId(3));
     data.addConnection(100, 101);
 
@@ -263,7 +263,7 @@ TEST_F(AttackerTests, attackOnNonOffspring)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Non-offspring cells should be attacked
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -278,13 +278,13 @@ TEST_F(AttackerTests, noAttackOnFixedCells)
     auto data = createAttackerWithIncomingSignal({100.0f, 100.0f});
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 0, 100.0f, true), false);  // fixed=true
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Fixed cells should NOT be attacked
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -298,11 +298,11 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
 {
     // Create attacker with connections that block the attack ray
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
         // Create a connection that crosses the ray path to target at (100, 99)
-        CellDescription().id(3).pos({99.0f, 99.0f}),
-        CellDescription().id(4).pos({101.0f, 99.0f}),
+        ObjectDescription().id(3).pos({99.0f, 99.0f}),
+        ObjectDescription().id(4).pos({101.0f, 99.0f}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -312,13 +312,13 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
     // Add target creature below (ray to target is blocked by connection 3-4)
     data.add(createTargetCreature({100.0f, 97.0f}), false);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because ray is blocked by same-creature connections
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -331,8 +331,8 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
 
     // Create a different creature with connections that would cross the ray path
     data.addCreature({
-        CellDescription().id(50).pos({99.0f, 98.5f}),
-        CellDescription().id(51).pos({101.0f, 98.5f}),
+        ObjectDescription().id(50).pos({99.0f, 98.5f}),
+        ObjectDescription().id(51).pos({101.0f, 98.5f}),
     }, CreatureDescription().id(3));
     data.addConnection(50, 51);
 
@@ -343,8 +343,8 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget1 = actualData.getCellRef(100);
-    auto actualTarget2 = actualData.getCellRef(50);
+    auto actualTarget1 = actualData.getObjectRef(100);
+    auto actualTarget2 = actualData.getObjectRef(50);
 
     // Both targets should be attacked because blocking connections belong to different creature
     EXPECT_TRUE(actualTarget1._usableEnergy < 100.0f - NEAR_ZERO);
@@ -355,11 +355,11 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
 {
     // Create attacker with connections that do NOT block the attack ray
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
         // Connections that don't intersect the ray to target
-        CellDescription().id(3).pos({102.0f, 99.0f}),
-        CellDescription().id(4).pos({103.0f, 99.0f}),
+        ObjectDescription().id(3).pos({102.0f, 99.0f}),
+        ObjectDescription().id(4).pos({103.0f, 99.0f}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -372,7 +372,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because ray is not blocked
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -386,8 +386,8 @@ TEST_F(AttackerTests, restrictToColor_matchingColor)
 {
     // Create attacker that only attacks color 1
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToColor(1))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToColor(1))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
@@ -398,7 +398,7 @@ TEST_F(AttackerTests, restrictToColor_matchingColor)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because color matches restriction
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -408,21 +408,21 @@ TEST_F(AttackerTests, restrictToColor_nonMatchingColor)
 {
     // Create attacker that only attacks color 1
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToColor(1))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToColor(1))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add target creature with non-matching color (color 0)
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 0), false);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because color does not match restriction
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -432,8 +432,8 @@ TEST_F(AttackerTests, restrictToColor_noRestriction)
 {
     // Create attacker with no color restriction
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackCreatureDescription())),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
@@ -444,7 +444,7 @@ TEST_F(AttackerTests, restrictToColor_noRestriction)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because there is no color restriction
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -458,8 +458,8 @@ TEST_F(AttackerTests, minNumCells_creatureAboveMinimum)
 {
     // Create attacker that only attacks creatures with at least 2 cells
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription().minNumCells(2))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription().minNumCells(2))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
@@ -470,7 +470,7 @@ TEST_F(AttackerTests, minNumCells_creatureAboveMinimum)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because creature has at least 2 cells
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -480,21 +480,21 @@ TEST_F(AttackerTests, minNumCells_creatureBelowMinimum)
 {
     // Create attacker that only attacks creatures with at least 3 cells
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription().minNumCells(3))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription().minNumCells(3))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add target creature with only 2 cells (below minimum)
     data.add(createTargetCreature({100.0f, 103.0f}), false);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because creature has fewer cells than minimum
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -508,8 +508,8 @@ TEST_F(AttackerTests, maxNumCells_creatureBelowMaximum)
 {
     // Create attacker that only attacks creatures with at most 5 cells
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription().maxNumCells(5))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription().maxNumCells(5))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
@@ -520,7 +520,7 @@ TEST_F(AttackerTests, maxNumCells_creatureBelowMaximum)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because creature has at most 5 cells
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -530,21 +530,21 @@ TEST_F(AttackerTests, maxNumCells_creatureAboveMaximum)
 {
     // Create attacker that only attacks creatures with at most 1 cell
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription().maxNumCells(1))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription().maxNumCells(1))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add target creature with 2 cells (above maximum)
     data.add(createTargetCreature({100.0f, 103.0f}), false);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because creature has more cells than maximum
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -558,18 +558,18 @@ TEST_F(AttackerTests, restrictToLineage_sameLineage_matching)
 {
     // Create attacker creature with lineage 42, restricted to same lineage
     auto data = Description().addCreature({
-        CellDescription()
+        ObjectDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToLineage(LineageRestriction_SameLineage))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1).lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with same lineage (42)
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
     }, CreatureDescription().id(2).lineageId(42));
     data.addConnection(100, 101);
 
@@ -577,7 +577,7 @@ TEST_F(AttackerTests, restrictToLineage_sameLineage_matching)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because lineage matches
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -587,28 +587,28 @@ TEST_F(AttackerTests, restrictToLineage_sameLineage_notMatching)
 {
     // Create attacker creature with lineage 42, restricted to same lineage
     auto data = Description().addCreature({
-        CellDescription()
+        ObjectDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToLineage(LineageRestriction_SameLineage))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1).lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with different lineage (43)
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
     }, CreatureDescription().id(2).lineageId(43));
     data.addConnection(100, 101);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because lineage does not match
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -618,18 +618,18 @@ TEST_F(AttackerTests, restrictToLineage_otherLineage_matching)
 {
     // Create attacker creature with lineage 42, restricted to other lineage
     auto data = Description().addCreature({
-        CellDescription()
+        ObjectDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToLineage(LineageRestriction_OtherLineage))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1).lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with different lineage (43)
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
     }, CreatureDescription().id(2).lineageId(43));
     data.addConnection(100, 101);
 
@@ -637,7 +637,7 @@ TEST_F(AttackerTests, restrictToLineage_otherLineage_matching)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because lineage is different
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -647,28 +647,28 @@ TEST_F(AttackerTests, restrictToLineage_otherLineage_notMatching)
 {
     // Create attacker creature with lineage 42, restricted to other lineage
     auto data = Description().addCreature({
-        CellDescription()
+        ObjectDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToLineage(LineageRestriction_OtherLineage))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1).lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with same lineage (42)
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
     }, CreatureDescription().id(2).lineageId(42));
     data.addConnection(100, 101);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because lineage is the same
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -678,15 +678,15 @@ TEST_F(AttackerTests, restrictToLineage_noRestriction)
 {
     // Create attacker creature with lineage 42, no lineage restriction
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1).lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with different lineage (43)
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(101).pos({101.0f, 103.0f}).usableEnergy(100.0f),
     }, CreatureDescription().id(2).lineageId(43));
     data.addConnection(100, 101);
 
@@ -694,7 +694,7 @@ TEST_F(AttackerTests, restrictToLineage_noRestriction)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because there is no lineage restriction
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -711,12 +711,12 @@ TEST_F(AttackerTests, combinedRestrictions_allMatch)
     // - minNumCells: 2
     // - maxNumCells: 5
     auto data = Description().addCreature({
-        CellDescription()
+        ObjectDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .color(0)
             .cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToColor(1).minNumCells(2).maxNumCells(5))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
@@ -727,7 +727,7 @@ TEST_F(AttackerTests, combinedRestrictions_allMatch)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because all restrictions are met
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -737,21 +737,21 @@ TEST_F(AttackerTests, combinedRestrictions_colorMismatch)
 {
     // Create attacker with restrictions: color 1, minNumCells 2
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToColor(1).minNumCells(2))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackCreatureDescription().restrictToColor(1).minNumCells(2))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add target creature with wrong color but correct cell count: color 0, 2 cells
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 0), false);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because color does not match
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -765,21 +765,21 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
 {
     // Create attacker creature in FreeCell mode
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackFreeCellDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackFreeObjectDescription())),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
-    // Add a free cell (not part of a creature) - using FreeCellDescription
+    // Add a free cell (not part of a creature) - using FreeObjectDescription
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f).cellType(FreeCellDescription()),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f).cellType(FreeObjectDescription()),
     }, CreatureDescription().id(2));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should be attacked in FreeCell mode
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -789,21 +789,21 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
 {
     // Create attacker creature in FreeCell mode with color restriction to color 1
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackFreeCellDescription().restrictToColor(1))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackFreeObjectDescription().restrictToColor(1))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add a free cell with matching color (color 1)
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).color(1).usableEnergy(100.0f).cellType(FreeCellDescription()),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(1).usableEnergy(100.0f).cellType(FreeObjectDescription()),
     }, CreatureDescription().id(2));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should be attacked because color matches restriction
     EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
@@ -813,23 +813,23 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
 {
     // Create attacker creature in FreeCell mode with color restriction to color 1
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackFreeCellDescription().restrictToColor(1))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).cellType(AttackerDescription().mode(AttackFreeObjectDescription().restrictToColor(1))),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add a free cell with non-matching color (color 0)
     data.addCreature({
-        CellDescription().id(100).pos({100.0f, 103.0f}).color(0).usableEnergy(100.0f).cellType(FreeCellDescription()),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(0).usableEnergy(100.0f).cellType(FreeObjectDescription()),
     }, CreatureDescription().id(2));
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should NOT be attacked because color does not match restriction
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -839,21 +839,21 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
 {
     // Create attacker creature in FreeCell mode
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackFreeCellDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackFreeObjectDescription())),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add target creature (cells that are part of a creature, not free cells)
     data.add(createTargetCreature({100.0f, 103.0f}), false);
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Creature should NOT be attacked in FreeCell mode
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
@@ -863,23 +863,23 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
 {
     // Create attacker creature in Creature mode
     auto data = Description().addCreature({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription().mode(AttackCreatureDescription())),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add a free cell (not part of a creature)
-    data.cells({
-        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f).cellType(FreeCellDescription()),
+    data.objects({
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f).cellType(FreeObjectDescription()),
     });
 
-    auto origTarget = data.getCellRef(100);
+    auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should NOT be attacked in Creature mode
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));

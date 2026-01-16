@@ -141,12 +141,12 @@ void _SimulationFacadeImpl::setDetached(bool value)
     _worker.setDetached(value);
 }
 
-void _SimulationFacadeImpl::changeCell(CellDescription const& changedCell)
+void _SimulationFacadeImpl::changeCell(ObjectDescription const& changedCell)
 {
     _worker.changeCell(changedCell);
 }
 
-void _SimulationFacadeImpl::changeParticle(ParticleDescription const& changedParticle)
+void _SimulationFacadeImpl::changeParticle(EnergyDescription const& changedParticle)
 {
     _worker.changeParticle(changedParticle);
 }
@@ -377,19 +377,19 @@ void _SimulationFacadeImpl::setCurrentTimestepForPreview(uint64_t timestep)
     _worker.setCurrentTimestepForPreview(timestep);
 }
 
-void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)
+void _SimulationFacadeImpl::testOnly_mutate(uint64_t objectId, MutationType mutationType)
 {
-    _worker.testOnly_mutate(cellId, mutationType);
+    _worker.testOnly_mutate(objectId, mutationType);
 }
 
-void _SimulationFacadeImpl::testOnly_mutationCheck(uint64_t cellId)
+void _SimulationFacadeImpl::testOnly_mutationCheck(uint64_t objectId)
 {
-    _worker.testOnly_mutationCheck(cellId);
+    _worker.testOnly_mutationCheck(objectId);
 }
 
-void _SimulationFacadeImpl::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
+void _SimulationFacadeImpl::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
-    _worker.testOnly_createConnection(cellId1, cellId2);
+    _worker.testOnly_createConnection(objectId1, objectId2);
 }
 
 void _SimulationFacadeImpl::testOnly_cleanupAfterTimestep()

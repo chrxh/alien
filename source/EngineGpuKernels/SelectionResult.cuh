@@ -3,7 +3,7 @@
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "Definitions.cuh"
-#include "Object.cuh"
+#include "Entity.cuh"
 
 class SelectionResult
 {
@@ -26,10 +26,10 @@ public:
 
     __device__ void reset()
     {
-        _selectionShallowData->numCells = 0;
+        _selectionShallowData->numObjects = 0;
         _selectionShallowData->numCreatures = 0;
         _selectionShallowData->numClusterCells = 0;
-        _selectionShallowData->numParticles = 0;
+        _selectionShallowData->numEnergyParticles = 0;
 
         _selectionShallowData->centerPosX = 0;
         _selectionShallowData->centerPosY = 0;
@@ -42,32 +42,32 @@ public:
         _selectionShallowData->clusterCenterVelY = 0;
     }
 
-    __device__ void collectCell(Cell* cell, float2 refPos, BaseMap const& map)
+    __device__ void collectCell(Object* object, float2 refPos, BaseMap const& map)
     {
-        auto pos = cell->pos + map.getCorrectionIncrement(refPos, cell->pos);
+        auto pos = object->pos + map.getCorrectionIncrement(refPos, object->pos);
 
-        if (1 == cell->selected) {
-            atomicAdd(&_selectionShallowData->numCells, 1);
+        if (1 == object->selected) {
+            atomicAdd(&_selectionShallowData->numObjects, 1);
             atomicAdd(&_selectionShallowData->centerPosX, pos.x);
             atomicAdd(&_selectionShallowData->centerPosY, pos.y);
-            atomicAdd(&_selectionShallowData->centerVelX, cell->vel.x);
-            atomicAdd(&_selectionShallowData->centerVelY, cell->vel.y);
+            atomicAdd(&_selectionShallowData->centerVelX, object->vel.x);
+            atomicAdd(&_selectionShallowData->centerVelY, object->vel.y);
         }
 
         atomicAdd(&_selectionShallowData->numClusterCells, 1);
         atomicAdd(&_selectionShallowData->clusterCenterPosX, pos.x);
         atomicAdd(&_selectionShallowData->clusterCenterPosY, pos.y);
-        atomicAdd(&_selectionShallowData->clusterCenterVelX, cell->vel.x);
-        atomicAdd(&_selectionShallowData->clusterCenterVelY, cell->vel.y);
+        atomicAdd(&_selectionShallowData->clusterCenterVelX, object->vel.x);
+        atomicAdd(&_selectionShallowData->clusterCenterVelY, object->vel.y);
     }
 
     __device__ void collectCreature() { atomicAdd(&_selectionShallowData->numCreatures, 1); }
 
-    __device__ void collectParticle(Particle* particle, float2 refPos, BaseMap const& map)
+    __device__ void collectParticle(Energy* particle, float2 refPos, BaseMap const& map)
     {
         auto pos = particle->pos + map.getCorrectionIncrement(refPos, particle->pos);
 
-        atomicAdd(&_selectionShallowData->numParticles, 1);
+        atomicAdd(&_selectionShallowData->numEnergyParticles, 1);
         atomicAdd(&_selectionShallowData->centerPosX, pos.x);
         atomicAdd(&_selectionShallowData->centerPosY, pos.y);
         atomicAdd(&_selectionShallowData->centerVelX, particle->vel.x);
@@ -80,7 +80,7 @@ public:
 
     __device__ void finalize(BaseMap const& map, bool mapCorrection)
     {
-        auto numEntities = _selectionShallowData->numCells + _selectionShallowData->numParticles;
+        auto numEntities = _selectionShallowData->numObjects + _selectionShallowData->numEnergyParticles;
         if (numEntities > 0) {
             _selectionShallowData->centerPosX /= numEntities;
             _selectionShallowData->centerPosY /= numEntities;
@@ -93,7 +93,7 @@ public:
             }
         }
 
-        auto numExtEntities = _selectionShallowData->numClusterCells + _selectionShallowData->numParticles;
+        auto numExtEntities = _selectionShallowData->numClusterCells + _selectionShallowData->numEnergyParticles;
         if (numEntities > 0) {
             _selectionShallowData->clusterCenterPosX /= numExtEntities;
             _selectionShallowData->clusterCenterPosY /= numExtEntities;

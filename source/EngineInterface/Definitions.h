@@ -15,8 +15,8 @@ struct ColorTransitionRule;
 struct ParameterSpec;
 
 struct Description;
-struct CellDescription;
-struct ParticleDescription;
+struct ObjectDescription;
+struct EnergyDescription;
 struct GenomeDescription;
 struct GeneDescription;
 
@@ -50,7 +50,7 @@ class _GeometryBuffers;
 using GeometryBuffers = std::shared_ptr<_GeometryBuffers>;
 
 struct NumRenderObjects;
-struct CellVertexData;
-struct EnergyParticleVertexData;
+struct ObjectVertexData;
+struct EnergyVertexData;
 
 struct ParametersFilter;

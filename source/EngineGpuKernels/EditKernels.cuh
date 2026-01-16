@@ -8,11 +8,11 @@
 #include "sm_60_atomic_functions.h"
 
 #include "Base.cuh"
-#include "CellConnectionProcessor.cuh"
-#include "CellProcessor.cuh"
+#include "ObjectConnectionProcessor.cuh"
+#include "ObjectProcessor.cuh"
 #include "GarbageCollectorKernels.cuh"
 #include "Map.cuh"
-#include "ObjectFactory.cuh"
+#include "EntityFactory.cuh"
 #include "SelectionResult.cuh"
 #include "SimulationData.cuh"
 #include "TO.cuh"
@@ -25,7 +25,7 @@ __global__ void cudaAddGenomeAndCreature(SimulationData data, TO to, Genome** ne
 __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCreature, bool* result);
 
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
-__global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters);
+__global__ void cudaRemoveSelectedObjectConnections(SimulationData data, bool includeClusters);
 __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerWithinSelection, int* result);
 __global__ void cudaPrepareMapForReconnection(SimulationData data);

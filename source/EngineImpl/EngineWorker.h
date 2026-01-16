@@ -68,8 +68,8 @@ public:
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeCell(CellDescription const& changedCell);
-    void changeParticle(ParticleDescription const& changedParticle);
+    void changeCell(ObjectDescription const& changedCell);
+    void changeParticle(EnergyDescription const& changedParticle);
     bool changeCreature(uint64_t creatureId, GenomeDescription const& genome);
     std::optional<GenomeDescription> getGenomeOfCreature(uint64_t creatureId);
 
@@ -119,9 +119,9 @@ public:
     void setCurrentTimestepForPreview(uint64_t timestep);
 
     // Only for tests
-    void testOnly_mutate(uint64_t cellId, MutationType mutationType);
-    void testOnly_mutationCheck(uint64_t cellId);
-    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
+    void testOnly_mutate(uint64_t objectId, MutationType mutationType);
+    void testOnly_mutationCheck(uint64_t objectId);
+    void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);

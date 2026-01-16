@@ -27,8 +27,8 @@ public:
         CellTypeMode mode = std::monostate{};
     };
     std::vector<CellParameter> getAllCellParameters() const;
-    CellDescription createNonDefaultCellDescription(CellParameter cellParameter) const;
-    ParticleDescription createNonDefaultParticleDescription() const;
+    ObjectDescription createNonDefaultObjectDescription(CellParameter cellParameter) const;
+    EnergyDescription createNonDefaultEnergyDescription() const;
 
     struct NodeParameter
     {
@@ -40,9 +40,9 @@ public:
     std::pair<CreatureDescription, GenomeDescription> createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;
 
     bool compare(Description left, Description right) const;
-    bool compare(CellDescription left, CellDescription right) const;
-    bool compare(ParticleDescription left, ParticleDescription right) const;
-    bool compare(CellDescription const& cell, NodeDescription const& node) const;
+    bool compare(ObjectDescription left, ObjectDescription right) const;
+    bool compare(EnergyDescription left, EnergyDescription right) const;
+    bool compare(ObjectDescription const& cell, NodeDescription const& node) const;
 
 private:
     CellTypeDescription createNonDefaultCellTypeDescription(CellParameter cellParameter) const;

@@ -49,13 +49,13 @@ namespace
             return Color{h, s, v};
         };
         if (cellColors.empty()) {
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor1));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor2));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor3));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor4));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor5));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor6));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor7));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor1));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor2));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor3));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor4));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor5));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor6));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor7));
         }
 
         std::optional<int> bestMatchIndex;
@@ -102,9 +102,9 @@ void ImageToPatternDialog::show()
                     int matchedCellColor;
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
-                    dataDesc._cells.emplace_back(CellDescription()
+                    dataDesc._objects.emplace_back(ObjectDescription()
                                                      .id(NumberGenerator::get().createId())
-                                                     .cellType(StructureCellDescription())
+                                                     .cellType(StructureObjectDescription())
                                                      .usableEnergy(matchedCellIntensity * 200)
                                                      .pos({toFloat(x) + xOffset, toFloat(y)})
                                                      .color(matchedCellColor)

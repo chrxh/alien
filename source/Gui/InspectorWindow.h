@@ -23,15 +23,15 @@ private:
     bool isCell() const;
     std::string generateTitle() const;
 
-    void processCell(ExtendedCellDescription& creatureCell);
-    void processCellGeneralTab(ExtendedCellDescription& creatureCell);
-    void processCellTypeTab(CellDescription& cell);
-    void processCellTypePropertiesTab(CellDescription& cell);
+    void processCell(ExtendedObjectDescription& creatureCell);
+    void processCellGeneralTab(ExtendedObjectDescription& creatureCell);
+    void processCellTypeTab(ObjectDescription& cell);
+    void processCellTypePropertiesTab(ObjectDescription& cell);
     template <typename Description>
     void processCellGenomeTab(Description& desc);
 
     void processGeneratorContent(GeneratorDescription& generator);
-    void processNeuronContent(CellDescription& cell);
+    void processNeuronContent(ObjectDescription& cell);
     void processConstructorContent(ConstructorDescription& constructor);
     void processInjectorContent(InjectorDescription& injector);
     void processAttackerContent(AttackerDescription& attacker);
@@ -42,11 +42,11 @@ private:
     void processReconnectorContent(ReconnectorDescription& reconnector);
     void processDetonatorContent(DetonatorDescription& detonator);
 
-    void processParticle(ParticleDescription particle);
+    void processParticle(EnergyDescription particle);
 
     float calcWindowWidth() const;
 
-    void validateAndCorrect(CellDescription& cell) const;
+    void validateAndCorrect(ObjectDescription& cell) const;
 
     RealVector2D _initialPos;
 

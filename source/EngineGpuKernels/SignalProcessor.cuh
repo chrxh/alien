@@ -2,7 +2,7 @@
 
 #include "Base.cuh"
 #include "Map.cuh"
-#include "ObjectFactory.cuh"
+#include "EntityFactory.cuh"
 #include "ParameterCalculator.cuh"
 #include "TO.cuh"
 
@@ -13,12 +13,12 @@ public:
     __inline__ __device__ static void calcFutureSignals(SimulationData& data);
     __inline__ __device__ static void updateSignals(SimulationData& data);
 
-    __inline__ __device__ static void createEmptySignal(Cell* cell);
-    __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void createEmptySignal(Object* object);
+    __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Object* object);
 
-    __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview = false);
-    __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Cell* cell);
-    __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview = false);
+    __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview = false);
+    __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Object* object);
+    __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview = false);
 };
 
 /************************************************************************/
@@ -27,17 +27,17 @@ public:
 
 __inline__ __device__ void SignalProcessor::collectCellTypeOperations(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
+        auto& object = objects.at(index);
 
-        if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free && cell->cellType != CellType_Base) {
-            if (cell->cellType == CellType_Detonator && cell->cellTypeData.detonator.state == DetonatorState_Activated) {
-                data.cellTypeOperations[cell->cellType].tryAddEntry(CellTypeOperation{cell});
-            } else if (cell->cellState != CellState_Constructing && cell->cellState != CellState_Activating && cell->activationTime == 0) {
-                data.cellTypeOperations[cell->cellType].tryAddEntry(CellTypeOperation{cell});
+        if (object->cellType != CellType_Structure && object->cellType != CellType_Free && object->cellType != CellType_Base) {
+            if (object->cellType == CellType_Detonator && object->cellTypeData.detonator.state == DetonatorState_Activated) {
+                data.cellTypeOperations[object->cellType].tryAddEntry(CellTypeOperation{object});
+            } else if (object->cellState != CellState_Constructing && object->cellState != CellState_Activating && object->activationTime == 0) {
+                data.cellTypeOperations[object->cellType].tryAddEntry(CellTypeOperation{object});
             }
         }
     }
@@ -45,27 +45,27 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
 
 __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (cell->cellType == CellType_Structure || cell->cellType == CellType_Free) {
+        auto& object = objects.at(index);
+        if (object->cellType == CellType_Structure || object->cellType == CellType_Free) {
             continue;
         }
 
-        cell->futureSignalState = SignalState_Inactive;
-        if (cell->signalState != SignalState_Inactive) {
+        object->futureSignalState = SignalState_Inactive;
+        if (object->signalState != SignalState_Inactive) {
             continue;
         }
 
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            cell->futureSignal.channels[i] = 0;
+            object->futureSignal.channels[i] = 0;
         }
-        cell->futureSignal.numTimesSent = INT_MAX;  // Will track minimum
+        object->futureSignal.numTimesSent = INT_MAX;  // Will track minimum
 
-        for (int i = 0, j = cell->numConnections; i < j; ++i) {
-            auto connectedCell = cell->connections[i].cell;
+        for (int i = 0, j = object->numConnections; i < j; ++i) {
+            auto connectedCell = object->connections[i].object;
             if (connectedCell->cellState == CellState_Constructing || connectedCell->signalState != SignalState_Active) {
                 continue;
             }
@@ -78,7 +78,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 
                 float connectionAngle = 0;
                 for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {
-                    if (connectedCell->connections[k].cell == cell) {
+                    if (connectedCell->connections[k].object == object) {
                         bool isInsideCone = Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, connectionAngle);
                         if (!isInsideCone) {
                             // Outside the cone: signal is always blocked for both Active and Conditional modes
@@ -98,58 +98,58 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
                 }
             }
 
-            cell->futureSignalState = SignalState_Active;
+            object->futureSignalState = SignalState_Active;
             for (int k = 0; k < MAX_CHANNELS; ++k) {
-                cell->futureSignal.channels[k] += connectedCell->signal.channels[k];
+                object->futureSignal.channels[k] += connectedCell->signal.channels[k];
             }
             // Keep minimum numTimesSent when signals merge
-            cell->futureSignal.numTimesSent = min(cell->futureSignal.numTimesSent, connectedCell->signal.numTimesSent);
+            object->futureSignal.numTimesSent = min(object->futureSignal.numTimesSent, connectedCell->signal.numTimesSent);
         }
     }
 }
 
 __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (cell->cellType == CellType_Structure || cell->cellType == CellType_Free) {
+        auto& object = objects.at(index);
+        if (object->cellType == CellType_Structure || object->cellType == CellType_Free) {
             continue;
         }
 
-        if (cell->futureSignalState != SignalState_Inactive) {
-            cell->cellTriggered = CellTriggered_Yes;
+        if (object->futureSignalState != SignalState_Inactive) {
+            object->cellTriggered = CellTriggered_Yes;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cell->signal.channels[i] = cell->futureSignal.channels[i];
+                object->signal.channels[i] = object->futureSignal.channels[i];
             }
-            cell->signal.numTimesSent = cell->futureSignal.numTimesSent;
-            cell->signalState = SignalState_Active;
+            object->signal.numTimesSent = object->futureSignal.numTimesSent;
+            object->signalState = SignalState_Active;
         } else {
-            cell->signalState = max(0, cell->signalState - 1);
+            object->signalState = max(0, object->signalState - 1);
         }
     }
 }
 
-__inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
+__inline__ __device__ void SignalProcessor::createEmptySignal(Object* object)
 {
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->signal.channels[i] = 0;
+        object->signal.channels[i] = 0;
     }
-    cell->signal.numTimesSent = 0;
-    cell->signalState = SignalState_Active;
+    object->signal.numTimesSent = 0;
+    object->signalState = SignalState_Active;
 }
 
-__inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationData& data, Cell* cell)
+__inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationData& data, Object* object)
 {
-    if (cell->numConnections == 0) {
+    if (object->numConnections == 0) {
         return float2{0.0f, -1.0f};
     }
-    return Math::getNormalized(data.cellMap.getCorrectedDirection(cell->connections[0].cell->pos - cell->pos));
+    return Math::getNormalized(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos));
 }
 
-__inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview)
+__inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview)
 {
     auto triggerInterval = max(SignalState_Count, autoTriggerInterval);
     if (cell->creature != nullptr) {
@@ -163,18 +163,18 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
     }
 }
 
-__inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& data, Cell* cell)
+__inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& data, Object* object)
 {
-    if (cell->signalState != SignalState_Active) {
+    if (object->signalState != SignalState_Active) {
         return false;
     }
-    if (abs(cell->signal.channels[Channels::CellTypeActivation]) < TRIGGER_THRESHOLD) {
+    if (abs(object->signal.channels[Channels::CellTypeActivation]) < TRIGGER_THRESHOLD) {
         return false;
     }
     return true;
 }
 
-__inline__ __device__ bool SignalProcessor::isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview)
+__inline__ __device__ bool SignalProcessor::isAutoOrManuallyTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview)
 {
     if (autoTriggerInterval == 0) {
         return isManuallyTriggered(data, cell);

@@ -227,8 +227,8 @@ CreatorWindow::CreatorWindow()
 
 void CreatorWindow::createCell()
 {
-    auto cell = CellDescription()
-                    .cellType(StructureCellDescription())
+    auto object = ObjectDescription()
+                    .cellType(StructureObjectDescription())
                     .pos(getRandomPos())
                     .usableEnergy(_energy)
                     .stiffness(_stiffness)
@@ -236,15 +236,15 @@ void CreatorWindow::createCell()
                     .fixed(_fixed)
                     .sticky(_makeSticky);
     Description description;
-    description._cells.emplace_back(cell);
+    description._objects.emplace_back(object);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createParticle()
 {
-    auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
+    auto energyParticle = EnergyDescription().pos(getRandomPos()).energy(_energy);
     Description description;
-    description._particles.emplace_back(particle);
+    description._energies.emplace_back(energyParticle);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
@@ -255,7 +255,7 @@ void CreatorWindow::createRectangle()
     }
 
     auto description = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
-                                                                    .cellType(StructureCellDescription())
+                                                                    .cellType(StructureObjectDescription())
                                                                     .width(_rectHorizontalCells)
                                                                     .height(_rectVerticalCells)
                                                                     .cellDistance(_cellDistance)
@@ -275,7 +275,7 @@ void CreatorWindow::createHexagon()
         return;
     }
     Description description = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
-                                                                          .cellType(StructureCellDescription())
+                                                                          .cellType(StructureObjectDescription())
                                                                           .layers(_layers)
                                                                           .cellDistance(_cellDistance)
                                                                           .usableEnergy(_energy)
@@ -307,9 +307,9 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            description._cells.emplace_back(CellDescription()
+            description._objects.emplace_back(ObjectDescription()
                                                 .id(NumberGenerator::get().createId())
-                                                .cellType(StructureCellDescription())
+                                                .cellType(StructureObjectDescription())
                                                 .usableEnergy(_energy)
                                                 .stiffness(_stiffness)
                                                 .sticky(_makeSticky)

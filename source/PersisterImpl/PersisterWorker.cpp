@@ -428,11 +428,11 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         settings = serializedSim.auxiliaryData;
         statistics = serializedSim.statistics;
         size = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
-        numObjects = toInt(deserializedSim.mainData._cells.size() + deserializedSim.mainData._particles.size());
+        numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
         THROW_NOT_IMPLEMENTED();
         //auto genome = std::get<UploadNetworkResourceRequestData::GenomeData>(requestData.data).description;
-        //if (genome._cells.empty()) {
+        //if (genome._objects.empty()) {
         //    return std::make_shared<_PersisterRequestError>(
         //        request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for uploading selected."});
         //}
@@ -517,7 +517,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         settings = serializedSim.auxiliaryData;
         statistics = serializedSim.statistics;
         worldSize = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
-        numObjects = toInt(deserializedSim.mainData._cells.size() + deserializedSim.mainData._particles.size());
+        numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
         THROW_NOT_IMPLEMENTED();
     }

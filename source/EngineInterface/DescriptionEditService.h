@@ -14,7 +14,7 @@ public:
     {
         MEMBER(CreateRectParameters, int, width, 10);
         MEMBER(CreateRectParameters, int, height, 10);
-        MEMBER(CreateRectParameters, CellTypeDescription, cellType, StructureCellDescription());
+        MEMBER(CreateRectParameters, CellTypeDescription, cellType, StructureObjectDescription());
         MEMBER(CreateRectParameters, float, cellDistance, 1.0f);
         MEMBER(CreateRectParameters, float, usableEnergy, 100.0f);
         MEMBER(CreateRectParameters, float, rawEnergy, 0.0f);
@@ -29,7 +29,7 @@ public:
     struct CreateHexParameters
     {
         MEMBER(CreateHexParameters, int, layers, 10);
-        MEMBER(CreateHexParameters, CellTypeDescription, cellType, StructureCellDescription());
+        MEMBER(CreateHexParameters, CellTypeDescription, cellType, StructureObjectDescription());
         MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
         MEMBER(CreateHexParameters, float, usableEnergy, 100.0f);
         MEMBER(CreateHexParameters, float, stiffness, 1.0f);
@@ -106,10 +106,10 @@ public:
     void randomizeCountdowns(Description& description, int minValue, int maxValue) const;
     void randomizeLineageIds(Description& description) const;
 
-    uint64_t getId(ExtendedCellOrParticleDescription const& entity) const;
-    RealVector2D getPos(ExtendedCellOrParticleDescription const& entity) const;
-    std::vector<ExtendedCellOrParticleDescription> getObjects(Description const& description) const;
-    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(Description const& description) const;
+    uint64_t getId(ExtendedObjectOrEnergyDescription const& entity) const;
+    RealVector2D getPos(ExtendedObjectOrEnergyDescription const& entity) const;
+    std::vector<ExtendedObjectOrEnergyDescription> getObjects(Description const& description) const;
+    std::vector<ExtendedObjectOrEnergyDescription> getCellsForCreatureRepresentatives(Description const& description) const;
 
     void setCenter(Description& collection, RealVector2D const& center) const;
     RealVector2D calcCenter(Description const& collection) const;
@@ -117,8 +117,8 @@ public:
     void rotate(Description& collection, float angle) const;
     void accelerate(Description& collection, RealVector2D const& velDelta, float angularVelDelta) const;
 
-    void removeCell(Description& collection, uint64_t cellId) const;
-    void removeCellIf(Description& collection, std::function<bool(CellDescription const&)> const& predicate) const;
+    void removeCell(Description& collection, uint64_t objectId) const;
+    void removeCellIf(Description& collection, std::function<bool(ObjectDescription const&)> const& predicate) const;
 
 private:
     bool isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance) const;

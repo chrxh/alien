@@ -7,14 +7,14 @@
 #include "Genome.cuh"
 #include "Math.cuh"
 
-struct Particle
+struct Energy
 {
     uint64_t id;
     float2 pos;
     float2 vel;
     uint8_t color;
     float energy;
-    Cell* lastAbsorbedCell;  //could be invalid
+    Object* lastAbsorbedObject;  //could be invalid
 
     // Editing data
     uint8_t selected;  //0 = no, 1 = selected
@@ -38,9 +38,9 @@ struct Particle
     }
 };
 
-struct CellConnection
+struct ObjectConnection
 {
-    Cell* cell;
+    Object* object;
     float distance;
     float angleFromPrevious;
 };
@@ -435,7 +435,7 @@ struct Creature
 
     uint32_t generation;
     uint32_t lineageId;
-    uint32_t numCells;
+    uint32_t numObjects;
 
     Genome* genome;
 
@@ -446,12 +446,12 @@ struct Creature
     uint64_t creatureIndex;  // May be invalid
 };
 
-struct Cell
+struct Object
 {
     // General
     uint64_t id;
     uint8_t numConnections;
-    CellConnection connections[MAX_CELL_BONDS];
+    ObjectConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
     float usableEnergy;
@@ -500,7 +500,7 @@ struct Cell
     TempValue tempValue;
 
     float density;
-    Cell* nextCell;                   // Linked list for finding all overlapping cells
+    Object* nextCell;                   // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
     float2 shared1;                   // Variable with different meanings depending on context
     float2 shared2;
@@ -514,13 +514,13 @@ struct Cell
     float clusterAngularMass;
     uint32_t numCellsInCluster;
 
-    __device__ __inline__ bool isSameCreature(Cell* otherCell)
+    __device__ __inline__ bool isSameCreature(Object* otherCell)
     {
         return (otherCell->creature != nullptr && this->creature != nullptr && otherCell->creature->id == this->creature->id)
             || (otherCell->creature == nullptr && this->creature == nullptr);
     }
 
-    __device__ __inline__ float& getRefDistance(Cell* connectedCell)
+    __device__ __inline__ float& getRefDistance(Object* connectedCell)
     {
         auto index = getConnectionIndex(connectedCell);
         return connections[index].distance;
@@ -529,10 +529,10 @@ struct Cell
         return tempValue.as_uint32_float.floatPart;  // Return some dummy in order to prevent compile error
     }
 
-    __device__ __inline__ int getConnectionIndex(Cell* connectedCell)
+    __device__ __inline__ int getConnectionIndex(Object* connectedCell)
     {
         for (int i = 0; i < numConnections; i++) {
-            if (connections[i].cell == connectedCell) {
+            if (connections[i].object == connectedCell) {
                 return i;
             }
         }
@@ -540,8 +540,8 @@ struct Cell
         return 0;
     }
 
-    __device__ __inline__ CellConnection& getConnection(int index) { return connections[(index + numConnections) % numConnections]; }
-    __device__ __inline__ Cell* getConnectedCell(int index) { return connections[(index + numConnections) % numConnections].cell; }
+    __device__ __inline__ ObjectConnection& getConnection(int index) { return connections[(index + numConnections) % numConnections]; }
+    __device__ __inline__ Object* getConnectedCell(int index) { return connections[(index + numConnections) % numConnections].object; }
     __device__ __inline__ void increaseAngle(int index, float increment) {
         auto& angle1 = getConnection(index).angleFromPrevious;
         auto& angle2 = getConnection(index + 1).angleFromPrevious;
@@ -568,15 +568,15 @@ struct Cell
         return Math::getNormalizedAngle(result, 0.0f);
     }
 
-    __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2)
+    __device__ __inline__ float getAngelSpan(Object* connectedCell1, Object* connectedCell2)
     {
         auto connectionIndex1 = -1;
         auto connectionIndex2 = -1;
         for (int i = 0; i < numConnections; i++) {
-            if (connections[i].cell == connectedCell1) {
+            if (connections[i].object == connectedCell1) {
                 connectionIndex1 = i;
             }
-            if (connections[i].cell == connectedCell2) {
+            if (connections[i].object == connectedCell2) {
                 connectionIndex2 = i;
             }
         }
@@ -619,7 +619,7 @@ struct Cell
 };
 
 template <>
-struct HashFunctor<Cell*>
+struct HashFunctor<Object*>
 {
-    __device__ __inline__ int operator()(Cell* const& cell) { return abs(static_cast<int>(cell->id)); }
+    __device__ __inline__ int operator()(Object* const& object) { return abs(static_cast<int>(object->id)); }
 };

@@ -4,7 +4,7 @@
 
 #include <EngineImpl/SimulationCudaFacade.cuh>
 
-#include "CellConnectionProcessor.cuh"
+#include "ObjectConnectionProcessor.cuh"
 #include "ConstructorHelper.cuh"
 #include "CudaShapeGenerator.cuh"
 #include "Genome.cuh"
@@ -35,7 +35,7 @@ private:
         bool hasInfiniteConcatenations;
 
         // Construction data
-        Cell* lastConstructionCell;
+        Object* lastConstructionCell;
         float angle;
         float cellEnergy;
         float depotEnergy;
@@ -44,48 +44,48 @@ private:
         int requiredNodeId2;           // -1 = none
     };
     //
-    //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Object* object);
     //
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool isPreview);
-    __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Cell* cell);
-    __inline__ __device__ static ConstructionData createConstructionData(Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
+    __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
+    __inline__ __device__ static ConstructionData createConstructionData(Object* object);
 
-    __inline__ __device__ static Cell*
-    tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Object*
+    tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostCell, ConstructionData const& constructionData);
 
-    __inline__ __device__ static Cell* getLastConstructedCellOnBranch(Cell* hostCell);
-    __inline__ __device__ static Cell*
-    startConstructionOnNewBranch(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static Cell*
-    continueConstructionOnBranch(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Object* getLastConstructedCellOnBranch(Object* hostCell);
+    __inline__ __device__ static Object*
+    startConstructionOnNewBranch(SimulationData& data, SimulationStatistics& statistics, Object* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Object*
+    continueConstructionOnBranch(SimulationData& data, SimulationStatistics& statistics, Object* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static void getCellsToConnect(
-        Cell* result[],
+        Object* result[],
         int& numResultCells,
         SimulationData& data,
-        Cell* hostCell,
+        Object* hostCell,
         float2 const& newCellPos,
         ConstructionData const& constructionData);
 
-    __inline__ __device__ static Cell* constructCellIntern(
+    __inline__ __device__ static Object* constructCellIntern(
         SimulationData& data,
         SimulationStatistics& statistics,
-        uint64_t& cellIndex,
-        Cell* hostCell,
+        uint64_t& objectIndex,
+        Object* hostCell,
         float2 newCellPos,
         ConstructionData const& constructionData);
 
-    __inline__ __device__ static bool checkForValidConstruction(Cell* hostCell);
-    __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static void activateNewCellOnLastNode(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static bool checkForValidConstruction(Object* hostCell);
+    __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static void activateNewCellOnLastNode(Object* newCell, Object* hostCell, ConstructionData const& constructionData);
 
     //
-    // Assumption: cell1 is connected with cell2 and cell2 is connected with cell3
+    // Assumption: object1 is connected with object2 and object2 is connected with cell3
     //
-    // If cell3 is connected to cell1 directly or via further cells (not cell2):
+    // If cell3 is connected to object1 directly or via further cells (not object2):
     //  Calculates the inner angle sum of the n-polygon spanned by
-    //      (1) cell1
-    //      (2) cell2
+    //      (1) object1
+    //      (2) object2
     //      (3) cell3
     //      + possibly further cells between (3) and (1)
     //  and
@@ -95,7 +95,7 @@ private:
     // Else:
     //  No angle correction
     //
-    __inline__ __device__ static void correctAnglesByInnerAngleSum(Cell* cell1, Cell* cell2, Cell* cell3);
+    __inline__ __device__ static void correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* cell3);
 };
 
 /************************************************************************/
@@ -106,7 +106,7 @@ __inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data
     //auto& operations = data.cellTypeOperations[CellType_Constructor];
     //auto partition = calcAllThreadsPartition(operations.getNumEntries());
     //for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-    //    completenessCheck(data, statistics, operations.at(i).cell);
+    //    completenessCheck(data, statistics, operations.at(i).object);
     //}
 }
 
@@ -115,20 +115,20 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
     auto& operations = data.cellTypeOperations[CellType_Constructor];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, statistics, operations.at(i).cell, isPreview);
+        processCell(data, statistics, operations.at(i).object, isPreview);
     }
 }
 
-//__inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+//__inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data, SimulationStatistics& statistics, Object* object)
 //{
 //    if (!cudaSimulationParameters.constructorCompletenessCheck.value) {
 //        return;
 //    }
-//    auto& constructor = cell->cellTypeData.constructor;
+//    auto& constructor = object->cellTypeData.constructor;
 //    if (!GenomeDecoder::isFirstNode(constructor)) {
 //        return;
 //    }
-//    if (!SignalProcessor::isAutoTriggered(data, cell, cell->cellTypeData.constructor.autoTriggerInterval)) {
+//    if (!SignalProcessor::isAutoTriggered(data, object, object->cellTypeData.constructor.autoTriggerInterval)) {
 //        return;
 //    }
 //
@@ -137,13 +137,13 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //        return;
 //    }
 //
-//    uint32_t tagBit = 1 << toInt(cell->id % 30);
-//    atomicOr(&cell->tempValue, toInt(tagBit));
+//    uint32_t tagBit = 1 << toInt(object->id % 30);
+//    atomicOr(&object->tempValue, toInt(tagBit));
 //    auto actualCells = 1;
 //
 //    auto constexpr QueueLength = 512;
-//    Cell* taggedCells[QueueLength];
-//    taggedCells[0] = cell;
+//    Object* taggedCells[QueueLength];
+//    taggedCells[0] = object;
 //    int numTaggedCells = 1;
 //    int currentTaggedCellIndex = 0;
 //    do {
@@ -151,8 +151,8 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //
 //        if ((numTaggedCells + 1) % QueueLength != currentTaggedCellIndex) {
 //            for (int i = 0, j = currentCell->numConnections; i < j; ++i) {
-//                auto& nextCell = currentCell->connections[i].cell;
-//                if (nextCell->creatureId == cell->creatureId) {
+//                auto& nextCell = currentCell->connections[i].object;
+//                if (nextCell->creatureId == object->creatureId) {
 //                    auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tempValue, toInt(tagBit)));
 //                    if ((origTagBit & tagBit) == 0) {
 //                        taggedCells[numTaggedCells] = nextCell;
@@ -171,30 +171,30 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //    constructor.isReady = (actualCells >= constructor.numExpectedCells);
 //}
 //
-__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool isPreview)
+__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
-    if (cell->creature == nullptr) {
+    if (object->creature == nullptr) {
         return;
     }
-    auto& constructor = cell->cellTypeData.constructor;
-    if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, constructor.autoTriggerInterval, isPreview)) {
-        constructor.offspring = findOrCreateNewCreature(data, cell);
+    auto& constructor = object->cellTypeData.constructor;
+    if (SignalProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
+        constructor.offspring = findOrCreateNewCreature(data, object);
 
         if (ConstructorHelper::isFinished(constructor, *constructor.offspring->genome)) {
             return;
         }
 
-        if (!checkForValidConstruction(cell)) {
+        if (!checkForValidConstruction(object)) {
             constructor.currentNodeIndex = 0;
             constructor.currentConcatenation = 0;
         }
 
-        auto constructionData = createConstructionData(cell);
-        if (tryConstructCell(data, statistics, cell, constructionData)) {
+        auto constructionData = createConstructionData(object);
+        if (tryConstructCell(data, statistics, object, constructionData)) {
 
-            cell->signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
+            object->signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
-            ++constructionData.creature->numCells;
+            ++constructionData.creature->numObjects;
             if (!constructionData.isLastNode) {
                 ++constructor.currentNodeIndex;
             } else {
@@ -213,36 +213,36 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
                     // HACK for preview mode: Do not construct more than one offspring + move seed away
                     if (isPreview) {
-                        cell->pos.y += toFloat(PREVIEW_HEIGHT / 3);
+                        object->pos.y += toFloat(PREVIEW_HEIGHT / 3);
                     }
                 }
             }
         } else {
-            cell->signal.channels[Channels::ConstructorSuccess] = 0;  // Failed
+            object->signal.channels[Channels::ConstructorSuccess] = 0;  // Failed
         }
     }
 }
 
-__inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, Cell* cell)
+__inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, Object* object)
 {
-    auto& constructor = cell->cellTypeData.constructor;
+    auto& constructor = object->cellTypeData.constructor;
 
     if (constructor.offspring != nullptr) {
         return constructor.offspring;
     }
 
     // No separation => same creature
-    auto& genome = cell->creature->genome;
+    auto& genome = object->creature->genome;
     if (constructor.geneIndex < genome->numGenes) {
         auto const& gene = ConstructorHelper::getCurrentGene(constructor, *genome);
         if (!gene->separation) {
-            return cell->creature;
+            return object->creature;
         }
     }
 
     // Current branch under construction => use creature reference from there
     if (!(ConstructorHelper::isFirstNode(constructor) && ConstructorHelper::isFirstConcatenation(constructor))) {
-        auto lastConstructionCell = getLastConstructedCellOnBranch(cell);
+        auto lastConstructionCell = getLastConstructedCellOnBranch(object);
         if (lastConstructionCell) {
             return lastConstructionCell->creature;
         }
@@ -250,20 +250,20 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
 
     // Other branches already constructed => same creature
     if (constructor.currentBranch > 0) {
-        return cell->creature;
+        return object->creature;
     }
 
     // Nothing found => clone creature
-    ObjectFactory factory;
+    EntityFactory factory;
     factory.init(&data);
-    auto result = factory.cloneCreature(cell->creature);
-    result->numCells = 0;
+    auto result = factory.cloneCreature(object->creature);
+    result->numObjects = 0;
     return result;
 }
 
-__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Cell* cell)
+__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Object* object)
 {
-    auto& constructor = cell->cellTypeData.constructor;
+    auto& constructor = object->cellTypeData.constructor;
     auto& genome = constructor.offspring->genome;
 
     auto isFirstNode = ConstructorHelper::isFirstNode(constructor);
@@ -279,9 +279,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, *genome);
 
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
-    result.lastConstructionCell = getLastConstructedCellOnBranch(cell);
+    result.lastConstructionCell = getLastConstructedCellOnBranch(object);
     result.angle = result.node->referenceAngle;
-    result.cellEnergy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
+    result.cellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     if (result.node->cellType == CellTypeGenome_Constructor) {
         auto const& constructorNode = result.node->cellTypeData.constructor;
         if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
@@ -338,8 +338,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     return result;
 }
 
-__inline__ __device__ Cell*
-ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData)
+__inline__ __device__ Object*
+ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostCell, ConstructionData const& constructionData)
 {
     if (!hostCell->tryLock()) {
         return nullptr;
@@ -362,12 +362,12 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
     }
 }
 
-__inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCellOnBranch(Cell* hostCell)
+__inline__ __device__ Object* ConstructorProcessor::getLastConstructedCellOnBranch(Object* hostCell)
 {
     auto const& constructor = hostCell->cellTypeData.constructor;
     if (constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64) {
         for (int i = 0; i < hostCell->numConnections; ++i) {
-            auto const& connectedCell = hostCell->connections[i].cell;
+            auto const& connectedCell = hostCell->connections[i].object;
             if (connectedCell->id == constructor.lastConstructedCellId) {
                 return connectedCell;
             }
@@ -376,10 +376,10 @@ __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCellOnBranch
     return nullptr;
 }
 
-__inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
+__inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch(
     SimulationData& data,
     SimulationStatistics& statistics,
-    Cell* hostCell,
+    Object* hostCell,
     ConstructionData const& constructionData)
 {
     auto& constructor = hostCell->cellTypeData.constructor;
@@ -387,12 +387,12 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
     if (hostCell->numConnections == MAX_CELL_BONDS) {
         return nullptr;
     }
-    auto anglesForNewConnection = CellConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
+    auto anglesForNewConnection = ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
     float2 newCellPos = hostCell->pos + newCellDirection;
 
-    if (CellConnectionProcessor::existCrossingConnections(
+    if (ObjectConnectionProcessor::existCrossingConnections(
             data, hostCell->pos, newCellPos, cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color], hostCell->detached)) {
         return nullptr;
     }
@@ -407,20 +407,20 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
 
     // For bending muscle cells: Reset front angle and restore initial angle
     for (int i = 0; i < hostCell->numConnections; ++i) {
-        auto const& connectedCell = hostCell->connections[i].cell;
+        auto const& connectedCell = hostCell->connections[i].object;
         if (connectedCell->cellType == CellType_Muscle && connectedCell->cellTypeData.muscle.isBendingMuscle()) {
             connectedCell->frontAngle = VALUE_NOT_SET_FLOAT;
             MuscleProcessor::restoreInitialAngleFromPrevious(connectedCell, hostCell, i);
 
             // Update newCell position and direction for corrected angle
-            anglesForNewConnection = CellConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
+            anglesForNewConnection = ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
             newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
             newCellPos = hostCell->pos + newCellDirection;
         }
     }
 
     uint64_t cellPointerIndex;
-    Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, constructionData);
+    Object* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, constructionData);
 
     if (!newCell->tryLock()) {
         return nullptr;
@@ -430,8 +430,8 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
         auto distance = constructionData.isLastNodeOfLastConcatenation && !constructionData.isSeparation
             ? constructionData.gene->connectionDistance
             : constructionData.gene->connectionDistance + cudaSimulationParameters.constructorAdditionalOffspringDistance;
-        if (!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
-            CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
+        if (!ObjectConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
+            ObjectConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
     }
     if ((constructionData.isSeparation || constructor.geneIndex == 0) && constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
@@ -443,26 +443,26 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
     return newCell;
 }
 
-__inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
+__inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch(
     SimulationData& data,
     SimulationStatistics& statistics,
-    Cell* hostCell,
+    Object* hostCell,
     ConstructionData const& constructionData)
 {
     auto const& lastCell = constructionData.lastConstructionCell;
-    auto posDelta = data.cellMap.getCorrectedDirection(lastCell->pos - hostCell->pos);
+    auto posDelta = data.objectMap.getCorrectedDirection(lastCell->pos - hostCell->pos);
     auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
 
     auto desiredDistance = constructionData.gene->connectionDistance;
     auto constructionSiteDistance = hostCell->getRefDistance(lastCell);
     posDelta = Math::getNormalized(posDelta) * (constructionSiteDistance - desiredDistance);
-    if (Math::length(posDelta) <= cudaSimulationParameters.minCellDistance.value
-        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minCellDistance.value) {
+    if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value
+        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minObjectDistance.value) {
         return nullptr;
     }
 
     auto newCellPos = hostCell->pos + posDelta;
-    if (CellConnectionProcessor::existCrossingConnections(
+    if (ObjectConnectionProcessor::existCrossingConnections(
             data,
             hostCell->pos,
             constructionData.lastConstructionCell->pos,
@@ -471,7 +471,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
         return nullptr;
     }
 
-    Cell* cellsToConnect[MAX_CELL_BONDS];
+    Object* cellsToConnect[MAX_CELL_BONDS];
     int numCellsToConnect;
     getCellsToConnect(cellsToConnect, numCellsToConnect, data, hostCell, newCellPos, constructionData);
 
@@ -493,7 +493,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     }
 
     uint64_t cellPointerIndex;
-    Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, constructionData);
+    Object* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, constructionData);
 
     if (!newCell->tryLock()) {
         return nullptr;
@@ -504,7 +504,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
     float origAngleFromPreviousOnHostCell;
     for (int i = 0; i < hostCell->numConnections; ++i) {
-        if (hostCell->connections[i].cell == constructionData.lastConstructionCell) {
+        if (hostCell->connections[i].object == constructionData.lastConstructionCell) {
             origAngleFromPreviousOnHostCell = hostCell->connections[i].angleFromPrevious;
             break;
         }
@@ -512,7 +512,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
     float origAngleFromPreviousOnLastConstructedCell;
     for (int i = 0; i < constructionData.lastConstructionCell->numConnections; ++i) {
-        if (constructionData.lastConstructionCell->connections[i].cell == hostCell) {
+        if (constructionData.lastConstructionCell->connections[i].object == hostCell) {
             origAngleFromPreviousOnLastConstructedCell = constructionData.lastConstructionCell->connections[i].angleFromPrevious;
         }
     }
@@ -520,15 +520,15 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     // Move connection between lastConstructionCell and hostCell to a connection between lastConstructionCell and newCell
     for (int i = 0; i < lastCell->numConnections; ++i) {
         auto& connection = lastCell->connections[i];
-        if (connection.cell == hostCell) {
-            connection.cell = newCell;
+        if (connection.object == hostCell) {
+            connection.object = newCell;
             connection.distance = desiredDistance;
             connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;
             newCell->numConnections = 1;
-            newCell->connections[0].cell = lastCell;
+            newCell->connections[0].object = lastCell;
             newCell->connections[0].distance = desiredDistance;
             newCell->connections[0].angleFromPrevious = 360.0f;
-            CellConnectionProcessor::deleteConnectionOneWay(hostCell, lastCell);
+            ObjectConnectionProcessor::deleteConnectionOneWay(hostCell, lastCell);
             break;
         }
     }
@@ -542,11 +542,11 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
             distance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
         }
 
-        if (!CellConnectionProcessor::tryAddConnections(data, newCell, hostCell, 0, origAngleFromPreviousOnHostCell, distance)) {
-            CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
+        if (!ObjectConnectionProcessor::tryAddConnections(data, newCell, hostCell, 0, origAngleFromPreviousOnHostCell, distance)) {
+            ObjectConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
             hostCell->cellState = CellState_Dying;
             for (int i = 0; i < hostCell->numConnections; ++i) {
-                auto const& connectedCell = hostCell->connections[i].cell;
+                auto const& connectedCell = hostCell->connections[i].object;
                 if (connectedCell->creature == hostCell->creature) {
                     connectedCell->cellState = CellState_Detaching;
                 }
@@ -560,20 +560,20 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     if (numCellsToConnect > 0 && constructionData.numAdditionalConnections != 0) {
 
         // Sort surrounding cells by distance from newCell
-        bubbleSort(cellsToConnect, numCellsToConnect, [&](auto const& cell1, auto const& cell2) {
-            auto dist1 = data.cellMap.getDistance(cell1->pos, newCellPos);
-            auto dist2 = data.cellMap.getDistance(cell2->pos, newCellPos);
+        bubbleSort(cellsToConnect, numCellsToConnect, [&](auto const& object1, auto const& object2) {
+            auto dist1 = data.objectMap.getDistance(object1->pos, newCellPos);
+            auto dist2 = data.objectMap.getDistance(object2->pos, newCellPos);
             return dist1 < dist2;
         });
 
         // Connect surrounding cells if possible
         int numConnectedCells = 0;
         for (int i = 0; i < numCellsToConnect; ++i) {
-            Cell* otherCell = cellsToConnect[i];
+            Object* otherCell = cellsToConnect[i];
 
             if (otherCell->tryLock()) {
                 if (newCell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS) {
-                    if (CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
+                    if (ObjectConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
                         ++numConnectedCells;
                     }
                 }
@@ -628,10 +628,10 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 }
 
 __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
-    Cell* result[],
+    Object* result[],
     int& numResultCells,
     SimulationData& data,
-    Cell* hostCell,
+    Object* hostCell,
     float2 const& newCellPos,
     ConstructionData const& constructionData)
 {
@@ -641,18 +641,18 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
         return;
     }
 
-    Cell* nearCells[MAX_CELL_BONDS * 4];
+    Object* nearCells[MAX_CELL_BONDS * 4];
     int numNearCells;
-    data.cellMap.getMatchingCells(
+    data.objectMap.getMatchingCells(
         nearCells,
         MAX_CELL_BONDS * 4,
         numNearCells,
         newCellPos,
         cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
         hostCell->detached,
-        [&](Cell* const& otherCell) { return otherCell != hostCell && otherCell != constructionData.lastConstructionCell; });
+        [&](Object* const& otherCell) { return otherCell != hostCell && otherCell != constructionData.lastConstructionCell; });
 
-    Cell* otherCellCandidates[MAX_CELL_BONDS * 2];
+    Object* otherCellCandidates[MAX_CELL_BONDS * 2];
     int numOtherCellCandidates;
 
     if (constructionData.requiredNodeId1 == -1) {
@@ -661,7 +661,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
         float angleFromPrevious1;
         float angleFromPrevious2;
         for (int i = 0; i < lastConstructionCell->numConnections; ++i) {
-            if (lastConstructionCell->connections[i].cell == hostCell) {
+            if (lastConstructionCell->connections[i].object == hostCell) {
                 angleFromPrevious1 = lastConstructionCell->connections[i].angleFromPrevious;
                 angleFromPrevious2 = lastConstructionCell->connections[(i + 1) % lastConstructionCell->numConnections].angleFromPrevious;
                 break;
@@ -671,14 +671,14 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
         Math::rotateQuarterClockwise(n);
 
         // assemble surrounding cell candidates
-        data.cellMap.getMatchingCells(
+        data.objectMap.getMatchingCells(
             otherCellCandidates,
             MAX_CELL_BONDS * 2,
             numOtherCellCandidates,
             newCellPos,
             cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
             hostCell->detached,
-            [&](Cell* const& otherCell) {
+            [&](Object* const& otherCell) {
                 if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
                     || (otherCell->cellState != CellState_Constructing && otherCell->activationTime == 0) || otherCell->creature != constructionData.creature
                     || otherCell->parentNodeIndex != hostCell->nodeIndex) {
@@ -687,7 +687,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
 
                 // discard cells that are not on the correct side
                 if (abs(angleFromPrevious1 - angleFromPrevious2) > NEAR_ZERO) {
-                    auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - lastConstructionCell->pos);
+                    auto delta = data.objectMap.getCorrectedDirection(otherCell->pos - lastConstructionCell->pos);
                     if (angleFromPrevious2 < angleFromPrevious1) {
                         if (Math::dot(delta, n) < 0) {
                             return false;
@@ -702,14 +702,14 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                 return true;
             });
     } else {
-        data.cellMap.getMatchingCells(
+        data.objectMap.getMatchingCells(
             otherCellCandidates,
             MAX_CELL_BONDS * 2,
             numOtherCellCandidates,
             newCellPos,
             cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
             hostCell->detached,
-            [&](Cell* const& otherCell) {
+            [&](Object* const& otherCell) {
                 if (otherCell->cellState != CellState_Constructing || otherCell->creature != constructionData.creature
                     || otherCell->parentNodeIndex != hostCell->nodeIndex) {
                     return false;
@@ -726,7 +726,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
 
     // evaluate candidates (locking is needed for the evaluation)
     for (int i = 0; i < numOtherCellCandidates; ++i) {
-        Cell* otherCell = otherCellCandidates[i];
+        Object* otherCell = otherCellCandidates[i];
         if (otherCell->tryLock()) {
             bool crossingLinks = false;
             for (int j = 0; j < numNearCells; ++j) {
@@ -736,10 +736,10 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                 }
                 if (nearCell->tryLock()) {
                     for (int k = 0; k < nearCell->numConnections; ++k) {
-                        if (nearCell->connections[k].cell == otherCell) {
+                        if (nearCell->connections[k].object == otherCell) {
                             continue;
                         }
-                        if (Math::crossing(newCellPos, otherCell->pos, nearCell->pos, nearCell->connections[k].cell->pos)) {
+                        if (Math::crossing(newCellPos, otherCell->pos, nearCell->pos, nearCell->connections[k].object->pos)) {
                             crossingLinks = true;
                         }
                     }
@@ -749,8 +749,8 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                 }
             }
             if (!crossingLinks) {
-                auto delta = data.cellMap.getCorrectedDirection(newCellPos - otherCell->pos);
-                if (CellConnectionProcessor::hasAngleSpace(data, otherCell, Math::angleOfVector(delta), constructionData.gene->angleAlignment)) {
+                auto delta = data.objectMap.getCorrectedDirection(newCellPos - otherCell->pos);
+                if (ObjectConnectionProcessor::hasAngleSpace(data, otherCell, Math::angleOfVector(delta), constructionData.gene->angleAlignment)) {
                     result[numResultCells++] = otherCell;
                 }
             }
@@ -762,22 +762,22 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
     }
 }
 
-__inline__ __device__ Cell* ConstructorProcessor::constructCellIntern(
+__inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     SimulationData& data,
     SimulationStatistics& statistics,
-    uint64_t& cellIndex,
-    Cell* hostCell,
+    uint64_t& objectIndex,
+    Object* hostCell,
     float2 posOfNewCell,
     ConstructionData const& constructionData)
 {
     auto& constructor = hostCell->cellTypeData.constructor;
 
-    data.cellMap.correctPosition(posOfNewCell);
+    data.objectMap.correctPosition(posOfNewCell);
 
-    ObjectFactory factory;
+    EntityFactory factory;
     factory.init(&data);
-    Cell* result = factory.createCellFromNode(
-        cellIndex,
+    Object* result = factory.createCellFromNode(
+        objectIndex,
         constructionData.creature,
         constructor.geneIndex,
         constructor.currentNodeIndex,
@@ -806,7 +806,7 @@ __inline__ __device__ Cell* ConstructorProcessor::constructCellIntern(
     return result;
 }
 
-__inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Cell* hostCell)
+__inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Object* hostCell)
 {
     auto& constructor = hostCell->cellTypeData.constructor;
     auto& genome = constructor.offspring->genome;
@@ -825,7 +825,7 @@ __inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Cell*
 }
 
 
-__inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
+__inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Object* hostCell, ConstructionData const& constructionData)
 {
     if (hostCell->cellTypeData.constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
         return true;
@@ -891,7 +891,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     return true;
 }
 
-__inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData)
+__inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Object* newCell, Object* hostCell, ConstructionData const& constructionData)
 {
     if (constructionData.isLastNode) {
         newCell->cellState = CellState_Activating;
@@ -899,43 +899,43 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell*
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Cell* cell1, Cell* cell2, Cell* cell3)
+__inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* cell3)
 {
-    // Check if cell3 connects back to cell1 (directly or via further cells, not through cell2)
+    // Check if cell3 connects back to object1 (directly or via further cells, not through object2)
     // to form a closed polygon
 
     // Determine traversal direction to find minimal polygon
-    // Find indices of cell1 and cell3 in cell2's connections (which are sorted clockwise)
-    int cell1IndexInCell2 = cell2->getConnectionIndex(cell1);
-    int cell3IndexInCell2 = cell2->getConnectionIndex(cell3);
+    // Find indices of object1 and cell3 in object2's connections (which are sorted clockwise)
+    int cell1IndexInCell2 = object2->getConnectionIndex(object1);
+    int cell3IndexInCell2 = object2->getConnectionIndex(cell3);
 
-    // Determine if we go clockwise or counter-clockwise from cell3 to find cell1
-    // The polygon is: cell1 -> cell2 -> cell3 -> ... -> cell1
-    // From cell2's perspective, we go clockwise from cell1 to cell3
-    // So from cell3, we should continue in a consistent direction to find cell1
+    // Determine if we go clockwise or counter-clockwise from cell3 to find object1
+    // The polygon is: object1 -> object2 -> cell3 -> ... -> object1
+    // From object2's perspective, we go clockwise from object1 to cell3
+    // So from cell3, we should continue in a consistent direction to find object1
     bool goClockwiseFromCell3;
-    if (cell3IndexInCell2 == (cell1IndexInCell2 + 1) % cell2->numConnections) {
-        // cell3 is clockwise from cell1 in cell2's connections
+    if (cell3IndexInCell2 == (cell1IndexInCell2 + 1) % object2->numConnections) {
+        // cell3 is clockwise from object1 in object2's connections
         goClockwiseFromCell3 = true;
     } else {
-        // cell3 is counter-clockwise from cell1 (wrapped around)
+        // cell3 is counter-clockwise from object1 (wrapped around)
         goClockwiseFromCell3 = false;
     }
 
-    // Find the minimal path from cell3 to cell1 (not going through cell2)
-    Cell* currentCell = cell3;
-    Cell* previousCell = cell2;
+    // Find the minimal path from cell3 to object1 (not going through object2)
+    Object* currentCell = cell3;
+    Object* previousCell = object2;
     int numIntermediateCells = 0;
     bool foundPolygon = false;
-    Cell* cell4 = nullptr;  // The next cell after cell3 in the polygon
+    Object* cell4 = nullptr;  // The next cell after cell3 in the polygon
 
-    // Find cell2's index in cell3's connections to determine traversal direction
-    int cell2IndexInCell3 = cell3->getConnectionIndex(cell2);
+    // Find object2's index in cell3's connections to determine traversal direction
+    int cell2IndexInCell3 = cell3->getConnectionIndex(object2);
 
     constexpr int maxPolygonSize = 50;
     float currentAngleSum = 0.0f;
     for (int step = 0; step < maxPolygonSize; ++step) {
-        Cell* nextCell = nullptr;
+        Object* nextCell = nullptr;
 
         if (step == 0) {
             int startIndex = goClockwiseFromCell3 ? cell2IndexInCell3 + 1 : cell2IndexInCell3 - 1;
@@ -943,12 +943,12 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
             for (int i = 0; i < cell3->numConnections; ++i) {
                 int index = goClockwiseFromCell3 ? startIndex + i : startIndex - i;
 
-                Cell* candidate = cell3->getConnectedCell(index);
-                if (candidate == cell1) {
+                Object* candidate = cell3->getConnectedCell(index);
+                if (candidate == object1) {
                     nextCell = candidate;
                     foundPolygon = true;
                     break;
-                } else if (candidate != cell2) {
+                } else if (candidate != object2) {
                     nextCell = candidate;
                     cell4 = candidate;
                     break;
@@ -962,12 +962,12 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
             for (int i = 1; i < currentCell->numConnections; ++i) {
                 int index = goClockwiseFromCell3 ? prevIndex + i : prevIndex - i;
 
-                Cell* candidate = currentCell->getConnectedCell(index);
-                if (candidate == cell1) {
+                Object* candidate = currentCell->getConnectedCell(index);
+                if (candidate == object1) {
                     nextCell = candidate;
                     foundPolygon = true;
                     break;
-                } else if (candidate != cell2) {
+                } else if (candidate != object2) {
                     nextCell = candidate;
                     break;
                 }
@@ -996,31 +996,31 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
         return;
     }
 
-    // If cell4 is still null, it means cell3 connects directly to cell1
+    // If cell4 is still null, it means cell3 connects directly to object1
     if (cell4 == nullptr) {
-        cell4 = cell1;
+        cell4 = object1;
     }
 
     // Number of vertices in the polygon
-    int numVertices = 3 + numIntermediateCells;  // cell1, cell2, cell3, + intermediate cells
+    int numVertices = 3 + numIntermediateCells;  // object1, object2, cell3, + intermediate cells
 
     // Calculate expected inner angle sum for an n-sided polygon: (n - 2) * 180 degrees
     float expectedAngleSum = (numVertices - 2) * 180.0f;
 
-    Cell* lastCellBeforeCell1 = currentCell;  // This is the last cell we visited before reaching cell1
+    Object* lastCellBeforeCell1 = currentCell;  // This is the last cell we visited before reaching object1
     if (!goClockwiseFromCell3) {
-        currentAngleSum += cell1->getAngelSpan(cell2, lastCellBeforeCell1);
-        currentAngleSum += cell2->getAngelSpan(cell3, cell1);
-        currentAngleSum += cell3->getAngelSpan(cell4, cell2);
+        currentAngleSum += object1->getAngelSpan(object2, lastCellBeforeCell1);
+        currentAngleSum += object2->getAngelSpan(cell3, object1);
+        currentAngleSum += cell3->getAngelSpan(cell4, object2);
     } else {
-        currentAngleSum += cell1->getAngelSpan(lastCellBeforeCell1, cell2);
-        currentAngleSum += cell2->getAngelSpan(cell1, cell3);
-        currentAngleSum += cell3->getAngelSpan(cell2, cell4);
+        currentAngleSum += object1->getAngelSpan(lastCellBeforeCell1, object2);
+        currentAngleSum += object2->getAngelSpan(object1, cell3);
+        currentAngleSum += cell3->getAngelSpan(object2, cell4);
     }
 
     float angleCorrection = expectedAngleSum - currentAngleSum;
 
-    int cell2Index = cell3->getConnectionIndex(cell2);
+    int cell2Index = cell3->getConnectionIndex(object2);
 
     if (!goClockwiseFromCell3) {
         cell3->increaseAngle(cell2Index, angleCorrection);

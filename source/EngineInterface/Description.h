@@ -16,19 +16,19 @@ struct ConnectionDescription
 {
     auto operator<=>(ConnectionDescription const&) const = default;
 
-    MEMBER(ConnectionDescription, uint64_t, cellId, 0);
+    MEMBER(ConnectionDescription, uint64_t, objectId, 0);
     MEMBER(ConnectionDescription, float, distance, 0.0f);
     MEMBER(ConnectionDescription, float, angleFromPrevious, 0.0f);
 };
 
-struct StructureCellDescription
+struct StructureObjectDescription
 {
-    auto operator<=>(StructureCellDescription const&) const = default;
+    auto operator<=>(StructureObjectDescription const&) const = default;
 };
 
-struct FreeCellDescription
+struct FreeObjectDescription
 {
-    auto operator<=>(FreeCellDescription const&) const = default;
+    auto operator<=>(FreeObjectDescription const&) const = default;
 };
 
 struct NeuralNetworkDescription
@@ -93,12 +93,12 @@ struct DetectStructureDescription
     auto operator<=>(DetectStructureDescription const&) const = default;
 };
 
-struct DetectFreeCellDescription
+struct DetectFreeObjectDescription
 {
-    auto operator<=>(DetectFreeCellDescription const&) const = default;
+    auto operator<=>(DetectFreeObjectDescription const&) const = default;
 
-    MEMBER(DetectFreeCellDescription, float, minDensity, 0.05f);
-    MEMBER(DetectFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectFreeObjectDescription, float, minDensity, 0.05f);
+    MEMBER(DetectFreeObjectDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
 struct DetectCreatureDescription
@@ -111,7 +111,7 @@ struct DetectCreatureDescription
     MEMBER(DetectCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeDescription = std::variant<TelemetryDescription, DetectEnergyDescription, DetectStructureDescription, DetectFreeCellDescription, DetectCreatureDescription>;
+using SensorModeDescription = std::variant<TelemetryDescription, DetectEnergyDescription, DetectStructureDescription, DetectFreeObjectDescription, DetectCreatureDescription>;
 
 struct SensorLastMatchDescription
 {
@@ -153,11 +153,11 @@ struct GeneratorDescription
     MEMBER(GeneratorDescription, int, numPulses, 0);
 };
 
-struct AttackFreeCellDescription
+struct AttackFreeObjectDescription
 {
-    auto operator<=>(AttackFreeCellDescription const&) const = default;
+    auto operator<=>(AttackFreeObjectDescription const&) const = default;
 
-    MEMBER(AttackFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackFreeObjectDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
 struct AttackCreatureDescription
@@ -170,7 +170,7 @@ struct AttackCreatureDescription
     MEMBER(AttackCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using AttackerModeDescription = std::variant<AttackFreeCellDescription, AttackCreatureDescription>;
+using AttackerModeDescription = std::variant<AttackFreeObjectDescription, AttackCreatureDescription>;
 
 struct AttackerDescription
 {
@@ -301,11 +301,11 @@ struct ReconnectStructureDescription
     auto operator<=>(ReconnectStructureDescription const&) const = default;
 };
 
-struct ReconnectFreeCellDescription
+struct ReconnectFreeObjectDescription
 {
-    auto operator<=>(ReconnectFreeCellDescription const&) const = default;
+    auto operator<=>(ReconnectFreeObjectDescription const&) const = default;
 
-    MEMBER(ReconnectFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectFreeObjectDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
 struct ReconnectCreatureDescription
@@ -318,7 +318,7 @@ struct ReconnectCreatureDescription
     MEMBER(ReconnectCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using ReconnectorModeDescription = std::variant<ReconnectStructureDescription, ReconnectFreeCellDescription, ReconnectCreatureDescription>;
+using ReconnectorModeDescription = std::variant<ReconnectStructureDescription, ReconnectFreeObjectDescription, ReconnectCreatureDescription>;
 
 struct ReconnectorDescription
 {
@@ -433,8 +433,8 @@ struct CommunicatorDescription
 };
 
 using CellTypeDescription = std::variant<
-    StructureCellDescription,
-    FreeCellDescription,
+    StructureObjectDescription,
+    FreeObjectDescription,
     BaseDescription,
     DepotDescription,
     ConstructorDescription,
@@ -468,69 +468,69 @@ struct SignalDescription
     MEMBER(SignalDescription, int, numTimesSent, 0);
 };
 
-struct CellDescription
+struct ObjectDescription
 {
-    CellDescription(bool createIds = true);
-    auto operator<=>(CellDescription const&) const = default;
+    ObjectDescription(bool createIds = true);
+    auto operator<=>(ObjectDescription const&) const = default;
 
     // General
     uint64_t _id = 0;
-    CellDescription id(uint64_t id);
-    MEMBER(CellDescription, std::vector<ConnectionDescription>, connections, {});
-    MEMBER(CellDescription, RealVector2D, pos, RealVector2D());
-    MEMBER(CellDescription, RealVector2D, vel, RealVector2D());
-    MEMBER(CellDescription, float, usableEnergy, 100.0f);
-    MEMBER(CellDescription, float, rawEnergy, 0.0f);
-    MEMBER(CellDescription, float, stiffness, 1.0f);
-    MEMBER(CellDescription, int, color, 0);
+    ObjectDescription id(uint64_t id);
+    MEMBER(ObjectDescription, std::vector<ConnectionDescription>, connections, {});
+    MEMBER(ObjectDescription, RealVector2D, pos, RealVector2D());
+    MEMBER(ObjectDescription, RealVector2D, vel, RealVector2D());
+    MEMBER(ObjectDescription, float, usableEnergy, 100.0f);
+    MEMBER(ObjectDescription, float, rawEnergy, 0.0f);
+    MEMBER(ObjectDescription, float, stiffness, 1.0f);
+    MEMBER(ObjectDescription, int, color, 0);
     MEMBER(
-        CellDescription,
+        ObjectDescription,
         std::optional<float>,
         frontAngle,
         std::nullopt);  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
-    MEMBER(CellDescription, bool, fixed, false);
-    MEMBER(CellDescription, bool, sticky, false);
-    MEMBER(CellDescription, int, age, 0);
-    MEMBER(CellDescription, CellState, cellState, CellState_Ready);
+    MEMBER(ObjectDescription, bool, fixed, false);
+    MEMBER(ObjectDescription, bool, sticky, false);
+    MEMBER(ObjectDescription, int, age, 0);
+    MEMBER(ObjectDescription, CellState, cellState, CellState_Ready);
 
     // Creature/genome data
-    MEMBER(CellDescription, std::optional<uint64_t>, creatureId, std::nullopt);
-    MEMBER(CellDescription, int, nodeIndex, 0);
-    MEMBER(CellDescription, int, parentNodeIndex, 0);
-    MEMBER(CellDescription, int, geneIndex, 0);
+    MEMBER(ObjectDescription, std::optional<uint64_t>, creatureId, std::nullopt);
+    MEMBER(ObjectDescription, int, nodeIndex, 0);
+    MEMBER(ObjectDescription, int, parentNodeIndex, 0);
+    MEMBER(ObjectDescription, int, geneIndex, 0);
 
     // Cell type-specific data
-    MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);
-    MEMBER(CellDescription, CellTypeDescription, cellType, BaseDescription());
-    MEMBER(CellDescription, SignalState, signalState, SignalState_Inactive);
-    MEMBER(CellDescription, SignalDescription, signal, SignalDescription());    // For signalState == SignalState_Active
-    MEMBER(CellDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
-    MEMBER(CellDescription, int, activationTime, 0);
-    MEMBER(CellDescription, CellTriggered, cellTriggered, CellTriggered_No);
+    MEMBER(ObjectDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);
+    MEMBER(ObjectDescription, CellTypeDescription, cellType, BaseDescription());
+    MEMBER(ObjectDescription, SignalState, signalState, SignalState_Inactive);
+    MEMBER(ObjectDescription, SignalDescription, signal, SignalDescription());    // For signalState == SignalState_Active
+    MEMBER(ObjectDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
+    MEMBER(ObjectDescription, int, activationTime, 0);
+    MEMBER(ObjectDescription, CellTriggered, cellTriggered, CellTriggered_No);
 
     // Process data
-    MEMBER(CellDescription, int, frontAngleId, 0);
-    MEMBER(CellDescription, bool, headCell, false);
+    MEMBER(ObjectDescription, int, frontAngleId, 0);
+    MEMBER(ObjectDescription, bool, headCell, false);
 
     CellType getCellType() const;
-    CellDescription& signalAndState(std::vector<float> const& value);
-    CellDescription& signalRestriction(float baseAngle, float openingAngle);
+    ObjectDescription& signalAndState(std::vector<float> const& value);
+    ObjectDescription& signalRestriction(float baseAngle, float openingAngle);
 
     bool isConnectedTo(uint64_t id) const;
     float getAngleSpan(uint64_t connectedCellId1, uint64_t connectedCellId2) const;
 };
 
-struct ParticleDescription
+struct EnergyDescription
 {
-    ParticleDescription();
-    auto operator<=>(ParticleDescription const&) const = default;
+    EnergyDescription();
+    auto operator<=>(EnergyDescription const&) const = default;
 
     uint64_t _id = 0;
-    ParticleDescription id(uint64_t id);
-    MEMBER(ParticleDescription, RealVector2D, pos, RealVector2D());
-    MEMBER(ParticleDescription, RealVector2D, vel, RealVector2D());
-    MEMBER(ParticleDescription, float, energy, 0.0f);
-    MEMBER(ParticleDescription, int, color, 0);
+    EnergyDescription id(uint64_t id);
+    MEMBER(EnergyDescription, RealVector2D, pos, RealVector2D());
+    MEMBER(EnergyDescription, RealVector2D, vel, RealVector2D());
+    MEMBER(EnergyDescription, float, energy, 0.0f);
+    MEMBER(EnergyDescription, int, color, 0);
 };
 
 struct CreatureDescription
@@ -543,7 +543,7 @@ struct CreatureDescription
     MEMBER(CreatureDescription, std::optional<uint64_t>, ancestorId, std::nullopt);
     MEMBER(CreatureDescription, int, generation, 0);
     MEMBER(CreatureDescription, int, lineageId, 0);
-    MEMBER(CreatureDescription, int, numCells, 0);
+    MEMBER(CreatureDescription, int, numObjects, 0);
     MEMBER(CreatureDescription, uint64_t, genomeId, 0);
 
     // Process data
@@ -552,7 +552,7 @@ struct CreatureDescription
 
 struct _DescriptionCache
 {
-    std::unordered_map<uint64_t, int> cellIdToIndex;
+    std::unordered_map<uint64_t, int> objectIdToIndex;
     std::unordered_map<uint64_t, uint64_t> creatureIdToIndex;
     std::unordered_map<uint64_t, uint64_t> genomeIdToIndex;
 };
@@ -562,8 +562,8 @@ struct Description
 {
     auto operator<=>(Description const&) const = default;
 
-    MEMBER(Description, std::vector<CellDescription>, cells, {});
-    MEMBER(Description, std::vector<ParticleDescription>, particles, {});
+    MEMBER(Description, std::vector<ObjectDescription>, objects, {});
+    MEMBER(Description, std::vector<EnergyDescription>, energies, {});
     MEMBER(Description, std::vector<CreatureDescription>, creatures, {});
     MEMBER(Description, std::vector<GenomeDescription>, genomes, {});
 
@@ -575,40 +575,40 @@ struct Description
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
 
-    Description& addCreature(std::vector<CellDescription> const& cells, CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
+    Description& addCreature(std::vector<ObjectDescription> const& objects, CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
 
-    size_t getNumCells() const;
-    size_t getNumCellsWithoutCreature() const;
-    std::vector<CellDescription> getCellsForCreature(uint64_t creatureId) const;
+    size_t getNumObjects() const;
+    size_t getNumObjectsWithoutCreature() const;
+    std::vector<ObjectDescription> getObjectsForCreature(uint64_t creatureId) const;
 
     DescriptionCache createCache() const;
-    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, DescriptionCache const& cache = nullptr);
-    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, DescriptionCache const& cache = nullptr);
+    Description& addConnection(uint64_t const& objectId1, uint64_t const& objectId2, DescriptionCache const& cache = nullptr);
+    Description& addConnection(uint64_t const& objectId1, uint64_t const& objectId2, RealVector2D const& refPosCell2, DescriptionCache const& cache = nullptr);
 
-    CellDescription const& getCellRef(uint64_t const& cellId, DescriptionCache const& cache = nullptr) const;
-    CellDescription& getCellRef(uint64_t const& cellId, DescriptionCache const& cache = nullptr);
+    ObjectDescription const& getObjectRef(uint64_t const& objectId, DescriptionCache const& cache = nullptr) const;
+    ObjectDescription& getObjectRef(uint64_t const& objectId, DescriptionCache const& cache = nullptr);
 
-    CellDescription& getOtherCellRef(uint64_t id);
-    CellDescription& getOtherCellRef(std::set<uint64_t> const& ids);
-    std::vector<CellDescription> getOtherCells(std::set<uint64_t> const& ids) const;
+    ObjectDescription& getOtherObjectRef(uint64_t id);
+    ObjectDescription& getOtherObjectRef(std::set<uint64_t> const& ids);
+    std::vector<ObjectDescription> getOtherObjects(std::set<uint64_t> const& ids) const;
 
     GenomeDescription const& getGenomeRef(uint64_t const& genomeId, DescriptionCache const& cache = nullptr) const;
 
     bool hasConnection(uint64_t id, uint64_t otherId) const;
-    bool hasConnection(CellDescription const& cell1, CellDescription const& cell2) const;
+    bool hasConnection(ObjectDescription const& object1, ObjectDescription const& object2) const;
     ConnectionDescription& getConnectionRef(uint64_t id, uint64_t otherId);
-    ConnectionDescription const& getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
+    ConnectionDescription const& getConnection(ObjectDescription const& object1, ObjectDescription const& object2) const;
     CreatureDescription& getCreatureRef(uint64_t id);
     CreatureDescription& getOtherCreatureRef(uint64_t id);
 
 private:
-    uint64_t getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const;
+    uint64_t getObjectIndex(uint64_t const& objectId, DescriptionCache const& cache) const;
 };
 
-struct ExtendedCellDescription
+struct ExtendedObjectDescription
 {
-    CellDescription cell;
+    ObjectDescription object;
     std::optional<uint64_t> creatureId;
     std::optional<GenomeDescription> genome;
 };
-using ExtendedCellOrParticleDescription = std::variant<ExtendedCellDescription, ParticleDescription>;
+using ExtendedObjectOrEnergyDescription = std::variant<ExtendedObjectDescription, EnergyDescription>;

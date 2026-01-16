@@ -6,25 +6,25 @@
 struct AddConnectionPairOperation
 {
     bool addTokens;
-    Cell* cell;
-    Cell* otherCell;
+    Object* object;
+    Object* otherObject;
 };
 
 struct DelConnectionOperation
 {
-    Cell* connectedCell;
+    Object* connectedObject;
 };
 
-struct DelCellOperation
+struct DelObjectOperation
 {
-    uint64_t cellIndex;
+    uint64_t objectIndex;
 };
 
 union StructureOperationData
 {
     AddConnectionPairOperation addConnection;
     DelConnectionOperation delConnection;
-    DelCellOperation delCell;
+    DelObjectOperation delObject;
 };
 
 struct StructuralOperation
@@ -33,7 +33,7 @@ struct StructuralOperation
     {
         AddConnectionPair,
         DelConnection,
-        DelCell,
+        DelObject,
     };
     Type type;
     StructureOperationData data;
@@ -42,5 +42,5 @@ struct StructuralOperation
 
 struct CellTypeOperation
 {
-    Cell* cell;
+    Object* object;
 };

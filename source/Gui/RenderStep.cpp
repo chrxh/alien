@@ -123,7 +123,7 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
 
     // Draw points
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().cells));
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().objects));
 
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
@@ -312,7 +312,7 @@ void _EnergyParticleRenderStep::execute(ExecutionParameters parameters)
 
     // Draw energy particles
     glBindVertexArray(parameters._geometryBuffers->getVaoForEnergyParticles());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().energyParticles));
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().energies));
 
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
@@ -418,7 +418,7 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
 
     // Draw overlay points (geometry shader will convert to textured quads)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().cells));
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().objects));
 
     // Disable blending
     glDisable(GL_BLEND);

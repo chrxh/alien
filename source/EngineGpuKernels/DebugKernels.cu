@@ -2,76 +2,76 @@
 
 __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int location)
 {
-    auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        if (auto& cell = cells.at(index)) {
+        if (auto& object = objects.at(index)) {
 
-            if (reinterpret_cast<uint64_t>(cell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                || reinterpret_cast<uint64_t>(cell) + sizeof(Cell)
-                    >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+            if (reinterpret_cast<uint64_t>(object) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                || reinterpret_cast<uint64_t>(object) + sizeof(Object)
+                    >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                 printf("wrong cell pointer at %d\n", location);
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
 
-            if (cell->creature) {
-                if (reinterpret_cast<uint64_t>(cell->creature) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                    || reinterpret_cast<uint64_t>(cell->creature) + sizeof(Creature)
-                        >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+            if (object->creature) {
+                if (reinterpret_cast<uint64_t>(object->creature) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                    || reinterpret_cast<uint64_t>(object->creature) + sizeof(Creature)
+                        >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                     printf("wrong creature pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                if (reinterpret_cast<uint64_t>(cell->creature->genome) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                    || reinterpret_cast<uint64_t>(cell->creature->genome) + sizeof(Genome)
-                        >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                if (reinterpret_cast<uint64_t>(object->creature->genome) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                    || reinterpret_cast<uint64_t>(object->creature->genome) + sizeof(Genome)
+                        >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                     printf("wrong genome pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                if (reinterpret_cast<uint64_t>(cell->creature->genome->genes) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                    || reinterpret_cast<uint64_t>(cell->creature->genome->genes) + sizeof(Gene) * cell->creature->genome->numGenes
-                        >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                if (reinterpret_cast<uint64_t>(object->creature->genome->genes) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                    || reinterpret_cast<uint64_t>(object->creature->genome->genes) + sizeof(Gene) * object->creature->genome->numGenes
+                        >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                     printf("wrong genes pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                for (int i = 0; i < cell->creature->genome->numGenes; ++i) {
-                    auto const& gene = cell->creature->genome->genes[i];
-                    if (reinterpret_cast<uint64_t>(gene.nodes) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                for (int i = 0; i < object->creature->genome->numGenes; ++i) {
+                    auto const& gene = object->creature->genome->genes[i];
+                    if (reinterpret_cast<uint64_t>(gene.nodes) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
                         || reinterpret_cast<uint64_t>(gene.nodes) + sizeof(Node) * gene.numNodes
-                            >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                            >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                         printf("wrong nodes pointer at %d\n", location);
                         CUDA_THROW_NOT_IMPLEMENTED();
                     }
                 }
             }
 
-            if (cell->numConnections > MAX_CELL_BONDS) {
+            if (object->numConnections > MAX_CELL_BONDS) {
                 printf("too much cell connections at %d\n", location);
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto connectingCell = cell->connections[i].cell;
-                if (reinterpret_cast<uint64_t>(connectingCell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                    || reinterpret_cast<uint64_t>(connectingCell) + sizeof(Cell)
-                        >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
-                    printf("wrong connectingCell pointer (cell: %llu, numConnections: %d) at %d\n", cell->id, cell->numConnections, location);
+            for (int i = 0; i < object->numConnections; ++i) {
+                auto connectingCell = object->connections[i].object;
+                if (reinterpret_cast<uint64_t>(connectingCell) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                    || reinterpret_cast<uint64_t>(connectingCell) + sizeof(Object)
+                        >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
+                    printf("wrong connectingCell pointer (cell: %llu, numConnections: %d) at %d\n", object->id, object->numConnections, location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
 
-                auto displacement = connectingCell->pos - cell->pos;
-                data.cellMap.correctDirection(displacement);
+                auto displacement = connectingCell->pos - object->pos;
+                data.objectMap.correctDirection(displacement);
                 auto actualDistance = Math::length(displacement);
                 if (actualDistance > 14) {
                     printf("distance too large at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
             }
-            if (cell->usableEnergy < 0 || isnan(cell->usableEnergy)) {
+            if (object->usableEnergy < 0 || isnan(object->usableEnergy)) {
                 printf("cell energy invalid at %d", location);
                 //CUDA_THROW_NOT_IMPLEMENTED();
             }
             if (sumEnergy != nullptr) {
-                atomicAdd(sumEnergy, cell->usableEnergy);
+                atomicAdd(sumEnergy, object->usableEnergy);
             }
         }
     }
@@ -79,13 +79,13 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
 
 __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int location)
 {
-    auto partition = calcSystemThreadPartition(data.objects.particles.getNumEntries());
+    auto partition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
-        if (auto& particle = data.objects.particles.at(particleIndex)) {
-            if (reinterpret_cast<uint64_t>(particle) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                || reinterpret_cast<uint64_t>(particle) + sizeof(Particle)
-                    >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+        if (auto& particle = data.entities.energies.at(particleIndex)) {
+            if (reinterpret_cast<uint64_t>(particle) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                || reinterpret_cast<uint64_t>(particle) + sizeof(Energy)
+                    >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                 printf("wrong particle pointer at %d\n", location);
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
@@ -102,20 +102,20 @@ __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int
 
 __global__ void DEBUG_checkAngles(SimulationData data)
 {
-    auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        if (auto& cell = cells.at(index)) {
-            if (cell->numConnections > 0) {
+        if (auto& object = objects.at(index)) {
+            if (object->numConnections > 0) {
                 float sumAngles = 0;
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    sumAngles += cell->connections[i].angleFromPrevious;
-                    if (cell->connections[i].angleFromPrevious < -NEAR_ZERO) {
-                        printf("invalid angle: %f\n", cell->connections[i].angleFromPrevious);
+                for (int i = 0; i < object->numConnections; ++i) {
+                    sumAngles += object->connections[i].angleFromPrevious;
+                    if (object->connections[i].angleFromPrevious < -NEAR_ZERO) {
+                        printf("invalid angle: %f\n", object->connections[i].angleFromPrevious);
                         CUDA_THROW_NOT_IMPLEMENTED();
                     }
-                    if (cell->connections[i].angleFromPrevious < NEAR_ZERO) {
+                    if (object->connections[i].angleFromPrevious < NEAR_ZERO) {
                         printf("zero angle\n");
                     }
                 }

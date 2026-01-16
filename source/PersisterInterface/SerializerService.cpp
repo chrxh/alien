@@ -768,27 +768,27 @@ namespace
     auto constexpr Id_Creature_FrontAngleId = 5;
     auto constexpr Id_Creature_GenomeId = 6;
 
-    auto constexpr Id_Cell_Id = 0;
-    auto constexpr Id_Cell_Energy = 1;
-    auto constexpr Id_Cell_RawEnergy = 20;
-    auto constexpr Id_Cell_Pos = 2;
-    auto constexpr Id_Cell_Vel = 3;
-    auto constexpr Id_Cell_Stiffness = 4;
-    auto constexpr Id_Cell_Color = 5;
-    auto constexpr Id_Cell_Fixed = 6;
-    auto constexpr Id_Cell_Age = 7;
-    auto constexpr Id_Cell_CellState = 8;
-    auto constexpr Id_Cell_ActivationTime = 9;
-    auto constexpr Id_Cell_CellTriggered = 10;
-    auto constexpr Id_Cell_NodeIndex = 12;
-    auto constexpr Id_Cell_ParentNodeIndex = 13;
-    auto constexpr Id_Cell_GeneIndex = 14;
-    auto constexpr Id_Cell_SignalState = 15;
-    auto constexpr Id_Cell_AngleToFront = 16;
-    auto constexpr Id_Cell_Sticky = 17;
-    auto constexpr Id_Cell_FrontAngleId = 18;
-    auto constexpr Id_Cell_IsFrontAngleRefCell = 19;
-    auto constexpr Id_Cell_CreatureId = 21;
+    auto constexpr Id_Object_Id = 0;
+    auto constexpr Id_Object_Energy = 1;
+    auto constexpr Id_Object_RawEnergy = 20;
+    auto constexpr Id_Object_Pos = 2;
+    auto constexpr Id_Object_Vel = 3;
+    auto constexpr Id_Object_Stiffness = 4;
+    auto constexpr Id_Object_Color = 5;
+    auto constexpr Id_Object_Fixed = 6;
+    auto constexpr Id_Object_Age = 7;
+    auto constexpr Id_Object_CellState = 8;
+    auto constexpr Id_Object_ActivationTime = 9;
+    auto constexpr Id_Object_CellTriggered = 10;
+    auto constexpr Id_Object_NodeIndex = 12;
+    auto constexpr Id_Object_ParentNodeIndex = 13;
+    auto constexpr Id_Object_GeneIndex = 14;
+    auto constexpr Id_Object_SignalState = 15;
+    auto constexpr Id_Object_AngleToFront = 16;
+    auto constexpr Id_Object_Sticky = 17;
+    auto constexpr Id_Object_FrontAngleId = 18;
+    auto constexpr Id_Object_IsFrontAngleRefCell = 19;
+    auto constexpr Id_Object_CreatureId = 21;
 
     auto constexpr Id_Signal_Channels = 0;
     auto constexpr Id_Signal_NumTimesSent = 1;
@@ -797,7 +797,7 @@ namespace
     auto constexpr Id_SignalRestriction_BaseAngle = 1;
     auto constexpr Id_SignalRestriction_OpeningAngle = 2;
 
-    auto constexpr Id_Connection_CellId = 0;
+    auto constexpr Id_Connection_ObjectId = 0;
     auto constexpr Id_Connection_Distance = 1;
     auto constexpr Id_Connection_AngleFromPrevious = 2;
 
@@ -933,7 +933,7 @@ namespace cereal
     {
         ConnectionDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Connection_CellId, data._cellId, defaultObject._cellId);
+        loadSave(task, auxiliaries, Id_Connection_ObjectId, data._objectId, defaultObject._objectId);
         loadSave(task, auxiliaries, Id_Connection_Distance, data._distance, defaultObject._distance);
         loadSave(task, auxiliaries, Id_Connection_AngleFromPrevious, data._angleFromPrevious, defaultObject._angleFromPrevious);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -1064,15 +1064,15 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectStructureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, DetectFreeCellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, DetectFreeObjectDescription& data)
     {
-        DetectFreeCellDescription defaultObject;
+        DetectFreeObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(DetectFreeCellDescription)
+    SPLIT_SERIALIZATION(DetectFreeObjectDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectCreatureDescription& data)
@@ -1126,14 +1126,14 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneratorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, AttackFreeCellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, AttackFreeObjectDescription& data)
     {
-        AttackFreeCellDescription defaultObject;
+        AttackFreeObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(AttackFreeCellDescription)
+    SPLIT_SERIALIZATION(AttackFreeObjectDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackCreatureDescription& data)
@@ -1286,14 +1286,14 @@ namespace cereal
     SPLIT_SERIALIZATION(ReconnectStructureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeObjectDescription& data)
     {
-        ReconnectFreeCellDescription defaultObject;
+        ReconnectFreeObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ReconnectFreeCellDescription)
+    SPLIT_SERIALIZATION(ReconnectFreeObjectDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ReconnectCreatureDescription& data)
@@ -1442,36 +1442,36 @@ namespace cereal
     SPLIT_SERIALIZATION(CommunicatorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ObjectDescription& data)
     {
-        CellDescription defaultObject;
+        ObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Cell_Id, data._id, defaultObject._id);
-        loadSave(task, auxiliaries, Id_Cell_Energy, data._usableEnergy, defaultObject._usableEnergy);
-        loadSave(task, auxiliaries, Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
-        loadSave(task, auxiliaries, Id_Cell_Pos, data._pos, defaultObject._pos);
-        loadSave(task, auxiliaries, Id_Cell_Vel, data._vel, defaultObject._vel);
-        loadSave(task, auxiliaries, Id_Cell_Stiffness, data._stiffness, defaultObject._stiffness);
-        loadSave(task, auxiliaries, Id_Cell_Color, data._color, defaultObject._color);
-        loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
-        loadSave(task, auxiliaries, Id_Cell_Fixed, data._fixed, defaultObject._fixed);
-        loadSave(task, auxiliaries, Id_Cell_Sticky, data._sticky, defaultObject._sticky);
-        loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
-        loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);
-        loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
-        loadSave(task, auxiliaries, Id_Cell_CellTriggered, data._cellTriggered, defaultObject._cellTriggered);
-        loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
-        loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
-        loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        loadSave(task, auxiliaries, Id_Cell_SignalState, data._signalState, defaultObject._signalState);
-        loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
-        loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
-        loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
+        loadSave(task, auxiliaries, Id_Object_Id, data._id, defaultObject._id);
+        loadSave(task, auxiliaries, Id_Object_Energy, data._usableEnergy, defaultObject._usableEnergy);
+        loadSave(task, auxiliaries, Id_Object_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        loadSave(task, auxiliaries, Id_Object_Pos, data._pos, defaultObject._pos);
+        loadSave(task, auxiliaries, Id_Object_Vel, data._vel, defaultObject._vel);
+        loadSave(task, auxiliaries, Id_Object_Stiffness, data._stiffness, defaultObject._stiffness);
+        loadSave(task, auxiliaries, Id_Object_Color, data._color, defaultObject._color);
+        loadSave(task, auxiliaries, Id_Object_AngleToFront, data._frontAngle, defaultObject._frontAngle);
+        loadSave(task, auxiliaries, Id_Object_Fixed, data._fixed, defaultObject._fixed);
+        loadSave(task, auxiliaries, Id_Object_Sticky, data._sticky, defaultObject._sticky);
+        loadSave(task, auxiliaries, Id_Object_Age, data._age, defaultObject._age);
+        loadSave(task, auxiliaries, Id_Object_CellState, data._cellState, defaultObject._cellState);
+        loadSave(task, auxiliaries, Id_Object_ActivationTime, data._activationTime, defaultObject._activationTime);
+        loadSave(task, auxiliaries, Id_Object_CellTriggered, data._cellTriggered, defaultObject._cellTriggered);
+        loadSave(task, auxiliaries, Id_Object_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
+        loadSave(task, auxiliaries, Id_Object_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
+        loadSave(task, auxiliaries, Id_Object_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        loadSave(task, auxiliaries, Id_Object_SignalState, data._signalState, defaultObject._signalState);
+        loadSave(task, auxiliaries, Id_Object_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
+        loadSave(task, auxiliaries, Id_Object_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
+        loadSave(task, auxiliaries, Id_Object_CreatureId, data._creatureId, defaultObject._creatureId);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._connections, data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
     }
-    SPLIT_SERIALIZATION(CellDescription)
+    SPLIT_SERIALIZATION(ObjectDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CreatureDescription& data)
@@ -1482,7 +1482,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
-        loadSave(task, auxiliaries, Id_Creature_NumCells, data._numCells, defaultObject._numCells);
+        loadSave(task, auxiliaries, Id_Creature_NumCells, data._numObjects, defaultObject._numObjects);
         loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
 
@@ -1491,9 +1491,9 @@ namespace cereal
     SPLIT_SERIALIZATION(CreatureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ParticleDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, EnergyDescription& data)
     {
-        ParticleDescription defaultObject;
+        EnergyDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Particle_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Particle_Pos, data._pos, defaultObject._pos);
@@ -1502,12 +1502,12 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Particle_Color, data._color, defaultObject._color);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ParticleDescription)
+    SPLIT_SERIALIZATION(EnergyDescription)
 
     template <class Archive>
     void serialize(Archive& ar, Description& description)
     {
-        ar(description._cells, description._particles, description._creatures, description._genomes);
+        ar(description._objects, description._energies, description._creatures, description._genomes);
     }
 }
 
@@ -1924,7 +1924,7 @@ namespace
         if (colIndex == 0) {
             return &dataPoints.time;
         } else if (colIndex == 1) {
-            return &dataPoints.numCells;
+            return &dataPoints.numObjects;
         } else if (colIndex == 2) {
             return &dataPoints.numSelfReplicators;
         } else if (colIndex == 3) {
@@ -1932,7 +1932,7 @@ namespace
         } else if (colIndex == 4) {
             return &dataPoints.numFreeCells;
         } else if (colIndex == 5) {
-            return &dataPoints.numParticles;
+            return &dataPoints.numEnergyParticles;
         } else if (colIndex == 6) {
             return &dataPoints.averageGenomeCells;
         } else if (colIndex == 7) {

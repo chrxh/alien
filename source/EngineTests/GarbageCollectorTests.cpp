@@ -43,7 +43,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
 
     auto data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().layers(10).center({100.0f, 100.0}));
     for (int i = 0; i < 100; ++i) {
-        data._particles.emplace_back(ParticleDescription()
+        data._energies.emplace_back(EnergyDescription()
                                          .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
                                          .vel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
                                          .energy(numberGen.getRandomFloat(0.0f, 100.0f)));
@@ -56,7 +56,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
     case CleanupAction::CleanupAfterDataManipulation:
         _simulationFacade->testOnly_cleanupAfterDataManipulation();
     case CleanupAction::ResizeArrays:
-        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.cellArray = 1000, .particleArray = 1000, .heap = 1000000});
+        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.objectArray = 1000, .energyArray = 1000, .heap = 1000000});
     }
     EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
 }
@@ -74,8 +74,8 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
 
     auto data = Description().addCreature(
         {
-            CellDescription().pos({100.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription()})),
-            CellDescription().pos({101.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription(), SignalEntryDescription()})),
+            ObjectDescription().pos({100.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription()})),
+            ObjectDescription().pos({101.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription(), SignalEntryDescription()})),
         },
         CreatureDescription(),
         genome);
@@ -87,7 +87,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
     case CleanupAction::CleanupAfterDataManipulation:
         _simulationFacade->testOnly_cleanupAfterDataManipulation();
     case CleanupAction::ResizeArrays:
-        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.cellArray = 1000, .particleArray = 1000, .heap = 1000000});
+        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.objectArray = 1000, .energyArray = 1000, .heap = 1000000});
     }
     EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
 }

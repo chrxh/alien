@@ -225,9 +225,9 @@ namespace
         return VALUE_NOT_SET_UINT64;
     }
 
-    __device__ void createCreatureTO(Cell* cell, TO& to)
+    __device__ void createCreatureTO(Object* object, TO& to)
     {
-        uint64_t origCreatureTOIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
+        uint64_t origCreatureTOIndex = alienAtomicExch64(&object->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
         if (origCreatureTOIndex == VALUE_NOT_SET_UINT64) {
 
             auto creatureTOIndex = alienAtomicAdd64(to.numCreatures, static_cast<uint64_t>(1));
@@ -236,255 +236,255 @@ namespace
                 ABORT();
             }
             auto& creatureTO = to.creatures[creatureTOIndex];
-            auto const& creature = cell->creature;
+            auto const& creature = object->creature;
             creatureTO.id = creature->id;
             creatureTO.ancestorId = creature->ancestorId;
             creatureTO.generation = creature->generation;
             creatureTO.lineageId = creature->lineageId;
-            creatureTO.numCells = creature->numCells;
+            creatureTO.numObjects = creature->numObjects;
             creatureTO.frontAngleId = creature->frontAngleId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
-            alienAtomicExch64(&cell->creature->creatureIndex, creatureTOIndex);
+            alienAtomicExch64(&object->creature->creatureIndex, creatureTOIndex);
         } else if (origCreatureTOIndex != 0) {
-            alienAtomicExch64(&cell->creature->creatureIndex, origCreatureTOIndex);
+            alienAtomicExch64(&object->creature->creatureIndex, origCreatureTOIndex);
         }
     }
 
-    __device__ void createCellTO(Cell* cell, TO& to, uint8_t* heap)
+    __device__ void createObjectTO(Object* object, TO& to, uint8_t* heap)
     {
-        auto cellTOIndex = alienAtomicAdd64(to.numCells, static_cast<uint64_t>(1));
-        if (cellTOIndex >= to.capacities.cells) {
+        auto objectTOIndex = alienAtomicAdd64(to.numObjects, static_cast<uint64_t>(1));
+        if (objectTOIndex >= to.capacities.objects) {
             printf("Insufficient cell memory for transfer objects.\n");
             ABORT();
         }
-        auto& cellTO = to.cells[cellTOIndex];
+        auto& objectTO = to.objects[objectTOIndex];
 
-        cellTO.id = cell->id;
-        cellTO.belongToCreature = (cell->creature != nullptr);
-        if (cellTO.belongToCreature) {
-            cellTO.creatureIndex = cell->creature->creatureIndex;
+        objectTO.id = object->id;
+        objectTO.belongToCreature = (object->creature != nullptr);
+        if (objectTO.belongToCreature) {
+            objectTO.creatureIndex = object->creature->creatureIndex;
         }
-        cellTO.pos = cell->pos;
-        cellTO.vel = cell->vel;
-        cellTO.fixed = cell->fixed;
-        cellTO.sticky = cell->sticky;
-        cellTO.usableEnergy = cell->usableEnergy;
-        cellTO.rawEnergy = cell->rawEnergy;
-        cellTO.stiffness = cell->stiffness;
-        cellTO.numConnections = cell->numConnections;
-        cellTO.cellState = cell->cellState;
-        cellTO.cellType = cell->cellType;
-        cellTO.color = cell->color;
-        cellTO.frontAngle = cell->frontAngle;
-        cellTO.age = cell->age;
-        cellTO.signalRestriction.mode = cell->signalRestriction.mode;
-        cellTO.signalRestriction.baseAngle = cell->signalRestriction.baseAngle;
-        cellTO.signalRestriction.openingAngle = cell->signalRestriction.openingAngle;
-        cellTO.signalState = cell->signalState;
+        objectTO.pos = object->pos;
+        objectTO.vel = object->vel;
+        objectTO.fixed = object->fixed;
+        objectTO.sticky = object->sticky;
+        objectTO.usableEnergy = object->usableEnergy;
+        objectTO.rawEnergy = object->rawEnergy;
+        objectTO.stiffness = object->stiffness;
+        objectTO.numConnections = object->numConnections;
+        objectTO.cellState = object->cellState;
+        objectTO.cellType = object->cellType;
+        objectTO.color = object->color;
+        objectTO.frontAngle = object->frontAngle;
+        objectTO.age = object->age;
+        objectTO.signalRestriction.mode = object->signalRestriction.mode;
+        objectTO.signalRestriction.baseAngle = object->signalRestriction.baseAngle;
+        objectTO.signalRestriction.openingAngle = object->signalRestriction.openingAngle;
+        objectTO.signalState = object->signalState;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            cellTO.signal.channels[i] = cell->signal.channels[i];
+            objectTO.signal.channels[i] = object->signal.channels[i];
         }
-        cellTO.signal.numTimesSent = cell->signal.numTimesSent;
-        cellTO.activationTime = cell->activationTime;
-        cellTO.cellTriggered = cell->cellTriggered;
-        cellTO.nodeIndex = cell->nodeIndex;
-        cellTO.parentNodeIndex = cell->parentNodeIndex;
-        cellTO.geneIndex = cell->geneIndex;
-        cellTO.frontAngleId = cell->frontAngleId;
-        cellTO.headCell = cell->headCell;
+        objectTO.signal.numTimesSent = object->signal.numTimesSent;
+        objectTO.activationTime = object->activationTime;
+        objectTO.cellTriggered = object->cellTriggered;
+        objectTO.nodeIndex = object->nodeIndex;
+        objectTO.parentNodeIndex = object->parentNodeIndex;
+        objectTO.geneIndex = object->geneIndex;
+        objectTO.frontAngleId = object->frontAngleId;
+        objectTO.headCell = object->headCell;
 
-        cell->tempValue.as_uint64 = cellTOIndex;
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto connectingCell = cell->connections[i].cell;
-            cellTO.connections[i].cellIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
-            cellTO.connections[i].distance = cell->connections[i].distance;
-            cellTO.connections[i].angleFromPrevious = cell->connections[i].angleFromPrevious;
+        object->tempValue.as_uint64 = objectTOIndex;
+        for (int i = 0; i < object->numConnections; ++i) {
+            auto connectingCell = object->connections[i].object;
+            objectTO.connections[i].objectIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
+            objectTO.connections[i].distance = object->connections[i].distance;
+            objectTO.connections[i].angleFromPrevious = object->connections[i].angleFromPrevious;
         }
 
-        if (cell->neuralNetwork != nullptr) {
+        if (object->neuralNetwork != nullptr) {
             int targetSize;  //not used
-            copyDataToHeap<int>(sizeof(NeuralNetwork), reinterpret_cast<uint8_t*>(cell->neuralNetwork), targetSize, cellTO.neuralNetworkDataIndex, to);
+            copyDataToHeap<int>(sizeof(NeuralNetwork), reinterpret_cast<uint8_t*>(object->neuralNetwork), targetSize, objectTO.neuralNetworkDataIndex, to);
         } else {
-            cellTO.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
+            objectTO.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
         }
-        switch (cell->cellType) {
+        switch (object->cellType) {
         case CellType_Base: {
         } break;
         case CellType_Depot: {
-            cellTO.cellTypeData.depot.storageLimit = cell->cellTypeData.depot.storageLimit;
-            cellTO.cellTypeData.depot.storedUsableEnergy = cell->cellTypeData.depot.storedUsableEnergy;
+            objectTO.cellTypeData.depot.storageLimit = object->cellTypeData.depot.storageLimit;
+            objectTO.cellTypeData.depot.storedUsableEnergy = object->cellTypeData.depot.storedUsableEnergy;
         } break;
         case CellType_Constructor: {
-            cellTO.cellTypeData.constructor.autoTriggerInterval = cell->cellTypeData.constructor.autoTriggerInterval;
-            cellTO.cellTypeData.constructor.constructionActivationTime = cell->cellTypeData.constructor.constructionActivationTime;
-            cellTO.cellTypeData.constructor.constructionAngle = cell->cellTypeData.constructor.constructionAngle;
-            cellTO.cellTypeData.constructor.provideEnergy = cell->cellTypeData.constructor.provideEnergy;
-            cellTO.cellTypeData.constructor.geneIndex = cell->cellTypeData.constructor.geneIndex;
-            cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
-            cellTO.cellTypeData.constructor.currentNodeIndex = cell->cellTypeData.constructor.currentNodeIndex;
-            cellTO.cellTypeData.constructor.currentConcatenation = cell->cellTypeData.constructor.currentConcatenation;
-            cellTO.cellTypeData.constructor.currentBranch = cell->cellTypeData.constructor.currentBranch;
+            objectTO.cellTypeData.constructor.autoTriggerInterval = object->cellTypeData.constructor.autoTriggerInterval;
+            objectTO.cellTypeData.constructor.constructionActivationTime = object->cellTypeData.constructor.constructionActivationTime;
+            objectTO.cellTypeData.constructor.constructionAngle = object->cellTypeData.constructor.constructionAngle;
+            objectTO.cellTypeData.constructor.provideEnergy = object->cellTypeData.constructor.provideEnergy;
+            objectTO.cellTypeData.constructor.geneIndex = object->cellTypeData.constructor.geneIndex;
+            objectTO.cellTypeData.constructor.lastConstructedCellId = object->cellTypeData.constructor.lastConstructedCellId;
+            objectTO.cellTypeData.constructor.currentNodeIndex = object->cellTypeData.constructor.currentNodeIndex;
+            objectTO.cellTypeData.constructor.currentConcatenation = object->cellTypeData.constructor.currentConcatenation;
+            objectTO.cellTypeData.constructor.currentBranch = object->cellTypeData.constructor.currentBranch;
         } break;
         case CellType_Sensor: {
-            cellTO.cellTypeData.sensor.autoTriggerInterval = cell->cellTypeData.sensor.autoTriggerInterval;
-            cellTO.cellTypeData.sensor.minRange = cell->cellTypeData.sensor.minRange;
-            cellTO.cellTypeData.sensor.maxRange = cell->cellTypeData.sensor.maxRange;
-            cellTO.cellTypeData.sensor.mode = cell->cellTypeData.sensor.mode;
-            if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
-                cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = cell->cellTypeData.sensor.modeData.detectEnergy.minDensity;
-            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
-            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
-                cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity = cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
-            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells = cell->cellTypeData.sensor.modeData.detectCreature.minNumCells;
-                cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells = cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor = cell->cellTypeData.sensor.modeData.detectCreature.restrictToColor;
-                cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+            objectTO.cellTypeData.sensor.autoTriggerInterval = object->cellTypeData.sensor.autoTriggerInterval;
+            objectTO.cellTypeData.sensor.minRange = object->cellTypeData.sensor.minRange;
+            objectTO.cellTypeData.sensor.maxRange = object->cellTypeData.sensor.maxRange;
+            objectTO.cellTypeData.sensor.mode = object->cellTypeData.sensor.mode;
+            if (objectTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
+            } else if (objectTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                objectTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = object->cellTypeData.sensor.modeData.detectEnergy.minDensity;
+            } else if (objectTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+            } else if (objectTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
+                objectTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity = object->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
+                objectTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = object->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+            } else if (objectTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+                objectTO.cellTypeData.sensor.modeData.detectCreature.minNumCells = object->cellTypeData.sensor.modeData.detectCreature.minNumCells;
+                objectTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells = object->cellTypeData.sensor.modeData.detectCreature.maxNumCells;
+                objectTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor = object->cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                objectTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = object->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
             }
-            cellTO.cellTypeData.sensor.lastMatchAvailable = cell->cellTypeData.sensor.lastMatchAvailable;
-            cellTO.cellTypeData.sensor.lastMatch.creatureId = cell->cellTypeData.sensor.lastMatch.creatureId;
-            cellTO.cellTypeData.sensor.lastMatch.pos = cell->cellTypeData.sensor.lastMatch.pos;
+            objectTO.cellTypeData.sensor.lastMatchAvailable = object->cellTypeData.sensor.lastMatchAvailable;
+            objectTO.cellTypeData.sensor.lastMatch.creatureId = object->cellTypeData.sensor.lastMatch.creatureId;
+            objectTO.cellTypeData.sensor.lastMatch.pos = object->cellTypeData.sensor.lastMatch.pos;
         } break;
         case CellType_Generator: {
-            cellTO.cellTypeData.generator.autoTriggerInterval = cell->cellTypeData.generator.autoTriggerInterval;
-            cellTO.cellTypeData.generator.pulseType = cell->cellTypeData.generator.pulseType;
-            cellTO.cellTypeData.generator.alternationInterval = cell->cellTypeData.generator.alternationInterval;
-            cellTO.cellTypeData.generator.numPulses = cell->cellTypeData.generator.numPulses;
+            objectTO.cellTypeData.generator.autoTriggerInterval = object->cellTypeData.generator.autoTriggerInterval;
+            objectTO.cellTypeData.generator.pulseType = object->cellTypeData.generator.pulseType;
+            objectTO.cellTypeData.generator.alternationInterval = object->cellTypeData.generator.alternationInterval;
+            objectTO.cellTypeData.generator.numPulses = object->cellTypeData.generator.numPulses;
         } break;
         case CellType_Attacker: {
-            cellTO.cellTypeData.attacker.mode = cell->cellTypeData.attacker.mode;
-            if (cell->cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-                cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
-            } else if (cell->cellTypeData.attacker.mode == AttackerMode_Creature) {
-                cellTO.cellTypeData.attacker.modeData.attackCreature.minNumCells = cell->cellTypeData.attacker.modeData.attackCreature.minNumCells;
-                cellTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells = cell->cellTypeData.attacker.modeData.attackCreature.maxNumCells;
-                cellTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor = cell->cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-                cellTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage = cell->cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
+            objectTO.cellTypeData.attacker.mode = object->cellTypeData.attacker.mode;
+            if (object->cellTypeData.attacker.mode == AttackerMode_FreeCell) {
+                objectTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = object->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+            } else if (object->cellTypeData.attacker.mode == AttackerMode_Creature) {
+                objectTO.cellTypeData.attacker.modeData.attackCreature.minNumCells = object->cellTypeData.attacker.modeData.attackCreature.minNumCells;
+                objectTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells = object->cellTypeData.attacker.modeData.attackCreature.maxNumCells;
+                objectTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor = object->cellTypeData.attacker.modeData.attackCreature.restrictToColor;
+                objectTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage = object->cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
             }
         } break;
         case CellType_Injector: {
-            cellTO.cellTypeData.injector.geneIndex = cell->cellTypeData.injector.geneIndex;
+            objectTO.cellTypeData.injector.geneIndex = object->cellTypeData.injector.geneIndex;
         } break;
         case CellType_Muscle: {
-            cellTO.cellTypeData.muscle.mode = cell->cellTypeData.muscle.mode;
-            if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
-                cellTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
-                cellTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio = cell->cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
-                cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle = cell->cellTypeData.muscle.modeData.autoBending.initialAngle;
-                cellTO.cellTypeData.muscle.modeData.autoBending.forward = cell->cellTypeData.muscle.modeData.autoBending.forward;
-                cellTO.cellTypeData.muscle.modeData.autoBending.activation = cell->cellTypeData.muscle.modeData.autoBending.activation;
-                cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown = cell->cellTypeData.muscle.modeData.autoBending.activationCountdown;
-                cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cell->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
-            } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
-                cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
-                cellTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio = cell->cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
-                cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle = cell->cellTypeData.muscle.modeData.manualBending.initialAngle;
-                cellTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta = cell->cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
-                cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied =
-                    cell->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
-            } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
-                cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
-                    cell->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
-                cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle = cell->cellTypeData.muscle.modeData.angleBending.initialAngle;
-            } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
-                cellTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = cell->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
-                cellTO.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio = cell->cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
-                cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance = cell->cellTypeData.muscle.modeData.autoCrawling.initialDistance;
-                cellTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance = cell->cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
-                cellTO.cellTypeData.muscle.modeData.autoCrawling.forward = cell->cellTypeData.muscle.modeData.autoCrawling.forward;
-                cellTO.cellTypeData.muscle.modeData.autoCrawling.activation = cell->cellTypeData.muscle.modeData.autoCrawling.activation;
-                cellTO.cellTypeData.muscle.modeData.autoCrawling.activationCountdown = cell->cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
-                cellTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied = cell->cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
-            } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
-                cellTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
-                    cell->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-                cellTO.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio =
-                    cell->cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
-                cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance = cell->cellTypeData.muscle.modeData.manualCrawling.initialDistance;
-                cellTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = cell->cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
-                cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = cell->cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
-                cellTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied =
-                    cell->cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
-            } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
+            objectTO.cellTypeData.muscle.mode = object->cellTypeData.muscle.mode;
+            if (objectTO.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
+                objectTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = object->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
+                objectTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio = object->cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
+                objectTO.cellTypeData.muscle.modeData.autoBending.initialAngle = object->cellTypeData.muscle.modeData.autoBending.initialAngle;
+                objectTO.cellTypeData.muscle.modeData.autoBending.forward = object->cellTypeData.muscle.modeData.autoBending.forward;
+                objectTO.cellTypeData.muscle.modeData.autoBending.activation = object->cellTypeData.muscle.modeData.autoBending.activation;
+                objectTO.cellTypeData.muscle.modeData.autoBending.activationCountdown = object->cellTypeData.muscle.modeData.autoBending.activationCountdown;
+                objectTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = object->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
+            } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
+                objectTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = object->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
+                objectTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio = object->cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
+                objectTO.cellTypeData.muscle.modeData.manualBending.initialAngle = object->cellTypeData.muscle.modeData.manualBending.initialAngle;
+                objectTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta = object->cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
+                objectTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied =
+                    object->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
+            } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
+                objectTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = object->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
+                objectTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
+                    object->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
+                objectTO.cellTypeData.muscle.modeData.angleBending.initialAngle = object->cellTypeData.muscle.modeData.angleBending.initialAngle;
+            } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
+                objectTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = object->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
+                objectTO.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio = object->cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
+                objectTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance = object->cellTypeData.muscle.modeData.autoCrawling.initialDistance;
+                objectTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance = object->cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
+                objectTO.cellTypeData.muscle.modeData.autoCrawling.forward = object->cellTypeData.muscle.modeData.autoCrawling.forward;
+                objectTO.cellTypeData.muscle.modeData.autoCrawling.activation = object->cellTypeData.muscle.modeData.autoCrawling.activation;
+                objectTO.cellTypeData.muscle.modeData.autoCrawling.activationCountdown = object->cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
+                objectTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied = object->cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
+            } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
+                objectTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
+                    object->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
+                objectTO.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio =
+                    object->cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
+                objectTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance = object->cellTypeData.muscle.modeData.manualCrawling.initialDistance;
+                objectTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = object->cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
+                objectTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = object->cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
+                objectTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied =
+                    object->cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
+            } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
             }
-            cellTO.cellTypeData.muscle.lastMovementX = cell->cellTypeData.muscle.lastMovementX;
-            cellTO.cellTypeData.muscle.lastMovementY = cell->cellTypeData.muscle.lastMovementY;
+            objectTO.cellTypeData.muscle.lastMovementX = object->cellTypeData.muscle.lastMovementX;
+            objectTO.cellTypeData.muscle.lastMovementY = object->cellTypeData.muscle.lastMovementY;
         } break;
         case CellType_Defender: {
-            cellTO.cellTypeData.defender.mode = cell->cellTypeData.defender.mode;
+            objectTO.cellTypeData.defender.mode = object->cellTypeData.defender.mode;
         } break;
         case CellType_Reconnector: {
-            cellTO.cellTypeData.reconnector.mode = cell->cellTypeData.reconnector.mode;
-            if (cell->cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
-            } else if (cell->cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-                cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor = cell->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
-            } else if (cell->cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
-                cellTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells = cell->cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
-                cellTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells = cell->cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
-                cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor = cell->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
-                cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage = cell->cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
+            objectTO.cellTypeData.reconnector.mode = object->cellTypeData.reconnector.mode;
+            if (object->cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+            } else if (object->cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
+                objectTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor = object->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
+            } else if (object->cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
+                objectTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells = object->cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
+                objectTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells = object->cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
+                objectTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor = object->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
+                objectTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage = object->cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
             }
         } break;
         case CellType_Detonator: {
-            cellTO.cellTypeData.detonator.state = cell->cellTypeData.detonator.state;
-            cellTO.cellTypeData.detonator.countdown = cell->cellTypeData.detonator.countdown;
+            objectTO.cellTypeData.detonator.state = object->cellTypeData.detonator.state;
+            objectTO.cellTypeData.detonator.countdown = object->cellTypeData.detonator.countdown;
         } break;
         case CellType_Digestor: {
-            cellTO.cellTypeData.digestor.rawEnergyConductivity = cell->cellTypeData.digestor.rawEnergyConductivity;
+            objectTO.cellTypeData.digestor.rawEnergyConductivity = object->cellTypeData.digestor.rawEnergyConductivity;
         } break;
         case CellType_Memory: {
-            cellTO.cellTypeData.memory.mode = cell->cellTypeData.memory.mode;
-            cellTO.cellTypeData.memory.numSignalEntries = cell->cellTypeData.memory.numSignalEntries;
-            cellTO.cellTypeData.memory.channelBitMask = cell->cellTypeData.memory.channelBitMask;
-            if (cell->cellTypeData.memory.mode == MemoryMode_SignalDelay) {
-                cellTO.cellTypeData.memory.modeData.signalDelay.delay = cell->cellTypeData.memory.modeData.signalDelay.delay;
-                cellTO.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized = cell->cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized;
-                cellTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex = cell->cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
-            } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
-                cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
-                cellTO.cellTypeData.memory.modeData.signalRecorder.state = cell->cellTypeData.memory.modeData.signalRecorder.state;
-                cellTO.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
-                cellTO.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
-            } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
-                cellTO.cellTypeData.memory.modeData.signalStorage.readOnly = cell->cellTypeData.memory.modeData.signalStorage.readOnly;
-            } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
-                cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
-                    cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
+            objectTO.cellTypeData.memory.mode = object->cellTypeData.memory.mode;
+            objectTO.cellTypeData.memory.numSignalEntries = object->cellTypeData.memory.numSignalEntries;
+            objectTO.cellTypeData.memory.channelBitMask = object->cellTypeData.memory.channelBitMask;
+            if (object->cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+                objectTO.cellTypeData.memory.modeData.signalDelay.delay = object->cellTypeData.memory.modeData.signalDelay.delay;
+                objectTO.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized = object->cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized;
+                objectTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex = object->cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
+            } else if (object->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
+                objectTO.cellTypeData.memory.modeData.signalRecorder.readOnly = object->cellTypeData.memory.modeData.signalRecorder.readOnly;
+                objectTO.cellTypeData.memory.modeData.signalRecorder.state = object->cellTypeData.memory.modeData.signalRecorder.state;
+                objectTO.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = object->cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
+                objectTO.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries = object->cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
+            } else if (object->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                objectTO.cellTypeData.memory.modeData.signalStorage.readOnly = object->cellTypeData.memory.modeData.signalStorage.readOnly;
+            } else if (object->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
+                objectTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
+                    object->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
             }
             int targetSize;  // not used
             copyDataToHeap<int>(
-                sizeof(SignalEntry) * cell->cellTypeData.memory.numSignalEntries,
-                reinterpret_cast<uint8_t*>(cell->cellTypeData.memory.signalEntries),
+                sizeof(SignalEntry) * object->cellTypeData.memory.numSignalEntries,
+                reinterpret_cast<uint8_t*>(object->cellTypeData.memory.signalEntries),
                 targetSize,
-                cellTO.cellTypeData.memory.signalEntriesDataIndex,
+                objectTO.cellTypeData.memory.signalEntriesDataIndex,
                 to);
         } break;
         case CellType_Communicator: {
-            cellTO.cellTypeData.communicator.mode = cell->cellTypeData.communicator.mode;
-            if (cell->cellTypeData.communicator.mode == CommunicatorMode_Sender) {
-                cellTO.cellTypeData.communicator.modeData.sender.range = cell->cellTypeData.communicator.modeData.sender.range;
-                cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent = cell->cellTypeData.communicator.modeData.sender.maxTimesSent;
-            } else if (cell->cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor = cell->cellTypeData.communicator.modeData.receiver.restrictToColor;
-                cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = cell->cellTypeData.communicator.modeData.receiver.restrictToLineage;
+            objectTO.cellTypeData.communicator.mode = object->cellTypeData.communicator.mode;
+            if (object->cellTypeData.communicator.mode == CommunicatorMode_Sender) {
+                objectTO.cellTypeData.communicator.modeData.sender.range = object->cellTypeData.communicator.modeData.sender.range;
+                objectTO.cellTypeData.communicator.modeData.sender.maxTimesSent = object->cellTypeData.communicator.modeData.sender.maxTimesSent;
+            } else if (object->cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
+                objectTO.cellTypeData.communicator.modeData.receiver.restrictToColor = object->cellTypeData.communicator.modeData.receiver.restrictToColor;
+                objectTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = object->cellTypeData.communicator.modeData.receiver.restrictToLineage;
             }
         } break;
         }
     }
 
-    __device__ void createParticleTO(Particle* particle, TO& to)
+    __device__ void createEnergyTO(Energy* particle, TO& to)
     {
-        int particleTOIndex = alienAtomicAdd64(to.numParticles, uint64_t(1));
-        if (particleTOIndex >= to.capacities.particles) {
+        int particleTOIndex = alienAtomicAdd64(to.numEnergyParticles, uint64_t(1));
+        if (particleTOIndex >= to.capacities.energyParticles) {
             printf("Insufficient particle memory for transfer objects.\n");
             ABORT();
         }
 
-        ParticleTO& particleTO = to.particles[particleTOIndex];
+        EnergyTO& particleTO = to.energyParticles[particleTOIndex];
 
         particleTO.id = particle->id;
         particleTO.pos = particle->pos;
@@ -500,139 +500,139 @@ namespace
 /************************************************************************/
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (!cell->creature) {
+        auto& object = objects.at(index);
+        if (!object->creature) {
             continue;
         }
-        auto pos = cell->pos;
-        data.cellMap.correctPosition(pos);
+        auto pos = object->pos;
+        data.objectMap.correctPosition(pos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
-            cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
+            object->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+            object->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
         }
     }
 }
 
 __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeClusters, SimulationData data)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (!cell->creature) {
+        auto& object = objects.at(index);
+        if (!object->creature) {
             continue;
         }
-        if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
+        if ((includeClusters && object->selected == 0) || (!includeClusters && object->selected != 1)) {
             continue;
         }
-        cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
-        cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
+        object->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+        object->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
     }
 }
 
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (!cell->creature) {
+        auto& object = objects.at(index);
+        if (!object->creature) {
             continue;
         }
-        cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
-        cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
+        object->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+        object->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
     }
 }
 
 __global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, SimulationData data)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (!cell->creature) {
+        auto& object = objects.at(index);
+        if (!object->creature) {
             continue;
         }
-        if (cell->creature->id == creatureId) {
-            cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
+        if (object->creature->id == creatureId) {
+            object->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
         }
     }
 }
 
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, TO to)
+__global__ void cudaGetSelectedObjectDataWithoutConnections(SimulationData data, bool includeClusters, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.objects.heap.getArray();
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+    auto const cellArrayStart = data.entities.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
-            cell->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
+        auto& object = objects.at(index);
+        if ((includeClusters && object->selected == 0) || (!includeClusters && object->selected != 1)) {
+            object->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
-        createCellTO(cell, to, cellArrayStart);
+        createObjectTO(object, to, cellArrayStart);
     }
 }
 
-__global__ void cudaGetSelectedParticleData(SimulationData data, TO access)
+__global__ void cudaGetSelectedEnergyData(SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartition(data.objects.particles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
-        auto const& particle = data.objects.particles.at(particleIndex);
+        auto const& particle = data.entities.energies.at(particleIndex);
         if (particle->selected == 0) {
             continue;
         }
 
-        createParticleTO(particle, access);
+        createEnergyTO(particle, access);
     }
 }
 
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO to)
+__global__ void cudaGetInspectedObjectDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
-    auto const heapStart = data.objects.heap.getArray();
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+    auto const heapStart = data.entities.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
+        auto& object = objects.at(index);
         bool found = false;
         for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
             if (ids.values[i] == Const::MaxInspectedObjects_Break) {
                 break;
             }
-            if (ids.values[i] == cell->id) {
+            if (ids.values[i] == object->id) {
                 found = true;
             }
-            for (int j = 0; j < cell->numConnections; ++j) {
-                if (ids.values[i] == cell->connections[j].cell->id) {
+            for (int j = 0; j < object->numConnections; ++j) {
+                if (ids.values[i] == object->connections[j].object->id) {
                     found = true;
                 }
             }
         }
         if (!found) {
-            cell->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
+            object->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
 
-        createCellTO(cell, to, heapStart);
+        createObjectTO(object, to, heapStart);
     }
 }
 
-__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, TO access)
+__global__ void cudaGetInspectedEnergyData(InspectedEntityIds ids, SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartition(data.objects.particles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
-        auto const& particle = data.objects.particles.at(particleIndex);
+        auto const& particle = data.entities.energies.at(particleIndex);
         bool found = false;
         for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
             if (ids.values[i] == Const::MaxInspectedObjects_Break) {
@@ -646,49 +646,49 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
             continue;
         }
 
-        createParticleTO(particle, access);
+        createEnergyTO(particle, access);
     }
 }
 
 __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     {
-        auto const& cells = data.objects.cells;
-        auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+        auto const& objects = data.entities.objects;
+        auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            auto& cell = cells.at(index);
+            auto& object = objects.at(index);
 
-            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.x), toFloat(rectLowerRight.x), cell->pos.x, toFloat(data.worldSize.x))) {
+            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.x), toFloat(rectLowerRight.x), object->pos.x, toFloat(data.worldSize.x))) {
                 continue;
             }
-            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.y), toFloat(rectLowerRight.y), cell->pos.y, toFloat(data.worldSize.y))) {
+            if (!Math::isInBetweenModulo(toFloat(rectUpperLeft.y), toFloat(rectLowerRight.y), object->pos.y, toFloat(data.worldSize.y))) {
                 continue;
             }
 
-            auto cellTOIndex = alienAtomicAdd64(to.numCells, uint64_t(1));
-            auto& cellTO = to.cells[cellTOIndex];
+            auto objectTOIndex = alienAtomicAdd64(to.numObjects, uint64_t(1));
+            auto& objectTO = to.objects[objectTOIndex];
 
-            cellTO.id = cell->id;
-            cellTO.pos = cell->pos;
-            cellTO.cellType = cell->cellType;
-            cellTO.selected = cell->selected;
+            objectTO.id = object->id;
+            objectTO.pos = object->pos;
+            objectTO.cellType = object->cellType;
+            objectTO.selected = object->selected;
         }
     }
     {
-        auto const& particles = data.objects.particles;
+        auto const& particles = data.entities.energies;
         auto const partition = calcSystemThreadPartition(particles.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& particle = particles.at(index);
 
             auto pos = particle->pos;
-            data.particleMap.correctPosition(pos);
+            data.energyMap.correctPosition(pos);
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
-            auto particleTOIndex = alienAtomicAdd64(to.numParticles, uint64_t(1));
-            auto& particleTO = to.particles[particleTOIndex];
+            auto particleTOIndex = alienAtomicAdd64(to.numEnergyParticles, uint64_t(1));
+            auto& particleTO = to.energyParticles[particleTOIndex];
 
             particleTO.id = particle->id;
             particleTO.pos = particle->pos;
@@ -699,50 +699,50 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
 
 __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
+        auto& object = objects.at(index);
 
-        auto pos = cell->pos;
-        data.cellMap.correctPosition(pos);
+        auto pos = object->pos;
+        data.objectMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
-        if (!cell->creature) {
+        if (!object->creature) {
             continue;
         }
-        createGenomeTO(cell->creature->genome, to);
+        createGenomeTO(object->creature->genome, to);
     }
 }
 
 __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
+        auto& object = objects.at(index);
+        if ((includeClusters && object->selected == 0) || (!includeClusters && object->selected != 1)) {
             continue;
         }
-        if (!cell->creature) {
+        if (!object->creature) {
             continue;
         }
 
-        createGenomeTO(cell->creature->genome, to);
+        createGenomeTO(object->creature->genome, to);
     }
 }
 
 __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (!cell->creature) {
+        auto& object = objects.at(index);
+        if (!object->creature) {
             continue;
         }
 
@@ -751,11 +751,11 @@ __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, T
             if (ids.values[i] == Const::MaxInspectedObjects_Break) {
                 break;
             }
-            if (ids.values[i] == cell->id) {
+            if (ids.values[i] == object->id) {
                 found = true;
             }
-            for (int j = 0; j < cell->numConnections; ++j) {
-                if (ids.values[i] == cell->connections[j].cell->id) {
+            for (int j = 0; j < object->numConnections; ++j) {
+                if (ids.values[i] == object->connections[j].object->id) {
                     found = true;
                 }
             }
@@ -763,56 +763,56 @@ __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, T
         if (!found) {
             continue;
         }
-        createGenomeTO(cell->creature->genome, to);
+        createGenomeTO(object->creature->genome, to);
     }
 }
 
 __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
+        auto& object = objects.at(index);
 
-        auto pos = cell->pos;
-        data.cellMap.correctPosition(pos);
+        auto pos = object->pos;
+        data.objectMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
-        if (!cell->creature) {
+        if (!object->creature) {
             continue;
         }
-        createCreatureTO(cell, to);
+        createCreatureTO(object, to);
     }
 }
 
 __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
+        auto& object = objects.at(index);
+        if ((includeClusters && object->selected == 0) || (!includeClusters && object->selected != 1)) {
             continue;
         }
-        if (!cell->creature) {
+        if (!object->creature) {
             continue;
         }
 
-        createCreatureTO(cell, to);
+        createCreatureTO(object, to);
     }
 }
 
 __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (!cell->creature) {
+        auto& object = objects.at(index);
+        if (!object->creature) {
             continue;
         }
 
@@ -821,11 +821,11 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
             if (ids.values[i] == Const::MaxInspectedObjects_Break) {
                 break;
             }
-            if (ids.values[i] == cell->id) {
+            if (ids.values[i] == object->id) {
                 found = true;
             }
-            for (int j = 0; j < cell->numConnections; ++j) {
-                if (ids.values[i] == cell->connections[j].cell->id) {
+            for (int j = 0; j < object->numConnections; ++j) {
+                if (ids.values[i] == object->connections[j].object->id) {
                     found = true;
                 }
             }
@@ -833,87 +833,87 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
         if (!found) {
             continue;
         }
-        createCreatureTO(cell, to);
+        createCreatureTO(object, to);
     }
 }
 
 __global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TO to, bool* found)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (!cell->creature) {
+        auto& object = objects.at(index);
+        if (!object->creature) {
             continue;
         }
-        if (cell->creature->id == creatureId) {
-            createGenomeTO(cell->creature->genome, to);
+        if (object->creature->id == creatureId) {
+            createGenomeTO(object->creature->genome, to);
             *found = true;
             return;
         }
     }
 }
 
-// tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
+// tags cell with objectTO index and tags objectTO connections with cell index
+__global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
-    auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
-    auto const heap = data.objects.heap.getArray();
+    auto const& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+    auto const heap = data.entities.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
+        auto& object = objects.at(index);
 
-        auto pos = cell->pos;
-        data.cellMap.correctPosition(pos);
+        auto pos = object->pos;
+        data.objectMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            cell->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
+            object->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
 
-        createCellTO(cell, to, heap);
+        createObjectTO(object, to, heap);
     }
 }
 
 __global__ void cudaResolveConnections(SimulationData data, TO to)
 {
-    auto const partition = calcSystemThreadPartition(*to.numCells);
+    auto const partition = calcSystemThreadPartition(*to.numObjects);
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cellTO = to.cells[index];
+        auto& objectTO = to.objects[index];
 
-        for (int i = 0; i < cellTO.numConnections; ++i) {
-            auto const cellIndex = cellTO.connections[i].cellIndex;
-            cellTO.connections[i].cellIndex = data.objects.heap.atType<Cell>(cellIndex).tempValue.as_uint64;
+        for (int i = 0; i < objectTO.numConnections; ++i) {
+            auto const objectIndex = objectTO.connections[i].objectIndex;
+            objectTO.connections[i].objectIndex = data.entities.heap.atType<Object>(objectIndex).tempValue.as_uint64;
         }
     }
 }
 
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartition(data.objects.particles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
-        auto const& particle = data.objects.particles.at(particleIndex);
+        auto const& particle = data.entities.energies.at(particleIndex);
         auto pos = particle->pos;
-        data.particleMap.correctPosition(pos);
+        data.energyMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
 
-        createParticleTO(particle, access);
+        createEnergyTO(particle, access);
     }
 }
 
-__global__ void cudaGetArraysBasedOnTO(SimulationData data, TO to, Cell** cellArray)
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, TO to, Object** cellArray)
 {
-    *cellArray = data.objects.heap.getTypedSubArray<Cell>(*to.numCells);
+    *cellArray = data.entities.heap.getTypedSubArray<Object>(*to.numObjects);
 }
 
 __global__ void cudaSetGenomeDataFromTO(SimulationData data, TO to)
 {
-    __shared__ ObjectFactory factory;
+    __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
         factory.init(&data);
     }
@@ -927,7 +927,7 @@ __global__ void cudaSetGenomeDataFromTO(SimulationData data, TO to)
 
 __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO to)
 {
-    __shared__ ObjectFactory factory;
+    __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
         factory.init(&data);
     }
@@ -939,27 +939,27 @@ __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO to)
     }
 }
 
-__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Cell** cellArray, bool selectNewData)
+__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Object** cellArray, bool selectNewData)
 {
-    __shared__ ObjectFactory factory;
+    __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
         factory.init(&data);
     }
     __syncthreads();
 
-    auto particlePartition = calcSystemThreadPartition(*to.numParticles);
+    auto particlePartition = calcSystemThreadPartition(*to.numEnergyParticles);
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
-        auto particle = factory.createParticleFromTO(to.particles[index]);
+        auto particle = factory.createParticleFromTO(to.energyParticles[index]);
         if (selectNewData) {
             particle->selected = 1;
         }
     }
 
-    auto cellPartition = calcSystemThreadPartition(*to.numCells);
+    auto cellPartition = calcSystemThreadPartition(*to.numObjects);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
-        auto cell = factory.createCellFromTO(to, index, *cellArray);
+        auto object = factory.createObjectFromTO(to, index, *cellArray);
         if (selectNewData) {
-            cell->selected = 1;
+            object->selected = 1;
         }
     }
 }
@@ -968,23 +968,23 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
 {
     Ids maxIds;
     {
-        auto const partition = calcSystemThreadPartition(*to.numCells);
+        auto const partition = calcSystemThreadPartition(*to.numObjects);
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            auto const& cell = to.cells[index];
-            maxIds.entityId = max(maxIds.entityId, cell.id);
+            auto const& object = to.objects[index];
+            maxIds.entityId = max(maxIds.entityId, object.id);
 
-            if (cell.belongToCreature) {
-                auto const& creature = to.creatures[cell.creatureIndex];
+            if (object.belongToCreature) {
+                auto const& creature = to.creatures[object.creatureIndex];
                 maxIds.entityId = max(maxIds.entityId, creature.id);
             }
             //maxIds.currentLineageId = max(maxIds.currentLineageId, cell.lineageId);
         }
     }
     {
-        auto const partition = calcSystemThreadPartition(*to.numParticles);
+        auto const partition = calcSystemThreadPartition(*to.numEnergyParticles);
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            auto const& particle = to.particles[index];
+            auto const& particle = to.energyParticles[index];
             maxIds.entityId = max(maxIds.entityId, particle.id);
         }
     }
@@ -993,8 +993,8 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
 
 __global__ void cudaClearDataTO(TO to)
 {
-    *to.numCells = 0;
-    *to.numParticles = 0;
+    *to.numObjects = 0;
+    *to.numEnergyParticles = 0;
     *to.numCreatures = 0;
     *to.numGenomes = 0;
     *to.numGenes = 0;
@@ -1004,55 +1004,55 @@ __global__ void cudaClearDataTO(TO to)
 
 __global__ void cudaSaveNumEntries(SimulationData data)
 {
-    data.objects.saveNumEntries();
+    data.entities.saveNumEntries();
 }
 
 __global__ void cudaClearData(SimulationData data)
 {
-    data.objects.cells.reset();
-    data.objects.particles.reset();
-    data.objects.heap.reset();
+    data.entities.objects.reset();
+    data.entities.energies.reset();
+    data.entities.heap.reset();
 }
 
 __global__ void cudaEstimateCapacityNeededForTO_step1(SimulationData data)
 {
-    auto const& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto const& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (cell->creature) {
-            cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
-            cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
+        auto& object = objects.at(index);
+        if (object->creature) {
+            object->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+            object->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
         }
     }
 }
 
 __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, ArraySizesForTO* arraySizes)
 {
-    auto const& cells = data.objects.cells;
-    auto const& particles = data.objects.particles;
+    auto const& objects = data.entities.objects;
+    auto const& particles = data.entities.energies;
 
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        arraySizes->cells = cells.getNumEntries();
-        arraySizes->particles = particles.getNumEntries();
+        arraySizes->objects = objects.getNumEntries();
+        arraySizes->energyParticles = particles.getNumEntries();
     }
 
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
     uint64_t heapBytes = 0;
     uint64_t numCreatures = 0;
     uint64_t numGenomes = 0;
     uint64_t numGenes = 0;
     uint64_t numNodes = 0;
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (cell->neuralNetwork) {
+        auto& object = objects.at(index);
+        if (object->neuralNetwork) {
             heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
         }
-        if (cell->cellType == CellType_Memory) {
-            heapBytes += sizeof(SignalEntry) * cell->cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
+        if (object->cellType == CellType_Memory) {
+            heapBytes += sizeof(SignalEntry) * object->cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
         }
-        if (cell->creature) {
-            auto const& creature = cell->creature;
+        if (object->creature) {
+            auto const& creature = object->creature;
             if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
                 ++numCreatures;
                 if (alienAtomicExch64(&creature->genome->genomeIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
@@ -1082,26 +1082,26 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
 __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arraySizes)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        arraySizes->cellArray = *to.numCells;
-        arraySizes->particleArray = *to.numParticles;
+        arraySizes->objectArray = *to.numObjects;
+        arraySizes->energyArray = *to.numEnergyParticles;
         alienAtomicAdd64(
             &arraySizes->heap,
-            *to.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *to.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes)
+            *to.numObjects * (sizeof(Object) + GpuMemoryAlignmentBytes) + *to.numEnergyParticles * (sizeof(Energy) + GpuMemoryAlignmentBytes)
                 + *to.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *to.numGenomes * (sizeof(Genome) + GpuMemoryAlignmentBytes)
                 + *to.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes) + *to.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
     }
 
     {
-        auto partition = calcSystemThreadPartition(*to.numCells);
+        auto partition = calcSystemThreadPartition(*to.numObjects);
         uint64_t heapBytes = 0;
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            auto& cellTO = to.cells[index];
-            heapBytes += sizeof(Cell) + GpuMemoryAlignmentBytes;
-            if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
+            auto& objectTO = to.objects[index];
+            heapBytes += sizeof(Object) + GpuMemoryAlignmentBytes;
+            if (objectTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
             }
-            if (cellTO.cellType == CellType_Memory) {
-                heapBytes += sizeof(SignalEntry) * cellTO.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
+            if (objectTO.cellType == CellType_Memory) {
+                heapBytes += sizeof(SignalEntry) * objectTO.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
             }
         }
         alienAtomicAdd64(&arraySizes->heap, heapBytes);

@@ -46,8 +46,8 @@ public:
     void colorSelectedObjects(unsigned char color, bool includeClusters) override;
     void reconnectSelectedObjects() override;
     void setDetached(bool value) override;
-    void changeCell(CellDescription const& changedCell) override;
-    void changeParticle(ParticleDescription const& changedParticle) override;
+    void changeCell(ObjectDescription const& changedCell) override;
+    void changeParticle(EnergyDescription const& changedParticle) override;
     bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) override;
     std::optional<GenomeDescription> getGenomeOfCreature(uint64_t creatureId) override;
 
@@ -106,9 +106,9 @@ public:
     void setCurrentTimestepForPreview(uint64_t timestep) override;
 
     // for tests only
-    void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
-    void testOnly_mutationCheck(uint64_t cellId) override;
-    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) override;
+    void testOnly_mutate(uint64_t objectId, MutationType mutationType) override;
+    void testOnly_mutationCheck(uint64_t objectId) override;
+    void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) override;
     void testOnly_cleanupAfterTimestep() override;
     void testOnly_cleanupAfterDataManipulation() override;
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) override;

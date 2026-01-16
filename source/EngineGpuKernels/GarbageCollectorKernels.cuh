@@ -3,21 +3,21 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "Object.cuh"
+#include "Entity.cuh"
 #include "SimulationData.cuh"
 
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data);
 __global__ void cudaPrepareHeapForCleanup(SimulationData data);
 
-__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Heap newHeap);
-__global__ void cudaPrepareCleanupCreaturesAndGenomes(Array<Cell*> cells);
-__global__ void cudaCleanupGenomesStep1(Array<Cell*> cells, Heap newHeap);
-__global__ void cudacudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap);
-__global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells, Heap newHeap);
-__global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap);
-__global__ void cudaCleanupCellsStep1(Array<Cell*> cells, Heap newHeap);
-__global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, Heap newHeap);
-__global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap);
+__global__ void cudaCleanupParticles(Array<Energy*> particlePointers, Heap newHeap);
+__global__ void cudaPrepareCleanupCreaturesAndGenomes(Array<Object*> cells);
+__global__ void cudaCleanupGenomesStep1(Array<Object*> cells, Heap newHeap);
+__global__ void cudacudaCleanupGenomesStep2(Array<Object*> cells, Heap newHeap);
+__global__ void cudaCleanupCreaturesStep1(Array<Object*> cells, Heap newHeap);
+__global__ void cudaCleanupCreaturesStep2(Array<Object*> cells, Heap newHeap);
+__global__ void cudaCleanupCellsStep1(Array<Object*> cells, Heap newHeap);
+__global__ void cudaCleanupCellsStep2(Array<Object*> cellPointers, Heap newHeap);
+__global__ void cudaCleanupDependentCellData(Array<Object*> cells, Heap newHeap);
 __global__ void cudaCleanupMaps(SimulationData data);
 __global__ void cudaSwapPointerArrays(SimulationData data);
 __global__ void cudaSwapHeaps(SimulationData data);

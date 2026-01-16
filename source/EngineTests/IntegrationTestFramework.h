@@ -38,8 +38,8 @@ protected:
     }
 
     bool compare(Description left, Description right) const;
-    bool compare(CellDescription left, CellDescription right) const;
-    bool compare(ParticleDescription left, ParticleDescription right) const;
+    bool compare(ObjectDescription left, ObjectDescription right) const;
+    bool compare(EnergyDescription left, EnergyDescription right) const;
 
     SimulationFacade _simulationFacade;
     SimulationParameters _parameters;

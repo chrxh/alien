@@ -17,7 +17,7 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
 {
     {
         auto vao = _geometryBuffers->getVaoForPointsAndLines();
-        auto vbo = _geometryBuffers->getVboForCells();
+        auto vbo = _geometryBuffers->getVboForObjects();
         auto ebo = _geometryBuffers->getEboForLines();
 
         glBindVertexArray(vao);
@@ -25,15 +25,15 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
 
         // Setup vertex attributes for CellVertexData (same as PointRenderStep)
         // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // States (1 int)
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(6 * sizeof(float)));
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
         // Bind EBO (will be filled by CUDA later)
@@ -41,7 +41,7 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
     }
     {
         auto vao = _geometryBuffers->getVaoForTriangles();
-        auto vbo = _geometryBuffers->getVboForCells();
+        auto vbo = _geometryBuffers->getVboForObjects();
         auto ebo = _geometryBuffers->getEboForTriangles();
 
         glBindVertexArray(vao);
@@ -49,15 +49,15 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
 
         // Setup vertex attributes for CellVertexData (same as PointRenderStep)
         // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // States (1 int)
-        glVertexAttribIPointer(2, 1, GL_INT, sizeof(CellVertexData), (void*)(6 * sizeof(float)));
+        glVertexAttribIPointer(2, 1, GL_INT, sizeof(ObjectVertexData), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
         // Bind EBO (will be filled by CUDA later)
@@ -65,18 +65,18 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
     }
     {
         auto vao = _geometryBuffers->getVaoForEnergyParticles();
-        auto vbo = _geometryBuffers->getVboForEnergyParticles();
+        auto vbo = _geometryBuffers->getVboForEnergies();
 
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
         // Setup vertex attributes for EnergyParticleVertexData
         // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EnergyParticleVertexData), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EnergyVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EnergyParticleVertexData), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EnergyVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
     }
     {
@@ -124,19 +124,19 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
 
         // Setup vertex attributes for SelectedObjectVertexData
         // Position (2 floats: x, y)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(getObjectVertexData), (void*)0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(SelectedObjectVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // HasSignalRestriction (1 int)
-        glVertexAttribIPointer(1, 1, GL_INT, sizeof(getObjectVertexData), (void*)(2 * sizeof(float)));
+        glVertexAttribIPointer(1, 1, GL_INT, sizeof(SelectedObjectVertexData), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // StartAngle (1 float)
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(getObjectVertexData), (void*)(2 * sizeof(float) + sizeof(int)));
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(SelectedObjectVertexData), (void*)(2 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(2);
 
         // EndAngle (1 float)
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(getObjectVertexData), (void*)(3 * sizeof(float) + sizeof(int)));
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(SelectedObjectVertexData), (void*)(3 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(3);
     }
     {

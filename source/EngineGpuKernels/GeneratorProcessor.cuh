@@ -4,7 +4,7 @@
 #include "sm_60_atomic_functions.h"
 
 #include "Base.cuh"
-#include "CellConnectionProcessor.cuh"
+#include "ObjectConnectionProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 #include "TO.cuh"
@@ -25,18 +25,18 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto const& operation = operations.at(i);
-        auto const& cell = operation.cell;
+        auto const& object = operation.object;
 
-        auto& generator = cell->cellTypeData.generator;
-        if (SignalProcessor::isAutoTriggered(data, cell, max(1, generator.autoTriggerInterval))) {
-            if (cell->signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(cell);
+        auto& generator = object->cellTypeData.generator;
+        if (SignalProcessor::isAutoTriggered(data, object, max(1, generator.autoTriggerInterval))) {
+            if (object->signalState != SignalState_Active) {
+                SignalProcessor::createEmptySignal(object);
             }
-            statistics.incNumGeneratorPulses(cell->color);
+            statistics.incNumGeneratorPulses(object->color);
             if (generator.pulseType == GeneratorPulseType_Positive) {
-                cell->signal.channels[Channels::CellTypeActivation] += 1.0f;
+                object->signal.channels[Channels::CellTypeActivation] += 1.0f;
             } else {
-                cell->signal.channels[Channels::CellTypeActivation] += generator.numPulses < generator.alternationInterval ? 1.0f : -1.0f;
+                object->signal.channels[Channels::CellTypeActivation] += generator.numPulses < generator.alternationInterval ? 1.0f : -1.0f;
             }
             ++generator.numPulses;
             if (generator.alternationInterval > 0 && generator.numPulses == generator.alternationInterval * 2) {

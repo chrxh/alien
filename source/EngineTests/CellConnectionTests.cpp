@@ -7,17 +7,17 @@
 
 #include "IntegrationTestFramework.h"
 
-class CellConnectionTests : public IntegrationTestFramework
+class ObjectConnectionTests : public IntegrationTestFramework
 {
 public:
-    CellConnectionTests()
+    ObjectConnectionTests()
         : IntegrationTestFramework()
     {}
 
-    ~CellConnectionTests() = default;
+    ~ObjectConnectionTests() = default;
 };
 
-TEST_F(CellConnectionTests, decay)
+TEST_F(ObjectConnectionTests, decay)
 {
     _parameters.radiationAbsorption.baseValue[0] = 0;
     _parameters.cellDeathConsequences.value = CellDeathConsequences_CreatureDies;
@@ -34,15 +34,15 @@ TEST_F(CellConnectionTests, decay)
     _simulationFacade->calcTimesteps(1000);
 
     auto data = _simulationFacade->getSimulationData();
-    EXPECT_EQ(0, data._cells.size());
+    EXPECT_EQ(0, data._objects.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(origData)));
 }
 
-TEST_F(CellConnectionTests, addFirstConnection)
+TEST_F(ObjectConnectionTests, addFirstConnection)
 {
-    auto data = Description().cells({
-        CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}),
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({0, 0}),
+        ObjectDescription().id(2).pos({1, 0}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -50,52 +50,52 @@ TEST_F(CellConnectionTests, addFirstConnection)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_EQ(2, actualData._cells.size());
+    EXPECT_EQ(2, actualData._objects.size());
 
-    auto cell1 = actualData.getCellRef(1);
-    EXPECT_EQ(1, cell1._connections.size());
-    EXPECT_TRUE(approxCompare(360.0f, cell1._connections.front()._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(1.0f, cell1._connections.front()._distance));
+    auto object1 = actualData.getObjectRef(1);
+    EXPECT_EQ(1, object1._connections.size());
+    EXPECT_TRUE(approxCompare(360.0f, object1._connections.front()._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, object1._connections.front()._distance));
 
-    auto cell2 = actualData.getCellRef(2);
-    EXPECT_EQ(1, cell2._connections.size());
-    EXPECT_TRUE(approxCompare(360.0f, cell2._connections.front()._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(1.0f, cell2._connections.front()._distance));
+    auto object2 = actualData.getObjectRef(2);
+    EXPECT_EQ(1, object2._connections.size());
+    EXPECT_TRUE(approxCompare(360.0f, object2._connections.front()._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, object2._connections.front()._distance));
 }
 
-TEST_F(CellConnectionTests, addSecondConnection)
+TEST_F(ObjectConnectionTests, addSecondConnection)
 {
-    auto data = Description().cells({
-        CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}),
-        CellDescription().id(3).pos({0, 1}),
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({0, 0}),
+        ObjectDescription().id(2).pos({1, 0}),
+        ObjectDescription().id(3).pos({0, 1}),
     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_createConnection(1, 3);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData._cells.size());
+    ASSERT_EQ(3, actualData._objects.size());
 
-    auto cell = actualData.getCellRef(1);
-    ASSERT_EQ(2, cell._connections.size());
+    auto object = actualData.getObjectRef(1);
+    ASSERT_EQ(2, object._connections.size());
 
-    auto connection1 = cell._connections.at(0);
+    auto connection1 = object._connections.at(0);
     EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
     EXPECT_TRUE(approxCompare(270.0f, connection1._angleFromPrevious));
 
-    auto connection2 = cell._connections.at(1);
+    auto connection2 = object._connections.at(1);
     EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 }
 
-TEST_F(CellConnectionTests, addThirdConnection1)
+TEST_F(ObjectConnectionTests, addThirdConnection1)
 {
-    auto data = Description().cells({
-        CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}),
-        CellDescription().id(3).pos({0, 1}),
-        CellDescription().id(4).pos({0, -1}),
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({0, 0}),
+        ObjectDescription().id(2).pos({1, 0}),
+        ObjectDescription().id(3).pos({0, 1}),
+        ObjectDescription().id(4).pos({0, -1}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -103,32 +103,32 @@ TEST_F(CellConnectionTests, addThirdConnection1)
     _simulationFacade->testOnly_createConnection(1, 4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(4, actualData._cells.size());
+    EXPECT_EQ(4, actualData._objects.size());
 
-    auto cell = actualData.getCellRef(1);
-    EXPECT_EQ(3, cell._connections.size());
+    auto object = actualData.getObjectRef(1);
+    EXPECT_EQ(3, object._connections.size());
 
-    auto connection1 = cell._connections.at(0);
+    auto connection1 = object._connections.at(0);
     EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection1._angleFromPrevious));
 
-    auto connection2 = cell._connections.at(1);
+    auto connection2 = object._connections.at(1);
     EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 
-    auto connection3 = cell._connections.at(2);
+    auto connection3 = object._connections.at(2);
     EXPECT_TRUE(approxCompare(1.0f, connection3._distance));
     EXPECT_TRUE(approxCompare(180.0f, connection3._angleFromPrevious));
 }
 
 
-TEST_F(CellConnectionTests, addThirdConnection2)
+TEST_F(ObjectConnectionTests, addThirdConnection2)
 {
-    auto data = Description().cells({
-        CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}),
-        CellDescription().id(3).pos({-1, 0}),
-        CellDescription().id(4).pos({0, 1}),
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({0, 0}),
+        ObjectDescription().id(2).pos({1, 0}),
+        ObjectDescription().id(3).pos({-1, 0}),
+        ObjectDescription().id(4).pos({0, 1}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -136,20 +136,20 @@ TEST_F(CellConnectionTests, addThirdConnection2)
     _simulationFacade->testOnly_createConnection(1, 4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(4, actualData._cells.size());
+    EXPECT_EQ(4, actualData._objects.size());
 
-    auto cell = actualData.getCellRef(1);
-    EXPECT_EQ(3, cell._connections.size());
+    auto object = actualData.getObjectRef(1);
+    EXPECT_EQ(3, object._connections.size());
 
-    auto connection1 = cell._connections.at(0);
+    auto connection1 = object._connections.at(0);
     EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
     EXPECT_TRUE(approxCompare(180.0f, connection1._angleFromPrevious));
 
-    auto connection2 = cell._connections.at(1);
+    auto connection2 = object._connections.at(1);
     EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 
-    auto connection3 = cell._connections.at(2);
+    auto connection3 = object._connections.at(2);
     EXPECT_TRUE(approxCompare(1.0f, connection3._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection3._angleFromPrevious));
 }

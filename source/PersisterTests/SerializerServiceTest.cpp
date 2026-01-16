@@ -34,7 +34,7 @@ protected:
 TEST_F(SerializerServiceTests, singleParticle)
 {
     Description data;
-    data._particles.emplace_back(_descriptionTestDataFactory->createNonDefaultParticleDescription());
+    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
 
     testSerializationAndDeserialization(data);
 }
@@ -55,7 +55,7 @@ TEST_P(SerializerServiceTests_AllCellTypes, cellWithoutCreature)
     auto cellParameter = GetParam();
 
     Description data;
-    data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
+    data._objects.emplace_back(_descriptionTestDataFactory->createNonDefaultObjectDescription(cellParameter));
 
     testSerializationAndDeserialization(data);
 }
@@ -77,7 +77,7 @@ TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
 
     auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
 
-    auto data = Description().addCreature({CellDescription()}, creature, genome);
+    auto data = Description().addCreature({ObjectDescription()}, creature, genome);
 
     testSerializationAndDeserialization(data);
 }

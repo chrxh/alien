@@ -42,12 +42,12 @@ std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactor
     };
 }
 
-CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(CellParameter cellParameter) const
+ObjectDescription DescriptionTestDataFactory::createNonDefaultObjectDescription(CellParameter cellParameter) const
 {
-    CellDescription defaultCell;
+    ObjectDescription defaultCell;
 
     auto cellTypeDesc = createNonDefaultCellTypeDescription(cellParameter);
-    auto result = CellDescription()
+    auto result = ObjectDescription()
                       .pos({0.5f, 0.8f})
                       .vel({-0.3f, 0.7f})
                       .usableEnergy(150.0f)
@@ -77,10 +77,10 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
     return result;
 }
 
-ParticleDescription DescriptionTestDataFactory::createNonDefaultParticleDescription() const
+EnergyDescription DescriptionTestDataFactory::createNonDefaultEnergyDescription() const
 {
-    ParticleDescription defaultParticle;
-    return ParticleDescription().id(1).pos({0.3f, 0.9f}).vel({-0.6f, 0.2f}).energy(75.0f).color(5);
+    EnergyDescription defaultParticle;
+    return EnergyDescription().id(1).pos({0.3f, 0.9f}).vel({-0.6f, 0.2f}).energy(75.0f).color(5);
 }
 
 std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactory::getAllNodeParameters() const
@@ -159,7 +159,7 @@ std::pair<CreatureDescription, GenomeDescription> DescriptionTestDataFactory::cr
                               }),
                       });
 
-    auto creature = CreatureDescription().ancestorId(1001).lineageId(502).generation(7).numCells(25).frontAngleId(42).genomeId(genome._id);
+    auto creature = CreatureDescription().ancestorId(1001).lineageId(502).generation(7).numObjects(25).frontAngleId(42).genomeId(genome._id);
 
     return {creature, genome};
 }
@@ -169,17 +169,17 @@ bool DescriptionTestDataFactory::compare(Description left, Description right) co
     return TestHelper::compare(left, right);
 }
 
-bool DescriptionTestDataFactory::compare(CellDescription left, CellDescription right) const
+bool DescriptionTestDataFactory::compare(ObjectDescription left, ObjectDescription right) const
 {
     return TestHelper::compare(left, right);
 }
 
-bool DescriptionTestDataFactory::compare(ParticleDescription left, ParticleDescription right) const
+bool DescriptionTestDataFactory::compare(EnergyDescription left, EnergyDescription right) const
 {
     return TestHelper::compare(left, right);
 }
 
-bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescription const& node) const
+bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDescription const& node) const
 {
     if (cell._color != node._color) {
         return false;
@@ -275,7 +275,7 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             // No fields to compare
         } break;
         case SensorMode_DetectFreeCell: {
-            auto const& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+            auto const& detectFreeCell = std::get<DetectFreeObjectDescription>(sensor._mode);
             auto const& nodeDetectFreeCell = std::get<DetectFreeCellGenomeDescription>(nodeSensor._mode);
             if (detectFreeCell._minDensity != nodeDetectFreeCell._minDensity) {
                 return false;
@@ -329,7 +329,7 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         switch (attacker.getMode()) {
         case AttackerMode_FreeCell: {
-            auto const& freeCellMode = std::get<AttackFreeCellDescription>(attacker._mode);
+            auto const& freeCellMode = std::get<AttackFreeObjectDescription>(attacker._mode);
             auto const& nodeFreeCellMode = std::get<AttackFreeCellGenomeDescription>(nodeAttacker._mode);
             if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
                 return false;
@@ -453,7 +453,7 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             // No fields to compare
         } break;
         case ReconnectorMode_FreeCell: {
-            auto const& freeCellMode = std::get<ReconnectFreeCellDescription>(reconnector._mode);
+            auto const& freeCellMode = std::get<ReconnectFreeObjectDescription>(reconnector._mode);
             auto const& nodeFreeCellMode = std::get<ReconnectFreeCellGenomeDescription>(nodeReconnector._mode);
             if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
                 return false;
@@ -601,9 +601,9 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
 
     switch (type) {
     case CellType_Structure:
-        return StructureCellDescription();
+        return StructureObjectDescription();
     case CellType_Free:
-        return FreeCellDescription();
+        return FreeObjectDescription();
     case CellType_Base:
         return BaseDescription();
     case CellType_Depot:
@@ -633,7 +633,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             sensorModeDesc = DetectStructureDescription();
             break;
         case SensorMode_DetectFreeCell:
-            sensorModeDesc = DetectFreeCellDescription().minDensity(0.25f).restrictToColor(2);
+            sensorModeDesc = DetectFreeObjectDescription().minDensity(0.25f).restrictToColor(2);
             break;
         case SensorMode_DetectCreature:
             sensorModeDesc =
@@ -721,7 +721,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             reconnectorModeDesc = ReconnectStructureDescription();
             break;
         case ReconnectorMode_FreeCell:
-            reconnectorModeDesc = ReconnectFreeCellDescription().restrictToColor(2);
+            reconnectorModeDesc = ReconnectFreeObjectDescription().restrictToColor(2);
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =

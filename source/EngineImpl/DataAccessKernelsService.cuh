@@ -35,7 +35,7 @@ private:
     DataAccessKernelsService() = default;
 
     // Gpu memory
-    Cell** _cudaCellArray = nullptr;
+    Object** _cudaCellArray = nullptr;
     ArraySizesForGpu* _arraySizesGPU = nullptr;
     ArraySizesForTO* _arraySizesTO = nullptr;
     bool* _foundResult = nullptr;
