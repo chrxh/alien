@@ -171,25 +171,25 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
         if (1 != object->selected) {
             continue;
         }
-        data.objectMap.executeForEach(object->pos, 1.3f, object->detached, [&](auto const& otherCell) {
-            if (!otherCell || otherCell == object) {
+        data.objectMap.executeForEach(object->pos, 1.3f, object->detached, [&](auto const& otherObject) {
+            if (!otherObject || otherObject == object) {
                 return;
             }
-            if (1 == otherCell->selected && !considerWithinSelection) {
+            if (1 == otherObject->selected && !considerWithinSelection) {
                 return;
             }
 
-            auto posDelta = object->pos - otherCell->pos;
+            auto posDelta = object->pos - otherObject->pos;
             data.objectMap.correctDirection(posDelta);
 
             for (int i = 0; i < object->numConnections; ++i) {
                 auto const& connectedCell = object->connections[i].object;
-                if (connectedCell == otherCell) {
+                if (connectedCell == otherObject) {
                     return;
                 }
             }
-            if (object->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS) {
-                ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherCell);
+            if (object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
+                ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                 atomicExch(result, 1);
             }
         });

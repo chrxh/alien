@@ -154,18 +154,18 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto origOtherCell = data.getObjectRef(2);
+    auto origOtherObject = data.getObjectRef(2);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getObjectRef(1);
-    auto actualOtherCell = actualData.getObjectRef(2);
+    auto actualOtherObject = actualData.getObjectRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(
-        initialUsableEnergy + origOtherCell.getCellRef()._usableEnergy - SimulationParameters::depotEnergyTransferUnit,
-        actualDepot.getCellRef()._usableEnergy + actualOtherCell.getCellRef()._usableEnergy));
+        initialUsableEnergy + origOtherObject.getCellRef()._usableEnergy - SimulationParameters::depotEnergyTransferUnit,
+        actualDepot.getCellRef()._usableEnergy + actualOtherObject.getCellRef()._usableEnergy));
 }
 
 TEST_F(DepotTests, positiveSignal_reachedStorageLimit1)
@@ -180,11 +180,11 @@ TEST_F(DepotTests, positiveSignal_reachedStorageLimit1)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto origOtherCell = data.getObjectRef(2);
+    auto origOtherObject = data.getObjectRef(2);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getObjectRef(1);
-    auto actualOtherCell = actualData.getObjectRef(2);
+    auto actualOtherObject = actualData.getObjectRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -204,11 +204,11 @@ TEST_F(DepotTests, positiveSignal_reachedStorageLimit2)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto origOtherCell = data.getObjectRef(2);
+    auto origOtherObject = data.getObjectRef(2);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getObjectRef(1);
-    auto actualOtherCell = actualData.getObjectRef(2);
+    auto actualOtherObject = actualData.getObjectRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -227,17 +227,17 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto origOtherCell = data.getObjectRef(2);
+    auto origOtherObject = data.getObjectRef(2);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getObjectRef(1);
-    auto actualOtherCell = actualData.getObjectRef(2);
+    auto actualOtherObject = actualData.getObjectRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(
         initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(
-        origDepotEnergy + origOtherCell.getCellRef()._usableEnergy + SimulationParameters::depotEnergyTransferUnit,
-        actualDepot.getCellRef()._usableEnergy + actualOtherCell.getCellRef()._usableEnergy));
+        origDepotEnergy + origOtherObject.getCellRef()._usableEnergy + SimulationParameters::depotEnergyTransferUnit,
+        actualDepot.getCellRef()._usableEnergy + actualOtherObject.getCellRef()._usableEnergy));
 }

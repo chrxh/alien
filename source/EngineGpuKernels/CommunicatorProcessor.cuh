@@ -78,18 +78,18 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     int rangeInt = static_cast<int>(ceilf(range));
 
     // Matching lambda to check if a cell is a valid receiver
-    auto isMatch = [&object](Object* otherCell) {
+    auto isMatch = [&object](Object* otherObject) {
         // Must be a communicator in receiver mode
-        if (otherCell->typeData.cell.cellType != CellType_Communicator || otherCell->typeData.cell.cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
+        if (otherObject->typeData.cell.cellType != CellType_Communicator || otherObject->typeData.cell.cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
             return false;
         }
 
         // Must be from a different creature
-        if (object->typeData.cell.isSameCreature(&otherCell->typeData.cell)) {
+        if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
             return false;
         }
 
-        auto const& receiver = otherCell->typeData.cell.cellTypeData.communicator.modeData.receiver;
+        auto const& receiver = otherObject->typeData.cell.cellTypeData.communicator.modeData.receiver;
 
         // Check color restriction
         if (receiver.restrictToColor != 255 && object->color != receiver.restrictToColor) {
@@ -98,14 +98,14 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
 
         // Check lineage restriction
         if (receiver.restrictToLineage != LineageRestriction_No) {
-            if (object->typeData.cell.creature == nullptr || otherCell->typeData.cell.creature == nullptr) {
+            if (object->typeData.cell.creature == nullptr || otherObject->typeData.cell.creature == nullptr) {
                 return false;
             } else if (receiver.restrictToLineage == LineageRestriction_SameLineage) {
-                if (object->typeData.cell.creature->lineageId != otherCell->typeData.cell.creature->lineageId) {
+                if (object->typeData.cell.creature->lineageId != otherObject->typeData.cell.creature->lineageId) {
                     return false;
                 }
             } else if (receiver.restrictToLineage == LineageRestriction_OtherLineage) {
-                if (object->typeData.cell.creature->lineageId == otherCell->typeData.cell.creature->lineageId) {
+                if (object->typeData.cell.creature->lineageId == otherObject->typeData.cell.creature->lineageId) {
                     return false;
                 }
             }
@@ -133,12 +133,12 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         data.objectMap.correctPosition(scanPos);
 
         // Check all cells at this position (including overlapping cells)
-        auto otherCell = data.objectMap.getFirst(scanPos);
-        while (otherCell != nullptr) {
-            if (isMatch(otherCell)) {
-                tryTransmitSignal(data, object, otherCell, newNumTimesSent);
+        auto otherObject = data.objectMap.getFirst(scanPos);
+        while (otherObject != nullptr) {
+            if (isMatch(otherObject)) {
+                tryTransmitSignal(data, object, otherObject, newNumTimesSent);
             }
-            otherCell = otherCell->nextCell;
+            otherObject = otherObject->nextCell;
         }
     }
 }

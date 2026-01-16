@@ -526,23 +526,23 @@ Description& Description::addConnection(uint64_t const& objectId1, uint64_t cons
     auto& object2 = getObjectRef(objectId2, cache);
 
     auto addConnection = [this,
-                          &cache](ObjectDescription& object, ObjectDescription& otherCell, RealVector2D const& cellRefPos, RealVector2D const& otherCellRefPos) {
-        CHECK(object._connections.size() < MAX_CELL_BONDS);
+                          &cache](ObjectDescription& object, ObjectDescription& otherObject, RealVector2D const& cellRefPos, RealVector2D const& otherObjectRefPos) {
+        CHECK(object._connections.size() < MAX_OBJECT_CONNECTIONS);
 
-        auto newAngle = Math::angleOfVector(otherCellRefPos - cellRefPos);
+        auto newAngle = Math::angleOfVector(otherObjectRefPos - cellRefPos);
 
         if (object._connections.empty()) {
             ConnectionDescription newConnection;
-            newConnection._objectId = otherCell._id;
-            newConnection._distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
+            newConnection._objectId = otherObject._id;
+            newConnection._distance = toFloat(Math::length(otherObjectRefPos - cellRefPos));
             newConnection._angleFromPrevious = 360.0;
             object._connections.emplace_back(newConnection);
             return;
         }
         if (1 == object._connections.size()) {
             ConnectionDescription newConnection;
-            newConnection._objectId = otherCell._id;
-            newConnection._distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
+            newConnection._objectId = otherObject._id;
+            newConnection._distance = toFloat(Math::length(otherObjectRefPos - cellRefPos));
 
             auto connectedCell = getObjectRef(object._connections.front()._objectId, cache);
             auto connectedCellDelta = connectedCell._pos - cellRefPos;
@@ -581,8 +581,8 @@ Description& Description::addConnection(uint64_t const& objectId1, uint64_t cons
         }
 
         ConnectionDescription newConnection;
-        newConnection._objectId = otherCell._id;
-        newConnection._distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
+        newConnection._objectId = otherObject._id;
+        newConnection._distance = toFloat(Math::length(otherObjectRefPos - cellRefPos));
 
         auto angleDiff1 = newAngle - angle;
         if (angleDiff1 < 0) {

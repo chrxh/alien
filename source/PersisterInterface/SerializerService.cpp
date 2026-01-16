@@ -159,9 +159,8 @@ namespace
     auto constexpr Id_NeuralNetworkGenome_Biases = 1;
     auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 2;
 
-    auto constexpr Id_DepotGenome_Mode = 0;
-    auto constexpr Id_DepotGenome_storageLimit = 1;
-    auto constexpr Id_DepotGenome_InitialStoredUsableEnergy = 2;
+    auto constexpr Id_DepotGenome_storageLimit = 0;
+    auto constexpr Id_DepotGenome_InitialStoredUsableEnergy = 1;
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
@@ -768,27 +767,28 @@ namespace
     auto constexpr Id_Creature_FrontAngleId = 5;
     auto constexpr Id_Creature_GenomeId = 6;
 
+    auto constexpr Id_Cell_UsableEnergy = 1;
+    auto constexpr Id_Cell_RawEnergy = 20;
+    auto constexpr Id_Cell_Age = 7;
+    auto constexpr Id_Cell_CellState = 8;
+    auto constexpr Id_Cell_ActivationTime = 9;
+    auto constexpr Id_Cell_CellTriggered = 10;
+    auto constexpr Id_Cell_NodeIndex = 12;
+    auto constexpr Id_Cell_ParentNodeIndex = 13;
+    auto constexpr Id_Cell_GeneIndex = 14;
+    auto constexpr Id_Cell_SignalState = 15;
+    auto constexpr Id_Cell_AngleToFront = 16;
+    auto constexpr Id_Cell_FrontAngleId = 18;
+    auto constexpr Id_Cell_IsFrontAngleRefCell = 19;
+    auto constexpr Id_Cell_CreatureId = 21;
+
     auto constexpr Id_Object_Id = 0;
-    auto constexpr Id_Object_Energy = 1;
-    auto constexpr Id_Object_RawEnergy = 20;
     auto constexpr Id_Object_Pos = 2;
     auto constexpr Id_Object_Vel = 3;
     auto constexpr Id_Object_Stiffness = 4;
     auto constexpr Id_Object_Color = 5;
     auto constexpr Id_Object_Fixed = 6;
-    auto constexpr Id_Object_Age = 7;
-    auto constexpr Id_Object_CellState = 8;
-    auto constexpr Id_Object_ActivationTime = 9;
-    auto constexpr Id_Object_CellTriggered = 10;
-    auto constexpr Id_Object_NodeIndex = 12;
-    auto constexpr Id_Object_ParentNodeIndex = 13;
-    auto constexpr Id_Object_GeneIndex = 14;
-    auto constexpr Id_Object_SignalState = 15;
-    auto constexpr Id_Object_AngleToFront = 16;
     auto constexpr Id_Object_Sticky = 17;
-    auto constexpr Id_Object_FrontAngleId = 18;
-    auto constexpr Id_Object_IsFrontAngleRefCell = 19;
-    auto constexpr Id_Object_CreatureId = 21;
 
     auto constexpr Id_Signal_Channels = 0;
     auto constexpr Id_Signal_NumTimesSent = 1;
@@ -1442,34 +1442,45 @@ namespace cereal
     SPLIT_SERIALIZATION(CommunicatorDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
+    {
+        CellDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Cell_UsableEnergy, data._usableEnergy, defaultObject._usableEnergy);
+        loadSave(task, auxiliaries, Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
+        loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
+        loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);
+        loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
+        loadSave(task, auxiliaries, Id_Cell_CellTriggered, data._cellTriggered, defaultObject._cellTriggered);
+        loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
+        loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
+        loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        loadSave(task, auxiliaries, Id_Cell_SignalState, data._signalState, defaultObject._signalState);
+        loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
+        loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
+        loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
+    }
+    SPLIT_SERIALIZATION(CellDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ObjectDescription& data)
     {
         ObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Object_Id, data._id, defaultObject._id);
-        loadSave(task, auxiliaries, Id_Object_Energy, data.getCellRef()._usableEnergy, defaultObject.getCellRef()._usableEnergy);
-        loadSave(task, auxiliaries, Id_Object_RawEnergy, data.getCellRef()._rawEnergy, defaultObject.getCellRef()._rawEnergy);
         loadSave(task, auxiliaries, Id_Object_Pos, data._pos, defaultObject._pos);
         loadSave(task, auxiliaries, Id_Object_Vel, data._vel, defaultObject._vel);
         loadSave(task, auxiliaries, Id_Object_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Object_Color, data._color, defaultObject._color);
-        loadSave(task, auxiliaries, Id_Object_AngleToFront, data.getCellRef()._frontAngle, defaultObject.getCellRef()._frontAngle);
         loadSave(task, auxiliaries, Id_Object_Fixed, data._fixed, defaultObject._fixed);
         loadSave(task, auxiliaries, Id_Object_Sticky, data._sticky, defaultObject._sticky);
-        loadSave(task, auxiliaries, Id_Object_Age, data.getCellRef()._age, defaultObject.getCellRef()._age);
-        loadSave(task, auxiliaries, Id_Object_CellState, data.getCellRef()._cellState, defaultObject.getCellRef()._cellState);
-        loadSave(task, auxiliaries, Id_Object_ActivationTime, data.getCellRef()._activationTime, defaultObject.getCellRef()._activationTime);
-        loadSave(task, auxiliaries, Id_Object_CellTriggered, data.getCellRef()._cellTriggered, defaultObject.getCellRef()._cellTriggered);
-        loadSave(task, auxiliaries, Id_Object_NodeIndex, data.getCellRef()._nodeIndex, defaultObject.getCellRef()._nodeIndex);
-        loadSave(task, auxiliaries, Id_Object_ParentNodeIndex, data.getCellRef()._parentNodeIndex, defaultObject.getCellRef()._parentNodeIndex);
-        loadSave(task, auxiliaries, Id_Object_GeneIndex, data.getCellRef()._geneIndex, defaultObject.getCellRef()._geneIndex);
-        loadSave(task, auxiliaries, Id_Object_SignalState, data.getCellRef()._signalState, defaultObject.getCellRef()._signalState);
-        loadSave(task, auxiliaries, Id_Object_FrontAngleId, data.getCellRef()._frontAngleId, defaultObject.getCellRef()._frontAngleId);
-        loadSave(task, auxiliaries, Id_Object_IsFrontAngleRefCell, data.getCellRef()._headCell, defaultObject.getCellRef()._headCell);
-        loadSave(task, auxiliaries, Id_Object_CreatureId, data.getCellRef()._creatureId, defaultObject.getCellRef()._creatureId);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._connections, data.getCellRef()._cellType, data.getCellRef()._signal, data.getCellRef()._signalRestriction, data.getCellRef()._neuralNetwork);
+        ar(data._connections, data._type);
     }
     SPLIT_SERIALIZATION(ObjectDescription)
 

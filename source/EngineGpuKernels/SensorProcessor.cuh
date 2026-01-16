@@ -138,8 +138,8 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
         seedAngle = data.primaryNumberGen.random(360.0f);
 
         data.objectMap.getMatchingCells(
-            nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, object->pos, 4.0f, object->detached, [&](Object* const& otherCell) {
-                return object->typeData.cell.isSameCreature(&otherCell->typeData.cell);
+            nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, object->pos, 4.0f, object->detached, [&](Object* const& otherObject) {
+                return object->typeData.cell.isSameCreature(&otherObject->typeData.cell);
             });
     }
 
@@ -156,10 +156,10 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     // Check if ray is blocked by connections of nearby same-creature cells
     auto rayBlocked = false;
     for (int i = 0; i < numNearCreatureCells; ++i) {
-        auto nearCell = nearCreatureCells[i];
-        for (int j = 0, k = nearCell->numConnections; j < k; ++j) {
-            auto& connectedNearCell = nearCell->connections[j].object;
-            if (Math::crossing(nearCell->pos, connectedNearCell->pos, object->pos, object->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
+        auto nearObject = nearCreatureCells[i];
+        for (int j = 0, k = nearObject->numConnections; j < k; ++j) {
+            auto& connectedNearObject = nearObject->connections[j].object;
+            if (Math::crossing(nearObject->pos, connectedNearObject->pos, object->pos, object->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
                 rayBlocked = true;
                 break;
             }
@@ -352,58 +352,58 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             auto const& restrictToColor = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
             auto const& restrictToLineage = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
 
-            auto otherCell = data.objectMap.getFirst(scanPos);
-            while (otherCell != nullptr) {
+            auto otherObject = data.objectMap.getFirst(scanPos);
+            while (otherObject != nullptr) {
                 // Check if this cell is part of a creature (not structure or free object)
-                if (otherCell->typeData.cell.cellType != CellType_Structure && otherCell->typeData.cell.cellType != CellType_Free && !object->typeData.cell.isSameCreature(&otherCell->typeData.cell)) {
+                if (otherObject->typeData.cell.cellType != CellType_Structure && otherObject->typeData.cell.cellType != CellType_Free && !object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                     bool matches = true;
 
-                    if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+                    if (restrictToColor != 255 && otherObject->color != restrictToColor) {
                         matches = false;
                     }
-                    if (otherCell->typeData.cell.creature == nullptr) {
+                    if (otherObject->typeData.cell.creature == nullptr) {
                         matches = false;
                     }
-                    if (minNumCells > 0 && otherCell->typeData.cell.creature->numObjects < minNumCells) {
+                    if (minNumCells > 0 && otherObject->typeData.cell.creature->numObjects < minNumCells) {
                         matches = false;
                     }
-                    if (maxNumCells > 0 && otherCell->typeData.cell.creature->numObjects > maxNumCells) {
+                    if (maxNumCells > 0 && otherObject->typeData.cell.creature->numObjects > maxNumCells) {
                         matches = false;
                     }
                     if (matches && restrictToLineage != LineageRestriction_No) {
-                        if (object->typeData.cell.creature == nullptr || otherCell->typeData.cell.creature == nullptr) {
+                        if (object->typeData.cell.creature == nullptr || otherObject->typeData.cell.creature == nullptr) {
                             matches = false;
                         } else if (restrictToLineage == LineageRestriction_SameLineage) {
-                            if (object->typeData.cell.creature->lineageId != otherCell->typeData.cell.creature->lineageId) {
+                            if (object->typeData.cell.creature->lineageId != otherObject->typeData.cell.creature->lineageId) {
                                 matches = false;
                             }
                         } else if (restrictToLineage == LineageRestriction_OtherLineage) {
-                            if (object->typeData.cell.creature->lineageId == otherCell->typeData.cell.creature->lineageId) {
+                            if (object->typeData.cell.creature->lineageId == otherObject->typeData.cell.creature->lineageId) {
                                 matches = false;
                             }
                         }
                     }
 
                     if (matches) {
-                        uint16_t creatureIdPart = otherCell->typeData.cell.creature != nullptr ? static_cast<uint16_t>(otherCell->typeData.cell.creature->id & 0xFFFF) : 0;
-                        float density = calcCreatureDensityFromNumCells(otherCell->typeData.cell.creature->numObjects);
+                        uint16_t creatureIdPart = otherObject->typeData.cell.creature != nullptr ? static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xFFFF) : 0;
+                        float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numObjects);
                         return pack(distance, absAngle, density, creatureIdPart);
                     }
                 }
-                otherCell = otherCell->nextCell;
+                otherObject = otherObject->nextCell;
             }
 
         // Else: ScanType::Relocation
         } else {
             auto& sensor = object->typeData.cell.cellTypeData.sensor;
-            auto otherCell = data.objectMap.getFirst(scanPos);
-            while (otherCell != nullptr) {
-                if (otherCell->typeData.cell.creature != nullptr && (otherCell->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureId) {
-                    uint16_t creatureIdPart = static_cast<uint16_t>(otherCell->typeData.cell.creature->id & 0xffff);
-                    float density = calcCreatureDensityFromNumCells(otherCell->typeData.cell.creature->numObjects);
+            auto otherObject = data.objectMap.getFirst(scanPos);
+            while (otherObject != nullptr) {
+                if (otherObject->typeData.cell.creature != nullptr && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureId) {
+                    uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
+                    float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numObjects);
                     return pack(distance, absAngle, density, creatureIdPart);
                 }
-                otherCell = otherCell->nextCell;
+                otherObject = otherObject->nextCell;
             }
         }
     }

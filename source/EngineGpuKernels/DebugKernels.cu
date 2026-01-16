@@ -45,7 +45,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 }
             }
 
-            if (object->numConnections > MAX_CELL_BONDS) {
+            if (object->numConnections > MAX_OBJECT_CONNECTIONS) {
                 printf("too much cell connections at %d\n", location);
                 CUDA_THROW_NOT_IMPLEMENTED();
             }

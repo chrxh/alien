@@ -491,10 +491,10 @@ struct Cell
     float clusterAngularMass;
     uint32_t numCellsInCluster;
 
-    __device__ __inline__ bool isSameCreature(Cell* otherCell)
+    __device__ __inline__ bool isSameCreature(Cell* otherObject)
     {
-        return (otherCell->creature != nullptr && this->creature != nullptr && otherCell->creature->id == this->creature->id)
-            || (otherCell->creature == nullptr && this->creature == nullptr);
+        return (otherObject->creature != nullptr && this->creature != nullptr && otherObject->creature->id == this->creature->id)
+            || (otherObject->creature == nullptr && this->creature == nullptr);
     }
 
     __device__ __inline__ float getEnergy() const
@@ -517,7 +517,7 @@ struct Object
     // General
     uint64_t id;
     uint8_t numConnections;
-    ObjectConnection connections[MAX_CELL_BONDS];
+    ObjectConnection connections[MAX_OBJECT_CONNECTIONS];
     float2 pos;
     float2 vel;
     float stiffness;

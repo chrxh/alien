@@ -102,9 +102,9 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
                                node._signalRestriction._mode == SignalRestrictionMode_Conditional) && 
                               !object._connections.empty();
         if (hasRestriction) {
-            auto otherCellId = object._connections.front()._objectId;
-            auto const& otherCell = phenotype.getObjectRef(otherCellId, cache);
-            auto baseAngle = Math::angleOfVector(otherCell._pos - object._pos) + 180.0f + node._signalRestriction._baseAngle;
+            auto otherObjectId = object._connections.front()._objectId;
+            auto const& otherObject = phenotype.getObjectRef(otherObjectId, cache);
+            auto baseAngle = Math::angleOfVector(otherObject._pos - object._pos) + 180.0f + node._signalRestriction._baseAngle;
             auto signalAngleRestrictionStart = Math::getNormalizedAngle(baseAngle - node._signalRestriction._openingAngle / 2, 0);
             auto signalAngleRestrictionEnd = Math::getNormalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
             previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);

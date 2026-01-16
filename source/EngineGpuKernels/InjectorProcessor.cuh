@@ -34,28 +34,28 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
         Object* injectedCell = nullptr;
         int numDefenders = 0;
-        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached, [&](auto const& otherCell) {
+        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached, [&](auto const& otherObject) {
             if (injectedCell != nullptr) {
                 return;
             }
-            if (otherCell->typeData.cell.creature == nullptr) {
+            if (otherObject->typeData.cell.creature == nullptr) {
                 return;
             }
-            if (object->typeData.cell.isSameCreature(&otherCell->typeData.cell)) {
+            if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                 return;
             }
-            if (otherCell->fixed) {
+            if (otherObject->fixed) {
                 return;
             }
-            if (otherCell->typeData.cell.cellType != CellType_Constructor) {
+            if (otherObject->typeData.cell.cellType != CellType_Constructor) {
                 return;
             }
             // Only inject to other cells which are in a visible cone with respect to the injector cell
-            if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherCell)) {
+            if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherObject)) {
                 return;
             }
-            injectedCell = otherCell;
-            numDefenders = countDefenderCells(statistics, otherCell);
+            injectedCell = otherObject;
+            numDefenders = countDefenderCells(statistics, otherObject);
         });
 
         if (injectedCell) {

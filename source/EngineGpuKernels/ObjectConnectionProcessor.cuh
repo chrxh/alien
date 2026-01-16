@@ -33,9 +33,9 @@ public:
 
     __inline__ __device__ static bool
     existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached);
-    __inline__ __device__ static bool checkConnectedCellsForCrossingConnection(Object* object1, float2 otherCellPos);
+    __inline__ __device__ static bool checkConnectedCellsForCrossingConnection(Object* object1, float2 otherObjectPos);
     __inline__ __device__ static bool hasAngleSpace(SimulationData& data, Object* object, float angle, ConstructorAngleAlignment angleAlignment);
-    __inline__ __device__ static bool isConnectedConnected(Object* object, Object* otherCell);
+    __inline__ __device__ static bool isConnectedConnected(Object* object, Object* otherObject);
 
     struct ReferenceAndActualAngle
     {
@@ -44,7 +44,7 @@ public:
     };
     __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Object* object, float angleDeviation);
 
-    __inline__ __device__ static bool existsOwnIntersectingCellInBetween(SimulationData& data, Object* object, Object* otherCell);
+    __inline__ __device__ static bool existsOwnIntersectingCellInBetween(SimulationData& data, Object* object, Object* otherObject);
 
 private:
     static int constexpr MaxOperationsPerCell = 30;
@@ -225,7 +225,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnections(
     auto posDelta = object2->pos - object1->pos;
     data.objectMap.correctDirection(posDelta);
 
-    ObjectConnection origConnections[MAX_CELL_BONDS];
+    ObjectConnection origConnections[MAX_OBJECT_CONNECTIONS];
     int origNumConnection = object1->numConnections;
     for (int i = 0; i < origNumConnection; ++i) {
         origConnections[i] = object1->connections[i];
@@ -264,7 +264,7 @@ __inline__ __device__ void ObjectConnectionProcessor::lockAndtryAddConnections(S
             }
         }
 
-        if (!alreadyConnected && object1->numConnections < MAX_CELL_BONDS && object2->numConnections < MAX_CELL_BONDS) {
+        if (!alreadyConnected && object1->numConnections < MAX_OBJECT_CONNECTIONS && object2->numConnections < MAX_OBJECT_CONNECTIONS) {
 
             tryAddConnections(data, object1, object2, 0, 0, 0);
         }
@@ -282,7 +282,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     float desiredAngleOnCell1,
     ConstructorAngleAlignment angleAlignment)
 {
-    if (object1->numConnections == MAX_CELL_BONDS) {
+    if (object1->numConnections == MAX_OBJECT_CONNECTIONS) {
         return false;
     }
     if (ConstructorAngleAlignment_None != angleAlignment && object1->numConnections >= angleAlignment + 1) {
@@ -414,7 +414,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
         }
 
         // ensure that sum of angles is 360 deg
-        for (int repetition = 0; repetition < MAX_CELL_BONDS; ++repetition) {
+        for (int repetition = 0; repetition < MAX_OBJECT_CONNECTIONS; ++repetition) {
             float sumAngle = 0;
             for (int i = 0, j = object1->numConnections + 1; i < j; ++i) {
                 sumAngle += object1->connections[i].angleFromPrevious;
@@ -468,24 +468,24 @@ __inline__ __device__ bool
 ObjectConnectionProcessor::existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached)
 {
     auto result = false;
-    data.objectMap.executeForEach(pos2, radius, detached, [&](auto const& nearCell) {
-        if (!nearCell->tryLock()) {
+    data.objectMap.executeForEach(pos2, radius, detached, [&](auto const& nearObject) {
+        if (!nearObject->tryLock()) {
             return;
         }
-        for (int j = 0; j < nearCell->numConnections; ++j) {
-            auto const& connectedNearCell = nearCell->connections[j].object;
-            if (Math::crossing(pos1, pos2, nearCell->pos, connectedNearCell->pos)) {
-                nearCell->releaseLock();
+        for (int j = 0; j < nearObject->numConnections; ++j) {
+            auto const& connectedNearObject = nearObject->connections[j].object;
+            if (Math::crossing(pos1, pos2, nearObject->pos, connectedNearObject->pos)) {
+                nearObject->releaseLock();
                 result = true;
                 return;
             }
         }
-        nearCell->releaseLock();
+        nearObject->releaseLock();
     });
     return result;
 }
 
-__inline__ __device__ bool ObjectConnectionProcessor::checkConnectedCellsForCrossingConnection(Object* object1, float2 otherCellPos)
+__inline__ __device__ bool ObjectConnectionProcessor::checkConnectedCellsForCrossingConnection(Object* object1, float2 otherObjectPos)
 {
     auto const& n = object1->numConnections;
     if (n < 2) {
@@ -504,7 +504,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::checkConnectedCellsForCros
         if (!bothConnected) {
             continue;
         }
-        if (Math::crossing(object1->pos, otherCellPos, connectedCell->pos, nextConnectedCell->pos)) {
+        if (Math::crossing(object1->pos, otherObjectPos, connectedCell->pos, nextConnectedCell->pos)) {
             return true;
         }
     }
@@ -532,14 +532,14 @@ __inline__ __device__ bool ObjectConnectionProcessor::hasAngleSpace(SimulationDa
     return true;
 }
 
-__inline__ __device__ bool ObjectConnectionProcessor::isConnectedConnected(Object* object, Object* otherCell)
+__inline__ __device__ bool ObjectConnectionProcessor::isConnectedConnected(Object* object, Object* otherObject)
 {
-    if (object == otherCell) {
+    if (object == otherObject) {
         return true;
     }
     bool result = false;
-    for (int i = 0; i < otherCell->numConnections; ++i) {
-        auto const& connectedCell = otherCell->connections[i].object;
+    for (int i = 0; i < otherObject->numConnections; ++i) {
+        auto const& connectedCell = otherObject->connections[i].object;
         if (connectedCell == object) {
             result = true;
             break;
@@ -621,25 +621,25 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(Si
     }
 }
 
-__inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Object* object, Object* otherCell)
+__inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Object* object, Object* otherObject)
 {
     auto result = false;
-    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](Object* nearCell) {
+    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](Object* nearObject) {
         if (result) {
             return;
         }
-        if (nearCell == object) {
+        if (nearObject == object) {
             return;
         }
-        if (nearCell == otherCell) {
+        if (nearObject == otherObject) {
             return;
         }
-        if (!object->typeData.cell.isSameCreature(&nearCell->typeData.cell)) {
+        if (!object->typeData.cell.isSameCreature(&nearObject->typeData.cell)) {
             return;
         }
-        for (int i = 0; i < nearCell->numConnections; ++i) {
-            auto connectedNearCell = nearCell->connections[i].object;
-            if (Math::crossing(nearCell->pos, connectedNearCell->pos, object->pos, otherCell->pos)) {
+        for (int i = 0; i < nearObject->numConnections; ++i) {
+            auto connectedNearObject = nearObject->connections[i].object;
+            if (Math::crossing(nearObject->pos, connectedNearObject->pos, object->pos, otherObject->pos)) {
                 result = true;
                 return;
             }

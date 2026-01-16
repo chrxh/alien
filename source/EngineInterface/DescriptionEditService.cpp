@@ -357,8 +357,8 @@ void DescriptionEditService::flattenTopology(Description& description, IntVector
             for (auto const& connection : object._connections) {
                 if (freeCellIds.contains(connection._objectId)) {
                     // Do topology correction
-                    auto& otherCell = description.getObjectRef(connection._objectId, cache);
-                    otherCell._pos += space.getCorrectionIncrement(object._pos, otherCell._pos);
+                    auto& otherObject = description.getObjectRef(connection._objectId, cache);
+                    otherObject._pos += space.getCorrectionIncrement(object._pos, otherObject._pos);
 
                     freeCellIds.erase(connection._objectId);
                     newWorkingCellIds.insert(connection._objectId);
@@ -387,7 +387,7 @@ void DescriptionEditService::reconnectCells(Description& description, float maxD
         auto nearbyCellIndices = getObjectIndicesWithinRadius(description, cellIndicesBySlot, object._pos, maxDistance);
         for (auto const& nearbyCellIndex : nearbyCellIndices) {
             auto const& nearbyCell = description._objects.at(nearbyCellIndex);
-            if (object._id != nearbyCell._id && object._connections.size() < MAX_CELL_BONDS && nearbyCell._connections.size() < MAX_CELL_BONDS
+            if (object._id != nearbyCell._id && object._connections.size() < MAX_OBJECT_CONNECTIONS && nearbyCell._connections.size() < MAX_OBJECT_CONNECTIONS
                 && !object.isConnectedTo(nearbyCell._id)) {
                 description.addConnection(object._id, nearbyCell._id, cache);
             }

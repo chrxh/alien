@@ -27,7 +27,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
         for (auto& node : gene._nodes) {
             // Validate node-level attributes
             node._color = std::clamp(node._color, 0, MAX_COLORS - 1);
-            node._numAdditionalConnections = std::clamp(node._numAdditionalConnections, 0, MAX_CELL_BONDS - 1);
+            node._numAdditionalConnections = std::clamp(node._numAdditionalConnections, 0, MAX_OBJECT_CONNECTIONS - 1);
 
             // Validate neural network
             for (auto& activationFunction : node._neuralNetwork._activationFunctions) {

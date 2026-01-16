@@ -88,7 +88,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         int isInTriangleOrQuad = 0;
         if (object->numConnections > 1) {
             bool first = true;
-            int backIndices[MAX_CELL_BONDS];
+            int backIndices[MAX_OBJECT_CONNECTIONS];
             for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
                 auto connectionIndex = i % numConnections;
                 auto const& connectedCell = object->connections[connectionIndex].object;
@@ -215,7 +215,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             continue;
         }
         bool first = true;
-        int backIndices[MAX_CELL_BONDS];
+        int backIndices[MAX_OBJECT_CONNECTIONS];
         for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
             auto connectionIndex = i % numConnections;
             auto const& connectedCell = object->connections[connectionIndex].object;

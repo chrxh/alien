@@ -431,7 +431,7 @@ struct ObjectTO
     // General
     uint64_t id;
     uint8_t numConnections;
-    ConnectionTO connections[MAX_CELL_BONDS];
+    ConnectionTO connections[MAX_OBJECT_CONNECTIONS];
     float2 pos;
     float2 vel;
     float stiffness;

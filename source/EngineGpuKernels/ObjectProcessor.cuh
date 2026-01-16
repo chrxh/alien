@@ -189,32 +189,32 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
         int2 scanPos{cellPosInt.x + (toInt(block.thread_rank()) % scanLength), cellPosInt.y + (toInt(block.thread_rank()) / scanLength)};
         data.objectMap.correctPosition(scanPos);
-        auto otherCell = data.objectMap.getFirst(scanPos);
+        auto otherObject = data.objectMap.getFirst(scanPos);
         for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
-            if (!otherCell) {
+            if (!otherObject) {
                 break;
             }
-            auto posDelta = object->pos - otherCell->pos;
+            auto posDelta = object->pos - otherObject->pos;
             data.objectMap.correctDirection(posDelta);
             auto adaptedDistance = Math::length(posDelta);
             auto origDistance = adaptedDistance;
-            if (object->typeData.cell.isSameCreature(&otherCell->typeData.cell) && (object->numConnections < 3 || otherCell->numConnections < 3)) {
+            if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell) && (object->numConnections < 3 || otherObject->numConnections < 3)) {
                 adaptedDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
             }
 
-            if (otherCell->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherCell->detached != 1) {
+            if (otherObject->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherObject->detached != 1) {
                 auto index = atomicAdd(&numFixedCells, 1);
                 if (index < MaxBarrierCellsForCollision) {
-                    fixedCells[index] = otherCell;
+                    fixedCells[index] = otherObject;
                 }
             }
 
-            if (!otherCell->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherCell->detached != 1) {
+            if (!otherObject->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherObject->detached != 1) {
 
                 // Calc density
                 localDensity += calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
 
-                if (object != otherCell) {
+                if (object != otherObject) {
 
                     // Overlap correction
                     if (!object->fixed && origDistance < cudaSimulationParameters.minObjectDistance.value) {
@@ -222,11 +222,11 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                         localCellPosDelta.y += posDelta.y * cudaSimulationParameters.minObjectDistance.value / 5;
                     }
 
-                    auto velDelta = object->vel - otherCell->vel;
+                    auto velDelta = object->vel - otherObject->vel;
                     bool isConnected = false;
                     for (int i = 0; i < object->numConnections; ++i) {
                         auto const& connectedCell = object->connections[i].object;
-                        if (connectedCell == otherCell) {
+                        if (connectedCell == otherObject) {
                             isConnected = true;
                         }
                     }
@@ -234,8 +234,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
                         // Calc forces: for simplicity pressure = density
                         auto const& cellPressure = object->density;            // Optimization: using the density from last time step
-                        auto const& otherCellPressure = otherCell->density;  // Optimization: using the density from last time step
-                        auto factor = cellPressure / (object->density * object->density) + otherCellPressure / (otherCell->density * otherCell->density);
+                        auto const& otherObjectPressure = otherObject->density;  // Optimization: using the density from last time step
+                        auto factor = cellPressure / (object->density * object->density) + otherObjectPressure / (otherObject->density * otherObject->density);
 
                         if (adaptedDistance > NEAR_ZERO) {
                             float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
@@ -244,21 +244,21 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                             localF_pressure.x += F_pressureDelta.x;
                             localF_pressure.y += F_pressureDelta.y;
 
-                            auto F_viscosityDelta = velDelta / otherCell->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f);
+                            auto F_viscosityDelta = velDelta / otherObject->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f);
                             localF_viscosity.x += F_viscosityDelta.x;
                             localF_viscosity.y += F_viscosityDelta.y;
                         }
                     }
 
                     // Fusion
-                    if (Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
-                        && (object->sticky || otherCell->sticky) && object->typeData.cell.usableEnergy <= cellMaxBindingEnergy && otherCell->typeData.cell.usableEnergy <= cellMaxBindingEnergy
-                        && !object->fixed && !otherCell->fixed) {
-                        ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherCell);
+                    if (Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS
+                        && (object->sticky || otherObject->sticky) && object->typeData.cell.usableEnergy <= cellMaxBindingEnergy && otherObject->typeData.cell.usableEnergy <= cellMaxBindingEnergy
+                        && !object->fixed && !otherObject->fixed) {
+                        ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                     }
                 }
             }
-            otherCell = otherCell->nextCell;
+            otherObject = otherObject->nextCell;
         }
 
         // Warp-level reduction followed by atomic accumulation across warps
@@ -304,12 +304,12 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     auto angleToCell = Math::angleOfVector(data.objectMap.getCorrectedDirection(object->pos - closestFixedCell->pos));
                     auto numConnections = closestFixedCell->numConnections;
                     for (int i = 0; i < numConnections; ++i) {
-                        auto otherCell1 = closestFixedCell->connections[i].object;
-                        auto otherCell2 = closestFixedCell->connections[(i + 1) % numConnections].object;
-                        auto angleToOtherCell1 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherCell1->pos - closestFixedCell->pos));
-                        auto angleToOtherCell2 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherCell2->pos - closestFixedCell->pos));
-                        if (Math::isAngleInBetween(angleToOtherCell1, angleToOtherCell2, angleToCell)) {
-                            r = otherCell2->pos - otherCell1->pos;
+                        auto otherObject1 = closestFixedCell->connections[i].object;
+                        auto otherObject2 = closestFixedCell->connections[(i + 1) % numConnections].object;
+                        auto angleToOtherObject1 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherObject1->pos - closestFixedCell->pos));
+                        auto angleToOtherObject2 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherObject2->pos - closestFixedCell->pos));
+                        if (Math::isAngleInBetween(angleToOtherObject1, angleToOtherObject2, angleToCell)) {
+                            r = otherObject2->pos - otherObject1->pos;
                             Math::rotateQuarterCounterClockwise(r);
                             break;
                         }
@@ -340,12 +340,12 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.maxCollisionDistance.value, object->detached, [&](auto const& otherCell) {
-            if (otherCell == object) {
+        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.maxCollisionDistance.value, object->detached, [&](auto const& otherObject) {
+            if (otherObject == object) {
                 return;
             }
 
-            auto posDelta = object->pos - otherCell->pos;
+            auto posDelta = object->pos - otherObject->pos;
             data.objectMap.correctDirection(posDelta);
 
             auto distance = Math::length(posDelta);
@@ -360,7 +360,7 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
             bool alreadyConnected = false;
             for (int i = 0; i < object->numConnections; ++i) {
                 auto const& connectedCell = object->connections[i].object;
-                if (connectedCell == otherCell) {
+                if (connectedCell == otherObject) {
                     alreadyConnected = true;
                     break;
                 }
@@ -369,7 +369,7 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
             if (!alreadyConnected) {
 
                 //collision algorithm
-                auto velDelta = object->vel - otherCell->vel;
+                auto velDelta = object->vel - otherObject->vel;
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
                 auto fixedFactor = object->fixed ? 2 : 1;
 
@@ -378,25 +378,25 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                     auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * fixedFactor;
                     atomicAdd(&object->shared1.x, force.x);
                     atomicAdd(&object->shared1.y, force.y);
-                    atomicAdd(&otherCell->shared1.x, -force.x);
-                    atomicAdd(&otherCell->shared1.y, -force.y);
+                    atomicAdd(&otherObject->shared1.x, -force.x);
+                    atomicAdd(&otherObject->shared1.y, -force.y);
                 } else {
                     auto force = Math::getNormalized(posDelta) * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
                         * cudaSimulationParameters.repulsionStrength.value * fixedFactor;
                     atomicAdd(&object->shared1.x, force.x);
                     atomicAdd(&object->shared1.y, force.y);
-                    atomicAdd(&otherCell->shared1.x, -force.x);
-                    atomicAdd(&otherCell->shared1.y, -force.y);
+                    atomicAdd(&otherObject->shared1.x, -force.x);
+                    atomicAdd(&otherObject->shared1.y, -force.y);
                 }
 
                 //fusion
                 auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.objectMaxBindingEnergy, data, object->pos);
                 auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
-                if (object->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS && (object->sticky || otherCell->sticky)
+                if (object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || otherObject->sticky)
                     && Math::length(velDelta) >= cellFusionVelocity && isApproaching && object->typeData.cell.usableEnergy <= cellMaxBindingEnergy
-                    && otherCell->typeData.cell.usableEnergy <= cellMaxBindingEnergy && !object->fixed && !otherCell->fixed) {
-                    ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherCell);
+                    && otherObject->typeData.cell.usableEnergy <= cellMaxBindingEnergy && !object->fixed && !otherObject->fixed) {
+                    ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                 }
             }
         });
@@ -718,15 +718,15 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(Sim
             if (!object->typeData.cell.headCell) {
                 auto update = false;
                 for (int i = 0, j = object->numConnections; i < j; ++i) {
-                    auto const& otherCell = object->connections[i].object;
-                    if (!object->typeData.cell.isSameCreature(&otherCell->typeData.cell)) {
+                    auto const& otherObject = object->connections[i].object;
+                    if (!object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                         continue;
                     }
-                    if (otherCell->typeData.cell.frontAngleId == object->typeData.cell.creature->frontAngleId) {
-                        auto frontAngle_otherCell_cell =
-                            Math::getNormalizedAngle(otherCell->typeData.cell.frontAngle + getInitialAngelSpan(otherCell, object, otherCell->connections[0].object), -180.0f);
-                        auto frontAngle_cell_otherCell = Math::getNormalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
-                        auto frontAngle_cell_connection0 = Math::getNormalizedAngle(frontAngle_cell_otherCell + getInitialAngelSpan(object, 0, i), -180.0f);
+                    if (otherObject->typeData.cell.frontAngleId == object->typeData.cell.creature->frontAngleId) {
+                        auto frontAngle_otherObject_cell =
+                            Math::getNormalizedAngle(otherObject->typeData.cell.frontAngle + getInitialAngelSpan(otherObject, object, otherObject->connections[0].object), -180.0f);
+                        auto frontAngle_cell_otherObject = Math::getNormalizedAngle(frontAngle_otherObject_cell - 180.0f, -180.0f);
+                        auto frontAngle_cell_connection0 = Math::getNormalizedAngle(frontAngle_cell_otherObject + getInitialAngelSpan(object, 0, i), -180.0f);
                         object->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
 
                         update = true;

@@ -50,41 +50,41 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         auto const& attackerMode = object->typeData.cell.cellTypeData.attacker.mode;
 
         auto sumEnergyToTransfer = 0.0f;
-        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherCell) {
+        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
 
             if (attackerMode == AttackerMode_FreeCell) {
-                if (otherCell->typeData.cell.cellType != CellType_Free) {
+                if (otherObject->typeData.cell.cellType != CellType_Free) {
                     return;
                 }
 
                 // Filter by color restriction
                 auto const& restrictToColor = object->typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
-                if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+                if (restrictToColor != 255 && otherObject->color != restrictToColor) {
                     return;
                 }
 
             } else if (attackerMode == AttackerMode_Creature) {
-                if (otherCell->typeData.cell.creature == nullptr) {
+                if (otherObject->typeData.cell.creature == nullptr) {
                     return;
                 }
 
 
-                if (object->typeData.cell.isSameCreature(&otherCell->typeData.cell)) {
+                if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                     return;
                 }
                 // Do not attack direct offspring (only applicable for Creature mode since free cells have no ancestry)
                 if (object->typeData.cell.creature != nullptr) {
-                    if (otherCell->typeData.cell.creature->ancestorId == object->typeData.cell.creature->id) {
+                    if (otherObject->typeData.cell.creature->ancestorId == object->typeData.cell.creature->id) {
                         return;
                     }
                 }
-                if (otherCell->fixed) {
+                if (otherObject->fixed) {
                     return;
                 }
 
                 // Filter by color restriction
                 auto const& restrictToColor = object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-                if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+                if (restrictToColor != 255 && otherObject->color != restrictToColor) {
                     return;
                 }
 
@@ -93,12 +93,12 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 auto const& restrictToLineage = object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
 
                 // Filter by minimum number of cells in creature
-                if (minNumCells > 0 && otherCell->typeData.cell.creature->numObjects < minNumCells) {
+                if (minNumCells > 0 && otherObject->typeData.cell.creature->numObjects < minNumCells) {
                     return;
                 }
 
                 // Filter by maximum number of cells in creature
-                if (maxNumCells > 0 && otherCell->typeData.cell.creature->numObjects > maxNumCells) {
+                if (maxNumCells > 0 && otherObject->typeData.cell.creature->numObjects > maxNumCells) {
                     return;
                 }
 
@@ -108,11 +108,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                         return;
                     }
                     if (restrictToLineage == LineageRestriction_SameLineage) {
-                        if (object->typeData.cell.creature->lineageId != otherCell->typeData.cell.creature->lineageId) {
+                        if (object->typeData.cell.creature->lineageId != otherObject->typeData.cell.creature->lineageId) {
                             return;
                         }
                     } else if (restrictToLineage == LineageRestriction_OtherLineage) {
-                        if (object->typeData.cell.creature->lineageId == otherCell->typeData.cell.creature->lineageId) {
+                        if (object->typeData.cell.creature->lineageId == otherObject->typeData.cell.creature->lineageId) {
                             return;
                         }
                     }
@@ -120,16 +120,16 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Only attack cells with energy above base value
-            auto energyToTransfer = atomicAdd(&otherCell->typeData.cell.usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color];
+            auto energyToTransfer = atomicAdd(&otherObject->typeData.cell.usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color];
             if (energyToTransfer < 0) {
                 return;
             }
 
             auto color = calcMod(object->color, MAX_COLORS);
-            auto otherColor = calcMod(otherCell->color, MAX_COLORS);
+            auto otherColor = calcMod(otherObject->color, MAX_COLORS);
 
             // Evaluate defender strength
-            auto numDefenderCells = countDefenderCells(statistics, otherCell);
+            auto numDefenderCells = countDefenderCells(statistics, otherObject);
             auto defendStrength =
                 numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength.value[color] + 1.0f, numDefenderCells);
             energyToTransfer /= defendStrength;
@@ -140,27 +140,27 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (energyToTransfer > NEAR_ZERO) {
 
                 // Only attack other cells which are in a visible cone with respect to the attack cell
-                if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherCell)) {
+                if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherObject)) {
                     return;
                 }
 
                 // Notify attacked cell
-                if (otherCell->typeData.cell.signalState != SignalState_Active) {
-                    SignalProcessor::createEmptySignal(otherCell);
+                if (otherObject->typeData.cell.signalState != SignalState_Active) {
+                    SignalProcessor::createEmptySignal(otherObject);
                 }
-                atomicAdd(&otherCell->typeData.cell.signal.channels[Channels::AttackerNotify], 1.0f);
-                otherCell->typeData.cell.event = CellEvent_Attacked;
-                otherCell->typeData.cell.eventCounter = 10;
-                otherCell->typeData.cell.eventPos = object->pos;
+                atomicAdd(&otherObject->typeData.cell.signal.channels[Channels::AttackerNotify], 1.0f);
+                otherObject->typeData.cell.event = CellEvent_Attacked;
+                otherObject->typeData.cell.eventCounter = 10;
+                otherObject->typeData.cell.eventPos = object->pos;
 
                 // Absorb energy from attacked cell
-                auto origEnergy = atomicAdd(&otherCell->typeData.cell.usableEnergy, -energyToTransfer);
+                auto origEnergy = atomicAdd(&otherObject->typeData.cell.usableEnergy, -energyToTransfer);
                 if (origEnergy > energyToTransfer) {
                     sumEnergyToTransfer += energyToTransfer;
                 }
                 // Revert
                 else {
-                    atomicAdd(&otherCell->typeData.cell.usableEnergy, energyToTransfer);
+                    atomicAdd(&otherObject->typeData.cell.usableEnergy, energyToTransfer);
                 }
             }
         });

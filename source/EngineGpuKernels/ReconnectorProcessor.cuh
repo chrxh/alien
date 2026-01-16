@@ -54,53 +54,53 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
     Object* closestCell = nullptr;
     float closestDistance = 0;
-    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.reconnectorRadius.value[object->color], object->detached, [&](Object* const& otherCell) {
+    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.reconnectorRadius.value[object->color], object->detached, [&](Object* const& otherObject) {
 
         // Skip if already connected or too closely connected
-        if (ObjectConnectionProcessor::isConnectedConnected(object, otherCell)) {
+        if (ObjectConnectionProcessor::isConnectedConnected(object, otherObject)) {
             return;
         }
 
         if (reconnectorMode == ReconnectorMode_Structure) {
             // Connect to structure cells only
-            if (otherCell->typeData.cell.cellType != CellType_Structure) {
+            if (otherObject->typeData.cell.cellType != CellType_Structure) {
                 return;
             }
         } else if (reconnectorMode == ReconnectorMode_FreeCell) {
             // Connect to free cells only
-            if (otherCell->typeData.cell.cellType != CellType_Free) {
+            if (otherObject->typeData.cell.cellType != CellType_Free) {
                 return;
             }
 
             // Filter by color restriction
             auto const& restrictToColor = reconnector.modeData.reconnectFreeCell.restrictToColor;
-            if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+            if (restrictToColor != 255 && otherObject->color != restrictToColor) {
                 return;
             }
         } else if (reconnectorMode == ReconnectorMode_Creature) {
             // Must be from a different creature
-            if (otherCell->typeData.cell.creature == nullptr) {
+            if (otherObject->typeData.cell.creature == nullptr) {
                 return;
             }
-            if (object->typeData.cell.isSameCreature(&otherCell->typeData.cell)) {
+            if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                 return;
             }
 
             // Filter by color restriction
             auto const& restrictToColor = reconnector.modeData.reconnectCreature.restrictToColor;
-            if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+            if (restrictToColor != 255 && otherObject->color != restrictToColor) {
                 return;
             }
 
             // Filter by minimum number of cells in creature
             if (reconnector.modeData.reconnectCreature.minNumCells > 0
-                && otherCell->typeData.cell.creature->numObjects < reconnector.modeData.reconnectCreature.minNumCells) {
+                && otherObject->typeData.cell.creature->numObjects < reconnector.modeData.reconnectCreature.minNumCells) {
                 return;
             }
 
             // Filter by maximum number of cells in creature
             if (reconnector.modeData.reconnectCreature.maxNumCells > 0
-                && otherCell->typeData.cell.creature->numObjects > reconnector.modeData.reconnectCreature.maxNumCells) {
+                && otherObject->typeData.cell.creature->numObjects > reconnector.modeData.reconnectCreature.maxNumCells) {
                 return;
             }
 
@@ -110,11 +110,11 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                     return;
                 }
                 if (reconnector.modeData.reconnectCreature.restrictToLineage == LineageRestriction_SameLineage) {
-                    if (object->typeData.cell.creature->lineageId != otherCell->typeData.cell.creature->lineageId) {
+                    if (object->typeData.cell.creature->lineageId != otherObject->typeData.cell.creature->lineageId) {
                         return;
                     }
                 } else if (reconnector.modeData.reconnectCreature.restrictToLineage == LineageRestriction_OtherLineage) {
-                    if (object->typeData.cell.creature->lineageId == otherCell->typeData.cell.creature->lineageId) {
+                    if (object->typeData.cell.creature->lineageId == otherObject->typeData.cell.creature->lineageId) {
                         return;
                     }
                 }
@@ -123,13 +123,13 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         }
 
         // Check for own intersecting cells in between
-        if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherCell)) {
+        if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherObject)) {
             return;
         }
 
-        auto distance = data.objectMap.getDistance(object->pos, otherCell->pos);
+        auto distance = data.objectMap.getDistance(object->pos, otherObject->pos);
         if (!closestCell || distance < closestDistance) {
-            closestCell = otherCell;
+            closestCell = otherObject;
             closestDistance = distance;
         }
     });
@@ -139,7 +139,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         SystemDoubleLock lock;
         lock.init(&object->locked, &closestCell->locked);
         if (lock.tryLock()) {
-            if (object->numConnections < MAX_CELL_BONDS && closestCell->numConnections < MAX_CELL_BONDS) {
+            if (object->numConnections < MAX_OBJECT_CONNECTIONS && closestCell->numConnections < MAX_OBJECT_CONNECTIONS) {
                 ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, closestCell);
                 object->typeData.cell.signal.channels[Channels::ReconnectorSuccess] = 1;
                 statistics.incNumReconnectorCreated(object->color);

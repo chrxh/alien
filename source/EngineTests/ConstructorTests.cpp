@@ -1359,19 +1359,19 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, actualData.getObjectsForCreature(creature._id).size());
 
-    auto actualOtherCell = actualData.getObjectRef(1);
+    auto actualOtherObject = actualData.getObjectRef(1);
     auto actualHostCell = actualData.getObjectRef(2);
     auto actualPrevConstructedCell = actualData.getObjectRef(3);
     auto actualConstructedCell = actualData.getOtherObjectRef({1, 2, 3});
 
-    ASSERT_EQ(1, actualOtherCell._connections.size());
+    ASSERT_EQ(1, actualOtherObject._connections.size());
     ASSERT_EQ(2, actualHostCell._connections.size());
     ASSERT_EQ(2, actualConstructedCell._connections.size());
     ASSERT_EQ(1, actualPrevConstructedCell._connections.size());
 
-    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualOtherCell, actualHostCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualOtherObject, actualHostCell)._angleFromPrevious));
 
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualHostCell, actualOtherCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualHostCell, actualOtherObject)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
 
     EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
@@ -2418,7 +2418,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     }
 }
 
-TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
+TEST_F(ConstructorTests, avoidDeadlockByLockingNearObjects)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().nodes({}),
