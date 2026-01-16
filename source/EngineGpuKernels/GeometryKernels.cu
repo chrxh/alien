@@ -169,7 +169,7 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
         auto const& object = data.entities.objects.at(index);
 
         // Cell index is just the array index (stored in tempValue)
-        uint64_t cellIndex = object->tempValue.as_uint64;
+        uint64_t objectIndex = object->tempValue.as_uint64;
 
         // Add line indices for each connection
         for (int i = 0; i < object->numConnections; ++i) {
@@ -181,7 +181,7 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
                     uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
                     if (lineIndices != nullptr) {
                         uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
-                        lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
+                        lineIndices[lineIndex] = static_cast<unsigned int>(objectIndex);
                         lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
                     }
                 }
@@ -194,7 +194,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
-    auto addTriangle = [&](Object* object, uint64_t cellIndex, Object* connectedCell, Object* prevConnectedCell) {
+    auto addTriangle = [&](Object* object, uint64_t objectIndex, Object* connectedCell, Object* prevConnectedCell) {
         // Only add triangle once (avoid duplicates by checking ids)
         if (Math::length(object->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
             && Math::length(object->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
@@ -203,7 +203,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             uint64_t connectedIndex2 = prevConnectedCell->tempValue.as_uint64;
             uint64_t triangleIndex = alienAtomicAdd64(numTriangleIndices, uint64_t(3));
             if (triangleIndices != nullptr) {
-                triangleIndices[triangleIndex] = static_cast<unsigned int>(cellIndex);
+                triangleIndices[triangleIndex] = static_cast<unsigned int>(objectIndex);
                 triangleIndices[triangleIndex + 1] = static_cast<unsigned int>(connectedIndex1);
                 triangleIndices[triangleIndex + 2] = static_cast<unsigned int>(connectedIndex2);
             }
@@ -385,11 +385,11 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
 __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
 {
     // Process selected cells
-    auto const& cells = data.entities.objects;
-    auto numCells = cells.getNumEntries();
+    auto const& objects = data.entities.objects;
+    auto numCells = objects.getNumEntries();
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numCells; index += blockDim.x * gridDim.x) {
-        auto const& object = cells.at(index);
+        auto const& object = objects.at(index);
         if (object->selected == 1) {
             auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
             if (selectedObjectData != nullptr) {

@@ -24,11 +24,11 @@ private:
 
 __device__ __inline__ void ClusterProcessor::initClusterData(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         object->clusterIndex = index;
         object->clusterBoundaries = 0;
         object->clusterPos = {0, 0};
@@ -41,11 +41,11 @@ __device__ __inline__ void ClusterProcessor::initClusterData(SimulationData& dat
 
 __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto currentCell = cells.at(index);
+        auto currentCell = objects.at(index);
 
         //heuristics to cover connected cells
         for (int i = 0; i < 30; ++i) {
@@ -69,12 +69,12 @@ __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData
 
 __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto object = cells.at(index);
-        auto cluster = cells.at(object->clusterIndex);
+        auto object = objects.at(index);
+        auto cluster = objects.at(object->clusterIndex);
         if (object->pos.x < data.worldSize.x / 3) {
             atomicOr(&cluster->clusterBoundaries, 1);
         }
@@ -86,12 +86,12 @@ __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationDat
 
 __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto object = cells.at(index);
-        auto cluster = cells.at(object->clusterIndex);
+        auto object = objects.at(index);
+        auto cluster = objects.at(object->clusterIndex);
         atomicAdd(&cluster->clusterVel.x, object->vel.x);
         atomicAdd(&cluster->clusterVel.y, object->vel.y);
 
@@ -113,12 +113,12 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(Simulati
 
 __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto object = cells.at(index);
-        auto cluster = cells.at(object->clusterIndex);
+        auto object = objects.at(index);
+        auto cluster = objects.at(object->clusterIndex);
         auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
 
@@ -141,12 +141,12 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
 
 __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto object = cells.at(index);
-        auto cluster = cells.at(object->clusterIndex);
+        auto object = objects.at(index);
+        auto cluster = objects.at(object->clusterIndex);
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
         auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
 

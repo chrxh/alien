@@ -4,11 +4,11 @@
 
 __global__ void cudaTestMutate(SimulationData data, uint64_t objectId, MutationType mutationType)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         //if (object->id == objectId) {
         //    switch (mutationType) {
         //    case MutationType::Properties:
@@ -56,12 +56,12 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1
 {
     CUDA_CHECK(blockDim.x == 1 && gridDim.x == 1);
 
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
     Object* object1 = nullptr;
     Object* object2 = nullptr;
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->id == objectId1) {
             object1 = object;
         }
@@ -145,11 +145,11 @@ namespace
 
 __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        if (auto& object = cells.at(index)) {
+        if (auto& object = objects.at(index)) {
 
             if (isPointerValid(data, object)) {
                 for (int i = 0; i < object->numConnections; ++i) {
@@ -184,7 +184,7 @@ __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
 
 __global__ void cudaTestMutationCheck(SimulationData data, uint64_t objectId)
 {
-    //auto& cells = data.entities.objects;
+    //auto& objects = data.entities.objects;
     //auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {

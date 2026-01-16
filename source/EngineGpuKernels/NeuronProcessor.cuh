@@ -28,11 +28,11 @@ private:
 
 __device__ __inline__ void NeuronProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcBlockPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcBlockPartition(objects.getNumEntries());
 
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto& object = cells.at(i);
+        auto& object = objects.at(i);
         if (object->neuralNetwork) {
             processCell(data, statistics, object);
         }

@@ -102,11 +102,11 @@ __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int
 
 __global__ void DEBUG_checkAngles(SimulationData data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        if (auto& object = cells.at(index)) {
+        if (auto& object = objects.at(index)) {
             if (object->numConnections > 0) {
                 float sumAngles = 0;
                 for (int i = 0; i < object->numConnections; ++i) {

@@ -17,7 +17,7 @@ struct DelConnectionOperation
 
 struct DelObjectOperation
 {
-    uint64_t cellIndex;
+    uint64_t objectIndex;
 };
 
 union StructureOperationData

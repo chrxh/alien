@@ -420,14 +420,14 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
 TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)
 {
     // Create test data
-    auto data = Description().energyParticles({EnergyDescription().id(0), EnergyDescription().id(1)});
+    auto data = Description().energies({EnergyDescription().id(0), EnergyDescription().id(1)});
 
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._energyParticles) {
+    for (auto const& object : data._energies) {
         ids.insert(object._id);
     }
     EXPECT_EQ(2, ids.size());
@@ -436,14 +436,14 @@ TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)
 TEST_F(DescriptionEditTests, assignNewIds_sameParticleIds)
 {
     // Create test data
-    auto data = Description().energyParticles({EnergyDescription().id(0), EnergyDescription().id(0)});
+    auto data = Description().energies({EnergyDescription().id(0), EnergyDescription().id(0)});
 
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._energyParticles) {
+    for (auto const& object : data._energies) {
         ids.insert(object._id);
     }
     EXPECT_EQ(2, ids.size());
@@ -552,7 +552,7 @@ TEST_F(DescriptionEditTests, adaptMaxIds)
     auto data = Description()
                     .addCreature({ObjectDescription().id(5)}, CreatureDescription().id(3))
                     .addCreature({ObjectDescription()}, CreatureDescription())
-                    .energyParticles({
+                    .energies({
                         EnergyDescription().id(7),
                         EnergyDescription(),
                     });
@@ -561,7 +561,7 @@ TEST_F(DescriptionEditTests, adaptMaxIds)
     auto cells0 = data.getObjectsForCreature(data._creatures.at(0)._id);
     auto cells1 = data.getObjectsForCreature(data._creatures.at(1)._id);
     EXPECT_LT(cells0.at(0)._id, cells1.at(0)._id);
-    EXPECT_LT(data._energyParticles.at(0)._id, data._energyParticles.at(1)._id);
+    EXPECT_LT(data._energies.at(0)._id, data._energies.at(1)._id);
 }
 
 

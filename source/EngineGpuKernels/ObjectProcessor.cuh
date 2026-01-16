@@ -71,10 +71,10 @@ private:
 
 __inline__ __device__ void ObjectProcessor::init(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
 
         object->shared1 = {0, 0};
         object->nextCell = nullptr;
@@ -144,12 +144,12 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     auto block = cg::this_thread_block();
     auto warp = cg::tiled_partition<32>(block);
 
-    auto& cells = data.entities.objects;
-    auto blockPartition = calcBlockPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto blockPartition = calcBlockPartition(objects.getNumEntries());
     auto const& smoothingLength = cudaSimulationParameters.smoothingLength.value;
 
-    for (int cellIndex = blockPartition.startIndex; cellIndex <= blockPartition.endIndex; ++cellIndex) {
-        auto& object = cells.at(cellIndex);
+    for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
+        auto& object = objects.at(objectIndex);
 
         __shared__ float cellMaxBindingEnergy;
         __shared__ float cellFusionVelocity;
@@ -166,8 +166,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         __shared__ float density;
 
         if (block.thread_rank() == 0) {
-            cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, object->pos);
-            cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, object->pos);
+            cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.objectMaxBindingEnergy, data, object->pos);
+            cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
             int radiusInt = ceilf(smoothingLength * 2);
             scanLength = radiusInt * 2 + 1;
@@ -217,9 +217,9 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 if (object != otherCell) {
 
                     // Overlap correction
-                    if (!object->fixed && origDistance < cudaSimulationParameters.minCellDistance.value) {
-                        localCellPosDelta.x += posDelta.x * cudaSimulationParameters.minCellDistance.value / 5;
-                        localCellPosDelta.y += posDelta.y * cudaSimulationParameters.minCellDistance.value / 5;
+                    if (!object->fixed && origDistance < cudaSimulationParameters.minObjectDistance.value) {
+                        localCellPosDelta.x += posDelta.x * cudaSimulationParameters.minObjectDistance.value / 5;
+                        localCellPosDelta.y += posDelta.y * cudaSimulationParameters.minObjectDistance.value / 5;
                     }
 
                     auto velDelta = object->vel - otherCell->vel;
@@ -335,11 +335,11 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
 __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correctOverlap(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         data.objectMap.executeForEach(object->pos, cudaSimulationParameters.maxCollisionDistance.value, object->detached, [&](auto const& otherCell) {
             if (otherCell == object) {
                 return;
@@ -352,8 +352,8 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
 
             //overlap correction
             if (!object->fixed) {
-                if (distance < cudaSimulationParameters.minCellDistance.value) {
-                    object->pos += posDelta * cudaSimulationParameters.minCellDistance.value / 5;
+                if (distance < cudaSimulationParameters.minObjectDistance.value) {
+                    object->pos += posDelta * cudaSimulationParameters.minObjectDistance.value / 5;
                 }
             }
 
@@ -390,8 +390,8 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                 }
 
                 //fusion
-                auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, object->pos);
-                auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, object->pos);
+                auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.objectMaxBindingEnergy, data, object->pos);
+                auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
                 if (object->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS && (object->sticky || otherCell->sticky)
                     && Math::length(velDelta) >= cellFusionVelocity && isApproaching && object->usableEnergy <= cellMaxBindingEnergy
@@ -405,11 +405,11 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
 
 __inline__ __device__ void ObjectProcessor::checkForces(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         object->density = object->shared2.x;
         if (object->fixed) {
             continue;
@@ -425,11 +425,11 @@ __inline__ __device__ void ObjectProcessor::checkForces(SimulationData& data)
 
 __inline__ __device__ void ObjectProcessor::applyForces(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }
@@ -444,11 +444,11 @@ __inline__ __device__ void ObjectProcessor::applyForces(SimulationData& data)
 
 __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData& data, bool calcAngularForces)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (0 == object->numConnections || object->fixed) {
             continue;
         }
@@ -490,8 +490,8 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                     r2 *= -1.0f;
                 }
                 auto g = 5e-4f * abs(Math::getNormalizedAngle(theta - referenceAngleFromPrevious, -180.0f)) * cellStiffnessSquared;
-                auto strength1 = g / max(Math::lengthSquared(r1), cudaSimulationParameters.minCellDistance.value);
-                auto strength2 = g / max(Math::lengthSquared(r2), cudaSimulationParameters.minCellDistance.value);
+                auto strength1 = g / max(Math::lengthSquared(r1), cudaSimulationParameters.minObjectDistance.value);
+                auto strength2 = g / max(Math::lengthSquared(r2), cudaSimulationParameters.minObjectDistance.value);
                 auto force2 = r1 * strength1;
                 auto force1 = r2 * strength2;
 
@@ -513,11 +513,11 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
 
 __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }
@@ -545,11 +545,11 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
 
 __inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects  = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             object->pos += object->vel * cudaSimulationParameters.timestepSize.value;
             data.objectMap.correctPosition(object->pos);
@@ -565,11 +565,11 @@ __inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData&
 
 __inline__ __device__ void ObjectProcessor::verletVelocityUpdate(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumOrigEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }
@@ -615,11 +615,11 @@ __inline__ __device__ void ObjectProcessor::aging(SimulationData& data)
 
 __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
 
         bool isSameCreatureNeighborDetaching = false;
         bool isOtherCreatureNeighborDetaching = false;
@@ -694,11 +694,11 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
 
 __inline__ __device__ void ObjectProcessor::cellStateTransition_applyNextState(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         object->cellState = object->tempValue.as_uint32_float.uint32Part;
         object->tempValue.as_uint32_float.uint32Part = 0;
     }
@@ -706,11 +706,11 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_applyNextState(S
 
 __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->creature == nullptr) {
             continue;
         }
@@ -743,11 +743,11 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(Sim
 
 __inline__ __device__ void ObjectProcessor::frontAngleUpdate_applyFutureValue(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->creature == nullptr) {
             continue;
         }
@@ -768,12 +768,12 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_applyFutureValue(Si
 
 __inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     auto const innerFriction = cudaSimulationParameters.innerFriction.value;
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }
@@ -801,11 +801,11 @@ __inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& d
 
 __inline__ __device__ void ObjectProcessor::applyFriction(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }
@@ -817,11 +817,11 @@ __inline__ __device__ void ObjectProcessor::applyFriction(SimulationData& data)
 
 __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
+    auto& objects = data.entities.objects;
 
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }
@@ -868,15 +868,15 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
 
 __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }
-        auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, object->pos);
+        auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.objectMaxBindingEnergy, data, object->pos);
         if (object->usableEnergy > cellMaxBindingEnergy) {
             ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
         }
@@ -935,11 +935,11 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
 
 __inline__ __device__ void ObjectProcessor::resetDensity(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
 
         object->density = 1.0f;
     }
@@ -947,11 +947,11 @@ __inline__ __device__ void ObjectProcessor::resetDensity(SimulationData& data)
 
 __inline__ __device__ void ObjectProcessor::updateCellEvents(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->eventCounter > 0) {
             --object->eventCounter;
         }
@@ -960,11 +960,11 @@ __inline__ __device__ void ObjectProcessor::updateCellEvents(SimulationData& dat
 
 __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& data)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->numConnections == 0) {
             continue;
         }

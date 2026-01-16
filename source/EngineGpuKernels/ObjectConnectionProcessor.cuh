@@ -14,7 +14,7 @@ public:
     __inline__ __device__ static void scheduleAddConnectionPair(SimulationData& data, Object* object1, Object* object2);
     __inline__ __device__ static void scheduleDeleteAllConnections(SimulationData& data, Object* object);
     __inline__ __device__ static void scheduleDeleteConnectionPair(SimulationData& data, Object* object1, Object* object2);
-    __inline__ __device__ static void scheduleDeleteCell(SimulationData& data, uint64_t const& cellIndex);
+    __inline__ __device__ static void scheduleDeleteCell(SimulationData& data, uint64_t const& objectIndex);
 
     __inline__ __device__ static void processAddOperations(SimulationData& data);
     __inline__ __device__ static void processDeleteCellOperations(SimulationData& data);
@@ -127,11 +127,11 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteConnectionPa
     }
 }
 
-__inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteCell(SimulationData& data, uint64_t const& cellIndex)
+__inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteCell(SimulationData& data, uint64_t const& objectIndex)
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::DelObject;
-    operation.data.delObject.cellIndex = cellIndex;
+    operation.data.delObject.objectIndex = objectIndex;
     data.structuralOperations.tryAddEntry(operation);
 }
 
@@ -154,10 +154,10 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteCellOperation
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::DelObject == operation.type) {
-            auto cellIndex = operation.data.delObject.cellIndex;
+            auto objectIndex = operation.data.delObject.objectIndex;
 
             Object* empty = nullptr;
-            auto origCell = alienAtomicExch(&data.entities.objects.at(cellIndex), empty);
+            auto origCell = alienAtomicExch(&data.entities.objects.at(objectIndex), empty);
             if (origCell) {
                 EnergyProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->getEnergy());
 

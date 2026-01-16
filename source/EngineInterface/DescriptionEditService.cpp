@@ -206,10 +206,10 @@ namespace
             for (int y = upperLeftIntPos.y; y <= lowerRightIntPos.y; ++y) {
                 if (cellIndicesBySlot.find(x) != cellIndicesBySlot.end()) {
                     if (cellIndicesBySlot.at(x).find(y) != cellIndicesBySlot.at(x).end()) {
-                        for (auto const& cellIndex : cellIndicesBySlot.at(x).at(y)) {
-                            auto const& object = description._objects.at(cellIndex);
+                        for (auto const& objectIndex : cellIndicesBySlot.at(x).at(y)) {
+                            auto const& object = description._objects.at(objectIndex);
                             if (Math::length(object._pos - pos) <= radius) {
-                                result.emplace_back(cellIndex);
+                                result.emplace_back(objectIndex);
                             }
                         }
                     }

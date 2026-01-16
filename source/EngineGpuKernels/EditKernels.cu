@@ -25,11 +25,11 @@ __global__ void cudaChangeCell(SimulationData data, TO changeTO)
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
-        auto const& cellTO = changeTO.objects[0];
-        if (object->id == cellTO.id) {
+        auto const& objectTO = changeTO.objects[0];
+        if (object->id == objectTO.id) {
             EntityFactory entityFactory;
             entityFactory.init(&data);
-            entityFactory.changeObjectFromTO(changeTO, cellTO, object);
+            entityFactory.changeObjectFromTO(changeTO, objectTO, object);
         }
     }
 }
@@ -451,7 +451,7 @@ __global__ void cudaSetDetached(SimulationData data, bool value)
 
 __global__ void cudaApplyCataclysm(SimulationData data)
 {
-    //auto& cells = data.entities.objects;
+    //auto& objects = data.entities.objects;
     //auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {

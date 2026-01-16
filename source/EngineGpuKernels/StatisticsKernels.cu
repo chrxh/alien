@@ -8,11 +8,11 @@ __global__ void cudaUpdateTimestepStatistics_substep1(SimulationData data, Simul
 __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, SimulationStatistics statistics)
 {
     {
-        auto& cells = data.entities.objects;
-        auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+        auto& objects = data.entities.objects;
+        auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            auto& object = cells.at(index);
+            auto& object = objects.at(index);
             statistics.incNumCells(object->color);
             if (object->cellType == CellType_Free) {
                 statistics.incNumFreeCells(object->color);
@@ -49,7 +49,7 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
     }
 
     {
-        //auto& cells = data.entities.objects;
+        //auto& objects = data.entities.objects;
         //auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
         //auto numReplicators = toDouble(statistics.getNumReplicators());
@@ -73,11 +73,11 @@ __global__ void cudaUpdateHistogramData_substep1(SimulationData data, Simulation
 
 __global__ void cudaUpdateHistogramData_substep2(SimulationData data, SimulationStatistics statistics)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }
@@ -87,12 +87,12 @@ __global__ void cudaUpdateHistogramData_substep2(SimulationData data, Simulation
 
 __global__ void cudaUpdateHistogramData_substep3(SimulationData data, SimulationStatistics statistics)
 {
-    auto& cells = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     auto maxAge = statistics.getMaxValue();
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = cells.at(index);
+        auto& object = objects.at(index);
         if (object->fixed) {
             continue;
         }

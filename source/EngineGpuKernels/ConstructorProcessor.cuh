@@ -70,7 +70,7 @@ private:
     __inline__ __device__ static Object* constructCellIntern(
         SimulationData& data,
         SimulationStatistics& statistics,
-        uint64_t& cellIndex,
+        uint64_t& objectIndex,
         Object* hostCell,
         float2 newCellPos,
         ConstructionData const& constructionData);
@@ -456,8 +456,8 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     auto desiredDistance = constructionData.gene->connectionDistance;
     auto constructionSiteDistance = hostCell->getRefDistance(lastCell);
     posDelta = Math::getNormalized(posDelta) * (constructionSiteDistance - desiredDistance);
-    if (Math::length(posDelta) <= cudaSimulationParameters.minCellDistance.value
-        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minCellDistance.value) {
+    if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value
+        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minObjectDistance.value) {
         return nullptr;
     }
 
@@ -765,7 +765,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
 __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     SimulationData& data,
     SimulationStatistics& statistics,
-    uint64_t& cellIndex,
+    uint64_t& objectIndex,
     Object* hostCell,
     float2 posOfNewCell,
     ConstructionData const& constructionData)
@@ -777,7 +777,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     EntityFactory factory;
     factory.init(&data);
     Object* result = factory.createCellFromNode(
-        cellIndex,
+        objectIndex,
         constructionData.creature,
         constructor.geneIndex,
         constructor.currentNodeIndex,
