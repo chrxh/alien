@@ -337,9 +337,9 @@ void Description::assignNewIds()
             }
         }
         {
-            auto insertionResult = creatureIdToOldToNewCellId[std::get<CellDescription>(object._type)._creatureId].insert({oldId, newId});
+            auto insertionResult = creatureIdToOldToNewCellId[object.getCellRef()._creatureId].insert({oldId, newId});
             if (!insertionResult.second) {
-                creatureIdToNonUniqueCellIds[std::get<CellDescription>(object._type)._creatureId].insert(oldId);
+                creatureIdToNonUniqueCellIds[object.getCellRef()._creatureId].insert(oldId);
             }
         }
 
@@ -384,12 +384,12 @@ void Description::assignNewIds()
 
     for (auto& object : _objects) {
         for (auto& connection : object._connections) {
-            connection._objectId = findNewCellId(std::get<CellDescription>(object._type)._creatureId, connection._objectId);
+            connection._objectId = findNewCellId(object.getCellRef()._creatureId, connection._objectId);
         }
-        if (std::get<CellDescription>(object._type).getCellType() == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorDescription>(std::get<CellDescription>(object._type)._cellType);
+        if (object.getCellRef().getCellType() == CellType_Constructor) {
+            auto& constructor = std::get<ConstructorDescription>(object.getCellRef()._cellType);
             if (constructor._lastConstructedCellId.has_value()) {
-                constructor._lastConstructedCellId = findNewCellId(std::get<CellDescription>(object._type)._creatureId, constructor._lastConstructedCellId.value());
+                constructor._lastConstructedCellId = findNewCellId(object.getCellRef()._creatureId, constructor._lastConstructedCellId.value());
             }
         }
     }
@@ -408,11 +408,11 @@ void Description::assignNewIds()
 
     // Assign new creatureIds to cells
     for (auto& object : _objects) {
-        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-            CHECK(!nonUniqueCreatureIds.contains(std::get<CellDescription>(object._type)._creatureId.value()));
-            auto findResult = oldToNewCreatureId.find(std::get<CellDescription>(object._type)._creatureId.value());
+        if (object.getCellRef()._creatureId.has_value()) {
+            CHECK(!nonUniqueCreatureIds.contains(object.getCellRef()._creatureId.value()));
+            auto findResult = oldToNewCreatureId.find(object.getCellRef()._creatureId.value());
             if (findResult != oldToNewCreatureId.end()) {
-                std::get<CellDescription>(object._type)._creatureId = findResult->second;
+                object.getCellRef()._creatureId = findResult->second;
             }
         }
     }
@@ -471,7 +471,7 @@ Description& Description::addCreature(std::vector<ObjectDescription> const& obje
 
     // Add cells with creatureId set
     for (auto object : objects) {
-        std::get<CellDescription>(object._type)._creatureId = creature._id;
+        object.getCellRef()._creatureId = creature._id;
         _objects.emplace_back(object);
     }
 
@@ -485,14 +485,14 @@ size_t Description::getNumObjects() const
 
 size_t Description::getNumObjectsWithoutCreature() const
 {
-    return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) { return !std::get<CellDescription>(object._type)._creatureId.has_value(); });
+    return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) { return !object.getCellRef()._creatureId.has_value(); });
 }
 
 std::vector<ObjectDescription> Description::getObjectsForCreature(uint64_t creatureId) const
 {
     std::vector<ObjectDescription> result;
     for (auto const& object : _objects) {
-        if (std::get<CellDescription>(object._type)._creatureId.has_value() && std::get<CellDescription>(object._type)._creatureId.value() == creatureId) {
+        if (object.getCellRef()._creatureId.has_value() && object.getCellRef()._creatureId.value() == creatureId) {
             result.push_back(object);
         }
     }

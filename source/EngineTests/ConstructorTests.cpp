@@ -56,11 +56,11 @@ TEST_F(ConstructorTests, alreadyFinished)
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, emptyGenome)
@@ -83,11 +83,11 @@ TEST_F(ConstructorTests, emptyGenome)
     ASSERT_EQ(1, creature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, emptyGene)
@@ -110,11 +110,11 @@ TEST_F(ConstructorTests, emptyGene)
     ASSERT_EQ(1, creature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, nodeIndexOutOfRange)
@@ -137,11 +137,11 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
     ASSERT_EQ(1, creature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, geneIndexOutOfRange)
@@ -164,11 +164,11 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
     ASSERT_EQ(1, creature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, insufficientEnergy)
@@ -191,11 +191,11 @@ TEST_F(ConstructorTests, insufficientEnergy)
     ASSERT_EQ(1, creature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
@@ -220,12 +220,12 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
     ASSERT_EQ(2, creature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    ASSERT_TRUE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(hostCell._type)._signal._channels[Channels::ConstructorSuccess]));
+    ASSERT_TRUE(hostCell.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(0.0f, hostCell.getCellRef()._signal._channels[Channels::ConstructorSuccess]));
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
@@ -250,12 +250,12 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
     ASSERT_EQ(3, creature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    ASSERT_TRUE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(hostCell._type)._signal._channels[Channels::ConstructorSuccess]));
+    ASSERT_TRUE(hostCell.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, hostCell.getCellRef()._signal._channels[Channels::ConstructorSuccess]));
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
@@ -280,11 +280,11 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
     ASSERT_EQ(2, creature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, lastConstructedCellNotFound)
@@ -307,11 +307,11 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
     ASSERT_EQ(2, hostCreature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, insufficientSpace)
@@ -346,11 +346,11 @@ TEST_F(ConstructorTests, insufficientSpace)
     ASSERT_EQ(1, newCreature._numObjects);
 
     auto hostCell = actualData.getObjectRef(0);
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, crossingLinks)
@@ -423,18 +423,18 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto hostCell = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newCell = actualData.getObjectsForCreature(newCreature._id).front();
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
-    EXPECT_EQ(FrontAngleId, std::get<CellDescription>(newCell._type)._frontAngleId);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
+    EXPECT_EQ(FrontAngleId, newCell.getCellRef()._frontAngleId);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(_descriptionTestDataFactory->compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(std::get<CellDescription>(hostCell._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(hostCell.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview)
@@ -465,13 +465,13 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto hostCell = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newCell = actualData.getObjectsForCreature(newCreature._id).front();
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
     EXPECT_TRUE(_descriptionTestDataFactory->compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -504,13 +504,13 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto hostCell = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newCell = actualData.getObjectsForCreature(newCreature._id).front();
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
     EXPECT_TRUE(_descriptionTestDataFactory->compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -542,12 +542,12 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto hostCell = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newCell = actualData.getObjectsForCreature(newCreature._id).front();
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -586,11 +586,11 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     auto prevConstructedCell = actualData.getObjectRef(2);
     auto prevPrevConstructedCell = actualData.getObjectRef(3);
 
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualConstructedCell._type)._cellState);
+    EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
 
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(prevConstructedCell._type)._cellState);
+    EXPECT_EQ(CellState_Ready, prevConstructedCell.getCellRef()._cellState);
 
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(prevPrevConstructedCell._type)._cellState);
+    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell.getCellRef()._cellState);
 }
 
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__frontAngle_lowerSide)
@@ -626,11 +626,11 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     auto prevConstructedCell = actualData.getObjectRef(2);
     auto prevPrevConstructedCell = actualData.getObjectRef(3);
 
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualConstructedCell._type)._cellState);
+    EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
 
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(prevConstructedCell._type)._cellState);
+    EXPECT_EQ(CellState_Ready, prevConstructedCell.getCellRef()._cellState);
 
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(prevPrevConstructedCell._type)._cellState);
+    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell.getCellRef()._cellState);
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_0)
@@ -654,8 +654,8 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef(0);
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -663,7 +663,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f, connection._distance);
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
@@ -690,8 +690,8 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef(0);
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_FALSE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_FALSE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -699,7 +699,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f, connection._distance);
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
@@ -730,8 +730,8 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef(0);
-    EXPECT_EQ(CellState_Constructing, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Constructing, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -739,7 +739,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f + _parameters.constructorAdditionalOffspringDistance, connection._distance);
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -770,8 +770,8 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
 
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef(0);
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -779,7 +779,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f + _parameters.constructorAdditionalOffspringDistance, connection._distance);
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(1, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -838,7 +838,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
     auto hostCell = actualData.getObjectRef(1);
     auto prevCell = actualData.getObjectRef(3);
     auto newCell = actualData.getOtherObjectRef({0, 1, 2, 3});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(approxCompare(hostCell._pos + RealVector2D(1.0f, 0.0f), newCell._pos));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -846,12 +846,12 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f, connection._distance);
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
 
-    auto muscle = std::get<MuscleDescription>(std::get<CellDescription>(prevCell._type)._cellType);
+    auto muscle = std::get<MuscleDescription>(prevCell.getCellRef()._cellType);
     if (muscleModeType == MuscleMode_AutoBending) {
         EXPECT_FALSE(std::get<AutoBendingDescription>(muscle._mode)._initialAngle.has_value());
     } else if (muscleModeType == MuscleMode_ManualBending) {
@@ -889,7 +889,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
 
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef({0});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -897,7 +897,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f, connection._distance);
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
@@ -928,8 +928,8 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
 
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef({0, 1});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_FALSE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_FALSE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(0.0f, 1.0f), newCell._pos));
 
@@ -938,7 +938,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f, connection._distance);
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(2, hostConstructor._currentBranch);
@@ -967,7 +967,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
 
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef({0});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -975,7 +975,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f, connection._distance);
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(2, hostConstructor._currentBranch);
@@ -1009,10 +1009,10 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef({0});
 
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_FALSE(actualData.hasConnection(newCell, hostCell));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -1045,8 +1045,8 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 
     auto hostCell = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newCell = actualData.getObjectsForCreature(newCreature._id).front();
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(1.0f, 0.0f), newCell._pos));
     EXPECT_FALSE(actualData.hasConnection(0, newCell._id));
     EXPECT_FALSE(actualData.hasConnection(1, newCell._id));
@@ -1076,8 +1076,8 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
 
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef({0, 1});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_TRUE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
+    EXPECT_TRUE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(1.0f, 0.0f), newCell._pos));
     EXPECT_TRUE(actualData.hasConnection(0, newCell._id));
     EXPECT_FALSE(actualData.hasConnection(1, newCell._id));
@@ -1112,7 +1112,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
 
     auto hostCell = actualData.getObjectRef(1);
     auto newCell = actualData.getOtherObjectRef({0, 1, 2});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(approxCompare(hostCell._pos + RealVector2D(0.0f, 1.0f), newCell._pos));
     EXPECT_TRUE(actualData.hasConnection(1, newCell._id));
     EXPECT_FALSE(actualData.hasConnection(0, newCell._id));
@@ -1150,14 +1150,14 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
 
     auto hostCell = actualData.getObjectRef(1);
     auto newCell = actualData.getOtherObjectRef({0, 1, 2});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
     auto connection = actualData.getConnection(hostCell, newCell);
     EXPECT_EQ(1.0f, connection._distance);
     EXPECT_TRUE(approxCompare(90.0f + 45.0f + ConstructionAngle, connection._angleFromPrevious));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
@@ -1201,7 +1201,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
     auto hostCell = actualData.getObjectRef(0);
     auto prevCell = actualData.getObjectRef(1);
     auto newCell = actualData.getOtherObjectRef({0, 1});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_FALSE(actualData.hasConnection(hostCell, prevCell));
@@ -1236,7 +1236,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
         auto hostCell = actualData.getObjectRef(0);
         auto prevCell = actualData.getObjectRef(1);
         auto newCell = actualData.getOtherObjectRef({0, 1});
-        EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+        EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
         EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
         EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
         EXPECT_FALSE(actualData.hasConnection(hostCell, prevCell));
@@ -1248,7 +1248,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
     {
         auto actualData = _simulationFacade->getSimulationData();
         auto prevCell = actualData.getObjectRef(1);
-        EXPECT_EQ(CellState_Activating, std::get<CellDescription>(prevCell._type)._cellState);
+        EXPECT_EQ(CellState_Activating, prevCell.getCellRef()._cellState);
     }
 }
 
@@ -1288,7 +1288,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
     auto hostCell = actualData.getObjectRef(1);
     auto prevCell = actualData.getObjectRef(3);
     auto newCell = actualData.getOtherObjectRef({0, 1, 2, 3});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_FALSE(actualData.hasConnection(hostCell, prevCell));
@@ -1327,7 +1327,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
     auto hostCell = actualData.getObjectRef(1);
     auto prevCell = actualData.getObjectRef(3);
     auto newCell = actualData.getOtherObjectRef({0, 1, 2, 3});
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_FALSE(actualData.hasConnection(hostCell, prevCell));
@@ -1415,13 +1415,13 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
     auto prevCell = actualData.getObjectRef(1);
     auto newCell = actualData.getOtherObjectRef({0, 1});
 
-    EXPECT_EQ(CellState_Constructing, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Constructing, newCell.getCellRef()._cellState);
     EXPECT_TRUE(actualData.hasConnection(1, newCell._id));
     EXPECT_FALSE(actualData.hasConnection(0, 1));
     EXPECT_TRUE(actualData.hasConnection(0, newCell._id));
     EXPECT_TRUE(approxCompare(180.0f + 45.0f, actualData.getConnection(newCell, hostCell)._angleFromPrevious));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(2, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -1473,7 +1473,7 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
     auto prevCell = actualData.getObjectRef(2);
     auto newCell = actualData.getOtherObjectRef({0, 1, 2});
 
-    EXPECT_EQ(CellState_Constructing, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Constructing, newCell.getCellRef()._cellState);
     EXPECT_TRUE(actualData.hasConnection(prevPrevCell, prevCell));
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_TRUE(actualData.hasConnection(newCell, hostCell));
@@ -1483,7 +1483,7 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
     EXPECT_EQ(1, hostCell._connections.size());
     EXPECT_TRUE(approxCompare(180.0f + 45.0f, actualData.getConnection(newCell, hostCell)._angleFromPrevious));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(3, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -1561,7 +1561,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
     auto prevCell = actualData.getObjectRef(2);
     auto newCell = actualData.getOtherObjectRef({0, 1, 2});
 
-    EXPECT_EQ(CellState_Constructing, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Constructing, newCell.getCellRef()._cellState);
     if (angleAlignment != ConstructorAngleAlignment_180) {
         EXPECT_TRUE(actualData.hasConnection(prevPrevCell, prevCell));
         EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
@@ -1616,7 +1616,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
         EXPECT_TRUE(approxCompare(180.0f + NodeAngle, actualData.getConnection(newCell, hostCell)._angleFromPrevious));
     }
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(3, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -1650,7 +1650,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
     auto prevCell = actualData.getObjectRef(1);
     auto newCell = actualData.getOtherObjectRef({0, 1});
 
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_TRUE(actualData.hasConnection(newCell, hostCell));
     EXPECT_EQ(1, prevCell._connections.size());
@@ -1658,7 +1658,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
     EXPECT_EQ(1, hostCell._connections.size());
     EXPECT_TRUE(approxCompare(180.0f + ConcatenationAngle, actualData.getConnection(newCell, hostCell)._angleFromPrevious));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(2, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -1708,8 +1708,8 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
     auto prevPrevPrevCell = actualData.getObjectRef(2);
     auto newCell = actualData.getOtherObjectRef({0, 1, 2, 3, 4});
 
-    EXPECT_EQ(CellState_Constructing, std::get<CellDescription>(newCell._type)._cellState);
-    EXPECT_FALSE(std::get<CellDescription>(newCell._type)._headCell);
+    EXPECT_EQ(CellState_Constructing, newCell.getCellRef()._cellState);
+    EXPECT_FALSE(newCell.getCellRef()._headCell);
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_TRUE(actualData.hasConnection(newCell, hostCell));
     EXPECT_TRUE(actualData.hasConnection(newCell, prevPrevPrevCell));
@@ -1721,7 +1721,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
     EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(newCell, prevPrevPrevCell)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(newCell, hostCell)._angleFromPrevious));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(1, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -2149,10 +2149,10 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
     auto hostCell = actualData.getObjectRef(0);
     auto newCell = actualData.getOtherObjectRef({0});
 
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(actualData.hasConnection(newCell, hostCell));
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(1, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -2191,14 +2191,14 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
     auto prevCell = actualData.getObjectRef(1);
     auto newCell = actualData.getOtherObjectRef({0, 1});
 
-    EXPECT_EQ(CellState_Activating, std::get<CellDescription>(newCell._type)._cellState);
+    EXPECT_EQ(CellState_Activating, newCell.getCellRef()._cellState);
     EXPECT_TRUE(actualData.hasConnection(newCell, hostCell));
     EXPECT_TRUE(actualData.hasConnection(newCell, prevCell));
     EXPECT_EQ(1, prevCell._connections.size());
     EXPECT_EQ(2, newCell._connections.size());
     EXPECT_EQ(1, hostCell._connections.size());
 
-    auto hostConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(hostCell._type)._cellType);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell.getCellRef()._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(2, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
@@ -2265,7 +2265,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 
     auto actualConstructedCell = actualData.getOtherObjectRef({1, 2, 3});
 
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualConstructedCell._type)._cellState);
+    EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
 }
 
 TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__frontAngle_rightSide)
@@ -2294,7 +2294,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 
     auto actualConstructedCell = actualData.getOtherObjectRef({1, 2, 3});
 
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualConstructedCell._type)._cellState);
+    EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
 }
 
 class ConstructorTests_AllShapes
@@ -2369,9 +2369,9 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             createdCellIds.emplace_back(newCell._id);
 
             if (i < n - 1) {
-                EXPECT_EQ(CellState_Constructing, std::get<CellDescription>(newCell._type)._cellState);
+                EXPECT_EQ(CellState_Constructing, newCell.getCellRef()._cellState);
             } else {
-                EXPECT_EQ(CellState_Ready, std::get<CellDescription>(newCell._type)._cellState);
+                EXPECT_EQ(CellState_Ready, newCell.getCellRef()._cellState);
             }
             EXPECT_TRUE(actualData.hasConnection(hostCell, newCell));
         }
@@ -2495,7 +2495,7 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     auto constructedCells = actualData.getOtherObjects({1, 2, 3, 4, 5, 6});
     ObjectDescription object1, object2;
     for (auto const& object : constructedCells) {
-        if (std::get<CellDescription>(object._type)._parentNodeIndex == 0) {
+        if (object.getCellRef()._parentNodeIndex == 0) {
             object1 = object;
         } else {
             object2 = object;
@@ -2577,8 +2577,8 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
     auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
 
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
-        EXPECT_TRUE(approxCompare(normalCellEnergy, std::get<CellDescription>(actualData.getObjectRef(0)._type)._usableEnergy));
-        auto newConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(actualConstructedCell._type)._cellType);
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
+        auto newConstructor = std::get<ConstructorDescription>(actualConstructedCell.getCellRef()._cellType);
         if (separation == Separation::Yes) {
             EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
         } else {
@@ -2586,9 +2586,9 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
         }
     } else {
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), std::get<CellDescription>(actualConstructedCell._type)._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell.getCellRef()._usableEnergy));
         } else {
-            EXPECT_TRUE(approxCompare(normalCellEnergy, std::get<CellDescription>(actualConstructedCell._type)._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
         }
     }
 }
@@ -2680,12 +2680,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
 
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
-        EXPECT_TRUE(approxCompare(normalCellEnergy, std::get<CellDescription>(actualData.getObjectRef(0)._type)._usableEnergy));
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
     } else {
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 + 1), std::get<CellDescription>(actualConstructedCell._type)._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 + 1), actualConstructedCell.getCellRef()._usableEnergy));
         } else {
-            EXPECT_TRUE(approxCompare(normalCellEnergy, std::get<CellDescription>(actualConstructedCell._type)._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
         }
     }
 }
@@ -2754,8 +2754,8 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
 
     // Verify the constructed cell is a depot with stored energy
-    EXPECT_EQ(CellType_Depot, std::get<CellDescription>(actualConstructedCell._type).getCellType());
-    auto const& depot = std::get<DepotDescription>(std::get<CellDescription>(actualConstructedCell._type)._cellType);
+    EXPECT_EQ(CellType_Depot, actualConstructedCell.getCellRef().getCellType());
+    auto const& depot = std::get<DepotDescription>(actualConstructedCell.getCellRef()._cellType);
     EXPECT_TRUE(approxCompare(InitialStoredUsableEnergy, depot._storedUsableEnergy));
     if (provideEnergy != ProvideEnergy_FreeGeneration) {
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));

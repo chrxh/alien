@@ -66,8 +66,8 @@ TEST_F(InjectorTests, noTargetFound)
     auto actualInjector = actualData.getObjectRef(1);
 
     // Injector should have a signal with success value = 0
-    if (std::get<CellDescription>(actualInjector._type)._signalState == SignalState_Active) {
-        EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualInjector._type)._signal._channels[Channels::InjectorSuccess]));
+    if (actualInjector.getCellRef()._signalState == SignalState_Active) {
+        EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
     }
 }
 
@@ -88,11 +88,11 @@ TEST_F(InjectorTests, successfulInjection)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
-    auto actualTargetConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(actualData.getObjectRef(100)._type)._cellType);
+    auto actualTargetConstructor = std::get<ConstructorDescription>(actualData.getObjectRef(100).getCellRef()._cellType);
 
     // Injector should have a signal with success value > 0
-    ASSERT_TRUE(std::get<CellDescription>(actualInjector._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(std::get<CellDescription>(actualInjector._type)._signal._channels[Channels::InjectorSuccess] > NEAR_ZERO);
+    ASSERT_TRUE(actualInjector.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess] > NEAR_ZERO);
 
     // Target constructor should have the injector's geneIndex
     EXPECT_EQ(2, actualTargetConstructor._geneIndex);
@@ -113,13 +113,13 @@ TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
-    auto origConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(data.getObjectRef(3)._type)._cellType);
+    auto origConstructor = std::get<ConstructorDescription>(data.getObjectRef(3).getCellRef()._cellType);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(actualData.getObjectRef(3)._type)._cellType);
+    auto actualConstructor = std::get<ConstructorDescription>(actualData.getObjectRef(3).getCellRef()._cellType);
 
     // Constructor's geneIndex should remain unchanged
     EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
@@ -140,13 +140,13 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
     }, CreatureDescription().id(2));
     data.addConnection(100, 101);
 
-    auto origConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(data.getObjectRef(100)._type)._cellType);
+    auto origConstructor = std::get<ConstructorDescription>(data.getObjectRef(100).getCellRef()._cellType);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(actualData.getObjectRef(100)._type)._cellType);
+    auto actualConstructor = std::get<ConstructorDescription>(actualData.getObjectRef(100).getCellRef()._cellType);
 
     // Constructor's geneIndex should remain unchanged
     EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
@@ -178,13 +178,13 @@ TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
     }, CreatureDescription().id(2));
     data.addConnection(100, 101);
 
-    auto origConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(data.getObjectRef(100)._type)._cellType);
+    auto origConstructor = std::get<ConstructorDescription>(data.getObjectRef(100).getCellRef()._cellType);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(actualData.getObjectRef(100)._type)._cellType);
+    auto actualConstructor = std::get<ConstructorDescription>(actualData.getObjectRef(100).getCellRef()._cellType);
 
     // Constructor's geneIndex should remain unchanged because ray is blocked
     EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
@@ -209,7 +209,7 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualConstructor = std::get<ConstructorDescription>(std::get<CellDescription>(actualData.getObjectRef(100)._type)._cellType);
+    auto actualConstructor = std::get<ConstructorDescription>(actualData.getObjectRef(100).getCellRef()._cellType);
 
     // Constructor's geneIndex should be the injector's geneIndex
     EXPECT_EQ(2, actualConstructor._geneIndex);

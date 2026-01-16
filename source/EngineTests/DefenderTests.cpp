@@ -66,7 +66,7 @@
 //    auto actualTarget = getCell(actualData, 3);
 //
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-//    EXPECT_TRUE(std::get<CellDescription>(actualAttacker._type)._signal._channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualAttacker.getCellRef()._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_LT(origTarget._energy, actualTarget._energy + 0.1f);
 //}
 //
@@ -102,7 +102,7 @@
 //    auto actualTarget = getCell(actualData, 3);
 //
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-//    EXPECT_TRUE(std::get<CellDescription>(actualAttacker._type)._signal._channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualAttacker.getCellRef()._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_GT(origTarget._energy, actualTarget._energy + 0.1f);
 //}
 //
@@ -138,15 +138,15 @@
 //    auto actualData = _simulationFacade->getSimulationData();
 //
 //    auto actualInjector = getCell(actualData, 1);
-//    auto actualInjectorFunc = std::get<InjectorDescription>(std::get<CellDescription>(actualInjector._type)._cellType);
+//    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector.getCellRef()._cellType);
 //
 //    auto actualTarget = getCell(actualData, 3);
-//    auto actualTargetFunc = std::get<ConstructorDescription>(std::get<CellDescription>(actualTarget._type)._cellType);
+//    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget.getCellRef()._cellType);
 //
 //    auto origInjector = getCell(data, 1);
-//    auto origInjectorFunc = std::get<InjectorDescription>(std::get<CellDescription>(origInjector._type)._cellType);
+//    auto origInjectorFunc = std::get<InjectorDescription>(origInjector.getCellRef()._cellType);
 //
-//    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualInjector._type)._signal._channels[0]));
+//    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._signal._channels[0]));
 //    EXPECT_EQ(0, actualInjectorFunc._counter);
 //    EXPECT_EQ(origInjectorFunc._genome, actualTargetFunc._genome);
 //}
@@ -183,18 +183,18 @@
 //    auto actualData = _simulationFacade->getSimulationData();
 //
 //    auto actualInjector = getCell(actualData, 1);
-//    auto actualInjectorFunc = std::get<InjectorDescription>(std::get<CellDescription>(actualInjector._type)._cellType);
+//    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector.getCellRef()._cellType);
 //
 //    auto origTarget = getCell(data, 3);
-//    auto origTargetFunc = std::get<ConstructorDescription>(std::get<CellDescription>(origTarget._type)._cellType);
+//    auto origTargetFunc = std::get<ConstructorDescription>(origTarget.getCellRef()._cellType);
 //
 //    auto actualTarget = getCell(actualData, 3);
-//    auto actualTargetFunc = std::get<ConstructorDescription>(std::get<CellDescription>(actualTarget._type)._cellType);
+//    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget.getCellRef()._cellType);
 //
 //    auto origInjector = getCell(data, 1);
-//    auto origInjectorFunc = std::get<InjectorDescription>(std::get<CellDescription>(origInjector._type)._cellType);
+//    auto origInjectorFunc = std::get<InjectorDescription>(origInjector.getCellRef()._cellType);
 //
-//    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualInjector._type)._signal._channels[0]));
+//    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._signal._channels[0]));
 //    EXPECT_EQ(4, actualInjectorFunc._counter);
 //    EXPECT_EQ(origTargetFunc._genome, actualTargetFunc._genome);
 //}

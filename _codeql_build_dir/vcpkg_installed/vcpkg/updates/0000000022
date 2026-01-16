@@ -1,0 +1,8 @@
+Package: boost-core
+Version: 1.90.0
+Depends: boost-assert, boost-cmake, boost-config, boost-headers, boost-throw-exception
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 7eed4ec397f3474c1e54f8fccfd9632e5abfd17c78299d78231ef94ad1cad166
+Description: Boost core module
+Status: install ok half-installed

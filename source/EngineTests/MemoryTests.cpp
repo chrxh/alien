@@ -56,7 +56,7 @@ TEST_F(MemoryTests, signalIntegrator_firstSignal_storesSignalInMemory)
 
     // After first signal, the memory cell should store the incoming signal
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memory = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memory = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     EXPECT_EQ(1u, memory._signalEntries.size());
     EXPECT_TRUE(approxCompare(signal, memory._signalEntries[0]._channels));
 }
@@ -85,12 +85,12 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memory = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memory = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     EXPECT_EQ(1u, memory._signalEntries.size());
 
     // Expected: (1-0.25)*0.8 + 0.25*0.2 = 0.6 + 0.05 = 0.65
     std::vector<float> expectedSignal = {0.65f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    EXPECT_TRUE(approxCompare(expectedSignal, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(expectedSignal, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
@@ -115,7 +115,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
 
     // With weight 1.0, stored value = (1-1)*stored + 1*incoming = incoming
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memory = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memory = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     EXPECT_TRUE(approxCompare(incomingSignal, memory._signalEntries[0]._channels));
 }
 
@@ -141,7 +141,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfZero_preservesStoredSignal)
 
     // With weight 0.0, stored value = (1-0)*stored + 0*incoming = stored
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memory = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memory = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     EXPECT_TRUE(approxCompare(storedSignal, memory._signalEntries[0]._channels));
 }
 
@@ -160,7 +160,7 @@ TEST_F(MemoryTests, signalDelay_firstSignal_storesSignalInMemory)
 
     // After first signal, the memory cell should store the incoming signal
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memory = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memory = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalDelay = std::get<SignalDelayDescription>(memory._mode);
 
     // Signal should be stored in memory
@@ -171,8 +171,8 @@ TEST_F(MemoryTests, signalDelay_firstSignal_storesSignalInMemory)
     EXPECT_TRUE(approxCompare(signal, memory._signalEntries[0]._channels));
 
     // Verify the output signal (buffer not full yet, so signal should be unchanged)
-    EXPECT_EQ(SignalState_Active, std::get<CellDescription>(memoryCell._type)._signalState);
-    EXPECT_TRUE(approxCompare(signal, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
+    EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf0_outputsSameCycleSignal)
@@ -186,14 +186,14 @@ TEST_F(MemoryTests, signalDelay_delayOf0_outputsSameCycleSignal)
 
     // With delay of 1, after first cycle, the buffer is full
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memory = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memory = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalDelay = std::get<SignalDelayDescription>(memory._mode);
 
     EXPECT_EQ(0, signalDelay._numSignalEntriesInitialized);
 
     // Verify the output signal
-    EXPECT_EQ(SignalState_Active, std::get<CellDescription>(memoryCell._type)._signalState);
-    EXPECT_TRUE(approxCompare(signal, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
+    EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
@@ -214,15 +214,15 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
 
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memory = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memory = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalDelay = std::get<SignalDelayDescription>(memory._mode);
 
     // Buffer should be fully initialized after 2 signals
     EXPECT_EQ(1, signalDelay._numSignalEntriesInitialized);
 
     // The output signal should be signal1 (the first signal, delayed by 2)
-    EXPECT_EQ(SignalState_Active, std::get<CellDescription>(memoryCell._type)._signalState);
-    EXPECT_TRUE(approxCompare(signal1, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
+    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
@@ -252,10 +252,10 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     // After 3 signals, the buffer is full and output should be signal1
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
-    auto& signalDelay = std::get<SignalDelayDescription>(std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType)._mode);
+    auto& signalDelay = std::get<SignalDelayDescription>(std::get<MemoryDescription>(memoryCell.getCellRef()._cellType)._mode);
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
-    EXPECT_EQ(SignalState_Active, std::get<CellDescription>(memoryCell._type)._signalState);
-    EXPECT_TRUE(approxCompare(signal1, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
+    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 
     // Waiting
     _simulationFacade->calcTimesteps(2);
@@ -268,8 +268,8 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
 
     actualData = _simulationFacade->getSimulationData();
     memoryCell = actualData.getObjectRef(1);
-    EXPECT_EQ(SignalState_Active, std::get<CellDescription>(memoryCell._type)._signalState);
-    EXPECT_TRUE(approxCompare(signal2, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
+    EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
@@ -284,12 +284,12 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
-    auto& signalDelay = std::get<SignalDelayDescription>(std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType)._mode);
+    auto& signalDelay = std::get<SignalDelayDescription>(std::get<MemoryDescription>(memoryCell.getCellRef()._cellType)._mode);
 
     // After first signal, buffer not full yet
     EXPECT_EQ(1, signalDelay._numSignalEntriesInitialized);
     // Signal should still be the incoming signal1 (not modified by delay output)
-    EXPECT_TRUE(approxCompare(signal1, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 
     // Waiting
     _simulationFacade->calcTimesteps(2);
@@ -302,14 +302,14 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
 
     actualData = _simulationFacade->getSimulationData();
     memoryCell = actualData.getObjectRef(1);
-    signalDelay = std::get<SignalDelayDescription>(std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType)._mode);
+    signalDelay = std::get<SignalDelayDescription>(std::get<MemoryDescription>(memoryCell.getCellRef()._cellType)._mode);
 
     // After second signal, buffer is full
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
 
     // Signal should still be the incoming signal2 (not modified by delay output)
-    EXPECT_EQ(SignalState_Active, std::get<CellDescription>(memoryCell._type)._signalState);
-    EXPECT_TRUE(approxCompare(signal2, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
+    EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._signal._channels));
 }
 
 //*****************
@@ -328,7 +328,7 @@ TEST_F(MemoryTests, signalRecorder_positiveChannel0_startsRecording)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Should be in recording state with 1 entry recorded
@@ -356,7 +356,7 @@ TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
 
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Recording should be complete, back to idle
@@ -383,13 +383,13 @@ TEST_F(MemoryTests, signalRecorder_negativeChannel0_startsReading)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Should be in reading state, output first stored signal
     EXPECT_EQ(SignalRecorderState_Reading, signalRecorder._state);
     EXPECT_EQ(1, signalRecorder._numReadSignalEntries);
-    EXPECT_TRUE(approxCompare(storedSignal, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
@@ -416,13 +416,13 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
 
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Reading should be complete, back to idle
     EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);
     EXPECT_EQ(0, signalRecorder._numReadSignalEntries);
-    EXPECT_TRUE(approxCompare(storedSignal2, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(storedSignal2, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
@@ -440,7 +440,7 @@ TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
 
     auto memoryCell = actualData.getObjectRef(1);
     // Should output the pre-stored signal
-    EXPECT_TRUE(approxCompare(storedSignal, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
@@ -462,7 +462,7 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
 
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Should still be recording, with 2 entries recorded (including the negative signal)
@@ -482,7 +482,7 @@ TEST_F(MemoryTests, signalRecorder_readOnly_readingInsteadOfRecording)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Should remain in idle state because readOnly prevents recording
@@ -504,12 +504,12 @@ TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
     auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Reading should work even with readOnly = true
     EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);  // Reading completes with only 1 entry
-    EXPECT_TRUE(approxCompare(storedSignal, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(storedSignal, memoryCell.getCellRef()._signal._channels));
 }
 
 //******************
@@ -536,7 +536,7 @@ TEST_F(MemoryTests, signalStorage_readWithPositiveInput_readsFromIndex)
 
     auto memoryCell = actualData.getObjectRef(1);
     // With channel[0] = 0.5, index = 0.5 * (3 - 1) = 1
-    EXPECT_TRUE(approxCompare(entry1, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(entry1, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalStorage_readWithZeroInput_readsFromIndex0)
@@ -556,7 +556,7 @@ TEST_F(MemoryTests, signalStorage_readWithZeroInput_readsFromIndex0)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    EXPECT_TRUE(approxCompare(entry0, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalStorage_readWithMaxInput_readsFromLastIndex)
@@ -579,7 +579,7 @@ TEST_F(MemoryTests, signalStorage_readWithMaxInput_readsFromLastIndex)
 
     auto memoryCell = actualData.getObjectRef(1);
     // With channel[0] = 1.0, index = 1.0 * (3 - 1) = 2
-    EXPECT_TRUE(approxCompare(entry2, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(entry2, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalStorage_writeWithNegativeInput_writesToIndex)
@@ -601,7 +601,7 @@ TEST_F(MemoryTests, signalStorage_writeWithNegativeInput_writesToIndex)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
 
     // Entry at index 1 should now contain the input signal
     EXPECT_TRUE(approxCompare(inputSignal, memoryDesc._signalEntries[1]._channels));
@@ -628,7 +628,7 @@ TEST_F(MemoryTests, signalStorage_readOnly_readsWithPositiveInput)
 
     auto memoryCell = actualData.getObjectRef(1);
     // With 2 entries and input 0.4, index = 0.4 * (2 - 1)) = 0.4
-    EXPECT_TRUE(approxCompare(entry0, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalStorage_readOnly_readsWithNegativeInput)
@@ -648,10 +648,10 @@ TEST_F(MemoryTests, signalStorage_readOnly_readsWithNegativeInput)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
 
     // With input = -1.0 and readOnly = true, index = abs(-1.0) * (2 - 1) = 1
-    EXPECT_TRUE(approxCompare(entry1, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(entry1, memoryCell.getCellRef()._signal._channels));
 
     // Memory should be unchanged (no write occurred)
     EXPECT_TRUE(approxCompare(entry0, memoryDesc._signalEntries[0]._channels));
@@ -674,7 +674,7 @@ TEST_F(MemoryTests, signalStorage_singleEntry_alwaysAccessesIndex0)
 
     auto memoryCell = actualData.getObjectRef(1);
     // With 1 entry, index = 0.8 * (1 - 1) = 0
-    EXPECT_TRUE(approxCompare(entry0, std::get<CellDescription>(memoryCell._type)._signal._channels));
+    EXPECT_TRUE(approxCompare(entry0, memoryCell.getCellRef()._signal._channels));
 }
 
 TEST_F(MemoryTests, signalStorage_writeWithMaxNegativeInput_writesToLastIndex)
@@ -694,7 +694,7 @@ TEST_F(MemoryTests, signalStorage_writeWithMaxNegativeInput_writesToLastIndex)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
-    auto& memoryDesc = std::get<MemoryDescription>(std::get<CellDescription>(memoryCell._type)._cellType);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell.getCellRef()._cellType);
 
     // Entry at index 1 should now contain the input signal
     EXPECT_TRUE(approxCompare(inputSignal, memoryDesc._signalEntries[1]._channels));

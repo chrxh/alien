@@ -1,0 +1,8 @@
+Package: boost-preprocessor
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-headers
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 5c1177220ce7565ac98938283fc8510c038adbff4d0600dfc92337fd2cc20dc5
+Description: Boost preprocessor module
+Status: install ok installed

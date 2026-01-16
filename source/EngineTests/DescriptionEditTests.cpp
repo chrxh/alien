@@ -194,7 +194,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
     auto cells = GetParam() == CellsOnCreature::No ? data._objects : data.getObjectsForCreature(data._creatures.front()._id);
     std::map<int, ObjectDescription> ageToCell;
     for (auto const& object : cells) {
-        ageToCell.insert_or_assign(std::get<CellDescription>(object._type)._age, object);
+        ageToCell.insert_or_assign(object.getCellRef()._age, object);
     }
     EXPECT_EQ(10, ageToCell.size());
 
@@ -327,7 +327,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     // Only look at cells without creature
     std::optional<ObjectDescription> cellWithoutConnection, cellWithConnection;
     for (auto const& object : data._objects) {
-        if (!std::get<CellDescription>(object._type)._creatureId.has_value()) {
+        if (!object.getCellRef()._creatureId.has_value()) {
             if (object._connections.empty()) {
                 cellWithoutConnection = object;
             } else {
@@ -370,17 +370,17 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 
     std::optional<ObjectDescription> constructor, base;
     for (auto const& object : data._objects) {
-        if (std::get<CellDescription>(object._type).getCellType() == CellType_Constructor) {
+        if (object.getCellRef().getCellType() == CellType_Constructor) {
             constructor = object;
         }
-        if (std::get<CellDescription>(object._type).getCellType() == CellType_Base) {
+        if (object.getCellRef().getCellType() == CellType_Base) {
             base = object;
         }
     }
     ASSERT_TRUE(constructor.has_value());
     ASSERT_TRUE(base.has_value());
 
-    EXPECT_EQ(base->_id, std::get<ConstructorDescription>(std::get<CellDescription>(constructor->_type)._cellType)._lastConstructedCellId);
+    EXPECT_EQ(base->_id, std::get<ConstructorDescription>(constructor->getCellRef()._cellType)._lastConstructedCellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notContained)
@@ -404,17 +404,17 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
 
     std::optional<ObjectDescription> constructor, base;
     for (auto const& object : data._objects) {
-        if (std::get<CellDescription>(object._type).getCellType() == CellType_Constructor) {
+        if (object.getCellRef().getCellType() == CellType_Constructor) {
             constructor = object;
         }
-        if (std::get<CellDescription>(object._type).getCellType() == CellType_Base) {
+        if (object.getCellRef().getCellType() == CellType_Base) {
             base = object;
         }
     }
     ASSERT_TRUE(constructor.has_value());
     ASSERT_TRUE(base.has_value());
 
-    EXPECT_EQ(2, std::get<ConstructorDescription>(std::get<CellDescription>(constructor->_type)._cellType)._lastConstructedCellId);
+    EXPECT_EQ(2, std::get<ConstructorDescription>(constructor->getCellRef()._cellType)._lastConstructedCellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)

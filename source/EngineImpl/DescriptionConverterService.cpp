@@ -153,7 +153,7 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
 
         if (to.objects[i].typeData.cell.belongToCreature) {
             auto creatureTOIndex = to.objects[i].typeData.cell.creatureIndex;
-            std::get<CellDescription>(object._type)._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
+            object.getCellRef()._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
         }
         result._objects.emplace_back(object);
     }
@@ -188,7 +188,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
 
     std::unordered_map<uint64_t, uint64_t> objectIndexTOById;
     for (auto const& object : description._objects) {
-        convertObjectToTO(objectTOs, heap, objectIndexTOById, object, std::get<CellDescription>(object._type)._creatureId, creatureTOIndexById);
+        convertObjectToTO(objectTOs, heap, objectIndexTOById, object, object.getCellRef()._creatureId, creatureTOIndexById);
     }
     for (auto const& object : description._objects) {
         setConnections(objectTOs, object, objectIndexTOById);
@@ -248,7 +248,7 @@ DescriptionConverterService::DescriptionConverterService()
 ObjectDescription DescriptionConverterService::createObjectDescription(TO const& to, int objectIndex) const
 {
     ObjectDescription result(false);
-    CellDescription& cellDesc = std::get<CellDescription>(result._type);
+    CellDescription& cellDesc = result.getCellRef();
 
     auto const& objectTO = to.objects[objectIndex];
     result._id = objectTO.id;
@@ -1175,7 +1175,7 @@ void DescriptionConverterService::convertObjectToTO(
     std::optional<uint64_t> const& creatureId,
     std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const
 {
-    CellDescription const& cellDesc = std::get<CellDescription>(objectDesc._type);
+    CellDescription const& cellDesc = objectDesc.getCellRef();
 
     auto objectIndex = objectTOs.size();
     objectTOs.resize(objectIndex + 1);
@@ -1195,7 +1195,7 @@ void DescriptionConverterService::convertObjectToTO(
     objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;
     objectTO.stiffness = objectDesc._stiffness;
     objectTO.typeData.cell.cellState = cellDesc._cellState;
-    objectTO.typeData.cell.cellType = objectDesc.getCellType();
+    objectTO.typeData.cell.cellType = cellDesc.getCellType();
     objectTO.typeData.cell.cellTriggered = cellDesc._cellTriggered;
     objectTO.typeData.cell.nodeIndex = cellDesc._nodeIndex;
     objectTO.typeData.cell.parentNodeIndex = cellDesc._parentNodeIndex;
@@ -1204,7 +1204,7 @@ void DescriptionConverterService::convertObjectToTO(
     objectTO.typeData.cell.frontAngleId = cellDesc._frontAngleId;
     objectTO.typeData.cell.headCell = cellDesc._headCell;
 
-    auto cellType = objectDesc.getCellType();
+    auto cellType = cellDesc.getCellType();
     if (cellDesc._neuralNetwork.has_value()) {
         objectTO.typeData.cell.neuralNetworkDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(NeuralNetworkTO));

@@ -42,9 +42,9 @@ TEST_F(DetonatorTests, doNothing)
 
     EXPECT_EQ(1, actualData._objects.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_FALSE(std::get<CellDescription>(actualDetonatorCell._type)._signalState == SignalState_Active);
-    EXPECT_EQ(14, std::get<DetonatorDescription>(std::get<CellDescription>(actualDetonatorCell._type)._cellType)._countdown);
-    EXPECT_EQ(DetonatorState_Ready, std::get<DetonatorDescription>(std::get<CellDescription>(actualDetonatorCell._type)._cellType)._state);
+    EXPECT_FALSE(actualDetonatorCell.getCellRef()._signalState == SignalState_Active);
+    EXPECT_EQ(14, std::get<DetonatorDescription>(actualDetonatorCell.getCellRef()._cellType)._countdown);
+    EXPECT_EQ(DetonatorState_Ready, std::get<DetonatorDescription>(actualDetonatorCell.getCellRef()._cellType)._state);
 }
 
 TEST_F(DetonatorTests, activateDetonator)
@@ -64,9 +64,9 @@ TEST_F(DetonatorTests, activateDetonator)
 
     EXPECT_EQ(2, actualData._objects.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualDetonatorCell._type)._signal._channels[0]));
-    EXPECT_EQ(9, std::get<DetonatorDescription>(std::get<CellDescription>(actualDetonatorCell._type)._cellType)._countdown);
-    EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(std::get<CellDescription>(actualDetonatorCell._type)._cellType)._state);
+    EXPECT_TRUE(approxCompare(1.0f, actualDetonatorCell.getCellRef()._signal._channels[0]));
+    EXPECT_EQ(9, std::get<DetonatorDescription>(actualDetonatorCell.getCellRef()._cellType)._countdown);
+    EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(actualDetonatorCell.getCellRef()._cellType)._state);
 }
 
 TEST_F(DetonatorTests, explosion)
@@ -86,9 +86,9 @@ TEST_F(DetonatorTests, explosion)
 
     EXPECT_EQ(2, actualData._objects.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_FALSE(std::get<CellDescription>(actualDetonatorCell._type)._signalState == SignalState_Active);
-    EXPECT_EQ(0, std::get<DetonatorDescription>(std::get<CellDescription>(actualDetonatorCell._type)._cellType)._countdown);
-    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(std::get<CellDescription>(actualDetonatorCell._type)._cellType)._state);
+    EXPECT_FALSE(actualDetonatorCell.getCellRef()._signalState == SignalState_Active);
+    EXPECT_EQ(0, std::get<DetonatorDescription>(actualDetonatorCell.getCellRef()._cellType)._countdown);
+    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell.getCellRef()._cellType)._state);
     EXPECT_TRUE(Math::length(actualOtherCell._vel) > NEAR_ZERO);
 }
 
@@ -107,9 +107,9 @@ TEST_F(DetonatorTests, chainExplosion)
     auto actualDetonatorCell = actualData.getObjectRef(1);
     auto actualOtherCell = actualData.getObjectRef(2);
 
-    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(std::get<CellDescription>(actualDetonatorCell._type)._cellType)._state);
-    EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(std::get<CellDescription>(actualOtherCell._type)._cellType)._state);
-    EXPECT_EQ(1, std::get<DetonatorDescription>(std::get<CellDescription>(actualOtherCell._type)._cellType)._countdown);
+    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell.getCellRef()._cellType)._state);
+    EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(actualOtherCell.getCellRef()._cellType)._state);
+    EXPECT_EQ(1, std::get<DetonatorDescription>(actualOtherCell.getCellRef()._cellType)._countdown);
 }
 
 TEST_F(DetonatorTests, explosionAlsoIfDying)
@@ -126,5 +126,5 @@ TEST_F(DetonatorTests, explosionAlsoIfDying)
     auto actualDetonatorCell = actualData.getObjectRef(1);
 
     EXPECT_EQ(1, actualData._objects.size());
-    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(std::get<CellDescription>(actualDetonatorCell._type)._cellType)._state);
+    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell.getCellRef()._cellType)._state);
 }

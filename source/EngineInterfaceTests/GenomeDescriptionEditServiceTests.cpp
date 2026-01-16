@@ -956,9 +956,9 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
     // Find cells for each creature based on index in cells array
     std::vector<ObjectDescription> cells1, cells2;
     for (auto const& object : result.description._objects) {
-        if (std::get<CellDescription>(object._type)._creatureId == result.description._creatures.at(0)._id) {
+        if (object.getCellRef()._creatureId == result.description._creatures.at(0)._id) {
             cells1.push_back(object);
-        } else if (std::get<CellDescription>(object._type)._creatureId == result.description._creatures.at(1)._id) {
+        } else if (object.getCellRef()._creatureId == result.description._creatures.at(1)._id) {
             cells2.push_back(object);
         }
     }
@@ -1169,7 +1169,7 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
 
     // Should have the cell associated with the seed creature
     ASSERT_EQ(1, result.at(0)._objects.size());
-    EXPECT_EQ(seedId, std::get<CellDescription>(result.at(0)._objects.at(0)._type)._creatureId);
+    EXPECT_EQ(seedId, result.at(0)._objects.at(0).getCellRef()._creatureId);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSeed_withOffspring)
@@ -1219,7 +1219,7 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     // Verify cells are associated with correct creatures
     std::set<uint64_t> cellCreatureIds;
     for (auto const& object : result.at(0)._objects) {
-        cellCreatureIds.insert(*std::get<CellDescription>(object._type)._creatureId);
+        cellCreatureIds.insert(*object.getCellRef()._creatureId);
     }
     EXPECT_TRUE(cellCreatureIds.contains(seedId));
     EXPECT_TRUE(cellCreatureIds.contains(offspringId));
@@ -1290,7 +1290,7 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     ASSERT_EQ(2, result.at(0)._objects.size());
     std::set<uint64_t> phenotype1CellCreatureIds;
     for (auto const& object : result.at(0)._objects) {
-        phenotype1CellCreatureIds.insert(*std::get<CellDescription>(object._type)._creatureId);
+        phenotype1CellCreatureIds.insert(*object.getCellRef()._creatureId);
     }
     EXPECT_TRUE(phenotype1CellCreatureIds.contains(seed1Id));
     EXPECT_TRUE(phenotype1CellCreatureIds.contains(offspring1Id));
@@ -1299,7 +1299,7 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     ASSERT_EQ(2, result.at(1)._objects.size());
     std::set<uint64_t> phenotype2CellCreatureIds;
     for (auto const& object : result.at(1)._objects) {
-        phenotype2CellCreatureIds.insert(*std::get<CellDescription>(object._type)._creatureId);
+        phenotype2CellCreatureIds.insert(*object.getCellRef()._creatureId);
     }
     EXPECT_TRUE(phenotype2CellCreatureIds.contains(seed2Id));
     EXPECT_TRUE(phenotype2CellCreatureIds.contains(offspring2Id));

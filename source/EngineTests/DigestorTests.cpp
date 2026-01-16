@@ -41,8 +41,8 @@ TEST_F(DigestorTests, conversion_noEnergyConversion)
     auto actualDigestor = actualData.getObjectRef(0);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(actualDigestor._type)._rawEnergy, std::get<CellDescription>(origDigestor._type)._rawEnergy));
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(actualDigestor._type)._usableEnergy, std::get<CellDescription>(origDigestor._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(actualDigestor.getCellRef()._rawEnergy, origDigestor.getCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(actualDigestor.getCellRef()._usableEnergy, origDigestor.getCellRef()._usableEnergy));
 }
 
 TEST_F(DigestorTests, conversion_highEnergyConversionRate)
@@ -60,7 +60,7 @@ TEST_F(DigestorTests, conversion_highEnergyConversionRate)
     auto actualDigestor = actualData.getObjectRef(0);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(std::get<CellDescription>(actualDigestor._type)._rawEnergy < std::get<CellDescription>(origDigestor._type)._rawEnergy - NEAR_ZERO);
-    EXPECT_TRUE(std::get<CellDescription>(actualDigestor._type)._usableEnergy > std::get<CellDescription>(origDigestor._type)._usableEnergy + NEAR_ZERO);
+    EXPECT_TRUE(actualDigestor.getCellRef()._rawEnergy < origDigestor.getCellRef()._rawEnergy - NEAR_ZERO);
+    EXPECT_TRUE(actualDigestor.getCellRef()._usableEnergy > origDigestor.getCellRef()._usableEnergy + NEAR_ZERO);
 }
 

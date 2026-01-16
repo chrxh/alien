@@ -113,7 +113,7 @@ namespace
     {
         ObjectDescription* refCell = nullptr;
         for (auto& object : description._objects) {
-            if (std::get<CellDescription>(object._type)._creatureId == creatureId) {
+            if (object.getCellRef()._creatureId == creatureId) {
                 if (!refCell) {
                     refCell = &object;
                 }
@@ -129,7 +129,7 @@ namespace
         auto cache = description.createCache();
 
         for (auto& object : description._objects) {
-            if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
+            if (object.getCellRef()._creatureId.has_value()) {
                 continue;
             }
             std::vector<ConnectionDescription> newConnections;
@@ -406,13 +406,13 @@ void DescriptionEditService::randomizeCellColors(Description& description, std::
     // Step 2: Iterate over cells and apply stored color values (including cells without creatureId)
     auto nonCreatureColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
     for (auto& object : description._objects) {
-        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-            auto it = cellColorsByCreatureId.find(std::get<CellDescription>(object._type)._creatureId.value());
+        if (object.getCellRef()._creatureId.has_value()) {
+            auto it = cellColorsByCreatureId.find(object.getCellRef()._creatureId.value());
             if (it != cellColorsByCreatureId.end()) {
                 object._color = it->second;
             }
         } else {
-            std::get<CellDescription>(object._type)._usableEnergy = nonCreatureColor;
+            object.getCellRef()._usableEnergy = nonCreatureColor;
         }
     }
 }
@@ -440,13 +440,13 @@ void DescriptionEditService::randomizeEnergies(Description& description, float m
     // Step 2: Iterate over cells and apply stored energy values (including cells without creatureId)
     auto nonCreatureEnergy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
     for (auto& object : description._objects) {
-        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-            auto it = creatureEnergies.find(std::get<CellDescription>(object._type)._creatureId.value());
+        if (object.getCellRef()._creatureId.has_value()) {
+            auto it = creatureEnergies.find(object.getCellRef()._creatureId.value());
             if (it != creatureEnergies.end()) {
-                std::get<CellDescription>(object._type)._usableEnergy = it->second;
+                object.getCellRef()._usableEnergy = it->second;
             }
         } else {
-            std::get<CellDescription>(object._type)._usableEnergy = nonCreatureEnergy;
+            object.getCellRef()._usableEnergy = nonCreatureEnergy;
         }
     }
 }
@@ -462,13 +462,13 @@ void DescriptionEditService::randomizeAges(Description& description, int minAge,
     // Step 2: Iterate over cells and apply stored age values (including cells without creatureId)
     auto nonCreatureAge = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
     for (auto& object : description._objects) {
-        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-            auto it = creatureAges.find(std::get<CellDescription>(object._type)._creatureId.value());
+        if (object.getCellRef()._creatureId.has_value()) {
+            auto it = creatureAges.find(object.getCellRef()._creatureId.value());
             if (it != creatureAges.end()) {
-                std::get<CellDescription>(object._type)._age = it->second;
+                object.getCellRef()._age = it->second;
             }
         } else {
-            std::get<CellDescription>(object._type)._age = nonCreatureAge;
+            object.getCellRef()._age = nonCreatureAge;
         }
     }
 }
@@ -484,14 +484,14 @@ void DescriptionEditService::randomizeCountdowns(Description& description, int m
     // Step 2: Iterate over cells and apply stored countdown values (including cells without creatureId)
     auto nonCreatureCountdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
     for (auto& object : description._objects) {
-        if (std::get<CellDescription>(object._type).getCellType() == CellType_Detonator) {
-            if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-                auto it = creatureCountdowns.find(std::get<CellDescription>(object._type)._creatureId.value());
+        if (object.getCellRef().getCellType() == CellType_Detonator) {
+            if (object.getCellRef()._creatureId.has_value()) {
+                auto it = creatureCountdowns.find(object.getCellRef()._creatureId.value());
                 if (it != creatureCountdowns.end()) {
-                    std::get<DetonatorDescription>(std::get<CellDescription>(object._type)._cellType)._countdown = it->second;
+                    std::get<DetonatorDescription>(object.getCellRef()._cellType)._countdown = it->second;
                 }
             } else {
-                std::get<DetonatorDescription>(std::get<CellDescription>(object._type)._cellType)._countdown = nonCreatureCountdown;
+                std::get<DetonatorDescription>(object.getCellRef()._cellType)._countdown = nonCreatureCountdown;
             }
         }
     }
@@ -578,8 +578,8 @@ void DescriptionEditService::removeCell(Description& description, uint64_t objec
     // Check if any creatures have no cells left
     std::unordered_set<uint64_t> creaturesWithCells;
     for (auto const& object : description._objects) {
-        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-            creaturesWithCells.insert(std::get<CellDescription>(object._type)._creatureId.value());
+        if (object.getCellRef()._creatureId.has_value()) {
+            creaturesWithCells.insert(object.getCellRef()._creatureId.value());
         }
     }
     std::erase_if(description._creatures, [&](auto const& creature) { return !creaturesWithCells.contains(creature._id); });
@@ -622,8 +622,8 @@ void DescriptionEditService::removeCellIf(Description& description, std::functio
     // Check if any creatures have no cells left
     std::unordered_set<uint64_t> creaturesWithCells;
     for (auto const& object : description._objects) {
-        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-            creaturesWithCells.insert(std::get<CellDescription>(object._type)._creatureId.value());
+        if (object.getCellRef()._creatureId.has_value()) {
+            creaturesWithCells.insert(object.getCellRef()._creatureId.value());
         }
     }
     std::erase_if(description._creatures, [&](auto const& creature) { return !creaturesWithCells.contains(creature._id); });
@@ -723,9 +723,9 @@ std::vector<ExtendedObjectOrEnergyDescription> DescriptionEditService::getObject
     for (auto const& object : description._objects) {
         ExtendedObjectDescription extCell;
         extCell.object = object;
-        extCell.creatureId = std::get<CellDescription>(object._type)._creatureId;
-        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-            auto genomeIt = genomeByCreatureId.find(std::get<CellDescription>(object._type)._creatureId.value());
+        extCell.creatureId = object.getCellRef()._creatureId;
+        if (object.getCellRef()._creatureId.has_value()) {
+            auto genomeIt = genomeByCreatureId.find(object.getCellRef()._creatureId.value());
             if (genomeIt != genomeByCreatureId.end()) {
                 extCell.genome = genomeIt->second;
             }
