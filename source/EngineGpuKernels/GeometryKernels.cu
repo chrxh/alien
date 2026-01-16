@@ -545,11 +545,26 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
 
+        CellEvent event;
+        uint8_t eventCounter;
+        float2 eventPos;
+
+        if (object->type == ObjectType_Cell) {
+            event = object->typeData.cell.event;
+            eventCounter = object->typeData.cell.eventCounter;
+            eventPos = object->typeData.cell.eventPos;
+        } else if (object->type == ObjectType_FreeCell) {
+            event = object->typeData.freeCell.event;
+            eventCounter = object->typeData.freeCell.eventCounter;
+            eventPos = object->typeData.freeCell.eventPos;
+        } else {
+            continue;
+        }
         // Only process cells that have been attacked and have attackVisualization enabled
-        if (object->typeData.cell.eventCounter > 0 && object->typeData.cell.event == CellEvent_Attacked) {
+        if (eventCounter > 0 && event == CellEvent_Attacked) {
 
             // Check if the attacker position is close enough to draw
-            if (Math::length(object->typeData.cell.eventPos - object->pos) < 10.0f) {
+            if (Math::length(eventPos - object->pos) < 10.0f) {
                 // Add attack event line data (2 vertices for the line: from attacker to attacked)
                 uint64_t vertexIndex = alienAtomicAdd64(numAttackEventVertices, uint64_t(2));
                 if (attackEventData != nullptr) {
@@ -557,8 +572,8 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
                     float redColor[3] = {0.5f, 0.0f, 0.0f};
 
                     // First vertex (attacker position - from eventPos)
-                    attackEventData[vertexIndex].pos[0] = object->typeData.cell.eventPos.x;
-                    attackEventData[vertexIndex].pos[1] = object->typeData.cell.eventPos.y;
+                    attackEventData[vertexIndex].pos[0] = eventPos.x;
+                    attackEventData[vertexIndex].pos[1] = eventPos.y;
                     attackEventData[vertexIndex].color[0] = redColor[0];
                     attackEventData[vertexIndex].color[1] = redColor[1];
                     attackEventData[vertexIndex].color[2] = redColor[2];

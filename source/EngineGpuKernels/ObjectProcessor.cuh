@@ -778,22 +778,22 @@ __inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& d
             continue;
         }
         for (int index = 0; index < object->numConnections; ++index) {
-            auto connectingCell = object->connections[index].object;
-            if (connectingCell->fixed) {
+            auto connectedObject = object->connections[index].object;
+            if (connectedObject->fixed) {
                 continue;
             }
-            auto posDelta = object->pos - connectingCell->pos;
+            auto posDelta = object->pos - connectedObject->pos;
             auto distance = Math::length(posDelta);
             if (distance > NEAR_ZERO) {
                 auto direction = posDelta / distance;
-                auto velDelta = object->vel - connectingCell->vel;
+                auto velDelta = object->vel - connectedObject->vel;
                 auto velDelta_part = Math::dot(velDelta, direction);
 
                 auto delta = direction * innerFriction * velDelta_part;
                 atomicAdd(&object->vel.x, -delta.x * 0.5f);
                 atomicAdd(&object->vel.y, -delta.y * 0.5f);
-                atomicAdd(&connectingCell->vel.x, delta.x * 0.5f);
-                atomicAdd(&connectingCell->vel.y, delta.y * 0.5f);
+                atomicAdd(&connectedObject->vel.x, delta.x * 0.5f);
+                atomicAdd(&connectedObject->vel.y, delta.y * 0.5f);
             }
         }
     }

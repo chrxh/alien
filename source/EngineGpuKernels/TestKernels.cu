@@ -153,8 +153,8 @@ __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
 
             if (isPointerValid(data, object)) {
                 for (int i = 0; i < object->numConnections; ++i) {
-                    auto connectingCell = object->connections[i].object;
-                    *result &= isPointerValid(data, connectingCell);
+                    auto connectedObject = object->connections[i].object;
+                    *result &= isPointerValid(data, connectedObject);
                 }
 
                 if (object->typeData.cell.cellType == CellType_Memory) {

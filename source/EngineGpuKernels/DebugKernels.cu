@@ -50,15 +50,15 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
             for (int i = 0; i < object->numConnections; ++i) {
-                auto connectingCell = object->connections[i].object;
-                if (reinterpret_cast<uint64_t>(connectingCell) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(connectingCell) + sizeof(Object)
+                auto connectedObject = object->connections[i].object;
+                if (reinterpret_cast<uint64_t>(connectedObject) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                    || reinterpret_cast<uint64_t>(connectedObject) + sizeof(Object)
                         >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
-                    printf("wrong connectingCell pointer (cell: %llu, numConnections: %d) at %d\n", object->id, object->numConnections, location);
+                    printf("wrong connectedObject pointer (cell: %llu, numConnections: %d) at %d\n", object->id, object->numConnections, location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
 
-                auto displacement = connectingCell->pos - object->pos;
+                auto displacement = connectedObject->pos - object->pos;
                 data.objectMap.correctDirection(displacement);
                 auto actualDistance = Math::length(displacement);
                 if (actualDistance > 14) {

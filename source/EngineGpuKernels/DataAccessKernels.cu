@@ -261,226 +261,270 @@ namespace
         auto& objectTO = to.objects[objectTOIndex];
 
         objectTO.id = object->id;
-        objectTO.pos = object->pos;
-        objectTO.vel = object->vel;
-        objectTO.fixed = object->fixed;
-        objectTO.sticky = object->sticky;
-        objectTO.stiffness = object->stiffness;
-        objectTO.numConnections = object->numConnections;
-        objectTO.color = object->color;
-        objectTO.type = object->type;
-
         object->tempValue.as_uint64 = objectTOIndex;
         for (int i = 0; i < object->numConnections; ++i) {
-            auto connectingCell = object->connections[i].object;
-            objectTO.connections[i].objectIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
+            auto connectedObject = object->connections[i].object;
+            objectTO.connections[i].objectIndex = reinterpret_cast<uint8_t*>(connectedObject) - heap;
             objectTO.connections[i].distance = object->connections[i].distance;
             objectTO.connections[i].angleFromPrevious = object->connections[i].angleFromPrevious;
         }
-
-        // Handle Structure and FreeCell object types
-        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
-            return;
-        }
-
-        // ObjectType_Cell - access cell data
-        objectTO.typeData.cell.belongToCreature = (object->typeData.cell.creature != nullptr);
-        if (objectTO.typeData.cell.belongToCreature) {
+        if (object->type == ObjectType_Structure) {
+        } else if (object->type == ObjectType_FreeCell) {
+            objectTO.typeData.freeCell.rawEnergy = object->typeData.freeCell.rawEnergy;
+        } else if (object->type == ObjectType_Cell) {
             objectTO.typeData.cell.creatureIndex = object->typeData.cell.creature->creatureIndex;
-        }
-        objectTO.typeData.cell.usableEnergy = object->typeData.cell.usableEnergy;
-        objectTO.typeData.cell.rawEnergy = object->typeData.cell.rawEnergy;
-        objectTO.typeData.cell.cellState = object->typeData.cell.cellState;
-        objectTO.typeData.cell.cellType = object->typeData.cell.cellType;
-        objectTO.typeData.cell.frontAngle = object->typeData.cell.frontAngle;
-        objectTO.typeData.cell.age = object->typeData.cell.age;
-        objectTO.typeData.cell.signalRestriction.mode = object->typeData.cell.signalRestriction.mode;
-        objectTO.typeData.cell.signalRestriction.baseAngle = object->typeData.cell.signalRestriction.baseAngle;
-        objectTO.typeData.cell.signalRestriction.openingAngle = object->typeData.cell.signalRestriction.openingAngle;
-        objectTO.typeData.cell.signalState = object->typeData.cell.signalState;
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            objectTO.typeData.cell.signal.channels[i] = object->typeData.cell.signal.channels[i];
-        }
-        objectTO.typeData.cell.signal.numTimesSent = object->typeData.cell.signal.numTimesSent;
-        objectTO.typeData.cell.activationTime = object->typeData.cell.activationTime;
-        objectTO.typeData.cell.cellTriggered = object->typeData.cell.cellTriggered;
-        objectTO.typeData.cell.nodeIndex = object->typeData.cell.nodeIndex;
-        objectTO.typeData.cell.parentNodeIndex = object->typeData.cell.parentNodeIndex;
-        objectTO.typeData.cell.geneIndex = object->typeData.cell.geneIndex;
-        objectTO.typeData.cell.frontAngleId = object->typeData.cell.frontAngleId;
-        objectTO.typeData.cell.headCell = object->typeData.cell.headCell;
+            objectTO.typeData.cell.usableEnergy = object->typeData.cell.usableEnergy;
+            objectTO.typeData.cell.rawEnergy = object->typeData.cell.rawEnergy;
+            objectTO.typeData.cell.cellState = object->typeData.cell.cellState;
+            objectTO.typeData.cell.cellType = object->typeData.cell.cellType;
+            objectTO.typeData.cell.frontAngle = object->typeData.cell.frontAngle;
+            objectTO.typeData.cell.age = object->typeData.cell.age;
+            objectTO.typeData.cell.signalRestriction.mode = object->typeData.cell.signalRestriction.mode;
+            objectTO.typeData.cell.signalRestriction.baseAngle = object->typeData.cell.signalRestriction.baseAngle;
+            objectTO.typeData.cell.signalRestriction.openingAngle = object->typeData.cell.signalRestriction.openingAngle;
+            objectTO.typeData.cell.signalState = object->typeData.cell.signalState;
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                objectTO.typeData.cell.signal.channels[i] = object->typeData.cell.signal.channels[i];
+            }
+            objectTO.typeData.cell.signal.numTimesSent = object->typeData.cell.signal.numTimesSent;
+            objectTO.typeData.cell.activationTime = object->typeData.cell.activationTime;
+            objectTO.typeData.cell.cellTriggered = object->typeData.cell.cellTriggered;
+            objectTO.typeData.cell.nodeIndex = object->typeData.cell.nodeIndex;
+            objectTO.typeData.cell.parentNodeIndex = object->typeData.cell.parentNodeIndex;
+            objectTO.typeData.cell.geneIndex = object->typeData.cell.geneIndex;
+            objectTO.typeData.cell.frontAngleId = object->typeData.cell.frontAngleId;
+            objectTO.typeData.cell.headCell = object->typeData.cell.headCell;
 
-        if (object->typeData.cell.neuralNetwork != nullptr) {
-            int targetSize;  //not used
-            copyDataToHeap<int>(sizeof(NeuralNetwork), reinterpret_cast<uint8_t*>(object->typeData.cell.neuralNetwork), targetSize, objectTO.typeData.cell.neuralNetworkDataIndex, to);
-        } else {
-            objectTO.typeData.cell.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
-        }
-        switch (object->typeData.cell.cellType) {
-        case CellType_Base: {
-        } break;
-        case CellType_Depot: {
-            objectTO.typeData.cell.cellTypeData.depot.storageLimit = object->typeData.cell.cellTypeData.depot.storageLimit;
-            objectTO.typeData.cell.cellTypeData.depot.storedUsableEnergy = object->typeData.cell.cellTypeData.depot.storedUsableEnergy;
-        } break;
-        case CellType_Constructor: {
-            objectTO.typeData.cell.cellTypeData.constructor.autoTriggerInterval = object->typeData.cell.cellTypeData.constructor.autoTriggerInterval;
-            objectTO.typeData.cell.cellTypeData.constructor.constructionActivationTime = object->typeData.cell.cellTypeData.constructor.constructionActivationTime;
-            objectTO.typeData.cell.cellTypeData.constructor.constructionAngle = object->typeData.cell.cellTypeData.constructor.constructionAngle;
-            objectTO.typeData.cell.cellTypeData.constructor.provideEnergy = object->typeData.cell.cellTypeData.constructor.provideEnergy;
-            objectTO.typeData.cell.cellTypeData.constructor.geneIndex = object->typeData.cell.cellTypeData.constructor.geneIndex;
-            objectTO.typeData.cell.cellTypeData.constructor.lastConstructedCellId = object->typeData.cell.cellTypeData.constructor.lastConstructedCellId;
-            objectTO.typeData.cell.cellTypeData.constructor.currentNodeIndex = object->typeData.cell.cellTypeData.constructor.currentNodeIndex;
-            objectTO.typeData.cell.cellTypeData.constructor.currentConcatenation = object->typeData.cell.cellTypeData.constructor.currentConcatenation;
-            objectTO.typeData.cell.cellTypeData.constructor.currentBranch = object->typeData.cell.cellTypeData.constructor.currentBranch;
-        } break;
-        case CellType_Sensor: {
-            objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval = object->typeData.cell.cellTypeData.sensor.autoTriggerInterval;
-            objectTO.typeData.cell.cellTypeData.sensor.minRange = object->typeData.cell.cellTypeData.sensor.minRange;
-            objectTO.typeData.cell.cellTypeData.sensor.maxRange = object->typeData.cell.cellTypeData.sensor.maxRange;
-            objectTO.typeData.cell.cellTypeData.sensor.mode = object->typeData.cell.cellTypeData.sensor.mode;
-            if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-            } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
-                objectTO.typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity = object->typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
-            } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
-            } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
-                objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity = object->typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = object->typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
-            } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells;
-                objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
-                objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+            if (object->typeData.cell.neuralNetwork != nullptr) {
+                int targetSize;  //not used
+                copyDataToHeap<int>(
+                    sizeof(NeuralNetwork),
+                    reinterpret_cast<uint8_t*>(object->typeData.cell.neuralNetwork),
+                    targetSize,
+                    objectTO.typeData.cell.neuralNetworkDataIndex,
+                    to);
             }
-            objectTO.typeData.cell.cellTypeData.sensor.lastMatchAvailable = object->typeData.cell.cellTypeData.sensor.lastMatchAvailable;
-            objectTO.typeData.cell.cellTypeData.sensor.lastMatch.creatureId = object->typeData.cell.cellTypeData.sensor.lastMatch.creatureId;
-            objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos = object->typeData.cell.cellTypeData.sensor.lastMatch.pos;
-        } break;
-        case CellType_Generator: {
-            objectTO.typeData.cell.cellTypeData.generator.autoTriggerInterval = object->typeData.cell.cellTypeData.generator.autoTriggerInterval;
-            objectTO.typeData.cell.cellTypeData.generator.pulseType = object->typeData.cell.cellTypeData.generator.pulseType;
-            objectTO.typeData.cell.cellTypeData.generator.alternationInterval = object->typeData.cell.cellTypeData.generator.alternationInterval;
-            objectTO.typeData.cell.cellTypeData.generator.numPulses = object->typeData.cell.cellTypeData.generator.numPulses;
-        } break;
-        case CellType_Attacker: {
-            objectTO.typeData.cell.cellTypeData.attacker.mode = object->typeData.cell.cellTypeData.attacker.mode;
-            if (object->typeData.cell.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-                objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = object->typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
-            } else if (object->typeData.cell.cellTypeData.attacker.mode == AttackerMode_Creature) {
-                objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells = object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells;
-                objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells = object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells;
-                objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor = object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-                objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToLineage = object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
+
+            switch (object->typeData.cell.cellType) {
+            case CellType_Base: {
+            } break;
+            case CellType_Depot: {
+                objectTO.typeData.cell.cellTypeData.depot.storageLimit = object->typeData.cell.cellTypeData.depot.storageLimit;
+                objectTO.typeData.cell.cellTypeData.depot.storedUsableEnergy = object->typeData.cell.cellTypeData.depot.storedUsableEnergy;
+            } break;
+            case CellType_Constructor: {
+                objectTO.typeData.cell.cellTypeData.constructor.autoTriggerInterval = object->typeData.cell.cellTypeData.constructor.autoTriggerInterval;
+                objectTO.typeData.cell.cellTypeData.constructor.constructionActivationTime =
+                    object->typeData.cell.cellTypeData.constructor.constructionActivationTime;
+                objectTO.typeData.cell.cellTypeData.constructor.constructionAngle = object->typeData.cell.cellTypeData.constructor.constructionAngle;
+                objectTO.typeData.cell.cellTypeData.constructor.provideEnergy = object->typeData.cell.cellTypeData.constructor.provideEnergy;
+                objectTO.typeData.cell.cellTypeData.constructor.geneIndex = object->typeData.cell.cellTypeData.constructor.geneIndex;
+                objectTO.typeData.cell.cellTypeData.constructor.lastConstructedCellId = object->typeData.cell.cellTypeData.constructor.lastConstructedCellId;
+                objectTO.typeData.cell.cellTypeData.constructor.currentNodeIndex = object->typeData.cell.cellTypeData.constructor.currentNodeIndex;
+                objectTO.typeData.cell.cellTypeData.constructor.currentConcatenation = object->typeData.cell.cellTypeData.constructor.currentConcatenation;
+                objectTO.typeData.cell.cellTypeData.constructor.currentBranch = object->typeData.cell.cellTypeData.constructor.currentBranch;
+            } break;
+            case CellType_Sensor: {
+                objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval = object->typeData.cell.cellTypeData.sensor.autoTriggerInterval;
+                objectTO.typeData.cell.cellTypeData.sensor.minRange = object->typeData.cell.cellTypeData.sensor.minRange;
+                objectTO.typeData.cell.cellTypeData.sensor.maxRange = object->typeData.cell.cellTypeData.sensor.maxRange;
+                objectTO.typeData.cell.cellTypeData.sensor.mode = object->typeData.cell.cellTypeData.sensor.mode;
+                if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_Telemetry) {
+                } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                    objectTO.typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity =
+                        object->typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
+                } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+                } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
+                    objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity =
+                        object->typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
+                    objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor =
+                        object->typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+                    objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells =
+                        object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells;
+                    objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells =
+                        object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
+                    objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor =
+                        object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                    objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage =
+                        object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+                }
+                objectTO.typeData.cell.cellTypeData.sensor.lastMatchAvailable = object->typeData.cell.cellTypeData.sensor.lastMatchAvailable;
+                objectTO.typeData.cell.cellTypeData.sensor.lastMatch.creatureId = object->typeData.cell.cellTypeData.sensor.lastMatch.creatureId;
+                objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos = object->typeData.cell.cellTypeData.sensor.lastMatch.pos;
+            } break;
+            case CellType_Generator: {
+                objectTO.typeData.cell.cellTypeData.generator.autoTriggerInterval = object->typeData.cell.cellTypeData.generator.autoTriggerInterval;
+                objectTO.typeData.cell.cellTypeData.generator.pulseType = object->typeData.cell.cellTypeData.generator.pulseType;
+                objectTO.typeData.cell.cellTypeData.generator.alternationInterval = object->typeData.cell.cellTypeData.generator.alternationInterval;
+                objectTO.typeData.cell.cellTypeData.generator.numPulses = object->typeData.cell.cellTypeData.generator.numPulses;
+            } break;
+            case CellType_Attacker: {
+                objectTO.typeData.cell.cellTypeData.attacker.mode = object->typeData.cell.cellTypeData.attacker.mode;
+                if (object->typeData.cell.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
+                    objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor =
+                        object->typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+                } else if (object->typeData.cell.cellTypeData.attacker.mode == AttackerMode_Creature) {
+                    objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells =
+                        object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells;
+                    objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells =
+                        object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells;
+                    objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor =
+                        object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
+                    objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToLineage =
+                        object->typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
+                }
+            } break;
+            case CellType_Injector: {
+                objectTO.typeData.cell.cellTypeData.injector.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
+            } break;
+            case CellType_Muscle: {
+                objectTO.typeData.cell.cellTypeData.muscle.mode = object->typeData.cell.cellTypeData.muscle.mode;
+                if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forward =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoBending.forward;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activation =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoBending.activation;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activationCountdown =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoBending.activationCountdown;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
+                } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
+                } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation =
+                        object->typeData.cell.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
+                        object->typeData.cell.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.initialAngle =
+                        object->typeData.cell.cellTypeData.muscle.modeData.angleBending.initialAngle;
+                } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forward =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forward;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activation =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activation;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied =
+                        object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
+                } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
+                    objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied =
+                        object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
+                } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
+                }
+                objectTO.typeData.cell.cellTypeData.muscle.lastMovementX = object->typeData.cell.cellTypeData.muscle.lastMovementX;
+                objectTO.typeData.cell.cellTypeData.muscle.lastMovementY = object->typeData.cell.cellTypeData.muscle.lastMovementY;
+            } break;
+            case CellType_Defender: {
+                objectTO.typeData.cell.cellTypeData.defender.mode = object->typeData.cell.cellTypeData.defender.mode;
+            } break;
+            case CellType_Reconnector: {
+                objectTO.typeData.cell.cellTypeData.reconnector.mode = object->typeData.cell.cellTypeData.reconnector.mode;
+                if (object->typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+                } else if (object->typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
+                    objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor =
+                        object->typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
+                } else if (object->typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
+                    objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells =
+                        object->typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
+                    objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells =
+                        object->typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
+                    objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor =
+                        object->typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
+                    objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage =
+                        object->typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
+                }
+            } break;
+            case CellType_Detonator: {
+                objectTO.typeData.cell.cellTypeData.detonator.state = object->typeData.cell.cellTypeData.detonator.state;
+                objectTO.typeData.cell.cellTypeData.detonator.countdown = object->typeData.cell.cellTypeData.detonator.countdown;
+            } break;
+            case CellType_Digestor: {
+                objectTO.typeData.cell.cellTypeData.digestor.rawEnergyConductivity = object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
+            } break;
+            case CellType_Memory: {
+                objectTO.typeData.cell.cellTypeData.memory.mode = object->typeData.cell.cellTypeData.memory.mode;
+                objectTO.typeData.cell.cellTypeData.memory.numSignalEntries = object->typeData.cell.cellTypeData.memory.numSignalEntries;
+                objectTO.typeData.cell.cellTypeData.memory.channelBitMask = object->typeData.cell.cellTypeData.memory.channelBitMask;
+                if (object->typeData.cell.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalDelay.delay =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalDelay.delay;
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized;
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalDelay.ringBufferIndex =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
+                } else if (object->typeData.cell.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalRecorder.readOnly =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalRecorder.readOnly;
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalRecorder.state =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalRecorder.state;
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
+                } else if (object->typeData.cell.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalStorage.readOnly =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalStorage.readOnly;
+                } else if (object->typeData.cell.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
+                    objectTO.typeData.cell.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
+                        object->typeData.cell.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
+                }
+                int targetSize;  // not used
+                copyDataToHeap<int>(
+                    sizeof(SignalEntry) * object->typeData.cell.cellTypeData.memory.numSignalEntries,
+                    reinterpret_cast<uint8_t*>(object->typeData.cell.cellTypeData.memory.signalEntries),
+                    targetSize,
+                    objectTO.typeData.cell.cellTypeData.memory.signalEntriesDataIndex,
+                    to);
+            } break;
+            case CellType_Communicator: {
+                objectTO.typeData.cell.cellTypeData.communicator.mode = object->typeData.cell.cellTypeData.communicator.mode;
+                if (object->typeData.cell.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
+                    objectTO.typeData.cell.cellTypeData.communicator.modeData.sender.range =
+                        object->typeData.cell.cellTypeData.communicator.modeData.sender.range;
+                    objectTO.typeData.cell.cellTypeData.communicator.modeData.sender.maxTimesSent =
+                        object->typeData.cell.cellTypeData.communicator.modeData.sender.maxTimesSent;
+                } else if (object->typeData.cell.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
+                    objectTO.typeData.cell.cellTypeData.communicator.modeData.receiver.restrictToColor =
+                        object->typeData.cell.cellTypeData.communicator.modeData.receiver.restrictToColor;
+                    objectTO.typeData.cell.cellTypeData.communicator.modeData.receiver.restrictToLineage =
+                        object->typeData.cell.cellTypeData.communicator.modeData.receiver.restrictToLineage;
+                }
+            } break;
             }
-        } break;
-        case CellType_Injector: {
-            objectTO.typeData.cell.cellTypeData.injector.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
-        } break;
-        case CellType_Muscle: {
-            objectTO.typeData.cell.cellTypeData.muscle.mode = object->typeData.cell.cellTypeData.muscle.mode;
-            if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = object->typeData.cell.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio = object->typeData.cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle = object->typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forward = object->typeData.cell.cellTypeData.muscle.modeData.autoBending.forward;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activation = object->typeData.cell.cellTypeData.muscle.modeData.autoBending.activation;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activationCountdown = object->typeData.cell.cellTypeData.muscle.modeData.autoBending.activationCountdown;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = object->typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
-            } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = object->typeData.cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio = object->typeData.cell.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle = object->typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta = object->typeData.cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied =
-                    object->typeData.cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
-            } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = object->typeData.cell.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
-                    object->typeData.cell.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.initialAngle = object->typeData.cell.cellTypeData.muscle.modeData.angleBending.initialAngle;
-            } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio = object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance = object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance = object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forward = object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forward;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activation = object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activation;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown = object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied = object->typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
-            } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
-                    object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio =
-                    object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance = object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
-                objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied =
-                    object->typeData.cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
-            } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
-            }
-            objectTO.typeData.cell.cellTypeData.muscle.lastMovementX = object->typeData.cell.cellTypeData.muscle.lastMovementX;
-            objectTO.typeData.cell.cellTypeData.muscle.lastMovementY = object->typeData.cell.cellTypeData.muscle.lastMovementY;
-        } break;
-        case CellType_Defender: {
-            objectTO.typeData.cell.cellTypeData.defender.mode = object->typeData.cell.cellTypeData.defender.mode;
-        } break;
-        case CellType_Reconnector: {
-            objectTO.typeData.cell.cellTypeData.reconnector.mode = object->typeData.cell.cellTypeData.reconnector.mode;
-            if (object->typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
-            } else if (object->typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-                objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor = object->typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
-            } else if (object->typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
-                objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells = object->typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
-                objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells = object->typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
-                objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor = object->typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
-                objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage = object->typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
-            }
-        } break;
-        case CellType_Detonator: {
-            objectTO.typeData.cell.cellTypeData.detonator.state = object->typeData.cell.cellTypeData.detonator.state;
-            objectTO.typeData.cell.cellTypeData.detonator.countdown = object->typeData.cell.cellTypeData.detonator.countdown;
-        } break;
-        case CellType_Digestor: {
-            objectTO.typeData.cell.cellTypeData.digestor.rawEnergyConductivity = object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
-        } break;
-        case CellType_Memory: {
-            objectTO.typeData.cell.cellTypeData.memory.mode = object->typeData.cell.cellTypeData.memory.mode;
-            objectTO.typeData.cell.cellTypeData.memory.numSignalEntries = object->typeData.cell.cellTypeData.memory.numSignalEntries;
-            objectTO.typeData.cell.cellTypeData.memory.channelBitMask = object->typeData.cell.cellTypeData.memory.channelBitMask;
-            if (object->typeData.cell.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalDelay.delay = object->typeData.cell.cellTypeData.memory.modeData.signalDelay.delay;
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized = object->typeData.cell.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized;
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalDelay.ringBufferIndex = object->typeData.cell.cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
-            } else if (object->typeData.cell.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalRecorder.readOnly = object->typeData.cell.cellTypeData.memory.modeData.signalRecorder.readOnly;
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalRecorder.state = object->typeData.cell.cellTypeData.memory.modeData.signalRecorder.state;
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = object->typeData.cell.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries = object->typeData.cell.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
-            } else if (object->typeData.cell.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalStorage.readOnly = object->typeData.cell.cellTypeData.memory.modeData.signalStorage.readOnly;
-            } else if (object->typeData.cell.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
-                objectTO.typeData.cell.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
-                    object->typeData.cell.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
-            }
-            int targetSize;  // not used
-            copyDataToHeap<int>(
-                sizeof(SignalEntry) * object->typeData.cell.cellTypeData.memory.numSignalEntries,
-                reinterpret_cast<uint8_t*>(object->typeData.cell.cellTypeData.memory.signalEntries),
-                targetSize,
-                objectTO.typeData.cell.cellTypeData.memory.signalEntriesDataIndex,
-                to);
-        } break;
-        case CellType_Communicator: {
-            objectTO.typeData.cell.cellTypeData.communicator.mode = object->typeData.cell.cellTypeData.communicator.mode;
-            if (object->typeData.cell.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
-                objectTO.typeData.cell.cellTypeData.communicator.modeData.sender.range = object->typeData.cell.cellTypeData.communicator.modeData.sender.range;
-                objectTO.typeData.cell.cellTypeData.communicator.modeData.sender.maxTimesSent = object->typeData.cell.cellTypeData.communicator.modeData.sender.maxTimesSent;
-            } else if (object->typeData.cell.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                objectTO.typeData.cell.cellTypeData.communicator.modeData.receiver.restrictToColor = object->typeData.cell.cellTypeData.communicator.modeData.receiver.restrictToColor;
-                objectTO.typeData.cell.cellTypeData.communicator.modeData.receiver.restrictToLineage = object->typeData.cell.cellTypeData.communicator.modeData.receiver.restrictToLineage;
-            }
-        } break;
         }
     }
 

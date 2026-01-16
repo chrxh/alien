@@ -196,6 +196,16 @@ ObjectType ObjectDescription::getObjectType() const
     CHECK(false);
 }
 
+FreeCellDescription& ObjectDescription::getFreeCellRef()
+{
+    return std::get<FreeCellDescription>(_type);
+}
+
+FreeCellDescription const& ObjectDescription::getFreeCellRef() const
+{
+    return std::get<FreeCellDescription>(_type);
+}
+
 CellDescription& ObjectDescription::getCellRef()
 {
     return std::get<CellDescription>(_type);

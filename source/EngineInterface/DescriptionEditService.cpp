@@ -135,8 +135,8 @@ namespace
             std::vector<ConnectionDescription> newConnections;
             float angleToAdd = 0;
             for (auto connection : object._connections) {
-                auto const& connectingCell = description.getObjectRef(connection._objectId, cache);
-                if (Math::length(object._pos - connectingCell._pos) > threshold) {
+                auto const& connectedObject = description.getObjectRef(connection._objectId, cache);
+                if (Math::length(object._pos - connectedObject._pos) > threshold) {
                     angleToAdd += connection._angleFromPrevious;
                 } else {
                     connection._angleFromPrevious += angleToAdd;
