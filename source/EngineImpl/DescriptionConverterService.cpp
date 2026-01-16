@@ -151,7 +151,8 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
     for (int i = 0; i < *to.numObjects; ++i) {
         auto object = createObjectDescription(to, i);
 
-        if (to.objects[i].typeData.cell.belongToCreature) {
+        // Only access cell data for Cell objects
+        if (to.objects[i].type == ObjectType_Cell && to.objects[i].typeData.cell.belongToCreature) {
             auto creatureTOIndex = to.objects[i].typeData.cell.creatureIndex;
             object.getCellRef()._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
         }
@@ -188,7 +189,11 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
 
     std::unordered_map<uint64_t, uint64_t> objectIndexTOById;
     for (auto const& object : description._objects) {
-        convertObjectToTO(objectTOs, heap, objectIndexTOById, object, object.getCellRef()._creatureId, creatureTOIndexById);
+        std::optional<uint64_t> creatureId = std::nullopt;
+        if (object.getObjectType() == ObjectType_Cell) {
+            creatureId = object.getCellRef()._creatureId;
+        }
+        convertObjectToTO(objectTOs, heap, objectIndexTOById, object, creatureId, creatureTOIndexById);
     }
     for (auto const& object : description._objects) {
         setConnections(objectTOs, object, objectIndexTOById);
