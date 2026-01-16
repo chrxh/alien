@@ -446,6 +446,21 @@ struct Creature
     uint64_t creatureIndex;  // May be invalid
 };
 
+struct Structure
+{
+    // Cluster data
+    uint32_t clusterIndex;
+    int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
+    float2 clusterPos;
+    float2 clusterVel;
+    float clusterAngularMomentum;
+    float clusterAngularMass;
+    uint32_t numCellsInCluster;
+};
+
+struct FreeCell
+{};
+
 struct Cell
 {
     // General
@@ -482,15 +497,6 @@ struct Cell
     uint8_t eventCounter;
     float2 eventPos;
 
-    // Cluster data
-    uint32_t clusterIndex;
-    int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
-    float2 clusterPos;
-    float2 clusterVel;
-    float clusterAngularMomentum;
-    float clusterAngularMass;
-    uint32_t numCellsInCluster;
-
     __device__ __inline__ bool isSameCreature(Cell* otherObject)
     {
         return (otherObject->creature != nullptr && this->creature != nullptr && otherObject->creature->id == this->creature->id)
@@ -509,6 +515,8 @@ struct Cell
 
 union ObjectTypeData
 {
+    Structure structure;
+    FreeCell freeCell;
     Cell cell;
 };
 

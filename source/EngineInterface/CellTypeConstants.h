@@ -18,6 +18,8 @@ namespace Channels
 using ObjectType = int;
 enum ObjectType_
 {
+    ObjectType_Structure,
+    ObjectType_FreeCell,
     ObjectType_Cell,
     ObjectType_Count,
 };
@@ -25,8 +27,6 @@ enum ObjectType_
 using CellType = int;
 enum CellType_
 {
-    CellType_Structure,
-    CellType_Free,
     CellType_Base,
     CellType_Depot,
     CellType_Constructor,

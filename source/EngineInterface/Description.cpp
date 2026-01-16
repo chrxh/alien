@@ -188,6 +188,18 @@ ObjectDescription ObjectDescription::id(uint64_t id)
     return *this;
 }
 
+ObjectType ObjectDescription::getObjectType() const
+{
+    if (std::holds_alternative<StructureDescription>(_type)) {
+        return ObjectType_Structure;
+    } else if (std::holds_alternative<FreeCellDescription>(_type)) {
+        return ObjectType_FreeCell;
+    } else if (std::holds_alternative<CellDescription>(_type)) {
+        return ObjectType_Cell;
+    }
+    CHECK(false);
+}
+
 CellDescription& ObjectDescription::getCellRef()
 {
     return std::get<CellDescription>(_type);

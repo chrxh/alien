@@ -390,6 +390,12 @@ struct SignalTO
     int numTimesSent;
 };
 
+struct StructureTO
+{};
+
+struct FreeCellTO
+{};
+
 struct CellTO
 {
     // General
@@ -423,6 +429,8 @@ struct CellTO
 
 union ObjectTypeDataTO
 {
+    StructureTO structure;
+    FreeCellTO freeCell;
     CellTO cell;
 };
 

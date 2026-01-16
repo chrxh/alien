@@ -21,16 +21,6 @@ struct ConnectionDescription
     MEMBER(ConnectionDescription, float, angleFromPrevious, 0.0f);
 };
 
-struct StructureDescription
-{
-    auto operator<=>(StructureDescription const&) const = default;
-};
-
-struct FreeCellDescription
-{
-    auto operator<=>(FreeCellDescription const&) const = default;
-};
-
 struct NeuralNetworkDescription
 {
     NeuralNetworkDescription();
@@ -433,8 +423,6 @@ struct CommunicatorDescription
 };
 
 using CellTypeDescription = std::variant<
-    StructureDescription,
-    FreeCellDescription,
     BaseDescription,
     DepotDescription,
     ConstructorDescription,
@@ -466,6 +454,16 @@ struct SignalDescription
 
     MEMBER(SignalDescription, std::vector<float>, channels, {});
     MEMBER(SignalDescription, int, numTimesSent, 0);
+};
+
+struct StructureDescription
+{
+    auto operator<=>(StructureDescription const&) const = default;
+};
+
+struct FreeCellDescription
+{
+    auto operator<=>(FreeCellDescription const&) const = default;
 };
 
 struct CellDescription
@@ -506,7 +504,7 @@ struct CellDescription
     CellDescription& signalRestriction(float baseAngle, float openingAngle);
 };
 
-using ObjectTypeDescription = std::variant<CellDescription>;
+using ObjectTypeDescription = std::variant<StructureDescription, FreeCellDescription, CellDescription>;
 
 struct ObjectDescription
 {
@@ -523,6 +521,9 @@ struct ObjectDescription
     MEMBER(ObjectDescription, bool, fixed, false);
     MEMBER(ObjectDescription, bool, sticky, false);
     MEMBER(ObjectDescription, ObjectTypeDescription, type, CellDescription());
+
+    ObjectType getObjectType() const;
+
     CellDescription& getCellRef();
     CellDescription const& getCellRef() const;
 
