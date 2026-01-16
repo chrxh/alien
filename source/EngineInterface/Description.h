@@ -523,6 +523,8 @@ struct ObjectDescription
     MEMBER(ObjectDescription, bool, fixed, false);
     MEMBER(ObjectDescription, bool, sticky, false);
     MEMBER(ObjectDescription, ObjectTypeDescription, type, CellDescription());
+    CellDescription& getCellRef();
+    CellDescription const& getCellRef() const;
 
     bool isConnectedTo(uint64_t id) const;
     float getAngleSpan(uint64_t connectedCellId1, uint64_t connectedCellId2) const;

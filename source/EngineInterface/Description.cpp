@@ -188,6 +188,16 @@ ObjectDescription ObjectDescription::id(uint64_t id)
     return *this;
 }
 
+CellDescription& ObjectDescription::getCellRef()
+{
+    return std::get<CellDescription>(_type);
+}
+
+CellDescription const& ObjectDescription::getCellRef() const
+{
+    return std::get<CellDescription>(_type);
+}
+
 bool ObjectDescription::isConnectedTo(uint64_t id) const
 {
     return std::find_if(_connections.begin(), _connections.end(), [&id](auto const& connection) { return connection._objectId == id; }) != _connections.end();
