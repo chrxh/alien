@@ -25,7 +25,7 @@ Description DescriptionEditService::createRect(CreateRectParameters const& param
                                            .color(parameters._color)
                                            .fixed(parameters._fixed)
                                            .sticky(parameters._sticky)
-                                           .type(CellDescription().usableEnergy(parameters._usableEnergy).rawEnergy(parameters._rawEnergy).cellType(parameters._cellType)));
+                                           .type(parameters._objectType));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -47,7 +47,7 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
                                            .color(parameters._color)
                                            .fixed(parameters._fixed)
                                            .sticky(parameters._sticky)
-                                           .type(CellDescription().usableEnergy(parameters._usableEnergy).cellType(parameters._cellType)));
+                                           .type(parameters._objectType));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
@@ -56,7 +56,7 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
                                                .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
                                                .color(parameters._color)
                                                .fixed(parameters._fixed)
-                                               .type(CellDescription().usableEnergy(parameters._usableEnergy).cellType(StructureDescription())));
+                                               .type(parameters._objectType));
             }
         }
     }
@@ -78,7 +78,7 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
                                        .color(parameters._color)
                                        .fixed(parameters._fixed)
                                        .sticky(parameters._sticky)
-                                       .type(CellDescription().usableEnergy(parameters._usableEnergy).cellType(StructureDescription())));
+                                       .type(StructureDescription()));
         return result;
     }
 
@@ -101,7 +101,7 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
                                            .color(parameters._color)
                                            .fixed(parameters._fixed)
                                            .sticky(parameters._sticky)
-                                           .type(CellDescription().usableEnergy(parameters._usableEnergy).cellType(StructureDescription())));
+                                           .type(StructureDescription()));
         }
     }
     return result;

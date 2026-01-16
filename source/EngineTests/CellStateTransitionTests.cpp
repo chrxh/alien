@@ -111,7 +111,7 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Ready).cellType(getObjectTypeDescription(objectType, cellType))),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
         ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
     });
     data.addConnection(1, 2);
@@ -152,7 +152,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
 
     Description data;
     data.addCreature({
-            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Ready).headCell(true).cellType(getObjectTypeDescription(objectType, cellType))),
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
             ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
         }, CreatureDescription(), genome);
     data.addConnection(1, 2);
@@ -193,7 +193,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
 
     Description data;
     data.addCreature({
-            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Ready).headCell(false).cellType(getObjectTypeDescription(objectType, cellType))),
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
             ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
         }, CreatureDescription(), genome);
     data.addConnection(1, 2);
@@ -229,7 +229,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     _simulationFacade->setSimulationParameters(_parameters);
 
     Description data;
-    data.addCreature({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Ready).headCell(true).cellType(getObjectTypeDescription(objectType, cellType)))}, CreatureDescription(), GenomeDescription());
+    data.addCreature({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))}, CreatureDescription(), GenomeDescription());
     data.addCreature({ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching))}, CreatureDescription(), GenomeDescription());
     data.addConnection(1, 2);
 
@@ -256,7 +256,7 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching).cellType(getObjectTypeDescription(objectType, cellType))),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
         ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Reviving)),
     });
     data.addConnection(1, 2);
@@ -292,7 +292,7 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Constructing).cellType(getObjectTypeDescription(objectType, cellType))),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
         ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Activating)),
     });
     data.addConnection(1, 2);
@@ -316,7 +316,7 @@ TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = Description().objects({
-        ObjectDescription().id(1).fixed(true).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Dying).cellType(getObjectTypeDescription(objectType, cellType))),
+        ObjectDescription().id(1).fixed(true).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
     });
 
     _simulationFacade->setSimulationData(data);

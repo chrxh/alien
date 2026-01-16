@@ -14,7 +14,7 @@ public:
     {
         MEMBER(CreateRectParameters, int, width, 10);
         MEMBER(CreateRectParameters, int, height, 10);
-        MEMBER(CreateRectParameters, CellTypeDescription, cellType, StructureDescription());
+        MEMBER(CreateRectParameters, ObjectTypeDescription, objectType, StructureDescription());
         MEMBER(CreateRectParameters, float, cellDistance, 1.0f);
         MEMBER(CreateRectParameters, float, usableEnergy, 100.0f);
         MEMBER(CreateRectParameters, float, rawEnergy, 0.0f);
@@ -29,7 +29,7 @@ public:
     struct CreateHexParameters
     {
         MEMBER(CreateHexParameters, int, layers, 10);
-        MEMBER(CreateHexParameters, CellTypeDescription, cellType, StructureDescription());
+        MEMBER(CreateHexParameters, ObjectTypeDescription, objectType, StructureDescription());
         MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
         MEMBER(CreateHexParameters, float, usableEnergy, 100.0f);
         MEMBER(CreateHexParameters, float, stiffness, 1.0f);

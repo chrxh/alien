@@ -1181,8 +1181,6 @@ void DescriptionConverterService::convertObjectToTO(
     std::optional<uint64_t> const& creatureId,
     std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const
 {
-    CellDescription const& cellDesc = objectDesc.getCellRef();
-
     auto objectIndex = objectTOs.size();
     objectTOs.resize(objectIndex + 1);
 
@@ -1190,16 +1188,34 @@ void DescriptionConverterService::convertObjectToTO(
     objectTO.id = objectDesc._id;
     objectTOIndexById.insert_or_assign(objectTO.id, objectIndex);
 
+    objectTO.pos = {objectDesc._pos.x, objectDesc._pos.y};
+    objectTO.vel = {objectDesc._vel.x, objectDesc._vel.y};
+    objectTO.stiffness = objectDesc._stiffness;
+    objectTO.numConnections = 0;
+    objectTO.fixed = objectDesc._fixed;
+    objectTO.sticky = objectDesc._sticky;
+    objectTO.color = objectDesc._color;
+
+    // Set object type
+    objectTO.type = objectDesc.getObjectType();
+
+    // Handle Structure and FreeCell object types
+    if (objectTO.type == ObjectType_Structure) {
+        return;
+    } else if (objectTO.type == ObjectType_FreeCell) {
+        return;
+    }
+
+    // ObjectType_Cell - access cell data
+    CellDescription const& cellDesc = objectDesc.getCellRef();
+
     objectTO.typeData.cell.belongToCreature = creatureId.has_value();
     if (objectTO.typeData.cell.belongToCreature) {
         objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(creatureId.value());
     }
-    objectTO.pos = {objectDesc._pos.x, objectDesc._pos.y};
-    objectTO.vel = {objectDesc._vel.x, objectDesc._vel.y};
     objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
     checkAndCorrectInvalidEnergy(objectTO.typeData.cell.usableEnergy);
     objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;
-    objectTO.stiffness = objectDesc._stiffness;
     objectTO.typeData.cell.cellState = cellDesc._cellState;
     objectTO.typeData.cell.cellType = cellDesc.getCellType();
     objectTO.typeData.cell.cellTriggered = cellDesc._cellTriggered;
@@ -1209,6 +1225,8 @@ void DescriptionConverterService::convertObjectToTO(
     objectTO.typeData.cell.frontAngle = cellDesc._frontAngle.value_or(VALUE_NOT_SET_FLOAT);
     objectTO.typeData.cell.frontAngleId = cellDesc._frontAngleId;
     objectTO.typeData.cell.headCell = cellDesc._headCell;
+    objectTO.typeData.cell.age = cellDesc._age;
+    objectTO.typeData.cell.activationTime = cellDesc._activationTime;
 
     auto cellType = cellDesc.getCellType();
     if (cellDesc._neuralNetwork.has_value()) {
@@ -1448,12 +1466,6 @@ void DescriptionConverterService::convertObjectToTO(
         }
         objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
     }
-    objectTO.typeData.cell.activationTime = cellDesc._activationTime;
-    objectTO.numConnections = 0;
-    objectTO.fixed = objectDesc._fixed;
-    objectTO.sticky = objectDesc._sticky;
-    objectTO.typeData.cell.age = cellDesc._age;
-    objectTO.color = objectDesc._color;
 }
 
 void DescriptionConverterService::addParticle(std::vector<EnergyTO>& particleTOs, EnergyDescription const& particleDesc) const
