@@ -32,10 +32,12 @@ protected:
         std::vector<float> const& signal,
         std::vector<SignalEntryDescription> const& signalEntries = {})
     {
-        auto data = Description().addCreature({
-            ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(MemoryDescription().mode(mode).signalEntries(signalEntries))),
-            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState(signal)),
-        }, CreatureDescription().id(1));
+        auto data = Description().addCreature(
+            {
+                ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(MemoryDescription().mode(mode).signalEntries(signalEntries))),
+                ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState(signal)),
+            },
+            CreatureDescription().id(1));
         data.addConnection(1, 2);
         return data;
     }
@@ -69,15 +71,17 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
     std::vector<float> incomingSignal = {0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float newSignalWeight = 0.25f;
 
-    auto data = Description().addCreature({
-        ObjectDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .type(CellDescription().cellType(MemoryDescription()
-                          .mode(SignalIntegratorDescription().newSignalWeight(newSignalWeight))
-                          .signalEntries({SignalEntryDescription().channels(storedSignal)}))),
-        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState(incomingSignal)),
-    }, CreatureDescription().id(1));
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription().cellType(MemoryDescription()
+                                                     .mode(SignalIntegratorDescription().newSignalWeight(newSignalWeight))
+                                                     .signalEntries({SignalEntryDescription().channels(storedSignal)}))),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState(incomingSignal)),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -99,14 +103,17 @@ TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
     std::vector<float> storedSignal = {1.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> incomingSignal = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-    auto data = Description().addCreature({
-        ObjectDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .type(CellDescription().cellType(
-                MemoryDescription().mode(SignalIntegratorDescription().newSignalWeight(1.0f)).signalEntries({SignalEntryDescription().channels(storedSignal)}))),
-        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState(incomingSignal)),
-    }, CreatureDescription().id(1));
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription().cellType(MemoryDescription()
+                                                     .mode(SignalIntegratorDescription().newSignalWeight(1.0f))
+                                                     .signalEntries({SignalEntryDescription().channels(storedSignal)}))),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState(incomingSignal)),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -125,14 +132,17 @@ TEST_F(MemoryTests, signalIntegrator_weightOfZero_preservesStoredSignal)
     std::vector<float> storedSignal = {1.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> incomingSignal = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-    auto data = Description().addCreature({
-        ObjectDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .type(CellDescription().cellType(
-                MemoryDescription().mode(SignalIntegratorDescription().newSignalWeight(0.0f)).signalEntries({SignalEntryDescription().channels(storedSignal)}))),
-        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState(incomingSignal)),
-    }, CreatureDescription().id(1));
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription().cellType(MemoryDescription()
+                                                     .mode(SignalIntegratorDescription().newSignalWeight(0.0f))
+                                                     .signalEntries({SignalEntryDescription().channels(storedSignal)}))),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState(incomingSignal)),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -208,7 +218,7 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
     // Second signal
     std::vector<float> signal2 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2)._type = CellDescription().signalAndState(signal2);
+    actualData.getObjectRef(2).getCellRef().signalAndState(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -239,13 +249,13 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
 
     // Second signal
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2)._type = CellDescription().signalAndState(signal2);
+    actualData.getObjectRef(2).getCellRef().signalAndState(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(3);
 
     // Third signal
     actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2)._type = CellDescription().signalAndState(signal3);
+    actualData.getObjectRef(2).getCellRef().signalAndState(signal3);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -262,7 +272,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     actualData = _simulationFacade->getSimulationData();
 
     // Fourth signal - should output signal2
-    actualData.getObjectRef(2)._type = CellDescription().signalAndState(signal4);
+    actualData.getObjectRef(2).getCellRef().signalAndState(signal4);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -296,7 +306,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     actualData = _simulationFacade->getSimulationData();
 
     // Second signal
-    actualData.getObjectRef(2)._type = CellDescription().signalAndState(signal2);
+    actualData.getObjectRef(2).getCellRef().signalAndState(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -350,7 +360,7 @@ TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
 
     // Second signal - should record and complete
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2)._type = CellDescription().signalAndState(signal2);
+    actualData.getObjectRef(2).getCellRef().signalAndState(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -375,8 +385,7 @@ TEST_F(MemoryTests, signalRecorder_negativeChannel0_startsReading)
         SignalEntryDescription().channels(storedSignal),
         SignalEntryDescription().channels({0.1f, 0.2f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}),
     };
-    auto data = createMemoryCellWithIncomingSignal(
-        SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
+    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -402,15 +411,14 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
         SignalEntryDescription().channels(storedSignal1),
         SignalEntryDescription().channels(storedSignal2),
     };
-    auto data = createMemoryCellWithIncomingSignal(
-        SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
+    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3);
 
     // Second read - should read second entry and complete
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2)._type = CellDescription().signalAndState(triggerSignal);
+    actualData.getObjectRef(2).getCellRef().signalAndState(triggerSignal);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -431,8 +439,7 @@ TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
     std::vector<float> storedSignal = {0.75f, 0.5f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> triggerSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<SignalEntryDescription> signalEntries = {SignalEntryDescription().channels(storedSignal)};
-    auto data = createMemoryCellWithIncomingSignal(
-        SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(1), triggerSignal, signalEntries);
+    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(1), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -456,7 +463,7 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
 
     // Send negative signal - should continue recording, not switch to reading
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2)._type = CellDescription().signalAndState(negativeSignal);
+    actualData.getObjectRef(2).getCellRef().signalAndState(negativeSignal);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -496,8 +503,7 @@ TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)
     std::vector<float> storedSignal = {0.75f, 0.5f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> triggerSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<SignalEntryDescription> signalEntries = {SignalEntryDescription().channels(storedSignal)};
-    auto data = createMemoryCellWithIncomingSignal(
-        SignalRecorderDescription().readOnly(true).numWrittenSignalEntries(1), triggerSignal, signalEntries);
+    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(true).numWrittenSignalEntries(1), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
