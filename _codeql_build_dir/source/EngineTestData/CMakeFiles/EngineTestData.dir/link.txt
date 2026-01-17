@@ -1,2 +1,0 @@
-/usr/bin/ar qc libEngineTestData.a CMakeFiles/EngineTestData.dir/DescriptionTestDataFactory.cpp.o CMakeFiles/EngineTestData.dir/TestHelper.cpp.o
-/usr/bin/ranlib libEngineTestData.a

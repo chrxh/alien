@@ -1,6 +1,0 @@
-x64-linux/
-x64-linux/share/
-x64-linux/share/opengl/
-x64-linux/share/opengl/usage
-x64-linux/share/opengl/vcpkg.spdx.json
-x64-linux/share/opengl/vcpkg_abi_info.txt

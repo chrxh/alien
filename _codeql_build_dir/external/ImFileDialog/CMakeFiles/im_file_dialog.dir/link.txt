@@ -1,2 +1,0 @@
-/usr/bin/ar qc libim_file_dialog.a CMakeFiles/im_file_dialog.dir/ImFileDialog.cpp.o
-/usr/bin/ranlib libim_file_dialog.a

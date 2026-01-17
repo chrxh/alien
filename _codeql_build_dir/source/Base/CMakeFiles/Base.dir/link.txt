@@ -1,2 +1,0 @@
-/usr/bin/ar qc libBase.a CMakeFiles/Base.dir/Definitions.cpp.o CMakeFiles/Base.dir/FileLogger.cpp.o CMakeFiles/Base.dir/GlobalSettings.cpp.o CMakeFiles/Base.dir/LoggingService.cpp.o CMakeFiles/Base.dir/Math.cpp.o CMakeFiles/Base.dir/MathTypes.cpp.o CMakeFiles/Base.dir/Physics.cpp.o CMakeFiles/Base.dir/StringHelper.cpp.o CMakeFiles/Base.dir/VersionParserService.cpp.o
-/usr/bin/ranlib libBase.a
