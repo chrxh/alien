@@ -62,7 +62,7 @@ __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCrea
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (object->typeData.cell.creature->id == (*newCreature)->id) {
+        if (object->type == ObjectType_Cell && object->typeData.cell.creature->id == (*newCreature)->id) {
             object->typeData.cell.creature = *newCreature;
             *result = true;
         }
@@ -505,7 +505,7 @@ __global__ void cudaGetSelectionShallowData_step1(SimulationData data)
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (0 != object->selected && object->typeData.cell.creature != nullptr) {
+        if (0 != object->selected && object->type == ObjectType_Cell && object->typeData.cell.creature != nullptr) {
             object->typeData.cell.creature->creatureIndex = 0;
         }
     }
@@ -521,7 +521,7 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCe
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
             result.collectCell(object, refPos, data.objectMap);
-            if (object->typeData.cell.creature != nullptr) {
+            if (object->type == ObjectType_Cell && object->typeData.cell.creature != nullptr) {
                 if (alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
                     result.collectCreature();
                 }

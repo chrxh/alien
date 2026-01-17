@@ -38,6 +38,10 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (injectedCell != nullptr) {
                 return;
             }
+            // Skip non-Cell objects
+            if (otherObject->type != ObjectType_Cell) {
+                return;
+            }
             if (otherObject->typeData.cell.creature == nullptr) {
                 return;
             }
@@ -91,6 +95,10 @@ __inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatis
     int result = 0;
     for (int i = 0; i < object->numConnections; ++i) {
         auto connectedObject = object->connections[i].object;
+        // Skip non-Cell objects
+        if (connectedObject->type != ObjectType_Cell) {
+            continue;
+        }
         if (connectedObject->typeData.cell.cellType == CellType_Defender && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
             statistics.incNumDefenderActivities(connectedObject->color);
             ++result;

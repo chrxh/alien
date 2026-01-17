@@ -79,6 +79,10 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
 
     // Matching lambda to check if a cell is a valid receiver
     auto isMatch = [&object](Object* otherObject) {
+        // Must be a Cell type
+        if (otherObject->type != ObjectType_Cell) {
+            return false;
+        }
         // Must be a communicator in receiver mode
         if (otherObject->typeData.cell.cellType != CellType_Communicator || otherObject->typeData.cell.cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
             return false;

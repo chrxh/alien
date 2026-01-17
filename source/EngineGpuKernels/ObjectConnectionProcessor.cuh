@@ -623,6 +623,10 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(Si
 
 __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Object* object, Object* otherObject)
 {
+    // Only check for Cell objects
+    if (object->type != ObjectType_Cell) {
+        return false;
+    }
     auto result = false;
     data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](Object* nearObject) {
         if (result) {
@@ -632,6 +636,10 @@ __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellI
             return;
         }
         if (nearObject == otherObject) {
+            return;
+        }
+        // Skip non-Cell objects
+        if (nearObject->type != ObjectType_Cell) {
             return;
         }
         if (!object->typeData.cell.isSameCreature(&nearObject->typeData.cell)) {

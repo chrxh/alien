@@ -124,7 +124,16 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
 
         auto const& cellColor = getCellColor(object->color);
 
-        auto luminance = object->typeData.cell.getEnergy() / 300.0f;  //1.0f - 50000.0f / (object->energy * object->energy + 50000.0f);
+        // Handle energy calculation based on object type
+        float energy = 0.0f;
+        if (object->type == ObjectType_Cell) {
+            energy = object->typeData.cell.getEnergy();
+        } else if (object->type == ObjectType_FreeCell) {
+            energy = object->typeData.freeCell.rawEnergy;
+        }
+        // Structure objects have no energy field
+
+        auto luminance = energy / 300.0f;  //1.0f - 50000.0f / (object->energy * object->energy + 50000.0f);
         auto white = luminance / 10.0f;
         if (object->selected == 1) {
             luminance = (luminance + 0.1f) * 1.7f;
@@ -143,7 +152,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         float zPos = normalizedHash * 0.05f;
 
-        auto zOffset = object->typeData.cell.creature != nullptr ? toFloat(object->typeData.cell.creature->id % 1000) / 2000 : 0.0f;
+        auto zOffset = (object->type == ObjectType_Cell && object->typeData.cell.creature != nullptr) ? toFloat(object->typeData.cell.creature->id % 1000) / 2000 : 0.0f;
 
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
@@ -154,7 +163,10 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
         // Pack both cellType (lower 8 bits) and signalState (upper 8 bits) into state field
-        objectData[index].state = object->typeData.cell.cellType | (object->typeData.cell.signalState << 8) | (isInTriangleOrQuad << 16);
+        // For non-Cell objects, use default values (CellType_Base and SignalState_Inactive)
+        int cellType = (object->type == ObjectType_Cell) ? object->typeData.cell.cellType : CellType_Base;
+        int signalState = (object->type == ObjectType_Cell) ? object->typeData.cell.signalState : SignalState_Inactive;
+        objectData[index].state = cellType | (signalState << 8) | (isInTriangleOrQuad << 16);
 
         // Store cell index for line extraction (just use the index directly)
         object->tempValue.as_uint64 = index;

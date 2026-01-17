@@ -78,6 +78,10 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 return;
             }
         } else if (reconnectorMode == ReconnectorMode_Creature) {
+            // Must be a Cell type
+            if (otherObject->type != ObjectType_Cell) {
+                return;
+            }
             // Must be from a different creature
             if (otherObject->typeData.cell.creature == nullptr) {
                 return;
@@ -163,8 +167,7 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
 
         if (connectedObject->type == ObjectType_Structure || connectedObject->type == ObjectType_FreeCell) {
             shouldRemove = true;
-        }
-        if (!object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
+        } else if (connectedObject->type == ObjectType_Cell && !object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
             shouldRemove = true;
         }
 

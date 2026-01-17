@@ -621,6 +621,12 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
 
+        // Skip non-Cell objects
+        if (object->type != ObjectType_Cell) {
+            object->tempValue.as_uint32_float.uint32Part = 0;
+            continue;
+        }
+
         bool isSameCreatureNeighborDetaching = false;
         bool isOtherCreatureNeighborDetaching = false;
         bool isSameCreatureNeighborReviving = false;
@@ -628,6 +634,10 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
         //int activatingObjectConnection = -1;
         for (int i = 0; i < object->numConnections; ++i) {
             auto const& connectedObject = object->connections[i].object;
+            // Skip if connected object is not a Cell
+            if (connectedObject->type != ObjectType_Cell) {
+                continue;
+            }
             if (object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
                 auto connectedObjectState = connectedObject->typeData.cell.cellState;
                 if (connectedObjectState == CellState_Detaching) {
@@ -684,9 +694,6 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
                     }
                 }
             }
-            if (object->type == ObjectType_FreeCell || object->type == ObjectType_Structure) {
-                cellState = origCellState;
-            }
         }
         object->tempValue.as_uint32_float.uint32Part = cellState;
     }
@@ -699,7 +706,9 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_applyNextState(S
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        object->typeData.cell.cellState = object->tempValue.as_uint32_float.uint32Part;
+        if (object->type == ObjectType_Cell) {
+            object->typeData.cell.cellState = object->tempValue.as_uint32_float.uint32Part;
+        }
         object->tempValue.as_uint32_float.uint32Part = 0;
     }
 }
@@ -711,6 +720,9 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(Sim
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
         if (object->typeData.cell.creature == nullptr) {
             continue;
         }
@@ -748,6 +760,9 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_applyFutureValue(Si
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
         if (object->typeData.cell.creature == nullptr) {
             continue;
         }

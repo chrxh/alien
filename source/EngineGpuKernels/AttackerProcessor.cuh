@@ -119,6 +119,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 if (cell->isSameCreature(otherCell)) {
                     return;
                 }
+                // Skip if either creature is nullptr
+                if (cell->creature == nullptr || otherCell->creature == nullptr) {
+                    return;
+                }
                 // Do not attack offspring
                 if (otherCell->creature->ancestorId == cell->creature->id) {
                     return;
@@ -146,9 +150,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                 // Filter by lineage restriction
                 if (restrictToLineage != LineageRestriction_No) {
-                    if (cell->creature == nullptr) {
-                        return;
-                    }
                     if (restrictToLineage == LineageRestriction_SameLineage) {
                         if (cell->creature->lineageId != otherCell->creature->lineageId) {
                             return;

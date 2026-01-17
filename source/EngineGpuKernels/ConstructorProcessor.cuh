@@ -495,7 +495,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             hostObject->typeData.cell.cellState = CellState_Dying;
             for (int i = 0; i < hostObject->numConnections; ++i) {
                 auto const& connectedObject = hostObject->connections[i].object;
-                if (connectedObject->typeData.cell.creature == hostObject->typeData.cell.creature) {
+                if (connectedObject->type == ObjectType_Cell && connectedObject->typeData.cell.creature == hostObject->typeData.cell.creature) {
                     connectedObject->typeData.cell.cellState = CellState_Detaching;
                 }
             }
@@ -627,6 +627,9 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
             cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color],
             hostObject->detached,
             [&](Object* const& otherObject) {
+                if (otherObject->type != ObjectType_Cell) {
+                    return false;
+                }
                 if (otherObject == constructionData.lastConstructionObject || otherObject == hostObject
                     || (otherObject->typeData.cell.cellState != CellState_Constructing && otherObject->typeData.cell.activationTime == 0) || otherObject->typeData.cell.creature != constructionData.creature
                     || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
@@ -658,6 +661,9 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
             cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color],
             hostObject->detached,
             [&](Object* const& otherObject) {
+                if (otherObject->type != ObjectType_Cell) {
+                    return false;
+                }
                 if (otherObject->typeData.cell.cellState != CellState_Constructing || otherObject->typeData.cell.creature != constructionData.creature
                     || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
                     return false;
