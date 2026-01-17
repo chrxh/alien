@@ -357,7 +357,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
     for (int i = 0; i < hostObject->numConnections; ++i) {
         auto const& connectedObject = hostObject->connections[i].object;
         if (connectedObject->type != ObjectType_Cell) {
-            return false;
+            continue;
         }
         if (connectedObject->typeData.cell.cellType == CellType_Muscle && connectedObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
             connectedObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
