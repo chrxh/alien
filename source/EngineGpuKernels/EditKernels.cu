@@ -1,6 +1,6 @@
 ﻿#include "EditKernels.cuh"
 
-__global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters)
+__global__ void cudaColorSelectedObjects(SimulationData data, unsigned char color, bool includeClusters)
 {
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
@@ -20,7 +20,7 @@ __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color,
 }
 
 //assumes that *changeTO.numObjects == 1
-__global__ void cudaChangeCell(SimulationData data, TO changeTO)
+__global__ void cudaChangeObject(SimulationData data, TO changeTO)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
@@ -62,6 +62,9 @@ __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCrea
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
         if (object->typeData.cell.creature->id == (*newCreature)->id) {
             object->typeData.cell.creature = *newCreature;
             *result = true;
@@ -252,10 +255,10 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
     }
 }
 
-__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCellIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters)
+__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refObjectIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters)
 {
     {
-        float2 refPos = refCellIndex != -1 ? data.entities.objects.at(refCellIndex)->pos : float2{0, 0};
+        float2 refPos = refObjectIndex != -1 ? data.entities.objects.at(refObjectIndex)->pos : float2{0, 0};
 
         auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
@@ -487,14 +490,14 @@ __global__ void cudaResetSelectionResult(SelectionResult result)
     result.reset();
 }
 
-__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex)
+__global__ void cudaCalcObjectWithMinimalPosY(SimulationData data, unsigned long long int* minObjectPosYAndIndex)
 {
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
-            atomicMin(minCellPosYAndIndex, (static_cast<unsigned long long int>(abs(object->pos.y)) << 32) | static_cast<unsigned long long int>(index));
+            atomicMin(minObjectPosYAndIndex, (static_cast<unsigned long long int>(abs(object->pos.y)) << 32) | static_cast<unsigned long long int>(index));
         }
     }
 }
@@ -505,23 +508,23 @@ __global__ void cudaGetSelectionShallowData_step1(SimulationData data)
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (0 != object->selected && object->typeData.cell.creature != nullptr) {
+        if (0 != object->selected && object->type == ObjectType_Cell) {
             object->typeData.cell.creature->creatureIndex = 0;
         }
     }
 }
 
-__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCellIndex, SelectionResult result)
+__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refObjectIndex, SelectionResult result)
 {
-    float2 refPos = refCellIndex != 0xffffffff ? data.entities.objects.at(refCellIndex)->pos : float2{0, 0};
+    float2 refPos = refObjectIndex != 0xffffffff ? data.entities.objects.at(refObjectIndex)->pos : float2{0, 0};
 
     auto const objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
-            result.collectCell(object, refPos, data.objectMap);
-            if (object->typeData.cell.creature != nullptr) {
+            result.collectObject(object, refPos, data.objectMap);
+            if (object->type == ObjectType_Cell) {
                 if (alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
                     result.collectCreature();
                 }

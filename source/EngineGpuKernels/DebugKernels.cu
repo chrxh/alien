@@ -15,7 +15,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
 
-            if (object->typeData.cell.creature) {
+            if (object->type == ObjectType_Cell) {
                 if (reinterpret_cast<uint64_t>(object->typeData.cell.creature) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
                     || reinterpret_cast<uint64_t>(object->typeData.cell.creature) + sizeof(Creature)
                         >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {

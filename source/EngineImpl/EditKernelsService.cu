@@ -67,7 +67,7 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
         setValueToDevice(_cudaNumEntities, 0);
 
         setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffff00000000ull);
-        KERNEL_CALL(cudaCalcCellWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
+        KERNEL_CALL(cudaCalcObjectWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
         cudaDeviceSynchronize();
         auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
 
@@ -195,7 +195,7 @@ void EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, S
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     if (copyToHost(changeTO.numObjects) == 1) {
-        KERNEL_CALL(cudaChangeCell, data, changeTO);
+        KERNEL_CALL(cudaChangeObject, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     }
@@ -221,7 +221,7 @@ bool EditKernelsService::changeCreature(CudaSettings const& gpuSettings, Simulat
 
 void EditKernelsService::colorSelectedCells(CudaSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters)
 {
-    KERNEL_CALL(cudaColorSelectedCells, data, color, includeClusters);
+    KERNEL_CALL(cudaColorSelectedObjects, data, color, includeClusters);
 }
 
 void EditKernelsService::setDetached(CudaSettings const& gpuSettings, SimulationData const& data, bool value)
@@ -243,7 +243,7 @@ void EditKernelsService::getSelectionShallowData(CudaSettings const& gpuSettings
 {
     KERNEL_CALL_1_1(cudaResetSelectionResult, selectionResult);
     setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffffull);
-    KERNEL_CALL(cudaCalcCellWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
+    KERNEL_CALL(cudaCalcObjectWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
     cudaDeviceSynchronize();
     auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
     KERNEL_CALL(cudaGetSelectionShallowData_step1, data);

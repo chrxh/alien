@@ -42,7 +42,7 @@ public:
         _selectionShallowData->clusterCenterVelY = 0;
     }
 
-    __device__ void collectCell(Object* object, float2 refPos, BaseMap const& map)
+    __device__ void collectObject(Object* object, float2 refPos, BaseMap const& map)
     {
         auto pos = object->pos + map.getCorrectionIncrement(refPos, object->pos);
 

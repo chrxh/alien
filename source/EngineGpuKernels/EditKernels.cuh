@@ -17,8 +17,8 @@
 #include "SimulationData.cuh"
 #include "TO.cuh"
 
-__global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters);
-__global__ void cudaChangeCell(SimulationData data, TO changeTO);      // changeTO contains only 1 cell
+__global__ void cudaColorSelectedObjects(SimulationData data, unsigned char color, bool includeClusters);
+__global__ void cudaChangeObject(SimulationData data, TO changeTO);      // changeTO contains only 1 cell
 __global__ void cudaChangeParticle(SimulationData data, TO changeTO);  // changeTO contains only 1 particle
 
 __global__ void cudaAddGenomeAndCreature(SimulationData data, TO to, Genome** newGenome, Creature** newCreature);
@@ -32,7 +32,7 @@ __global__ void cudaPrepareMapForReconnection(SimulationData data);
 __global__ void cudaUpdateMapForReconnection(SimulationData data);
 __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center);
 __global__ void
-cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCellIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters);
+cudaCalcAccumulatedCenterAndVel(SimulationData data, int refObjectIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters);
 __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data);
 __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters);
 __global__ void cudaMakeSticky(SimulationData data, bool includeClusters);
@@ -47,7 +47,7 @@ __global__ void cudaSetDetached(SimulationData data, bool value);
 __global__ void cudaApplyCataclysm(SimulationData data);
 
 __global__ void cudaResetSelectionResult(SelectionResult result);
-__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex);
+__global__ void cudaCalcObjectWithMinimalPosY(SimulationData data, unsigned long long int* minObjectPosYAndIndex);
 __global__ void cudaGetSelectionShallowData_step1(SimulationData data);
-__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCellIndex, SelectionResult result);
+__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refObjectIndex, SelectionResult result);
 __global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map);
