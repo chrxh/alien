@@ -1,0 +1,2 @@
+/usr/bin/ar qc libNetwork.a CMakeFiles/Network.dir/NetworkService.cpp.o CMakeFiles/Network.dir/NetworkResourceParserService.cpp.o CMakeFiles/Network.dir/NetworkResourceRawTO.cpp.o CMakeFiles/Network.dir/NetworkResourceService.cpp.o CMakeFiles/Network.dir/NetworkResourceTreeTO.cpp.o CMakeFiles/Network.dir/NetworkValidationService.cpp.o
+/usr/bin/ranlib libNetwork.a

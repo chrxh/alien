@@ -18,10 +18,10 @@ public:
 
 TEST_F(EditTests, getSelectionShallowData_noSelection)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({50, 50}),
         ObjectDescription().id(2).pos({51, 50}),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -36,11 +36,11 @@ TEST_F(EditTests, getSelectionShallowData_noSelection)
 
 TEST_F(EditTests, getSelectionShallowData_selectCells)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({50, 50}),
         ObjectDescription().id(2).pos({51, 50}),
         ObjectDescription().id(3).pos({52, 50}),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     _simulationFacade->setSimulationData(data);

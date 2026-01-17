@@ -126,7 +126,7 @@ TEST_F(EnergyParticleTests, particleAbsorption)
     auto particleEnergy = 10.0f;
 
     auto data = Description()
-                    .objects({ObjectDescription().id(1).pos({100.4f, 100.4f}).color(0).type(CellDescription().usableEnergy(cellEnergy))})
+                    .addCreature({ObjectDescription().id(1).pos({100.4f, 100.4f}).color(0).type(CellDescription().usableEnergy(cellEnergy))}, CreatureDescription().id(1))
                     .energies({EnergyDescription().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
     _simulationFacade->setSimulationData(data);
@@ -152,8 +152,9 @@ TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
     auto cellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
     auto depotEnergy = 100.0f;
 
-    auto data = Description().objects(
-        {ObjectDescription().id(1).pos({100.4f, 100.4f}).color(0).type(CellDescription().usableEnergy(cellEnergy).cellType(DepotDescription().storedUsableEnergy(depotEnergy)))});
+    auto data = Description().addCreature(
+        {ObjectDescription().id(1).pos({100.4f, 100.4f}).color(0).type(CellDescription().usableEnergy(cellEnergy).cellType(DepotDescription().storedUsableEnergy(depotEnergy)))},
+        CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
 

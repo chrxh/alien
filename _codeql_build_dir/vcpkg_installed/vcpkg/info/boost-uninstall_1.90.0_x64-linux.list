@@ -1,0 +1,7 @@
+x64-linux/
+x64-linux/share/
+x64-linux/share/boost-uninstall/
+x64-linux/share/boost-uninstall/vcpkg.spdx.json
+x64-linux/share/boost-uninstall/vcpkg_abi_info.txt
+x64-linux/share/boost/
+x64-linux/share/boost/vcpkg-cmake-wrapper.cmake

@@ -24,11 +24,11 @@ TEST_F(ObjectConnectionTests, decay)
     _parameters.cellDeathProbability.baseValue[0] = 0.5f;
 
     _simulationFacade->setSimulationParameters(_parameters);
-    auto origData = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
-                                                                 .width(1)
-                                                                 .height(1)
-                                                                 .usableEnergy(_parameters.minCellEnergy.baseValue[0] / 2)
-                                                                 .rawEnergy(_parameters.minCellEnergy.baseValue[0] / 2));
+    
+    auto cellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
+    auto origData = Description().addCreature({
+        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().usableEnergy(cellEnergy).rawEnergy(cellEnergy)),
+    }, CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);
@@ -40,10 +40,10 @@ TEST_F(ObjectConnectionTests, decay)
 
 TEST_F(ObjectConnectionTests, addFirstConnection)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}),
-    });
+    }, CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_createConnection(1, 2);
@@ -65,11 +65,11 @@ TEST_F(ObjectConnectionTests, addFirstConnection)
 
 TEST_F(ObjectConnectionTests, addSecondConnection)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}),
         ObjectDescription().id(3).pos({0, 1}),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_createConnection(1, 3);
@@ -91,12 +91,12 @@ TEST_F(ObjectConnectionTests, addSecondConnection)
 
 TEST_F(ObjectConnectionTests, addThirdConnection1)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}),
         ObjectDescription().id(3).pos({0, 1}),
         ObjectDescription().id(4).pos({0, -1}),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     _simulationFacade->setSimulationData(data);
@@ -124,12 +124,12 @@ TEST_F(ObjectConnectionTests, addThirdConnection1)
 
 TEST_F(ObjectConnectionTests, addThirdConnection2)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}),
         ObjectDescription().id(3).pos({-1, 0}),
         ObjectDescription().id(4).pos({0, 1}),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     _simulationFacade->setSimulationData(data);

@@ -54,12 +54,12 @@ TEST_F(DescriptionEditTests, correctConnections)
 
 TEST_F(DescriptionEditTests, addThirdConnection1)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}),
         ObjectDescription().id(3).pos({0, 1}),
         ObjectDescription().id(4).pos({0, -1}),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(1, 4);
@@ -352,10 +352,10 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_contained)
 {
     // Create test data
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(1))),
         ObjectDescription().id(1),
-    });
+    }, CreatureDescription().id(1));
 
     // Perform action
     data.assignNewIds();
@@ -386,10 +386,10 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notContained)
 {
     // Create test data
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(2))),
         ObjectDescription().id(1),
-    });
+    }, CreatureDescription().id(1));
 
     // Perform action
     data.assignNewIds();

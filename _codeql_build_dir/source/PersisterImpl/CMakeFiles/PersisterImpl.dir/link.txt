@@ -1,0 +1,2 @@
+/usr/bin/ar qc libPersisterImpl.a CMakeFiles/PersisterImpl.dir/PersisterFacadeImpl.cpp.o CMakeFiles/PersisterImpl.dir/PersisterRequestError.cpp.o CMakeFiles/PersisterImpl.dir/PersisterWorker.cpp.o
+/usr/bin/ranlib libPersisterImpl.a
