@@ -329,6 +329,10 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TO const& to, Objec
     object->pos = objectTO.pos;
     _map.correctPosition(object->pos);
     object->vel = objectTO.vel;
+    object->stiffness = objectTO.stiffness;
+    object->color = objectTO.color;
+    object->fixed = objectTO.fixed;
+    object->sticky = objectTO.sticky;
     object->type = objectTO.type;
 
     if (objectTO.type == ObjectType_Structure) {
