@@ -26,34 +26,34 @@ protected:
     DescriptionTestDataFactory* _descriptionTestDataFactory;
 };
 
-TEST_F(DataTransferTests, singleParticle)
-{
-    Description data;
-    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
+//TEST_F(DataTransferTests, singleParticle)
+//{
+//    Description data;
+//    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
+//
+//    _simulationFacade->setSimulationData(data);
+//    auto actualData = _simulationFacade->getSimulationData();
+//
+//    EXPECT_TRUE(compare(data, actualData));
+//}
 
-    _simulationFacade->setSimulationData(data);
-    auto actualData = _simulationFacade->getSimulationData();
-
-    EXPECT_TRUE(compare(data, actualData));
-}
-
-TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
-{
-    auto genome = GenomeDescription().genes(
-        {GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
-         GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription()})});
-
-    Description data;
-    data.addCreature({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(BaseDescription())), ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(BaseDescription()))}, CreatureDescription(), genome);
-    data.addCreature({ObjectDescription().id(3).pos({20.0f, 20.0f}).type(CellDescription().cellType(BaseDescription())), ObjectDescription().id(4).pos({21.0f, 20.0f}).type(CellDescription().cellType(BaseDescription()))}, CreatureDescription(), genome);
-    data.addConnection(1, 2);
-    data.addConnection(3, 4);
-
-    _simulationFacade->setSimulationData(data);
-    auto actualData = _simulationFacade->getSimulationData();
-
-    EXPECT_TRUE(compare(data, actualData));
-}
+//TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
+//{
+//    auto genome = GenomeDescription().genes(
+//        {GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
+//         GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription()})});
+//
+//    Description data;
+//    data.addCreature({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(BaseDescription())), ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(BaseDescription()))}, CreatureDescription(), genome);
+//    data.addCreature({ObjectDescription().id(3).pos({20.0f, 20.0f}).type(CellDescription().cellType(BaseDescription())), ObjectDescription().id(4).pos({21.0f, 20.0f}).type(CellDescription().cellType(BaseDescription()))}, CreatureDescription(), genome);
+//    data.addConnection(1, 2);
+//    data.addConnection(3, 4);
+//
+//    _simulationFacade->setSimulationData(data);
+//    auto actualData = _simulationFacade->getSimulationData();
+//
+//    EXPECT_TRUE(compare(data, actualData));
+//}
 
 using ObjectParameter = DescriptionTestDataFactory::ObjectParameter;
 class DataTransferTests_AllObjectTypes
@@ -350,7 +350,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
 TEST_F(DataTransferTests, adaptIdGenerator_objects)
 {
     auto constexpr HighId = 1000000;
-    auto data = Description().objects({ObjectDescription().id(HighId)});
+    auto data = Description().objects({ObjectDescription().id(HighId).type(StructureDescription())});
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});

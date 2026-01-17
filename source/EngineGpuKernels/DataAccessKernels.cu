@@ -1077,26 +1077,26 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
     uint64_t numNodes = 0;
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->typeData.cell.neuralNetwork) {
+        if (object->type == ObjectType_Cell) {
             heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
-        }
-        if (object->typeData.cell.cellType == CellType_Memory) {
-            heapBytes += sizeof(SignalEntry) * object->typeData.cell.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
-        }
-        if (object->typeData.cell.creature) {
-            auto const& creature = object->typeData.cell.creature;
-            if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
-                ++numCreatures;
-                if (alienAtomicExch64(&creature->genome->genomeIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
-                    ++numGenomes;
-                    numGenes += creature->genome->numGenes;
-                    for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
-                        auto& gene = creature->genome->genes[i];
-                        numNodes += gene.numNodes;
-                        for (int k = 0; k < gene.numNodes; ++k) {
-                            auto& node = gene.nodes[k];
-                            if (node.cellType == CellTypeGenome_Memory) {
-                                heapBytes += sizeof(SignalEntryGenome) * node.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
+            if (object->typeData.cell.cellType == CellType_Memory) {
+                heapBytes += sizeof(SignalEntry) * object->typeData.cell.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
+            }
+            if (object->typeData.cell.creature) {
+                auto const& creature = object->typeData.cell.creature;
+                if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
+                    ++numCreatures;
+                    if (alienAtomicExch64(&creature->genome->genomeIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
+                        ++numGenomes;
+                        numGenes += creature->genome->numGenes;
+                        for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
+                            auto& gene = creature->genome->genes[i];
+                            numNodes += gene.numNodes;
+                            for (int k = 0; k < gene.numNodes; ++k) {
+                                auto& node = gene.nodes[k];
+                                if (node.cellType == CellTypeGenome_Memory) {
+                                    heapBytes += sizeof(SignalEntryGenome) * node.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
+                                }
                             }
                         }
                     }
@@ -1129,11 +1129,11 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& objectTO = to.objects[index];
             heapBytes += sizeof(Object) + GpuMemoryAlignmentBytes;
-            if (objectTO.typeData.cell.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
+            if (objectTO.type == ObjectType_Cell) {
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
-            }
-            if (objectTO.typeData.cell.cellType == CellType_Memory) {
-                heapBytes += sizeof(SignalEntry) * objectTO.typeData.cell.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
+                if (objectTO.typeData.cell.cellType == CellType_Memory) {
+                    heapBytes += sizeof(SignalEntry) * objectTO.typeData.cell.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
+                }
             }
         }
         alienAtomicAdd64(&arraySizes->heap, heapBytes);
