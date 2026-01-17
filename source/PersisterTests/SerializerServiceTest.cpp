@@ -39,7 +39,7 @@ TEST_F(SerializerServiceTests, singleParticle)
     testSerializationAndDeserialization(data);
 }
 
-using CellParameter = DescriptionTestDataFactory::CellParameter;
+using CellParameter = DescriptionTestDataFactory::ObjectParameter;
 class SerializerServiceTests_AllCellTypes
     : public SerializerServiceTests
     , public testing::WithParamInterface<CellParameter>
@@ -48,7 +48,7 @@ class SerializerServiceTests_AllCellTypes
 INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllCellTypes,
     SerializerServiceTests_AllCellTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllCellParameters()));
+    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
 
 TEST_P(SerializerServiceTests_AllCellTypes, cellWithoutCreature)
 {

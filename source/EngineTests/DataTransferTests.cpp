@@ -55,7 +55,7 @@ TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-using CellParameter = DescriptionTestDataFactory::CellParameter;
+using CellParameter = DescriptionTestDataFactory::ObjectParameter;
 class DataTransferTests_AllCellTypes
     : public DataTransferTests
     , public testing::WithParamInterface<CellParameter>
@@ -64,7 +64,7 @@ class DataTransferTests_AllCellTypes
 INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllCellTypes,
     DataTransferTests_AllCellTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllCellParameters()));
+    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
 
 TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
 {

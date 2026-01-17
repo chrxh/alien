@@ -51,7 +51,6 @@ private:
         std::vector<uint8_t>& heap,
         std::unordered_map<uint64_t, uint64_t>& objectTOIndexById,
         ObjectDescription const& cellToAdd,
-        std::optional<uint64_t> const& creatureId,
         std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const;
     void addParticle(std::vector<EnergyTO>& particleTOs, EnergyDescription const& particleDesc) const;
 

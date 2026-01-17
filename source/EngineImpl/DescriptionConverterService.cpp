@@ -189,11 +189,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
 
     std::unordered_map<uint64_t, uint64_t> objectIndexTOById;
     for (auto const& object : description._objects) {
-        std::optional<uint64_t> creatureId = std::nullopt;
-        if (object.getObjectType() == ObjectType_Cell) {
-            creatureId = object.getCellRef()._creatureId;
-        }
-        convertObjectToTO(objectTOs, heap, objectIndexTOById, object, creatureId, creatureTOIndexById);
+        convertObjectToTO(objectTOs, heap, objectIndexTOById, object, creatureTOIndexById);
     }
     for (auto const& object : description._objects) {
         setConnections(objectTOs, object, objectIndexTOById);
@@ -212,7 +208,7 @@ TO DescriptionConverterService::convertDescriptionToTO(ObjectDescription const& 
 
     std::unordered_map<uint64_t, uint64_t> objectIndexTOById;
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    convertObjectToTO(objectTOs, heap, objectIndexTOById, object, std::nullopt, creatureTOIndexById);
+    convertObjectToTO(objectTOs, heap, objectIndexTOById, object, creatureTOIndexById);
 
     return provideDataTO({}, {}, {}, {}, objectTOs, {}, heap);
 }
@@ -576,10 +572,8 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             cellDesc._cellType = communicator;
         } break;
         }
-        if (objectTO.typeData.cell.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
-            auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
-            cellDesc._neuralNetwork = convert(*neuralNetworkTO);
-        }
+        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
+        cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
         SignalRestrictionDescription routingRestriction;
         routingRestriction._mode = objectTO.typeData.cell.signalRestriction.mode;
@@ -1190,7 +1184,6 @@ void DescriptionConverterService::convertObjectToTO(
     std::vector<uint8_t>& heap,
     std::unordered_map<uint64_t, uint64_t>& objectTOIndexById,
     ObjectDescription const& objectDesc,
-    std::optional<uint64_t> const& creatureId,
     std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const
 {
     auto objectIndex = objectTOs.size();
@@ -1221,7 +1214,7 @@ void DescriptionConverterService::convertObjectToTO(
         // ObjectType_Cell - access cell data
         CellDescription const& cellDesc = objectDesc.getCellRef();
 
-        objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(creatureId.value());
+        objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(cellDesc._creatureId.value());
         objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
         checkAndCorrectInvalidEnergy(objectTO.typeData.cell.usableEnergy);
         objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;
@@ -1237,15 +1230,12 @@ void DescriptionConverterService::convertObjectToTO(
         objectTO.typeData.cell.age = cellDesc._age;
         objectTO.typeData.cell.activationTime = cellDesc._activationTime;
 
+        objectTO.typeData.cell.neuralNetworkDataIndex = heap.size();
+        heap.resize(heap.size() + sizeof(NeuralNetworkTO));
+        auto neuralNetworkTO = reinterpret_cast<NeuralNetworkTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkTO));
+        *neuralNetworkTO = convert(cellDesc._neuralNetwork);
         auto cellType = cellDesc.getCellType();
-        if (cellDesc._neuralNetwork.has_value()) {
-            objectTO.typeData.cell.neuralNetworkDataIndex = heap.size();
-            heap.resize(heap.size() + sizeof(NeuralNetworkTO));
-            auto neuralNetworkTO = reinterpret_cast<NeuralNetworkTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkTO));
-            *neuralNetworkTO = convert(*cellDesc._neuralNetwork);
-        } else {
-            objectTO.typeData.cell.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
-        }
+
         switch (cellType) {
         case CellType_Base: {
             BaseTO baseTO;

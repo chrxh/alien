@@ -279,9 +279,7 @@ void _InspectorWindow::processCellTypeTab(ObjectDescription& object)
         int type = object.getCellRef().getCellType();
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-            if (object.getCellRef()._neuralNetwork.has_value()) {
-                processNeuronContent(object);
-            }
+            processNeuronContent(object);
 
             if (ImGui::TreeNodeEx("Properties###type", TreeNodeFlags)) {
                 if (AlienGui::Combo(

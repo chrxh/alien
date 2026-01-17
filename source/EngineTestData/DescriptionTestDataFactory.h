@@ -21,13 +21,14 @@ public:
 
     using CellTypeMode = std::variant<std::monostate, MuscleModeWrapper, SensorModeWrapper, ReconnectorModeWrapper, MemoryModeWrapper, CommunicatorModeWrapper>;
 
-    struct CellParameter
+    struct ObjectParameter
     {
+        ObjectType objectType;
         CellType cellType;
         CellTypeMode mode = std::monostate{};
     };
-    std::vector<CellParameter> getAllCellParameters() const;
-    ObjectDescription createNonDefaultObjectDescription(CellParameter cellParameter) const;
+    std::vector<ObjectParameter> getAllObjectParameters() const;
+    ObjectDescription createNonDefaultObjectDescription(ObjectParameter objectParameter) const;
     EnergyDescription createNonDefaultEnergyDescription() const;
 
     struct NodeParameter
@@ -42,10 +43,10 @@ public:
     bool compare(Description left, Description right) const;
     bool compare(ObjectDescription left, ObjectDescription right) const;
     bool compare(EnergyDescription left, EnergyDescription right) const;
-    bool compare(ObjectDescription const& cell, NodeDescription const& node) const;
+    bool compare(ObjectDescription const& object, NodeDescription const& node) const;
 
 private:
-    CellTypeDescription createNonDefaultCellTypeDescription(CellParameter cellParameter) const;
+    CellTypeDescription createNonDefaultCellTypeDescription(ObjectParameter objectParameter) const;
 
-    CellTypeGenomeDescription createNonDefaultCellTypeGenomeDescription(NodeParameter cellParameter) const;
+    CellTypeGenomeDescription createNonDefaultCellTypeGenomeDescription(NodeParameter objectParameter) const;
 };
