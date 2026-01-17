@@ -51,10 +51,10 @@ TEST_F(DepotTests, noSignal_noChange)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto initialUsableEnergy = normalCellEnergy + 20.0f;
 
-    // Create depot without a cell carrying a signel => no signal will be sent
-    auto data = Description().objects({
+    // Create depot without a cell carrying a signal => no signal will be sent
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
-    });
+    }, CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
