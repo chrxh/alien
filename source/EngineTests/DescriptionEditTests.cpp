@@ -54,12 +54,14 @@ TEST_F(DescriptionEditTests, correctConnections)
 
 TEST_F(DescriptionEditTests, addThirdConnection1)
 {
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({0, 0}),
-        ObjectDescription().id(2).pos({1, 0}),
-        ObjectDescription().id(3).pos({0, 1}),
-        ObjectDescription().id(4).pos({0, -1}),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({0, 0}),
+            ObjectDescription().id(2).pos({1, 0}),
+            ObjectDescription().id(3).pos({0, 1}),
+            ObjectDescription().id(4).pos({0, -1}),
+        },
+        CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(1, 4);
@@ -83,13 +85,14 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
 
 TEST_F(DescriptionEditTests, addThirdConnection2)
 {
-    Description data;
-    data._objects = {
-        ObjectDescription().id(1).pos({0, 0}),
-        ObjectDescription().id(2).pos({1, 0}),
-        ObjectDescription().id(3).pos({-1, 0}),
-        ObjectDescription().id(4).pos({0, 1}),
-    };
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({0, 0}),
+            ObjectDescription().id(2).pos({1, 0}),
+            ObjectDescription().id(3).pos({-1, 0}),
+            ObjectDescription().id(4).pos({0, 1}),
+        },
+        CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(1, 4);
@@ -143,7 +146,9 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._objects) { ids.insert(object._id); }
+    for (auto const& object : data._objects) {
+        ids.insert(object._id);
+    }
 
     EXPECT_EQ(2, ids.size());
 }
@@ -165,7 +170,9 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._objects) { ids.insert(object._id); }
+    for (auto const& object : data._objects) {
+        ids.insert(object._id);
+    }
     EXPECT_EQ(2, ids.size());
 }
 
@@ -212,25 +219,31 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
 {
     // Create test data
     auto data = Description()
-                    .objects({
-                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
-                        ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
-                    })
-                    .addCreature({
-                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
-                        ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
-                    }, CreatureDescription());
+                    .addCreature(
+                        {
+                            ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
+                            ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
+                        },
+                        CreatureDescription())
+                    .addCreature(
+                        {
+                            ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
+                            ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
+                        },
+                        CreatureDescription());
 
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._objects) { ids.insert(object._id); }
+    for (auto const& object : data._objects) {
+        ids.insert(object._id);
+    }
     ASSERT_EQ(4, ids.size());
 
-    ASSERT_EQ(2, data.getNumObjectsWithoutCreature());
-    ASSERT_EQ(1, data._creatures.size());
+    ASSERT_EQ(0, data.getNumObjectsWithoutCreature());
+    ASSERT_EQ(2, data._creatures.size());
 
     for (auto const& creature : data._creatures) {
         auto creatureCells = data.getObjectsForCreature(creature._id);
@@ -250,20 +263,26 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 {
     // Create test data
     auto data = Description()
-                    .addCreature({
-                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(2)}),
-                        ObjectDescription().id(1),
-                    }, CreatureDescription())
-                    .addCreature({
-                        ObjectDescription().id(2).connections({ConnectionDescription().objectId(0)}),
-                    }, CreatureDescription());
+                    .addCreature(
+                        {
+                            ObjectDescription().id(0).connections({ConnectionDescription().objectId(2)}),
+                            ObjectDescription().id(1),
+                        },
+                        CreatureDescription())
+                    .addCreature(
+                        {
+                            ObjectDescription().id(2).connections({ConnectionDescription().objectId(0)}),
+                        },
+                        CreatureDescription());
 
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._objects) { ids.insert(object._id); }
+    for (auto const& object : data._objects) {
+        ids.insert(object._id);
+    }
     ASSERT_EQ(3, ids.size());
 
     ASSERT_EQ(0, data.getNumObjectsWithoutCreature());
@@ -306,33 +325,49 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
 {
     // Create test data
     auto data = Description()
-                    .objects({
-                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(3)}),
-                        ObjectDescription().id(1),
-                    })
-                    .addCreature({
-                        ObjectDescription().id(2).connections({ConnectionDescription().objectId(4)}),
-                    }, CreatureDescription());
+                    .addCreature(
+                        {
+                            ObjectDescription().id(0).connections({ConnectionDescription().objectId(3)}),
+                            ObjectDescription().id(1),
+                        },
+                        CreatureDescription())
+                    .addCreature(
+                        {
+                            ObjectDescription().id(2).connections({ConnectionDescription().objectId(4)}),
+                        },
+                        CreatureDescription());
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._objects) { ids.insert(object._id); }
+    for (auto const& object : data._objects) {
+        ids.insert(object._id);
+    }
     ASSERT_EQ(3, ids.size());
 
-    ASSERT_EQ(2, data.getNumObjectsWithoutCreature());
-    ASSERT_EQ(1, data._creatures.size());
+    ASSERT_EQ(0, data.getNumObjectsWithoutCreature());
+    ASSERT_EQ(2, data._creatures.size());
 
-    // Only look at cells without creature
+    // Find the creature with two cells (the "larger" creature)
+    std::optional<CreatureDescription> largerCreature, smallerCreature;
+    for (auto const& creature : data._creatures) {
+        if (data.getObjectsForCreature(creature._id).size() == 2) {
+            largerCreature = creature;
+        } else {
+            smallerCreature = creature;
+        }
+    }
+    ASSERT_TRUE(largerCreature.has_value());
+    ASSERT_TRUE(smallerCreature.has_value());
+
+    auto largerCreatureCells = data.getObjectsForCreature(largerCreature->_id);
     std::optional<ObjectDescription> cellWithoutConnection, cellWithConnection;
-    for (auto const& object : data._objects) {
-        if (!object.getCellRef()._creatureId.has_value()) {
-            if (object._connections.empty()) {
-                cellWithoutConnection = object;
-            } else {
-                cellWithConnection = object;
-            }
+    for (auto const& object : largerCreatureCells) {
+        if (object._connections.empty()) {
+            cellWithoutConnection = object;
+        } else {
+            cellWithConnection = object;
         }
     }
     ASSERT_TRUE(cellWithoutConnection.has_value());
@@ -341,32 +376,35 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     ASSERT_EQ(1, cellWithConnection->_connections.size());
     EXPECT_EQ(3, cellWithConnection->_connections.front()._objectId);
 
-    auto const& creature = data._creatures.front();
-    auto creatureCells = data.getObjectsForCreature(creature._id);
-    ASSERT_EQ(1, creatureCells.size());
+    auto smallerCreatureCells = data.getObjectsForCreature(smallerCreature->_id);
+    ASSERT_EQ(1, smallerCreatureCells.size());
 
-    ASSERT_EQ(1, creatureCells.front()._connections.size());
-    ASSERT_EQ(4, creatureCells.front()._connections.front()._objectId);
+    ASSERT_EQ(1, smallerCreatureCells.front()._connections.size());
+    ASSERT_EQ(4, smallerCreatureCells.front()._connections.front()._objectId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_contained)
 {
     // Create test data
-    auto data = Description().objects({
-        ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(1))),
-        ObjectDescription().id(1),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(1))),
+            ObjectDescription().id(1),
+        },
+        CreatureDescription());
 
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._objects) { ids.insert(object._id); }
+    for (auto const& object : data._objects) {
+        ids.insert(object._id);
+    }
     ASSERT_EQ(2, ids.size());
 
     ASSERT_EQ(2, data._objects.size());
-    ASSERT_EQ(0, data._creatures.size());
+    ASSERT_EQ(1, data._creatures.size());
 
     std::optional<ObjectDescription> constructor, base;
     for (auto const& object : data._objects) {
@@ -386,21 +424,25 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notContained)
 {
     // Create test data
-    auto data = Description().objects({
-        ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(2))),
-        ObjectDescription().id(1),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(2))),
+            ObjectDescription().id(1),
+        },
+        CreatureDescription());
 
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    for (auto const& object : data._objects) { ids.insert(object._id); }
+    for (auto const& object : data._objects) {
+        ids.insert(object._id);
+    }
     ASSERT_EQ(2, ids.size());
 
     ASSERT_EQ(2, data._objects.size());
-    ASSERT_EQ(0, data._creatures.size());
+    ASSERT_EQ(1, data._creatures.size());
 
     std::optional<ObjectDescription> constructor, base;
     for (auto const& object : data._objects) {
@@ -469,7 +511,9 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
     }
     {
         std::unordered_set<uint64_t> ids;
-        for (auto const& object : data._objects) { ids.insert(object._id); }
+        for (auto const& object : data._objects) {
+            ids.insert(object._id);
+        }
         ASSERT_EQ(4, ids.size());
     }
 }
