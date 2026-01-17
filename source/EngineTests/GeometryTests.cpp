@@ -55,11 +55,11 @@ TEST_F(GeometryTests, copyBuffers_emptySim)
 
 TEST_F(GeometryTests, copyBuffers_objects)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
         ObjectDescription().id(3).pos({102.0f, 100.0f}),
-    });
+    }, CreatureDescription());
     _simulationFacade->setSimulationData(data);
     auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
@@ -99,10 +99,10 @@ TEST_F(GeometryTests, copyBuffers_energyParticles)
 
 TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    }, CreatureDescription());
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -122,11 +122,11 @@ TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
 
 TEST_F(GeometryTests, copyBuffers_triangle)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
         ObjectDescription().id(3).pos({100.5f, 100.866f}),
-    });
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 1);
@@ -151,12 +151,12 @@ TEST_F(GeometryTests, copyBuffers_triangle)
 
 TEST_F(GeometryTests, copyBuffers_quad)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
         ObjectDescription().id(3).pos({101.0f, 101.0f}),
         ObjectDescription().id(4).pos({100.0f, 101.0f}),
-    });
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 4);
@@ -183,10 +183,10 @@ TEST_F(GeometryTests, copyBuffers_quad)
 TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 {
     auto data = Description()
-                    .objects({
+                    .addCreature({
                         ObjectDescription().id(1).pos({100.0f, 100.0f}),
                         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-                    })
+                    }, CreatureDescription())
                     .energies({
                         EnergyDescription().id(3).pos({200.0f, 200.0f}).energy(10.0f),
                         EnergyDescription().id(4).pos({201.0f, 200.0f}).energy(10.0f),
@@ -242,10 +242,10 @@ TEST_F(GeometryTests, copyBuffers_selectedObjectData_noRestriction_inactive)
 {
     auto object = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive).baseAngle(45.0f).openingAngle(90.0f)));
 
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         object,
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    }, CreatureDescription());
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -265,10 +265,10 @@ TEST_F(GeometryTests, copyBuffers_selectedObjectData_hasRestriction_active)
 {
     auto object = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(90.0f)));
 
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         object,
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    }, CreatureDescription());
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -288,10 +288,10 @@ TEST_F(GeometryTests, copyBuffers_selectedObjectData_hasRestriction_conditional)
 {
     auto object = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Conditional).baseAngle(45.0f).openingAngle(90.0f)));
 
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         object,
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    }, CreatureDescription());
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -313,7 +313,7 @@ TEST_F(GeometryTests, copyBuffers_connectionData_noRestriction_inactive_bothDire
 
     auto object2 = ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive)));
 
-    auto data = Description().objects({object1, object2});
+    auto data = Description().addCreature({object1, object2}, CreatureDescription());
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -340,7 +340,7 @@ TEST_F(GeometryTests, copyBuffers_connectionData_withRestriction_active_restrict
 
     auto object2 = ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive)));
 
-    auto data = Description().objects({object1, object2});
+    auto data = Description().addCreature({object1, object2}, CreatureDescription());
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -367,7 +367,7 @@ TEST_F(GeometryTests, copyBuffers_connectionData_withRestriction_conditional_res
 
     auto object2 = ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive)));
 
-    auto data = Description().objects({object1, object2});
+    auto data = Description().addCreature({object1, object2}, CreatureDescription());
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
