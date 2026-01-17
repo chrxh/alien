@@ -18,10 +18,9 @@ public:
 
 TEST_F(SignalTests, noSignal)
 {
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1),
-    };
+    }, CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -35,11 +34,10 @@ TEST_F(SignalTests, noSignal)
 TEST_F(SignalTests, forwardSignal)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signal(SignalDescription().channels(signal).numTimesSent(3)).signalState(SignalState_Active)),
         ObjectDescription().id(2).pos({1, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -60,11 +58,10 @@ TEST_F(SignalTests, forwardSignal)
 TEST_F(SignalTests, forwardSignal_detailedPreview)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signalAndState(signal)),
         ObjectDescription().id(2).pos({1, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
 
     _simulationFacade->setPreviewData(data);
@@ -84,10 +81,9 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
 TEST_F(SignalTests, vanishSignal_singleCell)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signalAndState(signal)),
-    };
+    }, CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -100,11 +96,10 @@ TEST_F(SignalTests, vanishSignal_singleCell)
 TEST_F(SignalTests, vanishSignal_relaxationNeeded)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signal(SignalDescription().channels(signal))),
         ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalState(1)),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -119,12 +114,11 @@ TEST_F(SignalTests, mergeSignals)
 {
     std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, -1.0f, 0.0f};
     std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f};
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signal(SignalDescription().channels(signal1).numTimesSent(7)).signalState(SignalState_Active)),
         ObjectDescription().id(2).pos({1, 0}),
         ObjectDescription().id(3).pos({2, 0}).type(CellDescription().signal(SignalDescription().channels(signal2).numTimesSent(3)).signalState(SignalState_Active)),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -155,12 +149,11 @@ TEST_F(SignalTests, mergeSignals)
 TEST_F(SignalTests, forkSignals)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signal(SignalDescription().channels(signal).numTimesSent(5)).signalState(SignalState_Active)),
         ObjectDescription().id(3).pos({2, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -202,12 +195,11 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
 {
     auto side = GetParam();
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal).signalRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f)),
         ObjectDescription().id(3).pos({2, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -233,12 +225,11 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
 {
     auto side = GetParam();
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
-    Description data;
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal).signalRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f)),
         ObjectDescription().id(3).pos({2, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -262,7 +253,6 @@ TEST_F(SignalTests, conditionalMode_outsideCone_alwaysBlocked)
 {
     // Conditional mode: signals outside the cone are always blocked, regardless of channel[0]
     std::vector<float> signal = {0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0.5 >= 0
-    Description data;
 
     // Cell 2 has conditional restriction - signal to cell 3 is outside the cone
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
@@ -270,11 +260,11 @@ TEST_F(SignalTests, conditionalMode_outsideCone_alwaysBlocked)
     cell2Desc.getCellRef()._signalRestriction._baseAngle = 45.0f;  // Restriction points away from cell 3
     cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
 
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -290,7 +280,6 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
 {
     // Conditional mode: signals inside the cone are blocked if channel[0] < 0
     std::vector<float> signal = {-0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = -0.5 < 0
-    Description data;
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone but channel[0] < 0
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
@@ -298,11 +287,11 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
     cell2Desc.getCellRef()._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
     cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
 
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -318,7 +307,6 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
 {
     // Conditional mode: signals inside the cone pass if channel[0] >= 0
     std::vector<float> signal = {0.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0 >= 0
-    Description data;
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone and channel[0] >= 0
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
@@ -326,11 +314,11 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
     cell2Desc.getCellRef()._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
     cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
 
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -347,7 +335,6 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
 {
     // Conditional mode: signals inside the cone pass if channel[0] >= 0
     std::vector<float> signal = {0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0.5 >= 0
-    Description data;
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone and channel[0] >= 0
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
@@ -355,11 +342,11 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
     cell2Desc.getCellRef()._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
     cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
 
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -376,7 +363,6 @@ TEST_F(SignalTests, inactiveMode_noRestriction)
 {
     // Inactive mode means no restriction regardless of angles
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
-    Description data;
 
     // Cell 2 has inactive restriction - signal should pass even with restrictive angles
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
@@ -384,11 +370,11 @@ TEST_F(SignalTests, inactiveMode_noRestriction)
     cell2Desc.getCellRef()._signalRestriction._baseAngle = 45.0f;  // Would block if active
     cell2Desc.getCellRef()._signalRestriction._openingAngle = 10.0f;
 
-    data._objects = {
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    };
+    }, CreatureDescription());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
