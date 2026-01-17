@@ -4,6 +4,18 @@
 
 #include <PersisterInterface/SerializerService.h>
 
+namespace
+{
+    std::vector<DescriptionTestDataFactory::ObjectParameter> getAllObjectParametersIncludingNonCellTypes()
+    {
+        auto params = DescriptionTestDataFactory::get().getAllObjectParameters();
+        params.insert(
+            params.begin(),
+            {DescriptionTestDataFactory::ObjectParameter{ObjectType_Structure, CellType_Base},
+             DescriptionTestDataFactory::ObjectParameter{ObjectType_FreeCell, CellType_Base}});
+        return params;
+    }
+}
 
 class SerializerServiceTests : public ::testing::Test
 {
@@ -48,7 +60,7 @@ class SerializerServiceTests_AllCellTypes
 INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllCellTypes,
     SerializerServiceTests_AllCellTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
+    ::testing::ValuesIn(getAllObjectParametersIncludingNonCellTypes()));
 
 TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
 {

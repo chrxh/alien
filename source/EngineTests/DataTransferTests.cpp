@@ -12,6 +12,18 @@
 
 #include "IntegrationTestFramework.h"
 
+namespace
+{
+    std::vector<DescriptionTestDataFactory::ObjectParameter> getAllObjectParametersIncludingNonCellTypes()
+    {
+        auto params = DescriptionTestDataFactory::get().getAllObjectParameters();
+        params.insert(
+            params.begin(),
+            {DescriptionTestDataFactory::ObjectParameter{ObjectType_Structure, CellType_Base},
+             DescriptionTestDataFactory::ObjectParameter{ObjectType_FreeCell, CellType_Base}});
+        return params;
+    }
+}
 
 class DataTransferTests : public IntegrationTestFramework
 {
@@ -64,7 +76,7 @@ class DataTransferTests_AllObjectTypes
 INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllObjectTypes,
     DataTransferTests_AllObjectTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
+    ::testing::ValuesIn(getAllObjectParametersIncludingNonCellTypes()));
 
 TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes)
 {
@@ -151,10 +163,14 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
 
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
-    auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDescription()));
+    auto hexagon =
+        DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDescription()));
 
 
-    auto data = Description().addCreature(hexagon._objects, CreatureDescription(), GenomeDescription().genes({
+    auto data = Description().addCreature(
+        hexagon._objects,
+        CreatureDescription(),
+        GenomeDescription().genes({
             GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
             GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
         }));
@@ -179,9 +195,13 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> expectedCellIds;
-    for (auto const& object : data._objects) { expectedCellIds.insert(object._id); }
+    for (auto const& object : data._objects) {
+        expectedCellIds.insert(object._id);
+    }
     std::unordered_set<uint64_t> actualCellIds;
-    for (auto const& object : actualData._objects) { actualCellIds.insert(object._id); }
+    for (auto const& object : actualData._objects) {
+        actualCellIds.insert(object._id);
+    }
     EXPECT_EQ(expectedCellIds, actualCellIds);
 
     std::unordered_set<uint64_t> expectedCreatureIds;
@@ -219,7 +239,9 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> actualCellIds;
-    for (auto const& object : actualData._objects) { actualCellIds.insert(object._id); }
+    for (auto const& object : actualData._objects) {
+        actualCellIds.insert(object._id);
+    }
     EXPECT_EQ(2 * 4, actualCellIds.size());
 
     std::unordered_set<uint64_t> actualCreatureIds;
@@ -285,7 +307,8 @@ TEST_F(DataTransferTests, getGenomeOfCreature_successful)
 
     auto genome =
         GenomeDescription().name("Test Genome").genes({GeneDescription().name("Gene1").separation(true).nodes({NodeDescription(), NodeDescription()})});
-    auto data = Description().addCreature({ObjectDescription(), ObjectDescription(), ObjectDescription(), ObjectDescription()}, CreatureDescription().id(CreatureId), genome);
+    auto data = Description().addCreature(
+        {ObjectDescription(), ObjectDescription(), ObjectDescription(), ObjectDescription()}, CreatureDescription().id(CreatureId), genome);
 
     _simulationFacade->setSimulationData(data);
 
