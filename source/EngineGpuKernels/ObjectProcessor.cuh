@@ -732,6 +732,9 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(Sim
         if (object->type != ObjectType_Cell) {
             continue;
         }
+        if (object->typeData.cell.creature == nullptr) {
+            continue;
+        }
         if (object->typeData.cell.frontAngleId != object->typeData.cell.creature->frontAngleId) {
             if (!object->typeData.cell.headCell) {
                 auto update = false;
@@ -770,6 +773,9 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_applyFutureValue(Si
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if (object->type != ObjectType_Cell) {
+            continue;
+        }
+        if (object->typeData.cell.creature == nullptr) {
             continue;
         }
         if (object->typeData.cell.frontAngleId != object->typeData.cell.creature->frontAngleId) {

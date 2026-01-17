@@ -139,7 +139,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
         data.objectMap.getMatchingObjects(
             nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, object->pos, 4.0f, object->detached, [&](Object* const& otherObject) {
-                return object->typeData.cell.isSameCreature(&otherObject->typeData.cell);
+                return otherObject->type == ObjectType_Cell && object->typeData.cell.isSameCreature(&otherObject->typeData.cell);
             });
     }
 
@@ -355,7 +355,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             auto otherObject = data.objectMap.getFirst(scanPos);
             while (otherObject != nullptr) {
                 // Check if this cell is part of a creature (not structure or free object)
-                if (otherObject->type != ObjectType_Structure && otherObject->type != ObjectType_FreeCell && !object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
+                if (otherObject->type == ObjectType_Cell && !object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                     bool matches = true;
 
                     if (restrictToColor != 255 && otherObject->color != restrictToColor) {
@@ -364,10 +364,10 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                     if (otherObject->typeData.cell.creature == nullptr) {
                         matches = false;
                     }
-                    if (minNumCells > 0 && otherObject->typeData.cell.creature->numObjects < minNumCells) {
+                    if (matches && minNumCells > 0 && otherObject->typeData.cell.creature->numObjects < minNumCells) {
                         matches = false;
                     }
-                    if (maxNumCells > 0 && otherObject->typeData.cell.creature->numObjects > maxNumCells) {
+                    if (matches && maxNumCells > 0 && otherObject->typeData.cell.creature->numObjects > maxNumCells) {
                         matches = false;
                     }
                     if (matches && restrictToLineage != LineageRestriction_No) {
@@ -398,7 +398,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             auto& sensor = object->typeData.cell.cellTypeData.sensor;
             auto otherObject = data.objectMap.getFirst(scanPos);
             while (otherObject != nullptr) {
-                if (otherObject->typeData.cell.creature != nullptr && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureId) {
+                if (otherObject->type == ObjectType_Cell && otherObject->typeData.cell.creature != nullptr && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureId) {
                     uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
                     float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numObjects);
                     return pack(distance, absAngle, density, creatureIdPart);
