@@ -29,10 +29,11 @@ public:
 
 TEST_F(DetonatorTests, doNothing)
 {
-    Description data;
-    data._objects = {
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().countdown(14))),
-    };
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().countdown(14))),
+        },
+        CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -49,11 +50,12 @@ TEST_F(DetonatorTests, doNothing)
 
 TEST_F(DetonatorTests, activateDetonator)
 {
-    Description data;
-    data._objects = {
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().countdown(10))),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription()).signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
-    };
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().countdown(10))),
+            ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription()).signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -71,11 +73,12 @@ TEST_F(DetonatorTests, activateDetonator)
 
 TEST_F(DetonatorTests, explosion)
 {
-    Description data;
-    data._objects = {
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
-        ObjectDescription().id(2).pos({12.0f, 10.0f}),
-    };
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
+            ObjectDescription().id(2).pos({12.0f, 10.0f}),
+        },
+        CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);
@@ -94,11 +97,12 @@ TEST_F(DetonatorTests, explosion)
 
 TEST_F(DetonatorTests, chainExplosion)
 {
-    Description data;
-    data._objects = {
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
-        ObjectDescription().id(2).pos({12.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Ready).countdown(10))),
-    };
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
+            ObjectDescription().id(2).pos({12.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Ready).countdown(10))),
+        },
+        CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);
@@ -114,10 +118,17 @@ TEST_F(DetonatorTests, chainExplosion)
 
 TEST_F(DetonatorTests, explosionAlsoIfDying)
 {
-    Description data;
-    data._objects = {
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Dying).activationTime(100).cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
-    };
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .type(CellDescription()
+                          .cellState(CellState_Dying)
+                          .activationTime(100)
+                          .cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
+        },
+        CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);
