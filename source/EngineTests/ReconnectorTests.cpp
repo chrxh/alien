@@ -78,8 +78,8 @@ TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDescription());
 
-    // Add base cell (non-structure) within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(BaseDescription())));
+    // Add free cell (non-structure) within range
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(FreeCellDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -134,8 +134,8 @@ TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription());
 
-    // Add base cell (non-free) within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(BaseDescription())));
+    // Add structure cell (non-free) within range
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
