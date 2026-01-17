@@ -120,6 +120,10 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                     if (radiationAbsorption < NEAR_ZERO) {
                         continue;
                     }
+                    // Structure objects don't absorb energy
+                    if (object->type == ObjectType_Structure) {
+                        continue;
+                    }
                     if (!object->tryLock()) {
                         continue;
                     }
@@ -144,7 +148,12 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                         if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
                             energyToTransfer = particle->energy;
                         }
-                        object->typeData.cell.rawEnergy += energyToTransfer;
+                        // Add energy to the appropriate field based on object type
+                        if (object->type == ObjectType_Cell) {
+                            object->typeData.cell.rawEnergy += energyToTransfer;
+                        } else if (object->type == ObjectType_FreeCell) {
+                            object->typeData.freeCell.rawEnergy += energyToTransfer;
+                        }
                         particle->energy -= energyToTransfer;
                         bool killParticle = particle->energy < NEAR_ZERO;
 
