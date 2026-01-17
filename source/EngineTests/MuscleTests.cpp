@@ -68,11 +68,13 @@ protected:
 
 TEST_F(MuscleTests, noFrontAngle)
 {
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(MuscleDescription().mode(AutoBendingDescription()))),
-        ObjectDescription().id(3).pos({12.0f, 10.0f}),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
+            ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(MuscleDescription().mode(AutoBendingDescription()))),
+            ObjectDescription().id(3).pos({12.0f, 10.0f}),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -142,14 +144,23 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     auto [side, channel0, channel1] = GetParam();
 
-    Description data;
-    std::vector<ObjectDescription> cellsToAdd = {
-        ObjectDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
-        ObjectDescription().id(2).pos({side == Side::Left ? 11.0f : 12.0f, 10.0f}).type(CellDescription().frontAngle(side == Side::Left ? 90.0f : -90.0f).cellType(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4))),
-        ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
-        ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
-    };
-    data._objects.insert(data._objects.end(), cellsToAdd.begin(), cellsToAdd.end());
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(1)
+                .pos({side == Side::Left ? 10.0f : 13.0f, 10.0f})
+                .type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
+            ObjectDescription()
+                .id(2)
+                .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
+                .type(CellDescription()
+                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
+                          .cellType(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4))),
+            ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+            ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 4);
@@ -214,12 +225,20 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     auto [side, channel0, channel1] = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}),
-        ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
-        ObjectDescription().id(3).pos({10.0f, 12.0f}),
-        ObjectDescription().id(4).pos({side == Side::Left ? 9.0f : 11.0f, 11.0f}).type(CellDescription().frontAngle(side == Side::Left ? -90.0f : 90.0f).cellType(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4))),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}),
+            ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
+            ObjectDescription().id(3).pos({10.0f, 12.0f}),
+            ObjectDescription()
+                .id(4)
+                .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
+                .type(CellDescription()
+                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
+                          .cellType(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4))),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(4, 2);
@@ -297,12 +316,23 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
-        ObjectDescription().id(2).pos({side == Side::Left ? 11.0f : 12.0f, 10.0f}).type(CellDescription().frontAngle(side == Side::Left ? 90.0f : -90.0f).cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
-        ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
-        ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(1)
+                .pos({side == Side::Left ? 10.0f : 13.0f, 10.0f})
+                .type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
+            ObjectDescription()
+                .id(2)
+                .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
+                .type(CellDescription()
+                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
+                          .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
+            ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+            ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 4);
@@ -389,12 +419,21 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}),
-        ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
-        ObjectDescription().id(3).pos({10.0f, 12.0f}),
-        ObjectDescription().id(4).pos({side == Side::Left ? 9.0f : 11.0f, 11.0f}).type(CellDescription().frontAngle(side == Side::Left ? -90.0f : 90.0f).cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.8f))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}),
+            ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(20))),
+            ObjectDescription().id(3).pos({10.0f, 12.0f}),
+            ObjectDescription()
+                .id(4)
+                .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
+                .type(CellDescription()
+                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
+                          .cellType(
+                              MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.8f)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(4, 2);
@@ -501,12 +540,23 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto [side, targetAngle] = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(10))),
-        ObjectDescription().id(2).pos({side == Side::Left ? 11.0f : 12.0f, 10.0f}).type(CellDescription().frontAngle(side == Side::Left ? 90.0f : -90.0f).cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f))),
-        ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
-        ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(1)
+                .pos({side == Side::Left ? 10.0f : 13.0f, 10.0f})
+                .type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(10))),
+            ObjectDescription()
+                .id(2)
+                .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
+                .type(CellDescription()
+                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
+                          .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f))),
+            ObjectDescription().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+            ObjectDescription().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 4);
@@ -548,12 +598,21 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     auto [side, targetAngle] = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}),
-        ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(10))),
-        ObjectDescription().id(3).pos({10.0f, 12.0f}),
-        ObjectDescription().id(4).pos({side == Side::Left ? 9.0f : 11.0f, 11.0f}).type(CellDescription().frontAngle(side == Side::Left ? -90.0f : 90.0f).cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).attractionRepulsionRatio(0.8f))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f))),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}),
+            ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(10))),
+            ObjectDescription().id(3).pos({10.0f, 12.0f}),
+            ObjectDescription()
+                .id(4)
+                .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
+                .type(CellDescription()
+                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
+                          .cellType(MuscleDescription().mode(
+                              AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).attractionRepulsionRatio(0.8f)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f))),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(4, 2);
@@ -599,11 +658,19 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10))),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().frontAngle(180.0f).cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
-        ObjectDescription().id(3).pos({12.0f, 10.0f}).type(CellDescription().frontAngle(180.0f)),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10))),
+            ObjectDescription()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDescription()
+                          .frontAngle(180.0f)
+                          .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
+            ObjectDescription().id(3).pos({12.0f, 10.0f}).type(CellDescription().frontAngle(180.0f)),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -660,10 +727,18 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10))),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().frontAngle(180.0f).cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10))),
+            ObjectDescription()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDescription()
+                          .frontAngle(180.0f)
+                          .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -722,11 +797,19 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10))),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().frontAngle(180.0f).cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
-        ObjectDescription().id(3).pos({12.0f, 10.0f}).type(CellDescription().frontAngle(180.0f)),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10))),
+            ObjectDescription()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDescription()
+                          .frontAngle(180.0f)
+                          .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
+            ObjectDescription().id(3).pos({12.0f, 10.0f}).type(CellDescription().frontAngle(180.0f)),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -768,10 +851,18 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10))),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().frontAngle(180.0f).cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10))),
+            ObjectDescription()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDescription()
+                          .frontAngle(180.0f)
+                          .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)))),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -830,11 +921,19 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     auto constexpr AnglePrecision = 1.0f;
     auto [channel0, channel1] = GetParam();
 
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(3))),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().frontAngle(0.0f).cellType(MuscleDescription().mode(DirectMovementDescription())).neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 2))),
-        ObjectDescription().id(3).pos({12.0f, 10.0f}),
-    });
+    auto data = Description().addCreature(
+        {
+            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(3))),
+            ObjectDescription()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDescription()
+                          .frontAngle(0.0f)
+                          .cellType(MuscleDescription().mode(DirectMovementDescription()))
+                          .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 2))),
+            ObjectDescription().id(3).pos({12.0f, 10.0f}),
+        },
+        CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
