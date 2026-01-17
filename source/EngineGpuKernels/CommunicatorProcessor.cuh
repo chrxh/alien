@@ -17,7 +17,7 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderCell, Object* receiverCell, int newNumTimesSent);
+    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent);
 };
 
 /************************************************************************/
@@ -80,6 +80,9 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     // Matching lambda to check if a cell is a valid receiver
     auto isMatch = [&object](Object* otherObject) {
         // Must be a communicator in receiver mode
+        if (otherObject->type != ObjectType_Cell) {
+            return false;
+        }
         if (otherObject->typeData.cell.cellType != CellType_Communicator || otherObject->typeData.cell.cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
             return false;
         }
@@ -143,15 +146,15 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     }
 }
 
-__inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderCell, Object* receiverCell, int newNumTimesSent)
+__inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent)
 {
-    receiverCell->getLock();
+    receiverObject->getLock();
 
     // Check if we should override existing signal
     bool shouldTransmit = false;
-    if (receiverCell->typeData.cell.signalState != SignalState_Active) {
+    if (receiverObject->typeData.cell.signalState != SignalState_Active) {
         shouldTransmit = true;
-    } else if (newNumTimesSent < receiverCell->typeData.cell.signal.numTimesSent) {
+    } else if (newNumTimesSent < receiverObject->typeData.cell.signal.numTimesSent) {
         // Override only if new signal has fewer transmission hops
         shouldTransmit = true;
     }
@@ -159,29 +162,29 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
     if (shouldTransmit) {
         // Copy signal to receiver with incremented numTimesSent
         for (int k = 0; k < MAX_CHANNELS; ++k) {
-            receiverCell->typeData.cell.signal.channels[k] = senderCell->typeData.cell.signal.channels[k];
+            receiverObject->typeData.cell.signal.channels[k] = senderObject->typeData.cell.signal.channels[k];
         }
-        receiverCell->typeData.cell.signal.numTimesSent = newNumTimesSent;
-        receiverCell->typeData.cell.signalState = SignalState_Active;
+        receiverObject->typeData.cell.signal.numTimesSent = newNumTimesSent;
+        receiverObject->typeData.cell.signalState = SignalState_Active;
 
         // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
         // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
         // We need to maintain the absolute direction: senderRefDir rotated by senderAngle = receiverRefDir rotated by receiverAngle
         // Therefore: receiverAngle = senderAngle + (senderRefAngle - receiverRefAngle)
-        auto senderRefDir = SignalProcessor::calcReferenceDirection(data, senderCell);
-        auto receiverRefDir = SignalProcessor::calcReferenceDirection(data, receiverCell);
+        auto senderRefDir = SignalProcessor::calcReferenceDirection(data, senderObject);
+        auto receiverRefDir = SignalProcessor::calcReferenceDirection(data, receiverObject);
         auto senderRefAngle = Math::angleOfVector(senderRefDir);
         auto receiverRefAngle = Math::angleOfVector(receiverRefDir);
         auto angleDiff = senderRefAngle - receiverRefAngle;
 
         // The signal angle is encoded as angle/180, so the diff must also be scaled
-        auto senderAngle = senderCell->typeData.cell.signal.channels[Channels::CommunicatorAngle];
+        auto senderAngle = senderObject->typeData.cell.signal.channels[Channels::CommunicatorAngle];
         auto translatedAngle = senderAngle + angleDiff / 180.0f;
         // Normalize to [-1, 1] range (representing [-180, 180] degrees)
         translatedAngle = Math::getNormalizedAngle(translatedAngle * 180.0f, -180.0f) / 180.0f;
-        receiverCell->typeData.cell.signal.channels[Channels::CommunicatorAngle] = translatedAngle;
+        receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = translatedAngle;
     }
 
-    receiverCell->releaseLock();
+    receiverObject->releaseLock();
     return shouldTransmit;
 }

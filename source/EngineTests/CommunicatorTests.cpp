@@ -31,7 +31,7 @@ protected:
     {
         auto data = Description().addCreature({
                     ObjectDescription().id(creatureId * 100).pos(pos).color(color).type(CellDescription().cellType(CommunicatorDescription().mode(SenderDescription().range(range).maxTimesSent(maxTimesSent)))),
-                    ObjectDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDescription().signalAndState({1.0f, 0.5f, 3.0f, 0, 0, 0, 0, 0})),
+                    ObjectDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDescription().signalAndState({1.0f, 0.5f, 2.0f, 0, 0, 0, 0, 0})),
                 }, CreatureDescription()
                 .id(creatureId));
         data.addConnection(creatureId * 100, creatureId * 100 + 1);
@@ -88,7 +88,7 @@ TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
     EXPECT_EQ(receiver.getCellRef()._signalState, SignalState_Active);
     EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[0], 1.0f);
     EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
-    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[2], 3.0f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[2], 2.0f);
     EXPECT_EQ(receiver.getCellRef()._signal._numTimesSent, 1);
 }
 
