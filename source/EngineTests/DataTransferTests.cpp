@@ -66,14 +66,19 @@ INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllObjectTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
 
-TEST_P(DataTransferTests_AllObjectTypes, objectsWithoutCreature)
+TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes)
 {
     auto objectParameter = GetParam();
 
     Description data;
-    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
-    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
-
+    if (objectParameter.objectType == ObjectType_Cell) {
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+    } else {
+        data.objects(
+            {_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter),
+             _descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)});
+    }
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -81,13 +86,19 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithoutCreature)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_P(DataTransferTests_AllObjectTypes, objectsWithoutCreature_preview)
+TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes_preview)
 {
     auto objectParameter = GetParam();
 
     Description data;
-    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
-    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+    if (objectParameter.objectType == ObjectType_Cell) {
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+    } else {
+        data.objects(
+            {_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter),
+             _descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)});
+    }
 
     _simulationFacade->setPreviewData(data);
     auto actualData = _simulationFacade->getPreviewData();
@@ -106,7 +117,7 @@ INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllNodeTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
 
-TEST_P(DataTransferTests_AllNodeTypes, objectsWithCreatures_oneNode)
+TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode)
 {
     auto nodeParameter = GetParam();
 
@@ -123,7 +134,7 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithCreatures_oneNode)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_P(DataTransferTests_AllNodeTypes, objectsWithCreatures_oneNode_preview)
+TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_preview)
 {
     auto nodeParameter = GetParam();
 

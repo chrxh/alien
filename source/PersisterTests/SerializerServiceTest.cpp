@@ -50,12 +50,17 @@ INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllCellTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
 
-TEST_P(SerializerServiceTests_AllCellTypes, objectWithoutCreature)
+TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
 {
     auto objectParameter = GetParam();
 
     Description data;
-    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+    if (objectParameter.objectType == ObjectType_Cell) {
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+    } else {
+        data.objects({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)});
+    }
+
 
     testSerializationAndDeserialization(data);
 }
@@ -71,7 +76,7 @@ INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllNodeTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
 
-TEST_P(SerializerServiceTests_AllNodeTypes, objectWithCreature)
+TEST_P(SerializerServiceTests_AllNodeTypes, objectWithNonEmptyGenome)
 {
     auto nodeParameter = GetParam();
 

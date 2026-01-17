@@ -500,6 +500,9 @@ Description& Description::addCreature(std::vector<ObjectDescription> const& obje
 
     // Add cells with creatureId set
     for (auto object : objects) {
+
+        // Only cells can belong to creatures
+        CHECK(object.getObjectType() == ObjectType_Cell);
         object.getCellRef()._creatureId = creature._id;
         _objects.emplace_back(object);
     }
