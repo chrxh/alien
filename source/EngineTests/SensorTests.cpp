@@ -789,10 +789,10 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
  */
 TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    }, CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add a particle with low energy
@@ -810,16 +810,18 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
  */
 TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription()))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    }, CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add many non-structure cells (should be ignored)
+    std::vector<ObjectDescription> otherCells;
     for (int i = 0; i < 20; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f)));
+        otherCells.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f)));
     }
+    data.addCreature(otherCells, CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -836,10 +838,10 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
  */
 TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.5f)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    }, CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add just a few free cells
@@ -854,10 +856,10 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
 
 TEST_F(SensorTests, detectFreeCell_restrictToColor)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0),
-    });
+    }, CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add free cells with wrong color (color 0) closer
@@ -884,16 +886,18 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
 
 TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
 {
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    }, CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add many non-free cells (should be ignored)
+    std::vector<ObjectDescription> otherCells;
     for (int i = 0; i < 20; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f)));
+        otherCells.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f)));
     }
+    data.addCreature(otherCells, CreatureDescription().id(1));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1354,9 +1358,9 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_relocation)
 TEST_F(SensorTests, telemetry_allOutputs)
 {
     // Test with a cell that has energy and velocity to verify all telemetry outputs
-    auto data = Description().objects({
+    auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.05f}).type(CellDescription().frontAngle(0.0f).usableEnergy(100.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(TelemetryDescription()))),  // Moving with both x and y components
-    });
+    }, CreatureDescription().id(0));
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->calcTimesteps(1);
