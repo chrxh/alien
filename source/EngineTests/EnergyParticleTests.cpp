@@ -34,12 +34,7 @@ TEST_F(EnergyParticleTests, particleToCell_transformationAllowed)
 
     // Create a particle with energy above normalCellEnergy
     Description data;
-    data._energies.emplace_back(EnergyDescription()
-                                      .id(1)
-                                      .pos({100.0f, 100.0f})
-                                      .vel({0.1f, 0.1f})
-                                      .energy(normalCellEnergy + 10.0f)
-                                      .color(0));
+    data._energies.emplace_back(EnergyDescription().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy + 10.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
 
@@ -71,12 +66,7 @@ TEST_F(EnergyParticleTests, particleToCell_transformationDisabled)
 
     // Create a particle with energy above normalCellEnergy
     Description data;
-    data._energies.emplace_back(EnergyDescription()
-                                      .id(1)
-                                      .pos({100.0f, 100.0f})
-                                      .vel({0.1f, 0.1f})
-                                      .energy(normalCellEnergy + 10.0f)
-                                      .color(0));
+    data._energies.emplace_back(EnergyDescription().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy + 10.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
 
@@ -101,12 +91,7 @@ TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
 
     // Create a particle with energy below normalCellEnergy
     Description data;
-    data._energies.emplace_back(EnergyDescription()
-                                      .id(1)
-                                      .pos({100.0f, 100.0f})
-                                      .vel({0.1f, 0.1f})
-                                      .energy(normalCellEnergy - 1.0f)
-                                      .color(0));
+    data._energies.emplace_back(EnergyDescription().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy - 1.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
 
@@ -126,7 +111,7 @@ TEST_F(EnergyParticleTests, particleAbsorption)
     auto particleEnergy = 10.0f;
 
     auto data = Description()
-                    .objects({ObjectDescription().id(1).pos({100.4f, 100.4f}).color(0).type(CellDescription().usableEnergy(cellEnergy))})
+                    .addCreature({ObjectDescription().pos({100.4f, 100.4f}).color(0).type(CellDescription().usableEnergy(cellEnergy))}, CreatureDescription())
                     .energies({EnergyDescription().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
     _simulationFacade->setSimulationData(data);
@@ -139,21 +124,25 @@ TEST_F(EnergyParticleTests, particleAbsorption)
     EXPECT_EQ(0, actualData._energies.size());
     EXPECT_EQ(1, actualData._objects.size());
 
-    auto const& object = actualData.getObjectRef(1);
+    auto const& object = actualData._objects.at(0);
     EXPECT_TRUE(approxCompare(cellEnergy, object.getCellRef()._usableEnergy));
     EXPECT_TRUE(approxCompare(particleEnergy, object.getCellRef()._rawEnergy));
 }
 
 TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
 {
-    _parameters.cellDeathProbability.baseValue[0] = 1.0f;  // Ensure cell will die instantly when below min energy   
+    _parameters.cellDeathProbability.baseValue[0] = 1.0f;  // Ensure cell will die instantly when below min energy
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto cellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
     auto depotEnergy = 100.0f;
 
-    auto data = Description().objects(
-        {ObjectDescription().id(1).pos({100.4f, 100.4f}).color(0).type(CellDescription().usableEnergy(cellEnergy).cellType(DepotDescription().storedUsableEnergy(depotEnergy)))});
+    auto data = Description().addCreature(
+        {ObjectDescription()
+             .pos({100.4f, 100.4f})
+             .color(0)
+             .type(CellDescription().usableEnergy(cellEnergy).cellType(DepotDescription().storedUsableEnergy(depotEnergy)))},
+        CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
 
