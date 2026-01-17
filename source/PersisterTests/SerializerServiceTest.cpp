@@ -31,7 +31,7 @@ protected:
     SerializerService* _serializerService;
 };
 
-TEST_F(SerializerServiceTests, singleParticle)
+TEST_F(SerializerServiceTests, singleEnergyParticle)
 {
     Description data;
     data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
@@ -39,10 +39,10 @@ TEST_F(SerializerServiceTests, singleParticle)
     testSerializationAndDeserialization(data);
 }
 
-using CellParameter = DescriptionTestDataFactory::ObjectParameter;
+using ObjectParameter = DescriptionTestDataFactory::ObjectParameter;
 class SerializerServiceTests_AllCellTypes
     : public SerializerServiceTests
-    , public testing::WithParamInterface<CellParameter>
+    , public testing::WithParamInterface<ObjectParameter>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
@@ -50,12 +50,12 @@ INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllCellTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
 
-TEST_P(SerializerServiceTests_AllCellTypes, cellWithoutCreature)
+TEST_P(SerializerServiceTests_AllCellTypes, objectWithoutCreature)
 {
-    auto cellParameter = GetParam();
+    auto objectParameter = GetParam();
 
     Description data;
-    data._objects.emplace_back(_descriptionTestDataFactory->createNonDefaultObjectDescription(cellParameter));
+    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
 
     testSerializationAndDeserialization(data);
 }
@@ -71,7 +71,7 @@ INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllNodeTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
 
-TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
+TEST_P(SerializerServiceTests_AllNodeTypes, objectWithCreature)
 {
     auto nodeParameter = GetParam();
 

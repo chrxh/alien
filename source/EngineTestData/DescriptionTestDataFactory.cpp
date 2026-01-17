@@ -142,7 +142,6 @@ NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(Node
 
 std::pair<CreatureDescription, GenomeDescription> DescriptionTestDataFactory::createNonDefaultCreatureDescription(NodeParameter nodeParameter) const
 {
-    CreatureDescription defaultCreature;
     GeneDescription defaultGene;
 
     auto genome = GenomeDescription()

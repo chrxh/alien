@@ -55,24 +55,25 @@ TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-using CellParameter = DescriptionTestDataFactory::ObjectParameter;
-class DataTransferTests_AllCellTypes
+using ObjectParameter = DescriptionTestDataFactory::ObjectParameter;
+class DataTransferTests_AllObjectTypes
     : public DataTransferTests
-    , public testing::WithParamInterface<CellParameter>
+    , public testing::WithParamInterface<ObjectParameter>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    DataTransferTests_AllCellTypes,
-    DataTransferTests_AllCellTypes,
+    DataTransferTests_AllObjectTypes,
+    DataTransferTests_AllObjectTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
 
-TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
+TEST_P(DataTransferTests_AllObjectTypes, objectsWithoutCreature)
 {
-    auto cellParameter = GetParam();
+    auto objectParameter = GetParam();
 
     Description data;
-    data._objects.emplace_back(_descriptionTestDataFactory->createNonDefaultObjectDescription(cellParameter));
-    data._objects.emplace_back(_descriptionTestDataFactory->createNonDefaultObjectDescription(cellParameter));
+    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -80,13 +81,13 @@ TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature_preview)
+TEST_P(DataTransferTests_AllObjectTypes, objectsWithoutCreature_preview)
 {
-    auto cellParameter = GetParam();
+    auto objectParameter = GetParam();
 
     Description data;
-    data._objects.emplace_back(_descriptionTestDataFactory->createNonDefaultObjectDescription(cellParameter));
-    data._objects.emplace_back(_descriptionTestDataFactory->createNonDefaultObjectDescription(cellParameter));
+    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+    data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
 
     _simulationFacade->setPreviewData(data);
     auto actualData = _simulationFacade->getPreviewData();
@@ -105,7 +106,7 @@ INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllNodeTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
 
-TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
+TEST_P(DataTransferTests_AllNodeTypes, objectsWithCreatures_oneNode)
 {
     auto nodeParameter = GetParam();
 
@@ -122,7 +123,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
+TEST_P(DataTransferTests_AllNodeTypes, objectsWithCreatures_oneNode_preview)
 {
     auto nodeParameter = GetParam();
 
@@ -139,7 +140,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
-    auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDescription().cellType(BaseDescription())));
+    auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDescription()));
 
 
     auto data = Description().addCreature(hexagon._objects, CreatureDescription(), GenomeDescription().genes({
