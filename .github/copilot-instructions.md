@@ -41,7 +41,12 @@ cd build
 ./NetworkTests          # <1 second
 ./PersisterTests        # ~1.4 seconds
 ./EngineTests           # >4 min
+
+# Debug mode for EngineTests (use -d for precise kernel failure info)
+./EngineTests -d --gtest_filter=TestSuite.TestName  # Much slower, use for debugging specific tests only
 ```
+
+**Note on `-d` flag**: The `-d` parameter enables debug mode which synchronizes CUDA after each kernel call. This provides more precise information about which kernel is failing, but significantly increases test execution time. Only recommended when debugging specific failing tests, not for full test suite runs.
 
 ### Run the Applications
 ```bash
