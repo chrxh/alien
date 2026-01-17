@@ -8,6 +8,8 @@
 std::vector<DescriptionTestDataFactory::ObjectParameter> DescriptionTestDataFactory::getAllObjectParameters() const
 {
     return {
+        ObjectParameter{ObjectType_Structure},
+        ObjectParameter{ObjectType_FreeCell},
         ObjectParameter{ObjectType_Cell, CellType_Base},
         ObjectParameter{ObjectType_Cell, CellType_Depot},
         ObjectParameter{ObjectType_Cell, CellType_Constructor},

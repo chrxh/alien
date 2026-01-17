@@ -320,10 +320,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto genome2 = GenomeDescription();
 
     Description data;
-    data.addCreature(
-        {ObjectDescription().id(1).type(FreeCellDescription()), ObjectDescription().id(2).type(StructureDescription())},
-        CreatureDescription().id(CreatureId1),
-        genome);
+    data.addCreature({ObjectDescription().id(1), ObjectDescription().id(2)}, CreatureDescription().id(CreatureId1), genome);
     data.addCreature({ObjectDescription().id(3)}, CreatureDescription().id(CreatureId2), genome2);
 
     data.addConnection(1, 2);

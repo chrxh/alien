@@ -742,7 +742,7 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
-        if (!object->typeData.cell.creature) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
         createGenomeTO(object->typeData.cell.creature->genome, to);
@@ -759,7 +759,7 @@ __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClust
         if ((includeClusters && object->selected == 0) || (!includeClusters && object->selected != 1)) {
             continue;
         }
-        if (!object->typeData.cell.creature) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
 
@@ -774,7 +774,7 @@ __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, T
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (!object->typeData.cell.creature) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
 
@@ -812,7 +812,7 @@ __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, Sim
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;
         }
-        if (!object->typeData.cell.creature) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
         createCreatureTO(object, to);
@@ -829,7 +829,7 @@ __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClu
         if ((includeClusters && object->selected == 0) || (!includeClusters && object->selected != 1)) {
             continue;
         }
-        if (!object->typeData.cell.creature) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
 
@@ -844,7 +844,7 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (!object->typeData.cell.creature) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
 
@@ -876,7 +876,7 @@ __global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (!object->typeData.cell.creature) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
         if (object->typeData.cell.creature->id == creatureId) {
@@ -1052,7 +1052,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step1(SimulationData data)
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->typeData.cell.creature) {
+        if (object->type == ObjectType_Cell) {
             object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
             object->typeData.cell.creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
         }

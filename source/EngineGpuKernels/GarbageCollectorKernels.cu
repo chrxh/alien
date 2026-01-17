@@ -46,8 +46,10 @@ __global__ void cudaCleanupCellsStep2(Array<Object*> cellPointers, Heap newHeap)
                 auto& connectedObject = object->connections[i].object;
                 connectedObject = reinterpret_cast<Object*>(newHeapStart + connectedObject->tempValue.as_uint64);
             }
-            if (object->typeData.cell.cellType == CellType_Constructor) {
-                object->typeData.cell.cellTypeData.constructor.offspring = nullptr;
+            if (object->type == ObjectType_Cell) {
+                if (object->typeData.cell.cellType == CellType_Constructor) {
+                    object->typeData.cell.cellTypeData.constructor.offspring = nullptr;
+                }
             }
         }
     }
@@ -142,7 +144,7 @@ __global__ void cudaPrepareCleanupCreaturesAndGenomes(Array<Object*> cells)
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
-        if (object->typeData.cell.creature) {
+        if (object->type == ObjectType_Cell) {
             object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
             object->typeData.cell.creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
         }
@@ -156,7 +158,7 @@ __global__ void cudaCleanupGenomesStep1(Array<Object*> cells, Heap newHeap)
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
 
-        if (object->typeData.cell.creature) {
+        if (object->type == ObjectType_Cell) {
             auto const& genome = object->typeData.cell.creature->genome;
             auto origGenomeIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
 
@@ -208,7 +210,7 @@ __global__ void cudacudaCleanupGenomesStep2(Array<Object*> cells, Heap newHeap)
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
-        if (object->typeData.cell.creature) {
+        if (object->type == ObjectType_Cell) {
             object->typeData.cell.creature->genome = &newHeap.atType<Genome>(object->typeData.cell.creature->genome->genomeIndex);
         }
     }
@@ -221,8 +223,9 @@ __global__ void cudaCleanupCreaturesStep1(Array<Object*> cells, Heap newHeap)
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
 
-        if (object->typeData.cell.creature) {
-            auto origCreatureIndex = alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
+        if (object->type == ObjectType_Cell) {
+            auto origCreatureIndex =
+                alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
             if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
                 auto newCreature = newHeap.getTypedSubArray<Creature>(1);
                 auto const& creature = object->typeData.cell.creature;
@@ -243,8 +246,8 @@ __global__ void cudaCleanupCreaturesStep2(Array<Object*> cells, Heap newHeap)
 
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto& object = cells.at(index);
-        auto const& creature = object->typeData.cell.creature;
-        if (creature) {
+        if (object->type == ObjectType_Cell) {
+            auto const& creature = object->typeData.cell.creature;
             object->typeData.cell.creature = &newHeap.atType<Creature>(creature->creatureIndex);
         }
     }
