@@ -589,6 +589,10 @@ __inline__ __device__ void ObjectProcessor::aging(SimulationData& data)
         if (object->fixed) {
             continue;
         }
+        // Only Cell objects have age and cell state
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
         ++object->typeData.cell.age;
 
 
@@ -843,7 +847,8 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
         if (object->fixed) {
             continue;
         }
-        if (object->type == ObjectType_Structure) {
+        // Only Cell objects have radiation behavior with usableEnergy/rawEnergy/age
+        if (object->type != ObjectType_Cell) {
             continue;
         }
         if (data.primaryNumberGen.random() < cudaSimulationParameters.radiationProbability) {
@@ -894,6 +899,10 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
         if (object->fixed) {
             continue;
         }
+        // Only Cell objects have decay behavior with usableEnergy/cellState/age
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
         auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.objectMaxBindingEnergy, data, object->pos);
         if (object->typeData.cell.usableEnergy > cellMaxBindingEnergy) {
             ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
@@ -914,11 +923,12 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[object->color];
-        if (cudaSimulationParameters.cellAgeLimiterToggle.value && object->type != ObjectType_FreeCell && object->type != ObjectType_Structure
+        if (cudaSimulationParameters.cellAgeLimiterToggle.value
             && object->typeData.cell.cellTriggered == CellTriggered_No && object->typeData.cell.cellState == CellState_Ready && object->typeData.cell.activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < object->numConnections; ++i) {
-                if (object->connections[i].object->typeData.cell.cellTriggered == CellTriggered_Yes) {
+                auto connectedObject = object->connections[i].object;
+                if (connectedObject->type == ObjectType_Cell && connectedObject->typeData.cell.cellTriggered == CellTriggered_Yes) {
                     adjacentCellsUsed = true;
                     break;
                 }
@@ -929,9 +939,6 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
                 cellMaxAge = toInt(cellInactiveMaxAge);
             }
         }
-        if (cudaSimulationParameters.cellAgeLimiterToggle.value && object->type == ObjectType_FreeCell) {
-            cellMaxAge = cudaSimulationParameters.freeCellMaxAge.value[object->color];
-        }
         if (cellMaxAge > 0 && object->typeData.cell.age > cellMaxAge) {
             cellDestruction = true;
         }
@@ -941,6 +948,9 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
             if (orig != CellState_Dying) {
                 for (int i = 0; i < object->numConnections; ++i) {
                     auto const& connectedObject = object->connections[i].object;
+                    if (connectedObject->type != ObjectType_Cell) {
+                        continue;
+                    }
                     auto origConnected = atomicExch(&connectedObject->typeData.cell.cellState, CellState_Detaching);
                     if (origConnected == CellState_Dying) {
                         atomicExch(&connectedObject->typeData.cell.cellState, CellState_Dying);

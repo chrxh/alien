@@ -33,7 +33,8 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
 
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto& object = objects.at(i);
-        if (object->typeData.cell.neuralNetwork) {
+        // Only Cell objects have neural networks
+        if (object->type == ObjectType_Cell && object->typeData.cell.neuralNetwork) {
             processCell(data, statistics, object);
         }
     }

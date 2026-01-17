@@ -16,8 +16,11 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             statistics.incNumCells(object->color);
             if (object->type == ObjectType_FreeCell) {
                 statistics.incNumFreeCells(object->color);
+                statistics.addEnergy(object->color, object->typeData.freeCell.rawEnergy);
+            } else if (object->type == ObjectType_Cell) {
+                statistics.addEnergy(object->color, object->typeData.cell.getEnergy());
             }
-            statistics.addEnergy(object->color, object->typeData.cell.getEnergy());
+            // Structure objects don't have energy to track
             //if (object->typeData.cell.cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(object->typeData.cell.cellTypeData.constructor)) {
             //    statistics.incNumReplicator(object->color);
             //    statistics.incMutant(object->color, object->lineageId, object->numObjects);
@@ -81,6 +84,10 @@ __global__ void cudaUpdateHistogramData_substep2(SimulationData data, Simulation
         if (object->fixed) {
             continue;
         }
+        // Only Cell objects have age
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
         statistics.maxValue(object->typeData.cell.age);
     }
 }
@@ -94,6 +101,10 @@ __global__ void cudaUpdateHistogramData_substep3(SimulationData data, Simulation
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if (object->fixed) {
+            continue;
+        }
+        // Only Cell objects have age
+        if (object->type != ObjectType_Cell) {
             continue;
         }
         auto slot = object->typeData.cell.age * MAX_HISTOGRAM_SLOTS / (maxAge + 1);

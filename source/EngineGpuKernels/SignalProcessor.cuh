@@ -33,7 +33,11 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
 
-        if (object->type != ObjectType_Structure && object->type != ObjectType_FreeCell && object->typeData.cell.cellType != CellType_Base) {
+        // Only Cell objects have cellType operations
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
+        if (object->typeData.cell.cellType != CellType_Base) {
             if (object->typeData.cell.cellType == CellType_Detonator && object->typeData.cell.cellTypeData.detonator.state == DetonatorState_Activated) {
                 data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object});
             } else if (object->typeData.cell.cellState != CellState_Constructing && object->typeData.cell.cellState != CellState_Activating && object->typeData.cell.activationTime == 0) {
@@ -50,7 +54,8 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
+        // Only Cell objects have signal state
+        if (object->type != ObjectType_Cell) {
             continue;
         }
 
@@ -66,8 +71,8 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 
         for (int i = 0, j = object->numConnections; i < j; ++i) {
             auto connectedObject = object->connections[i].object;
-            // Skip Structure and FreeCell objects for signal propagation
-            if (connectedObject->type == ObjectType_Structure || connectedObject->type == ObjectType_FreeCell) {
+            // Only Cell objects have signal for propagation
+            if (connectedObject->type != ObjectType_Cell) {
                 continue;
             }
             if (connectedObject->typeData.cell.cellState == CellState_Constructing || connectedObject->typeData.cell.signalState != SignalState_Active) {
@@ -119,7 +124,8 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
+        // Only Cell objects have signal state
+        if (object->type != ObjectType_Cell) {
             continue;
         }
 
