@@ -51,7 +51,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 return;
             }
             // Only inject to other cells which are in a visible cone with respect to the injector cell
-            if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherObject)) {
+            if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
                 return;
             }
             injectedCell = otherObject;

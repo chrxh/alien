@@ -396,6 +396,7 @@ struct StructureTO
 struct FreeCellTO
 {
     float rawEnergy;
+    uint32_t age;
 };
 
 struct CellTO

@@ -755,9 +755,9 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
     data.addConnection(1, 2);
 
     // Add a free cell (not part of a creature) - using FreeCellDescription
-    data.addCreature({
+    data.addObjects({
         ObjectDescription().id(100).pos({100.0f, 103.0f}).type(FreeCellDescription()),
-    }, CreatureDescription().id(2));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -766,7 +766,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should be attacked in FreeCell mode
-    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getFreeCellRef()._rawEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
@@ -779,9 +779,9 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     data.addConnection(1, 2);
 
     // Add a free cell with matching color (color 1)
-    data.addCreature({
+    data.addObjects({
         ObjectDescription().id(100).pos({100.0f, 103.0f}).color(1).type(FreeCellDescription()),
-    }, CreatureDescription().id(2));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -790,7 +790,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should be attacked because color matches restriction
-    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getFreeCellRef()._rawEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
@@ -803,9 +803,9 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
     data.addConnection(1, 2);
 
     // Add a free cell with non-matching color (color 0)
-    data.addCreature({
+    data.addObjects({
         ObjectDescription().id(100).pos({100.0f, 103.0f}).color(0).type(FreeCellDescription()),
-    }, CreatureDescription().id(2));
+    });
 
     auto origTarget = data.getObjectRef(100);
 
@@ -816,7 +816,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should NOT be attacked because color does not match restriction
-    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getFreeCellRef()._rawEnergy, actualTarget.getFreeCellRef()._rawEnergy));
 }
 
 TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
@@ -853,7 +853,7 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
     data.addConnection(1, 2);
 
     // Add a free cell (not part of a creature)
-    data.objects({
+    data.addObjects({
         ObjectDescription().id(100).pos({100.0f, 103.0f}).type(FreeCellDescription()),
     });
 
@@ -866,5 +866,5 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should NOT be attacked in Creature mode
-    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getFreeCellRef()._rawEnergy, actualTarget.getFreeCellRef()._rawEnergy));
 }

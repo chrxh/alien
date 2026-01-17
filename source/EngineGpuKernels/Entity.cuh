@@ -461,6 +461,7 @@ struct Structure
 struct FreeCell
 {
     float rawEnergy;
+    uint32_t age;
 
     // Additional rendering data
     CellEvent event;

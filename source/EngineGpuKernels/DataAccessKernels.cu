@@ -297,6 +297,7 @@ namespace
         if (object->type == ObjectType_Structure) {
         } else if (object->type == ObjectType_FreeCell) {
             objectTO.typeData.freeCell.rawEnergy = object->typeData.freeCell.rawEnergy;
+            objectTO.typeData.freeCell.age = object->typeData.freeCell.age;
         } else if (object->type == ObjectType_Cell) {
             auto& cellTO = objectTO.typeData.cell;
             auto const& cell = object->typeData.cell;

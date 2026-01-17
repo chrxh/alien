@@ -283,6 +283,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
     } else if (objectTO.type == ObjectType_FreeCell) {
         FreeCellDescription freeCellDesc;
         freeCellDesc._rawEnergy = objectTO.typeData.freeCell.rawEnergy;
+        freeCellDesc._age = objectTO.typeData.freeCell.age;
         result._type = freeCellDesc;
 
     } else if (objectTO.type == ObjectType_Cell) {
@@ -1209,6 +1210,7 @@ void DescriptionConverterService::convertObjectToTO(
     } else if (objectTO.type == ObjectType_FreeCell) {
         FreeCellDescription const& freeCellDesc = objectDesc.getFreeCellRef();
         objectTO.typeData.freeCell.rawEnergy = freeCellDesc._rawEnergy;
+        objectTO.typeData.freeCell.age = freeCellDesc._age;
     } else if (objectTO.type == ObjectType_Cell) {
 
         // ObjectType_Cell - access cell data

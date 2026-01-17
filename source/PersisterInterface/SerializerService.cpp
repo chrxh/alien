@@ -768,6 +768,7 @@ namespace
     auto constexpr Id_Creature_GenomeId = 6;
 
     auto constexpr Id_FreeCell_RawEnergy = 0;
+    auto constexpr Id_FreeCell_Age = 1;
 
     auto constexpr Id_Cell_UsableEnergy = 0;
     auto constexpr Id_Cell_RawEnergy = 1;
@@ -1458,6 +1459,7 @@ namespace cereal
         FreeCellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_FreeCell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        loadSave(task, auxiliaries, Id_FreeCell_Age, data._age, defaultObject._age);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(FreeCellDescription)

@@ -510,6 +510,12 @@ Description& Description::addCreature(std::vector<ObjectDescription> const& obje
     return *this;
 }
 
+Description& Description::addObjects(std::vector<ObjectDescription> const& objects)
+{
+    _objects.insert(_objects.end(), objects.begin(), objects.end());
+    return *this;
+}
+
 size_t Description::getNumObjects() const
 {
     return _objects.size();

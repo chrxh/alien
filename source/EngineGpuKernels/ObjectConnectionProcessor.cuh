@@ -44,7 +44,7 @@ public:
     };
     __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Object* object, float angleDeviation);
 
-    __inline__ __device__ static bool existsOwnIntersectingCellInBetween(SimulationData& data, Object* object, Object* otherObject);
+    __inline__ __device__ static bool existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject);
 
 private:
     static int constexpr MaxOperationsPerCell = 30;
@@ -621,7 +621,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(Si
     }
 }
 
-__inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Object* object, Object* otherObject)
+__inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject)
 {
     auto result = false;
     data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](Object* nearObject) {
@@ -634,7 +634,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellI
         if (nearObject == otherObject) {
             return;
         }
-        if (!object->typeData.cell.isSameCreature(&nearObject->typeData.cell)) {
+        if (object->type == ObjectType_Cell && nearObject->type == ObjectType_Cell && !object->typeData.cell.isSameCreature(&nearObject->typeData.cell)) {
             return;
         }
         for (int i = 0; i < nearObject->numConnections; ++i) {

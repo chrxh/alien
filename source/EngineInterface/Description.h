@@ -466,6 +466,7 @@ struct FreeCellDescription
     auto operator<=>(FreeCellDescription const&) const = default;
 
     MEMBER(FreeCellDescription, float, rawEnergy, 100.0f);
+    MEMBER(FreeCellDescription, int, age, 0);
 };
 
 struct CellDescription
@@ -591,6 +592,7 @@ struct Description
     void assignNewIds();  // Preserves order of cell ids
 
     Description& addCreature(std::vector<ObjectDescription> const& objects, CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
+    Description& addObjects(std::vector<ObjectDescription> const& objects);
 
     size_t getNumObjects() const;
     size_t getNumObjectsWithoutCreature() const;

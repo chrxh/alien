@@ -50,7 +50,7 @@ ObjectDescription DescriptionTestDataFactory::createNonDefaultObjectDescription(
     case ObjectType_Structure:
         return ObjectDescription().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(StructureDescription());
     case ObjectType_FreeCell:
-        return ObjectDescription().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FreeCellDescription().rawEnergy(42.0f));
+        return ObjectDescription().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FreeCellDescription().rawEnergy(42.0f).age(7));
     case ObjectType_Cell: {
         auto cellTypeDesc = createNonDefaultCellTypeDescription(objectParameter);
         NeuralNetworkDescription nn;

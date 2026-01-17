@@ -338,6 +338,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TO const& to, Objec
     if (objectTO.type == ObjectType_Structure) {
     } else if (objectTO.type == ObjectType_FreeCell) {
         object->typeData.freeCell.rawEnergy = objectTO.typeData.freeCell.rawEnergy; 
+        object->typeData.freeCell.age= objectTO.typeData.freeCell.age;
     } else if (objectTO.type == ObjectType_Cell) {
         auto const& cell = &object->typeData.cell;
         auto const& cellTO = objectTO.typeData.cell;
@@ -657,6 +658,7 @@ __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2
     object->type = ObjectType_FreeCell;
     object->typeData.freeCell.event = CellEvent_No;
     object->typeData.freeCell.rawEnergy = energy;
+    object->typeData.freeCell.age = 0;
 
     return object;
 }

@@ -110,16 +110,16 @@ public:
             int2 posInt = {floorInt(object->pos.x), floorInt(object->pos.y)};
             correctPosition(posInt);
             auto slot = posInt.x + posInt.y * _size.x;
-            Object* slotCell = reinterpret_cast<Object*>(atomicCAS(
+            Object* slotObject = reinterpret_cast<Object*>(atomicCAS(
                 reinterpret_cast<unsigned long long int*>(&_map[slot]),
                 reinterpret_cast<unsigned long long int>(nullptr),
                 reinterpret_cast<unsigned long long int>(object)));
             for (int level = 0; level < 10; ++level) {
-                if (!slotCell) {
+                if (!slotObject) {
                     break;
                 }
-                slotCell = reinterpret_cast<Object*>(atomicCAS(
-                    reinterpret_cast<unsigned long long int*>(&slotCell->nextObject),
+                slotObject = reinterpret_cast<Object*>(atomicCAS(
+                    reinterpret_cast<unsigned long long int*>(&slotObject->nextObject),
                     reinterpret_cast<unsigned long long int>(nullptr),
                     reinterpret_cast<unsigned long long int>(object)));
             }
@@ -139,30 +139,30 @@ public:
     __device__ __inline__ Object* getFirst(int2 const& pos) const { return _map[pos.x + pos.y * _size.x]; }
 
     template <typename MatchFunc>
-    __device__ __inline__ void getMatchingCells(Object* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
+    __device__ __inline__ void getMatchingObjects(Object* objects[], int arraySize, int& numObjects, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
         const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        numCells = 0;
+        numObjects = 0;
         int radiusInt = ceilf(radius);
         for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
             for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
                 int slot = scanPos.x + scanPos.y * _size.x;
-                auto slotCell = _map[slot];
+                auto slotObject = _map[slot];
                 for (int level = 0; level < 10; ++level) {
-                    if (numCells == arraySize) {
+                    if (numObjects == arraySize) {
                         return;
                     }
-                    if (!slotCell) {
+                    if (!slotObject) {
                         break;
                     }
-                    if (Math::length(slotCell->pos - pos) <= radius && detached + slotCell->detached != 1 && matchFunc(slotCell)) {
-                        cells[numCells] = slotCell;
-                        ++numCells;
+                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached != 1 && matchFunc(slotObject)) {
+                        objects[numObjects] = slotObject;
+                        ++numObjects;
                     }
-                    slotCell = slotCell->nextObject;
+                    slotObject = slotObject->nextObject;
                 }
             }
         }
@@ -178,15 +178,15 @@ public:
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
                 int slot = scanPos.x + scanPos.y * _size.x;
-                auto slotCell = _map[slot];
+                auto slotObject = _map[slot];
                 for (int level = 0; level < 10; ++level) {
-                    if (!slotCell) {
+                    if (!slotObject) {
                         break;
                     }
-                    if (Math::length(slotCell->pos - pos) <= radius && detached + slotCell->detached != 1) {
-                        execFunc(slotCell);
+                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached != 1) {
+                        execFunc(slotObject);
                     }
-                    slotCell = slotCell->nextObject;
+                    slotObject = slotObject->nextObject;
                 }
             }
         }

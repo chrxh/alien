@@ -52,7 +52,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         auto sumEnergyToTransfer = 0.0f;
         data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
-
             if (otherObject->type == ObjectType_Structure) {
                 return;
             }
@@ -61,7 +60,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Only attack other cells which are in a visible cone with respect to the attack cell
-            if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherObject)) {
+            if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
                 return;
             }
 
@@ -115,7 +114,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     return;
                 }
                 auto const& otherCell = &otherObject->typeData.cell;
-
                 if (cell->isSameCreature(otherCell)) {
                     return;
                 }
@@ -146,9 +144,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                 // Filter by lineage restriction
                 if (restrictToLineage != LineageRestriction_No) {
-                    if (cell->creature == nullptr) {
-                        return;
-                    }
                     if (restrictToLineage == LineageRestriction_SameLineage) {
                         if (cell->creature->lineageId != otherCell->creature->lineageId) {
                             return;

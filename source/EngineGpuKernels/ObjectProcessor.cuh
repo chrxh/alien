@@ -198,7 +198,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             data.objectMap.correctDirection(posDelta);
             auto adaptedDistance = Math::length(posDelta);
             auto origDistance = adaptedDistance;
-            if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell) && (object->numConnections < 3 || otherObject->numConnections < 3)) {
+            if ((object->numConnections < 3 || otherObject->numConnections < 3) && object->type == ObjectType_Cell && otherObject->type == ObjectType_Cell
+                && object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                 adaptedDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
             }
 
@@ -583,10 +584,16 @@ __inline__ __device__ void ObjectProcessor::aging(SimulationData& data)
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
-        if (object->fixed) {
+        if (object->fixed || object->type == ObjectType_Structure) {
             continue;
         }
-        ++object->typeData.cell.age;
+        uint32_t* age = nullptr;
+        if (object->type == ObjectType_Cell) {
+            age = &object->typeData.cell.age;
+        } else if (object->type == ObjectType_FreeCell) {
+            age = &object->typeData.freeCell.age;
+        }
+        ++*age;
 
 
         if (cudaSimulationParameters.colorTransitionRulesToggle.value) {
@@ -601,13 +608,15 @@ __inline__ __device__ void ObjectProcessor::aging(SimulationData& data)
                 transitionDuration = cudaSimulationParameters.colorTransitionRules.layerValues[index].value[color].duration;
                 targetColor = cudaSimulationParameters.colorTransitionRules.layerValues[index].value[color].targetColor;
             }
-            if (transitionDuration > 0 && object->typeData.cell.age > transitionDuration) {
+            if (transitionDuration > 0 && *age > transitionDuration) {
                 object->color = targetColor;
-                object->typeData.cell.age = 0;
+                *age = 0;
             }
         }
-        if (object->typeData.cell.cellState == CellState_Ready && object->typeData.cell.activationTime > 0) {
-            --object->typeData.cell.activationTime;
+        if (object->type == ObjectType_Cell) {
+            if (object->typeData.cell.cellState == CellState_Ready && object->typeData.cell.activationTime > 0) {
+                --object->typeData.cell.activationTime;
+            }
         }
     }
 }
@@ -620,6 +629,9 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
 
         bool isSameCreatureNeighborDetaching = false;
         bool isOtherCreatureNeighborDetaching = false;
@@ -628,6 +640,9 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
         //int activatingObjectConnection = -1;
         for (int i = 0; i < object->numConnections; ++i) {
             auto const& connectedObject = object->connections[i].object;
+            if (connectedObject->type != ObjectType_Cell) {
+                continue;
+            }
             if (object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
                 auto connectedObjectState = connectedObject->typeData.cell.cellState;
                 if (connectedObjectState == CellState_Detaching) {
@@ -699,6 +714,9 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_applyNextState(S
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
         object->typeData.cell.cellState = object->tempValue.as_uint32_float.uint32Part;
         object->tempValue.as_uint32_float.uint32Part = 0;
     }
@@ -711,7 +729,7 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(Sim
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->typeData.cell.creature == nullptr) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
         if (object->typeData.cell.frontAngleId != object->typeData.cell.creature->frontAngleId) {
@@ -719,6 +737,9 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(Sim
                 auto update = false;
                 for (int i = 0, j = object->numConnections; i < j; ++i) {
                     auto const& otherObject = object->connections[i].object;
+                    if (otherObject->type != ObjectType_Cell) {
+                        continue;
+                    }
                     if (!object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                         continue;
                     }
@@ -748,7 +769,7 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_applyFutureValue(Si
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->typeData.cell.creature == nullptr) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
         if (object->typeData.cell.frontAngleId != object->typeData.cell.creature->frontAngleId) {
@@ -952,6 +973,9 @@ __inline__ __device__ void ObjectProcessor::updateCellEvents(SimulationData& dat
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
         if (object->typeData.cell.eventCounter > 0) {
             --object->typeData.cell.eventCounter;
         }

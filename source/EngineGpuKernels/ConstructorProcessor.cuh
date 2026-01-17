@@ -591,7 +591,7 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
 
     Object* nearObjects[MAX_OBJECT_CONNECTIONS * 4];
     int numNearObjects;
-    data.objectMap.getMatchingCells(
+    data.objectMap.getMatchingObjects(
         nearObjects,
         MAX_OBJECT_CONNECTIONS * 4,
         numNearObjects,
@@ -619,7 +619,7 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
         Math::rotateQuarterClockwise(n);
 
         // assemble surrounding cell candidates
-        data.objectMap.getMatchingCells(
+        data.objectMap.getMatchingObjects(
             otherObjectCandidates,
             MAX_OBJECT_CONNECTIONS * 2,
             numOtherObjectCandidates,
@@ -650,7 +650,7 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
                 return true;
             });
     } else {
-        data.objectMap.getMatchingCells(
+        data.objectMap.getMatchingObjects(
             otherObjectCandidates,
             MAX_OBJECT_CONNECTIONS * 2,
             numOtherObjectCandidates,

@@ -123,7 +123,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         }
 
         // Check for own intersecting cells in between
-        if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherObject)) {
+        if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
             return;
         }
 

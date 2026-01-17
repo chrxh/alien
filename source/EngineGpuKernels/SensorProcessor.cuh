@@ -137,7 +137,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
         lookupResult = 0xffffffffffffffff;
         seedAngle = data.primaryNumberGen.random(360.0f);
 
-        data.objectMap.getMatchingCells(
+        data.objectMap.getMatchingObjects(
             nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, object->pos, 4.0f, object->detached, [&](Object* const& otherObject) {
                 return object->typeData.cell.isSameCreature(&otherObject->typeData.cell);
             });
