@@ -43,6 +43,34 @@ public:
             return CellDescription().cellType(BaseDescription());
         }
     }
+
+    // Helper to create a description with mixed object types - non-Cell objects are added directly,
+    // while Cell objects go through addCreature()
+    Description createMixedDescription(ObjectType objectType1, ObjectDescription obj1, ObjectDescription obj2)
+    {
+        Description data;
+        if (objectType1 == ObjectType_Cell) {
+            // Both objects are cells - use addCreature for both
+            data.addCreature({obj1, obj2}, CreatureDescription().id(1));
+        } else {
+            // First object is Structure/FreeCell - add directly, second is a Cell in its own creature
+            data._objects.emplace_back(obj1);
+            data.addCreature({obj2}, CreatureDescription().id(1));
+        }
+        return data;
+    }
+
+    // Helper to create a single object description
+    Description createSingleObjectDescription(ObjectType objectType, ObjectDescription obj)
+    {
+        Description data;
+        if (objectType == ObjectType_Cell) {
+            data.addCreature({obj}, CreatureDescription().id(1));
+        } else {
+            data._objects.emplace_back(obj);
+        }
+        return data;
+    }
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -68,10 +96,10 @@ TEST_P(CellStateTransitionTests, ready_ready)
     _parameters.cellDeathConsequences.value = deathConsequences;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().addCreature({
+    auto data = createMixedDescription(
+        objectType,
         ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Ready)),
-    }, CreatureDescription().id(1));
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Ready)));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -89,10 +117,10 @@ TEST_P(CellStateTransitionTests, ready_dying)
     _parameters.cellDeathConsequences.value = deathConsequences;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().addCreature({
+    auto data = createMixedDescription(
+        objectType,
         ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Dying)),
-    }, CreatureDescription().id(1));
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Dying)));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -110,10 +138,10 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     _parameters.cellDeathConsequences.value = deathConsequences;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().addCreature({
+    auto data = createMixedDescription(
+        objectType,
         ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
-    }, CreatureDescription().id(1));
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -255,10 +283,10 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     _parameters.cellDeathConsequences.value = deathConsequences;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().addCreature({
+    auto data = createMixedDescription(
+        objectType,
         ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Reviving)),
-    }, CreatureDescription().id(1));
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Reviving)));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -291,10 +319,10 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     _parameters.cellDeathConsequences.value = deathConsequences;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().addCreature({
+    auto data = createMixedDescription(
+        objectType,
         ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Activating)),
-    }, CreatureDescription().id(1));
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Activating)));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -315,12 +343,14 @@ TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
     _parameters.cellDeathConsequences.value = deathConsequences;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().addCreature({
-        ObjectDescription().id(1).fixed(true).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
-    }, CreatureDescription().id(1));
+    auto data = createSingleObjectDescription(
+        objectType,
+        ObjectDescription().id(1).fixed(true).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+    if (objectType == ObjectType_Cell) {
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+    }
 }
