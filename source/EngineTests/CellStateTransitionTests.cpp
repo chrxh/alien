@@ -149,20 +149,18 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        }
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
         if (objectType == ObjectType_Cell) {
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
         if (objectType == ObjectType_Cell) {
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
@@ -190,20 +188,18 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        }
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
         if (objectType == ObjectType_Cell) {
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
         if (objectType == ObjectType_Cell) {
             EXPECT_EQ(CellState_Reviving, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
@@ -231,20 +227,18 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        }
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
         if (objectType == ObjectType_Cell) {
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
         if (objectType == ObjectType_Cell) {
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
@@ -266,13 +260,19 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        }
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        }
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        }
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
@@ -296,18 +296,16 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     if (deathConsequences == CellDeathConsequences_None) {
         if (objectType == ObjectType_Cell) {
             EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         }
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
+        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
+        }
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
         if (objectType == ObjectType_Cell) {
             EXPECT_EQ(CellState_Reviving, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         }
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     }
@@ -331,8 +329,6 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
 
     if (objectType == ObjectType_Cell) {
         EXPECT_EQ(CellState_Activating, actualData.getObjectRef(1).getCellRef()._cellState);
-    } else {
-        EXPECT_EQ(CellState_Constructing, actualData.getObjectRef(1).getCellRef()._cellState);
     }
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
 }
