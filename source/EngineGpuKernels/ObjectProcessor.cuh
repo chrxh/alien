@@ -198,7 +198,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             data.objectMap.correctDirection(posDelta);
             auto adaptedDistance = Math::length(posDelta);
             auto origDistance = adaptedDistance;
-            if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell) && (object->numConnections < 3 || otherObject->numConnections < 3)) {
+            if (object->type == ObjectType_Cell && otherObject->type == ObjectType_Cell
+                && object->typeData.cell.isSameCreature(&otherObject->typeData.cell) && (object->numConnections < 3 || otherObject->numConnections < 3)) {
                 adaptedDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
             }
 
@@ -250,8 +251,9 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                         }
                     }
 
-                    // Fusion
-                    if (Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS
+                    // Fusion (only for Cell objects)
+                    if (object->type == ObjectType_Cell && otherObject->type == ObjectType_Cell
+                        && Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS
                         && (object->sticky || otherObject->sticky) && object->typeData.cell.usableEnergy <= cellMaxBindingEnergy && otherObject->typeData.cell.usableEnergy <= cellMaxBindingEnergy
                         && !object->fixed && !otherObject->fixed) {
                         ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
@@ -389,11 +391,12 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                     atomicAdd(&otherObject->shared1.y, -force.y);
                 }
 
-                //fusion
+                //fusion (only for Cell objects)
                 auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.objectMaxBindingEnergy, data, object->pos);
                 auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
-                if (object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || otherObject->sticky)
+                if (object->type == ObjectType_Cell && otherObject->type == ObjectType_Cell
+                    && object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || otherObject->sticky)
                     && Math::length(velDelta) >= cellFusionVelocity && isApproaching && object->typeData.cell.usableEnergy <= cellMaxBindingEnergy
                     && otherObject->typeData.cell.usableEnergy <= cellMaxBindingEnergy && !object->fixed && !otherObject->fixed) {
                     ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
