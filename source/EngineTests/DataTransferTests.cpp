@@ -167,7 +167,9 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 
 TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
-    auto data = Description().objects({ObjectDescription().id(0), ObjectDescription().id(1)}).energies({EnergyDescription().id(2), EnergyDescription().id(3)});
+    auto data = Description()
+                    .objects({ObjectDescription().id(0).type(StructureDescription()), ObjectDescription().id(1).type(FreeCellDescription())})
+                    .energies({EnergyDescription().id(2), EnergyDescription().id(3)});
     data.addCreature({ObjectDescription().id(5)}, CreatureDescription().id(4), GenomeDescription());
     data.addCreature({ObjectDescription().id(6)}, CreatureDescription().id(5), GenomeDescription());
 
@@ -205,7 +207,9 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 
 TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
-    auto data = Description().objects({ObjectDescription().id(0), ObjectDescription().id(1)}).energies({EnergyDescription().id(2), EnergyDescription().id(3)});
+    auto data = Description()
+                    .objects({ObjectDescription().id(0).type(FreeCellDescription()), ObjectDescription().id(1).type(FreeCellDescription())})
+                    .energies({EnergyDescription().id(2), EnergyDescription().id(3)});
     data.addCreature({ObjectDescription().id(5)}, CreatureDescription().id(4), GenomeDescription());
     data.addCreature({ObjectDescription().id(6)}, CreatureDescription().id(5), GenomeDescription());
 
@@ -316,7 +320,10 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto genome2 = GenomeDescription();
 
     Description data;
-    data.addCreature({ObjectDescription().id(1), ObjectDescription().id(2)}, CreatureDescription().id(CreatureId1), genome);
+    data.addCreature(
+        {ObjectDescription().id(1).type(FreeCellDescription()), ObjectDescription().id(2).type(StructureDescription())},
+        CreatureDescription().id(CreatureId1),
+        genome);
     data.addCreature({ObjectDescription().id(3)}, CreatureDescription().id(CreatureId2), genome2);
 
     data.addConnection(1, 2);
