@@ -68,8 +68,6 @@ ObjectDescription DescriptionTestDataFactory::createNonDefaultObjectDescription(
                       .cellState(false)
                       .geneIndex(42)
                       .nodeIndex(13)
-                      .frontAngleId(13)
-                      .headCell(true)
                       .parentNodeIndex(14)
                       .signal(SignalDescription().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}).numTimesSent(5))
                       .signalState(SignalState_Active)
@@ -162,7 +160,7 @@ std::pair<CreatureDescription, GenomeDescription> DescriptionTestDataFactory::cr
                               }),
                       });
 
-    auto creature = CreatureDescription().ancestorId(1001).lineageId(502).generation(7).numObjects(25).frontAngleId(42).genomeId(genome._id);
+    auto creature = CreatureDescription().ancestorId(1001).lineageId(502).generation(7).numObjects(25).genomeId(genome._id);
 
     return {creature, genome};
 }

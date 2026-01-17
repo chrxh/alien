@@ -156,7 +156,7 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 
 TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
-    auto data = Description().objects({ObjectDescription().id(0), ObjectDescription().id(1)}).energies({EnergyDescription().id(2), EnergyDescription().id(3)});
+    auto data = Description().objects({ObjectDescription().id(0).type(FreeCellDescription()), ObjectDescription().id(1).type(FreeCellDescription())}).energies({EnergyDescription().id(2), EnergyDescription().id(3)});
     data.addCreature({ObjectDescription().id(5)}, CreatureDescription().id(4), GenomeDescription());
     data.addCreature({ObjectDescription().id(6)}, CreatureDescription().id(5), GenomeDescription());
 
@@ -194,7 +194,7 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 
 TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
-    auto data = Description().objects({ObjectDescription().id(0), ObjectDescription().id(1)}).energies({EnergyDescription().id(2), EnergyDescription().id(3)});
+    auto data = Description().objects({ObjectDescription().id(0).type(FreeCellDescription()), ObjectDescription().id(1).type(FreeCellDescription())}).energies({EnergyDescription().id(2), EnergyDescription().id(3)});
     data.addCreature({ObjectDescription().id(5)}, CreatureDescription().id(4), GenomeDescription());
     data.addCreature({ObjectDescription().id(6)}, CreatureDescription().id(5), GenomeDescription());
 
@@ -332,7 +332,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
 TEST_F(DataTransferTests, adaptIdGenerator_objects)
 {
     auto constexpr HighId = 1000000;
-    auto data = Description().objects({ObjectDescription().id(HighId)});
+    auto data = Description().objects({ObjectDescription().id(HighId).type(FreeCellDescription())});
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
