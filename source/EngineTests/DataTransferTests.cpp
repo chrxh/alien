@@ -299,7 +299,7 @@ TEST_F(DataTransferTests, getGenomeOfCreature_successful)
     EXPECT_EQ(2, retrievedGenome->_genes.front()._nodes.size());
 }
 
-TEST_F(DataTransferTests, getGenomeOfCreature_nonexistentCreature)
+TEST_F(DataTransferTests, getGenomeOfCreature_nonExistentCreature)
 {
     auto constexpr CreatureId = 1;
     auto constexpr WrongCreatureId = 2;
