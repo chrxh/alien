@@ -53,10 +53,13 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
     switch (cleanupAction) {
     case CleanupAction::CleanupAfterTimestep:
         _simulationFacade->testOnly_cleanupAfterTimestep();
+        break;
     case CleanupAction::CleanupAfterDataManipulation:
         _simulationFacade->testOnly_cleanupAfterDataManipulation();
+        break;
     case CleanupAction::ResizeArrays:
         _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.objectArray = 1000, .energyArray = 1000, .heap = 1000000});
+        break;
     }
     EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
 }
@@ -84,10 +87,13 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
     switch (cleanupAction) {
     case CleanupAction::CleanupAfterTimestep:
         _simulationFacade->testOnly_cleanupAfterTimestep();
+        break;
     case CleanupAction::CleanupAfterDataManipulation:
         _simulationFacade->testOnly_cleanupAfterDataManipulation();
+        break;
     case CleanupAction::ResizeArrays:
         _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.objectArray = 1000, .energyArray = 1000, .heap = 1000000});
+        break;
     }
     EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
 }
