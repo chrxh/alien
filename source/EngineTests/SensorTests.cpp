@@ -960,9 +960,10 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
         CreatureDescription().id(2));
     data.addConnection(1, 2);
 
-    // Add many free cells (should be ignored - not structures)
+    // Add many non-structure cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(FreeCellDescription()));
+        data._objects.emplace_back(
+            ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f)));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -971,7 +972,7 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    // Should not find anything because only free cells are present, not structures
+    // Should not find anything because only non-structure cells are present
     ASSERT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
@@ -1011,28 +1012,32 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
                 .pos({100.0f, 100.0f})
                 .color(0)
                 .type(CellDescription().frontAngle(0.0f).cellType(
-                    SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.01f)))),  // No color restriction
-            ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).type(CellDescription()),
+                    SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1)))),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDescription().id(2));
     data.addConnection(1, 2);
 
-    // Add free cells nearby
-    for (int i = 0; i < 20; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({95.0f + (i % 5), 50.0f + (i / 5)}).color(1).type(FreeCellDescription()));
+    // Add free cells with wrong color (color 0) closer
+    for (int i = 0; i < 10; ++i) {
+        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(FreeCellDescription()));
+    }
+
+    // Add free cells with correct color (color 1) farther but still in range
+    for (int i = 0; i < 8; ++i) {
+        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(FreeCellDescription()));
     }
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);  // Run 4 timesteps to ensure trigger (3+1)
+    _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    auto foundResult = actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult];
-    auto distance = actualSensor.getCellRef()._signal._channels[Channels::SensorDistance];
-    std::cout << "SensorFoundResult = " << foundResult << ", SensorDistance = " << distance << std::endl;
-    EXPECT_TRUE(approxCompare(1.0f, foundResult));
-    EXPECT_TRUE(distance > 0.3f);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+    // Should detect the color 1 cells, not the color 0 cells
+    // Color 1 cells are farther (below at y=150 vs y=80), so distance should be higher
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] > 0.3f);
 }
 
 TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
@@ -1049,9 +1054,10 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
         CreatureDescription().id(2));
     data.addConnection(1, 2);
 
-    // Add many structure cells (should be ignored - not free cells)
+    // Add many non-free cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(StructureDescription()));
+        data._objects.emplace_back(
+            ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f)));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1060,7 +1066,7 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    // Should not find anything because only structure cells are present, not free cells
+    // Should not find anything because only non-free cells are present
     ASSERT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
@@ -1616,10 +1622,8 @@ TEST_F(SensorTests, telemetry_allOutputs)
                 .vel({0.1f, 0.05f})
                 .type(CellDescription().frontAngle(0.0f).usableEnergy(100.0f).cellType(
                     SensorDescription().autoTriggerInterval(3).mode(TelemetryDescription()))),  // Moving with both x and y components
-            ObjectDescription().id(2).pos({101.0f, 100.0f}).vel({0.1f, 0.05f}).type(CellDescription()),
         },
         CreatureDescription().id(2));
-    data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->calcTimesteps(1);
