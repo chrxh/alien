@@ -33,7 +33,7 @@ TEST_F(DetonatorTests, doNothing)
         {
             ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().countdown(14))),
         },
-        CreatureDescription().id(1));
+        CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -55,7 +55,7 @@ TEST_F(DetonatorTests, activateDetonator)
             ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().countdown(10))),
             ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription()).signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
         },
-        CreatureDescription().id(1));
+        CreatureDescription());
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -78,7 +78,7 @@ TEST_F(DetonatorTests, explosion)
             ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
             ObjectDescription().id(2).pos({12.0f, 10.0f}),
         },
-        CreatureDescription().id(1));
+        CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);
@@ -102,7 +102,7 @@ TEST_F(DetonatorTests, chainExplosion)
             ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
             ObjectDescription().id(2).pos({12.0f, 10.0f}).type(CellDescription().cellType(DetonatorDescription().state(DetonatorState_Ready).countdown(10))),
         },
-        CreatureDescription().id(1));
+        CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);
@@ -128,7 +128,7 @@ TEST_F(DetonatorTests, explosionAlsoIfDying)
                           .activationTime(100)
                           .cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10))),
         },
-        CreatureDescription().id(1));
+        CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);

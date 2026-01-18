@@ -20,12 +20,12 @@ Description DescriptionEditService::createRect(CreateRectParameters const& param
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result._objects.emplace_back(ObjectDescription()
-                                           .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
-                                           .stiffness(parameters._stiffness)
-                                           .color(parameters._color)
-                                           .fixed(parameters._fixed)
-                                           .sticky(parameters._sticky)
-                                           .type(parameters._objectType));
+                                             .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
+                                             .stiffness(parameters._stiffness)
+                                             .color(parameters._color)
+                                             .fixed(parameters._fixed)
+                                             .sticky(parameters._sticky)
+                                             .type(parameters._objectType));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -42,21 +42,21 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
 
             //create cell: upper layer
             result._objects.emplace_back(ObjectDescription()
-                                           .stiffness(parameters._stiffness)
-                                           .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
-                                           .color(parameters._color)
-                                           .fixed(parameters._fixed)
-                                           .sticky(parameters._sticky)
-                                           .type(parameters._objectType));
+                                             .stiffness(parameters._stiffness)
+                                             .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
+                                             .color(parameters._color)
+                                             .fixed(parameters._fixed)
+                                             .sticky(parameters._sticky)
+                                             .type(parameters._objectType));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
                 result._objects.emplace_back(ObjectDescription()
-                                               .stiffness(parameters._stiffness)
-                                               .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
-                                               .color(parameters._color)
-                                               .fixed(parameters._fixed)
-                                               .type(parameters._objectType));
+                                                 .stiffness(parameters._stiffness)
+                                                 .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
+                                                 .color(parameters._color)
+                                                 .fixed(parameters._fixed)
+                                                 .type(parameters._objectType));
             }
         }
     }
@@ -73,12 +73,12 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result._objects.emplace_back(ObjectDescription()
-                                       .pos(parameters._center)
-                                       .stiffness(parameters._stiffness)
-                                       .color(parameters._color)
-                                       .fixed(parameters._fixed)
-                                       .sticky(parameters._sticky)
-                                       .type(StructureDescription()));
+                                         .pos(parameters._center)
+                                         .stiffness(parameters._stiffness)
+                                         .color(parameters._color)
+                                         .fixed(parameters._fixed)
+                                         .sticky(parameters._sticky)
+                                         .type(StructureDescription()));
         return result;
     }
 
@@ -96,12 +96,12 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
                 continue;
             }
             result._objects.emplace_back(ObjectDescription()
-                                           .stiffness(parameters._stiffness)
-                                           .pos({parameters._center.x + dxMod, parameters._center.y + dy})
-                                           .color(parameters._color)
-                                           .fixed(parameters._fixed)
-                                           .sticky(parameters._sticky)
-                                           .type(StructureDescription()));
+                                             .stiffness(parameters._stiffness)
+                                             .pos({parameters._center.x + dxMod, parameters._center.y + dy})
+                                             .color(parameters._color)
+                                             .fixed(parameters._fixed)
+                                             .sticky(parameters._sticky)
+                                             .type(StructureDescription()));
         }
     }
     return result;
@@ -132,7 +132,7 @@ namespace
         auto cache = description.createCache();
 
         for (auto& object : description._objects) {
-            if (object.getObjectType() == ObjectType_Cell && object.getCellRef()._creatureId.has_value()) {
+            if (object.getObjectType() == ObjectType_Cell) {
                 continue;
             }
             std::vector<ConnectionDescription> newConnections;
@@ -409,16 +409,13 @@ void DescriptionEditService::randomizeCellColors(Description& description, std::
     // Step 2: Iterate over cells and apply stored color values (including cells without creatureId)
     auto nonCreatureColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
     for (auto& object : description._objects) {
-        if (object.getObjectType() != ObjectType_Cell) {
-            continue;
-        }
-        if (object.getCellRef()._creatureId.has_value()) {
+        if (object.getObjectType() == ObjectType_Cell) {
             auto it = cellColorsByCreatureId.find(object.getCellRef()._creatureId.value());
             if (it != cellColorsByCreatureId.end()) {
                 object._color = it->second;
             }
         } else {
-            object.getCellRef()._usableEnergy = nonCreatureColor;
+            object._color = nonCreatureColor;
         }
     }
 }
@@ -442,20 +439,17 @@ void DescriptionEditService::randomizeEnergies(Description& description, float m
     for (auto const& creature : description._creatures) {
         creatureEnergies[creature._id] = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
     }
-    
+
     // Step 2: Iterate over cells and apply stored energy values (including cells without creatureId)
     auto nonCreatureEnergy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
     for (auto& object : description._objects) {
-        if (object.getObjectType() != ObjectType_Cell) {
-            continue;
-        }
-        if (object.getCellRef()._creatureId.has_value()) {
+        if (object.getObjectType() == ObjectType_Cell) {
             auto it = creatureEnergies.find(object.getCellRef()._creatureId.value());
             if (it != creatureEnergies.end()) {
                 object.getCellRef()._usableEnergy = it->second;
             }
-        } else {
-            object.getCellRef()._usableEnergy = nonCreatureEnergy;
+        } else if (object.getObjectType() == ObjectType_FreeCell) {
+            object.getFreeCellRef()._rawEnergy = nonCreatureEnergy;
         }
     }
 }
@@ -467,20 +461,17 @@ void DescriptionEditService::randomizeAges(Description& description, int minAge,
     for (auto const& creature : description._creatures) {
         creatureAges[creature._id] = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
     }
-    
+
     // Step 2: Iterate over cells and apply stored age values (including cells without creatureId)
     auto nonCreatureAge = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
     for (auto& object : description._objects) {
-        if (object.getObjectType() != ObjectType_Cell) {
-            continue;
-        }
-        if (object.getCellRef()._creatureId.has_value()) {
+        if (object.getObjectType() == ObjectType_Cell) {
             auto it = creatureAges.find(object.getCellRef()._creatureId.value());
             if (it != creatureAges.end()) {
                 object.getCellRef()._age = it->second;
             }
-        } else {
-            object.getCellRef()._age = nonCreatureAge;
+        } else if (object.getObjectType() == ObjectType_FreeCell) {
+            object.getFreeCellRef()._age = nonCreatureAge;
         }
     }
 }
@@ -492,7 +483,7 @@ void DescriptionEditService::randomizeCountdowns(Description& description, int m
     for (auto const& creature : description._creatures) {
         creatureCountdowns[creature._id] = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
     }
-    
+
     // Step 2: Iterate over cells and apply stored countdown values (including cells without creatureId)
     auto nonCreatureCountdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
     for (auto& object : description._objects) {
@@ -593,7 +584,7 @@ void DescriptionEditService::removeCell(Description& description, uint64_t objec
     // Check if any creatures have no cells left
     std::unordered_set<uint64_t> creaturesWithCells;
     for (auto const& object : description._objects) {
-        if (object.getObjectType() == ObjectType_Cell && object.getCellRef()._creatureId.has_value()) {
+        if (object.getObjectType() == ObjectType_Cell) {
             creaturesWithCells.insert(object.getCellRef()._creatureId.value());
         }
     }
@@ -637,7 +628,7 @@ void DescriptionEditService::removeCellIf(Description& description, std::functio
     // Check if any creatures have no cells left
     std::unordered_set<uint64_t> creaturesWithCells;
     for (auto const& object : description._objects) {
-        if (object.getObjectType() == ObjectType_Cell && object.getCellRef()._creatureId.has_value()) {
+        if (object.getObjectType() == ObjectType_Cell) {
             creaturesWithCells.insert(object.getCellRef()._creatureId.value());
         }
     }

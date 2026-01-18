@@ -28,9 +28,14 @@ public:
 
 TEST_F(DigestorTests, conversion_noEnergyConversion)
 {
-    auto data = Description().addCreature({
-        ObjectDescription().id(0).pos({100.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription().setRawEnergyConversionRate(0.0f)).rawEnergy(100.0f)),
-    }, CreatureDescription().id(1));
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(0)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription().cellType(DigestorDescription().setRawEnergyConversionRate(0.0f)).rawEnergy(100.0f)),
+        },
+        CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -47,9 +52,14 @@ TEST_F(DigestorTests, conversion_noEnergyConversion)
 
 TEST_F(DigestorTests, conversion_highEnergyConversionRate)
 {
-    auto data = Description().addCreature({
-        ObjectDescription().id(0).pos({100.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription().setRawEnergyConversionRate(1.0f)).rawEnergy(100.0f)),
-    }, CreatureDescription().id(1));
+    auto data = Description().addCreature(
+        {
+            ObjectDescription()
+                .id(0)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription().cellType(DigestorDescription().setRawEnergyConversionRate(1.0f)).rawEnergy(100.0f)),
+        },
+        CreatureDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -63,4 +73,3 @@ TEST_F(DigestorTests, conversion_highEnergyConversionRate)
     EXPECT_TRUE(actualDigestor.getCellRef()._rawEnergy < origDigestor.getCellRef()._rawEnergy - NEAR_ZERO);
     EXPECT_TRUE(actualDigestor.getCellRef()._usableEnergy > origDigestor.getCellRef()._usableEnergy + NEAR_ZERO);
 }
-
