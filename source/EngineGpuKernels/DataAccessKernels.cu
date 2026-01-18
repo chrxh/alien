@@ -317,7 +317,6 @@ namespace
             }
             cellTO.signal.numTimesSent = cell.signal.numTimesSent;
             cellTO.activationTime = cell.activationTime;
-            cellTO.cellTriggered = cell.cellTriggered;
             cellTO.nodeIndex = cell.nodeIndex;
             cellTO.parentNodeIndex = cell.parentNodeIndex;
             cellTO.geneIndex = cell.geneIndex;

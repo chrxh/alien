@@ -295,7 +295,6 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
         cellDesc._cellState = objectTO.typeData.cell.cellState;
         cellDesc._age = objectTO.typeData.cell.age;
         cellDesc._frontAngle = objectTO.typeData.cell.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(objectTO.typeData.cell.frontAngle) : std::nullopt;
-        cellDesc._cellTriggered = objectTO.typeData.cell.cellTriggered;
         cellDesc._nodeIndex = objectTO.typeData.cell.nodeIndex;
         cellDesc._parentNodeIndex = objectTO.typeData.cell.parentNodeIndex;
         cellDesc._geneIndex = objectTO.typeData.cell.geneIndex;
@@ -1222,7 +1221,6 @@ void DescriptionConverterService::convertObjectToTO(
         objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;
         objectTO.typeData.cell.cellState = cellDesc._cellState;
         objectTO.typeData.cell.cellType = cellDesc.getCellType();
-        objectTO.typeData.cell.cellTriggered = cellDesc._cellTriggered;
         objectTO.typeData.cell.nodeIndex = cellDesc._nodeIndex;
         objectTO.typeData.cell.parentNodeIndex = cellDesc._parentNodeIndex;
         objectTO.typeData.cell.geneIndex = cellDesc._geneIndex;

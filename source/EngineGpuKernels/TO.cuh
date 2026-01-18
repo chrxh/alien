@@ -422,7 +422,6 @@ struct CellTO
     SignalTO signal;  // For signalState == SignalState_Active
     SignalRestrictionTO signalRestriction;
     uint32_t activationTime;
-    CellTriggered cellTriggered;
 
     // Process data
     uint32_t frontAngleId;

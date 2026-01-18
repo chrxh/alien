@@ -775,7 +775,6 @@ namespace
     auto constexpr Id_Cell_Age = 2;
     auto constexpr Id_Cell_CellState = 3;
     auto constexpr Id_Cell_ActivationTime = 4;
-    auto constexpr Id_Cell_CellTriggered = 5;
     auto constexpr Id_Cell_NodeIndex = 6;
     auto constexpr Id_Cell_ParentNodeIndex = 7;
     auto constexpr Id_Cell_GeneIndex = 8;
@@ -1475,7 +1474,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
         loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
-        loadSave(task, auxiliaries, Id_Cell_CellTriggered, data._cellTriggered, defaultObject._cellTriggered);
         loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);

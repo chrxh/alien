@@ -124,7 +124,6 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
         }
 
         if (object->typeData.cell.futureSignalState != SignalState_Inactive) {
-            object->typeData.cell.cellTriggered = CellTriggered_Yes;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 object->typeData.cell.signal.channels[i] = object->typeData.cell.futureSignal.channels[i];
             }

@@ -208,15 +208,6 @@ struct SimulationParameters
 
     // Expert settings: Cell age limiter
     ExpertToggle cellAgeLimiterToggle = {false};
-    BaseLayerParameter<ColorVector<float>> maxAgeForInactiveCells = {
-        .baseValue = {// Candidate for deletion
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value}};
     BaseParameter<ColorVector<int>> freeCellMaxAge = {
         {Infinity<int>::value,
          Infinity<int>::value,

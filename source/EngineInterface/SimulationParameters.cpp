@@ -719,13 +719,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .expertToggle(&SimulationParameters::cellAgeLimiterToggle)
                 .parameters({
                     ParameterSpec()
-                        .name("Maximum inactive cell age")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::maxAgeForInactiveCells).min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
-                        .description(
-                            "Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
-                            "are in state 'Under construction' are not affected by this option."),
-                    ParameterSpec()
                         .name("Maximum free cell age")
                         .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
                         .description("The maximal age of free cells (= cells that arise from energy particles) can be set here."),

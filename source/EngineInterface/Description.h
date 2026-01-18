@@ -496,7 +496,6 @@ struct CellDescription
     MEMBER(CellDescription, SignalDescription, signal, SignalDescription());  // For signalState == SignalState_Active
     MEMBER(CellDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
     MEMBER(CellDescription, int, activationTime, 0);
-    MEMBER(CellDescription, CellTriggered, cellTriggered, CellTriggered_No);
 
     // Process data
     MEMBER(CellDescription, int, frontAngleId, 0);

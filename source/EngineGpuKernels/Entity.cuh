@@ -492,7 +492,6 @@ struct Cell
     Signal signal;
     SignalRestriction signalRestriction;
     uint32_t activationTime;
-    CellTriggered cellTriggered;
 
     // Process data
     SignalState futureSignalState;

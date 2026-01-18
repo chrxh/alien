@@ -929,24 +929,6 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
 
             // Cell age radiation
             auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[object->color];
-            if (cudaSimulationParameters.cellAgeLimiterToggle.value
-                && object->typeData.cell.cellTriggered == CellTriggered_No && object->typeData.cell.cellState == CellState_Ready
-                && object->typeData.cell.activationTime == 0) {
-                bool adjacentCellsUsed = false;
-                for (int i = 0; i < object->numConnections; ++i) {
-                    if (object->connections[i].object->typeData.cell.cellTriggered == CellTriggered_Yes) {
-                        adjacentCellsUsed = true;
-                        break;
-                    }
-                }
-                if (!adjacentCellsUsed) {
-                    auto cellInactiveMaxAge =
-                        ParameterCalculator::calcParameter(cudaSimulationParameters.maxAgeForInactiveCells, data, object->pos, object->color);
-
-                    cellMaxAge = toInt(cellInactiveMaxAge);
-                }
-            }
-
             if (cellMaxAge > 0 && object->typeData.cell.age > cellMaxAge) {
                 cellDestruction = true;
             }

@@ -350,7 +350,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TO const& to, Objec
         cell->age = cellTO.age;
         cell->frontAngle = cellTO.frontAngle;
         cell->activationTime = cellTO.activationTime;
-        cell->cellTriggered = cellTO.cellTriggered;
         cell->nodeIndex = cellTO.nodeIndex;
         cell->parentNodeIndex = cellTO.parentNodeIndex;
         cell->geneIndex = cellTO.geneIndex;
@@ -734,7 +733,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.signalRestriction.openingAngle = node->signalRestriction.openingAngle;
     cell.signalState = 0;
     cell.activationTime = 0;
-    cell.cellTriggered = CellTriggered_No;
     cell.event = CellEvent_No;
 
     switch (node->cellType) {
