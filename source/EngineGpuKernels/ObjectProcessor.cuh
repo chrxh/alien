@@ -691,7 +691,7 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
                 }
             } else if (origCellState == CellState_Ready) {
                 if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsequences_None) {
-                    if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsequences_DetachedPartsDie && object->typeData.cell.creature != nullptr
+                    if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsequences_DetachedPartsDie
                         && object->typeData.cell.headCell) {
                         cellState = CellState_Reviving;
                     } else {

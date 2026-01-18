@@ -156,14 +156,10 @@ __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationD
 __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview)
 {
     auto triggerInterval = max(SignalState_Count, autoTriggerInterval);
-    if (cell->typeData.cell.creature != nullptr) {
-        if (isPreview) {
-            return *data.timestep % triggerInterval == 0;
-        } else {
-            return (*data.timestep + cell->typeData.cell.creature->id) % triggerInterval == 0;
-        }
-    } else {
+    if (isPreview) {
         return *data.timestep % triggerInterval == 0;
+    } else {
+        return (*data.timestep + cell->typeData.cell.creature->id) % triggerInterval == 0;
     }
 }
 

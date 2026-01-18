@@ -101,9 +101,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
 
         // Check lineage restriction
         if (receiver.restrictToLineage != LineageRestriction_No) {
-            if (object->typeData.cell.creature == nullptr || otherObject->typeData.cell.creature == nullptr) {
-                return false;
-            } else if (receiver.restrictToLineage == LineageRestriction_SameLineage) {
+            if (receiver.restrictToLineage == LineageRestriction_SameLineage) {
                 if (object->typeData.cell.creature->lineageId != otherObject->typeData.cell.creature->lineageId) {
                     return false;
                 }

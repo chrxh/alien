@@ -121,9 +121,6 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
-    if (object->typeData.cell.creature == nullptr) {
-        return;
-    }
     auto& constructor = object->typeData.cell.cellTypeData.constructor;
     if (SignalProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
         constructor.offspring = findOrCreateNewCreature(data, object);

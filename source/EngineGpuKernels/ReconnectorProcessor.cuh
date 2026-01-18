@@ -83,9 +83,6 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 return;
             }
             // Must be from a different creature
-            if (otherObject->typeData.cell.creature == nullptr) {
-                return;
-            }
             if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                 return;
             }
@@ -110,9 +107,6 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
             // Filter by lineage restriction
             if (reconnector.modeData.reconnectCreature.restrictToLineage != LineageRestriction_No) {
-                if (object->typeData.cell.creature == nullptr) {
-                    return;
-                }
                 if (reconnector.modeData.reconnectCreature.restrictToLineage == LineageRestriction_SameLineage) {
                     if (object->typeData.cell.creature->lineageId != otherObject->typeData.cell.creature->lineageId) {
                         return;
