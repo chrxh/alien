@@ -107,7 +107,7 @@ TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
                 .pos({100.0f, 100.0f})
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(15).mode(createModeWithDensity(GetParam())))),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     _simulationFacade->setSimulationData(data);
 
     {
@@ -137,7 +137,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_noSignal)
                 .type(
                     CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(std::nullopt).mode(createModeWithDensity(GetParam())))),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     _simulationFacade->setSimulationData(data);
 
     for (int i = 0; i < 10; ++i) {
@@ -158,7 +158,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
                     CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(std::nullopt).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -178,7 +178,7 @@ TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
                 .type(CellDescription().cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add detection targets above the sensor
@@ -201,7 +201,7 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove)
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add detection targets above the sensor
@@ -230,7 +230,7 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
                 .type(CellDescription().frontAngle(90.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add detection targets above the sensor
@@ -259,7 +259,7 @@ TEST_P(SensorTests_AllDetectionModes, targetBelow)
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add detection targets below the sensor
@@ -288,7 +288,7 @@ TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add a close cluster above
@@ -323,7 +323,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_found)
                     SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).minRange(40))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add targets just beyond minRange
@@ -349,7 +349,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
                     SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).minRange(120))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add targets within minRange (too close)
@@ -375,7 +375,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_found)
                     SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).maxRange(120))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add targets within maxRange
@@ -401,7 +401,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
                     SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).maxRange(30))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add targets beyond maxRange (too far)
@@ -429,7 +429,7 @@ TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
             ObjectDescription().id(2).pos({99.0f, 99.0f}).type(CellDescription()),
             ObjectDescription().id(3).pos({101.0f, 99.0f}),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(1, 3);
@@ -487,7 +487,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add structure cells between sensor and target (to block the ray)
@@ -517,7 +517,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add structure cells behind sensor and target
@@ -547,7 +547,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add structure cells behind sensor and target
@@ -578,7 +578,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     addDetectionTargets(data, GetParam(), {100.0f, 60.0f});
@@ -623,9 +623,9 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
-            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add target
@@ -642,9 +642,13 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     actualData = _simulationFacade->getSimulationData();
     auto sensorCell = actualData.getObjectRef(1);
     auto auxCell = actualData.getObjectRef(2);
+    auto creature = actualData.getCreatureRef(0);
+    auto genome = actualData.getGenomeRef(creature._genomeId);
     actualData.clear();
     actualData._objects.emplace_back(sensorCell);
     actualData._objects.emplace_back(auxCell);
+    actualData._creatures.emplace_back(creature);
+    actualData._genomes.emplace_back(genome);
     addDetectionTargets(actualData, GetParam(), {120.0f, 30.0f}, 10, false);
     addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 10, true);  // Add a closer target which should be ignored
     _simulationFacade->setSimulationData(actualData);
@@ -680,7 +684,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
                     SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).maxRange(60))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add target at distance ~50 (within maxRange of 60)
@@ -703,9 +707,13 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
     actualData = _simulationFacade->getSimulationData();
     auto sensorCell = actualData.getObjectRef(1);
     auto auxCell = actualData.getObjectRef(2);
+    auto creature = actualData.getCreatureRef(0);
+    auto genome = actualData.getGenomeRef(creature._genomeId);
     actualData.clear();
     actualData._objects.emplace_back(sensorCell);
     actualData._objects.emplace_back(auxCell);
+    actualData._creatures.emplace_back(creature);
+    actualData._genomes.emplace_back(genome);
     addDetectionTargets(actualData, GetParam(), {100.0f, 30.0f}, 10, false);
     _simulationFacade->setSimulationData(actualData);
 
@@ -733,7 +741,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
                     SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).minRange(40))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add target at distance ~50 (beyond minRange of 40)
@@ -756,9 +764,13 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
     actualData = _simulationFacade->getSimulationData();
     auto sensorCell = actualData.getObjectRef(1);
     auto auxCell = actualData.getObjectRef(2);
+    auto creature = actualData.getCreatureRef(0);
+    auto genome = actualData.getGenomeRef(creature._genomeId);
     actualData.clear();
     actualData._objects.emplace_back(sensorCell);
     actualData._objects.emplace_back(auxCell);
+    actualData._creatures.emplace_back(creature);
+    actualData._genomes.emplace_back(genome);
     addDetectionTargets(actualData, GetParam(), {100.0f, 80.0f}, 10, false);
     _simulationFacade->setSimulationData(actualData);
 
@@ -788,7 +800,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
                           .cellType(SensorDescription().autoTriggerInterval(std::nullopt).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(3))),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add target
@@ -805,9 +817,13 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     actualData = _simulationFacade->getSimulationData();
     auto sensorCell = actualData.getObjectRef(1);
     auto auxCell = actualData.getObjectRef(2);
+    auto creature = actualData.getCreatureRef(0);
+    auto genome = actualData.getGenomeRef(creature._genomeId);
     actualData.clear();
     actualData._objects.emplace_back(sensorCell);
     actualData._objects.emplace_back(auxCell);
+    actualData._creatures.emplace_back(creature);
+    actualData._genomes.emplace_back(genome);
     addDetectionTargets(actualData, GetParam(), {120.0f, 80.0f}, 10, false);
     addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 10, true);  // Add a closer target which should matched by initial scan
     _simulationFacade->setSimulationData(actualData);
@@ -841,7 +857,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add target
@@ -858,9 +874,13 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
     actualData = _simulationFacade->getSimulationData();
     auto sensorCell = actualData.getObjectRef(1);
     auto auxCell = actualData.getObjectRef(2);
+    auto creature = actualData.getCreatureRef(0);
+    auto genome = actualData.getGenomeRef(creature._genomeId);
     actualData.clear();
     actualData._objects.emplace_back(sensorCell);
     actualData._objects.emplace_back(auxCell);
+    actualData._creatures.emplace_back(creature);
+    actualData._genomes.emplace_back(genome);
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target disappeared, should not be found
@@ -886,7 +906,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add energy particles above the sensor
@@ -931,7 +951,7 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add a particle with low energy
@@ -956,14 +976,13 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
                 .pos({100.0f, 100.0f})
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription()))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
-        },
-        CreatureDescription().id(2));
+        }, CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add many non-structure cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
-        data._objects.emplace_back(
-            ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f)));
+        data.addCreature(
+            {ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription())});
     }
 
     _simulationFacade->setSimulationData(data);
@@ -990,7 +1009,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
                     CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.5f)))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add just a few free cells
@@ -1014,18 +1033,17 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
                 .type(CellDescription().frontAngle(0.0f).cellType(
                     SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1)))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0),
-        },
-        CreatureDescription().id(2));
+        }, CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add free cells with wrong color (color 0) closer
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(FreeCellDescription()));
+        data.addObjects({ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(FreeCellDescription())});
     }
 
     // Add free cells with correct color (color 1) farther but still in range
     for (int i = 0; i < 8; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(FreeCellDescription()));
+        data.addObjects({ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(FreeCellDescription())});
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1051,13 +1069,13 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
                     SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f)))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add many non-free cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
-        data._objects.emplace_back(
-            ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f)));
+        data.addCreature(
+            {ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription().cellType(BaseDescription()).usableEnergy(10.0f))});
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1623,7 +1641,7 @@ TEST_F(SensorTests, telemetry_allOutputs)
                 .type(CellDescription().frontAngle(0.0f).usableEnergy(100.0f).cellType(
                     SensorDescription().autoTriggerInterval(3).mode(TelemetryDescription()))),  // Moving with both x and y components
         },
-        CreatureDescription().id(2));
+        CreatureDescription().id(0));
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->calcTimesteps(1);

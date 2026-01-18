@@ -151,7 +151,6 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
         auto& object = objects.at(objectIndex);
 
-        __shared__ float cellMaxBindingEnergy;
         __shared__ float cellFusionVelocity;
 
         __shared__ int scanLength;
@@ -166,7 +165,6 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         __shared__ float density;
 
         if (block.thread_rank() == 0) {
-            cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, object->pos);
             cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
             int radiusInt = ceilf(smoothingLength * 2);
@@ -254,7 +252,6 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     // Fusion
                     if (Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_OBJECT_CONNECTIONS
                         && otherObject->numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || otherObject->sticky)
-                        && object->typeData.cell.usableEnergy <= cellMaxBindingEnergy && otherObject->typeData.cell.usableEnergy <= cellMaxBindingEnergy
                         && !object->fixed && !otherObject->fixed) {
                         ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                     }
@@ -392,12 +389,10 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                 }
 
                 //fusion
-                auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, object->pos);
                 auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
                 if (object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS
                     && (object->sticky || otherObject->sticky) && Math::length(velDelta) >= cellFusionVelocity && isApproaching
-                    && object->typeData.cell.usableEnergy <= cellMaxBindingEnergy && otherObject->typeData.cell.usableEnergy <= cellMaxBindingEnergy
                     && !object->fixed && !otherObject->fixed) {
                     ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                 }
