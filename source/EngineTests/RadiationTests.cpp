@@ -52,8 +52,6 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
 
 TEST_F(RadiationTests, structureCells_shouldNotRadiate)
 {
-    auto initialEnergy = 200.0f;
-
     Description data;
     data._objects.emplace_back(
         ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(StructureDescription()));
@@ -68,10 +66,10 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
     // Verify no particles were created (no radiation emitted)
     EXPECT_EQ(0, actualData._energies.size());
 
-    // Verify the structure cell retained its energy
+    // Verify the structure cell is still present
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, object.getCellRef()._usableEnergy));
+    EXPECT_EQ(ObjectType_Structure, object.getObjectType());
 }
 
 TEST_F(RadiationTests, baseCells_shouldRadiate)
@@ -143,8 +141,6 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
 TEST_F(RadiationTests, fixedStructureObject_shouldNotRadiate)
 {
     // Test that a cell that is both fixed AND a structure cell does not radiate
-    auto initialEnergy = 200.0f;
-
     Description data;
     data._objects.emplace_back(
         ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(StructureDescription()));
@@ -159,8 +155,8 @@ TEST_F(RadiationTests, fixedStructureObject_shouldNotRadiate)
     // Verify no particles were created (no radiation emitted)
     EXPECT_EQ(0, actualData._energies.size());
 
-    // Verify the cell retained its energy
+    // Verify the cell is still present
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, object.getCellRef()._usableEnergy));
+    EXPECT_EQ(ObjectType_Structure, object.getObjectType());
 }

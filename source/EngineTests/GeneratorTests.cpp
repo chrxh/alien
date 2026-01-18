@@ -20,7 +20,7 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97))),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97);
@@ -35,7 +35,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97))),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(98);
@@ -51,7 +51,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailedPreview)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97))),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
 
     _simulationFacade->setPreviewData(data);
     _simulationFacade->calcTimestepsForPreview(98, true);
@@ -66,7 +66,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97 * 2))),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 2 + 1);
@@ -82,7 +82,7 @@ TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97))),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(99);
@@ -97,7 +97,7 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 2 + 1);
@@ -113,7 +113,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 3 + 1);
@@ -129,7 +129,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 6 + 1);
@@ -149,7 +149,7 @@ TEST_F(GeneratorTests, generatePulse_triangularNetwork)
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(10))),
         ObjectDescription().id(2).pos({1, 0}),
         ObjectDescription().id(3).pos({0.5, 0.5}),
-    }, CreatureDescription().id(1));
+    }, CreatureDescription().id(0));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 1);

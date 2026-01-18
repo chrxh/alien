@@ -43,14 +43,15 @@ TEST_F(EnergyParticleTests, particleToCell_transformationAllowed)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Verify that the particle was transformed into a cell
+    // Verify that the particle was transformed into a free cell
     EXPECT_EQ(0, actualData._energies.size());
     EXPECT_EQ(1, actualData._objects.size());
 
-    // Verify the cell has approximately the same energy as the original particle
+    // Verify the free cell has approximately the same energy as the original particle
     if (!actualData._objects.empty()) {
         auto const& object = actualData._objects.at(0);
-        EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, object.getCellRef()._usableEnergy, 1.0f));
+        EXPECT_EQ(ObjectType_FreeCell, object.getObjectType());
+        EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, object.getFreeCellRef()._rawEnergy, 1.0f));
         EXPECT_EQ(0, object._color);
     }
 }
