@@ -54,7 +54,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
 {
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(StructureDescription()));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
 

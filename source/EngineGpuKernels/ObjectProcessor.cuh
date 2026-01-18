@@ -853,35 +853,61 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
 
             auto radiation1 = 0.0f;
             auto radiation2 = 0.0f;
-            auto const& cellEnergy = object->typeData.cell.usableEnergy;
-            auto const& cellRawEnergy = object->typeData.cell.rawEnergy;
-            if (object->typeData.cell.usableEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[object->color]) {
-                radiation1 += cudaSimulationParameters.radiationType2_strength.value[object->color];
-            }
-            if (object->typeData.cell.rawEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[object->color]) {
-                radiation2 += cudaSimulationParameters.radiationType2_strength.value[object->color];
-            }
-            if (object->typeData.cell.age > cudaSimulationParameters.radiationType1_minimumAge.value[object->color]) {
-                radiation1 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, object->pos, object->color);
-                radiation2 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, object->pos, object->color);
-            }
-            radiation1 *= cellEnergy;
-            radiation2 *= cellRawEnergy;
+            
+            if (object->type == ObjectType_Cell) {
+                auto const& cellEnergy = object->typeData.cell.usableEnergy;
+                auto const& cellRawEnergy = object->typeData.cell.rawEnergy;
+                if (object->typeData.cell.usableEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[object->color]) {
+                    radiation1 += cudaSimulationParameters.radiationType2_strength.value[object->color];
+                }
+                if (object->typeData.cell.rawEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[object->color]) {
+                    radiation2 += cudaSimulationParameters.radiationType2_strength.value[object->color];
+                }
+                if (object->typeData.cell.age > cudaSimulationParameters.radiationType1_minimumAge.value[object->color]) {
+                    radiation1 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, object->pos, object->color);
+                    radiation2 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, object->pos, object->color);
+                }
+                radiation1 *= cellEnergy;
+                radiation2 *= cellRawEnergy;
 
-            radiation1 = max(min(radiation1 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, cellEnergy - 1), 0.0f);
-            radiation2 = max(min(radiation2 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, cellRawEnergy - 1), 0.0f);
+                radiation1 = max(min(radiation1 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, cellEnergy - 1), 0.0f);
+                radiation2 = max(min(radiation2 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, cellRawEnergy - 1), 0.0f);
 
-            if (radiation1 > 0 || radiation2 > 0) {
-                float2 particleVel = object->vel * cudaSimulationParameters.radiationVelocityMultiplier
-                    + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
-                float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f
-                    - particleVel;  // minus particleVel because particle will still be moved in current time step
-                data.objectMap.correctPosition(particlePos);
+                if (radiation1 > 0 || radiation2 > 0) {
+                    float2 particleVel = object->vel * cudaSimulationParameters.radiationVelocityMultiplier
+                        + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
+                    float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f
+                        - particleVel;  // minus particleVel because particle will still be moved in current time step
+                    data.objectMap.correctPosition(particlePos);
 
-                EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiation1 + radiation2);
+                    EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiation1 + radiation2);
 
-                object->typeData.cell.usableEnergy -= radiation1;
-                object->typeData.cell.rawEnergy -= radiation2;
+                    object->typeData.cell.usableEnergy -= radiation1;
+                    object->typeData.cell.rawEnergy -= radiation2;
+                }
+            } else if (object->type == ObjectType_FreeCell) {
+                auto const& freeCellRawEnergy = object->typeData.freeCell.rawEnergy;
+                if (object->typeData.freeCell.rawEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[object->color]) {
+                    radiation2 += cudaSimulationParameters.radiationType2_strength.value[object->color];
+                }
+                if (object->typeData.freeCell.age > cudaSimulationParameters.radiationType1_minimumAge.value[object->color]) {
+                    radiation2 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, object->pos, object->color);
+                }
+                radiation2 *= freeCellRawEnergy;
+
+                radiation2 = max(min(radiation2 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, freeCellRawEnergy - 1), 0.0f);
+
+                if (radiation2 > 0) {
+                    float2 particleVel = object->vel * cudaSimulationParameters.radiationVelocityMultiplier
+                        + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
+                    float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f
+                        - particleVel;  // minus particleVel because particle will still be moved in current time step
+                    data.objectMap.correctPosition(particlePos);
+
+                    EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiation2);
+
+                    object->typeData.freeCell.rawEnergy -= radiation2;
+                }
             }
         }
     }
