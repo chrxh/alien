@@ -144,23 +144,22 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-        if (objectType == ObjectType_Cell) {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
+    // Only check object 1's cellState when it's actually a Cell
+    if (objectType == ObjectType_Cell) {
+        if (deathConsequences == CellDeathConsequences_None) {
             EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        }
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
-        if (objectType == ObjectType_Cell) {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else {
+        // For Structure/FreeCell connected to Cell, only check the Cell
+        if (deathConsequences == CellDeathConsequences_None) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        }
     }
 }
 
@@ -175,36 +174,43 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
     });
 
     Description data;
-    data.addCreature(
-        {
-            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
-            ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
-        },
-        CreatureDescription(),
-        genome);
+    if (objectType == ObjectType_Cell) {
+        data.addCreature(
+            {
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
+                ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
+            },
+            CreatureDescription(),
+            genome);
+    } else {
+        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))});
+        data.addCreature({ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching))}, CreatureDescription(), genome);
+    }
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-        if (objectType == ObjectType_Cell) {
+    // Only check object 1's cellState when it's actually a Cell
+    if (objectType == ObjectType_Cell) {
+        if (deathConsequences == CellDeathConsequences_None) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        }
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
-        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
             EXPECT_EQ(CellState_Reviving, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else {
+        // For Structure/FreeCell, only check the Cell (object 2)
+        if (deathConsequences == CellDeathConsequences_None) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        }
     }
 }
 
@@ -219,36 +225,43 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
     });
 
     Description data;
-    data.addCreature(
-        {
-            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
-            ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
-        },
-        CreatureDescription(),
-        genome);
+    if (objectType == ObjectType_Cell) {
+        data.addCreature(
+            {
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
+                ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
+            },
+            CreatureDescription(),
+            genome);
+    } else {
+        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))});
+        data.addCreature({ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching))}, CreatureDescription(), genome);
+    }
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-        if (objectType == ObjectType_Cell) {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
+    // Only check object 1's cellState when it's actually a Cell
+    if (objectType == ObjectType_Cell) {
+        if (deathConsequences == CellDeathConsequences_None) {
             EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        }
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
-        if (objectType == ObjectType_Cell) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else {
+        // For Structure/FreeCell, only check the Cell (object 2)
+        if (deathConsequences == CellDeathConsequences_None) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        }
     }
 }
 
@@ -259,8 +272,12 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     _simulationFacade->setSimulationParameters(_parameters);
 
     Description data;
-    data.addCreature(
-        {ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))}, CreatureDescription(), GenomeDescription());
+    if (objectType == ObjectType_Cell) {
+        data.addCreature(
+            {ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))}, CreatureDescription(), GenomeDescription());
+    } else {
+        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))});
+    }
     data.addCreature(
         {ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching))}, CreatureDescription(), GenomeDescription());
     data.addConnection(1, 2);
@@ -269,15 +286,25 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+    // Only check object 1's cellState when it's actually a Cell
+    if (objectType == ObjectType_Cell) {
+        if (deathConsequences == CellDeathConsequences_None) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        }
+    } else {
+        // For Structure/FreeCell, only check the Cell (object 2)
+        if (deathConsequences == CellDeathConsequences_None) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        }
     }
 }
 
