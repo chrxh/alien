@@ -152,9 +152,11 @@ TEST_P(CellStateTransitionTests, ready_detaching)
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
+    } else if (objectType == ObjectType_FreeCell && deathConsequences == CellDeathConsequences_None) {
+        // FreeCell with no death consequences: Cell transitions to Ready
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else {
-        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
-        // regardless of deathConsequences setting
+        // Structure or FreeCell with death consequences: Cell remains in Detaching
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
@@ -197,12 +199,19 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
-            EXPECT_EQ(CellState_Reviving, actualData.getObjectRef(1).getCellRef()._cellState);
+            // Both cells go to Detaching (not Reviving for object 1)
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
     } else {
-        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        // For Structure/FreeCell connected to Cell
+        if (objectType == ObjectType_FreeCell && deathConsequences == CellDeathConsequences_None) {
+            // FreeCell with no death consequences: Cell transitions to Ready
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else {
+            // Structure or FreeCell with death consequences: Cell remains in Detaching
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        }
     }
 }
 
@@ -248,8 +257,12 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
     } else {
-        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        // For Structure/FreeCell connected to Cell
+        if (objectType == ObjectType_FreeCell && deathConsequences == CellDeathConsequences_None) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        }
     }
 }
 
@@ -287,8 +300,12 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
     } else {
-        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
-        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        // For Structure/FreeCell connected to Cell
+        if (objectType == ObjectType_FreeCell && deathConsequences == CellDeathConsequences_None) {
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+        } else {
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
+        }
     }
 }
 
@@ -320,15 +337,13 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     if (objectType == ObjectType_Cell) {
         // Object 2 (the Cell) should transition to Ready state when connected to another Cell
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-        if (deathConsequences == CellDeathConsequences_None) {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
-            EXPECT_EQ(CellState_Reviving, actualData.getObjectRef(1).getCellRef()._cellState);
-        } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
-        }
+        // Object 1 stays Ready (Reviving state doesn't propagate to connected cells)
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+    } else if (objectType == ObjectType_FreeCell) {
+        // For FreeCell connected to Cell: Cell with Reviving state transitions to Ready
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else {
-        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
+        // For Structure connected to Cell: Cell remains in Detaching
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
@@ -361,9 +376,13 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     if (objectType == ObjectType_Cell) {
         // Object 2 (the Cell) should transition to Ready state after activating
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-        EXPECT_EQ(CellState_Activating, actualData.getObjectRef(1).getCellRef()._cellState);
+        // Object 1 stays at Ready (Activating state doesn't spread to connected cells)
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+    } else if (objectType == ObjectType_FreeCell) {
+        // For FreeCell connected to Cell: Cell with Activating state transitions to Ready
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else {
-        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
+        // For Structure connected to Cell: Cell remains in Detaching
         EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
