@@ -16,8 +16,10 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             statistics.incNumCells(object->color);
             if (object->type == ObjectType_FreeCell) {
                 statistics.incNumFreeCells(object->color);
+                statistics.addEnergy(object->color, object->typeData.freeCell.rawEnergy);
+            } else if (object->type == ObjectType_Cell) {
+                statistics.addEnergy(object->color, object->typeData.cell.getEnergy());
             }
-            statistics.addEnergy(object->color, object->typeData.cell.getEnergy());
             //if (object->typeData.cell.cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(object->typeData.cell.cellTypeData.constructor)) {
             //    statistics.incNumReplicator(object->color);
             //    statistics.incMutant(object->color, object->lineageId, object->numObjects);
@@ -81,7 +83,11 @@ __global__ void cudaUpdateHistogramData_substep2(SimulationData data, Simulation
         if (object->fixed) {
             continue;
         }
-        statistics.maxValue(object->typeData.cell.age);
+        if (object->type == ObjectType_Cell) {
+            statistics.maxValue(object->typeData.cell.age);
+        } else if (object->type == ObjectType_FreeCell) {
+            statistics.maxValue(object->typeData.freeCell.age);
+        }
     }
 }
 
@@ -96,7 +102,12 @@ __global__ void cudaUpdateHistogramData_substep3(SimulationData data, Simulation
         if (object->fixed) {
             continue;
         }
-        auto slot = object->typeData.cell.age * MAX_HISTOGRAM_SLOTS / (maxAge + 1);
-        statistics.incNumCells(object->color, slot);
+        if (object->type == ObjectType_Cell) {
+            auto slot = object->typeData.cell.age * MAX_HISTOGRAM_SLOTS / (maxAge + 1);
+            statistics.incNumCells(object->color, slot);
+        } else if (object->type == ObjectType_FreeCell) {
+            auto slot = object->typeData.freeCell.age * MAX_HISTOGRAM_SLOTS / (maxAge + 1);
+            statistics.incNumCells(object->color, slot);
+        }
     }
 }
