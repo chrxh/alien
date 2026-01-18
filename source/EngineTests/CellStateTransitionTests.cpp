@@ -370,7 +370,7 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
-TEST_P(CellStateTransitionTests, noDyingForFixedCells)
+TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
 {
     auto [deathConsequences, objectType, cellType] = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
