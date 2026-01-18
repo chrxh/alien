@@ -129,14 +129,13 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     if (objectType == ObjectType_Cell) {
         data.addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).fixed(true).type(getObjectTypeDescription(objectType, cellType)),
-                ObjectDescription().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDescription().cellState(CellState_Detaching)),
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
+                ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
             },
             CreatureDescription());
     } else {
-        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).fixed(true).type(getObjectTypeDescription(objectType, cellType))});
-        data.addCreature(
-            {ObjectDescription().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDescription().cellState(CellState_Detaching))}, CreatureDescription());
+        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))});
+        data.addCreature({ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching))}, CreatureDescription());
     }
     data.addConnection(1, 2);
 
@@ -154,12 +153,9 @@ TEST_P(CellStateTransitionTests, ready_detaching)
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
     } else {
-        // For Structure/FreeCell connected to Cell, only check the Cell
-        if (deathConsequences == CellDeathConsequences_None) {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
-        }
+        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
+        // regardless of deathConsequences setting
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -205,12 +201,8 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
     } else {
-        // For Structure/FreeCell, only check the Cell (object 2)
-        if (deathConsequences == CellDeathConsequences_None) {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
-        }
+        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -256,12 +248,8 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
     } else {
-        // For Structure/FreeCell, only check the Cell (object 2)
-        if (deathConsequences == CellDeathConsequences_None) {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
-        }
+        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -299,12 +287,8 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
         }
     } else {
-        // For Structure/FreeCell, only check the Cell (object 2)
-        if (deathConsequences == CellDeathConsequences_None) {
-            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-        } else {
-            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
-        }
+        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -318,14 +302,13 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     if (objectType == ObjectType_Cell) {
         data.addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).fixed(true).type(getObjectTypeDescription(objectType, cellType)),
-                ObjectDescription().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDescription().cellState(CellState_Reviving)),
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
+                ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Reviving)),
             },
             CreatureDescription());
     } else {
-        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).fixed(true).type(getObjectTypeDescription(objectType, cellType))});
-        data.addCreature(
-            {ObjectDescription().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDescription().cellState(CellState_Reviving))}, CreatureDescription());
+        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))});
+        data.addCreature({ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Reviving))}, CreatureDescription());
     }
     data.addConnection(1, 2);
 
@@ -333,11 +316,10 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Object 2 (the Cell) should transition to Ready state
-    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-
     // Only check object 1's cellState when it's actually a Cell
     if (objectType == ObjectType_Cell) {
+        // Object 2 (the Cell) should transition to Ready state when connected to another Cell
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
         if (deathConsequences == CellDeathConsequences_None) {
             EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
@@ -345,6 +327,9 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
         } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
             EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         }
+    } else {
+        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -358,14 +343,13 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     if (objectType == ObjectType_Cell) {
         data.addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).fixed(true).type(getObjectTypeDescription(objectType, cellType)),
-                ObjectDescription().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDescription().cellState(CellState_Activating)),
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType)),
+                ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Activating)),
             },
             CreatureDescription());
     } else {
-        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).fixed(true).type(getObjectTypeDescription(objectType, cellType))});
-        data.addCreature(
-            {ObjectDescription().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDescription().cellState(CellState_Activating))}, CreatureDescription());
+        data.addObjects({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(getObjectTypeDescription(objectType, cellType))});
+        data.addCreature({ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Activating))}, CreatureDescription());
     }
     data.addConnection(1, 2);
 
@@ -373,12 +357,14 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Object 2 (the Cell) should transition to Ready state after activating
-    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-
-    // Only check object 1's cellState when it's actually a Cell
+    // Only check cellState when object 1 is a Cell
     if (objectType == ObjectType_Cell) {
+        // Object 2 (the Cell) should transition to Ready state after activating
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
         EXPECT_EQ(CellState_Activating, actualData.getObjectRef(1).getCellRef()._cellState);
+    } else {
+        // For Structure/FreeCell connected to Cell, the cell detaches from non-creature objects
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
