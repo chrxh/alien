@@ -355,18 +355,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Fusion velocity")
                         .reference(FloatSpec().member(&SimulationParameters::objectFusionVelocity).min(0.0f).max(2.0f))
                         .description("Maximum force that can be applied to a cell without causing it to disintegrate."),
-                    ParameterSpec()
-                        .name("Maximum energy")
-                        .reference(
-                            FloatSpec()
-                                .member(&SimulationParameters::objectMaxBindingEnergy)
-                                .min(50.0f)
-                                .max(10000000.0f)
-                                .logarithmic(true)
-                                .infinity(true)
-                                .format("%.0f"))
-                        .description("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
-                                     "value, all bonds will be destroyed."),
                 }),
             ParameterGroupSpec()
                 .name("Radiation")

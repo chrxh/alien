@@ -37,7 +37,7 @@ private:
 
     static int constexpr NumScanAngles = 64;
     static float constexpr ScanStep = 8.0f;
-    static int constexpr MaxNearCreatureCells = 9 * 9;
+    static int constexpr MaxSameNearCreatureCells = 9 * 9;
     static float constexpr RayBlockingTestLength = 10.0f;
 };
 
@@ -129,8 +129,8 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 {
     __shared__ uint64_t lookupResult;
 
-    __shared__ Object* nearCreatureCells[MaxNearCreatureCells];
-    __shared__ int numNearCreatureCells;
+    __shared__ Object* nearSameCreatureCells[MaxSameNearCreatureCells];
+    __shared__ int numNearSameCreatureCells;
     __shared__ float seedAngle;
 
     if (threadIdx.x == 0) {
@@ -138,7 +138,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
         seedAngle = data.primaryNumberGen.random(360.0f);
 
         data.objectMap.getMatchingObjects(
-            nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, object->pos, 4.0f, object->detached, [&](Object* const& otherObject) {
+            nearSameCreatureCells, MaxSameNearCreatureCells, numNearSameCreatureCells, object->pos, 4.0f, object->detached, [&](Object* const& otherObject) {
                 return otherObject->type == ObjectType_Cell && object->typeData.cell.isSameCreature(&otherObject->typeData.cell);
             });
     }
@@ -155,8 +155,8 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
     // Check if ray is blocked by connections of nearby same-creature cells
     auto rayBlocked = false;
-    for (int i = 0; i < numNearCreatureCells; ++i) {
-        auto nearObject = nearCreatureCells[i];
+    for (int i = 0; i < numNearSameCreatureCells; ++i) {
+        auto nearObject = nearSameCreatureCells[i];
         for (int j = 0, k = nearObject->numConnections; j < k; ++j) {
             auto& connectedNearObject = nearObject->connections[j].object;
             if (Math::crossing(nearObject->pos, connectedNearObject->pos, object->pos, object->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
@@ -323,12 +323,13 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
         absAngle = Math::angleOfVector(delta);
     }
     absAngle = Math::getNormalizedAngle(absAngle, -180.0f);
+    auto const& cell = &object->typeData.cell;
 
-    auto const& mode = object->typeData.cell.cellTypeData.sensor.mode;
+    auto const& mode = cell->cellTypeData.sensor.mode;
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
 
     if (mode == SensorMode_DetectEnergy) {
-        auto const& minDensity = object->typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
+        auto const& minDensity = cell->cellTypeData.sensor.modeData.detectEnergy.minDensity;
         auto density = densityMap.getEnergyParticleDensity(scanPos);
         if (density >= minDensity) {
             return pack(distance, absAngle, density);
@@ -338,8 +339,8 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             return pack(distance, absAngle, 1.0f);
         }
     } else if (mode == SensorMode_DetectFreeCell) {
-        auto const& minDensity =  object->typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-        auto const& restrictToColor = object->typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+        auto const& minDensity =  cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
+        auto const& restrictToColor = cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
         auto density = densityMap.getFreeCellDensity(scanPos, restrictToColor);
         if (density >= minDensity) {
             return pack(distance, absAngle, density);
@@ -347,15 +348,15 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
     } else if (mode == SensorMode_DetectCreature) {
         if (scanType == ScanType::LocateMatch) {
 
-            auto const& minNumCells = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells;
-            auto const& maxNumCells = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-            auto const& restrictToColor = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
-            auto const& restrictToLineage = object->typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+            auto const& minNumCells = cell->cellTypeData.sensor.modeData.detectCreature.minNumCells;
+            auto const& maxNumCells = cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells;
+            auto const& restrictToColor = cell->cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+            auto const& restrictToLineage = cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
 
             auto otherObject = data.objectMap.getFirst(scanPos);
             while (otherObject != nullptr) {
                 // Check if this cell is part of a creature (not structure or free object)
-                if (otherObject->type == ObjectType_Cell && !object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
+                if (otherObject->type == ObjectType_Cell && !cell->isSameCreature(&otherObject->typeData.cell)) {
                     bool matches = true;
 
                     if (restrictToColor != 255 && otherObject->color != restrictToColor) {
@@ -390,7 +391,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
 
         // Else: ScanType::Relocation
         } else {
-            auto& sensor = object->typeData.cell.cellTypeData.sensor;
+            auto& sensor = cell->cellTypeData.sensor;
             auto otherObject = data.objectMap.getFirst(scanPos);
             while (otherObject != nullptr) {
                 if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureId) {

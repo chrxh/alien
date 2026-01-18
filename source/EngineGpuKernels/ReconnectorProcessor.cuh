@@ -159,9 +159,9 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
         auto connectedObject = object->connections[i].object;
         bool shouldRemove = false;
 
-        if (connectedObject->type == ObjectType_Structure || connectedObject->type == ObjectType_FreeCell) {
+        if (connectedObject->type != ObjectType_Cell) {
             shouldRemove = true;
-        } else if (connectedObject->type == ObjectType_Cell) {
+        } else {
             if (!object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
                 shouldRemove = true;
             }
