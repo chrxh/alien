@@ -233,10 +233,16 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Object 2 should transition to Ready state when connected to another Cell
-    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-    // Object 1 stays Ready (Reviving state doesn't propagate to connected cells)
-    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+    if (deathConsequences == CellDeathConsequences_None) {
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
+        EXPECT_EQ(CellState_Reviving, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+    }
 }
 
 TEST_P(CellStateTransitionTests, underConstruction_activating)
@@ -258,10 +264,10 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
+    // Object 1 stays at Ready (Activating state doesn't spread to connected cells)
+    EXPECT_EQ(CellState_Activating, actualData.getObjectRef(1).getCellRef()._cellState);
     // Object 2 should transition to Ready state after activating
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-    // Object 1 stays at Ready (Activating state doesn't spread to connected cells)
-    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
 }
 
 TEST_P(CellStateTransitionTests, noDyingForFixedCells)
