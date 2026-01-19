@@ -115,36 +115,36 @@ CommunicatorMode CommunicatorGenomeDesc::getMode() const
     CHECK(false);
 }
 
-CellTypeGenome NodeDesc::getCellType() const
+CellType NodeDesc::getCellType() const
 {
     if (std::holds_alternative<BaseGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Base;
+        return CellType_Base;
     } else if (std::holds_alternative<DepotGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Depot;
+        return CellType_Depot;
     } else if (std::holds_alternative<ConstructorGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Constructor;
+        return CellType_Constructor;
     } else if (std::holds_alternative<SensorGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Sensor;
+        return CellType_Sensor;
     } else if (std::holds_alternative<GeneratorGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Generator;
+        return CellType_Generator;
     } else if (std::holds_alternative<AttackerGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Attacker;
+        return CellType_Attacker;
     } else if (std::holds_alternative<InjectorGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Injector;
+        return CellType_Injector;
     } else if (std::holds_alternative<MuscleGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Muscle;
+        return CellType_Muscle;
     } else if (std::holds_alternative<DefenderGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Defender;
+        return CellType_Defender;
     } else if (std::holds_alternative<ReconnectorGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Reconnector;
+        return CellType_Reconnector;
     } else if (std::holds_alternative<DetonatorGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Detonator;
+        return CellType_Detonator;
     } else if (std::holds_alternative<DigestorGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Digestor;
+        return CellType_Digestor;
     } else if (std::holds_alternative<MemoryGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Memory;
+        return CellType_Memory;
     } else if (std::holds_alternative<CommunicatorGenomeDesc>(_cellType)) {
-        return CellTypeGenome_Communicator;
+        return CellType_Communicator;
     }
     CHECK(false);
 }

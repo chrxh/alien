@@ -92,35 +92,35 @@ EnergyDesc DescriptionTestDataFactory::createNonDefaultEnergyDesc() const
 std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactory::getAllNodeParameters() const
 {
     return {
-        NodeParameter{CellTypeGenome_Base},
-        NodeParameter{CellTypeGenome_Depot},
-        NodeParameter{CellTypeGenome_Constructor},
-        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
-        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
-        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
-        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
-        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
-        NodeParameter{CellTypeGenome_Generator},
-        NodeParameter{CellTypeGenome_Attacker},
-        NodeParameter{CellTypeGenome_Injector},
-        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_AutoBending}},
-        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_ManualBending}},
-        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_AngleBending}},
-        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_AutoCrawling}},
-        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_ManualCrawling}},
-        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_DirectMovement}},
-        NodeParameter{CellTypeGenome_Defender},
-        NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Structure}},
-        NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_FreeCell}},
-        NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
-        NodeParameter{CellTypeGenome_Detonator},
-        NodeParameter{CellTypeGenome_Digestor},
-        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
-        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
-        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
-        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
-        NodeParameter{CellTypeGenome_Communicator, CommunicatorModeWrapper{CommunicatorMode_Sender}},
-        NodeParameter{CellTypeGenome_Communicator, CommunicatorModeWrapper{CommunicatorMode_Receiver}},
+        NodeParameter{CellType_Base},
+        NodeParameter{CellType_Depot},
+        NodeParameter{CellType_Constructor},
+        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
+        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
+        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
+        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
+        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
+        NodeParameter{CellType_Generator},
+        NodeParameter{CellType_Attacker},
+        NodeParameter{CellType_Injector},
+        NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_AutoBending}},
+        NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_ManualBending}},
+        NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_AngleBending}},
+        NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_AutoCrawling}},
+        NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_ManualCrawling}},
+        NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_DirectMovement}},
+        NodeParameter{CellType_Defender},
+        NodeParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Structure}},
+        NodeParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_FreeCell}},
+        NodeParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
+        NodeParameter{CellType_Detonator},
+        NodeParameter{CellType_Digestor},
+        NodeParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
+        NodeParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
+        NodeParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
+        NodeParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
+        NodeParameter{CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Sender}},
+        NodeParameter{CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Receiver}},
     };
 }
 
@@ -222,12 +222,12 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     auto nodeType = node.getCellType();
     switch (cell.getCellType()) {
     case CellType_Base: {
-        if (nodeType != CellTypeGenome_Base) {
+        if (nodeType != CellType_Base) {
             return false;
         }
     } break;
     case CellType_Depot: {
-        if (nodeType != CellTypeGenome_Depot) {
+        if (nodeType != CellType_Depot) {
             return false;
         }
         auto const& depot = std::get<DepotDesc>(cell._cellType);
@@ -237,7 +237,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Constructor: {
-        if (nodeType != CellTypeGenome_Constructor) {
+        if (nodeType != CellType_Constructor) {
             return false;
         }
         auto const& constructor = std::get<ConstructorDesc>(cell._cellType);
@@ -253,7 +253,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Sensor: {
-        if (nodeType != CellTypeGenome_Sensor) {
+        if (nodeType != CellType_Sensor) {
             return false;
         }
         auto const& sensor = std::get<SensorDesc>(cell._cellType);
@@ -312,7 +312,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Generator: {
-        if (nodeType != CellTypeGenome_Generator) {
+        if (nodeType != CellType_Generator) {
             return false;
         }
         auto const& generator = std::get<GeneratorDesc>(cell._cellType);
@@ -328,7 +328,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Attacker: {
-        if (nodeType != CellTypeGenome_Attacker) {
+        if (nodeType != CellType_Attacker) {
             return false;
         }
         auto const& attacker = std::get<AttackerDesc>(cell._cellType);
@@ -363,7 +363,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Injector: {
-        if (nodeType != CellTypeGenome_Injector) {
+        if (nodeType != CellType_Injector) {
             return false;
         }
         auto const& injector = std::get<InjectorDesc>(cell._cellType);
@@ -373,7 +373,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Muscle: {
-        if (nodeType != CellTypeGenome_Muscle) {
+        if (nodeType != CellType_Muscle) {
             return false;
         }
         auto const& muscle = std::get<MuscleDesc>(cell._cellType);
@@ -439,7 +439,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Defender: {
-        if (nodeType != CellTypeGenome_Defender) {
+        if (nodeType != CellType_Defender) {
             return false;
         }
         auto const& defender = std::get<DefenderDesc>(cell._cellType);
@@ -449,7 +449,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Reconnector: {
-        if (nodeType != CellTypeGenome_Reconnector) {
+        if (nodeType != CellType_Reconnector) {
             return false;
         }
         auto const& reconnector = std::get<ReconnectorDesc>(cell._cellType);
@@ -487,7 +487,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Detonator: {
-        if (nodeType != CellTypeGenome_Detonator) {
+        if (nodeType != CellType_Detonator) {
             return false;
         }
         auto const& detonator = std::get<DetonatorDesc>(cell._cellType);
@@ -497,7 +497,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Digestor: {
-        if (nodeType != CellTypeGenome_Digestor) {
+        if (nodeType != CellType_Digestor) {
             return false;
         }
         auto const& digestor = std::get<DigestorDesc>(cell._cellType);
@@ -507,7 +507,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Memory: {
-        if (nodeType != CellTypeGenome_Memory) {
+        if (nodeType != CellType_Memory) {
             return false;
         }
         auto const& memory = std::get<MemoryDesc>(cell._cellType);
@@ -563,7 +563,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
     } break;
     case CellType_Communicator: {
-        if (nodeType != CellTypeGenome_Communicator) {
+        if (nodeType != CellType_Communicator) {
             return false;
         }
         auto const& communicator = std::get<CommunicatorDesc>(cell._cellType);
@@ -799,17 +799,17 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value : ReconnectorMode_Structure;
     auto memoryMode = std::holds_alternative<MemoryModeWrapper>(objectParameter.mode) ? std::get<MemoryModeWrapper>(objectParameter.mode).value : MemoryMode_SignalDelay;
     switch (type) {
-    case CellTypeGenome_Base:
+    case CellType_Base:
         return BaseGenomeDesc();
-    case CellTypeGenome_Depot:
+    case CellType_Depot:
         return DepotGenomeDesc().storageLimit(350.0f).initialStoredUsableEnergy(100.0f);
-    case CellTypeGenome_Constructor:
+    case CellType_Constructor:
         return ConstructorGenomeDesc()
             .autoTriggerInterval(45)
             .constructionActivationTime(85)
             .provideEnergy(ProvideEnergy_FreeGeneration)
             .constructionAngle(30.0f);
-    case CellTypeGenome_Sensor: {
+    case CellType_Sensor: {
         SensorModeGenomeDesc sensorModeDesc;
         switch (sensorMode) {
         case SensorMode_Telemetry:
@@ -834,18 +834,18 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         }
         return SensorGenomeDesc().autoTriggerInterval(70).mode(sensorModeDesc).minRange(5).maxRange(30);
     }
-    case CellTypeGenome_Generator:
+    case CellType_Generator:
         return GeneratorGenomeDesc().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
-    case CellTypeGenome_Attacker:
+    case CellType_Attacker:
         return AttackerGenomeDesc()
             .mode(AttackCreatureGenomeDesc()
                       .minNumCells(5)
                       .maxNumCells(18)
                       .restrictToColor(2)
                       .restrictToLineage(LineageRestriction_SameLineage));
-    case CellTypeGenome_Injector:
+    case CellType_Injector:
         return InjectorGenomeDesc().geneIndex(3);
-    case CellTypeGenome_Muscle: {
+    case CellType_Muscle: {
         MuscleModeGenomeDesc muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending:
@@ -871,9 +871,9 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         }
         return MuscleGenomeDesc().mode(muscleModeDesc);
     }
-    case CellTypeGenome_Defender:
+    case CellType_Defender:
         return DefenderGenomeDesc().mode(DefenderMode_DefendAgainstInjector);
-    case CellTypeGenome_Reconnector: {
+    case CellType_Reconnector: {
         ReconnectorModeGenomeDesc reconnectorModeDesc;
         switch (reconnectorMode) {
         case ReconnectorMode_Structure:
@@ -891,13 +891,13 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         }
         return ReconnectorGenomeDesc().mode(reconnectorModeDesc);
     }
-    case CellTypeGenome_Detonator: {
+    case CellType_Detonator: {
         return DetonatorGenomeDesc().countdown(45);
     }
-    case CellTypeGenome_Digestor: {
+    case CellType_Digestor: {
         return DigestorGenomeDesc().rawEnergyConductivity(0.8f);
     }
-    case CellTypeGenome_Memory: {
+    case CellType_Memory: {
         MemoryModeGenomeDesc memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
@@ -925,7 +925,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         }
         return memory;
     }
-    case CellTypeGenome_Communicator: {
+    case CellType_Communicator: {
         auto communicatorMode = std::holds_alternative<CommunicatorModeWrapper>(objectParameter.mode)
             ? std::get<CommunicatorModeWrapper>(objectParameter.mode).value
             : CommunicatorMode_Sender;

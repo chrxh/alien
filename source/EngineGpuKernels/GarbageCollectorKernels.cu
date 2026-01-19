@@ -183,7 +183,7 @@ __global__ void cudaCleanupGenomesStep1(Array<Object*> cells, Heap newHeap)
                         *newNode = *node;
 
                         // Copy dependent node data for memory cell type
-                        if (node->cellType == CellTypeGenome_Memory) {
+                        if (node->cellType == CellType_Memory) {
                             copyAndAssignNewHeapData(
                                 reinterpret_cast<uint8_t*&>(newNode->cellTypeData.memory.signalEntries),
                                 reinterpret_cast<uint8_t*&>(node->cellTypeData.memory.signalEntries),

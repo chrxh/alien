@@ -394,7 +394,7 @@ struct NodeDesc
     MEMBER(NodeDesc, CellTypeGenomeDesc, cellType, BaseGenomeDesc());
     MEMBER(NodeDesc, SignalRestrictionGenomeDesc, signalRestriction, SignalRestrictionGenomeDesc());
 
-    CellTypeGenome getCellType() const;
+    CellType getCellType() const;
 };
 
 struct GeneDesc

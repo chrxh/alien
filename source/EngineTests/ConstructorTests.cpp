@@ -479,7 +479,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview_detail)
 {
-    auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDesc(NodeParameter{CellTypeGenome_Base});
+    auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDesc(NodeParameter{CellType_Base});
 
     auto data = Desc().addCreature({ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).cellType(ConstructorDesc()))}, CreatureDesc().id(0), GenomeDesc().genes({
             GeneDesc().separation(true).nodes({randomNode}),

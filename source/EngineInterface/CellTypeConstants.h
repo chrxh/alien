@@ -68,44 +68,7 @@ namespace Const
         "Cell"};
 }
 
-using CellTypeGenome = int;
-enum CellTypeGenome_
-{
-    CellTypeGenome_Base,
-    CellTypeGenome_Depot,
-    CellTypeGenome_Constructor,
-    CellTypeGenome_Sensor,
-    CellTypeGenome_Generator,
-    CellTypeGenome_Attacker,
-    CellTypeGenome_Injector,
-    CellTypeGenome_Muscle,
-    CellTypeGenome_Defender,
-    CellTypeGenome_Reconnector,
-    CellTypeGenome_Detonator,
-    CellTypeGenome_Digestor,
-    CellTypeGenome_Memory,
-    CellTypeGenome_Communicator,
-    CellTypeGenome_Count,
-};
 
-namespace Const
-{
-    std::vector<std::string> const CellTypeGenomeStrings = {
-        "Base",
-        "Depot",
-        "Constructor",
-        "Sensor",
-        "Generator",
-        "Attacker",
-        "Injector",
-        "Muscle",
-        "Defender",
-        "Reconnector",
-        "Detonator",
-        "Digestor",
-        "Memory",
-        "Communicator"};
-}
 
 using CellState = int;
 enum CellState_

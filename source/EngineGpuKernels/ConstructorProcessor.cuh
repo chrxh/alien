@@ -227,7 +227,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.lastConstructionObject = getLastConstructedCellOnBranch(object);
     result.angle = result.node->referenceAngle;
     result.cellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-    if (result.node->cellType == CellTypeGenome_Constructor) {
+    if (result.node->cellType == CellType_Constructor) {
         auto const& constructorNode = result.node->cellTypeData.constructor;
         if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
             auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
@@ -241,7 +241,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
             }
         }
     }
-    result.depotEnergy = result.node->cellType == CellTypeGenome_Depot ? result.node->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
+    result.depotEnergy = result.node->cellType == CellType_Depot ? result.node->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
     result.numAdditionalConnections = result.node->numAdditionalConnections;
 
     CudaShapeGenerator shapeGenerator;

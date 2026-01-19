@@ -33,7 +33,7 @@ public:
 
     struct NodeParameter
     {
-        CellTypeGenome cellTypeGenome;
+        CellType cellTypeGenome;
         CellTypeMode mode = std::monostate{};
     };
     std::vector<NodeParameter> getAllNodeParameters() const;

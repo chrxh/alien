@@ -202,8 +202,8 @@ void _GeneEditorWidget::processNodeList()
                     ImGui::TableNextColumn();
                     {
                         auto nodeType = node.getCellType();
-                        auto text = Const::CellTypeGenomeStrings.at(nodeType);
-                        if (nodeType == CellTypeGenome_Constructor) {
+                        auto text = Const::CellTypeStrings.at(nodeType);
+                        if (nodeType == CellType_Constructor) {
                             auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                             text += " (Gene " + std::to_string(constructor._geneIndex + 1) + ")";
                         }

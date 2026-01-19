@@ -73,19 +73,19 @@ namespace
                     nodeTO.signalRestriction.openingAngle = node.signalRestriction.openingAngle;
                     nodeTO.cellType = node.cellType;
                     switch (node.cellType) {
-                    case CellTypeGenome_Base:
+                    case CellType_Base:
                         break;
-                    case CellTypeGenome_Depot:
+                    case CellType_Depot:
                         nodeTO.cellTypeData.depot.storageLimit = node.cellTypeData.depot.storageLimit;
                         break;
-                    case CellTypeGenome_Constructor:
+                    case CellType_Constructor:
                         nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
                         nodeTO.cellTypeData.constructor.geneIndex = node.cellTypeData.constructor.geneIndex;
                         nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
                         nodeTO.cellTypeData.constructor.constructionAngle = node.cellTypeData.constructor.constructionAngle;
                         nodeTO.cellTypeData.constructor.provideEnergy = node.cellTypeData.constructor.provideEnergy;
                         break;
-                    case CellTypeGenome_Sensor:
+                    case CellType_Sensor:
                         nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
                         nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
@@ -107,12 +107,12 @@ namespace
                                 node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                         }
                         break;
-                    case CellTypeGenome_Generator:
+                    case CellType_Generator:
                         nodeTO.cellTypeData.generator.autoTriggerInterval = node.cellTypeData.generator.autoTriggerInterval;
                         nodeTO.cellTypeData.generator.pulseType = node.cellTypeData.generator.pulseType;
                         nodeTO.cellTypeData.generator.alternationInterval = node.cellTypeData.generator.alternationInterval;
                         break;
-                    case CellTypeGenome_Attacker:
+                    case CellType_Attacker:
                         nodeTO.cellTypeData.attacker.mode = node.cellTypeData.attacker.mode;
                         if (node.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
                             nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor =
@@ -126,10 +126,10 @@ namespace
                                 node.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
                         }
                         break;
-                    case CellTypeGenome_Injector:
+                    case CellType_Injector:
                         nodeTO.cellTypeData.injector.geneIndex = node.cellTypeData.injector.geneIndex;
                         break;
-                    case CellTypeGenome_Muscle:
+                    case CellType_Muscle:
                         nodeTO.cellTypeData.muscle.mode = node.cellTypeData.muscle.mode;
                         switch (nodeTO.cellTypeData.muscle.mode) {
                         case MuscleMode_AutoBending:
@@ -164,10 +164,10 @@ namespace
                         case MuscleMode_DirectMovement:
                             break;
                         }
-                    case CellTypeGenome_Defender:
+                    case CellType_Defender:
                         nodeTO.cellTypeData.defender.mode = node.cellTypeData.defender.mode;
                         break;
-                    case CellTypeGenome_Reconnector:
+                    case CellType_Reconnector:
                         nodeTO.cellTypeData.reconnector.mode = node.cellTypeData.reconnector.mode;
                         if (node.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
                         } else if (node.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
@@ -184,13 +184,13 @@ namespace
                                 node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
                         }
                         break;
-                    case CellTypeGenome_Detonator:
+                    case CellType_Detonator:
                         nodeTO.cellTypeData.detonator.countdown = node.cellTypeData.detonator.countdown;
                         break;
-                    case CellTypeGenome_Digestor:
+                    case CellType_Digestor:
                         nodeTO.cellTypeData.digestor.rawEnergyConductivity = node.cellTypeData.digestor.rawEnergyConductivity;
                         break;
-                    case CellTypeGenome_Memory:
+                    case CellType_Memory:
                         nodeTO.cellTypeData.memory.mode = node.cellTypeData.memory.mode;
                         nodeTO.cellTypeData.memory.numSignalEntries = node.cellTypeData.memory.numSignalEntries;
                         nodeTO.cellTypeData.memory.channelBitMask = node.cellTypeData.memory.channelBitMask;
@@ -214,7 +214,7 @@ namespace
                             nodeTO.cellTypeData.memory.signalEntriesDataIndex,
                             to);
                         break;
-                    case CellTypeGenome_Communicator:
+                    case CellType_Communicator:
                         nodeTO.cellTypeData.communicator.mode = node.cellTypeData.communicator.mode;
                         if (node.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                             nodeTO.cellTypeData.communicator.modeData.sender.range = node.cellTypeData.communicator.modeData.sender.range;
@@ -1094,7 +1094,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
                             numNodes += gene.numNodes;
                             for (int k = 0; k < gene.numNodes; ++k) {
                                 auto& node = gene.nodes[k];
-                                if (node.cellType == CellTypeGenome_Memory) {
+                                if (node.cellType == CellType_Memory) {
                                     heapBytes += sizeof(SignalEntryGenome) * node.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
                                 }
                             }
@@ -1144,7 +1144,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
         uint64_t heapBytes = 0;
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& nodeTO = to.nodes[index];
-            if (nodeTO.cellType == CellTypeGenome_Memory) {
+            if (nodeTO.cellType == CellType_Memory) {
                 heapBytes += sizeof(SignalEntryGenome) * nodeTO.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
             }
         }

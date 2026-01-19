@@ -53,36 +53,36 @@ _NodeEditorWidget::_NodeEditorWidget(GenomeTabEditData const& editData, GenomeTa
 
 namespace
 {
-    CellTypeGenomeDesc createCellTypeGenomeDesc(CellTypeGenome cellType)
+    CellTypeGenomeDesc createCellTypeGenomeDesc(CellType cellType)
     {
         switch (cellType) {
-        case CellTypeGenome_Base:
+        case CellType_Base:
             return BaseGenomeDesc();
-        case CellTypeGenome_Depot:
+        case CellType_Depot:
             return DepotGenomeDesc();
-        case CellTypeGenome_Constructor:
+        case CellType_Constructor:
             return ConstructorGenomeDesc();
-        case CellTypeGenome_Sensor:
+        case CellType_Sensor:
             return SensorGenomeDesc();
-        case CellTypeGenome_Generator:
+        case CellType_Generator:
             return GeneratorGenomeDesc();
-        case CellTypeGenome_Attacker:
+        case CellType_Attacker:
             return AttackerGenomeDesc();
-        case CellTypeGenome_Injector:
+        case CellType_Injector:
             return InjectorGenomeDesc();
-        case CellTypeGenome_Muscle:
+        case CellType_Muscle:
             return MuscleGenomeDesc();
-        case CellTypeGenome_Defender:
+        case CellType_Defender:
             return DefenderGenomeDesc();
-        case CellTypeGenome_Reconnector:
+        case CellType_Reconnector:
             return ReconnectorGenomeDesc();
-        case CellTypeGenome_Detonator:
+        case CellType_Detonator:
             return DetonatorGenomeDesc();
-        case CellTypeGenome_Digestor:
+        case CellType_Digestor:
             return DigestorGenomeDesc();
-        case CellTypeGenome_Memory:
+        case CellType_Memory:
             return MemoryGenomeDesc();
-        case CellTypeGenome_Communicator:
+        case CellType_Communicator:
             return CommunicatorGenomeDesc();
         default:
             CHECK(false);
@@ -260,18 +260,18 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Type
             auto nodeType = node.getCellType();
-            if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
+            if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeStrings).textWidth(rightColumnWidth), nodeType)) {
                 node._cellType = createCellTypeGenomeDesc(nodeType);
             }
-            if (nodeType == CellTypeGenome_Base) {
-            } else if (nodeType == CellTypeGenome_Depot) {
+            if (nodeType == CellType_Base) {
+            } else if (nodeType == CellType_Depot) {
                 AlienGui::BeginIndent();
                 auto& depot = std::get<DepotGenomeDesc>(node._cellType);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Max energy for storage").textWidth(rightColumnWidth), depot._storageLimit);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Initial stored energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
                 AlienGui::EndIndent();
-            } else if (nodeType == CellTypeGenome_Constructor) {
+            } else if (nodeType == CellType_Constructor) {
 
                 AlienGui::BeginIndent();
 
@@ -306,7 +306,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
 
-            } else if (nodeType == CellTypeGenome_Sensor) {
+            } else if (nodeType == CellType_Sensor) {
 
                 AlienGui::BeginIndent();
 
@@ -364,7 +364,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
 
-            } else if (nodeType == CellTypeGenome_Generator) {
+            } else if (nodeType == CellType_Generator) {
 
                 AlienGui::BeginIndent();
 
@@ -388,7 +388,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
 
-            } else if (nodeType == CellTypeGenome_Attacker) {
+            } else if (nodeType == CellType_Attacker) {
 
                 AlienGui::BeginIndent();
 
@@ -425,7 +425,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 AlienGui::EndIndent();
-            } else if (nodeType == CellTypeGenome_Injector) {
+            } else if (nodeType == CellType_Injector) {
 
                 AlienGui::BeginIndent();
 
@@ -435,7 +435,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
 
-            } else if (nodeType == CellTypeGenome_Muscle) {
+            } else if (nodeType == CellType_Muscle) {
 
                 AlienGui::BeginIndent();
 
@@ -531,7 +531,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
 
-            } else if (nodeType == CellTypeGenome_Defender) {
+            } else if (nodeType == CellType_Defender) {
 
                 AlienGui::BeginIndent();
 
@@ -541,7 +541,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
 
-            } else if (nodeType == CellTypeGenome_Reconnector) {
+            } else if (nodeType == CellType_Reconnector) {
 
                 AlienGui::BeginIndent();
 
@@ -576,7 +576,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
 
-            } else if (nodeType == CellTypeGenome_Detonator) {
+            } else if (nodeType == CellType_Detonator) {
 
                 AlienGui::BeginIndent();
 
@@ -585,7 +585,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth), detonator._countdown);
 
                 AlienGui::EndIndent();
-            } else if (nodeType == CellTypeGenome_Digestor) {
+            } else if (nodeType == CellType_Digestor) {
                 AlienGui::BeginIndent();
                 auto& digestor = std::get<DigestorGenomeDesc>(node._cellType);
                 AlienGui::SliderFloat(
@@ -597,7 +597,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     &rawEnergyConversionRate);
                 digestor.setRawEnergyConversionRate(rawEnergyConversionRate);
                 AlienGui::EndIndent();
-            } else if (nodeType == CellTypeGenome_Memory) {
+            } else if (nodeType == CellType_Memory) {
 
                 AlienGui::BeginIndent();
 
@@ -654,7 +654,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 AlienGui::EndIndent();
-            } else if (nodeType == CellTypeGenome_Communicator) {
+            } else if (nodeType == CellType_Communicator) {
 
                 AlienGui::BeginIndent();
 

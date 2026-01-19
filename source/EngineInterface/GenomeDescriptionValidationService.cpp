@@ -42,12 +42,12 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
             // Validate cell-specific attributes based on type
             auto nodeType = node.getCellType();
 
-            if (nodeType == CellTypeGenome_Depot) {
+            if (nodeType == CellType_Depot) {
                 auto& depot = std::get<DepotGenomeDesc>(node._cellType);
                 depot._storageLimit = std::clamp(depot._storageLimit, 0.0f, 1000.0f);
                 depot._initialStoredUsableEnergy = std::clamp(depot._initialStoredUsableEnergy, 0.0f, depot._storageLimit);
 
-            } else if (nodeType == CellTypeGenome_Constructor) {
+            } else if (nodeType == CellType_Constructor) {
                 auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._autoTriggerInterval.has_value()) {
                     auto& value = constructor._autoTriggerInterval.value();
@@ -58,7 +58,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 constructor._provideEnergy =
                     std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_FreeGeneration));
 
-            } else if (nodeType == CellTypeGenome_Sensor) {
+            } else if (nodeType == CellType_Sensor) {
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 if (sensor._autoTriggerInterval.has_value()) {
                     auto& value = sensor._autoTriggerInterval.value();
@@ -97,13 +97,13 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                         std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
-            } else if (nodeType == CellTypeGenome_Generator) {
+            } else if (nodeType == CellType_Generator) {
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
                 generator._autoTriggerInterval = std::max(generator._autoTriggerInterval, 0);
                 generator._pulseType = std::clamp(generator._pulseType, 0, GeneratorPulseType_Count - 1);
                 generator._alternationInterval = std::max(generator._alternationInterval, 1);
 
-            } else if (nodeType == CellTypeGenome_Attacker) {
+            } else if (nodeType == CellType_Attacker) {
                 auto& attacker = std::get<AttackerGenomeDesc>(node._cellType);
                 auto attackerMode = attacker.getMode();
                 if (attackerMode == AttackerMode_FreeCell) {
@@ -129,11 +129,11 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                     creature._restrictToLineage = std::clamp(creature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
-            } else if (nodeType == CellTypeGenome_Injector) {
+            } else if (nodeType == CellType_Injector) {
                 auto& injector = std::get<InjectorGenomeDesc>(node._cellType);
                 injector._geneIndex = std::max(injector._geneIndex, 0);
 
-            } else if (nodeType == CellTypeGenome_Muscle) {
+            } else if (nodeType == CellType_Muscle) {
                 auto& muscle = std::get<MuscleGenomeDesc>(node._cellType);
 
                 // Validate muscle mode based on its variant type
@@ -164,11 +164,11 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 }
                 // DirectMovementGenomeDesc has no attributes to validate
 
-            } else if (nodeType == CellTypeGenome_Defender) {
+            } else if (nodeType == CellType_Defender) {
                 auto& defender = std::get<DefenderGenomeDesc>(node._cellType);
                 defender._mode = std::clamp(defender._mode, 0, DefenderMode_Count - 1);
 
-            } else if (nodeType == CellTypeGenome_Reconnector) {
+            } else if (nodeType == CellType_Reconnector) {
                 auto& reconnector = std::get<ReconnectorGenomeDesc>(node._cellType);
                 auto reconnectorMode = reconnector.getMode();
                 if (reconnectorMode == ReconnectorMode_FreeCell) {
@@ -194,11 +194,11 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                     creature._restrictToLineage = std::clamp(creature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
-            } else if (nodeType == CellTypeGenome_Detonator) {
+            } else if (nodeType == CellType_Detonator) {
                 auto& detonator = std::get<DetonatorGenomeDesc>(node._cellType);
                 detonator._countdown = std::max(detonator._countdown, 1);
 
-            } else if (nodeType == CellTypeGenome_Memory) {
+            } else if (nodeType == CellType_Memory) {
                 auto& memory = std::get<MemoryGenomeDesc>(node._cellType);
                 auto memoryMode = memory.getMode();
                 if (memoryMode == MemoryMode_SignalDelay) {
@@ -218,7 +218,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                     memory._signalEntries.resize(MAX_CELL_MEMORY_ENTRIES);
                 }
 
-            } else if (nodeType == CellTypeGenome_Communicator) {
+            } else if (nodeType == CellType_Communicator) {
                 auto& communicator = std::get<CommunicatorGenomeDesc>(node._cellType);
                 auto communicatorMode = communicator.getMode();
                 if (communicatorMode == CommunicatorMode_Sender) {
