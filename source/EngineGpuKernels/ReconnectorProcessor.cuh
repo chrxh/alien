@@ -78,10 +78,11 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 return;
             }
         } else if (reconnectorMode == ReconnectorMode_Creature) {
-            // Must be from a different creature
-            if (otherObject->typeData.cell.creature == nullptr) {
+            // Connect to cells with creatures only
+            if (otherObject->type != ObjectType_Cell) {
                 return;
             }
+            // Must be from a different creature
             if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                 return;
             }
@@ -106,9 +107,6 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
             // Filter by lineage restriction
             if (reconnector.modeData.reconnectCreature.restrictToLineage != LineageRestriction_No) {
-                if (object->typeData.cell.creature == nullptr) {
-                    return;
-                }
                 if (reconnector.modeData.reconnectCreature.restrictToLineage == LineageRestriction_SameLineage) {
                     if (object->typeData.cell.creature->lineageId != otherObject->typeData.cell.creature->lineageId) {
                         return;
@@ -161,11 +159,12 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
         auto connectedObject = object->connections[i].object;
         bool shouldRemove = false;
 
-        if (connectedObject->type == ObjectType_Structure || connectedObject->type == ObjectType_FreeCell) {
+        if (connectedObject->type != ObjectType_Cell) {
             shouldRemove = true;
-        }
-        if (!object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
-            shouldRemove = true;
+        } else {
+            if (!object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
+                shouldRemove = true;
+            }
         }
 
         if (shouldRemove) {

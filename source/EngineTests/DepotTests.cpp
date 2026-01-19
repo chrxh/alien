@@ -27,9 +27,14 @@ protected:
     Description createDepotWithIncomingPositiveSignal(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 200.0f)
     {
         auto data = Description().addCreature({
-            ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit)).usableEnergy(usableEnergy)),
+            ObjectDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription()
+                          .cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit))
+                          .usableEnergy(usableEnergy)),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
-        }, CreatureDescription().id(1));
+        });
         data.addConnection(1, 2);
         return data;
     }
@@ -38,9 +43,12 @@ protected:
     {
         // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
         auto data = Description().addCreature({
-            ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
+            ObjectDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription().cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),
-        }, CreatureDescription().id(1));
+        });
         data.addConnection(1, 2);
         return data;
     }
@@ -51,9 +59,12 @@ TEST_F(DepotTests, noSignal_noChange)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto initialUsableEnergy = normalCellEnergy + 20.0f;
 
-    // Create depot without a cell carrying a signel => no signal will be sent
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
+    // Create depot without a cell carrying a signal => no signal will be sent
+    auto data = Description().addCreature({
+        ObjectDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .type(CellDescription().cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -162,7 +173,8 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
-    EXPECT_TRUE(approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
+    EXPECT_TRUE(
+        approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(
         initialUsableEnergy + origOtherObject.getCellRef()._usableEnergy - SimulationParameters::depotEnergyTransferUnit,
         actualDepot.getCellRef()._usableEnergy + actualOtherObject.getCellRef()._usableEnergy));
@@ -236,7 +248,8 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(
-        initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
+        initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit,
+        std::get<DepotDescription>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(
         origDepotEnergy + origOtherObject.getCellRef()._usableEnergy + SimulationParameters::depotEnergyTransferUnit,
         actualDepot.getCellRef()._usableEnergy + actualOtherObject.getCellRef()._usableEnergy));

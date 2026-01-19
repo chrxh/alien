@@ -33,7 +33,7 @@ protected:
         auto data = Description().addCreature({
             ObjectDescription().id(1).pos(pos).color(color).type(CellDescription().cellType(ReconnectorDescription().mode(mode))),
             ObjectDescription().id(2).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
-        }, CreatureDescription().id(1).lineageId(lineageId));
+        }, CreatureDescription().lineageId(lineageId));
         data.addConnection(1, 2);
         return data;
     }
@@ -47,7 +47,7 @@ protected:
         auto data = Description().addCreature({
             ObjectDescription().id(1).pos(pos).color(color).type(CellDescription().cellType(ReconnectorDescription().mode(mode))),
             ObjectDescription().id(2).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDescription().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
-        }, CreatureDescription().id(1).lineageId(lineageId));
+        }, CreatureDescription().lineageId(lineageId));
         data.addConnection(1, 2);
         return data;
     }
@@ -78,8 +78,8 @@ TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDescription());
 
-    // Add base cell (non-structure) within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(BaseDescription())));
+    // Add free cell (non-structure) within range
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(FreeCellDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -134,8 +134,8 @@ TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription());
 
-    // Add base cell (non-free) within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(BaseDescription())));
+    // Add structure cell (non-free) within range
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -189,7 +189,7 @@ TEST_F(ReconnectorTests, creatureMode_connectToDifferentCreature)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2));
+    });
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -209,7 +209,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(ReconnectorDescription().mode(ReconnectCreatureDescription()))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(3))),
         ObjectDescription().id(3).pos({99.0f, 100.0f}),  // Potential target in same creature but not connected to reconnector
-    }, CreatureDescription().id(1));
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -248,7 +248,7 @@ TEST_F(ReconnectorTests, creatureMode_colorRestriction_success)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}).color(1),
         ObjectDescription().id(11).pos({98.0f, 100.0f}).color(1),
-    }, CreatureDescription().id(2));
+    });
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -267,7 +267,7 @@ TEST_F(ReconnectorTests, creatureMode_colorRestriction_failed)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}).color(0),
         ObjectDescription().id(11).pos({98.0f, 100.0f}).color(0),
-    }, CreatureDescription().id(2));
+    });
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -286,7 +286,7 @@ TEST_F(ReconnectorTests, creatureMode_minNumCells_success)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2).numObjects(3));
+    }, CreatureDescription().numObjects(3));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -305,7 +305,7 @@ TEST_F(ReconnectorTests, creatureMode_minNumCells_failed)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2).numObjects(3));
+    }, CreatureDescription().numObjects(3));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -324,7 +324,7 @@ TEST_F(ReconnectorTests, creatureMode_maxNumCells_success)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2).numObjects(5));
+    }, CreatureDescription().numObjects(5));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -345,7 +345,7 @@ TEST_F(ReconnectorTests, creatureMode_maxNumCells_failed)
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
         ObjectDescription().id(12).pos({97.0f, 100.0f}),
         ObjectDescription().id(13).pos({96.0f, 100.0f}),
-    }, CreatureDescription().id(2));
+    });
     data.addConnection(10, 11);
     data.addConnection(11, 12);
     data.addConnection(12, 13);
@@ -367,7 +367,7 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_success)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2).lineageId(5));
+    }, CreatureDescription().lineageId(5));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -387,7 +387,7 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_failed)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2).lineageId(6));
+    }, CreatureDescription().lineageId(6));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -407,7 +407,7 @@ TEST_F(ReconnectorTests, creatureMode_otherLineage_success)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2).lineageId(6));
+    }, CreatureDescription().lineageId(6));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -427,7 +427,7 @@ TEST_F(ReconnectorTests, creatureMode_otherLineage_failed)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2).lineageId(5));
+    }, CreatureDescription().lineageId(5));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -492,7 +492,7 @@ TEST_F(ReconnectorTests, removeConnections_removeDifferentCreatureConnection)
     data.addCreature({
         ObjectDescription().id(10).pos({99.0f, 100.0f}),
         ObjectDescription().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDescription().id(2));
+    });
     data.addConnection(10, 11);
     data.addConnection(1, 10);
 
@@ -516,7 +516,7 @@ TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
         ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(ReconnectorDescription().mode(ReconnectCreatureDescription()))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),
         ObjectDescription().id(3).pos({99.0f, 100.0f}),
-    }, CreatureDescription().id(1));
+    });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
@@ -545,7 +545,7 @@ TEST_F(ReconnectorTests, noTrigger_noAction)
     auto data = Description().addCreature({
         reconnectorCell,
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
-    }, CreatureDescription().id(1));
+    });
     data.addConnection(1, 2);
 
     // Add structure cell within range
@@ -626,7 +626,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
         // Create a connection that crosses the ray path to target at (100, 99)
         ObjectDescription().id(3).pos({99.0f, 99.0f}),
         ObjectDescription().id(4).pos({101.0f, 99.0f}),
-    }, CreatureDescription().id(1));
+    });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(3, 4);

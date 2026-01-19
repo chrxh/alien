@@ -18,9 +18,9 @@ public:
 
 TEST_F(EditTests, getSelectionShallowData_noSelection)
 {
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({50, 50}).type(StructureDescription()),
-        ObjectDescription().id(2).pos({51, 50}).type(StructureDescription()),
+    auto data = Description().addCreature({
+        ObjectDescription().id(1).pos({50, 50}),
+        ObjectDescription().id(2).pos({51, 50}),
     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
@@ -36,10 +36,10 @@ TEST_F(EditTests, getSelectionShallowData_noSelection)
 
 TEST_F(EditTests, getSelectionShallowData_selectCells)
 {
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({50, 50}).type(StructureDescription()),
-        ObjectDescription().id(2).pos({51, 50}).type(StructureDescription()),
-        ObjectDescription().id(3).pos({52, 50}).type(StructureDescription()),
+    auto data = Description().addCreature({
+        ObjectDescription().id(1).pos({50, 50}),
+        ObjectDescription().id(2).pos({51, 50}),
+        ObjectDescription().id(3).pos({52, 50}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -49,7 +49,7 @@ TEST_F(EditTests, getSelectionShallowData_selectCells)
     auto selectionData = _simulationFacade->getSelectionShallowData();
 
     EXPECT_EQ(2, selectionData.numObjects);
-    EXPECT_EQ(0, selectionData.numCreatures);
+    EXPECT_EQ(1, selectionData.numCreatures);
     EXPECT_EQ(3, selectionData.numClusterCells);
     EXPECT_EQ(0, selectionData.numEnergyParticles);
 }
@@ -60,10 +60,10 @@ TEST_F(EditTests, getSelectionShallowData_selectCreatures)
                     .addCreature({
                         ObjectDescription().id(1).pos({50, 50}),
                         ObjectDescription().id(2).pos({51, 50}),
-                    }, CreatureDescription())
+                    })
                     .addCreature({
                         ObjectDescription().id(3).pos({60, 50}),
-                    }, CreatureDescription());
+                    });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -108,7 +108,7 @@ TEST_F(EditTests, getSelectionShallowData_selectMixed)
                         ObjectDescription().id(4).pos({53, 50}),
                         ObjectDescription().id(5).pos({54, 50}),
                         ObjectDescription().id(6).pos({55, 50}),
-                    }, CreatureDescription());
+                    });
     data.addConnection(1, 2);
     data.addConnection(4, 5);
     data.addConnection(5, 6);
@@ -129,13 +129,13 @@ TEST_F(EditTests, getSelectionShallowData_selectMultipleCreatures)
                     .addCreature({
                         ObjectDescription().id(1).pos({50, 50}),
                         ObjectDescription().id(2).pos({51, 50}),
-                    }, CreatureDescription())
+                    })
                     .addCreature({
                         ObjectDescription().id(3).pos({52, 50}),
-                    }, CreatureDescription())
+                    })
                     .addCreature({
                         ObjectDescription().id(4).pos({70, 70}),
-                    }, CreatureDescription());
+                    });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 

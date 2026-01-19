@@ -38,7 +38,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (injectedCell != nullptr) {
                 return;
             }
-            if (otherObject->typeData.cell.creature == nullptr) {
+            if (otherObject->type != ObjectType_Cell) {
                 return;
             }
             if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {

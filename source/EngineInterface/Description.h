@@ -496,7 +496,6 @@ struct CellDescription
     MEMBER(CellDescription, SignalDescription, signal, SignalDescription());  // For signalState == SignalState_Active
     MEMBER(CellDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
     MEMBER(CellDescription, int, activationTime, 0);
-    MEMBER(CellDescription, CellTriggered, cellTriggered, CellTriggered_No);
 
     // Process data
     MEMBER(CellDescription, int, frontAngleId, 0);
@@ -591,7 +590,10 @@ struct Description
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
 
-    Description& addCreature(std::vector<ObjectDescription> const& objects, CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
+    Description& addCreature(
+        std::vector<ObjectDescription> const& objects,
+        CreatureDescription const& creature = CreatureDescription(),
+        GenomeDescription const& genome = GenomeDescription());
     Description& addObjects(std::vector<ObjectDescription> const& objects);
 
     size_t getNumObjects() const;

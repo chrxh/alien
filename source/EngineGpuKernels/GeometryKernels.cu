@@ -124,7 +124,23 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
 
         auto const& cellColor = getCellColor(object->color);
 
-        auto luminance = object->typeData.cell.getEnergy() / 300.0f;  //1.0f - 50000.0f / (object->energy * object->energy + 50000.0f);
+        float luminance;
+        float zOffset = 0.0f;
+        int cellType = 0;
+        int signalState = 0;
+
+        if (object->type == ObjectType_Cell) {
+            luminance = object->typeData.cell.getEnergy() / 300.0f;
+            zOffset = toFloat(object->typeData.cell.creature->id % 1000) / 2000;
+            cellType = object->typeData.cell.cellType;
+            signalState = object->typeData.cell.signalState;
+        } else if (object->type == ObjectType_FreeCell) {
+            luminance = object->typeData.freeCell.rawEnergy / 300.0f;
+        } else {
+            // Structure - no energy concept
+            luminance = 1.0f;
+        }
+
         auto white = luminance / 10.0f;
         if (object->selected == 1) {
             luminance = (luminance + 0.1f) * 1.7f;
@@ -143,8 +159,6 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         float zPos = normalizedHash * 0.05f;
 
-        auto zOffset = object->typeData.cell.creature != nullptr ? toFloat(object->typeData.cell.creature->id % 1000) / 2000 : 0.0f;
-
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
         objectData[index].pos[1] = pos.y;
@@ -154,7 +168,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
         // Pack both cellType (lower 8 bits) and signalState (upper 8 bits) into state field
-        objectData[index].state = object->typeData.cell.cellType | (object->typeData.cell.signalState << 8) | (isInTriangleOrQuad << 16);
+        objectData[index].state = cellType | (signalState << 8) | (isInTriangleOrQuad << 16);
 
         // Store cell index for line extraction (just use the index directly)
         object->tempValue.as_uint64 = index;
@@ -386,9 +400,9 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
 {
     // Process selected cells
     auto const& objects = data.entities.objects;
-    auto numCells = objects.getNumEntries();
+    auto numObjects = objects.getNumEntries();
 
-    for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numCells; index += blockDim.x * gridDim.x) {
+    for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numObjects; index += blockDim.x * gridDim.x) {
         auto const& object = objects.at(index);
         if (object->selected == 1) {
             auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
@@ -399,15 +413,18 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
                 // Calculate signal angle restrictions for this cell
                 // The 180° offset converts from connection-relative to absolute angles in world space
                 // Render as active if mode is Active or Conditional
-                bool hasRestriction = (object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active || 
-                                       object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional) && 
-                                      object->numConnections > 0;
+                bool hasRestriction = object->type == ObjectType_Cell
+                    && (object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active
+                        || object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional)
+                    && object->numConnections > 0;
                 if (hasRestriction) {
                     auto const& connectedObject = object->connections[0].object;
                     auto connectionAngle = Math::angleOfVector(connectedObject->pos - object->pos);
 
-                    auto signalAngleRestrictionStart = connectionAngle + 180.0f + object->typeData.cell.signalRestriction.baseAngle - object->typeData.cell.signalRestriction.openingAngle / 2;
-                    auto signalAngleRestrictionEnd = connectionAngle + 180.0f + object->typeData.cell.signalRestriction.baseAngle + object->typeData.cell.signalRestriction.openingAngle / 2;
+                    auto signalAngleRestrictionStart =
+                        connectionAngle + 180.0f + object->typeData.cell.signalRestriction.baseAngle - object->typeData.cell.signalRestriction.openingAngle / 2;
+                    auto signalAngleRestrictionEnd =
+                        connectionAngle + 180.0f + object->typeData.cell.signalRestriction.baseAngle + object->typeData.cell.signalRestriction.openingAngle / 2;
                     signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
                     signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
@@ -453,10 +470,13 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
         }
 
         // Calculate signal angle restrictions for this cell
-        auto signalAngleRestrictionStart = 180.0f + object->typeData.cell.signalRestriction.baseAngle - object->typeData.cell.signalRestriction.openingAngle / 2;
-        auto signalAngleRestrictionEnd = 180.0f + object->typeData.cell.signalRestriction.baseAngle + object->typeData.cell.signalRestriction.openingAngle / 2;
-        signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
-        signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
+        float signalAngleRestrictionStart = 0, signalAngleRestrictionEnd = 0;
+        if (object->type == ObjectType_Cell) {
+            signalAngleRestrictionStart = 180.0f + object->typeData.cell.signalRestriction.baseAngle - object->typeData.cell.signalRestriction.openingAngle / 2;
+            signalAngleRestrictionEnd = 180.0f + object->typeData.cell.signalRestriction.baseAngle + object->typeData.cell.signalRestriction.openingAngle / 2;
+            signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
+            signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
+        }
 
         auto summedAngle = 0.0f;
 
@@ -478,33 +498,38 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 continue;
             }
 
-            // Determine if signal can flow from object1 to object2
-            // For rendering, Active and Conditional modes are treated as having restriction
-            bool hasRestriction1 = (object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active || 
-                                    object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional);
-            bool arrowToCell2 =
-                !hasRestriction1 || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
-
-            // Determine if signal can flow from object2 to object1
-            // Need to calculate the reverse angle from connectedObject's perspective
-            auto signalAngleRestrictionStart2 = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle - connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
-            auto signalAngleRestrictionEnd2 = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle + connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
-            signalAngleRestrictionStart2 = Math::getNormalizedAngle(signalAngleRestrictionStart2, 0.0f);
-            signalAngleRestrictionEnd2 = Math::getNormalizedAngle(signalAngleRestrictionEnd2, 0.0f);
-
-            // Find the angle of this connection from connectedObject's perspective
-            auto summedAngle2 = 0.0f;
             bool arrowToCell1 = false;
-            bool hasRestriction2 = (connectedObject->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active || 
-                                    connectedObject->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional);
-            for (int j = 0; j < connectedObject->numConnections; ++j) {
-                if (j > 0) {
-                    summedAngle2 += connectedObject->connections[j].angleFromPrevious;
-                }
-                if (connectedObject->connections[j].object->id == object->id) {
-                    arrowToCell1 = !hasRestriction2
-                        || Math::isAngleStrictInBetween(signalAngleRestrictionStart2, signalAngleRestrictionEnd2, summedAngle2);
-                    break;
+            bool arrowToCell2 = false;
+            if (object->type == ObjectType_Cell) {
+                // Determine if signal can flow from object1 to object2
+                // For rendering, Active and Conditional modes are treated as having restriction
+                bool hasRestriction1 =
+                    (object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active
+                     || object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional);
+                arrowToCell2 = !hasRestriction1 || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
+
+                // Determine if signal can flow from object2 to object1
+                // Need to calculate the reverse angle from connectedObject's perspective
+                auto signalAngleRestrictionStart2 =
+                    180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle - connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
+                auto signalAngleRestrictionEnd2 =
+                    180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle + connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
+                signalAngleRestrictionStart2 = Math::getNormalizedAngle(signalAngleRestrictionStart2, 0.0f);
+                signalAngleRestrictionEnd2 = Math::getNormalizedAngle(signalAngleRestrictionEnd2, 0.0f);
+
+                // Find the angle of this connection from connectedObject's perspective
+                auto summedAngle2 = 0.0f;
+                bool hasRestriction2 =
+                    (connectedObject->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active
+                     || connectedObject->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional);
+                for (int j = 0; j < connectedObject->numConnections; ++j) {
+                    if (j > 0) {
+                        summedAngle2 += connectedObject->connections[j].angleFromPrevious;
+                    }
+                    if (connectedObject->connections[j].object->id == object->id) {
+                        arrowToCell1 = !hasRestriction2 || Math::isAngleStrictInBetween(signalAngleRestrictionStart2, signalAngleRestrictionEnd2, summedAngle2);
+                        break;
+                    }
                 }
             }
 

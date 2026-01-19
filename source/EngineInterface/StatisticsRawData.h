@@ -41,7 +41,7 @@ struct TimelineStatistics
 
 struct HistogramData
 {
-    int maxValue = 0;
+    int maxAge = 0;
     int numCellsByColorBySlot[MAX_COLORS][MAX_HISTOGRAM_SLOTS];
 };
 

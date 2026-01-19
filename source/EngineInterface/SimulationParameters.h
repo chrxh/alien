@@ -84,7 +84,6 @@ struct SimulationParameters
     // Physics: Binding
     BaseParameter<ColorVector<float>> maxBindingDistance = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
     BaseLayerParameter<float> objectFusionVelocity = {.baseValue = 0.1f};
-    BaseLayerParameter<float> objectMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
     // Radiation
     PinBaseParameter relativeStrengthBasePin = {false};
@@ -209,15 +208,6 @@ struct SimulationParameters
 
     // Expert settings: Cell age limiter
     ExpertToggle cellAgeLimiterToggle = {false};
-    BaseLayerParameter<ColorVector<float>> maxAgeForInactiveCells = {
-        .baseValue = {// Candidate for deletion
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value}};
     BaseParameter<ColorVector<int>> freeCellMaxAge = {
         {Infinity<int>::value,
          Infinity<int>::value,

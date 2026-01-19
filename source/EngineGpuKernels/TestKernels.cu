@@ -157,22 +157,24 @@ __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
                     *result &= isPointerValid(data, connectedObject);
                 }
 
-                if (object->typeData.cell.cellType == CellType_Memory) {
-                    if (object->typeData.cell.cellTypeData.memory.numSignalEntries > 0) {
-                        auto signalEntries = object->typeData.cell.cellTypeData.memory.signalEntries;
-                        *result &= isPointerValid(data, signalEntries);
+                if (object->type == ObjectType_Cell) {
+                    if (object->typeData.cell.cellType == CellType_Memory) {
+                        if (object->typeData.cell.cellTypeData.memory.numSignalEntries > 0) {
+                            auto signalEntries = object->typeData.cell.cellTypeData.memory.signalEntries;
+                            *result &= isPointerValid(data, signalEntries);
+                        }
                     }
-                }
 
-                if (object->typeData.cell.neuralNetwork != nullptr) {
-                    *result &= isPointerValid(data, object->typeData.cell.neuralNetwork);
-                }
+                    if (object->typeData.cell.neuralNetwork != nullptr) {
+                        *result &= isPointerValid(data, object->typeData.cell.neuralNetwork);
+                    }
 
-                if (object->typeData.cell.creature != nullptr) {
-                    if (!isPointerValid(data, object->typeData.cell.creature)) {
-                        *result = false;
-                    } else {
-                        *result &= isGenomeValid(data, object->typeData.cell.creature->genome);
+                    if (object->typeData.cell.creature != nullptr) {
+                        if (!isPointerValid(data, object->typeData.cell.creature)) {
+                            *result = false;
+                        } else {
+                            *result &= isGenomeValid(data, object->typeData.cell.creature->genome);
+                        }
                     }
                 }
             } else {

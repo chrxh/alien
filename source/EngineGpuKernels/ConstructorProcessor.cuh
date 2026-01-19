@@ -121,9 +121,6 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
-    if (object->typeData.cell.creature == nullptr) {
-        return;
-    }
     auto& constructor = object->typeData.cell.cellTypeData.constructor;
     if (SignalProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
         constructor.offspring = findOrCreateNewCreature(data, object);
@@ -382,7 +379,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
             ? constructionData.gene->connectionDistance
             : constructionData.gene->connectionDistance + cudaSimulationParameters.constructorAdditionalOffspringDistance;
         if (!ObjectConnectionProcessor::tryAddConnections(data, hostObject, newObject, anglesForNewConnection.referenceAngle, 0, distance)) {
-            ObjectConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
+            ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
         }
     }
     if ((constructionData.isSeparation || constructor.geneIndex == 0) && constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
@@ -494,7 +491,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         }
 
         if (!ObjectConnectionProcessor::tryAddConnections(data, newObject, hostObject, 0, origAngleFromPreviousOnHostCell, distance)) {
-            ObjectConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
+            ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
             hostObject->typeData.cell.cellState = CellState_Dying;
             for (int i = 0; i < hostObject->numConnections; ++i) {
                 auto const& connectedObject = hostObject->connections[i].object;

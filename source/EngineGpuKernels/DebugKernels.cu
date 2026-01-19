@@ -43,6 +43,20 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                         CUDA_THROW_NOT_IMPLEMENTED();
                     }
                 }
+                if (object->typeData.cell.usableEnergy < 0 || isnan(object->typeData.cell.usableEnergy)) {
+                    printf("usable cell energy invalid at %d", location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
+                if (object->typeData.cell.rawEnergy < 0 || isnan(object->typeData.cell.rawEnergy)) {
+                    printf("raw cell energy invalid at %d", location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
+            }
+            if (object->type == ObjectType_FreeCell) {
+                if (object->typeData.freeCell.rawEnergy < 0 || isnan(object->typeData.freeCell.rawEnergy)) {
+                    printf("raw cell energy invalid at %d", location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
             }
 
             if (object->numConnections > MAX_OBJECT_CONNECTIONS) {
@@ -66,12 +80,8 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
             }
-            if (object->typeData.cell.usableEnergy < 0 || isnan(object->typeData.cell.usableEnergy)) {
-                printf("cell energy invalid at %d", location);
-                //CUDA_THROW_NOT_IMPLEMENTED();
-            }
             if (sumEnergy != nullptr) {
-                atomicAdd(sumEnergy, object->typeData.cell.usableEnergy);
+                atomicAdd(sumEnergy, object->getEnergy());
             }
         }
     }
