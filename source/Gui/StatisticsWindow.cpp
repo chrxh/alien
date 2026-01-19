@@ -189,7 +189,7 @@ void StatisticsWindow::processHistogramsTab()
     std::string labelsX_temp[5];
     double positionsX[5];
 
-    auto slotAge = histogramData->maxValue / MAX_HISTOGRAM_SLOTS;
+    auto slotAge = histogramData->maxAge / MAX_HISTOGRAM_SLOTS;
     for (int i = 0; i < 5; ++i) {
         labelsX_temp[i] = getLabelString(slotAge * ((MAX_HISTOGRAM_SLOTS - 1) / 4) * i);
         labelsX[i] = labelsX_temp[i].c_str();

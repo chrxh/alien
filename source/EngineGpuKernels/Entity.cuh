@@ -587,6 +587,17 @@ struct Object
         angle2 -= increment;
     }
 
+    __device__ __inline__ float getEnergy() const
+    {
+        if (type == ObjectType_Cell) {
+            return typeData.cell.getEnergy();
+        } else if (type == ObjectType_FreeCell) {
+            return typeData.freeCell.rawEnergy;
+        } else {
+            return 0;
+        }
+    }
+
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
         if ((connectionIndex1 - connectionIndex2 + numConnections) % numConnections == 0) {

@@ -918,7 +918,7 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
             if (object->typeData.cell.cellState == CellState_Dying || object->typeData.cell.cellState == CellState_Detaching) {
                 auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, object->pos, object->color);
                 if (data.primaryNumberGen.random() <= cellDeathProbability) {
-                    ObjectConnectionProcessor::scheduleDeleteCell(data, index);
+                    ObjectConnectionProcessor::scheduleDeleteObject(data, index);
                 }
             }
 
@@ -964,7 +964,7 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
             }
 
             if (objectDestruction) {
-                ObjectConnectionProcessor::scheduleDeleteCell(data, index);
+                ObjectConnectionProcessor::scheduleDeleteObject(data, index);
             }
         }
     }

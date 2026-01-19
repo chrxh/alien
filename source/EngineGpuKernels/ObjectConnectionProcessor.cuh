@@ -14,10 +14,10 @@ public:
     __inline__ __device__ static void scheduleAddConnectionPair(SimulationData& data, Object* object1, Object* object2);
     __inline__ __device__ static void scheduleDeleteAllConnections(SimulationData& data, Object* object);
     __inline__ __device__ static void scheduleDeleteConnectionPair(SimulationData& data, Object* object1, Object* object2);
-    __inline__ __device__ static void scheduleDeleteCell(SimulationData& data, uint64_t const& objectIndex);
+    __inline__ __device__ static void scheduleDeleteObject(SimulationData& data, uint64_t const& objectIndex);
 
     __inline__ __device__ static void processAddOperations(SimulationData& data);
-    __inline__ __device__ static void processDeleteCellOperations(SimulationData& data);
+    __inline__ __device__ static void processDeleteObjectOperations(SimulationData& data);
     __inline__ __device__ static void processDeleteConnectionOperations(SimulationData& data);
 
     __inline__ __device__ static bool tryAddConnections(
@@ -127,7 +127,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteConnectionPa
     }
 }
 
-__inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteCell(SimulationData& data, uint64_t const& objectIndex)
+__inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteObject(SimulationData& data, uint64_t const& objectIndex)
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::DelObject;
@@ -147,7 +147,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processAddOperations(Simul
     }
 }
 
-__inline__ __device__ void ObjectConnectionProcessor::processDeleteCellOperations(SimulationData& data)
+__inline__ __device__ void ObjectConnectionProcessor::processDeleteObjectOperations(SimulationData& data)
 {
     auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
 
@@ -157,18 +157,18 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteCellOperation
             auto objectIndex = operation.data.delObject.objectIndex;
 
             Object* empty = nullptr;
-            auto origCell = alienAtomicExch(&data.entities.objects.at(objectIndex), empty);
-            if (origCell) {
-                EnergyProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->typeData.cell.getEnergy());
+            auto origObject = alienAtomicExch(&data.entities.objects.at(objectIndex), empty);
+            if (origObject) {
+                EnergyProcessor::createEnergyParticle(data, origObject->pos, origObject->vel, origObject->color, origObject->getEnergy());
 
-                for (int i = 0; i < origCell->numConnections; ++i) {
+                for (int i = 0; i < origObject->numConnections; ++i) {
                     StructuralOperation operation;
                     operation.type = StructuralOperation::Type::DelConnection;
-                    operation.data.delConnection.connectedObject = origCell;
+                    operation.data.delConnection.connectedObject = origObject;
                     operation.nextOperationIndex = -1;
                     auto operationIndex = data.structuralOperations.tryAddEntry(operation);
                     if (operationIndex != -1) {
-                        scheduleOperationOnCell(data, origCell->connections[i].object, operationIndex);
+                        scheduleOperationOnCell(data, origObject->connections[i].object, operationIndex);
                     } else {
                         CUDA_THROW_NOT_IMPLEMENTED();
                     }

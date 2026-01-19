@@ -109,7 +109,7 @@ public:
     uint64_t getId(ExtendedObjectOrEnergyDescription const& entity) const;
     RealVector2D getPos(ExtendedObjectOrEnergyDescription const& entity) const;
     std::vector<ExtendedObjectOrEnergyDescription> getObjects(Description const& description) const;
-    std::vector<ExtendedObjectOrEnergyDescription> getCellsForCreatureRepresentatives(Description const& description) const;
+    std::vector<ExtendedObjectOrEnergyDescription> getCreatureRepresentatives(Description const& description) const;
 
     void setCenter(Description& collection, RealVector2D const& center) const;
     RealVector2D calcCenter(Description const& collection) const;

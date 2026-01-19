@@ -84,7 +84,7 @@ void EditorController::onInspectSelectedObjects()
 void EditorController::onInspectSelectedGenomes()
 {
     Description selectedData = _SimulationFacade::get()->getSelectedSimulationData(true);
-    auto constructors = DescriptionEditService::get().getCellsForCreatureRepresentatives(selectedData);
+    auto constructors = DescriptionEditService::get().getCreatureRepresentatives(selectedData);
     if (constructors.size() > 1) {
         constructors = {constructors.front()};
     }

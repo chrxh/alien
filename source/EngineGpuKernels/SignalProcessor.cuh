@@ -16,7 +16,7 @@ public:
     __inline__ __device__ static void createEmptySignal(Object* object);
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Object* object);
 
-    __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview = false);
+    __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Object* object, uint32_t autoTriggerInterval, bool isPreview = false);
     __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Object* object);
     __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview = false);
 };
@@ -152,13 +152,15 @@ __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationD
     return Math::getNormalized(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos));
 }
 
-__inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview)
+__inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Object* object, uint32_t autoTriggerInterval, bool isPreview)
 {
+    CUDA_CHECK(object->type == ObjectType_Cell);
+
     auto triggerInterval = max(SignalState_Count, autoTriggerInterval);
     if (isPreview) {
         return *data.timestep % triggerInterval == 0;
     } else {
-        return (*data.timestep + cell->typeData.cell.creature->id) % triggerInterval == 0;
+        return (*data.timestep + object->typeData.cell.creature->id) % triggerInterval == 0;
     }
 }
 

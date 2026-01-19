@@ -219,7 +219,7 @@ __global__ void cudaNextTimestep_structuralOperations_substep2(SimulationData da
 
 __global__ void cudaNextTimestep_structuralOperations_substep3(SimulationData data)
 {
-    ObjectConnectionProcessor::processDeleteCellOperations(data);
+    ObjectConnectionProcessor::processDeleteObjectOperations(data);
 }
 
 __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData data)
