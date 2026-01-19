@@ -278,11 +278,12 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
     // Handle object type: Structure, FreeCell, or Cell
     if (objectTO.type == ObjectType_Structure) {
         StructureDesc structureDesc;
+        structureDesc._energy = objectTO.typeData.structure.energy;
         result._type = structureDesc;
 
     } else if (objectTO.type == ObjectType_FreeCell) {
         FreeCellDesc freeCellDesc;
-        freeCellDesc._rawEnergy = objectTO.typeData.freeCell.rawEnergy;
+        freeCellDesc._energy = objectTO.typeData.freeCell.energy;
         freeCellDesc._age = objectTO.typeData.freeCell.age;
         result._type = freeCellDesc;
 
@@ -1206,9 +1207,11 @@ void DescriptionConverterService::convertObjectToTO(
 
     // Handle Structure and FreeCell object types
     if (objectTO.type == ObjectType_Structure) {
+        StructureDesc const& structureDesc = objectDesc.getStructureRef();
+        objectTO.typeData.structure.energy = structureDesc._energy;
     } else if (objectTO.type == ObjectType_FreeCell) {
         FreeCellDesc const& freeCellDesc = objectDesc.getFreeCellRef();
-        objectTO.typeData.freeCell.rawEnergy = freeCellDesc._rawEnergy;
+        objectTO.typeData.freeCell.energy = freeCellDesc._energy;
         objectTO.typeData.freeCell.age = freeCellDesc._age;
     } else if (objectTO.type == ObjectType_Cell) {
 

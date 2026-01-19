@@ -295,8 +295,9 @@ namespace
         object->tempValue.as_uint64 = objectTOIndex;
 
         if (object->type == ObjectType_Structure) {
+            objectTO.typeData.structure.energy = object->typeData.structure.energy;
         } else if (object->type == ObjectType_FreeCell) {
-            objectTO.typeData.freeCell.rawEnergy = object->typeData.freeCell.rawEnergy;
+            objectTO.typeData.freeCell.energy = object->typeData.freeCell.energy;
             objectTO.typeData.freeCell.age = object->typeData.freeCell.age;
         } else if (object->type == ObjectType_Cell) {
             auto& cellTO = objectTO.typeData.cell;

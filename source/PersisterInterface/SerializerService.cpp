@@ -767,7 +767,9 @@ namespace
     auto constexpr Id_Creature_FrontAngleId = 5;
     auto constexpr Id_Creature_GenomeId = 6;
 
-    auto constexpr Id_FreeCell_RawEnergy = 0;
+    auto constexpr Id_Structure_Energy = 0;
+
+    auto constexpr Id_FreeCell_Energy = 0;
     auto constexpr Id_FreeCell_Age = 1;
 
     auto constexpr Id_Cell_UsableEnergy = 0;
@@ -1448,6 +1450,7 @@ namespace cereal
     {
         StructureDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Structure_Energy, data._energy, defaultObject._energy);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(StructureDesc)
@@ -1457,7 +1460,7 @@ namespace cereal
     {
         FreeCellDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_FreeCell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        loadSave(task, auxiliaries, Id_FreeCell_Energy, data._energy, defaultObject._energy);
         loadSave(task, auxiliaries, Id_FreeCell_Age, data._age, defaultObject._age);
         processLoadSaveMap(task, ar, auxiliaries);
     }

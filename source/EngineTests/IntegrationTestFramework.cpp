@@ -73,9 +73,10 @@ double IntegrationTestFramework::getEnergy(Desc const& data) const
             auto const& cell = object.getCellRef();
             result += cell._usableEnergy + cell._rawEnergy + getDepotEnergy(object);
         } else if (object.getObjectType() == ObjectType_FreeCell) {
-            result += object.getFreeCellRef()._rawEnergy;
+            result += object.getFreeCellRef()._energy;
+        } else if (object.getObjectType() == ObjectType_Structure) {
+            result += object.getStructureRef()._energy;
         }
-        // StructureDesc has no energy
     }
     for (auto const& energyParticle : data._energies) {
         result += energyParticle._energy;

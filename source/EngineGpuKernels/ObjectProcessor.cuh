@@ -859,7 +859,7 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
                 rawEnergy = object->typeData.cell.rawEnergy;
                 age = object->typeData.cell.age;
             } else if (object->type == ObjectType_FreeCell) {
-                rawEnergy = object->typeData.freeCell.rawEnergy;
+                rawEnergy = object->typeData.freeCell.energy;
                 age = object->typeData.freeCell.age;
             }
 
@@ -894,7 +894,7 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
                     object->typeData.cell.usableEnergy -= radiation1;
                     object->typeData.cell.rawEnergy -= radiation2;
                 } else if (object->type == ObjectType_FreeCell) {
-                    object->typeData.freeCell.rawEnergy -= radiation2;
+                    object->typeData.freeCell.energy -= radiation2;
                 }
             }
         }
@@ -950,7 +950,7 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
             auto minCellEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 
             bool objectDestruction = false;
-            if (object->typeData.freeCell.rawEnergy < minCellEnergy) {
+            if (object->typeData.freeCell.energy < minCellEnergy) {
                 auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, object->pos, object->color);
                 if (data.primaryNumberGen.random() <= cellDeathProbability) {
                     objectDestruction = true;

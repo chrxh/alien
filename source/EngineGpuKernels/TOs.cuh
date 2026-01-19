@@ -391,11 +391,13 @@ struct SignalTO
 };
 
 struct StructureTO
-{};
+{
+    float energy;
+};
 
 struct FreeCellTO
 {
-    float rawEnergy;
+    float energy;
     uint32_t age;
 };
 
