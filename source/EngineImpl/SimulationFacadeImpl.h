@@ -111,7 +111,7 @@ public:
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) override;
     void testOnly_cleanupAfterTimestep() override;
     void testOnly_cleanupAfterDataManipulation() override;
-    void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) override;
+    void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta) override;
     bool testOnly_arePointersValid() override;
 
 private:

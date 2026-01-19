@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include <EngineInterface/ArraySizesForGpu.h>
+#include <EngineInterface/ArraySizesForGpuEntities.h>
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/CudaSettings.h>
@@ -42,9 +42,9 @@ struct SimulationData
         secondaryNumberGen;  // Secondary random number generator used in combination with the primary generator for evaluating very low probabilities
 
     void init(int2 const& worldSize, uint64_t timestep);
-    bool shouldResize(ArraySizesForGpu const& sizeDelta);
-    void resizeTempObjects(ArraySizesForGpu const& size);
-    void resizeObjectsAndTempObjects(ArraySizesForGpu const& size);
+    bool shouldResize(ArraySizesForGpuEntities const& sizeDelta);
+    void resizeTempObjects(ArraySizesForGpuEntities const& size);
+    void resizeObjectsAndTempObjects(ArraySizesForGpuEntities const& size);
     void resizeObjectsByMatchingTempObjects();
     bool isEmpty();
     void free();

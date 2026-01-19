@@ -5,7 +5,7 @@
 
 #include "CudaGeometryBuffers.cuh"
 #include "SimulationData.cuh"
-#include "TO.cuh"
+#include "TOs.cuh"
 
 __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft);
 __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objectData);

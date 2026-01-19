@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-struct ArraySizesForTO
+struct ArraySizesForTOs
 {
     uint64_t creatures = 0;
     uint64_t genomes = 0;
@@ -12,5 +12,5 @@ struct ArraySizesForTO
     uint64_t energyParticles = 0;
     uint64_t heap = 0;
 
-    bool operator==(ArraySizesForTO const& other) const = default;
+    bool operator==(ArraySizesForTOs const& other) const = default;
 };

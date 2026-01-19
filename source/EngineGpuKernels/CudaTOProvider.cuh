@@ -2,9 +2,9 @@
 
 #include <optional>
 
-#include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/ArraySizesForTOs.h>
 
-#include "TO.cuh"
+#include "TOs.cuh"
 
 class _CudaTOProvider
 {
@@ -12,10 +12,10 @@ public:
     _CudaTOProvider();
     ~_CudaTOProvider();
 
-    TO provideDataTO(ArraySizesForTO const& requiredCapacity);
+    TOs provideDataTO(ArraySizesForTOs const& requiredCapacity);
 
 private:
     void destroy();
 
-    std::optional<TO> _to;
+    std::optional<TOs> _to;
 };

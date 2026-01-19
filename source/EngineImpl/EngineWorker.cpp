@@ -10,7 +10,7 @@
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/NumberGenerator.h>
 
-#include <EngineGpuKernels/TO.cuh>
+#include <EngineGpuKernels/TOs.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
 
 #include "DescriptionConverterService.h"
@@ -491,7 +491,7 @@ void EngineWorker::testOnly_cleanupAfterDataManipulation()
     _simulationCudaFacade->testOnly_cleanupAfterDataManipulation();
 }
 
-void EngineWorker::testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta)
+void EngineWorker::testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta)
 {
     EngineWorkerGuard access(this);
     _simulationCudaFacade->testOnly_resizeArrays(sizeDelta);

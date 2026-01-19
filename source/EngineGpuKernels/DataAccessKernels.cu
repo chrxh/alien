@@ -5,7 +5,7 @@
 namespace
 {
     template <typename T>
-    __device__ void copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, TO& to)
+    __device__ void copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, TOs& to)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
@@ -20,7 +20,7 @@ namespace
         }
     }
 
-    __device__ uint64_t createGenomeTO(Genome* genome, TO& to)
+    __device__ uint64_t createGenomeTO(Genome* genome, TOs& to)
     {
         uint64_t origGenomeTOIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
         if (origGenomeTOIndex == VALUE_NOT_SET_UINT64) {
@@ -239,7 +239,7 @@ namespace
         return VALUE_NOT_SET_UINT64;
     }
 
-    __device__ void createCreatureTO(Object* object, TO& to)
+    __device__ void createCreatureTO(Object* object, TOs& to)
     {
         uint64_t origCreatureTOIndex =
             alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
@@ -266,7 +266,7 @@ namespace
         }
     }
 
-    __device__ void createObjectTO(Object* object, TO& to, uint8_t* heap)
+    __device__ void createObjectTO(Object* object, TOs& to, uint8_t* heap)
     {
         auto objectTOIndex = alienAtomicAdd64(to.numObjects, static_cast<uint64_t>(1));
         if (objectTOIndex >= to.capacities.objects) {
@@ -508,7 +508,7 @@ namespace
         }
     }
 
-    __device__ void createEnergyTO(Energy* particle, TO& to)
+    __device__ void createEnergyTO(Energy* particle, TOs& to)
     {
         int particleTOIndex = alienAtomicAdd64(to.numEnergyParticles, uint64_t(1));
         if (particleTOIndex >= to.capacities.energyParticles) {
@@ -598,7 +598,7 @@ __global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, 
     }
 }
 
-__global__ void cudaGetSelectedObjectDataWithoutConnections(SimulationData data, bool includeClusters, TO to)
+__global__ void cudaGetSelectedObjectDataWithoutConnections(SimulationData data, bool includeClusters, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -614,7 +614,7 @@ __global__ void cudaGetSelectedObjectDataWithoutConnections(SimulationData data,
     }
 }
 
-__global__ void cudaGetSelectedEnergyData(SimulationData data, TO access)
+__global__ void cudaGetSelectedEnergyData(SimulationData data, TOs access)
 {
     auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
@@ -628,7 +628,7 @@ __global__ void cudaGetSelectedEnergyData(SimulationData data, TO access)
     }
 }
 
-__global__ void cudaGetInspectedObjectDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO to)
+__global__ void cudaGetInspectedObjectDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -659,7 +659,7 @@ __global__ void cudaGetInspectedObjectDataWithoutConnections(InspectedEntityIds 
     }
 }
 
-__global__ void cudaGetInspectedEnergyData(InspectedEntityIds ids, SimulationData data, TO access)
+__global__ void cudaGetInspectedEnergyData(InspectedEntityIds ids, SimulationData data, TOs access)
 {
     auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
@@ -682,7 +682,7 @@ __global__ void cudaGetInspectedEnergyData(InspectedEntityIds ids, SimulationDat
     }
 }
 
-__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TOs to)
 {
     {
         auto const& objects = data.entities.objects;
@@ -729,7 +729,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
     }
 }
 
-__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
+__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -749,7 +749,7 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
     }
 }
 
-__global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, TO to)
+__global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -767,7 +767,7 @@ __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClust
     }
 }
 
-__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TO to)
+__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -799,7 +799,7 @@ __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, T
     }
 }
 
-__global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
+__global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -819,7 +819,7 @@ __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TO to)
+__global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -837,7 +837,7 @@ __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClu
     }
 }
 
-__global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TO to)
+__global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -869,7 +869,7 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
     }
 }
 
-__global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TO to, bool* found)
+__global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TOs to, bool* found)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -888,7 +888,7 @@ __global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data
 }
 
 // tags cell with objectTO index and tags objectTO connections with cell index
-__global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
+__global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TOs to)
 {
     auto const& objects = data.entities.objects;
     auto const partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -908,7 +908,7 @@ __global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rec
     }
 }
 
-__global__ void cudaResolveConnections(SimulationData data, TO to)
+__global__ void cudaResolveConnections(SimulationData data, TOs to)
 {
     auto const partition = calcSystemThreadPartition(*to.numObjects);
 
@@ -922,7 +922,7 @@ __global__ void cudaResolveConnections(SimulationData data, TO to)
     }
 }
 
-__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO access)
+__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TOs access)
 {
     auto particleBlock = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
@@ -938,12 +938,12 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaGetArraysBasedOnTO(SimulationData data, TO to, Object** cellArray)
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, TOs to, Object** cellArray)
 {
     *cellArray = data.entities.heap.getTypedSubArray<Object>(*to.numObjects);
 }
 
-__global__ void cudaSetGenomeDataFromTO(SimulationData data, TO to)
+__global__ void cudaSetGenomeDataFromTO(SimulationData data, TOs to)
 {
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
@@ -957,7 +957,7 @@ __global__ void cudaSetGenomeDataFromTO(SimulationData data, TO to)
     }
 }
 
-__global__ void cudaSetCreatureDataFromTO(SimulationData data, TO to)
+__global__ void cudaSetCreatureDataFromTO(SimulationData data, TOs to)
 {
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
@@ -971,7 +971,7 @@ __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO to)
     }
 }
 
-__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Object** cellArray, bool selectNewData)
+__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TOs to, Object** cellArray, bool selectNewData)
 {
     __shared__ EntityFactory factory;
     if (0 == threadIdx.x) {
@@ -996,7 +996,7 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Obj
     }
 }
 
-__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TOs to)
 {
     Ids maxIds;
     {
@@ -1023,7 +1023,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
     numberGen.adaptMaxIds(maxIds);
 }
 
-__global__ void cudaClearDataTO(TO to)
+__global__ void cudaClearDataTO(TOs to)
 {
     *to.numObjects = 0;
     *to.numEnergyParticles = 0;
@@ -1059,7 +1059,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step1(SimulationData data)
     }
 }
 
-__global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, ArraySizesForTO* arraySizes)
+__global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, ArraySizesForTOs* arraySizes)
 {
     auto const& objects = data.entities.objects;
     auto const& particles = data.entities.energies;
@@ -1111,7 +1111,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
     alienAtomicAdd64(&arraySizes->heap, heapBytes);
 }
 
-__global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arraySizes)
+__global__ void cudaEstimateCapacityNeededForGpu(TOs to, ArraySizesForGpuEntities* arraySizes)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         arraySizes->objectArray = *to.numObjects;

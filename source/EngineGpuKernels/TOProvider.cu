@@ -25,7 +25,7 @@ namespace
     };
 }
 
-TO _TOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
+TOs _TOProvider::provideDataTO(ArraySizesForTOs const& requiredCapacity)
 {
     try {
         if (_to.has_value()) {
@@ -45,10 +45,10 @@ TO _TOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
     }
 }
 
-TO _TOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity)
+TOs _TOProvider::provideNewUnmanagedDataTO(ArraySizesForTOs const& requiredCapacity)
 {
     try {
-        TO result;
+        TOs result;
 
         result.capacities = requiredCapacity;
 
@@ -83,12 +83,12 @@ TO _TOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacit
     }
 }
 
-void _TOProvider::destroyUnmanagedDataTO(TO const& to)
+void _TOProvider::destroyUnmanagedDataTO(TOs const& to)
 {
     destroy(to);
 }
 
-void _TOProvider::destroy(TO const& to)
+void _TOProvider::destroy(TOs const& to)
 {
     delete to.numObjects;
     delete to.numEnergyParticles;

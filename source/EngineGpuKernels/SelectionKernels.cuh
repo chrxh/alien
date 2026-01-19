@@ -15,7 +15,7 @@
 #include "EntityFactory.cuh"
 #include "SelectionResult.cuh"
 #include "SimulationData.cuh"
-#include "TO.cuh"
+#include "TOs.cuh"
 
 
 __global__ void cudaRemoveSelection(SimulationData data, bool onlyClusterSelection);

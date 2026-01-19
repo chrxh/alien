@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ArraySizesForGpu.h"
+#include "ArraySizesForGpuEntities.h"
 #include "DataPointCollection.h"
 #include "Definitions.h"
 #include "GeometryBuffers.h"
@@ -127,7 +127,7 @@ public:
     virtual void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) = 0;
     virtual void testOnly_cleanupAfterTimestep() = 0;
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
-    virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;
+    virtual void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta) = 0;
     virtual bool testOnly_arePointersValid() = 0;
 
 protected:

@@ -20,7 +20,7 @@ struct CudaGeometryBuffers;
 class SelectionResult;
 struct ObjectTO;
 struct ClusterAccessTO;
-struct TO;
+struct TOs;
 struct SimulationParameters;
 struct CudaSettings;
 class SimulationStatistics;

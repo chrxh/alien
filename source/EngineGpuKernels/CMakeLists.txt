@@ -78,7 +78,7 @@ add_library(EngineGpuKernels
     StatisticsKernels.cuh
     TestKernels.cu
     TestKernels.cuh
-    TO.cuh
+    TOs.cuh
     TOProvider.cu
     TOProvider.cuh
     Util.cuh

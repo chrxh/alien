@@ -9,17 +9,17 @@
 #include "Entities.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
-#include "TO.cuh"
+#include "TOs.cuh"
 
 class EntityFactory
 {
 public:
     __inline__ __device__ void init(SimulationData* data);
     __inline__ __device__ Energy* createParticleFromTO(EnergyTO const& particleTO);
-    __inline__ __device__ Creature* createCreatureFromTO(TO const& to, int creatureIndex);
-    __inline__ __device__ Genome* createGenomeFromTO(TO const& to, int genomeIndex);
-    __inline__ __device__ Object* createObjectFromTO(TO const& to, int objectIndex, Object* objectArray);
-    __inline__ __device__ void changeObjectFromTO(TO const& to, ObjectTO const& objectTO, Object* object);
+    __inline__ __device__ Creature* createCreatureFromTO(TOs const& to, int creatureIndex);
+    __inline__ __device__ Genome* createGenomeFromTO(TOs const& to, int genomeIndex);
+    __inline__ __device__ Object* createObjectFromTO(TOs const& to, int objectIndex, Object* objectArray);
+    __inline__ __device__ void changeObjectFromTO(TOs const& to, ObjectTO const& objectTO, Object* object);
     __inline__ __device__ void changeEnergyFromTO(EnergyTO const& particleTO, Energy* particle);
 
     __inline__ __device__ Energy* createEnergy(float energy, float2 const& pos, float2 const& vel, int color);
@@ -77,7 +77,7 @@ __inline__ __device__ Energy* EntityFactory::createParticleFromTO(EnergyTO const
     return particle;
 }
 
-__inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TO const& to, int genomeIndex)
+__inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, int genomeIndex)
 {
     auto& genomeTO = to.genomes[genomeIndex];
     auto genome = _data->entities.heap.getTypedSubArray<Genome>(1);
@@ -273,7 +273,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TO const& to, in
     return genome;
 }
 
-__inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TO const& to, int creatureIndex)
+__inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& to, int creatureIndex)
 {
     auto& creatureTO = to.creatures[creatureIndex];
     auto creature = _data->entities.heap.getTypedSubArray<Creature>(1);
@@ -292,7 +292,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TO const& to
     return creature;
 }
 
-__inline__ __device__ Object* EntityFactory::createObjectFromTO(TO const& to, int objectIndex, Object* objectArray)
+__inline__ __device__ Object* EntityFactory::createObjectFromTO(TOs const& to, int objectIndex, Object* objectArray)
 {
     auto objectTO = to.objects[objectIndex];
     Object** objectPointer = _data->entities.objects.getNewElement();
@@ -323,7 +323,7 @@ __inline__ __device__ Object* EntityFactory::createObjectFromTO(TO const& to, in
     return object;
 }
 
-__inline__ __device__ void EntityFactory::changeObjectFromTO(TO const& to, ObjectTO const& objectTO, Object* object)
+__inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, ObjectTO const& objectTO, Object* object)
 {
     object->id = objectTO.id;
     object->pos = objectTO.pos;

@@ -24,7 +24,7 @@ namespace
     };
 }
 
-TO _CudaTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
+TOs _CudaTOProvider::provideDataTO(ArraySizesForTOs const& requiredCapacity)
 {
     try {
         if (_to.has_value()) {
@@ -36,7 +36,7 @@ TO _CudaTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
             checkAndExtendCapacity(_to->nodes, *_to->numNodes, _to->capacities.nodes, requiredCapacity.nodes);
             checkAndExtendCapacity(_to->heap, *_to->heapSize, _to->capacities.heap, requiredCapacity.heap);
         } else {
-            TO result;
+            TOs result;
             result.capacities = requiredCapacity;
             CudaMemoryManager::getInstance().acquireMemory(1, result.numObjects);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numEnergyParticles);

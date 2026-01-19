@@ -17,7 +17,7 @@
 #include "ObjectConnectionProcessor.cuh"
 #include "ParameterCalculator.cuh"
 #include "Physics.cuh"
-#include "TO.cuh"
+#include "TOs.cuh"
 
 namespace cg = cooperative_groups;
 

@@ -7,7 +7,7 @@
 #include "ObjectConnectionProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
-#include "TO.cuh"
+#include "TOs.cuh"
 
 class GeneratorProcessor
 {

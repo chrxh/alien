@@ -9,7 +9,7 @@
 #include <EngineInterface/SimulationParameters.h>
 
 #include <EngineGpuKernels/Definitions.h>
-#include <EngineGpuKernels/TO.cuh>
+#include <EngineGpuKernels/TOs.cuh>
 
 #include "Definitions.h"
 
@@ -18,20 +18,20 @@ class DescriptionConverterService
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescriptionConverterService);
 
 public:
-    Desc convertTOtoDescription(TO const& to) const;
-    TO convertDescriptionToTO(Desc const& description) const;
-    TO convertDescriptionToTO(ObjectDesc const& cell) const;
-    TO convertDescriptionToTO(EnergyDesc const& particle) const;
-    TO convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const;
+    Desc convertTOtoDescription(TOs const& to) const;
+    TOs convertDescriptionToTO(Desc const& description) const;
+    TOs convertDescriptionToTO(ObjectDesc const& cell) const;
+    TOs convertDescriptionToTO(EnergyDesc const& particle) const;
+    TOs convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const;
 
 private:
     DescriptionConverterService();
 
-    ObjectDesc createObjectDesc(TO const& to, int objectIndex) const;
-    NodeDesc createNodeDesc(TO const& to, NodeTO const* nodeTO) const;
-    GenomeDesc createGenomeDesc(TO const& to, int genomeIndex) const;
-    CreatureDesc createCreatureDesc(TO const& to, int creatureIndex) const;
-    EnergyDesc createEnergyDesc(TO const& to, int particleIndex) const;
+    ObjectDesc createObjectDesc(TOs const& to, int objectIndex) const;
+    NodeDesc createNodeDesc(TOs const& to, NodeTO const* nodeTO) const;
+    GenomeDesc createGenomeDesc(TOs const& to, int genomeIndex) const;
+    CreatureDesc createCreatureDesc(TOs const& to, int creatureIndex) const;
+    EnergyDesc createEnergyDesc(TOs const& to, int particleIndex) const;
 
     void convertGenomeToTO(
         std::vector<GenomeTO>& genomeTOs,
@@ -56,7 +56,7 @@ private:
 
     void setConnections(std::vector<ObjectTO>& objectTOs, ObjectDesc const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& objectIndexByIds) const;
 
-    TO provideDataTO(
+    TOs provideDataTO(
         std::vector<CreatureTO> const& creatureTOs,
         std::vector<GenomeTO> const& genomeTOs,
         std::vector<GeneTO> const& geneTOs,

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-struct ArraySizesForGpu
+struct ArraySizesForGpuEntities
 {
     uint64_t objectArray = 0;
     uint64_t energyArray = 0;

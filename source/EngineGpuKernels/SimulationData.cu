@@ -38,7 +38,7 @@ namespace
     }
 }
 
-bool SimulationData::shouldResize(ArraySizesForGpu const& sizeDelta)
+bool SimulationData::shouldResize(ArraySizesForGpuEntities const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.objectArray, sizeDelta.energyArray);
@@ -46,7 +46,7 @@ bool SimulationData::shouldResize(ArraySizesForGpu const& sizeDelta)
         || entities.heap.shouldResize_host(sizeDelta.heap);
 }
 
-void SimulationData::resizeTempObjects(ArraySizesForGpu const& size)
+void SimulationData::resizeTempObjects(ArraySizesForGpuEntities const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.objectArray, size.energyArray);
@@ -56,7 +56,7 @@ void SimulationData::resizeTempObjects(ArraySizesForGpu const& size)
     resizeTargetIntern(entities.heap, tempEntities.heap, size.heap);
 }
 
-void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
+void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpuEntities const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.objectArray, size.energyArray);

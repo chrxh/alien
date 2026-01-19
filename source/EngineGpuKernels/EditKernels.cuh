@@ -15,13 +15,13 @@
 #include "EntityFactory.cuh"
 #include "SelectionResult.cuh"
 #include "SimulationData.cuh"
-#include "TO.cuh"
+#include "TOs.cuh"
 
 __global__ void cudaColorSelectedObjects(SimulationData data, unsigned char color, bool includeClusters);
-__global__ void cudaChangeObject(SimulationData data, TO changeTO);      // changeTO contains only 1 cell
-__global__ void cudaChangeParticle(SimulationData data, TO changeTO);  // changeTO contains only 1 particle
+__global__ void cudaChangeObject(SimulationData data, TOs changeTO);      // changeTO contains only 1 cell
+__global__ void cudaChangeParticle(SimulationData data, TOs changeTO);  // changeTO contains only 1 particle
 
-__global__ void cudaAddGenomeAndCreature(SimulationData data, TO to, Genome** newGenome, Creature** newCreature);
+__global__ void cudaAddGenomeAndCreature(SimulationData data, TOs to, Genome** newGenome, Creature** newCreature);
 __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCreature, bool* result);
 
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);

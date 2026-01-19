@@ -4,7 +4,7 @@
 #include "Map.cuh"
 #include "EntityFactory.cuh"
 #include "ParameterCalculator.cuh"
-#include "TO.cuh"
+#include "TOs.cuh"
 
 class SignalProcessor
 {

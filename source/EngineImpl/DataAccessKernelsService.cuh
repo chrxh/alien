@@ -2,8 +2,8 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/ArraySizesForGpu.h>
-#include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/ArraySizesForGpuEntities.h>
+#include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
@@ -20,15 +20,15 @@ public:
     void init();
     void shutdown();
 
-    ArraySizesForTO estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data);
-    void getData(CudaSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, TO const& to);
-    void getSelectedData(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TO const& to);
-    void getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TO const& to);
-    void getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TO const& to);
-    bool getGenomeOfCreature(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t creatureId, TO const& to);
+    ArraySizesForTOs estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data);
+    void getData(CudaSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, TOs const& to);
+    void getSelectedData(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TOs const& to);
+    void getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TOs const& to);
+    void getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TOs const& to);
+    bool getGenomeOfCreature(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t creatureId, TOs const& to);
 
-    ArraySizesForGpu estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TO const& to);
-    void addData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& to, bool selectData);
+    ArraySizesForGpuEntities estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TOs const& to);
+    void addData(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to, bool selectData);
     void clearData(CudaSettings const& gpuSettings, SimulationData const& data);
 
 private:
@@ -36,7 +36,7 @@ private:
 
     // Gpu memory
     Object** _cudaCellArray = nullptr;
-    ArraySizesForGpu* _arraySizesGPU = nullptr;
-    ArraySizesForTO* _arraySizesTO = nullptr;
+    ArraySizesForGpuEntities* _arraySizesGPU = nullptr;
+    ArraySizesForTOs* _arraySizesTO = nullptr;
     bool* _foundResult = nullptr;
 };

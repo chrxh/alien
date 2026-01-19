@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
 
@@ -472,9 +472,9 @@ struct CreatureTO
     uint64_t creatureIndexOnGpu;
 };
 
-struct TO
+struct TOs
 {
-    ArraySizesForTO capacities;
+    ArraySizesForTOs capacities;
 
     uint64_t* numObjects = nullptr;
     ObjectTO* objects = nullptr;
@@ -491,5 +491,5 @@ struct TO
     uint64_t* heapSize = nullptr;
     uint8_t* heap = nullptr;
 
-    bool operator==(TO const& other) const = default;
+    bool operator==(TOs const& other) const = default;
 };

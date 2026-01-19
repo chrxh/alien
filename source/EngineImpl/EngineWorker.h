@@ -10,7 +10,7 @@
 
 #include <Base/Definitions.h>
 
-#include <EngineInterface/ArraySizesForGpu.h>
+#include <EngineInterface/ArraySizesForGpuEntities.h>
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
@@ -34,7 +34,7 @@ struct ExceptionData
     std::optional<std::string> errorMessage;
 };
 
-struct TO;
+struct TOs;
 
 class EngineWorker
 {
@@ -124,7 +124,7 @@ public:
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
-    void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
+    void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta);
     bool testOnly_arePointersValid();
 
 private:

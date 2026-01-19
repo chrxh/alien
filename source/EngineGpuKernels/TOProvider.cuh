@@ -2,9 +2,9 @@
 
 #include <optional>
 
-#include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/ArraySizesForTOs.h>
 
-#include <EngineGpuKernels/TO.cuh>
+#include <EngineGpuKernels/TOs.cuh>
 
 class _TOProvider
 {
@@ -12,13 +12,13 @@ public:
     _TOProvider();
     ~_TOProvider();
 
-    TO provideDataTO(ArraySizesForTO const& requiredCapacity);
-    TO provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity);
+    TOs provideDataTO(ArraySizesForTOs const& requiredCapacity);
+    TOs provideNewUnmanagedDataTO(ArraySizesForTOs const& requiredCapacity);
 
-    static void destroyUnmanagedDataTO(TO const& to);
+    static void destroyUnmanagedDataTO(TOs const& to);
 
 private:
-    static void destroy(TO const& to);
+    static void destroy(TOs const& to);
 
-    std::optional<TO> _to;
+    std::optional<TOs> _to;
 };

@@ -402,7 +402,7 @@ void _SimulationFacadeImpl::testOnly_cleanupAfterDataManipulation()
     _worker.testOnly_cleanupAfterDataManipulation();
 }
 
-void _SimulationFacadeImpl::testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta)
+void _SimulationFacadeImpl::testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta)
 {
     _worker.testOnly_resizeArrays(sizeDelta);
 }

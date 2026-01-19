@@ -125,7 +125,7 @@ namespace
 
 }
 
-Desc DescriptionConverterService::convertTOtoDescription(TO const& to) const
+Desc DescriptionConverterService::convertTOtoDescription(TOs const& to) const
 {
     Desc result;
 
@@ -167,7 +167,7 @@ Desc DescriptionConverterService::convertTOtoDescription(TO const& to) const
     return result;
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(Desc const& description) const
+TOs DescriptionConverterService::convertDescriptionToTO(Desc const& description) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<CreatureTO> creatureTOs;
@@ -201,7 +201,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Desc const& description) 
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, objectTOs, particleTOs, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(ObjectDesc const& object) const
+TOs DescriptionConverterService::convertDescriptionToTO(ObjectDesc const& object) const
 {
     std::vector<ObjectTO> objectTOs;
     std::vector<uint8_t> heap;
@@ -213,7 +213,7 @@ TO DescriptionConverterService::convertDescriptionToTO(ObjectDesc const& object)
     return provideDataTO({}, {}, {}, {}, objectTOs, {}, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(EnergyDesc const& particle) const
+TOs DescriptionConverterService::convertDescriptionToTO(EnergyDesc const& particle) const
 {
     std::vector<EnergyTO> particleTOs;
     std::vector<uint8_t> heap;
@@ -222,7 +222,7 @@ TO DescriptionConverterService::convertDescriptionToTO(EnergyDesc const& particl
     return provideDataTO({}, {}, {}, {}, {}, particleTOs, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const
+TOs DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<CreatureTO> creatureTOs;
@@ -246,7 +246,7 @@ DescriptionConverterService::DescriptionConverterService()
     _collectionTOProvider = std::make_shared<_TOProvider>();
 }
 
-ObjectDesc DescriptionConverterService::createObjectDesc(TO const& to, int objectIndex) const
+ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int objectIndex) const
 {
     ObjectDesc result(false);
 
@@ -597,7 +597,7 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TO const& to, int objec
 }
 
 
-NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const* nodeTO) const
+NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeTO) const
 {
     NodeDesc nodeDesc;
     nodeDesc._referenceAngle = nodeTO->referenceAngle;
@@ -837,7 +837,7 @@ NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const*
     return nodeDesc;
 }
 
-GenomeDesc DescriptionConverterService::createGenomeDesc(TO const& to, int genomeIndex) const
+GenomeDesc DescriptionConverterService::createGenomeDesc(TOs const& to, int genomeIndex) const
 {
     auto const& genomeTO = to.genomes[genomeIndex];
 
@@ -873,7 +873,7 @@ GenomeDesc DescriptionConverterService::createGenomeDesc(TO const& to, int genom
     return result;
 }
 
-CreatureDesc DescriptionConverterService::createCreatureDesc(TO const& to, int creatureIndex) const
+CreatureDesc DescriptionConverterService::createCreatureDesc(TOs const& to, int creatureIndex) const
 {
     CreatureDesc result;
 
@@ -890,7 +890,7 @@ CreatureDesc DescriptionConverterService::createCreatureDesc(TO const& to, int c
     return result;
 }
 
-EnergyDesc DescriptionConverterService::createEnergyDesc(TO const& to, int particleIndex) const
+EnergyDesc DescriptionConverterService::createEnergyDesc(TOs const& to, int particleIndex) const
 {
     auto const& energyParticle = to.energyParticles[particleIndex];
     NumberGenerator::get().adaptMaxIds({.entityId = energyParticle.id});
@@ -1503,7 +1503,7 @@ void DescriptionConverterService::setConnections(
     objectTO.numConnections = index;
 }
 
-TO DescriptionConverterService::provideDataTO(
+TOs DescriptionConverterService::provideDataTO(
     std::vector<CreatureTO> const& creatureTOs,
     std::vector<GenomeTO> const& genomeTOs,
     std::vector<GeneTO> const& geneTOs,
@@ -1512,7 +1512,7 @@ TO DescriptionConverterService::provideDataTO(
     std::vector<EnergyTO> const& particleTOs,
     std::vector<uint8_t> const& heap) const
 {
-    TO result = _collectionTOProvider->provideDataTO(
+    TOs result = _collectionTOProvider->provideDataTO(
         {.creatures = creatureTOs.size(),
          .genomes = genomeTOs.size(),
          .genes = geneTOs.size(),

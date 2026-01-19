@@ -9,8 +9,8 @@
 #include <windows.h>
 #endif
 
-#include <EngineInterface/ArraySizesForGpu.h>
-#include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/ArraySizesForGpuEntities.h>
+#include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/MutationType.h>
@@ -22,7 +22,7 @@
 #include <EngineInterface/StatisticsRawData.h>
 
 #include <EngineGpuKernels/Definitions.cuh>
-#include <EngineGpuKernels/TO.cuh>
+#include <EngineGpuKernels/TOs.cuh>
 
 #include <vector_types.h>
 
@@ -47,21 +47,21 @@ public:
     Ids getMaxIds() const;
 
     void copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect);
-    TO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
-    TO getSelectedSimulationData(bool includeClusters);
-    TO getInspectedSimulationData(std::vector<uint64_t> entityIds);
-    TO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
-    TO getGenomeOfCreature(uint64_t creatureId, bool& found);
-    void addAndSelectSimulationData(TO const& to);
-    void setSimulationData(TO const& to);
+    TOs getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
+    TOs getSelectedSimulationData(bool includeClusters);
+    TOs getInspectedSimulationData(std::vector<uint64_t> entityIds);
+    TOs getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
+    TOs getGenomeOfCreature(uint64_t creatureId, bool& found);
+    void addAndSelectSimulationData(TOs const& to);
+    void setSimulationData(TOs const& to);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeInspectedSimulationData(TO const& changeTO);
-    bool changeCreature(TO const& to);  // to only contains 1 genome
+    void changeInspectedSimulationData(TOs const& changeTO);
+    bool changeCreature(TOs const& to);  // to only contains 1 genome
 
     void applyForce(ApplyForceData const& applyData);
     void switchSelection(PointSelectionData const& switchData);
@@ -81,7 +81,7 @@ public:
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
 
-    ArraySizesForTO estimateCapacityNeededForTO() const;
+    ArraySizesForTOs estimateCapacityNeededForTO() const;
 
     StatisticsRawData getStatisticsRawData();
     void updateStatistics();
@@ -94,16 +94,16 @@ public:
 
     void clear();
 
-    void resizeArraysIfNecessary(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
+    void resizeArraysIfNecessary(ArraySizesForGpuEntities const& sizeDelta = ArraySizesForGpuEntities());
 
     // Simulated preview
     void initSettingsPreviewData();
-    void newPreview(TO const& to);
+    void newPreview(TOs const& to);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation);
     void calcTimestepsForPreview(int numSteps, bool detailSimulation);
     uint64_t getCurrentTimestepForPreview();
     void setCurrentTimestepForPreview(uint64_t timestep);
-    TO getPreviewData();
+    TOs getPreviewData();
 
     // Only for tests
     void testOnly_mutate(uint64_t objectId, MutationType mutationType);
@@ -111,16 +111,16 @@ public:
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
-    void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
+    void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta);
     bool testOnly_arePointersValid();
 
 private:
     void initCuda();
 
     void syncAndCheck();
-    void copyDataTOtoGpu(TO const& cudaTO, TO const& to);
-    void copyDataTOtoHost(TO const& to, TO const& cudaTO);
-    void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
+    void copyDataTOtoGpu(TOs const& cudaTO, TOs const& to);
+    void copyDataTOtoHost(TOs const& to, TOs const& cudaTO);
+    void resizeArrays(ArraySizesForGpuEntities const& sizeDelta = ArraySizesForGpuEntities());
     void checkAndProcessSimulationParameterChanges();
 
     SimulationData getSimulationDataPtrCopy() const;
