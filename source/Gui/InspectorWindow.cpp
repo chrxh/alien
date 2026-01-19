@@ -108,16 +108,17 @@ void _InspectorWindow::processCell(ExtendedObjectDescription& extendedCell)
     if (ImGui::BeginTabBar("##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto& object = extendedCell.object;
         auto origCell = object;
-        processCellGeneralTab(extendedCell);
-        processCellTypeTab(object);
-        processCellTypePropertiesTab(object);
-        if (object.getCellRef().getCellType() == CellType_Constructor) {
-            processCellGenomeTab(std::get<ConstructorDescription>(object.getCellRef()._cellType));
+        if (object.getObjectType() == ObjectType_Cell) {
+            processCellGeneralTab(extendedCell);
+            processCellTypeTab(object);
+            processCellTypePropertiesTab(object);
+            if (object.getCellRef().getCellType() == CellType_Constructor) {
+                processCellGenomeTab(std::get<ConstructorDescription>(object.getCellRef()._cellType));
+            }
+            if (object.getCellRef().getCellType() == CellType_Injector) {
+                processCellGenomeTab(std::get<InjectorDescription>(object.getCellRef()._cellType));
+            }
         }
-        if (object.getCellRef().getCellType() == CellType_Injector) {
-            processCellGenomeTab(std::get<InjectorDescription>(object.getCellRef()._cellType));
-        }
-
         validateAndCorrect(object);
 
         ImGui::EndTabBar();
@@ -412,7 +413,7 @@ void _InspectorWindow::processCellTypePropertiesTab(ObjectDescription& object)
 template <typename Description>
 void _InspectorWindow::processCellGenomeTab(Description& desc)
 {
-    auto const& parameters = _SimulationFacade::get()->getSimulationParameters();
+    //auto const& parameters = _SimulationFacade::get()->getSimulationParameters();
 
     int flags = ImGuiTabItemFlags_None;
     if (_selectGenomeTab) {
@@ -516,7 +517,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         //        ImGui::TreePop();
         //    }
         //}
-        ImGui::EndChild();
+        //ImGui::EndChild();
         ImGui::EndTabItem();
     }
 }
@@ -818,54 +819,57 @@ float _InspectorWindow::calcWindowWidth() const
 void _InspectorWindow::validateAndCorrect(ObjectDescription& object) const
 {
     object._stiffness = std::max(0.0f, std::min(1.0f, object._stiffness));
-    object.getCellRef()._usableEnergy = std::max(0.0f, object.getCellRef()._usableEnergy);
-    switch (object.getCellRef().getCellType()) {
-    case CellType_Constructor: {
-        auto& constructor = std::get<ConstructorDescription>(object.getCellRef()._cellType);
-        //auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
-        //if (numNodes > 0) {
-        //    constructor._currentNodeIndex = ((constructor._currentNodeIndex % numNodes) + numNodes) % numNodes;
-        //} else {
-        //    constructor._currentNodeIndex = 0;
-        //}
+    if (object.getObjectType() == ObjectType_Cell) {
+        object.getCellRef()._usableEnergy = std::max(0.0f, object.getCellRef()._usableEnergy);
+        switch (object.getCellRef().getCellType()) {
+        case CellType_Constructor: {
+            auto& constructor = std::get<ConstructorDescription>(object.getCellRef()._cellType);
+            //auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
+            //if (numNodes > 0) {
+            //    constructor._currentNodeIndex = ((constructor._currentNodeIndex % numNodes) + numNodes) % numNodes;
+            //} else {
+            //    constructor._currentNodeIndex = 0;
+            //}
 
-        //auto numRepetitions = GenomeDescriptionConverterService::get().getNumRepetitions(constructor._genome);
-        //if (numRepetitions != std::numeric_limits<int>::max()) {
-        //    constructor._currentConcatenation = ((constructor._currentConcatenation % numRepetitions) + numRepetitions) % numRepetitions;
-        //} else {
-        //    constructor._currentConcatenation = 0;
-        //}
+            //auto numRepetitions = GenomeDescriptionConverterService::get().getNumRepetitions(constructor._genome);
+            //if (numRepetitions != std::numeric_limits<int>::max()) {
+            //    constructor._currentConcatenation = ((constructor._currentConcatenation % numRepetitions) + numRepetitions) % numRepetitions;
+            //} else {
+            //    constructor._currentConcatenation = 0;
+            //}
 
-        constructor._constructionActivationTime = ((constructor._constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
-        if (constructor._constructionActivationTime < 0) {
-            constructor._constructionActivationTime = 0;
+            constructor._constructionActivationTime =
+                ((constructor._constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
+            if (constructor._constructionActivationTime < 0) {
+                constructor._constructionActivationTime = 0;
+            }
+            if (constructor._autoTriggerInterval < 0) {
+                constructor._autoTriggerInterval = 0;
+            }
+            //constructor._generation = std::max(0, constructor._generation);
+        } break;
+        case CellType_Sensor: {
+            auto& sensor = std::get<SensorDescription>(object.getCellRef()._cellType);
+            auto mode = sensor.getMode();
+            if (mode == SensorMode_DetectEnergy) {
+                auto& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
+                detectEnergy._minDensity = std::max(0.0f, std::min(1.0f, detectEnergy._minDensity));
+            } else if (mode == SensorMode_DetectFreeCell) {
+                auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+                detectFreeCell._minDensity = std::max(0.0f, std::min(1.0f, detectFreeCell._minDensity));
+            }
+            sensor._minRange = std::max(0, std::min(255, sensor._minRange));
+            sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
+        } break;
+        case CellType_Generator: {
+            auto& _generator = std::get<GeneratorDescription>(object.getCellRef()._cellType);
+            _generator._autoTriggerInterval = std::max(0, _generator._autoTriggerInterval);
+            _generator._alternationInterval = std::max(0, _generator._alternationInterval);
+        } break;
+        case CellType_Detonator: {
+            auto& detonator = std::get<DetonatorDescription>(object.getCellRef()._cellType);
+            detonator._countdown = std::min(0xffff, std::max(0, detonator._countdown));
+        } break;
         }
-        if (constructor._autoTriggerInterval < 0) {
-            constructor._autoTriggerInterval = 0;
-        }
-        //constructor._generation = std::max(0, constructor._generation);
-    } break;
-    case CellType_Sensor: {
-        auto& sensor = std::get<SensorDescription>(object.getCellRef()._cellType);
-        auto mode = sensor.getMode();
-        if (mode == SensorMode_DetectEnergy) {
-            auto& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
-            detectEnergy._minDensity = std::max(0.0f, std::min(1.0f, detectEnergy._minDensity));
-        } else if (mode == SensorMode_DetectFreeCell) {
-            auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
-            detectFreeCell._minDensity = std::max(0.0f, std::min(1.0f, detectFreeCell._minDensity));
-        }
-        sensor._minRange = std::max(0, std::min(255, sensor._minRange));
-        sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
-    } break;
-    case CellType_Generator: {
-        auto& _generator = std::get<GeneratorDescription>(object.getCellRef()._cellType);
-        _generator._autoTriggerInterval = std::max(0, _generator._autoTriggerInterval);
-        _generator._alternationInterval = std::max(0, _generator._alternationInterval);
-    } break;
-    case CellType_Detonator: {
-        auto& detonator = std::get<DetonatorDescription>(object.getCellRef()._cellType);
-        detonator._countdown = std::min(0xffff, std::max(0, detonator._countdown));
-    } break;
     }
 }
