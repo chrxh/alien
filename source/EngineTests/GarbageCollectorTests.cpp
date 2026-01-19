@@ -43,7 +43,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
 
     auto data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().layers(10).center({100.0f, 100.0}));
     for (int i = 0; i < 100; ++i) {
-        data._particles.emplace_back(ParticleDescription()
+        data._energies.emplace_back(EnergyDesc()
                                          .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
                                          .vel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
                                          .energy(numberGen.getRandomFloat(0.0f, 100.0f)));
@@ -53,10 +53,13 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
     switch (cleanupAction) {
     case CleanupAction::CleanupAfterTimestep:
         _simulationFacade->testOnly_cleanupAfterTimestep();
+        break;
     case CleanupAction::CleanupAfterDataManipulation:
         _simulationFacade->testOnly_cleanupAfterDataManipulation();
+        break;
     case CleanupAction::ResizeArrays:
-        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.cellArray = 1000, .particleArray = 1000, .heap = 1000000});
+        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.objectArray = 1000, .energyArray = 1000, .heap = 1000000});
+        break;
     }
     EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
 }
@@ -66,28 +69,31 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
     auto cleanupAction = GetParam();
 
     // Create a genome with memory cell type nodes that have memory entries
-    auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({
-        NodeDescription().cellType(MemoryGenomeDescription().signalEntries({SignalEntryGenomeDescription()})),
-        NodeDescription().cellType(
-            MemoryGenomeDescription().signalEntries({SignalEntryGenomeDescription(), SignalEntryGenomeDescription(), SignalEntryGenomeDescription()})),
+    auto genome = GenomeDesc().genes({GeneDesc().separation(true).nodes({
+        NodeDesc().cellType(MemoryGenomeDesc().signalEntries({SignalEntryGenomeDesc()})),
+        NodeDesc().cellType(
+            MemoryGenomeDesc().signalEntries({SignalEntryGenomeDesc(), SignalEntryGenomeDesc(), SignalEntryGenomeDesc()})),
     })});
 
-    auto data = Description().addCreature(
+    auto data = Desc().addCreature(
         {
-            CellDescription().pos({100.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription()})),
-            CellDescription().pos({101.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription(), SignalEntryDescription()})),
+            ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().signalEntries({SignalEntryDesc()}))),
+            ObjectDesc().pos({101.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().signalEntries({SignalEntryDesc(), SignalEntryDesc()}))),
         },
-        CreatureDescription(),
+        CreatureDesc(),
         genome);
     _simulationFacade->setSimulationData(data);
 
     switch (cleanupAction) {
     case CleanupAction::CleanupAfterTimestep:
         _simulationFacade->testOnly_cleanupAfterTimestep();
+        break;
     case CleanupAction::CleanupAfterDataManipulation:
         _simulationFacade->testOnly_cleanupAfterDataManipulation();
+        break;
     case CleanupAction::ResizeArrays:
-        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.cellArray = 1000, .particleArray = 1000, .heap = 1000000});
+        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.objectArray = 1000, .energyArray = 1000, .heap = 1000000});
+        break;
     }
     EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
 }

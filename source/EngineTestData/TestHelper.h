@@ -18,7 +18,7 @@ public:
     static bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual, float precision = 0.001f);
     static bool approxCompareAngles(float expected, float actual, float precision = 0.001f);
 
-    static bool compare(Description left, Description right);
-    static bool compare(CellDescription left, CellDescription right);
-    static bool compare(ParticleDescription left, ParticleDescription right);
+    static bool compare(Desc left, Desc right);
+    static bool compare(ObjectDesc left, ObjectDesc right);
+    static bool compare(EnergyDesc left, EnergyDesc right);
 };

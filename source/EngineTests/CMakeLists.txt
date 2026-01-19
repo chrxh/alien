@@ -2,7 +2,6 @@ target_sources(EngineTests
 PUBLIC
     AttackerTests.cpp
     BalanceTests.cpp
-    CellConnectionTests.cpp
     CellStateTransitionTests.cpp
     CommunicatorTests.cpp
     ConstructorTests.cpp
@@ -27,6 +26,7 @@ PUBLIC
     MemoryTests.cpp
     MuscleTests.cpp
     NeuronTests.cpp
+    ObjectConnectionTests.cpp
     PhysicsTests.cpp
     RadiationTests.cpp
     ReconnectorTests.cpp

@@ -17,7 +17,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static float applyActivationFunction(ActivationFunction activationFunction, float x);
 };
@@ -28,18 +28,18 @@ private:
 
 __device__ __inline__ void NeuronProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& cells = data.objects.cells;
-    auto partition = calcBlockPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcBlockPartition(objects.getNumEntries());
 
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        auto& cell = cells.at(i);
-        if (cell->neuralNetwork) {
-            processCell(data, statistics, cell);
+        auto& object = objects.at(i);
+        if (object->type == ObjectType_Cell) {
+            processCell(data, statistics, object);
         }
     }
 }
 
-__inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto block = cg::this_thread_block();
     auto tile = cg::tiled_partition<MAX_CHANNELS>(block);
@@ -47,8 +47,8 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ Signal signal;
     __shared__ SignalState signalState;
     if (block.thread_rank() == 0) {
-        signal = cell->signal;
-        signalState = cell->signalState;
+        signal = object->typeData.cell.signal;
+        signalState = object->typeData.cell.signalState;
     }
     block.sync();
 
@@ -56,7 +56,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
         return;
     }
 
-    auto& neuronsState = cell->neuralNetwork;
+    auto& neuronsState = object->typeData.cell.neuralNetwork;
 
     // Each thread computes one weight * input product
     // row = tile index (which output channel), col = position within tile
@@ -78,13 +78,13 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
             -2.0f,
             min(2.0f,
                 applyActivationFunction(
-                    cell->neuralNetwork->activationFunctions[block.thread_rank()], sumInput[block.thread_rank()])));  // truncate value to avoid overflow
+                    object->typeData.cell.neuralNetwork->activationFunctions[block.thread_rank()], sumInput[block.thread_rank()])));  // truncate value to avoid overflow
     }
     block.sync();
 
     if (block.thread_rank() == 0) {
-        cell->signal = signal;
-        statistics.incNumNeuronActivities(cell->color);
+        object->typeData.cell.signal = signal;
+        statistics.incNumNeuronActivities(object->color);
     }
     block.sync();
 }

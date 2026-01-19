@@ -49,13 +49,13 @@ namespace
             return Color{h, s, v};
         };
         if (cellColors.empty()) {
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor1));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor2));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor3));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor4));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor5));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor6));
-            cellColors.emplace_back(toHsv(Const::IndividualCellColor7));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor1));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor2));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor3));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor4));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor5));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor6));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor7));
         }
 
         std::optional<int> bestMatchIndex;
@@ -90,7 +90,7 @@ void ImageToPatternDialog::show()
         int width, height, nrChannels;
         unsigned char* dataImage = stbi_load(firstFilename.string().c_str(), &width, &height, &nrChannels, 0);
 
-        Description dataDesc;
+        Desc dataDesc;
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
                 auto address = (x + y * width) * nrChannels;
@@ -102,13 +102,7 @@ void ImageToPatternDialog::show()
                     int matchedCellColor;
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
-                    dataDesc._cells.emplace_back(CellDescription()
-                                                     .id(NumberGenerator::get().createId())
-                                                     .cellType(StructureCellDescription())
-                                                     .usableEnergy(matchedCellIntensity * 200)
-                                                     .pos({toFloat(x) + xOffset, toFloat(y)})
-                                                     .color(matchedCellColor)
-                                                     .fixed(false));
+                    dataDesc._objects.emplace_back(ObjectDesc().id(NumberGenerator::get().createId()).pos({toFloat(x) + xOffset, toFloat(y)}).color(matchedCellColor).fixed(false).type(StructureDesc()));
                 }
             }
         }

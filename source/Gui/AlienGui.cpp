@@ -687,7 +687,7 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
                 value = n;
             }
             ImGui::SameLine();
-            ColorField(Const::IndividualCellColors[n], colorFieldWidth1, ImGui::GetTextLineHeight());
+            ColorField(Const::IndividualObjectColors[n], colorFieldWidth1, ImGui::GetTextLineHeight());
             if (isSelected) {
                 ImGui::SetItemDefaultFocus();
             }
@@ -698,7 +698,7 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
 
     ImGuiStyle& style = ImGui::GetStyle();
     float h, s, v;
-    AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[value], h, s, v);
+    AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[value], h, s, v);
     if (enabled && !(*enabled)) {
         s = 0;
         v = 0.2f;
@@ -730,7 +730,7 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
 {
     // Source color field
     ImGui::PushID(sourceColor);
-    AlienGui::ColorField(Const::IndividualCellColors[sourceColor]);
+    AlienGui::ColorField(Const::IndividualObjectColors[sourceColor]);
     ImGui::SameLine();
 
     // Combo for target color
@@ -1789,11 +1789,11 @@ namespace
 
 }
 
-void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDescription>& entries)
+void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDesc>& entries)
 {
     int numEntries = toInt(entries.size());
     if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of signals").textWidth(parameters._textWidth), numEntries)) {
-        entries.resize(numEntries, SignalEntryGenomeDescription());
+        entries.resize(numEntries, SignalEntryGenomeDesc());
     }
     if (numEntries > 0) {
         std::vector<std::string> entryTexts;
@@ -1933,7 +1933,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
         ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - pinnedButtonWidth);
         if (parameters._colorDependence && isExpanded) {
-            AlienGui::ColorField(Const::IndividualCellColors[color], 0);
+            AlienGui::ColorField(Const::IndividualObjectColors[color], 0);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
         }
@@ -2129,9 +2129,9 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
                     ImGui::TableNextColumn();
                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
                     if (row == 0 && col > 0) {
-                        ColorField(Const::IndividualCellColors[col - 1], -1);
+                        ColorField(Const::IndividualObjectColors[col - 1], -1);
                     } else if (row > 0 && col == 0) {
-                        ColorField(Const::IndividualCellColors[row - 1], -1);
+                        ColorField(Const::IndividualObjectColors[row - 1], -1);
                     } else if (row > 0 && col > 0) {
                         if constexpr (std::is_same<T, float>()) {
                             ImGui::InputFloat(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0, parameters._format.c_str());

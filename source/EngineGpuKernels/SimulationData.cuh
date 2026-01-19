@@ -11,7 +11,7 @@
 #include "CudaNumberGenerator.cuh"
 #include "Definitions.cuh"
 #include "Map.cuh"
-#include "Objects.cuh"
+#include "Entities.cuh"
 #include "Operations.cuh"
 #include "PreprocessedSimulationData.cuh"
 
@@ -20,12 +20,12 @@ struct SimulationData
     // Maps
     uint64_t* timestep;
     int2 worldSize;
-    CellMap cellMap;
-    ParticleMap particleMap;
+    ObjectMap objectMap;
+    EnergyMap energyMap;
 
-    // Objects
-    Objects objects;
-    Objects tempObjects;
+    // Entities
+    Entities entities;
+    Entities tempEntities;
 
     // Additional data for cell functions
     double* externalEnergy;

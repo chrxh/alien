@@ -58,8 +58,8 @@ _PreviewWidget::_PreviewWidget(GenomeWindowEditData const& genomeEditData, Genom
 
 void _PreviewWidget::createSubGenomesForPreview()
 {
-    auto geneIndicesForSubGenomes = GenomeDescriptionInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
-    auto subGenomesForPreview = GenomeDescriptionEditService::get().createSubGenomesForPreview(_editData->genome, geneIndicesForSubGenomes, _editData->detailSimulation);
+    auto geneIndicesForSubGenomes = GenomeDescInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
+    auto subGenomesForPreview = GenomeDescEditService::get().createSubGenomesForPreview(_editData->genome, geneIndicesForSubGenomes, _editData->detailSimulation);
 
     if (_creatureWidgets.size() != subGenomesForPreview.size()) {
         _creatureWidgets.clear();
@@ -79,9 +79,9 @@ void _PreviewWidget::createSubGenomesForPreview()
 
 void _PreviewWidget::setupPreviewData(bool useCache)
 {
-    auto const& genomeEditService = GenomeDescriptionEditService::get();
+    auto const& genomeEditService = GenomeDescEditService::get();
 
-    std::vector<SubGenomeDescription> subGenomesForPreview;
+    std::vector<SubGenomeDesc> subGenomesForPreview;
     for (auto const& creatureWidget : _creatureWidgets) {
         subGenomesForPreview.emplace_back(creatureWidget->getGenomeWithStartIndex());
     }
@@ -134,7 +134,7 @@ void _PreviewWidget::processCreaturePreviews()
     // Get phenotypes for all sub-genomes
     auto seedCreatureIds = getSeedCreatureIds();
     auto subGenomesForPreview = getSubGenomes();
-    auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), seedCreatureIds);
+    auto phenotypes = GenomeDescEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), seedCreatureIds);
 
     // Display and edit previews
     auto phenotypeChanged = false;
@@ -159,7 +159,7 @@ void _PreviewWidget::processCreaturePreviews()
     ImGui::EndChild();
 }
 
-void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, Description& phenotype, float width)
+void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, Desc& phenotype, float width)
 {
     ImGui::PushID(subGenomeIndex);
     auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
@@ -304,9 +304,9 @@ void _PreviewWidget::setSeedCreatureIds(std::vector<uint64_t> const& value)
     }
 }
 
-std::vector<SubGenomeDescription> _PreviewWidget::getSubGenomes() const
+std::vector<SubGenomeDesc> _PreviewWidget::getSubGenomes() const
 {
-    std::vector<SubGenomeDescription> result;
+    std::vector<SubGenomeDesc> result;
     for (auto const& creatureWidget : _creatureWidgets) {
         result.emplace_back(creatureWidget->getGenomeWithStartIndex());
     }

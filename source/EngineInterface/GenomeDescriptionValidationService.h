@@ -4,10 +4,10 @@
 
 #include "GenomeDescription.h"
 
-class GenomeDescriptionValidationService
+class GenomeDescValidationService
 {
-    MAKE_SINGLETON(GenomeDescriptionValidationService);
+    MAKE_SINGLETON(GenomeDescValidationService);
 
 public:
-    void validateAndCorrect(GenomeDescription& genome);
+    void validateAndCorrect(GenomeDesc& genome);
 };

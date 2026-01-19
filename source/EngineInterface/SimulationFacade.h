@@ -25,8 +25,8 @@ public:
     //***********************************
     virtual void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& simulationParameters) = 0;
     virtual int getSessionId() const = 0;
-    virtual Description getSimulationData() = 0;
-    virtual void setSimulationData(Description const& dataToUpdate) = 0;
+    virtual Desc getSimulationData() = 0;
+    virtual void setSimulationData(Desc const& dataToUpdate) = 0;
     virtual void clear() = 0;
 
     //*****************************
@@ -45,9 +45,9 @@ public:
     //****************************************
     //* Methods for selection and manipulation
     //****************************************
-    virtual void addAndSelectSimulationData(Description&& dataToAdd) = 0;
-    virtual Description getSelectedSimulationData(bool includeClusters) = 0;
-    virtual Description getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
+    virtual void addAndSelectSimulationData(Desc&& dataToAdd) = 0;
+    virtual Desc getSelectedSimulationData(bool includeClusters) = 0;
+    virtual Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
     virtual void removeSelectedObjects(bool includeClusters) = 0;
     virtual void relaxSelectedObjects(bool includeClusters) = 0;
     virtual void uniformVelocitiesForSelectedObjects(bool includeClusters) = 0;
@@ -57,10 +57,10 @@ public:
     virtual void colorSelectedObjects(unsigned char color, bool includeClusters) = 0;
     virtual void reconnectSelectedObjects() = 0;
     virtual void setDetached(bool value) = 0;
-    virtual void changeCell(CellDescription const& changedCell) = 0;
-    virtual void changeParticle(ParticleDescription const& changedParticle) = 0;
-    virtual bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) = 0;
-    virtual std::optional<GenomeDescription> getGenomeOfCreature(uint64_t creatureId) = 0;
+    virtual void changeCell(ObjectDesc const& changedCell) = 0;
+    virtual void changeParticle(EnergyDesc const& changedParticle) = 0;
+    virtual bool changeCreature(uint64_t creatureId, GenomeDesc const& genome) = 0;
+    virtual std::optional<GenomeDesc> getGenomeOfCreature(uint64_t creatureId) = 0;
     virtual void switchSelection(RealVector2D const& pos, float radius) = 0;
     virtual void swapSelection(RealVector2D const& pos, float radius) = 0;
     virtual SelectionShallowData getSelectionShallowData() = 0;
@@ -112,8 +112,8 @@ public:
     //********************
     //* Preview simulation
     //********************
-    virtual Description getPreviewData() = 0;
-    virtual void setPreviewData(Description const& description) = 0;
+    virtual Desc getPreviewData() = 0;
+    virtual void setPreviewData(Desc const& description) = 0;
     virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation = false) = 0;
     virtual void calcTimestepsForPreview(int numSteps, bool detailSimulation = false) = 0;
     virtual uint64_t getCurrentTimestepForPreview() = 0;
@@ -122,9 +122,9 @@ public:
     //****************
     //* Only for tests
     //****************
-    virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;
-    virtual void testOnly_mutationCheck(uint64_t cellId) = 0;
-    virtual void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) = 0;
+    virtual void testOnly_mutate(uint64_t objectId, MutationType mutationType) = 0;
+    virtual void testOnly_mutationCheck(uint64_t objectId) = 0;
+    virtual void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) = 0;
     virtual void testOnly_cleanupAfterTimestep() = 0;
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
     virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;

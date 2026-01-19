@@ -31,7 +31,7 @@ struct SimulationParameters
     BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
     BaseParameter<CellColoring> primaryCellColoring = {CellColoring_CellColor};
     BaseParameter<CellType> highlightedCellType = {CellType_Constructor};
-    BaseParameter<float> cellRadius = {0.25f};
+    BaseParameter<float> objectRadius = {0.25f};
     BaseParameter<float> zoomLevelForNeuronVisualization = {2.0f};
     BaseParameter<bool> attackVisualization = {true};
     BaseParameter<bool> borderlessRendering = {false};
@@ -78,13 +78,12 @@ struct SimulationParameters
     // Physics: Thresholds
     BaseParameter<float> maxVelocity = {2.0f};
     BaseLayerParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
-    BaseParameter<float> minCellDistance = {0.3f};
+    BaseParameter<float> minObjectDistance = {0.3f};
     static float constexpr maxForceDecayProbability = 0.2f;
 
     // Physics: Binding
     BaseParameter<ColorVector<float>> maxBindingDistance = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
-    BaseLayerParameter<float> cellFusionVelocity = {.baseValue = 0.1f};
-    BaseLayerParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
+    BaseLayerParameter<float> objectFusionVelocity = {.baseValue = 0.1f};
 
     // Radiation
     PinBaseParameter relativeStrengthBasePin = {false};
@@ -209,15 +208,6 @@ struct SimulationParameters
 
     // Expert settings: Cell age limiter
     ExpertToggle cellAgeLimiterToggle = {false};
-    BaseLayerParameter<ColorVector<float>> maxAgeForInactiveCells = {
-        .baseValue = {// Candidate for deletion
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value,
-                      Infinity<float>::value}};
     BaseParameter<ColorVector<int>> freeCellMaxAge = {
         {Infinity<int>::value,
          Infinity<int>::value,
@@ -233,10 +223,10 @@ struct SimulationParameters
     ExpertToggle colorTransitionRulesToggle = {false};
     BaseLayerParameter<ColorVector<ColorTransitionRule>> colorTransitionRules;
 
-    // Expert settings: Cell glow
-    ExpertToggle cellGlowToggle = {false};
-    BaseParameter<float> cellGlowRadius = {4.0f};
-    BaseParameter<ColorVector<float>> cellGlowStrength = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
+    // Expert settings: Object glow
+    ExpertToggle objectGlowToggle = {false};
+    BaseParameter<float> objectGlowRadius = {4.0f};
+    BaseParameter<ColorVector<float>> objectGlowStrength = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
 
     // Expert settings: Customize deletion mutations setting
     ExpertToggle customizeDeletionMutationsToggle = {false};

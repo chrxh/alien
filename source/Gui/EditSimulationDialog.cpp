@@ -61,7 +61,7 @@ void EditSimulationDialog::processForLeaf()
 
     ImGui::PushID("description");
     AlienGui::InputTextMultiline(
-        AlienGui::InputTextMultilineParameters().hint("Description (optional)").textWidth(0).height(ImGui::GetContentRegionAvail().y - scale(50.0f)),
+        AlienGui::InputTextMultilineParameters().hint("Desc (optional)").textWidth(0).height(ImGui::GetContentRegionAvail().y - scale(50.0f)),
         _newDescription);
     ImGui::PopID();
 

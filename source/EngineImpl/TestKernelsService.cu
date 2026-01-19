@@ -13,19 +13,19 @@ void TestKernelsService::shutdown()
     CudaMemoryManager::getInstance().freeMemory(_cudaBoolResult);
 }
 
-void TestKernelsService::testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t cellId, MutationType mutationType)
+void TestKernelsService::testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId, MutationType mutationType)
 {
-    KERNEL_CALL(cudaTestMutate, data, cellId, mutationType);
+    KERNEL_CALL(cudaTestMutate, data, objectId, mutationType);
 }
 
-void TestKernelsService::testOnly_mutationCheck(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t cellId)
+void TestKernelsService::testOnly_mutationCheck(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL(cudaTestMutationCheck, data, cellId);
+    KERNEL_CALL(cudaTestMutationCheck, data, objectId);
 }
 
-void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t cellId1, uint64_t cellId2)
+void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2)
 {
-    KERNEL_CALL_1_1(cudaTestCreateConnection, data, cellId1, cellId2);
+    KERNEL_CALL_1_1(cudaTestCreateConnection, data, objectId1, objectId2);
 }
 
 bool TestKernelsService::testOnly_arePointersValid(CudaSettings const& gpuSettings, SimulationData const& data)

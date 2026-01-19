@@ -8,12 +8,12 @@ GeometryBuffers _GeometryBuffers::create()
 {
     auto result = new _GeometryBuffers();
     glGenVertexArrays(1, &result->_vaoForPointsAndLines);
-    glGenBuffers(1, &result->_vboForCells);
+    glGenBuffers(1, &result->_vboForObjects);
     glGenBuffers(1, &result->_eboForLines);
     glGenVertexArrays(1, &result->_vaoForTriangles);
     glGenBuffers(1, &result->_eboForTriangles);
     glGenVertexArrays(1, &result->_vaoForEnergyParticles);
-    glGenBuffers(1, &result->_vboForEnergyParticles);
+    glGenBuffers(1, &result->_vboForEnergies);
     glGenVertexArrays(1, &result->_vaoForLocations);
     glGenBuffers(1, &result->_vboForLocations);
     glGenVertexArrays(1, &result->_vaoForSelectedObjects);
@@ -30,15 +30,15 @@ GeometryBuffers _GeometryBuffers::create()
 void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
 {
     _numObjects = numRenderObjects;
-    if (numRenderObjects.cells >= _vertexBufferCapacity) {
-        _vertexBufferCapacity = std::max(numRenderObjects.cells * 2, static_cast<uint64_t>(100000));
-        glBindBuffer(GL_ARRAY_BUFFER, getVboForCells());
-        glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(CellVertexData)), nullptr, GL_DYNAMIC_DRAW);
+    if (numRenderObjects.objects >= _vertexBufferCapacity) {
+        _vertexBufferCapacity = std::max(numRenderObjects.objects * 2, static_cast<uint64_t>(100000));
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForObjects());
+        glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(ObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
-    if (numRenderObjects.energyParticles >= _energyParticleBufferCapacity) {
-        _energyParticleBufferCapacity = std::max(numRenderObjects.energyParticles * 2, static_cast<uint64_t>(100000));
-        glBindBuffer(GL_ARRAY_BUFFER, getVboForEnergyParticles());
-        glBufferData(GL_ARRAY_BUFFER, toInt(_energyParticleBufferCapacity * sizeof(EnergyParticleVertexData)), nullptr, GL_DYNAMIC_DRAW);
+    if (numRenderObjects.energies >= _energyParticleBufferCapacity) {
+        _energyParticleBufferCapacity = std::max(numRenderObjects.energies * 2, static_cast<uint64_t>(100000));
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForEnergies());
+        glBufferData(GL_ARRAY_BUFFER, toInt(_energyParticleBufferCapacity * sizeof(EnergyVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.locations >= _locationBufferCapacity) {
         _locationBufferCapacity = std::max(numRenderObjects.locations * 2, static_cast<uint64_t>(1000));
@@ -48,7 +48,7 @@ void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects
     if (numRenderObjects.selectedObjects >= _selectedObjectBufferCapacity) {
         _selectedObjectBufferCapacity = std::max(numRenderObjects.selectedObjects * 2, static_cast<uint64_t>(10000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedObjects());
-        glBufferData(GL_ARRAY_BUFFER, toInt(_selectedObjectBufferCapacity * sizeof(getObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, toInt(_selectedObjectBufferCapacity * sizeof(SelectedObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.lineIndices >= _lineIndexBufferCapacity) {
         _lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
@@ -84,18 +84,18 @@ NumRenderObjects _GeometryBuffers::getNumObjects() const
     return _numObjects;
 }
 
-void _GeometryBuffers::setCellData(CellVertexData const* data, uint64_t count)
+void _GeometryBuffers::setCellData(ObjectVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
-    glBindBuffer(GL_ARRAY_BUFFER, getVboForCells());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(CellVertexData)), data);
+    glBindBuffer(GL_ARRAY_BUFFER, getVboForObjects());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(ObjectVertexData)), data);
 }
 
-void _GeometryBuffers::setEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count)
+void _GeometryBuffers::setEnergyParticleData(EnergyVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
-    glBindBuffer(GL_ARRAY_BUFFER, getVboForEnergyParticles());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(EnergyParticleVertexData)), data);
+    glBindBuffer(GL_ARRAY_BUFFER, getVboForEnergies());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(EnergyVertexData)), data);
 }
 
 void _GeometryBuffers::setLocationData(LocationVertexData const* data, uint64_t count)
@@ -105,11 +105,11 @@ void _GeometryBuffers::setLocationData(LocationVertexData const* data, uint64_t 
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(LocationVertexData)), data);
 }
 
-void _GeometryBuffers::setSelectedObjectData(getObjectVertexData const* data, uint64_t count)
+void _GeometryBuffers::setSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedObjects());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(getObjectVertexData)), data);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(SelectedObjectVertexData)), data);
 }
 
 void _GeometryBuffers::setLineIndices(unsigned int const* data, uint64_t count)
@@ -149,21 +149,21 @@ void _GeometryBuffers::setDetonationEventData(DetonationEventVertexData const* d
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(DetonationEventVertexData)), data);
 }
 
-std::vector<CellVertexData> _GeometryBuffers::getCellData() const
+std::vector<ObjectVertexData> _GeometryBuffers::getCellData() const
 {
-    std::vector<CellVertexData> result(_numObjects.cells);
-    if (_numObjects.cells == 0) return result;
-    glBindBuffer(GL_ARRAY_BUFFER, _vboForCells);
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.cells * sizeof(CellVertexData)), result.data());
+    std::vector<ObjectVertexData> result(_numObjects.objects);
+    if (_numObjects.objects == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForObjects);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.objects * sizeof(ObjectVertexData)), result.data());
     return result;
 }
 
-std::vector<EnergyParticleVertexData> _GeometryBuffers::getEnergyParticleData() const
+std::vector<EnergyVertexData> _GeometryBuffers::getEnergyParticleData() const
 {
-    std::vector<EnergyParticleVertexData> result(_numObjects.energyParticles);
-    if (_numObjects.energyParticles == 0) return result;
-    glBindBuffer(GL_ARRAY_BUFFER, _vboForEnergyParticles);
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.energyParticles * sizeof(EnergyParticleVertexData)), result.data());
+    std::vector<EnergyVertexData> result(_numObjects.energies);
+    if (_numObjects.energies == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForEnergies);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.energies * sizeof(EnergyVertexData)), result.data());
     return result;
 }
 
@@ -176,12 +176,12 @@ std::vector<LocationVertexData> _GeometryBuffers::getLocationData() const
     return result;
 }
 
-std::vector<getObjectVertexData> _GeometryBuffers::getSelectedObjectData() const
+std::vector<SelectedObjectVertexData> _GeometryBuffers::getSelectedObjectData() const
 {
-    std::vector<getObjectVertexData> result(_numObjects.selectedObjects);
+    std::vector<SelectedObjectVertexData> result(_numObjects.selectedObjects);
     if (_numObjects.selectedObjects == 0) return result;
     glBindBuffer(GL_ARRAY_BUFFER, _vboForSelectedObjects);
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.selectedObjects * sizeof(getObjectVertexData)), result.data());
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.selectedObjects * sizeof(SelectedObjectVertexData)), result.data());
     return result;
 }
 

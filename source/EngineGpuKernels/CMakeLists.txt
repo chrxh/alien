@@ -4,8 +4,6 @@ add_library(EngineGpuKernels
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
-    CellConnectionProcessor.cuh
-    CellProcessor.cuh
     ClusterProcessor.cuh
     CommunicatorProcessor.cuh
     ConstantMemory.cu
@@ -32,7 +30,11 @@ add_library(EngineGpuKernels
     DigestorProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
-    EnergyParticleProcessor.cuh
+    EnergyProcessor.cuh
+    Entity.cuh
+    Entities.cu
+    Entities.cuh
+    EntityFactory.cuh
     ForceFieldKernels.cu
     ForceFieldKernels.cuh
     GarbageCollectorKernels.cu
@@ -56,10 +58,8 @@ add_library(EngineGpuKernels
     MemoryProcessor.cuh
     MuscleProcessor.cuh
     NeuronProcessor.cuh
-    Object.cuh
-    Objects.cu
-    Objects.cuh
-    ObjectFactory.cuh
+    ObjectConnectionProcessor.cuh
+    ObjectProcessor.cuh
     Operations.cuh
     ParameterCalculator.cuh
     Physics.cuh

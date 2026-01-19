@@ -22,7 +22,7 @@ public:
 
     void onInspectSelectedObjects();
     void onInspectSelectedGenomes();
-    bool onInspectObjects(std::vector<ExtendedCellOrParticleDescription> const& entities, bool selectGenomeTab);
+    bool onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> const& entities, bool selectGenomeTab);
 
     bool isCopyingPossible() const;
     void onCopy();
@@ -48,5 +48,5 @@ private:
     bool _on = false;
 
     std::vector<InspectorWindow> _inspectorWindows;
-    Description _drawing;
+    Desc _drawing;
 };

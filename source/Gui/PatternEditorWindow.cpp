@@ -189,37 +189,37 @@ void PatternEditorWindow::processIntern()
 
 
         AlienGui::Group(AlienGui::GroupParameters().text("Color"));
-        if (colorButton("    ##color1", Const::IndividualCellColor1)) {
+        if (colorButton("    ##color1", Const::IndividualObjectColor1)) {
             _SimulationFacade::get()->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(0);
         }
         ImGui::SameLine();
-        if (colorButton("    ##color2", Const::IndividualCellColor2)) {
+        if (colorButton("    ##color2", Const::IndividualObjectColor2)) {
             _SimulationFacade::get()->colorSelectedObjects(1, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(1);
         }
         ImGui::SameLine();
-        if (colorButton("    ##color3", Const::IndividualCellColor3)) {
+        if (colorButton("    ##color3", Const::IndividualObjectColor3)) {
             _SimulationFacade::get()->colorSelectedObjects(2, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(2);
         }
         ImGui::SameLine();
-        if (colorButton("    ##color4", Const::IndividualCellColor4)) {
+        if (colorButton("    ##color4", Const::IndividualObjectColor4)) {
             _SimulationFacade::get()->colorSelectedObjects(3, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(3);
         }
         ImGui::SameLine();
-        if (colorButton("    ##color5", Const::IndividualCellColor5)) {
+        if (colorButton("    ##color5", Const::IndividualObjectColor5)) {
             _SimulationFacade::get()->colorSelectedObjects(4, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(4);
         }
         ImGui::SameLine();
-        if (colorButton("    ##color6", Const::IndividualCellColor6)) {
+        if (colorButton("    ##color6", Const::IndividualObjectColor6)) {
             _SimulationFacade::get()->colorSelectedObjects(5, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(5);
         }
         ImGui::SameLine();
-        if (colorButton("    ##color7", Const::IndividualCellColor7)) {
+        if (colorButton("    ##color7", Const::IndividualObjectColor7)) {
             _SimulationFacade::get()->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(6);
         }
@@ -275,7 +275,7 @@ void PatternEditorWindow::processIntern()
         _angularVel = 0;
     }
     ImGui::SameLine();
-    AlienGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected cell.\n"
+    AlienGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected object.\n"
                          "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells "
                          "and the neighboring cells are recalculated when the positions are changed.\n"
                          "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
@@ -292,11 +292,11 @@ void PatternEditorWindow::onOpenPattern()
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
-        Description content;
+        Desc content;
         if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
             auto center = Viewport::get().getCenterInWorldPos();
             DescriptionEditService::get().setCenter(content, center);
-            _SimulationFacade::get()->addAndSelectSimulationData(Description(content));
+            _SimulationFacade::get()->addAndSelectSimulationData(Desc(content));
             EditorModel::get().update();
         } else {
             GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
@@ -400,5 +400,5 @@ bool PatternEditorWindow::hasSelectionChanged(SelectionShallowData const& select
     if (!_lastSelection) {
         return false;
     }
-    return _lastSelection->numCells != selection.numCells || _lastSelection->numParticles != selection.numParticles;
+    return _lastSelection->numObjects != selection.numObjects || _lastSelection->numEnergyParticles != selection.numEnergyParticles;
 }

@@ -3,7 +3,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 
 #include "ConstantMemory.cuh"
-#include "Object.cuh"
+#include "Entity.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -13,7 +13,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -25,16 +25,16 @@ __device__ __inline__ void DigestorProcessor::process(SimulationData& data, Simu
     auto& operations = data.cellTypeOperations[CellType_Digestor];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, result, operations.at(i).object);
     }
 }
 
-__device__ __inline__ void DigestorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void DigestorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    auto convertedEnergy = cell->rawEnergy;
-    auto threshold = (1.0f - cell->cellTypeData.digestor.rawEnergyConductivity) * cudaSimulationParameters.maxRawEnergyConversion.value[cell->color];
+    auto convertedEnergy = object->typeData.cell.rawEnergy;
+    auto threshold = (1.0f - object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity) * cudaSimulationParameters.maxRawEnergyConversion.value[object->color];
     convertedEnergy = min(convertedEnergy, threshold);
 
-    cell->rawEnergy -= convertedEnergy;
-    cell->usableEnergy += convertedEnergy;
+    object->typeData.cell.rawEnergy -= convertedEnergy;
+    object->typeData.cell.usableEnergy += convertedEnergy;
 }

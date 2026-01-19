@@ -412,7 +412,7 @@ namespace Const
     std::string const GenomeCurrentConcatenationTooltip = "The cell network encoded in the genome can be repeatedly built by specifying a number of "
                                                           "repetitions. This value indicates the index of the current repetition.";
 
-    std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
+    std::string const GenomeCurrentObjectTooltip = "The sequence number of the cell in the genome that will be constructed next.";
 
     std::string const GenomePreviewTooltip = "The spatial structure of the cells encoded in the genome is displayed here. This is only a rough "
                                              "prediction without using the physics engine.";

@@ -14,7 +14,7 @@ public:
     {
         MEMBER(CreateRectParameters, int, width, 10);
         MEMBER(CreateRectParameters, int, height, 10);
-        MEMBER(CreateRectParameters, CellTypeDescription, cellType, StructureCellDescription());
+        MEMBER(CreateRectParameters, ObjectTypeDesc, objectType, StructureDesc());
         MEMBER(CreateRectParameters, float, cellDistance, 1.0f);
         MEMBER(CreateRectParameters, float, usableEnergy, 100.0f);
         MEMBER(CreateRectParameters, float, rawEnergy, 0.0f);
@@ -24,12 +24,12 @@ public:
         MEMBER(CreateRectParameters, int, color, 0);
         MEMBER(CreateRectParameters, bool, fixed, false);
     };
-    Description createRect(CreateRectParameters const& parameters) const;
+    Desc createRect(CreateRectParameters const& parameters) const;
 
     struct CreateHexParameters
     {
         MEMBER(CreateHexParameters, int, layers, 10);
-        MEMBER(CreateHexParameters, CellTypeDescription, cellType, StructureCellDescription());
+        MEMBER(CreateHexParameters, ObjectTypeDesc, objectType, StructureDesc());
         MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
         MEMBER(CreateHexParameters, float, usableEnergy, 100.0f);
         MEMBER(CreateHexParameters, float, stiffness, 1.0f);
@@ -38,7 +38,7 @@ public:
         MEMBER(CreateHexParameters, int, color, 0);
         MEMBER(CreateHexParameters, bool, fixed, false);
     };
-    Description createHex(CreateHexParameters const& parameters) const;
+    Desc createHex(CreateHexParameters const& parameters) const;
 
     struct CreateUnconnectedCircleParameters
     {
@@ -51,9 +51,9 @@ public:
         MEMBER(CreateUnconnectedCircleParameters, bool, fixed, false);
         MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
     };
-    Description createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;
+    Desc createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;
 
-    void duplicate(Description& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
+    void duplicate(Desc& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
 
     struct GridMultiplyParameters
     {
@@ -70,7 +70,7 @@ public:
         MEMBER(GridMultiplyParameters, float, verticalVelYinc, 0);
         MEMBER(GridMultiplyParameters, float, verticalAngularVelInc, 0);
     };
-    Description gridMultiply(Description const& input, GridMultiplyParameters const& parameters) const;
+    Desc gridMultiply(Desc const& input, GridMultiplyParameters const& parameters) const;
 
     struct RandomMultiplyParameters
     {
@@ -85,40 +85,40 @@ public:
         MEMBER(RandomMultiplyParameters, float, maxAngularVel, 0);
         MEMBER(RandomMultiplyParameters, bool, overlappingCheck, false);
     };
-    Description randomMultiply(
-        Description const& input,
+    Desc randomMultiply(
+        Desc const& input,
         RandomMultiplyParameters const& parameters,
         IntVector2D const& worldSize,
-        Description&& existentData,
+        Desc&& existentData,
         bool& overlappingCheckSuccessful) const;
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
-    void addIfSpaceAvailable(Description& result, Occupancy& cellOccupancy, Description const& toAdd, float distance, IntVector2D const& worldSize) const;
+    void addIfSpaceAvailable(Desc& result, Occupancy& cellOccupancy, Desc const& toAdd, float distance, IntVector2D const& worldSize) const;
 
-    void flattenTopology(Description& description, IntVector2D const& worldSize) const;
+    void flattenTopology(Desc& description, IntVector2D const& worldSize) const;
 
-    void reconnectCells(Description& description, float maxDistance) const;  // For non-creatures
+    void reconnectCells(Desc& description, float maxDistance) const;  // For non-creatures
 
-    void randomizeCellColors(Description& description, std::vector<int> const& colorCodes) const;
-    void randomizeGenomeColors(Description& description, std::vector<int> const& colorCodes) const;
-    void randomizeEnergies(Description& description, float minEnergy, float maxEnergy) const;
-    void randomizeAges(Description& description, int minAge, int maxAge) const;
-    void randomizeCountdowns(Description& description, int minValue, int maxValue) const;
-    void randomizeLineageIds(Description& description) const;
+    void randomizeCellColors(Desc& description, std::vector<int> const& colorCodes) const;
+    void randomizeGenomeColors(Desc& description, std::vector<int> const& colorCodes) const;
+    void randomizeEnergies(Desc& description, float minEnergy, float maxEnergy) const;
+    void randomizeAges(Desc& description, int minAge, int maxAge) const;
+    void randomizeCountdowns(Desc& description, int minValue, int maxValue) const;
+    void randomizeLineageIds(Desc& description) const;
 
-    uint64_t getId(ExtendedCellOrParticleDescription const& entity) const;
-    RealVector2D getPos(ExtendedCellOrParticleDescription const& entity) const;
-    std::vector<ExtendedCellOrParticleDescription> getObjects(Description const& description) const;
-    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(Description const& description) const;
+    uint64_t getId(ExtendedObjectOrEnergyDesc const& entity) const;
+    RealVector2D getPos(ExtendedObjectOrEnergyDesc const& entity) const;
+    std::vector<ExtendedObjectOrEnergyDesc> getObjects(Desc const& description) const;
+    std::vector<ExtendedObjectOrEnergyDesc> getCreatureRepresentatives(Desc const& description) const;
 
-    void setCenter(Description& collection, RealVector2D const& center) const;
-    RealVector2D calcCenter(Description const& collection) const;
-    void shift(Description& collection, RealVector2D const& delta) const;
-    void rotate(Description& collection, float angle) const;
-    void accelerate(Description& collection, RealVector2D const& velDelta, float angularVelDelta) const;
+    void setCenter(Desc& collection, RealVector2D const& center) const;
+    RealVector2D calcCenter(Desc const& collection) const;
+    void shift(Desc& collection, RealVector2D const& delta) const;
+    void rotate(Desc& collection, float angle) const;
+    void accelerate(Desc& collection, RealVector2D const& velDelta, float angularVelDelta) const;
 
-    void removeCell(Description& collection, uint64_t cellId) const;
-    void removeCellIf(Description& collection, std::function<bool(CellDescription const&)> const& predicate) const;
+    void removeCell(Desc& collection, uint64_t objectId) const;
+    void removeCellIf(Desc& collection, std::function<bool(ObjectDesc const&)> const& predicate) const;
 
 private:
     bool isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance) const;

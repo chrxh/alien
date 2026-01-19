@@ -2,10 +2,10 @@
 
 struct SelectionShallowData
 {
-    int numCells = 0;
+    int numObjects = 0;
     int numCreatures = 0;
     int numClusterCells = 0;
-    int numParticles = 0;
+    int numEnergyParticles = 0;
 
     float centerPosX = 0;
     float centerPosY = 0;
@@ -19,7 +19,7 @@ struct SelectionShallowData
 
     bool compareSizes(SelectionShallowData const& other) const
     {
-        return numCells == other.numCells && numCreatures == other.numCreatures && numClusterCells == other.numClusterCells && numParticles == other.numParticles;
+        return numObjects == other.numObjects && numCreatures == other.numCreatures && numClusterCells == other.numClusterCells && numEnergyParticles == other.numEnergyParticles;
     }
 
     bool operator==(SelectionShallowData const& other) const = default;

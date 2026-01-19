@@ -5,12 +5,12 @@
 
 struct TimestepStatistics
 {
-    ColorVector<int> numCells = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numObjects = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numSelfReplicators = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numColonies = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numViruses = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numFreeCells = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<int> numParticles = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numEnergyParticles = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> totalEnergy = {0, 0, 0, 0, 0, 0, 0};
 };
 
@@ -41,7 +41,7 @@ struct TimelineStatistics
 
 struct HistogramData
 {
-    int maxValue = 0;
+    int maxAge = 0;
     int numCellsByColorBySlot[MAX_COLORS][MAX_HISTOGRAM_SLOTS];
 };
 

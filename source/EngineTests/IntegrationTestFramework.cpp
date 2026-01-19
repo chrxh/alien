@@ -40,7 +40,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& worldSize)
         _simulationFacade->newSimulation(0, _worldSize, _parameters);
     } else {
         _simulationFacade->clear();
-        _simulationFacade->setPreviewData(Description());
+        _simulationFacade->setPreviewData(Desc());
         _simulationFacade->setCurrentTimestepForPreview(0);
         _simulationFacade->setCurrentTimestep(0);
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -55,37 +55,45 @@ IntegrationTestFramework::~IntegrationTestFramework()
 {
 }
 
-double IntegrationTestFramework::getEnergy(Description const& data) const
+double IntegrationTestFramework::getEnergy(Desc const& data) const
 {
-    auto getDepotEnergy = [](CellDescription const& cell) -> double {
-        if (cell.getCellType() == CellType_Depot) {
-            auto const& depot = std::get<DepotDescription>(cell._cellType);
-            return depot._storedUsableEnergy;
+    auto getDepotEnergy = [](ObjectDesc const& object) -> double {
+        if (object.getObjectType() == ObjectType_Cell) {
+            if (object.getCellRef().getCellType() == CellType_Depot) {
+                auto const& depot = std::get<DepotDesc>(object.getCellRef()._cellType);
+                return depot._storedUsableEnergy;
+            }
         }
         return 0;
     };
 
     double result = 0;
-    for (auto const& cell : data._cells) {
-        result += cell._usableEnergy + cell._rawEnergy + getDepotEnergy(cell);
+    for (auto const& object : data._objects) {
+        if (object.getObjectType() == ObjectType_Cell) {
+            auto const& cell = object.getCellRef();
+            result += cell._usableEnergy + cell._rawEnergy + getDepotEnergy(object);
+        } else if (object.getObjectType() == ObjectType_FreeCell) {
+            result += object.getFreeCellRef()._rawEnergy;
+        }
+        // StructureDesc has no energy
     }
-    for (auto const& particle : data._particles) {
-        result += particle._energy;
+    for (auto const& energyParticle : data._energies) {
+        result += energyParticle._energy;
     }
     return result;
 }
 
-bool IntegrationTestFramework::compare(Description left, Description right) const
+bool IntegrationTestFramework::compare(Desc left, Desc right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }
 
-bool IntegrationTestFramework::compare(CellDescription left, CellDescription right) const
+bool IntegrationTestFramework::compare(ObjectDesc left, ObjectDesc right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }
 
-bool IntegrationTestFramework::compare(ParticleDescription left, ParticleDescription right) const
+bool IntegrationTestFramework::compare(EnergyDesc left, EnergyDesc right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }

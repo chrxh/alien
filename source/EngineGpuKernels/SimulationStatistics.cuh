@@ -37,12 +37,12 @@ public:
         auto partition = calcSystemThreadPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             _mutantToMutantStatisticsMap[index].count = 0;
-            _mutantToMutantStatisticsMap[index].numCells = 0;
+            _mutantToMutantStatisticsMap[index].numObjects = 0;
             _mutantToMutantStatisticsMap[index].color = 0;
         }
     }
 
-    __inline__ __device__ void incNumCells(int color) { atomicAdd(&(_data->timeline.timestep.numCells[color]), 1); }
+    __inline__ __device__ void incNumObjects(int color) { atomicAdd(&(_data->timeline.timestep.numObjects[color]), 1); }
     __inline__ __device__ void incNumReplicator(int color) { atomicAdd(&_data->timeline.timestep.numSelfReplicators[color], 1); }
     __inline__ __device__ int getNumReplicators()
     {
@@ -54,14 +54,14 @@ public:
     }
     __inline__ __device__ void incNumViruses(int color) { atomicAdd(&_data->timeline.timestep.numViruses[color], 1); }
     __inline__ __device__ void incNumFreeCells(int color) { atomicAdd(&_data->timeline.timestep.numFreeCells[color], 1); }
-    __inline__ __device__ void incNumParticles(int color) { atomicAdd(&_data->timeline.timestep.numParticles[color], 1); }
+    __inline__ __device__ void incNumParticles(int color) { atomicAdd(&_data->timeline.timestep.numEnergyParticles[color], 1); }
     __inline__ __device__ void addEnergy(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.totalEnergy[color], valueToAdd); }
-    __inline__ __device__ void addNumCells(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.numCells[color], valueToAdd); }
+    __inline__ __device__ void addNumObjects(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.numObjects[color], valueToAdd); }
     __inline__ __device__ double getSummedNumCells()
     {
         auto result = 0.0;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result += toDouble(_data->timeline.timestep.numCells[i]);
+            result += toDouble(_data->timeline.timestep.numObjects[i]);
         }
         return result;
     }
@@ -69,7 +69,7 @@ public:
     {
         atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].count, 1);
         atomicMax(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].color, color);
-        atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].numCells, numCells);
+        atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].numObjects, numCells);
     }
     __inline__ __device__ void halveNumConnections()
     {
@@ -115,7 +115,7 @@ public:
     //histogram
     __inline__ __device__ void resetHistogramData()
     {
-        _data->histogram.maxValue = 0;
+        _data->histogram.maxAge = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_HISTOGRAM_SLOTS; ++j) {
                 _data->histogram.numCellsByColorBySlot[i][j] = 0;
@@ -123,8 +123,8 @@ public:
         }
     }
     __inline__ __device__ void incNumCells(int color, int slot) { atomicAdd(&(_data->histogram.numCellsByColorBySlot[color][slot]), 1); }
-    __inline__ __device__ void maxValue(int value) { atomicMax(&_data->histogram.maxValue, value); }
-    __inline__ __device__ int getMaxValue() const { return _data->histogram.maxValue; }
+    __inline__ __device__ void maxAge(int value) { atomicMax(&_data->histogram.maxAge, value); }
+    __inline__ __device__ int getMaxAge() const { return _data->histogram.maxAge; }
 
 private:
     StatisticsRawData* _data;
@@ -135,7 +135,7 @@ private:
     {
         uint32_t color;
         uint32_t count;
-        float numCells;
+        float numObjects;
     };
     MutantStatistics* _mutantToMutantStatisticsMap;
 };

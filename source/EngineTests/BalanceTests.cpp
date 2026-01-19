@@ -19,30 +19,28 @@ public:
 
     ~BalanceTests() = default;
 
-    Description createSmallCreatureSeed()
+    Desc createSmallCreatureSeed()
     {
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto& numberGen = NumberGenerator::get();
-        return Description().addCreature(
+        return Desc().addCreature(
             {
-                CellDescription()
-                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
+                ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
-            CreatureDescription().lineageId(0),
-            GenomeDescription().genes({
-                GeneDescription()
+            CreatureDesc().lineageId(0),
+            GenomeDesc().genes({
+                GeneDesc()
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
                     .nodes({
-                        NodeDescription().cellType(DigestorGenomeDescription()),
-                        NodeDescription().cellType(AttackerGenomeDescription()),
-                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                        NodeDescription().cellType(ConstructorGenomeDescription()),
-                        NodeDescription().cellType(
-                            SensorGenomeDescription().mode(DetectCreatureGenomeDescription().restrictToLineage(LineageRestriction_OtherLineage))),
-                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                        NodeDescription().cellType(AttackerGenomeDescription()),
+                        NodeDesc().cellType(DigestorGenomeDesc()),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
+                        NodeDesc().cellType(ConstructorGenomeDesc()),
+                        NodeDesc().cellType(
+                            SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_OtherLineage))),
+                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
                     }),
             }));
     }
@@ -52,42 +50,40 @@ public:
         Low,
         High
     };
-    Description createLargeCreatureSeed(DigestionCapability const& digestionCapability)
+    Desc createLargeCreatureSeed(DigestionCapability const& digestionCapability)
     {
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto& numberGen = NumberGenerator::get();
         auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 1.0f : 0.0f;
-        return Description().addCreature(
+        return Desc().addCreature(
             {
-                CellDescription()
-                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
+                ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
-            CreatureDescription().lineageId(1),
-            GenomeDescription().genes({
-                GeneDescription()
+            CreatureDesc().lineageId(1),
+            GenomeDesc().genes({
+                GeneDesc()
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
                     .nodes({
-                        NodeDescription().cellType(GeneratorGenomeDescription().autoTriggerInterval(15)),
-                        NodeDescription().cellType(DigestorGenomeDescription()),
-                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDescription().cellType(AttackerGenomeDescription()),
-                        NodeDescription().cellType(AttackerGenomeDescription()),
-                        NodeDescription().cellType(AttackerGenomeDescription()),
-                        NodeDescription().cellType(AttackerGenomeDescription()),
-                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDescription().cellType(ConstructorGenomeDescription()),
-                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                        NodeDescription().cellType(AttackerGenomeDescription()),
+                        NodeDesc().cellType(GeneratorGenomeDesc().autoTriggerInterval(15)),
+                        NodeDesc().cellType(DigestorGenomeDesc()),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
+                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(ConstructorGenomeDesc()),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
+                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
                     }),
             }));
     }
@@ -99,7 +95,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
     _parameters.attackerRadius.value[0] = 4.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    Description data;
+    Desc data;
     for (int i = 0; i < 300; ++i) {
         data.add(createSmallCreatureSeed());
     }
@@ -134,7 +130,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
     _parameters.attackerRadius.value[0] = 4.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    Description data;
+    Desc data;
     for (int i = 0; i < 300; ++i) {
         data.add(createSmallCreatureSeed());
     }

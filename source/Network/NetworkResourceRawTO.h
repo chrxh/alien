@@ -12,7 +12,7 @@ enum NetworkResourceColumnId
     NetworkResourceColumnId_Timestamp,
     NetworkResourceColumnId_UserName,
     NetworkResourceColumnId_SimulationName,
-    NetworkResourceColumnId_Description,
+    NetworkResourceColumnId_Desc,
     NetworkResourceColumnId_Likes,
     NetworkResourceColumnId_NumDownloads,
     NetworkResourceColumnId_Width,

@@ -15,11 +15,18 @@ namespace Channels
     auto constexpr CellTypeActivation = 0;
 }
 
+using ObjectType = int;
+enum ObjectType_
+{
+    ObjectType_Structure,
+    ObjectType_FreeCell,
+    ObjectType_Cell,
+    ObjectType_Count,
+};
+
 using CellType = int;
 enum CellType_
 {
-    CellType_Structure,
-    CellType_Free,
     CellType_Base,
     CellType_Depot,
     CellType_Constructor,
@@ -40,8 +47,6 @@ enum CellType_
 namespace Const
 {
     std::vector<std::string> const CellTypeStrings = {
-        "Structure",
-        "Free",
         "Base",
         "Depot",
         "Constructor",
@@ -56,6 +61,11 @@ namespace Const
         "Digestor",
         "Memory",
         "Communicator"};
+
+    std::vector<std::string> const ObjectTypeStrings = {
+        "Structure",
+        "Free Cell",
+        "Cell"};
 }
 
 using CellTypeGenome = int;

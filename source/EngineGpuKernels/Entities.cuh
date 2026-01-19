@@ -6,10 +6,10 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-struct Objects
+struct Entities
 {
-    Array<Cell*> cells;
-    Array<Particle*> particles;
+    Array<Object*> objects;
+    Array<Energy*> energies;
 
     Heap heap;
 

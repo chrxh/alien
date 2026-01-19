@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Object.cuh"
+#include "Entity.cuh"
 #include "ParameterCalculator.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
@@ -24,38 +24,47 @@ private:
 
 __device__ __inline__ void ClusterProcessor::initClusterData(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        cell->clusterIndex = index;
-        cell->clusterBoundaries = 0;
-        cell->clusterPos = {0, 0};
-        cell->clusterVel = {0, 0};
-        cell->clusterAngularMass = 0;
-        cell->clusterAngularMomentum = 0;
-        cell->numCellsInCluster = 0;
+        auto& object = objects.at(index);
+        if (object->type != ObjectType_Structure) {
+            continue;
+        }
+        object->typeData.structure.clusterIndex = index;
+        object->typeData.structure.clusterBoundaries = 0;
+        object->typeData.structure.clusterPos = {0, 0};
+        object->typeData.structure.clusterVel = {0, 0};
+        object->typeData.structure.clusterAngularMass = 0;
+        object->typeData.structure.clusterAngularMomentum = 0;
+        object->typeData.structure.numCellsInCluster = 0;
     }
 }
 
 __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto currentCell = cells.at(index);
+        auto currentObject = objects.at(index);
+        if (currentObject->type != ObjectType_Structure) {
+            continue;
+        }
 
         //heuristics to cover connected cells
         for (int i = 0; i < 30; ++i) {
             bool found = false;
-            for (int j = 0; j < currentCell->numConnections; ++j) {
-                auto candidateCell = currentCell->connections[j].cell;
-                auto cellTag = currentCell->clusterIndex;
-                auto origTag = atomicMin(&candidateCell->clusterIndex, cellTag);
+            for (int j = 0; j < currentObject->numConnections; ++j) {
+                auto candidateObject = currentObject->connections[j].object;
+                if (candidateObject->type != ObjectType_Structure) {
+                    continue;
+                }
+                auto cellTag = currentObject->typeData.structure.clusterIndex;
+                auto origTag = atomicMin(&candidateObject->typeData.structure.clusterIndex, cellTag);
                 if (cellTag < origTag) {
-                    currentCell = candidateCell;
+                    currentObject = candidateObject;
                     found = true;
                     break;
                 }
@@ -69,99 +78,111 @@ __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData
 
 __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = cells.at(index);
-        auto cluster = cells.at(cell->clusterIndex);
-        if (cell->pos.x < data.worldSize.x / 3) {
-            atomicOr(&cluster->clusterBoundaries, 1);
+        auto object = objects.at(index);
+        if (object->type != ObjectType_Structure) {
+            continue;
         }
-        if (cell->pos.y < data.worldSize.y / 3) {
-            atomicOr(&cluster->clusterBoundaries, 2);
+        auto cluster = objects.at(object->typeData.structure.clusterIndex);
+        if (object->pos.x < data.worldSize.x / 3) {
+            atomicOr(&cluster->typeData.structure.clusterBoundaries, 1);
+        }
+        if (object->pos.y < data.worldSize.y / 3) {
+            atomicOr(&cluster->typeData.structure.clusterBoundaries, 2);
         }
     }
 }
 
 __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = cells.at(index);
-        auto cluster = cells.at(cell->clusterIndex);
-        atomicAdd(&cluster->clusterVel.x, cell->vel.x);
-        atomicAdd(&cluster->clusterVel.y, cell->vel.y);
+        auto object = objects.at(index);
+        if (object->type != ObjectType_Structure) {
+            continue;
+        }
+        auto cluster = objects.at(object->typeData.structure.clusterIndex);
+        atomicAdd(&cluster->typeData.structure.clusterVel.x, object->vel.x);
+        atomicAdd(&cluster->typeData.structure.clusterVel.y, object->vel.y);
 
         //topology correction
-        auto cellPos = cell->pos;
-        if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
+        auto cellPos = object->pos;
+        if ((cluster->typeData.structure.clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
-        if ((cluster->clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
+        if ((cluster->typeData.structure.clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
             cellPos.y -= data.worldSize.y;
         }
 
-        atomicAdd(&cluster->clusterPos.x, cellPos.x);
-        atomicAdd(&cluster->clusterPos.y, cellPos.y);
+        atomicAdd(&cluster->typeData.structure.clusterPos.x, cellPos.x);
+        atomicAdd(&cluster->typeData.structure.clusterPos.y, cellPos.y);
 
-        atomicAdd(&cluster->numCellsInCluster, 1);
+        atomicAdd(&cluster->typeData.structure.numCellsInCluster, 1);
     }
 }
 
 __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = cells.at(index);
-        auto cluster = cells.at(cell->clusterIndex);
-        auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
-        auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
+        auto object = objects.at(index);
+        if (object->type != ObjectType_Structure) {
+            continue;
+        }
+        auto cluster = objects.at(object->typeData.structure.clusterIndex);
+        auto clusterVel = cluster->typeData.structure.clusterVel / cluster->typeData.structure.numCellsInCluster;
+        auto clusterPos = cluster->typeData.structure.clusterPos / cluster->typeData.structure.numCellsInCluster;
 
         //topology correction
-        auto cellPos = cell->pos;
-        if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
+        auto cellPos = object->pos;
+        if ((cluster->typeData.structure.clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
-        if ((cluster->clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
+        if ((cluster->typeData.structure.clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
             cellPos.y -= data.worldSize.y;
         }
         auto r = cellPos - clusterPos;
 
         auto angularMass = Math::lengthSquared(r);
-        auto angularMomentum = Physics::angularMomentum(r, cell->vel - clusterVel);
-        atomicAdd(&cluster->clusterAngularMass, angularMass);
-        atomicAdd(&cluster->clusterAngularMomentum, angularMomentum);
+        auto angularMomentum = Physics::angularMomentum(r, object->vel - clusterVel);
+        atomicAdd(&cluster->typeData.structure.clusterAngularMass, angularMass);
+        atomicAdd(&cluster->typeData.structure.clusterAngularMomentum, angularMomentum);
     }
 }
 
 __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = cells.at(index);
-        auto cluster = cells.at(cell->clusterIndex);
-        auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
-        auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
+        auto object = objects.at(index);
+        if (object->type != ObjectType_Structure) {
+            continue;
+        }
+        auto cluster = objects.at(object->typeData.structure.clusterIndex);
+        auto clusterPos = cluster->typeData.structure.clusterPos / cluster->typeData.structure.numCellsInCluster;
+        auto clusterVel = cluster->typeData.structure.clusterVel / cluster->typeData.structure.numCellsInCluster;
 
-        auto cellPos = cell->pos;
-        if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
+        auto cellPos = object->pos;
+        if ((cluster->typeData.structure.clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
-        if ((cluster->clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
+        if ((cluster->typeData.structure.clusterBoundaries & 2) == 2 && cellPos.y > data.worldSize.y * 2 / 3) {
             cellPos.y -= data.worldSize.y;
         }
         auto r = cellPos - clusterPos;
 
-        auto angularVel = Physics::angularVelocity(cluster->clusterAngularMomentum, cluster->clusterAngularMass);
+        auto angularVel = Physics::angularVelocity(cluster->typeData.structure.clusterAngularMomentum, cluster->typeData.structure.clusterAngularMass);
 
-        auto rigidity = ParameterCalculator::calcParameter(cudaSimulationParameters.rigidity, data, cell->pos) * cell->stiffness * cell->stiffness;
-        cell->vel = cell->vel * (1.0f - rigidity) + Physics::tangentialVelocity(r, clusterVel, angularVel) * rigidity;
+        auto rigidity = ParameterCalculator::calcParameter(cudaSimulationParameters.rigidity, data, object->pos) * object->stiffness * object->stiffness;
+        object->vel = object->vel * (1.0f - rigidity) + Physics::tangentialVelocity(r, clusterVel, angularVel) * rigidity;
     }
 }

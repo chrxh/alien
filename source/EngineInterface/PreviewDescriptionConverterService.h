@@ -7,20 +7,20 @@
 
 struct ConversionResult
 {
-    PreviewDescription description;
+    PreviewDesc description;
     float frontAngle = 0;
     std::optional<float> visualFrontAngle;
 };
 
-class PreviewDescriptionConverterService
+class PreviewDescConverterService
 {
-    MAKE_SINGLETON(PreviewDescriptionConverterService);
+    MAKE_SINGLETON(PreviewDescConverterService);
 
 public:
     // Note: lastVisualFrontAngle currently deactivated
-    ConversionResult convertToPreviewDescription(
-        GenomeDescription const& genome,
+    ConversionResult convertToPreviewDesc(
+        GenomeDesc const& genome,
         int startGeneIndex,
-        Description&& phenotype,
+        Desc&& phenotype,
         std::optional<float> const& lastVisualFrontAngle) const;
 };

@@ -14,11 +14,11 @@ struct ExpertToggles;
 struct ColorTransitionRule;
 struct ParameterSpec;
 
-struct Description;
-struct CellDescription;
-struct ParticleDescription;
-struct GenomeDescription;
-struct GeneDescription;
+struct Desc;
+struct ObjectDesc;
+struct EnergyDesc;
+struct GenomeDesc;
+struct GeneDesc;
 
 struct CudaSettings;
 
@@ -40,7 +40,7 @@ class ShapeGeneratorResult;
 
 class StatisticsHistory;
 
-struct PreviewDescription;
+struct PreviewDesc;
 
 struct ConversionResult;
 
@@ -50,7 +50,7 @@ class _GeometryBuffers;
 using GeometryBuffers = std::shared_ptr<_GeometryBuffers>;
 
 struct NumRenderObjects;
-struct CellVertexData;
-struct EnergyParticleVertexData;
+struct ObjectVertexData;
+struct EnergyVertexData;
 
 struct ParametersFilter;

@@ -21,14 +21,15 @@ public:
 
     using CellTypeMode = std::variant<std::monostate, MuscleModeWrapper, SensorModeWrapper, ReconnectorModeWrapper, MemoryModeWrapper, CommunicatorModeWrapper>;
 
-    struct CellParameter
+    struct ObjectParameter
     {
+        ObjectType objectType;
         CellType cellType;
         CellTypeMode mode = std::monostate{};
     };
-    std::vector<CellParameter> getAllCellParameters() const;
-    CellDescription createNonDefaultCellDescription(CellParameter cellParameter) const;
-    ParticleDescription createNonDefaultParticleDescription() const;
+    std::vector<ObjectParameter> getAllObjectParameters() const;
+    ObjectDesc createNonDefaultObjectDesc(ObjectParameter objectParameter) const;
+    EnergyDesc createNonDefaultEnergyDesc() const;
 
     struct NodeParameter
     {
@@ -36,16 +37,16 @@ public:
         CellTypeMode mode = std::monostate{};
     };
     std::vector<NodeParameter> getAllNodeParameters() const;
-    NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
-    std::pair<CreatureDescription, GenomeDescription> createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;
+    NodeDesc createNonDefaultNodeDesc(NodeParameter nodeParameter) const;
+    std::pair<CreatureDesc, GenomeDesc> createNonDefaultCreatureDesc(NodeParameter nodeParameter) const;
 
-    bool compare(Description left, Description right) const;
-    bool compare(CellDescription left, CellDescription right) const;
-    bool compare(ParticleDescription left, ParticleDescription right) const;
-    bool compare(CellDescription const& cell, NodeDescription const& node) const;
+    bool compare(Desc left, Desc right) const;
+    bool compare(ObjectDesc left, ObjectDesc right) const;
+    bool compare(EnergyDesc left, EnergyDesc right) const;
+    bool compare(ObjectDesc const& object, NodeDesc const& node) const;
 
 private:
-    CellTypeDescription createNonDefaultCellTypeDescription(CellParameter cellParameter) const;
+    CellTypeDesc createNonDefaultCellTypeDesc(ObjectParameter objectParameter) const;
 
-    CellTypeGenomeDescription createNonDefaultCellTypeGenomeDescription(NodeParameter cellParameter) const;
+    CellTypeGenomeDesc createNonDefaultCellTypeGenomeDesc(NodeParameter objectParameter) const;
 };

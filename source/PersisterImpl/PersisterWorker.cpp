@@ -377,7 +377,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         //        request->getSenderInfo().senderId,
         //        PersisterErrorInfo{"Failed to load genome. Your program version may not match."});
         //}
-        //resultData.resourceData = GenomeDescriptionConverterService::get().convertBytesToDescription(genome);
+        //resultData.resourceData = GenomeDescConverterService::get().convertBytesToDescription(genome);
     }
 
     return std::make_shared<_DownloadNetworkResourceRequestResult>(request->getRequestId(), resultData);
@@ -428,16 +428,16 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         settings = serializedSim.auxiliaryData;
         statistics = serializedSim.statistics;
         size = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
-        numObjects = toInt(deserializedSim.mainData._cells.size() + deserializedSim.mainData._particles.size());
+        numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
         THROW_NOT_IMPLEMENTED();
         //auto genome = std::get<UploadNetworkResourceRequestData::GenomeData>(requestData.data).description;
-        //if (genome._cells.empty()) {
+        //if (genome._objects.empty()) {
         //    return std::make_shared<_PersisterRequestError>(
         //        request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for uploading selected."});
         //}
-        //auto genomeData = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome);
-        //numObjects = GenomeDescriptionConverterService::get().getNumNodesRecursively(genomeData, true);
+        //auto genomeData = GenomeDescConverterService::get().convertDescriptionToBytes(genome);
+        //numObjects = GenomeDescConverterService::get().getNumNodesRecursively(genomeData, true);
 
         //if (!SerializerService::get().serializeGenomeToString(mainData, genomeData)) {
         //    return std::make_shared<_PersisterRequestError>(
@@ -517,7 +517,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         settings = serializedSim.auxiliaryData;
         statistics = serializedSim.statistics;
         worldSize = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
-        numObjects = toInt(deserializedSim.mainData._cells.size() + deserializedSim.mainData._particles.size());
+        numObjects = toInt(deserializedSim.mainData._objects.size() + deserializedSim.mainData._energies.size());
     } else {
         THROW_NOT_IMPLEMENTED();
     }

@@ -14,7 +14,7 @@ public:
         _serializerService = &SerializerService::get();
     }
 
-    void testSerializationAndDeserialization(Description const& data)
+    void testSerializationAndDeserialization(Desc const& data)
     {
         DeserializedSimulation deserializedSimulationBefore{.mainData = data};
         SerializedSimulation serializedSimulation;
@@ -31,31 +31,36 @@ protected:
     SerializerService* _serializerService;
 };
 
-TEST_F(SerializerServiceTests, singleParticle)
+TEST_F(SerializerServiceTests, singleEnergyParticle)
 {
-    Description data;
-    data._particles.emplace_back(_descriptionTestDataFactory->createNonDefaultParticleDescription());
+    Desc data;
+    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDesc());
 
     testSerializationAndDeserialization(data);
 }
 
-using CellParameter = DescriptionTestDataFactory::CellParameter;
+using ObjectParameter = DescriptionTestDataFactory::ObjectParameter;
 class SerializerServiceTests_AllCellTypes
     : public SerializerServiceTests
-    , public testing::WithParamInterface<CellParameter>
+    , public testing::WithParamInterface<ObjectParameter>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllCellTypes,
     SerializerServiceTests_AllCellTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllCellParameters()));
+    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
 
-TEST_P(SerializerServiceTests_AllCellTypes, cellWithoutCreature)
+TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
 {
-    auto cellParameter = GetParam();
+    auto objectParameter = GetParam();
 
-    Description data;
-    data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
+    Desc data;
+    if (objectParameter.objectType == ObjectType_Cell) {
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+    } else {
+        data.objects({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
+    }
+
 
     testSerializationAndDeserialization(data);
 }
@@ -71,13 +76,13 @@ INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllNodeTypes,
     ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
 
-TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
+TEST_P(SerializerServiceTests_AllNodeTypes, objectWithNonEmptyGenome)
 {
     auto nodeParameter = GetParam();
 
-    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
-    auto data = Description().addCreature({CellDescription()}, creature, genome);
+    auto data = Desc().addCreature({ObjectDesc()}, creature, genome);
 
     testSerializationAndDeserialization(data);
 }

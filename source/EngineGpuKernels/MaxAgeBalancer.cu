@@ -29,7 +29,7 @@ void _MaxAgeBalancer::initializeIfNecessary(SimulationParameters const& paramete
 {
     auto needsInitialization = false;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        if (parameters.maxCellAge.value[i] != _lastCellMaxAge[i]) {
+        if (parameters.maxCellAge.value[i] != _lastObjectMaxAge[i]) {
             needsInitialization = true;
         }
     }
@@ -105,7 +105,7 @@ void _MaxAgeBalancer::startNewMeasurement(uint64_t timestep)
 void _MaxAgeBalancer::saveLastState(SimulationParameters const& parameters)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
-        _lastCellMaxAge[i] = parameters.maxCellAge.value[i];
+        _lastObjectMaxAge[i] = parameters.maxCellAge.value[i];
     }
     _lastAdaptiveCellMaxAge = parameters.maxCellAgeBalancerInterval.enabled;
 }

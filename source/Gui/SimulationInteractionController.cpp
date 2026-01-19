@@ -395,7 +395,7 @@ void SimulationInteractionController::drawCursor()
         } else {
             auto zoom = Viewport::get().getZoomFactor();
             auto radius = EditorModel::get().getPencilWidth() * zoom;
-            auto color = Const::IndividualCellColors[EditorModel::get().getDefaultColorCode()];
+            auto color = Const::IndividualObjectColors[EditorModel::get().getDefaultColorCode()];
             float h, s, v;
             AlienGui::ConvertRGBtoHSV(color, h, s, v);
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));

@@ -5,7 +5,7 @@
 #include "Array.cuh"
 #include "Base.cuh"
 #include "Math.cuh"
-#include "Object.cuh"
+#include "Entity.cuh"
 
 class BaseMap
 {
@@ -68,17 +68,17 @@ class BasicMap : public BaseMap
 public:
 };
 
-class CellMap : public BaseMap
+class ObjectMap : public BaseMap
 {
 public:
     __host__ __inline__ void init(int2 const& size)
     {
         BaseMap::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<Cell*>(size.x * size.y, _map);
+        CudaMemoryManager::getInstance().acquireMemory<Object*>(size.x * size.y, _map);
         _mapEntries.init();
 
-        std::vector<Cell*> hostMap(size.x * size.y, 0);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Cell*) * size.x * size.y, cudaMemcpyHostToDevice));
+        std::vector<Object*> hostMap(size.x * size.y, 0);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Object*) * size.x * size.y, cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
@@ -92,7 +92,7 @@ public:
         _mapEntries.free();
     }
 
-    __device__ __inline__ void set_block(int numEntities, Cell** cells)
+    __device__ __inline__ void set_block(int numEntities, Object** objects)
     {
         if (0 == numEntities) {
             return;
@@ -106,22 +106,22 @@ public:
 
         auto partition = calcThreadBlockPartition(numEntities);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& cell = cells[index];
-            int2 posInt = {floorInt(cell->pos.x), floorInt(cell->pos.y)};
+            auto const& object = objects[index];
+            int2 posInt = {floorInt(object->pos.x), floorInt(object->pos.y)};
             correctPosition(posInt);
             auto slot = posInt.x + posInt.y * _size.x;
-            Cell* slotCell = reinterpret_cast<Cell*>(atomicCAS(
+            Object* slotObject = reinterpret_cast<Object*>(atomicCAS(
                 reinterpret_cast<unsigned long long int*>(&_map[slot]),
                 reinterpret_cast<unsigned long long int>(nullptr),
-                reinterpret_cast<unsigned long long int>(cell)));
+                reinterpret_cast<unsigned long long int>(object)));
             for (int level = 0; level < 10; ++level) {
-                if (!slotCell) {
+                if (!slotObject) {
                     break;
                 }
-                slotCell = reinterpret_cast<Cell*>(atomicCAS(
-                    reinterpret_cast<unsigned long long int*>(&slotCell->nextCell),
+                slotObject = reinterpret_cast<Object*>(atomicCAS(
+                    reinterpret_cast<unsigned long long int*>(&slotObject->nextObject),
                     reinterpret_cast<unsigned long long int>(nullptr),
-                    reinterpret_cast<unsigned long long int>(cell)));
+                    reinterpret_cast<unsigned long long int>(object)));
             }
 
             entrySubarray[index] = slot;
@@ -129,40 +129,40 @@ public:
         __syncthreads();
     }
 
-    __device__ __inline__ Cell* getFirst(float2 const& pos) const
+    __device__ __inline__ Object* getFirst(float2 const& pos) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         correctPosition(posInt);
         return _map[posInt.x + posInt.y * _size.x];
     }
 
-    __device__ __inline__ Cell* getFirst(int2 const& pos) const { return _map[pos.x + pos.y * _size.x]; }
+    __device__ __inline__ Object* getFirst(int2 const& pos) const { return _map[pos.x + pos.y * _size.x]; }
 
     template <typename MatchFunc>
-    __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
+    __device__ __inline__ void getMatchingObjects(Object* objects[], int arraySize, int& numObjects, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
         const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
-        numCells = 0;
+        numObjects = 0;
         int radiusInt = ceilf(radius);
         for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
             for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
                 int slot = scanPos.x + scanPos.y * _size.x;
-                auto slotCell = _map[slot];
+                auto slotObject = _map[slot];
                 for (int level = 0; level < 10; ++level) {
-                    if (numCells == arraySize) {
+                    if (numObjects == arraySize) {
                         return;
                     }
-                    if (!slotCell) {
+                    if (!slotObject) {
                         break;
                     }
-                    if (Math::length(slotCell->pos - pos) <= radius && detached + slotCell->detached != 1 && matchFunc(slotCell)) {
-                        cells[numCells] = slotCell;
-                        ++numCells;
+                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached != 1 && matchFunc(slotObject)) {
+                        objects[numObjects] = slotObject;
+                        ++numObjects;
                     }
-                    slotCell = slotCell->nextCell;
+                    slotObject = slotObject->nextObject;
                 }
             }
         }
@@ -178,15 +178,15 @@ public:
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
                 int slot = scanPos.x + scanPos.y * _size.x;
-                auto slotCell = _map[slot];
+                auto slotObject = _map[slot];
                 for (int level = 0; level < 10; ++level) {
-                    if (!slotCell) {
+                    if (!slotObject) {
                         break;
                     }
-                    if (Math::length(slotCell->pos - pos) <= radius && detached + slotCell->detached != 1) {
-                        execFunc(slotCell);
+                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached != 1) {
+                        execFunc(slotObject);
                     }
-                    slotCell = slotCell->nextCell;
+                    slotObject = slotObject->nextObject;
                 }
             }
         }
@@ -202,21 +202,21 @@ public:
     }
 
 private:
-    Cell** _map;
+    Object** _map;
     Array<int> _mapEntries;
 };
 
-class ParticleMap : public BaseMap
+class EnergyMap : public BaseMap
 {
 public:
     __host__ __inline__ void init(int2 const& size)
     {
         BaseMap::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<Particle*>(size.x * size.y, _map);
+        CudaMemoryManager::getInstance().acquireMemory<Energy*>(size.x * size.y, _map);
         _mapEntries.init();
 
-        std::vector<Particle*> hostMap(size.x * size.y, 0);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Particle*) * size.x * size.y, cudaMemcpyHostToDevice));
+        std::vector<Energy*> hostMap(size.x * size.y, 0);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_map, hostMap.data(), sizeof(Energy*) * size.x * size.y, cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
@@ -229,7 +229,7 @@ public:
         _mapEntries.free();
     }
 
-    __device__ __inline__ void set_block(int numEntities, Particle** entities)
+    __device__ __inline__ void set_block(int numEntities, Energy** entities)
     {
         if (0 == numEntities) {
             return;
@@ -253,7 +253,7 @@ public:
         __syncthreads();
     }
 
-    __device__ __inline__ Particle* get(float2 const& pos) const
+    __device__ __inline__ Energy* get(float2 const& pos) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         correctPosition(posInt);
@@ -271,6 +271,6 @@ public:
     }
 
 private:
-    Particle** _map;
+    Energy** _map;
     Array<int> _mapEntries;
 };

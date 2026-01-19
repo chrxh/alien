@@ -20,7 +20,7 @@
 
 GenomeTabWidget _GenomeTabWidget::createDraftTab(
     GenomeWindowEditData const& genomeEditData,
-    GenomeDescription const& creature,
+    GenomeDesc const& creature,
     GenomeTabLayoutData const& layoutData)
 {
     return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, creature, DraftData(), layoutData));
@@ -29,7 +29,7 @@ GenomeTabWidget _GenomeTabWidget::createDraftTab(
 GenomeTabWidget _GenomeTabWidget::createCreatureTab(
     GenomeWindowEditData const& genomeEditData,
     uint64_t creatureId,
-    GenomeDescription const& genome,
+    GenomeDesc const& genome,
     GenomeTabLayoutData const& layoutData)
 {
     return GenomeTabWidget(
@@ -59,7 +59,7 @@ void _GenomeTabWidget::process()
     }
     ImGui::EndChild();
 
-    GenomeDescriptionValidationService::get().validateAndCorrect(_editData->genome);
+    GenomeDescValidationService::get().validateAndCorrect(_editData->genome);
 
     updateSpecificEditDataFromSimulation();
 }
@@ -104,12 +104,12 @@ GenomeTabLayoutData const& _GenomeTabWidget::getLayoutData() const
     return _layoutData;
 }
 
-GenomeDescription const& _GenomeTabWidget::getGenomeDescription() const
+GenomeDesc const& _GenomeTabWidget::getGenomeDesc() const
 {
     return _editData->genome;
 }
 
-void _GenomeTabWidget::setGenomeDescription(GenomeDescription const& genome)
+void _GenomeTabWidget::setGenomeDesc(GenomeDesc const& genome)
 {
     _editData->genome = genome;
 }
@@ -131,7 +131,7 @@ uint64_t _GenomeTabWidget::getCreatureId()
 
 bool _GenomeTabWidget::isEmpty() const
 {
-    return _editData->genome == GenomeDescription();
+    return _editData->genome == GenomeDesc();
 }
 
 void _GenomeTabWidget::convertToDraftTab()
@@ -155,7 +155,7 @@ void _GenomeTabWidget::resetChanges()
 
 _GenomeTabWidget::_GenomeTabWidget(
     GenomeWindowEditData const& genomeEditData,
-    GenomeDescription const& genome,
+    GenomeDesc const& genome,
     SpecificEditData const& specificEditData,
     GenomeTabLayoutData const& layoutData)
 {

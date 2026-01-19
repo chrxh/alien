@@ -71,7 +71,7 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
     _syncSimulationWithRenderingRatio = value;
 }
 
-Description EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+Desc EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     EngineWorkerGuard access(this);
 
@@ -81,7 +81,7 @@ Description EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, In
     return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-Description EngineWorker::getSelectedSimulationData(bool includeClusters)
+Desc EngineWorker::getSelectedSimulationData(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
@@ -90,7 +90,7 @@ Description EngineWorker::getSelectedSimulationData(bool includeClusters)
     return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-Description EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
+Desc EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
 {
     EngineWorkerGuard access(this);
 
@@ -114,7 +114,7 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
     _simulationCudaFacade->setStatisticsHistory(data);
 }
 
-void EngineWorker::addAndSelectSimulationData(Description&& dataToUpdate)
+void EngineWorker::addAndSelectSimulationData(Desc&& dataToUpdate)
 {
     EngineWorkerGuard access(this);
 
@@ -128,7 +128,7 @@ void EngineWorker::addAndSelectSimulationData(Description&& dataToUpdate)
     _simulationCudaFacade->addAndSelectSimulationData(dataTO);
 }
 
-void EngineWorker::setSimulationData(Description const& dataToUpdate)
+void EngineWorker::setSimulationData(Desc const& dataToUpdate)
 {
     if (!dataToUpdate.hasUniqueIds()) {
         throw std::runtime_error("Object ids are not unique.");
@@ -183,7 +183,7 @@ void EngineWorker::setBarrier(bool value, bool includeClusters)
     _simulationCudaFacade->setBarrier(value, includeClusters);
 }
 
-void EngineWorker::changeCell(CellDescription const& changedCell)
+void EngineWorker::changeCell(ObjectDesc const& changedCell)
 {
     EngineWorkerGuard access(this);
 
@@ -192,7 +192,7 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
 
-void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
+void EngineWorker::changeParticle(EnergyDesc const& changedParticle)
 {
     EngineWorkerGuard access(this);
 
@@ -201,7 +201,7 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
 
-bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDescription const& genome)
+bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDesc const& genome)
 {
     EngineWorkerGuard access(this);
 
@@ -210,7 +210,7 @@ bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDescription const& 
     return _simulationCudaFacade->changeCreature(dataTO);
 }
 
-std::optional<GenomeDescription> EngineWorker::getGenomeOfCreature(uint64_t creatureId)
+std::optional<GenomeDesc> EngineWorker::getGenomeOfCreature(uint64_t creatureId)
 {
     EngineWorkerGuard access(this);
 
@@ -414,7 +414,7 @@ bool EngineWorker::isSimulationRunning() const
     return _isSimulationRunning.load();
 }
 
-Description EngineWorker::getPreviewData()
+Desc EngineWorker::getPreviewData()
 {
     EngineWorkerGuard access(this);
 
@@ -424,7 +424,7 @@ Description EngineWorker::getPreviewData()
     return DescriptionConverterService::get().convertTOtoDescription(preview);
 }
 
-void EngineWorker::setPreviewData(Description const& description)
+void EngineWorker::setPreviewData(Desc const& description)
 {
     if (!description.hasUniqueIds()) {
         throw std::runtime_error("Cell ids are not unique.");
@@ -461,22 +461,22 @@ void EngineWorker::setCurrentTimestepForPreview(uint64_t timestep)
     _simulationCudaFacade->setCurrentTimestepForPreview(timestep);
 }
 
-void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)
+void EngineWorker::testOnly_mutate(uint64_t objectId, MutationType mutationType)
 {
     EngineWorkerGuard access(this);
-    _simulationCudaFacade->testOnly_mutate(cellId, mutationType);
+    _simulationCudaFacade->testOnly_mutate(objectId, mutationType);
 }
 
-void EngineWorker::testOnly_mutationCheck(uint64_t cellId)
+void EngineWorker::testOnly_mutationCheck(uint64_t objectId)
 {
     EngineWorkerGuard access(this);
-    _simulationCudaFacade->testOnly_mutationCheck(cellId);
+    _simulationCudaFacade->testOnly_mutationCheck(objectId);
 }
 
-void EngineWorker::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
+void EngineWorker::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
     EngineWorkerGuard access(this);
-    _simulationCudaFacade->testOnly_createConnection(cellId1, cellId2);
+    _simulationCudaFacade->testOnly_createConnection(objectId1, objectId2);
 }
 
 void EngineWorker::testOnly_cleanupAfterTimestep()

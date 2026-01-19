@@ -22,7 +22,7 @@ public:
     static void cleanupGlobalContext();
 
 protected:
-    double getEnergy(Description const& data) const;
+    double getEnergy(Desc const& data) const;
 
     bool approxCompare(double expected, double actual, float precision = 0.001f) const { return TestHelper::approxCompare(expected, actual, precision); }
 
@@ -37,9 +37,9 @@ protected:
         return TestHelper::approxCompareAngles(expected, actual, precision);
     }
 
-    bool compare(Description left, Description right) const;
-    bool compare(CellDescription left, CellDescription right) const;
-    bool compare(ParticleDescription left, ParticleDescription right) const;
+    bool compare(Desc left, Desc right) const;
+    bool compare(ObjectDesc left, ObjectDesc right) const;
+    bool compare(EnergyDesc left, EnergyDesc right) const;
 
     SimulationFacade _simulationFacade;
     SimulationParameters _parameters;

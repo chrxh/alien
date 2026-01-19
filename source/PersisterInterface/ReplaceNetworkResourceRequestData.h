@@ -21,7 +21,7 @@ struct ReplaceNetworkResourceRequestData
     };
     struct CreatureData
     {
-        GenomeDescription description;
+        GenomeDesc description;
     };
     std::variant<SimulationData, CreatureData> data;
 };

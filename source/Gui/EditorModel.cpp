@@ -22,12 +22,12 @@ void EditorModel::update()
 
 bool EditorModel::isSelectionEmpty() const
 {
-    return 0 == _selectionShallowData.numCells && 0 == _selectionShallowData.numClusterCells && 0 == _selectionShallowData.numParticles;
+    return 0 == _selectionShallowData.numObjects && 0 == _selectionShallowData.numClusterCells && 0 == _selectionShallowData.numEnergyParticles;
 }
 
 bool EditorModel::isCellSelectionEmpty() const
 {
-    return 0 == _selectionShallowData.numCells;
+    return 0 == _selectionShallowData.numObjects;
 }
 
 void EditorModel::clear()
@@ -40,17 +40,17 @@ bool EditorModel::existsInspectedEntity(uint64_t id) const
     return _inspectedEntityById.find(id) != _inspectedEntityById.end();
 }
 
-ExtendedCellOrParticleDescription EditorModel::getInspectedEntity(uint64_t id) const
+ExtendedObjectOrEnergyDesc EditorModel::getInspectedEntity(uint64_t id) const
 {
     return _inspectedEntityById.at(id);
 }
 
-void EditorModel::addInspectedEntity(ExtendedCellOrParticleDescription const& entity)
+void EditorModel::addInspectedEntity(ExtendedObjectOrEnergyDesc const& entity)
 {
     _inspectedEntityById.emplace(DescriptionEditService::get().getId(entity), entity);
 }
 
-void EditorModel::setInspectedEntities(std::vector<ExtendedCellOrParticleDescription> const& inspectedEntities)
+void EditorModel::setInspectedEntities(std::vector<ExtendedObjectOrEnergyDesc> const& inspectedEntities)
 {
     _inspectedEntityById.clear();
     for (auto const& entity : inspectedEntities) {

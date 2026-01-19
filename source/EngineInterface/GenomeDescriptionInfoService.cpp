@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iterator>
 
-int GenomeDescriptionInfoService::getNumberOfNodes(GenomeDescription const& genome) const
+int GenomeDescInfoService::getNumberOfNodes(GenomeDesc const& genome) const
 {
     int result = 0;
     for (auto const& gene : genome._genes) {
@@ -14,7 +14,7 @@ int GenomeDescriptionInfoService::getNumberOfNodes(GenomeDescription const& geno
 
 namespace
 {
-    int countNodes(GenomeDescription const& genome, int geneIndex, std::vector<int>& lastGenes)
+    int countNodes(GenomeDesc const& genome, int geneIndex, std::vector<int>& lastGenes)
     {
         if (std::ranges::find(lastGenes, geneIndex) != lastGenes.end()) {
             return -1;
@@ -32,7 +32,7 @@ namespace
         auto result = gene._nodes.size() * gene._numConcatenations * numBranches;
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._geneIndex != 0) {  // First gene is for self-replication and should not be counted
                     auto numNodes = numBranches * countNodes(genome, constructor._geneIndex, lastGenes);
                     if (numNodes == -1) {
@@ -47,7 +47,7 @@ namespace
     }
 }
 
-int GenomeDescriptionInfoService::getNumberOfResultingCells(GenomeDescription const& genome, int startGeneIndex) const
+int GenomeDescInfoService::getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex) const
 {
     if (genome._genes.empty()) {
         return 0;
@@ -56,26 +56,26 @@ int GenomeDescriptionInfoService::getNumberOfResultingCells(GenomeDescription co
     return countNodes(genome, startGeneIndex, lastGenes);
 }
 
-std::vector<int> GenomeDescriptionInfoService::getReferences(GeneDescription const& gene) const
+std::vector<int> GenomeDescInfoService::getReferences(GeneDesc const& gene) const
 {
     std::vector<int> result;
     for (auto const& node : gene._nodes) {
         if (node.getCellType() == CellTypeGenome_Constructor) {
-            auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+            auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
             result.emplace_back(constructor._geneIndex);
         }
     }
     return result;
 }
 
-std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription const& genome, int geneIndex) const
+std::vector<int> GenomeDescInfoService::getReferencedBy(GenomeDesc const& genome, int geneIndex) const
 {
     std::vector<int> result;
     for (int i = 0; i < genome._genes.size(); ++i) {
         auto const& gene = genome._genes[i];
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._geneIndex == geneIndex) {
                     result.emplace_back(i);
                 }
@@ -85,13 +85,13 @@ std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription
     return result;
 }
 
-bool GenomeDescriptionInfoService::isConnectedToRoot(GenomeDescription const& genome, int startGeneIndex) const
+bool GenomeDescInfoService::isConnectedToRoot(GenomeDesc const& genome, int startGeneIndex) const
 {
     auto hull = getReferencedGenesInRootGeneHull(genome);
     return hull.contains(startGeneIndex);
 }
 
-std::set<int> GenomeDescriptionInfoService::getReferencedGenesInRootGeneHull(GenomeDescription const& genome) const
+std::set<int> GenomeDescInfoService::getReferencedGenesInRootGeneHull(GenomeDesc const& genome) const
 {
     if (genome._genes.empty()) {
         return {};
@@ -121,7 +121,7 @@ std::set<int> GenomeDescriptionInfoService::getReferencedGenesInRootGeneHull(Gen
     return alreadyInspectedGeneIndices;
 }
 
-auto GenomeDescriptionInfoService::getGeneIndicesForSubGenomes(GenomeDescription const& genome) const -> std::vector<GeneIndicesForSubGenome>
+auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome) const -> std::vector<GeneIndicesForSubGenome>
 {
     if (genome._genes.empty()) {
         return {};
@@ -148,8 +148,8 @@ auto GenomeDescriptionInfoService::getGeneIndicesForSubGenomes(GenomeDescription
     return result;
 }
 
-auto GenomeDescriptionInfoService::getGeneIndicesForSubGenomes(
-    GenomeDescription const& genome,
+auto GenomeDescInfoService::getGeneIndicesForSubGenomes(
+    GenomeDesc const& genome,
     std::set<int> const& nonInspectedGeneIndices,
     int startGeneIndex) const -> std::vector<GeneIndicesForSubGenome>
 {
@@ -193,7 +193,7 @@ auto GenomeDescriptionInfoService::getGeneIndicesForSubGenomes(
     return result;
 }
 
-auto GenomeDescriptionInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDescription const& genome, int startGeneIndex) const -> ReferencedGenes
+auto GenomeDescInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDesc const& genome, int startGeneIndex) const -> ReferencedGenes
 {
     ReferencedGenes result;
     std::set<int> alreadyInspectedGeneIndices;

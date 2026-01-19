@@ -121,10 +121,10 @@ void main()
 
   
     // Extract arrow direction flags from the state field
-    // Bit 0: arrow to cell1 (vertex 0)
-    // Bit 1: arrow to cell2 (vertex 1)
-    bool arrowToCell1 = (vertexActive[0] & 1) != 0;
-    bool arrowToCell2 = (vertexActive[0] & 2) != 0;
+    // Bit 0: arrow to object1 (vertex 0)
+    // Bit 1: arrow to object2 (vertex 1)
+    bool arrowToObject1 = (vertexActive[0] & 1) != 0;
+    bool arrowToObject2 = (vertexActive[0] & 2) != 0;
     
     // Line width in NDC coordinates - thinner lines (1-2 pixels)
     float lineWidth = 2.0;
@@ -140,11 +140,11 @@ void main()
     emitLine(p0, p1, vertexColor[0], vertexColor[1], lineWidth);
     
     // Draw arrow heads if signal can flow
-    if (arrowToCell1) {
+    if (arrowToObject1) {
         emitArrowHead(p0, -dir, vertexColor[0], lineWidth, arrowSize);
     }
     
-    if (arrowToCell2) {
+    if (arrowToObject2) {
         emitArrowHead(p1, dir, vertexColor[1], lineWidth, arrowSize);
     }
 }

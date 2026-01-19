@@ -204,7 +204,7 @@ void _GeneEditorWidget::processNodeList()
                         auto nodeType = node.getCellType();
                         auto text = Const::CellTypeGenomeStrings.at(nodeType);
                         if (nodeType == CellTypeGenome_Constructor) {
-                            auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                            auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                             text += " (Gene " + std::to_string(constructor._geneIndex + 1) + ")";
                         }
                         AlienGui::Text(text);
@@ -217,7 +217,7 @@ void _GeneEditorWidget::processNodeList()
                     // Column 3: Color
                     ImGui::TableNextColumn();
                     if (ImGui::BeginChild("color", {0, ImGui::GetTextLineHeight()}, 0, ImGuiWindowFlags_NoInputs)) {
-                        AlienGui::ColorField(Const::IndividualCellColors[node._color], 40.0f, ImGui::GetTextLineHeight());
+                        AlienGui::ColorField(Const::IndividualObjectColors[node._color], 40.0f, ImGui::GetTextLineHeight());
                     }
                     ImGui::EndChild();
 
@@ -298,7 +298,7 @@ void _GeneEditorWidget::onAddNode()
     auto& gene = _editData->getSelectedGeneRef();
     auto selectedNode = _editData->getSelectedNodeIndex();
     if (gene._nodes.empty()) {
-        GenomeDescriptionEditService::get().addNode(gene, 0, NodeDescription());
+        GenomeDescEditService::get().addNode(gene, 0, NodeDesc());
         _editData->setSelectedNodeIndex(0);
     } else {
         int insertIndex;
@@ -309,7 +309,7 @@ void _GeneEditorWidget::onAddNode()
         }
         int color = gene._nodes.at(insertIndex)._color;
 
-        GenomeDescriptionEditService::get().addNode(gene, insertIndex, NodeDescription().color(color));
+        GenomeDescEditService::get().addNode(gene, insertIndex, NodeDesc().color(color));
 
         _editData->setSelectedNodeIndex(insertIndex + 1);
     }
@@ -320,7 +320,7 @@ void _GeneEditorWidget::onRemoveNode()
     int removeIndex = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
 
-    GenomeDescriptionEditService::get().removeNode(gene, removeIndex);
+    GenomeDescEditService::get().removeNode(gene, removeIndex);
 
     // Adapt node selection
     auto& nodes = gene._nodes;
@@ -337,7 +337,7 @@ void _GeneEditorWidget::onMoveNodeUpward()
 {
     auto indexToMove = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
-    GenomeDescriptionEditService::get().swapNodes(gene, indexToMove - 1);
+    GenomeDescEditService::get().swapNodes(gene, indexToMove - 1);
 
     // Adapt gene selection
     _editData->setSelectedNodeIndex(_editData->getSelectedNodeIndex().value() - 1);
@@ -347,7 +347,7 @@ void _GeneEditorWidget::onMoveNodeDownward()
 {
     auto indexToMove = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
-    GenomeDescriptionEditService::get().swapNodes(gene, indexToMove);
+    GenomeDescEditService::get().swapNodes(gene, indexToMove);
 
     // Adapt gene selection
     _editData->setSelectedNodeIndex(_editData->getSelectedNodeIndex().value() + 1);

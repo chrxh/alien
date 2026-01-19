@@ -3,7 +3,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 
 #include "ConstantMemory.cuh"
-#include "Object.cuh"
+#include "Entity.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -13,12 +13,12 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static void processIntegrator(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void processDelay(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processIntegrator(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processDelay(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -30,53 +30,53 @@ __device__ __inline__ void MemoryProcessor::process(SimulationData& data, Simula
     auto& operations = data.cellTypeOperations[CellType_Memory];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, result, operations.at(i).object);
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (cell->signalState != SignalState_Active) {
+    if (object->typeData.cell.signalState != SignalState_Active) {
         return;
     }
-    auto const& mode = cell->cellTypeData.memory.mode;
+    auto const& mode = object->typeData.cell.cellTypeData.memory.mode;
     if (mode == MemoryMode_SignalDelay) {
-        processDelay(data, statistics, cell);
+        processDelay(data, statistics, object);
     } else if (mode == MemoryMode_SignalIntegrator) {
-        processIntegrator(data, statistics, cell);
+        processIntegrator(data, statistics, object);
     } else if (mode == MemoryMode_SignalRecorder) {
-        processSignalRecorder(data, statistics, cell);
+        processSignalRecorder(data, statistics, object);
     } else if (mode == MemoryMode_SignalStorage) {
-        processSignalStorage(data, statistics, cell);
+        processSignalStorage(data, statistics, object);
     }
 }
 
-__inline__ __device__ void MemoryProcessor::processIntegrator(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ void MemoryProcessor::processIntegrator(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    auto& memory = cell->cellTypeData.memory;
+    auto& memory = object->typeData.cell.cellTypeData.memory;
 
     // Initialize memory if necessary
     if (memory.numSignalEntries != 1) {
         memory.numSignalEntries = 1;
-        memory.signalEntries = data.objects.heap.getTypedSubArray<SignalEntry>(1);
+        memory.signalEntries = data.entities.heap.getTypedSubArray<SignalEntry>(1);
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            memory.signalEntries->channels[i] = cell->signal.channels[i];
+            memory.signalEntries->channels[i] = object->typeData.cell.signal.channels[i];
         }
     } else {
         auto const& newSignalWeight = memory.modeData.signalIntegrator.newSignalWeight;
         auto const& channelBitMask = memory.channelBitMask;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            memory.signalEntries->channels[i] = (1.0f - newSignalWeight) * memory.signalEntries->channels[i] + newSignalWeight * cell->signal.channels[i];
+            memory.signalEntries->channels[i] = (1.0f - newSignalWeight) * memory.signalEntries->channels[i] + newSignalWeight * object->typeData.cell.signal.channels[i];
             if (channelBitMask & (1 << i)) {
-                cell->signal.channels[i] = memory.signalEntries->channels[i];
+                object->typeData.cell.signal.channels[i] = memory.signalEntries->channels[i];
             }
         }
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    auto& memory = cell->cellTypeData.memory;
+    auto& memory = object->typeData.cell.cellTypeData.memory;
     auto& signalDelay = memory.modeData.signalDelay;
 
     if (signalDelay.delay == 0) {
@@ -86,7 +86,7 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
     // Initialize memory if necessary
     if (memory.numSignalEntries != signalDelay.delay) {
         memory.numSignalEntries = signalDelay.delay;
-        memory.signalEntries = data.objects.heap.getTypedSubArray<SignalEntry>(memory.numSignalEntries);
+        memory.signalEntries = data.entities.heap.getTypedSubArray<SignalEntry>(memory.numSignalEntries);
         signalDelay.numSignalEntriesInitialized = 0;
         signalDelay.ringBufferIndex = 0;
     }
@@ -102,7 +102,7 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
 
     // Store current signal at ringBufferIndex (this position contains the oldest entry which we just output)
     for (int k = 0; k < MAX_CHANNELS; ++k) {
-        memory.signalEntries[signalDelay.ringBufferIndex].channels[k] = cell->signal.channels[k];
+        memory.signalEntries[signalDelay.ringBufferIndex].channels[k] = object->typeData.cell.signal.channels[k];
     }
 
     // Write output
@@ -110,7 +110,7 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
         auto const& channelBitMask = memory.channelBitMask;
         for (int k = 0; k < MAX_CHANNELS; ++k) {
             if (channelBitMask & (1 << k)) {
-                cell->signal.channels[k] = output.channels[k];
+                object->typeData.cell.signal.channels[k] = output.channels[k];
             }
         }
     }
@@ -124,9 +124,9 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    auto& memory = cell->cellTypeData.memory;
+    auto& memory = object->typeData.cell.cellTypeData.memory;
     auto& signalRecorder = memory.modeData.signalRecorder;
 
     if (memory.numSignalEntries == 0) {
@@ -150,13 +150,13 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
     // State machine for recording/reading
     if (state == SignalRecorderState_Idle) {
         // Check channel[0] to initiate recording or reading
-        if (cell->signal.channels[Channels::MemoryReadWriteAction] > TRIGGER_THRESHOLD && !signalRecorder.readOnly) {
+        if (object->typeData.cell.signal.channels[Channels::MemoryReadWriteAction] > TRIGGER_THRESHOLD && !signalRecorder.readOnly) {
             // Reset numRecorded to start fresh
             numWrittenSignalEntries = 0;
             state = SignalRecorderState_Recording;
         } else if (
-            cell->signal.channels[Channels::MemoryReadWriteAction] < -TRIGGER_THRESHOLD
-            || (signalRecorder.readOnly && abs(cell->signal.channels[Channels::MemoryReadWriteAction]) > TRIGGER_THRESHOLD)) {
+            object->typeData.cell.signal.channels[Channels::MemoryReadWriteAction] < -TRIGGER_THRESHOLD
+            || (signalRecorder.readOnly && abs(object->typeData.cell.signal.channels[Channels::MemoryReadWriteAction]) > TRIGGER_THRESHOLD)) {
             // Start reading - reset numReadSignalEntries
             numReadSignalEntries = 0;
             state = SignalRecorderState_Reading;
@@ -167,7 +167,7 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
         // Record signal to memory at index numRecorded
         if (numWrittenSignalEntries < memory.numSignalEntries) {
             for (int k = 0; k < MAX_CHANNELS; ++k) {
-                memory.signalEntries[numWrittenSignalEntries].channels[k] = cell->signal.channels[k];
+                memory.signalEntries[numWrittenSignalEntries].channels[k] = object->typeData.cell.signal.channels[k];
             }
             ++numWrittenSignalEntries;
         }
@@ -181,7 +181,7 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
             auto const& channelBitMask = memory.channelBitMask;
             for (int k = 0; k < MAX_CHANNELS; ++k) {
                 if (channelBitMask & (1 << k)) {
-                    cell->signal.channels[k] = memory.signalEntries[numReadSignalEntries].channels[k];
+                    object->typeData.cell.signal.channels[k] = memory.signalEntries[numReadSignalEntries].channels[k];
                 }
             }
             ++numReadSignalEntries;
@@ -194,16 +194,16 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    auto& memory = cell->cellTypeData.memory;
+    auto& memory = object->typeData.cell.cellTypeData.memory;
     auto& signalStorage = memory.modeData.signalStorage;
 
     if (memory.numSignalEntries == 0) {
         return;
     }
 
-    auto const& inputValue = cell->signal.channels[Channels::MemoryReadWriteAction];
+    auto const& inputValue = object->typeData.cell.signal.channels[Channels::MemoryReadWriteAction];
     auto const numSignalEntries = toInt(memory.numSignalEntries);
 
     // Calculate the index based on |channel[0]| * (numSignalEntries - 1)
@@ -222,20 +222,20 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
         // In readonly mode, always read regardless of sign
         for (int k = 0; k < MAX_CHANNELS; ++k) {
             if (channelBitMask & (1 << k)) {
-                cell->signal.channels[k] = memory.signalEntries[index].channels[k];
+                object->typeData.cell.signal.channels[k] = memory.signalEntries[index].channels[k];
             }
         }
     } else if (inputValue >= 0) {
         // Read mode: channel[0] >= 0
         for (int k = 0; k < MAX_CHANNELS; ++k) {
             if (channelBitMask & (1 << k)) {
-                cell->signal.channels[k] = memory.signalEntries[index].channels[k];
+                object->typeData.cell.signal.channels[k] = memory.signalEntries[index].channels[k];
             }
         }
     } else {
         // Write mode: channel[0] < 0
         for (int k = 0; k < MAX_CHANNELS; ++k) {
-            memory.signalEntries[index].channels[k] = cell->signal.channels[k];
+            memory.signalEntries[index].channels[k] = object->typeData.cell.signal.channels[k];
         }
     }
 }

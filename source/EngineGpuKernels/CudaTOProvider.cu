@@ -28,8 +28,8 @@ TO _CudaTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
 {
     try {
         if (_to.has_value()) {
-            checkAndExtendCapacity(_to->cells, *_to->numCells, _to->capacities.cells, requiredCapacity.cells);
-            checkAndExtendCapacity(_to->particles, *_to->numParticles, _to->capacities.particles, requiredCapacity.particles);
+            checkAndExtendCapacity(_to->objects, *_to->numObjects, _to->capacities.objects, requiredCapacity.objects);
+            checkAndExtendCapacity(_to->energyParticles, *_to->numEnergyParticles, _to->capacities.energyParticles, requiredCapacity.energyParticles);
             checkAndExtendCapacity(_to->creatures, *_to->numCreatures, _to->capacities.creatures, requiredCapacity.creatures);
             checkAndExtendCapacity(_to->genomes, *_to->numGenomes, _to->capacities.genomes, requiredCapacity.genomes);
             checkAndExtendCapacity(_to->genes, *_to->numGenes, _to->capacities.genes, requiredCapacity.genes);
@@ -38,22 +38,22 @@ TO _CudaTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
         } else {
             TO result;
             result.capacities = requiredCapacity;
-            CudaMemoryManager::getInstance().acquireMemory(1, result.numCells);
-            CudaMemoryManager::getInstance().acquireMemory(1, result.numParticles);
+            CudaMemoryManager::getInstance().acquireMemory(1, result.numObjects);
+            CudaMemoryManager::getInstance().acquireMemory(1, result.numEnergyParticles);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numCreatures);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numGenomes);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numGenes);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numNodes);
             CudaMemoryManager::getInstance().acquireMemory(1, result.heapSize);
-            CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.cells, result.cells);
-            CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.particles, result.particles);
+            CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.objects, result.objects);
+            CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.energyParticles, result.energyParticles);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.creatures, result.creatures);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.genomes, result.genomes);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.genes, result.genes);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.nodes, result.nodes);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.heap, result.heap);
-            setValueToDevice(result.numCells, static_cast<uint64_t>(0));
-            setValueToDevice(result.numParticles, static_cast<uint64_t>(0));
+            setValueToDevice(result.numObjects, static_cast<uint64_t>(0));
+            setValueToDevice(result.numEnergyParticles, static_cast<uint64_t>(0));
             setValueToDevice(result.numCreatures, static_cast<uint64_t>(0));
             setValueToDevice(result.numGenomes, static_cast<uint64_t>(0));
             setValueToDevice(result.numGenes, static_cast<uint64_t>(0));
@@ -70,16 +70,16 @@ TO _CudaTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
 
 void _CudaTOProvider::destroy()
 {
-    CudaMemoryManager::getInstance().freeMemory(_to->cells);
-    CudaMemoryManager::getInstance().freeMemory(_to->particles);
+    CudaMemoryManager::getInstance().freeMemory(_to->objects);
+    CudaMemoryManager::getInstance().freeMemory(_to->energyParticles);
     CudaMemoryManager::getInstance().freeMemory(_to->creatures);
     CudaMemoryManager::getInstance().freeMemory(_to->genomes);
     CudaMemoryManager::getInstance().freeMemory(_to->genes);
     CudaMemoryManager::getInstance().freeMemory(_to->nodes);
     CudaMemoryManager::getInstance().freeMemory(_to->heap);
 
-    CudaMemoryManager::getInstance().freeMemory(_to->numCells);
-    CudaMemoryManager::getInstance().freeMemory(_to->numParticles);
+    CudaMemoryManager::getInstance().freeMemory(_to->numObjects);
+    CudaMemoryManager::getInstance().freeMemory(_to->numEnergyParticles);
     CudaMemoryManager::getInstance().freeMemory(_to->numCreatures);
     CudaMemoryManager::getInstance().freeMemory(_to->numGenomes);
     CudaMemoryManager::getInstance().freeMemory(_to->numGenes);

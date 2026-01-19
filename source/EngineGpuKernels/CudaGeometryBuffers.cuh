@@ -19,10 +19,10 @@ struct CudaGeometryBuffers
     cudaGraphicsResource* detonationEventBuffer = nullptr;
 
     // CUDA device buffers for non-interop mode (data is copied to CPU then uploaded to OpenGL)
-    CellVertexData* deviceCellBuffer = nullptr;
-    EnergyParticleVertexData* deviceEnergyParticleBuffer = nullptr;
+    ObjectVertexData* deviceObjectBuffer = nullptr;
+    EnergyVertexData* deviceEnergyBuffer = nullptr;
     LocationVertexData* deviceLocationBuffer = nullptr;
-    getObjectVertexData* deviceSelectedObjectBuffer = nullptr;
+    SelectedObjectVertexData* deviceSelectedObjectBuffer = nullptr;
     unsigned int* deviceLineIndexBuffer = nullptr;
     unsigned int* deviceTriangleIndexBuffer = nullptr;
     ConnectionArrowVertexData* deviceSelectedConnectionBuffer = nullptr;
@@ -30,8 +30,8 @@ struct CudaGeometryBuffers
     DetonationEventVertexData* deviceDetonationEventBuffer = nullptr;
 
     // Capacity tracking for device buffers
-    uint64_t deviceCellBufferCapacity = 0;
-    uint64_t deviceEnergyParticleBufferCapacity = 0;
+    uint64_t deviceObjectBufferCapacity = 0;
+    uint64_t deviceEnergyBufferCapacity = 0;
     uint64_t deviceLocationBufferCapacity = 0;
     uint64_t deviceSelectedObjectBufferCapacity = 0;
     uint64_t deviceLineIndexBufferCapacity = 0;

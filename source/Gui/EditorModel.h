@@ -24,9 +24,9 @@ public:
     void clear();
 
     bool existsInspectedEntity(uint64_t id) const;
-    ExtendedCellOrParticleDescription getInspectedEntity(uint64_t id) const;
-    void addInspectedEntity(ExtendedCellOrParticleDescription const& entity);
-    void setInspectedEntities(std::vector<ExtendedCellOrParticleDescription> const& inspectedEntities);
+    ExtendedObjectOrEnergyDesc getInspectedEntity(uint64_t id) const;
+    void addInspectedEntity(ExtendedObjectOrEnergyDesc const& entity);
+    void setInspectedEntities(std::vector<ExtendedObjectOrEnergyDesc> const& inspectedEntities);
     bool areEntitiesInspected() const;
 
     void setPencilWidth(float value);
@@ -43,7 +43,7 @@ public:
 private:
     SelectionShallowData _selectionShallowData;
 
-    std::unordered_map<uint64_t, ExtendedCellOrParticleDescription> _inspectedEntityById;
+    std::unordered_map<uint64_t, ExtendedObjectOrEnergyDesc> _inspectedEntityById;
 
     float _pencilWidth = 3.0f;
     int _defaultColorCode = 0;

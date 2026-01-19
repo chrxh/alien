@@ -7,14 +7,14 @@
 #include "Genome.cuh"
 #include "Math.cuh"
 
-struct Particle
+struct Energy
 {
     uint64_t id;
     float2 pos;
     float2 vel;
     uint8_t color;
     float energy;
-    Cell* lastAbsorbedCell;  //could be invalid
+    Object* lastAbsorbedObject;  //could be invalid
 
     // Editing data
     uint8_t selected;  //0 = no, 1 = selected
@@ -38,9 +38,9 @@ struct Particle
     }
 };
 
-struct CellConnection
+struct ObjectConnection
 {
-    Cell* cell;
+    Object* object;
     float distance;
     float angleFromPrevious;
 };
@@ -435,7 +435,7 @@ struct Creature
 
     uint32_t generation;
     uint32_t lineageId;
-    uint32_t numCells;
+    uint32_t numObjects;
 
     Genome* genome;
 
@@ -446,21 +446,35 @@ struct Creature
     uint64_t creatureIndex;  // May be invalid
 };
 
+struct Structure
+{
+    // Cluster data
+    uint32_t clusterIndex;
+    int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
+    float2 clusterPos;
+    float2 clusterVel;
+    float clusterAngularMomentum;
+    float clusterAngularMass;
+    uint32_t numCellsInCluster;
+};
+
+struct FreeCell
+{
+    float rawEnergy;
+    uint32_t age;
+
+    // Additional rendering data
+    CellEvent event;
+    uint8_t eventCounter;
+    float2 eventPos;
+};
+
 struct Cell
 {
     // General
-    uint64_t id;
-    uint8_t numConnections;
-    CellConnection connections[MAX_CELL_BONDS];
-    float2 pos;
-    float2 vel;
     float usableEnergy;
     float rawEnergy;
-    float stiffness;
-    uint8_t color;
     float frontAngle;  // May be invalid
-    bool fixed;
-    bool sticky;
     uint32_t age;
     CellState cellState;
 
@@ -478,7 +492,6 @@ struct Cell
     Signal signal;
     SignalRestriction signalRestriction;
     uint32_t activationTime;
-    CellTriggered cellTriggered;
 
     // Process data
     SignalState futureSignalState;
@@ -491,6 +504,43 @@ struct Cell
     uint8_t eventCounter;
     float2 eventPos;
 
+    __device__ __inline__ bool isSameCreature(Cell* otherCell)
+    {
+        return otherCell->creature->id == this->creature->id;
+    }
+
+    __device__ __inline__ float getEnergy() const
+    {
+        auto result = usableEnergy + rawEnergy;
+        if (cellType == CellType_Depot) {
+            result += cellTypeData.depot.storedUsableEnergy;
+        }
+        return result;
+    }
+};
+
+union ObjectTypeData
+{
+    Structure structure;
+    FreeCell freeCell;
+    Cell cell;
+};
+
+struct Object
+{
+    // General
+    uint64_t id;
+    uint8_t numConnections;
+    ObjectConnection connections[MAX_OBJECT_CONNECTIONS];
+    float2 pos;
+    float2 vel;
+    float stiffness;
+    uint8_t color;
+    bool fixed;
+    bool sticky;
+    ObjectType type;
+    ObjectTypeData typeData;
+
     // Editing data
     uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
     uint8_t detached;  // 0 = no, 1 = yes
@@ -500,39 +550,24 @@ struct Cell
     TempValue tempValue;
 
     float density;
-    Cell* nextCell;                   // Linked list for finding all overlapping cells
+    Object* nextObject;                   // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
     float2 shared1;                   // Variable with different meanings depending on context
     float2 shared2;
 
-    // Cluster data
-    uint32_t clusterIndex;
-    int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
-    float2 clusterPos;
-    float2 clusterVel;
-    float clusterAngularMomentum;
-    float clusterAngularMass;
-    uint32_t numCellsInCluster;
-
-    __device__ __inline__ bool isSameCreature(Cell* otherCell)
+    __device__ __inline__ float& getRefDistance(Object* connectedObject)
     {
-        return (otherCell->creature != nullptr && this->creature != nullptr && otherCell->creature->id == this->creature->id)
-            || (otherCell->creature == nullptr && this->creature == nullptr);
-    }
-
-    __device__ __inline__ float& getRefDistance(Cell* connectedCell)
-    {
-        auto index = getConnectionIndex(connectedCell);
+        auto index = getConnectionIndex(connectedObject);
         return connections[index].distance;
 
         CUDA_CHECK(false);
         return tempValue.as_uint32_float.floatPart;  // Return some dummy in order to prevent compile error
     }
 
-    __device__ __inline__ int getConnectionIndex(Cell* connectedCell)
+    __device__ __inline__ int getConnectionIndex(Object* connectedObject)
     {
         for (int i = 0; i < numConnections; i++) {
-            if (connections[i].cell == connectedCell) {
+            if (connections[i].object == connectedObject) {
                 return i;
             }
         }
@@ -540,8 +575,8 @@ struct Cell
         return 0;
     }
 
-    __device__ __inline__ CellConnection& getConnection(int index) { return connections[(index + numConnections) % numConnections]; }
-    __device__ __inline__ Cell* getConnectedCell(int index) { return connections[(index + numConnections) % numConnections].cell; }
+    __device__ __inline__ ObjectConnection& getConnection(int index) { return connections[(index + numConnections) % numConnections]; }
+    __device__ __inline__ Object* getConnectedObject(int index) { return connections[(index + numConnections) % numConnections].object; }
     __device__ __inline__ void increaseAngle(int index, float increment) {
         auto& angle1 = getConnection(index).angleFromPrevious;
         auto& angle2 = getConnection(index + 1).angleFromPrevious;
@@ -550,6 +585,17 @@ struct Cell
         }
         angle1 += increment;
         angle2 -= increment;
+    }
+
+    __device__ __inline__ float getEnergy() const
+    {
+        if (type == ObjectType_Cell) {
+            return typeData.cell.getEnergy();
+        } else if (type == ObjectType_FreeCell) {
+            return typeData.freeCell.rawEnergy;
+        } else {
+            return 0;
+        }
     }
 
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
@@ -568,15 +614,15 @@ struct Cell
         return Math::getNormalizedAngle(result, 0.0f);
     }
 
-    __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2)
+    __device__ __inline__ float getAngelSpan(Object* connectedObject1, Object* connectedObject2)
     {
         auto connectionIndex1 = -1;
         auto connectionIndex2 = -1;
         for (int i = 0; i < numConnections; i++) {
-            if (connections[i].cell == connectedCell1) {
+            if (connections[i].object == connectedObject1) {
                 connectionIndex1 = i;
             }
-            if (connections[i].cell == connectedCell2) {
+            if (connections[i].object == connectedObject2) {
                 connectionIndex2 = i;
             }
         }
@@ -585,16 +631,6 @@ struct Cell
         }
         return getAngelSpan(connectionIndex1, connectionIndex2);
     }
-
-    __device__ __inline__ float getEnergy() const
-    {
-        auto result = usableEnergy + rawEnergy;
-        if (cellType == CellType_Depot) {
-            result += cellTypeData.depot.storedUsableEnergy;
-        }
-        return result;
-    }
-
 
     __device__ __inline__ void getLock()
     {
@@ -619,7 +655,7 @@ struct Cell
 };
 
 template <>
-struct HashFunctor<Cell*>
+struct HashFunctor<Object*>
 {
-    __device__ __inline__ int operator()(Cell* const& cell) { return abs(static_cast<int>(cell->id)); }
+    __device__ __inline__ int operator()(Object* const& object) { return abs(static_cast<int>(object->id)); }
 };

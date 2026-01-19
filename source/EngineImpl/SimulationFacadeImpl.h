@@ -31,12 +31,12 @@ public:
     int getSyncSimulationWithRenderingRatio() const override;
     void setSyncSimulationWithRenderingRatio(int value) override;
 
-    Description getSimulationData() override;
-    Description getSelectedSimulationData(bool includeClusters) override;
-    Description getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
+    Desc getSimulationData() override;
+    Desc getSelectedSimulationData(bool includeClusters) override;
+    Desc getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
 
-    void addAndSelectSimulationData(Description&& dataToAdd) override;
-    void setSimulationData(Description const& dataToUpdate) override;
+    void addAndSelectSimulationData(Desc&& dataToAdd) override;
+    void setSimulationData(Desc const& dataToUpdate) override;
     void removeSelectedObjects(bool includeClusters) override;
     void relaxSelectedObjects(bool includeClusters) override;
     void uniformVelocitiesForSelectedObjects(bool includeClusters) override;
@@ -46,10 +46,10 @@ public:
     void colorSelectedObjects(unsigned char color, bool includeClusters) override;
     void reconnectSelectedObjects() override;
     void setDetached(bool value) override;
-    void changeCell(CellDescription const& changedCell) override;
-    void changeParticle(ParticleDescription const& changedParticle) override;
-    bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) override;
-    std::optional<GenomeDescription> getGenomeOfCreature(uint64_t creatureId) override;
+    void changeCell(ObjectDesc const& changedCell) override;
+    void changeParticle(EnergyDesc const& changedParticle) override;
+    bool changeCreature(uint64_t creatureId, GenomeDesc const& genome) override;
+    std::optional<GenomeDesc> getGenomeOfCreature(uint64_t creatureId) override;
 
     void calcTimesteps(uint64_t timesteps) override;
     void runSimulation() override;
@@ -98,17 +98,17 @@ public:
     float getTps() const override;
 
     // Simulated preview
-    Description getPreviewData() override;
-    void setPreviewData(Description const& description) override;
+    Desc getPreviewData() override;
+    void setPreviewData(Desc const& description) override;
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation) override;
     void calcTimestepsForPreview(int numSteps, bool detailSimulation) override;
     uint64_t getCurrentTimestepForPreview() override;
     void setCurrentTimestepForPreview(uint64_t timestep) override;
 
     // for tests only
-    void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
-    void testOnly_mutationCheck(uint64_t cellId) override;
-    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) override;
+    void testOnly_mutate(uint64_t objectId, MutationType mutationType) override;
+    void testOnly_mutationCheck(uint64_t objectId) override;
+    void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) override;
     void testOnly_cleanupAfterTimestep() override;
     void testOnly_cleanupAfterDataManipulation() override;
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) override;

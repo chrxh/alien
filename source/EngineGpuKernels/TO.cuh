@@ -8,7 +8,7 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-struct ParticleTO
+struct EnergyTO
 {
     uint64_t id;
     float energy;
@@ -21,7 +21,7 @@ struct ParticleTO
 
 struct ConnectionTO
 {
-    uint64_t cellIndex;  // May be invalid
+    uint64_t objectIndex;  // May be invalid
 
     float distance;
     float angleFromPrevious;
@@ -390,44 +390,65 @@ struct SignalTO
     int numTimesSent;
 };
 
+struct StructureTO
+{};
+
+struct FreeCellTO
+{
+    float rawEnergy;
+    uint32_t age;
+};
+
 struct CellTO
 {
     // General
-    uint64_t id;
-    ConnectionTO connections[MAX_CELL_BONDS];
-    float2 pos;
-    float2 vel;
     float usableEnergy;
     float rawEnergy;
-    float stiffness;
-    uint8_t color;
-    uint8_t numConnections;
     float frontAngle;  // May be invalid
-    bool fixed;
-    bool sticky;
     uint32_t age;
     CellState cellState;
 
     // Creature/Genome data
-    bool belongToCreature;
     uint64_t creatureIndex;
     uint16_t nodeIndex;
     uint16_t parentNodeIndex;
     uint16_t geneIndex;
-
-    // Process data
-    uint32_t frontAngleId;
-    bool headCell;
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // May be invalid (not used for structure and base cells)
     CellType cellType;
     CellTypeDataTO cellTypeData;
     SignalState signalState;
-    SignalTO signal;    // For signalState == SignalState_Active
+    SignalTO signal;  // For signalState == SignalState_Active
     SignalRestrictionTO signalRestriction;
     uint32_t activationTime;
-    CellTriggered cellTriggered;
+
+    // Process data
+    uint32_t frontAngleId;
+    bool headCell;
+};
+
+union ObjectTypeDataTO
+{
+    StructureTO structure;
+    FreeCellTO freeCell;
+    CellTO cell;
+};
+
+struct ObjectTO
+{
+    // General
+    uint64_t id;
+    uint8_t numConnections;
+    ConnectionTO connections[MAX_OBJECT_CONNECTIONS];
+    float2 pos;
+    float2 vel;
+    float stiffness;
+    uint8_t color;
+    bool fixed;
+    bool sticky;
+    ObjectType type;
+    ObjectTypeDataTO typeData;
 
     // Editing data
     uint8_t selected;
@@ -440,7 +461,7 @@ struct CreatureTO
 
     uint32_t generation;
     uint32_t lineageId;
-    uint32_t numCells;
+    uint32_t numObjects;
 
     uint64_t genomeArrayIndex;
 
@@ -455,10 +476,10 @@ struct TO
 {
     ArraySizesForTO capacities;
 
-    uint64_t* numCells = nullptr;
-    CellTO* cells = nullptr;
-    uint64_t* numParticles = nullptr;
-    ParticleTO* particles = nullptr;
+    uint64_t* numObjects = nullptr;
+    ObjectTO* objects = nullptr;
+    uint64_t* numEnergyParticles = nullptr;
+    EnergyTO* energyParticles = nullptr;
     uint64_t* numCreatures = nullptr;
     CreatureTO* creatures = nullptr;
     uint64_t* numGenomes = nullptr;

@@ -23,7 +23,7 @@ private:
     void setupPreviewData(bool useCache = true);
     void calcPreview();
     void processCreaturePreviews();
-    void processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, Description& phenotype, float width);
+    void processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, Desc& phenotype, float width);
     void processActionBar();
 
     int calcTpsForPreview();
@@ -37,7 +37,7 @@ private:
     std::vector<uint64_t> getSeedCreatureIds() const;
     void setSeedCreatureIds(std::vector<uint64_t> const& value);
 
-    std::vector<SubGenomeDescription> getSubGenomes() const;
+    std::vector<SubGenomeDesc> getSubGenomes() const;
 
     std::vector<CreaturePreviewWidget> _creatureWidgets;
 
@@ -48,12 +48,12 @@ private:
     struct Savepoint
     {
         uint64_t timestep = 0;
-        Description description;
+        Desc description;
         std::vector<uint64_t> seedCreatureIds;
     };
     std::vector<Savepoint> _savepoints;
 
-    std::optional<GenomeDescription> _genomeFromPreviousFrame;
+    std::optional<GenomeDesc> _genomeFromPreviousFrame;
     std::optional<uint64_t> _sessionIdFromPreviousFrame;
 
     std::optional<uint64_t> _previewTimestepFromPreviousMeasure;

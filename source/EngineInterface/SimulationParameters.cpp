@@ -98,7 +98,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description(coloringTooltip),
                     ParameterSpec()
                         .name("Cell radius")
-                        .reference(FloatSpec().member(&SimulationParameters::cellRadius).min(0.0f).max(0.5f))
+                        .reference(FloatSpec().member(&SimulationParameters::objectRadius).min(0.0f).max(0.5f))
                         .description("Specifies the radius of the drawn cells in unit length."),
                     ParameterSpec()
                         .name("Zoom level for neural activity")
@@ -341,7 +341,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("Maximum force that can be applied to a cell without causing it to disintegrate."),
                     ParameterSpec()
                         .name("Minimum distance")
-                        .reference(FloatSpec().member(&SimulationParameters::minCellDistance).min(0.0f).max(1.0f))
+                        .reference(FloatSpec().member(&SimulationParameters::minObjectDistance).min(0.0f).max(1.0f))
                         .description("Minimum distance between two cells."),
                 }),
             ParameterGroupSpec()
@@ -353,20 +353,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("Maximum distance up to which a connection of two cells is possible."),
                     ParameterSpec()
                         .name("Fusion velocity")
-                        .reference(FloatSpec().member(&SimulationParameters::cellFusionVelocity).min(0.0f).max(2.0f))
+                        .reference(FloatSpec().member(&SimulationParameters::objectFusionVelocity).min(0.0f).max(2.0f))
                         .description("Maximum force that can be applied to a cell without causing it to disintegrate."),
-                    ParameterSpec()
-                        .name("Maximum energy")
-                        .reference(
-                            FloatSpec()
-                                .member(&SimulationParameters::cellMaxBindingEnergy)
-                                .min(50.0f)
-                                .max(10000000.0f)
-                                .logarithmic(true)
-                                .infinity(true)
-                                .format("%.0f"))
-                        .description("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
-                                     "value, all bonds will be destroyed."),
                 }),
             ParameterGroupSpec()
                 .name("Radiation")
@@ -731,13 +719,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .expertToggle(&SimulationParameters::cellAgeLimiterToggle)
                 .parameters({
                     ParameterSpec()
-                        .name("Maximum inactive cell age")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::maxAgeForInactiveCells).min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
-                        .description(
-                            "Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
-                            "are in state 'Under construction' are not affected by this option."),
-                    ParameterSpec()
                         .name("Maximum free cell age")
                         .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
                         .description("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
@@ -768,15 +749,15 @@ ParametersSpec const& SimulationParameters::getSpec()
                 }),
             ParameterGroupSpec()
                 .name("Cell glow")
-                .expertToggle(&SimulationParameters::cellGlowToggle)
+                .expertToggle(&SimulationParameters::objectGlowToggle)
                 .parameters({
                     ParameterSpec()
                         .name("Radius")
-                        .reference(FloatSpec().member(&SimulationParameters::cellGlowRadius).min(1.0f).max(8.0f))
+                        .reference(FloatSpec().member(&SimulationParameters::objectGlowRadius).min(1.0f).max(8.0f))
                         .description("The radius of the glow. Please note that a large radius affects the performance."),
                     ParameterSpec()
                         .name("Strength")
-                        .reference(FloatSpec().member(&SimulationParameters::cellGlowStrength).min(0.0f).max(1.0f))
+                        .reference(FloatSpec().member(&SimulationParameters::objectGlowStrength).min(0.0f).max(1.0f))
                         .description("The strength of the glow."),
                 }),
             ParameterGroupSpec()

@@ -70,10 +70,10 @@ void _GenomeEditorWidget::processHeaderData()
 
         AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
 
-        auto numNodesString = std::to_string(GenomeDescriptionInfoService::get().getNumberOfNodes(_editData->genome));
+        auto numNodesString = std::to_string(GenomeDescInfoService::get().getNumberOfNodes(_editData->genome));
         AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
 
-        auto numCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(_editData->genome);
+        auto numCells = GenomeDescInfoService::get().getNumberOfResultingCells(_editData->genome);
         auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
         AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
@@ -94,7 +94,7 @@ void _GenomeEditorWidget::processGeneList()
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
         _geneSelectedFromTable = false;
 
-        auto rootHull = GenomeDescriptionInfoService::get().getReferencedGenesInRootGeneHull(_editData->genome);
+        auto rootHull = GenomeDescInfoService::get().getReferencedGenesInRootGeneHull(_editData->genome);
 
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
@@ -164,14 +164,14 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 2: References
                     ImGui::TableNextColumn();
-                    auto references = GenomeDescriptionInfoService::get().getReferences(gene);
+                    auto references = GenomeDescInfoService::get().getReferences(gene);
                     auto referencesStrings = references | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                     auto referencesString = boost::algorithm::join(std::vector(referencesStrings.begin(), referencesStrings.end()), ", ");
                     AlienGui::Text(referencesString);
 
                     // Column 3: Referenced by
                     ImGui::TableNextColumn();
-                    auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(genome, row);
+                    auto referencedBy = GenomeDescInfoService::get().getReferencedBy(genome, row);
                     if (!referencedBy.empty()) {
                         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
@@ -274,7 +274,7 @@ void _GenomeEditorWidget::onAddGene()
     auto& genome = _editData->genome;
     auto name = "Gene " + std::to_string(++_sequenceNumberForCreatedGenes);
     if (genome._genes.empty()) {
-        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().name(name).separation(true).nodes({NodeDescription()}));
+        GenomeDescEditService::get().addGene(genome, 0, GeneDesc().name(name).separation(true).nodes({NodeDesc()}));
         _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;
@@ -284,8 +284,8 @@ void _GenomeEditorWidget::onAddGene()
             insertIndex = toInt(genome._genes.size()) - 1;
         }
 
-        GenomeDescriptionEditService::get().addGene(
-            genome, insertIndex, GeneDescription().name(name).separation(false).numBranches(1).nodes({NodeDescription()}));
+        GenomeDescEditService::get().addGene(
+            genome, insertIndex, GeneDesc().name(name).separation(false).numBranches(1).nodes({NodeDesc()}));
 
         // Adapt gene selection
         _editData->selectedGeneIndex = insertIndex + 1;
@@ -306,7 +306,7 @@ void _GenomeEditorWidget::onAddGene()
 
 void _GenomeEditorWidget::onRemoveGene()
 {
-    auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGeneIndex.value());
+    auto referencedBy = GenomeDescInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGeneIndex.value());
     if (!referencedBy.empty()) {
         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
@@ -347,7 +347,7 @@ void _GenomeEditorWidget::removeGeneIntern()
 {
     int removeIndex = _editData->selectedGeneIndex.value();
 
-    GenomeDescriptionEditService::get().removeGene(_editData->genome, removeIndex);
+    GenomeDescEditService::get().removeGene(_editData->genome, removeIndex);
 
     // Adapt gene selection
     auto& genes = _editData->genome._genes;
@@ -374,7 +374,7 @@ void _GenomeEditorWidget::removeGeneIntern()
 void _GenomeEditorWidget::moveGeneUpwardIntern()
 {
     int indexToMove = _editData->selectedGeneIndex.value();
-    GenomeDescriptionEditService::get().swapGenes(_editData->genome, indexToMove - 1);
+    GenomeDescEditService::get().swapGenes(_editData->genome, indexToMove - 1);
 
     // Adapt gene selection
     --_editData->selectedGeneIndex.value();
@@ -396,7 +396,7 @@ void _GenomeEditorWidget::moveGeneUpwardIntern()
 void _GenomeEditorWidget::moveGeneDownwardIntern()
 {
     int indexToMove = _editData->selectedGeneIndex.value();
-    GenomeDescriptionEditService::get().swapGenes(_editData->genome, indexToMove);
+    GenomeDescEditService::get().swapGenes(_editData->genome, indexToMove);
 
     // Adapt gene selection
     ++_editData->selectedGeneIndex.value();

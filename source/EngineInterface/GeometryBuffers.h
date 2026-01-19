@@ -7,8 +7,8 @@
 
 struct NumRenderObjects
 {
-    uint64_t cells;
-    uint64_t energyParticles;
+    uint64_t objects;
+    uint64_t energies;
     uint64_t locations;
     uint64_t lineIndices;
 
@@ -19,7 +19,7 @@ struct NumRenderObjects
     uint64_t detonationEventVertices;
 };
 
-struct CellVertexData
+struct ObjectVertexData
 {
     float pos[3];    // x, y, z position (z used for lighting)
     float color[3];  // r, g, b color
@@ -28,7 +28,7 @@ struct CellVertexData
                      // Bit 16 = occurrence in triangle or quad
 };
 
-struct EnergyParticleVertexData
+struct EnergyVertexData
 {
     float pos[3];    // x, y, z position
     float color[3];  // r, g, b color
@@ -45,7 +45,7 @@ struct LocationVertexData
     float opacity;        // opacity/transparency of the location
 };
 
-struct getObjectVertexData
+struct SelectedObjectVertexData
 {
     float pos[2];              // x, y position
     int hasSignalRestriction;  // 1 if signal restriction is active, 0 otherwise
@@ -85,8 +85,8 @@ public:
     unsigned int getVaoForSelectedConnections() const { return _vaoForSelectedConnections; }
     unsigned int getVaoForAttackEvents() const { return _vaoForAttackEvents; }
     unsigned int getVaoForDetonationEvents() const { return _vaoForDetonationEvents; }
-    unsigned int getVboForCells() const { return _vboForCells; }
-    unsigned int getVboForEnergyParticles() const { return _vboForEnergyParticles; }
+    unsigned int getVboForObjects() const { return _vboForObjects; }
+    unsigned int getVboForEnergies() const { return _vboForEnergies; }
     unsigned int getVboForLocations() const { return _vboForLocations; }
     unsigned int getVboForSelectedObjects() const { return _vboForSelectedObjects; }
     unsigned int getVboForSelectedConnections() const { return _vboForSelectedConnections; }
@@ -100,10 +100,10 @@ public:
     NumRenderObjects getNumObjects() const;
 
     // Methods for uploading data from host memory (used in no-interop mode)
-    void setCellData(CellVertexData const* data, uint64_t count);
-    void setEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count);
+    void setCellData(ObjectVertexData const* data, uint64_t count);
+    void setEnergyParticleData(EnergyVertexData const* data, uint64_t count);
     void setLocationData(LocationVertexData const* data, uint64_t count);
-    void setSelectedObjectData(getObjectVertexData const* data, uint64_t count);
+    void setSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count);
     void setLineIndices(unsigned int const* data, uint64_t count);
     void setTriangleIndices(unsigned int const* data, uint64_t count);
     void setSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count);
@@ -111,10 +111,10 @@ public:
     void setDetonationEventData(DetonationEventVertexData const* data, uint64_t count);
 
     // Methods for downloading data from OpenGL buffers to host memory (for tests)
-    std::vector<CellVertexData> getCellData() const;
-    std::vector<EnergyParticleVertexData> getEnergyParticleData() const;
+    std::vector<ObjectVertexData> getCellData() const;
+    std::vector<EnergyVertexData> getEnergyParticleData() const;
     std::vector<LocationVertexData> getLocationData() const;
-    std::vector<getObjectVertexData> getSelectedObjectData() const;
+    std::vector<SelectedObjectVertexData> getSelectedObjectData() const;
     std::vector<unsigned int> getLineIndices() const;
     std::vector<unsigned int> getTriangleIndices() const;
     std::vector<ConnectionArrowVertexData> getSelectedConnectionData() const;
@@ -130,8 +130,8 @@ private:
     unsigned int _vaoForSelectedConnections = 0;
     unsigned int _vaoForAttackEvents = 0;
     unsigned int _vaoForDetonationEvents = 0;
-    unsigned int _vboForCells = 0;
-    unsigned int _vboForEnergyParticles = 0;
+    unsigned int _vboForObjects = 0;
+    unsigned int _vboForEnergies = 0;
     unsigned int _vboForLocations = 0;
     unsigned int _vboForSelectedObjects = 0;
     unsigned int _vboForSelectedConnections = 0;

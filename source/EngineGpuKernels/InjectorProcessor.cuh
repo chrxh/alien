@@ -9,8 +9,8 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -22,77 +22,77 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
     auto& operations = data.cellTypeOperations[CellType_Injector];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, statistics, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).object);
     }
 }
 
-__inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (SignalProcessor::isManuallyTriggered(data, cell)) {
-        auto injectorEnergyCost = cudaSimulationParameters.injectorEnergyCost.value[cell->color];
-        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+    if (SignalProcessor::isManuallyTriggered(data, object)) {
+        auto injectorEnergyCost = cudaSimulationParameters.injectorEnergyCost.value[object->color];
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 
-        Cell* injectedCell = nullptr;
+        Object* injectedCell = nullptr;
         int numDefenders = 0;
-        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.injectorRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
+        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached, [&](auto const& otherObject) {
             if (injectedCell != nullptr) {
                 return;
             }
-            if (otherCell->creature == nullptr) {
+            if (otherObject->type != ObjectType_Cell) {
                 return;
             }
-            if (cell->isSameCreature(otherCell)) {
+            if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                 return;
             }
-            if (otherCell->fixed) {
+            if (otherObject->fixed) {
                 return;
             }
-            if (otherCell->cellType != CellType_Constructor) {
+            if (otherObject->typeData.cell.cellType != CellType_Constructor) {
                 return;
             }
             // Only inject to other cells which are in a visible cone with respect to the injector cell
-            if (CellConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
+            if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
                 return;
             }
-            injectedCell = otherCell;
-            numDefenders = countDefenderCells(statistics, otherCell);
+            injectedCell = otherObject;
+            numDefenders = countDefenderCells(statistics, otherObject);
         });
 
         if (injectedCell) {
             injectorEnergyCost *= (1.0f + toFloat(numDefenders) * 0.5f);
-            if (cell->usableEnergy - injectorEnergyCost < cellMinEnergy) {
-                cell->signal.channels[Channels::InjectorSuccess] = 0;
+            if (object->typeData.cell.usableEnergy - injectorEnergyCost < cellMinEnergy) {
+                object->typeData.cell.signal.channels[Channels::InjectorSuccess] = 0;
                 return;
             }
 
-            ObjectFactory factory;
+            EntityFactory factory;
             factory.init(&data);
-            auto cloneCreature = factory.cloneCreature(cell->creature);
-            cloneCreature->numCells = 1;
-            injectedCell->creature = cloneCreature;
-            injectedCell->cellTypeData.constructor.geneIndex = cell->cellTypeData.injector.geneIndex;
-            injectedCell->cellTypeData.constructor.currentNodeIndex = 0;
-            injectedCell->cellTypeData.constructor.currentConcatenation = 0;
-            injectedCell->cellTypeData.constructor.currentBranch = 0;
-            injectedCell->cellTypeData.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
-            cell->signal.channels[Channels::InjectorSuccess] = 1;
+            auto cloneCreature = factory.cloneCreature(object->typeData.cell.creature);
+            cloneCreature->numObjects = 1;
+            injectedCell->typeData.cell.creature = cloneCreature;
+            injectedCell->typeData.cell.cellTypeData.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
+            injectedCell->typeData.cell.cellTypeData.constructor.currentNodeIndex = 0;
+            injectedCell->typeData.cell.cellTypeData.constructor.currentConcatenation = 0;
+            injectedCell->typeData.cell.cellTypeData.constructor.currentBranch = 0;
+            injectedCell->typeData.cell.cellTypeData.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
+            object->typeData.cell.signal.channels[Channels::InjectorSuccess] = 1;
 
             if (injectorEnergyCost > 0) {
-                EnergyParticleProcessor::radiate(data, cell, injectorEnergyCost);
+                EnergyProcessor::radiate(data, object, injectorEnergyCost);
             }
         }
 
-        cell->signal.channels[Channels::InjectorSuccess] = injectedCell != nullptr ? 1 : 0;
+        object->typeData.cell.signal.channels[Channels::InjectorSuccess] = injectedCell != nullptr ? 1 : 0;
     }
 }
 
-__inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatistics& statistics, Object* object)
 {
     int result = 0;
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->cellType == CellType_Defender && connectedCell->cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
-            statistics.incNumDefenderActivities(connectedCell->color);
+    for (int i = 0; i < object->numConnections; ++i) {
+        auto connectedObject = object->connections[i].object;
+        if (connectedObject->typeData.cell.cellType == CellType_Defender && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
+            statistics.incNumDefenderActivities(connectedObject->color);
             ++result;
         }
     }

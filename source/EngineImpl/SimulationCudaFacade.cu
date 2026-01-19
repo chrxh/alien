@@ -29,7 +29,7 @@
 #include <EngineGpuKernels/GeometryKernels.cuh>
 #include <EngineGpuKernels/Map.cuh>
 #include <EngineGpuKernels/MaxAgeBalancer.cuh>
-#include <EngineGpuKernels/Objects.cuh>
+#include <EngineGpuKernels/Entities.cuh>
 #include <EngineGpuKernels/SelectionResult.cuh>
 #include <EngineGpuKernels/SimulationData.cuh>
 #include <EngineGpuKernels/SimulationStatistics.cuh>
@@ -612,26 +612,26 @@ TO _SimulationCudaFacade::getPreviewData()
     return to;
 }
 
-void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)
+void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId, MutationType mutationType)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId, mutationType);
+    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId, mutationType);
     syncAndCheck();
 
     resizeArraysIfNecessary();
 }
 
-void _SimulationCudaFacade::testOnly_mutationCheck(uint64_t cellId)
+void _SimulationCudaFacade::testOnly_mutationCheck(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_mutationCheck(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId);
+    TestKernelsService::get().testOnly_mutationCheck(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
+void _SimulationCudaFacade::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_createConnection(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId1, cellId2);
+    TestKernelsService::get().testOnly_createConnection(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId1, objectId2);
     syncAndCheck();
 }
 
@@ -733,16 +733,16 @@ void _SimulationCudaFacade::syncAndCheck()
 
 void _SimulationCudaFacade::copyDataTOtoGpu(TO const& cudaTO, TO const& to)
 {
-    copyToDevice(cudaTO.numCells, to.numCells);
-    copyToDevice(cudaTO.numParticles, to.numParticles);
+    copyToDevice(cudaTO.numObjects, to.numObjects);
+    copyToDevice(cudaTO.numEnergyParticles, to.numEnergyParticles);
     copyToDevice(cudaTO.numGenomes, to.numGenomes);
     copyToDevice(cudaTO.numCreatures, to.numCreatures);
     copyToDevice(cudaTO.numGenes, to.numGenes);
     copyToDevice(cudaTO.numNodes, to.numNodes);
     copyToDevice(cudaTO.heapSize, to.heapSize);
 
-    copyToDevice(cudaTO.cells, to.cells, *to.numCells);
-    copyToDevice(cudaTO.particles, to.particles, *to.numParticles);
+    copyToDevice(cudaTO.objects, to.objects, *to.numObjects);
+    copyToDevice(cudaTO.energyParticles, to.energyParticles, *to.numEnergyParticles);
     copyToDevice(cudaTO.genomes, to.genomes, *to.numGenomes);
     copyToDevice(cudaTO.creatures, to.creatures, *to.numCreatures);
     copyToDevice(cudaTO.genes, to.genes, *to.numGenes);
@@ -752,16 +752,16 @@ void _SimulationCudaFacade::copyDataTOtoGpu(TO const& cudaTO, TO const& to)
 
 void _SimulationCudaFacade::copyDataTOtoHost(TO const& to, TO const& cudaTO)
 {
-    copyToHost(to.numCells, cudaTO.numCells);
-    copyToHost(to.numParticles, cudaTO.numParticles);
+    copyToHost(to.numObjects, cudaTO.numObjects);
+    copyToHost(to.numEnergyParticles, cudaTO.numEnergyParticles);
     copyToHost(to.numGenomes, cudaTO.numGenomes);
     copyToHost(to.numCreatures, cudaTO.numCreatures);
     copyToHost(to.numGenes, cudaTO.numGenes);
     copyToHost(to.numNodes, cudaTO.numNodes);
     copyToHost(to.heapSize, cudaTO.heapSize);
 
-    copyToHost(to.cells, cudaTO.cells, *to.numCells);
-    copyToHost(to.particles, cudaTO.particles, *to.numParticles);
+    copyToHost(to.objects, cudaTO.objects, *to.numObjects);
+    copyToHost(to.energyParticles, cudaTO.energyParticles, *to.numEnergyParticles);
     copyToHost(to.genomes, cudaTO.genomes, *to.numGenomes);
     copyToHost(to.creatures, cudaTO.creatures, *to.numCreatures);
     copyToHost(to.genes, cudaTO.genes, *to.numGenes);
@@ -787,9 +787,9 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpu const& sizeDelta)
         _cudaSimulationData->resizeObjectsByMatchingTempObjects();
     }
 
-    auto cellArraySize = _cudaSimulationData->objects.cells.getCapacity_host();
-    auto particleArraySize = _cudaSimulationData->objects.particles.getCapacity_host();
-    auto auxiliaryDataSize = _cudaSimulationData->objects.heap.getCapacity_host();
+    auto cellArraySize = _cudaSimulationData->entities.objects.getCapacity_host();
+    auto particleArraySize = _cudaSimulationData->entities.energies.getCapacity_host();
+    auto auxiliaryDataSize = _cudaSimulationData->entities.heap.getCapacity_host();
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
