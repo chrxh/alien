@@ -2,6 +2,7 @@
 
 #include <Base/Math.h>
 
+#include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -432,16 +433,28 @@ _CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& par
 
 void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
 {
-    // Create a texture atlas containing all cell type strings
+    // Create a texture atlas containing all cell type strings and object type strings
     // We'll arrange them in a vertical strip, one per row
+    // Rows 0-13: Cell types (Base, Depot, Constructor, etc.)
+    // Row 14: "Structure" (for ObjectType_Structure)
+    // Row 15: "Free Cell" (for ObjectType_FreeCell)
     auto font = StyleRepository::get().getDefaultFont();
     float fontSize = 16.0f;  // Base font size for rendering
 
-    // Calculate dimensions for each cell type label
+    // Build combined list of labels: cell types + object types (Structure, Free Cell)
+    std::vector<std::string> allLabels;
+    for (auto const& cellTypeStr : Const::CellTypeStrings) {
+        allLabels.push_back(cellTypeStr);
+    }
+    // Add object type labels (only Structure and Free Cell, as Cell uses cell type names)
+    allLabels.push_back(Const::ObjectTypeStrings[ObjectType_Structure]);
+    allLabels.push_back(Const::ObjectTypeStrings[ObjectType_FreeCell]);
+
+    // Calculate dimensions for each label
     std::vector<ImVec2> textSizes;
 
-    for (auto const& cellTypeStr : Const::CellTypeStrings) {
-        auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, cellTypeStr.c_str());
+    for (auto const& labelStr : allLabels) {
+        auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, labelStr.c_str());
         textSizes.push_back(textSize);
     }
 
@@ -456,12 +469,12 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     unsigned char* atlasData;
     font->ContainerAtlas->GetTexDataAsAlpha8(&atlasData, &atlasWidth, &atlasHeight);
 
-    // Render each cell type string to the buffer using ImGui font
+    // Render each label string to the buffer using ImGui font
     int rowHeight = 20;
     float scale = fontSize / font->FontSize;
 
-    for (size_t i = 0; i < Const::CellTypeStrings.size(); ++i) {
-        auto const& cellTypeStr = Const::CellTypeStrings[i];
+    for (size_t i = 0; i < allLabels.size(); ++i) {
+        auto const& labelStr = allLabels[i];
         float posY = toFloat(i * rowHeight) + 2.0f;
         float posX = 5.0f;
 
@@ -486,8 +499,8 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
         }
 
         // Render each character
-        for (size_t charIdx = 0; charIdx < cellTypeStr.length(); ++charIdx) {
-            char character = cellTypeStr[charIdx];
+        for (size_t charIdx = 0; charIdx < labelStr.length(); ++charIdx) {
+            char character = labelStr[charIdx];
             auto glyph = font->FindGlyph((ImWchar)character);
             CHECK(glyph);
 

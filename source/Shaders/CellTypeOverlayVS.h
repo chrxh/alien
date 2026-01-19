@@ -12,7 +12,7 @@ layout (location = 2) in int aState;
 
 out vec3 vColor;
 out int vCellType;
-out int vSignalState;
+out int vObjectType;
 out vec2 vWorldPos;
 
 uniform vec2 worldSize;
@@ -25,8 +25,9 @@ uniform vec2 viewportSize;
 void main()
 {
     vColor = aColor;
-    // Unpack cellType (lower 8 bits) and signalState (upper 8 bits)
+    // Unpack cellType (bits 0-7) and objectType (bits 8-15)
     vCellType = aState & 0xFF;
+    vObjectType = (aState >> 8) & 0xFF;
     vWorldPos = aPos.xy;
     
     // Transform world position to normalized device coordinates
