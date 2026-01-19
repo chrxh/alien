@@ -28,8 +28,8 @@ public:
         CellTypeMode mode = std::monostate{};
     };
     std::vector<ObjectParameter> getAllObjectParameters() const;
-    ObjectDescription createNonDefaultObjectDescription(ObjectParameter objectParameter) const;
-    EnergyDescription createNonDefaultEnergyDescription() const;
+    ObjectDesc createNonDefaultObjectDesc(ObjectParameter objectParameter) const;
+    EnergyDesc createNonDefaultEnergyDesc() const;
 
     struct NodeParameter
     {
@@ -37,16 +37,16 @@ public:
         CellTypeMode mode = std::monostate{};
     };
     std::vector<NodeParameter> getAllNodeParameters() const;
-    NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
-    std::pair<CreatureDescription, GenomeDescription> createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;
+    NodeDesc createNonDefaultNodeDesc(NodeParameter nodeParameter) const;
+    std::pair<CreatureDesc, GenomeDesc> createNonDefaultCreatureDesc(NodeParameter nodeParameter) const;
 
-    bool compare(Description left, Description right) const;
-    bool compare(ObjectDescription left, ObjectDescription right) const;
-    bool compare(EnergyDescription left, EnergyDescription right) const;
-    bool compare(ObjectDescription const& object, NodeDescription const& node) const;
+    bool compare(Desc left, Desc right) const;
+    bool compare(ObjectDesc left, ObjectDesc right) const;
+    bool compare(EnergyDesc left, EnergyDesc right) const;
+    bool compare(ObjectDesc const& object, NodeDesc const& node) const;
 
 private:
-    CellTypeDescription createNonDefaultCellTypeDescription(ObjectParameter objectParameter) const;
+    CellTypeDesc createNonDefaultCellTypeDesc(ObjectParameter objectParameter) const;
 
-    CellTypeGenomeDescription createNonDefaultCellTypeGenomeDescription(NodeParameter objectParameter) const;
+    CellTypeGenomeDesc createNonDefaultCellTypeGenomeDesc(NodeParameter objectParameter) const;
 };

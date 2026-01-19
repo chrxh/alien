@@ -209,7 +209,7 @@ void CreatorWindow::onDrawing()
         }
     }
     DescriptionEditService::get().reconnectCells(_drawingDescription, 1.5f);
-    _SimulationFacade::get()->addAndSelectSimulationData(Description(_drawingDescription));
+    _SimulationFacade::get()->addAndSelectSimulationData(Desc(_drawingDescription));
 
     _SimulationFacade::get()->reconnectSelectedObjects();
     EditorModel::get().update();
@@ -227,16 +227,16 @@ CreatorWindow::CreatorWindow()
 
 void CreatorWindow::createCell()
 {
-    auto object = ObjectDescription().pos(getRandomPos()).stiffness(_stiffness).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).sticky(_makeSticky).type(StructureDescription());
-    Description description;
+    auto object = ObjectDesc().pos(getRandomPos()).stiffness(_stiffness).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).sticky(_makeSticky).type(StructureDesc());
+    Desc description;
     description._objects.emplace_back(object);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createParticle()
 {
-    auto energyParticle = EnergyDescription().pos(getRandomPos()).energy(_energy);
-    Description description;
+    auto energyParticle = EnergyDesc().pos(getRandomPos()).energy(_energy);
+    Desc description;
     description._energies.emplace_back(energyParticle);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
@@ -248,7 +248,7 @@ void CreatorWindow::createRectangle()
     }
 
     auto description = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
-                                                                    .objectType(StructureDescription())
+                                                                    .objectType(StructureDesc())
                                                                     .width(_rectHorizontalCells)
                                                                     .height(_rectVerticalCells)
                                                                     .cellDistance(_cellDistance)
@@ -267,8 +267,8 @@ void CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    Description description = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
-                                                                          .objectType(StructureDescription())
+    Desc description = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
+                                                                          .objectType(StructureDesc())
                                                                           .layers(_layers)
                                                                           .cellDistance(_cellDistance)
                                                                           .usableEnergy(_energy)
@@ -286,7 +286,7 @@ void CreatorWindow::createDisc()
         return;
     }
 
-    Description description;
+    Desc description;
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
         float angleInc = [&] {
@@ -300,7 +300,7 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            description._objects.emplace_back(ObjectDescription().id(NumberGenerator::get().createId()).stiffness(_stiffness).sticky(_makeSticky).pos(relPos).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).type(StructureDescription()));
+            description._objects.emplace_back(ObjectDesc().id(NumberGenerator::get().createId()).stiffness(_stiffness).sticky(_makeSticky).pos(relPos).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).type(StructureDesc()));
         }
     }
 

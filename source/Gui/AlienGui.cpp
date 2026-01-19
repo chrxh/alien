@@ -1789,11 +1789,11 @@ namespace
 
 }
 
-void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDescription>& entries)
+void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDesc>& entries)
 {
     int numEntries = toInt(entries.size());
     if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of signals").textWidth(parameters._textWidth), numEntries)) {
-        entries.resize(numEntries, SignalEntryGenomeDescription());
+        entries.resize(numEntries, SignalEntryGenomeDesc());
     }
     if (numEntries > 0) {
         std::vector<std::string> entryTexts;

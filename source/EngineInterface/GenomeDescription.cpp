@@ -2,7 +2,7 @@
 
 #include "NumberGenerator.h"
 
-NeuralNetworkGenomeDescription::NeuralNetworkGenomeDescription()
+NeuralNetworkGenomeDesc::NeuralNetworkGenomeDesc()
 {
     _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
     _biases.resize(MAX_CHANNELS, 0);
@@ -12,138 +12,138 @@ NeuralNetworkGenomeDescription::NeuralNetworkGenomeDescription()
     }
 }
 
-NeuralNetworkGenomeDescription& NeuralNetworkGenomeDescription::weight(int row, int col, float value)
+NeuralNetworkGenomeDesc& NeuralNetworkGenomeDesc::weight(int row, int col, float value)
 {
     _weights[row * MAX_CHANNELS + col] = value;
     return *this;
 }
 
-GenomeDescription::GenomeDescription()
+GenomeDesc::GenomeDesc()
 {
     _id = NumberGenerator::get().createId();
 }
 
-GenomeDescription GenomeDescription::id(uint64_t id)
+GenomeDesc GenomeDesc::id(uint64_t id)
 {
     NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
 
-SensorMode SensorGenomeDescription::getMode() const
+SensorMode SensorGenomeDesc::getMode() const
 {
-    if (std::holds_alternative<TelemetryGenomeDescription>(_mode)) {
+    if (std::holds_alternative<TelemetryGenomeDesc>(_mode)) {
         return SensorMode_Telemetry;
-    } else if (std::holds_alternative<DetectEnergyGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectEnergyGenomeDesc>(_mode)) {
         return SensorMode_DetectEnergy;
-    } else if (std::holds_alternative<DetectStructureGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectStructureGenomeDesc>(_mode)) {
         return SensorMode_DetectStructure;
-    } else if (std::holds_alternative<DetectFreeCellGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectFreeCellGenomeDesc>(_mode)) {
         return SensorMode_DetectFreeCell;
-    } else if (std::holds_alternative<DetectCreatureGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectCreatureGenomeDesc>(_mode)) {
         return SensorMode_DetectCreature;
     }
     CHECK(false);
 }
 
-MuscleMode MuscleGenomeDescription::getMode() const
+MuscleMode MuscleGenomeDesc::getMode() const
 {
-    if (std::holds_alternative<AutoBendingGenomeDescription>(_mode)) {
+    if (std::holds_alternative<AutoBendingGenomeDesc>(_mode)) {
         return MuscleMode_AutoBending;
-    } else if (std::holds_alternative<ManualBendingGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<ManualBendingGenomeDesc>(_mode)) {
         return MuscleMode_ManualBending;
-    } else if (std::holds_alternative<AngleBendingGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<AngleBendingGenomeDesc>(_mode)) {
         return MuscleMode_AngleBending;
-    } else if (std::holds_alternative<AutoCrawlingGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<AutoCrawlingGenomeDesc>(_mode)) {
         return MuscleMode_AutoCrawling;
-    } else if (std::holds_alternative<ManualCrawlingGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<ManualCrawlingGenomeDesc>(_mode)) {
         return MuscleMode_ManualCrawling;
-    } else if (std::holds_alternative<DirectMovementGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<DirectMovementGenomeDesc>(_mode)) {
         return MuscleMode_DirectMovement;
     }
     CHECK(false);
 }
 
-ReconnectorMode ReconnectorGenomeDescription::getMode() const
+ReconnectorMode ReconnectorGenomeDesc::getMode() const
 {
-    if (std::holds_alternative<ReconnectStructureGenomeDescription>(_mode)) {
+    if (std::holds_alternative<ReconnectStructureGenomeDesc>(_mode)) {
         return ReconnectorMode_Structure;
-    } else if (std::holds_alternative<ReconnectFreeCellGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<ReconnectFreeCellGenomeDesc>(_mode)) {
         return ReconnectorMode_FreeCell;
-    } else if (std::holds_alternative<ReconnectCreatureGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<ReconnectCreatureGenomeDesc>(_mode)) {
         return ReconnectorMode_Creature;
     }
     CHECK(false);
 }
 
-AttackerMode AttackerGenomeDescription::getMode() const
+AttackerMode AttackerGenomeDesc::getMode() const
 {
-    if (std::holds_alternative<AttackFreeCellGenomeDescription>(_mode)) {
+    if (std::holds_alternative<AttackFreeCellGenomeDesc>(_mode)) {
         return AttackerMode_FreeCell;
-    } else if (std::holds_alternative<AttackCreatureGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<AttackCreatureGenomeDesc>(_mode)) {
         return AttackerMode_Creature;
     }
     CHECK(false);
 }
 
-SignalEntryGenomeDescription::SignalEntryGenomeDescription()
+SignalEntryGenomeDesc::SignalEntryGenomeDesc()
 {
     _channels.resize(MAX_CHANNELS, 0);
 }
 
-MemoryMode MemoryGenomeDescription::getMode() const
+MemoryMode MemoryGenomeDesc::getMode() const
 {
-    if (std::holds_alternative<SignalDelayGenomeDescription>(_mode)) {
+    if (std::holds_alternative<SignalDelayGenomeDesc>(_mode)) {
         return MemoryMode_SignalDelay;
-    } else if (std::holds_alternative<SignalRecorderGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<SignalRecorderGenomeDesc>(_mode)) {
         return MemoryMode_SignalRecorder;
-    } else if (std::holds_alternative<SignalStorageGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<SignalStorageGenomeDesc>(_mode)) {
         return MemoryMode_SignalStorage;
-    } else if (std::holds_alternative<SignalIntegratorGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<SignalIntegratorGenomeDesc>(_mode)) {
         return MemoryMode_SignalIntegrator;
     }
     CHECK(false);
 }
 
-CommunicatorMode CommunicatorGenomeDescription::getMode() const
+CommunicatorMode CommunicatorGenomeDesc::getMode() const
 {
-    if (std::holds_alternative<SenderGenomeDescription>(_mode)) {
+    if (std::holds_alternative<SenderGenomeDesc>(_mode)) {
         return CommunicatorMode_Sender;
-    } else if (std::holds_alternative<ReceiverGenomeDescription>(_mode)) {
+    } else if (std::holds_alternative<ReceiverGenomeDesc>(_mode)) {
         return CommunicatorMode_Receiver;
     }
     CHECK(false);
 }
 
-CellTypeGenome NodeDescription::getCellType() const
+CellTypeGenome NodeDesc::getCellType() const
 {
-    if (std::holds_alternative<BaseGenomeDescription>(_cellType)) {
+    if (std::holds_alternative<BaseGenomeDesc>(_cellType)) {
         return CellTypeGenome_Base;
-    } else if (std::holds_alternative<DepotGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<DepotGenomeDesc>(_cellType)) {
         return CellTypeGenome_Depot;
-    } else if (std::holds_alternative<ConstructorGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<ConstructorGenomeDesc>(_cellType)) {
         return CellTypeGenome_Constructor;
-    } else if (std::holds_alternative<SensorGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<SensorGenomeDesc>(_cellType)) {
         return CellTypeGenome_Sensor;
-    } else if (std::holds_alternative<GeneratorGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<GeneratorGenomeDesc>(_cellType)) {
         return CellTypeGenome_Generator;
-    } else if (std::holds_alternative<AttackerGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<AttackerGenomeDesc>(_cellType)) {
         return CellTypeGenome_Attacker;
-    } else if (std::holds_alternative<InjectorGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<InjectorGenomeDesc>(_cellType)) {
         return CellTypeGenome_Injector;
-    } else if (std::holds_alternative<MuscleGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<MuscleGenomeDesc>(_cellType)) {
         return CellTypeGenome_Muscle;
-    } else if (std::holds_alternative<DefenderGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<DefenderGenomeDesc>(_cellType)) {
         return CellTypeGenome_Defender;
-    } else if (std::holds_alternative<ReconnectorGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<ReconnectorGenomeDesc>(_cellType)) {
         return CellTypeGenome_Reconnector;
-    } else if (std::holds_alternative<DetonatorGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<DetonatorGenomeDesc>(_cellType)) {
         return CellTypeGenome_Detonator;
-    } else if (std::holds_alternative<DigestorGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<DigestorGenomeDesc>(_cellType)) {
         return CellTypeGenome_Digestor;
-    } else if (std::holds_alternative<MemoryGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<MemoryGenomeDesc>(_cellType)) {
         return CellTypeGenome_Memory;
-    } else if (std::holds_alternative<CommunicatorGenomeDescription>(_cellType)) {
+    } else if (std::holds_alternative<CommunicatorGenomeDesc>(_cellType)) {
         return CellTypeGenome_Communicator;
     }
     CHECK(false);

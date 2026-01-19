@@ -40,7 +40,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& worldSize)
         _simulationFacade->newSimulation(0, _worldSize, _parameters);
     } else {
         _simulationFacade->clear();
-        _simulationFacade->setPreviewData(Description());
+        _simulationFacade->setPreviewData(Desc());
         _simulationFacade->setCurrentTimestepForPreview(0);
         _simulationFacade->setCurrentTimestep(0);
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -55,12 +55,12 @@ IntegrationTestFramework::~IntegrationTestFramework()
 {
 }
 
-double IntegrationTestFramework::getEnergy(Description const& data) const
+double IntegrationTestFramework::getEnergy(Desc const& data) const
 {
-    auto getDepotEnergy = [](ObjectDescription const& object) -> double {
+    auto getDepotEnergy = [](ObjectDesc const& object) -> double {
         if (object.getObjectType() == ObjectType_Cell) {
             if (object.getCellRef().getCellType() == CellType_Depot) {
-                auto const& depot = std::get<DepotDescription>(object.getCellRef()._cellType);
+                auto const& depot = std::get<DepotDesc>(object.getCellRef()._cellType);
                 return depot._storedUsableEnergy;
             }
         }
@@ -75,7 +75,7 @@ double IntegrationTestFramework::getEnergy(Description const& data) const
         } else if (object.getObjectType() == ObjectType_FreeCell) {
             result += object.getFreeCellRef()._rawEnergy;
         }
-        // StructureDescription has no energy
+        // StructureDesc has no energy
     }
     for (auto const& energyParticle : data._energies) {
         result += energyParticle._energy;
@@ -83,17 +83,17 @@ double IntegrationTestFramework::getEnergy(Description const& data) const
     return result;
 }
 
-bool IntegrationTestFramework::compare(Description left, Description right) const
+bool IntegrationTestFramework::compare(Desc left, Desc right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }
 
-bool IntegrationTestFramework::compare(ObjectDescription left, ObjectDescription right) const
+bool IntegrationTestFramework::compare(ObjectDesc left, ObjectDesc right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }
 
-bool IntegrationTestFramework::compare(EnergyDescription left, EnergyDescription right) const
+bool IntegrationTestFramework::compare(EnergyDesc left, EnergyDesc right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }

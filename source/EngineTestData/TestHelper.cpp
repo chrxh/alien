@@ -37,7 +37,7 @@ bool TestHelper::approxCompareAngles(float expected, float actual, float precisi
     return approxCompare(Math::getNormalizedAngle(expected - actual, -180.0f), 0.0f, precision);
 }
 
-bool TestHelper::compare(Description left, Description right)
+bool TestHelper::compare(Desc left, Desc right)
 {
     std::sort(left._objects.begin(), left._objects.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._objects.begin(), right._objects.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -50,14 +50,14 @@ bool TestHelper::compare(Description left, Description right)
     return left == right;
 }
 
-bool TestHelper::compare(ObjectDescription left, ObjectDescription right)
+bool TestHelper::compare(ObjectDesc left, ObjectDesc right)
 {
     left._id = 0;
     right._id = 0;
     return left == right;
 }
 
-bool TestHelper::compare(EnergyDescription left, EnergyDescription right)
+bool TestHelper::compare(EnergyDesc left, EnergyDesc right)
 {
     left._id = 0;
     right._id = 0;

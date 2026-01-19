@@ -21,7 +21,7 @@ int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkReso
         case NetworkResourceColumnId_SimulationName:
             delta = left->resourceName.compare(right->resourceName);
             break;
-        case NetworkResourceColumnId_Description:
+        case NetworkResourceColumnId_Desc:
             delta = left->description.compare(right->description);
             break;
         case NetworkResourceColumnId_Likes:

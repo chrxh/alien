@@ -25,16 +25,16 @@ TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
     auto const FrontAngle = 45.0f;
     auto const InitialFrontAngleId = 4;
 
-    auto data = Description().addCreature(
+    auto data = Desc().addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(3).pos({10.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
             },
-        CreatureDescription()
+        CreatureDesc()
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
-        GenomeDescription().frontAngle(FrontAngle));
+        GenomeDesc().frontAngle(FrontAngle));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -57,15 +57,15 @@ TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
 {
     auto const InitialFrontAngleId = 4;
 
-    auto data = Description().addCreature(
+    auto data = Desc().addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
             },
-        CreatureDescription()
+        CreatureDesc()
             .id(1)
             .frontAngleId(InitialFrontAngleId),
-        GenomeDescription().frontAngle(45.0f));
+        GenomeDesc().frontAngle(45.0f));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -89,22 +89,22 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
     auto const FrontAngle = 45.0f;
     auto const InitialFrontAngleId = 4;
 
-    auto data = Description().addCreature(
+    auto data = Desc().addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(3).pos({10.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(4).pos({9.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(5).pos({8.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(6).pos({9.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(7).pos({12.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(8).pos({11.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(9).pos({11.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(4).pos({9.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(5).pos({8.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(6).pos({9.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(7).pos({12.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(8).pos({11.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(9).pos({11.0f, 12.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
             },
-        CreatureDescription()
+        CreatureDesc()
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
-        GenomeDescription().frontAngle(FrontAngle));
+        GenomeDesc().frontAngle(FrontAngle));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 9);
@@ -142,16 +142,16 @@ TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
     auto const FrontAngle = 45.0f;
     auto const InitialFrontAngleId = 4;
 
-    auto data = Description().addCreature(
+    auto data = Desc().addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).frontAngle(7.0f).headCell(true)),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).frontAngle(42.0f)),
-                ObjectDescription().id(3).pos({10.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).frontAngle(23.0f)),
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).frontAngle(7.0f).headCell(true)),
+                ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).frontAngle(42.0f)),
+                ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).frontAngle(23.0f)),
             },
-        CreatureDescription()
+        CreatureDesc()
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
-        GenomeDescription().frontAngle(FrontAngle));
+        GenomeDesc().frontAngle(FrontAngle));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -175,24 +175,24 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
     auto const FrontAngle = 45.0f;
     auto const InitialFrontAngleId = 4;
 
-    Description data;
+    Desc data;
 
     data.addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
             },
-        CreatureDescription()
+        CreatureDesc()
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
-        GenomeDescription().frontAngle(FrontAngle));
+        GenomeDesc().frontAngle(FrontAngle));
 
     data.addCreature(
             {
-            ObjectDescription().id(3).pos({10.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
         },
-        CreatureDescription().id(2),
-        GenomeDescription().frontAngle(FrontAngle));
+        CreatureDesc().id(2),
+        GenomeDesc().frontAngle(FrontAngle));
 
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -236,25 +236,25 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     auto const FrontAngle = 45.0f;
     auto const InitialFrontAngleId = 4;
 
-    auto muscleMode = [&muscleModeType] -> MuscleModeDescription {
+    auto muscleMode = [&muscleModeType] -> MuscleModeDesc {
         if (muscleModeType == MuscleMode_AutoBending)
-            return AutoBendingDescription().initialAngle(180.0f);
+            return AutoBendingDesc().initialAngle(180.0f);
         else if (muscleModeType == MuscleMode_ManualBending)
-            return ManualBendingDescription().initialAngle(180.0f);
+            return ManualBendingDesc().initialAngle(180.0f);
         else
-            return AngleBendingDescription().initialAngle(180.0f);
+            return AngleBendingDesc().initialAngle(180.0f);
     }();
-    auto data = Description().addCreature(
+    auto data = Desc().addCreature(
             {
-                ObjectDescription().id(1).pos({11.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
-                ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode))),
-                ObjectDescription().id(3).pos({9.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(4).pos({9.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).cellType(MuscleDesc().mode(muscleMode))),
+                ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(4).pos({9.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
             },
-        CreatureDescription()
+        CreatureDesc()
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
-        GenomeDescription().frontAngle(FrontAngle));
+        GenomeDesc().frontAngle(FrontAngle));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 4);
@@ -289,24 +289,24 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
     auto const FrontAngle = 45.0f;
     auto const InitialFrontAngleId = 4;
 
-    auto muscleMode = [&muscleModeType] -> MuscleModeDescription {
+    auto muscleMode = [&muscleModeType] -> MuscleModeDesc {
         if (muscleModeType == MuscleMode_AutoBending)
-            return AutoBendingDescription().initialAngle(180.0f);
+            return AutoBendingDesc().initialAngle(180.0f);
         else if (muscleModeType == MuscleMode_ManualBending)
-            return ManualBendingDescription().initialAngle(180.0f);
+            return ManualBendingDesc().initialAngle(180.0f);
         else
-            return AngleBendingDescription().initialAngle(180.0f);
+            return AngleBendingDesc().initialAngle(180.0f);
     }();
-    auto data = Description().addCreature(
+    auto data = Desc().addCreature(
             {
-                ObjectDescription().id(1).pos({11.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode))),
-                ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
-                ObjectDescription().id(3).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).cellType(MuscleDesc().mode(muscleMode))),
+                ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(3).pos({10.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).headCell(true)),
             },
-        CreatureDescription()
+        CreatureDesc()
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
-        GenomeDescription().frontAngle(FrontAngle));
+        GenomeDesc().frontAngle(FrontAngle));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -338,24 +338,24 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
     auto const FrontAngle = 45.0f;
     auto const InitialFrontAngleId = 4;
 
-    auto muscleMode = [&muscleModeType] -> MuscleModeDescription {
+    auto muscleMode = [&muscleModeType] -> MuscleModeDesc {
         if (muscleModeType == MuscleMode_AutoBending)
-            return AutoBendingDescription();
+            return AutoBendingDesc();
         else if (muscleModeType == MuscleMode_ManualBending)
-            return ManualBendingDescription();
+            return ManualBendingDesc();
         else
-            return AngleBendingDescription();
+            return AngleBendingDesc();
     }();
-    auto data = Description().addCreature(
+    auto data = Desc().addCreature(
             {
-                ObjectDescription().id(1).pos({11.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
-                ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode))),
-                ObjectDescription().id(3).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).cellType(MuscleDesc().mode(muscleMode))),
+                ObjectDesc().id(3).pos({10.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
             },
-        CreatureDescription()
+        CreatureDesc()
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
-        GenomeDescription().frontAngle(FrontAngle));
+        GenomeDesc().frontAngle(FrontAngle));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 

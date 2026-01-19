@@ -7,7 +7,7 @@
 
 #include "EngineConstants.h"
 
-void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& genome)
+void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
 {
     // Validate genome-level attributes
     // frontAngle is unbounded, so no validation needed
@@ -43,12 +43,12 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
             auto nodeType = node.getCellType();
 
             if (nodeType == CellTypeGenome_Depot) {
-                auto& depot = std::get<DepotGenomeDescription>(node._cellType);
+                auto& depot = std::get<DepotGenomeDesc>(node._cellType);
                 depot._storageLimit = std::clamp(depot._storageLimit, 0.0f, 1000.0f);
                 depot._initialStoredUsableEnergy = std::clamp(depot._initialStoredUsableEnergy, 0.0f, depot._storageLimit);
 
             } else if (nodeType == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._autoTriggerInterval.has_value()) {
                     auto& value = constructor._autoTriggerInterval.value();
                     value = std::max(value, 1);
@@ -59,7 +59,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                     std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_FreeGeneration));
 
             } else if (nodeType == CellTypeGenome_Sensor) {
-                auto& sensor = std::get<SensorGenomeDescription>(node._cellType);
+                auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 if (sensor._autoTriggerInterval.has_value()) {
                     auto& value = sensor._autoTriggerInterval.value();
                     value = std::max(value, 1);
@@ -70,17 +70,17 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 // Validate mode-specific data
                 auto mode = sensor.getMode();
                 if (mode == SensorMode_DetectEnergy) {
-                    auto& detectEnergy = std::get<DetectEnergyGenomeDescription>(sensor._mode);
+                    auto& detectEnergy = std::get<DetectEnergyGenomeDesc>(sensor._mode);
                     detectEnergy._minDensity = std::max(detectEnergy._minDensity, 0.0f);
                 } else if (mode == SensorMode_DetectFreeCell) {
-                    auto& detectFreeCell = std::get<DetectFreeCellGenomeDescription>(sensor._mode);
+                    auto& detectFreeCell = std::get<DetectFreeCellGenomeDesc>(sensor._mode);
                     detectFreeCell._minDensity = std::clamp(detectFreeCell._minDensity, 0.0f, 1.0f);
                     if (detectFreeCell._restrictToColor.has_value()) {
                         auto& value = detectFreeCell._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
                 } else if (mode == SensorMode_DetectCreature) {
-                    auto& detectCreature = std::get<DetectCreatureGenomeDescription>(sensor._mode);
+                    auto& detectCreature = std::get<DetectCreatureGenomeDesc>(sensor._mode);
                     if (detectCreature._minNumCells.has_value()) {
                         auto& value = detectCreature._minNumCells.value();
                         value = std::max(value, 0);
@@ -98,22 +98,22 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 }
 
             } else if (nodeType == CellTypeGenome_Generator) {
-                auto& generator = std::get<GeneratorGenomeDescription>(node._cellType);
+                auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
                 generator._autoTriggerInterval = std::max(generator._autoTriggerInterval, 0);
                 generator._pulseType = std::clamp(generator._pulseType, 0, GeneratorPulseType_Count - 1);
                 generator._alternationInterval = std::max(generator._alternationInterval, 1);
 
             } else if (nodeType == CellTypeGenome_Attacker) {
-                auto& attacker = std::get<AttackerGenomeDescription>(node._cellType);
+                auto& attacker = std::get<AttackerGenomeDesc>(node._cellType);
                 auto attackerMode = attacker.getMode();
                 if (attackerMode == AttackerMode_FreeCell) {
-                    auto& freeCell = std::get<AttackFreeCellGenomeDescription>(attacker._mode);
+                    auto& freeCell = std::get<AttackFreeCellGenomeDesc>(attacker._mode);
                     if (freeCell._restrictToColor.has_value()) {
                         auto& value = freeCell._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
                 } else if (attackerMode == AttackerMode_Creature) {
-                    auto& creature = std::get<AttackCreatureGenomeDescription>(attacker._mode);
+                    auto& creature = std::get<AttackCreatureGenomeDesc>(attacker._mode);
                     if (creature._minNumCells.has_value()) {
                         auto& value = creature._minNumCells.value();
                         value = std::max(value, 0);
@@ -130,55 +130,55 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 }
 
             } else if (nodeType == CellTypeGenome_Injector) {
-                auto& injector = std::get<InjectorGenomeDescription>(node._cellType);
+                auto& injector = std::get<InjectorGenomeDesc>(node._cellType);
                 injector._geneIndex = std::max(injector._geneIndex, 0);
 
             } else if (nodeType == CellTypeGenome_Muscle) {
-                auto& muscle = std::get<MuscleGenomeDescription>(node._cellType);
+                auto& muscle = std::get<MuscleGenomeDesc>(node._cellType);
 
                 // Validate muscle mode based on its variant type
-                if (std::holds_alternative<AutoBendingGenomeDescription>(muscle._mode)) {
-                    auto& mode = std::get<AutoBendingGenomeDescription>(muscle._mode);
+                if (std::holds_alternative<AutoBendingGenomeDesc>(muscle._mode)) {
+                    auto& mode = std::get<AutoBendingGenomeDesc>(muscle._mode);
                     mode._maxAngleDeviation = std::clamp(mode._maxAngleDeviation, 0.0f, 1.0f);
                     mode._forwardBackwardRatio = std::clamp(mode._forwardBackwardRatio, 0.0f, 1.0f);
 
-                } else if (std::holds_alternative<ManualBendingGenomeDescription>(muscle._mode)) {
-                    auto& mode = std::get<ManualBendingGenomeDescription>(muscle._mode);
+                } else if (std::holds_alternative<ManualBendingGenomeDesc>(muscle._mode)) {
+                    auto& mode = std::get<ManualBendingGenomeDesc>(muscle._mode);
                     mode._maxAngleDeviation = std::clamp(mode._maxAngleDeviation, 0.0f, 1.0f);
                     mode._forwardBackwardRatio = std::clamp(mode._forwardBackwardRatio, 0.0f, 1.0f);
 
-                } else if (std::holds_alternative<AngleBendingGenomeDescription>(muscle._mode)) {
-                    auto& mode = std::get<AngleBendingGenomeDescription>(muscle._mode);
+                } else if (std::holds_alternative<AngleBendingGenomeDesc>(muscle._mode)) {
+                    auto& mode = std::get<AngleBendingGenomeDesc>(muscle._mode);
                     mode._maxAngleDeviation = std::clamp(mode._maxAngleDeviation, 0.0f, 1.0f);
                     mode._attractionRepulsionRatio = std::clamp(mode._attractionRepulsionRatio, 0.0f, 1.0f);
 
-                } else if (std::holds_alternative<AutoCrawlingGenomeDescription>(muscle._mode)) {
-                    auto& mode = std::get<AutoCrawlingGenomeDescription>(muscle._mode);
+                } else if (std::holds_alternative<AutoCrawlingGenomeDesc>(muscle._mode)) {
+                    auto& mode = std::get<AutoCrawlingGenomeDesc>(muscle._mode);
                     mode._maxDistanceDeviation = std::clamp(mode._maxDistanceDeviation, 0.0f, 1.0f);
                     mode._forwardBackwardRatio = std::clamp(mode._forwardBackwardRatio, 0.0f, 1.0f);
 
-                } else if (std::holds_alternative<ManualCrawlingGenomeDescription>(muscle._mode)) {
-                    auto& mode = std::get<ManualCrawlingGenomeDescription>(muscle._mode);
+                } else if (std::holds_alternative<ManualCrawlingGenomeDesc>(muscle._mode)) {
+                    auto& mode = std::get<ManualCrawlingGenomeDesc>(muscle._mode);
                     mode._maxDistanceDeviation = std::clamp(mode._maxDistanceDeviation, 0.0f, 1.0f);
                     mode._forwardBackwardRatio = std::clamp(mode._forwardBackwardRatio, 0.0f, 1.0f);
                 }
-                // DirectMovementGenomeDescription has no attributes to validate
+                // DirectMovementGenomeDesc has no attributes to validate
 
             } else if (nodeType == CellTypeGenome_Defender) {
-                auto& defender = std::get<DefenderGenomeDescription>(node._cellType);
+                auto& defender = std::get<DefenderGenomeDesc>(node._cellType);
                 defender._mode = std::clamp(defender._mode, 0, DefenderMode_Count - 1);
 
             } else if (nodeType == CellTypeGenome_Reconnector) {
-                auto& reconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
+                auto& reconnector = std::get<ReconnectorGenomeDesc>(node._cellType);
                 auto reconnectorMode = reconnector.getMode();
                 if (reconnectorMode == ReconnectorMode_FreeCell) {
-                    auto& freeCell = std::get<ReconnectFreeCellGenomeDescription>(reconnector._mode);
+                    auto& freeCell = std::get<ReconnectFreeCellGenomeDesc>(reconnector._mode);
                     if (freeCell._restrictToColor.has_value()) {
                         auto& value = freeCell._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
                 } else if (reconnectorMode == ReconnectorMode_Creature) {
-                    auto& creature = std::get<ReconnectCreatureGenomeDescription>(reconnector._mode);
+                    auto& creature = std::get<ReconnectCreatureGenomeDesc>(reconnector._mode);
                     if (creature._minNumCells.has_value()) {
                         auto& value = creature._minNumCells.value();
                         value = std::max(value, 0);
@@ -195,21 +195,21 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 }
 
             } else if (nodeType == CellTypeGenome_Detonator) {
-                auto& detonator = std::get<DetonatorGenomeDescription>(node._cellType);
+                auto& detonator = std::get<DetonatorGenomeDesc>(node._cellType);
                 detonator._countdown = std::max(detonator._countdown, 1);
 
             } else if (nodeType == CellTypeGenome_Memory) {
-                auto& memory = std::get<MemoryGenomeDescription>(node._cellType);
+                auto& memory = std::get<MemoryGenomeDesc>(node._cellType);
                 auto memoryMode = memory.getMode();
                 if (memoryMode == MemoryMode_SignalDelay) {
-                    auto& signalDelay = std::get<SignalDelayGenomeDescription>(memory._mode);
+                    auto& signalDelay = std::get<SignalDelayGenomeDesc>(memory._mode);
                     signalDelay._delay = std::clamp(signalDelay._delay, 0, MAX_CELL_MEMORY_ENTRIES);
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
-                    auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
+                    auto& signalRecorder = std::get<SignalRecorderGenomeDesc>(memory._mode);
                     signalRecorder._numWrittenSignalEntries = std::clamp(signalRecorder._numWrittenSignalEntries, 0, static_cast<int>(memory._signalEntries.size()));
                 } else if (memoryMode == MemoryMode_SignalStorage) {
                 } else if (memoryMode == MemoryMode_SignalIntegrator) {
-                    auto& signalIntegrator = std::get<SignalIntegratorGenomeDescription>(memory._mode);
+                    auto& signalIntegrator = std::get<SignalIntegratorGenomeDesc>(memory._mode);
                     signalIntegrator._newSignalWeight = std::clamp(signalIntegrator._newSignalWeight, 0.0f, 1.0f);
                 }
                 // Validate number of memory entries
@@ -219,14 +219,14 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 }
 
             } else if (nodeType == CellTypeGenome_Communicator) {
-                auto& communicator = std::get<CommunicatorGenomeDescription>(node._cellType);
+                auto& communicator = std::get<CommunicatorGenomeDesc>(node._cellType);
                 auto communicatorMode = communicator.getMode();
                 if (communicatorMode == CommunicatorMode_Sender) {
-                    auto& sender = std::get<SenderGenomeDescription>(communicator._mode);
+                    auto& sender = std::get<SenderGenomeDesc>(communicator._mode);
                     sender._range = std::max(sender._range, 0.0f);
                     sender._maxTimesSent = std::max(sender._maxTimesSent, 0);
                 } else if (communicatorMode == CommunicatorMode_Receiver) {
-                    auto& receiver = std::get<ReceiverGenomeDescription>(communicator._mode);
+                    auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);
                     if (receiver._restrictToColor.has_value()) {
                         auto& value = receiver._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);

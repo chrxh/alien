@@ -9,9 +9,9 @@ class _CreaturePreviewWidget
 {
 public:
     static CreaturePreviewWidget
-    create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex);
+    create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
-    void process(bool& phenotypeChanged, Description& phenotype, float width);
+    void process(bool& phenotypeChanged, Desc& phenotype, float width);
 
     uint64_t getCreatureId() const;
     void setCreatureId(uint64_t value);
@@ -19,17 +19,17 @@ public:
     GeneIndicesForSubGenome const& getGeneIndices() const;
     void setGeneIndices(GeneIndicesForSubGenome const& value);
 
-    SubGenomeDescription const& getGenomeWithStartIndex() const;
-    void setGenomeWithStartIndex(SubGenomeDescription const& value);
+    SubGenomeDesc const& getGenomeWithStartIndex() const;
+    void setGenomeWithStartIndex(SubGenomeDesc const& value);
 
     void resetVisualFrontAngle();
 
 private:
-    _CreaturePreviewWidget(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex);
+    _CreaturePreviewWidget(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
     void processMouseNavigation();
     void processCellGraphAndSelection(ConversionResult const& conversionResult);
-    void processSignalEditor(bool& phenotypeChanged, Description& phenotype, ConversionResult const& conversionResult);
+    void processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult);
     void processActionButtons();
     void processScrollbars();
     void processTitle();
@@ -38,13 +38,13 @@ private:
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     void moveCenter(RealVector2D const& startWorldPosition, RealVector2D const& endViewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos);
 
-    void updatePhenotype(Description& phenotype, CellPreviewDescription const& editedCell) const;
+    void updatePhenotype(Desc& phenotype, CellPreviewDesc const& editedCell) const;
 
     SimulationScrollbars _scrollbars;
 
     GenomeTabEditData _editData;
     GeneIndicesForSubGenome _geneIndices;
-    SubGenomeDescription _subGenome;
+    SubGenomeDesc _subGenome;
     uint64_t _creatureId = 0;
     std::optional<float> _visualFrontAngle;
     std::optional<uint64_t> _selectedCellIdFromPreview;

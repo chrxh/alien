@@ -53,129 +53,129 @@ _NodeEditorWidget::_NodeEditorWidget(GenomeTabEditData const& editData, GenomeTa
 
 namespace
 {
-    CellTypeGenomeDescription createCellTypeGenomeDescription(CellTypeGenome cellType)
+    CellTypeGenomeDesc createCellTypeGenomeDesc(CellTypeGenome cellType)
     {
         switch (cellType) {
         case CellTypeGenome_Base:
-            return BaseGenomeDescription();
+            return BaseGenomeDesc();
         case CellTypeGenome_Depot:
-            return DepotGenomeDescription();
+            return DepotGenomeDesc();
         case CellTypeGenome_Constructor:
-            return ConstructorGenomeDescription();
+            return ConstructorGenomeDesc();
         case CellTypeGenome_Sensor:
-            return SensorGenomeDescription();
+            return SensorGenomeDesc();
         case CellTypeGenome_Generator:
-            return GeneratorGenomeDescription();
+            return GeneratorGenomeDesc();
         case CellTypeGenome_Attacker:
-            return AttackerGenomeDescription();
+            return AttackerGenomeDesc();
         case CellTypeGenome_Injector:
-            return InjectorGenomeDescription();
+            return InjectorGenomeDesc();
         case CellTypeGenome_Muscle:
-            return MuscleGenomeDescription();
+            return MuscleGenomeDesc();
         case CellTypeGenome_Defender:
-            return DefenderGenomeDescription();
+            return DefenderGenomeDesc();
         case CellTypeGenome_Reconnector:
-            return ReconnectorGenomeDescription();
+            return ReconnectorGenomeDesc();
         case CellTypeGenome_Detonator:
-            return DetonatorGenomeDescription();
+            return DetonatorGenomeDesc();
         case CellTypeGenome_Digestor:
-            return DigestorGenomeDescription();
+            return DigestorGenomeDesc();
         case CellTypeGenome_Memory:
-            return MemoryGenomeDescription();
+            return MemoryGenomeDesc();
         case CellTypeGenome_Communicator:
-            return CommunicatorGenomeDescription();
+            return CommunicatorGenomeDesc();
         default:
             CHECK(false);
         }
     }
 
-    MuscleModeGenomeDescription createMuscleModeGenomeDescription(MuscleMode mode)
+    MuscleModeGenomeDesc createMuscleModeGenomeDesc(MuscleMode mode)
     {
         switch (mode) {
         case MuscleMode_AutoBending:
-            return AutoBendingGenomeDescription();
+            return AutoBendingGenomeDesc();
         case MuscleMode_ManualBending:
-            return ManualBendingGenomeDescription();
+            return ManualBendingGenomeDesc();
         case MuscleMode_AngleBending:
-            return AngleBendingGenomeDescription();
+            return AngleBendingGenomeDesc();
         case MuscleMode_AutoCrawling:
-            return AutoCrawlingGenomeDescription();
+            return AutoCrawlingGenomeDesc();
         case MuscleMode_ManualCrawling:
-            return ManualCrawlingGenomeDescription();
+            return ManualCrawlingGenomeDesc();
         case MuscleMode_DirectMovement:
-            return DirectMovementGenomeDescription();
+            return DirectMovementGenomeDesc();
         default:
             CHECK(false);
         }
     }
 
-    SensorModeGenomeDescription createSensorModeGenomeDescription(SensorMode mode)
+    SensorModeGenomeDesc createSensorModeGenomeDesc(SensorMode mode)
     {
         switch (mode) {
         case SensorMode_Telemetry:
-            return TelemetryGenomeDescription();
+            return TelemetryGenomeDesc();
         case SensorMode_DetectEnergy:
-            return DetectEnergyGenomeDescription();
+            return DetectEnergyGenomeDesc();
         case SensorMode_DetectStructure:
-            return DetectStructureGenomeDescription();
+            return DetectStructureGenomeDesc();
         case SensorMode_DetectFreeCell:
-            return DetectFreeCellGenomeDescription();
+            return DetectFreeCellGenomeDesc();
         case SensorMode_DetectCreature:
-            return DetectCreatureGenomeDescription();
+            return DetectCreatureGenomeDesc();
         default:
             CHECK(false);
         }
     }
 
-    AttackerModeGenomeDescription createAttackerModeGenomeDescription(AttackerMode mode)
+    AttackerModeGenomeDesc createAttackerModeGenomeDesc(AttackerMode mode)
     {
         switch (mode) {
         case AttackerMode_FreeCell:
-            return AttackFreeCellGenomeDescription();
+            return AttackFreeCellGenomeDesc();
         case AttackerMode_Creature:
-            return AttackCreatureGenomeDescription();
+            return AttackCreatureGenomeDesc();
         default:
             CHECK(false);
         }
     }
 
-    ReconnectorModeGenomeDescription createReconnectorModeGenomeDescription(ReconnectorMode mode)
+    ReconnectorModeGenomeDesc createReconnectorModeGenomeDesc(ReconnectorMode mode)
     {
         switch (mode) {
         case ReconnectorMode_Structure:
-            return ReconnectStructureGenomeDescription();
+            return ReconnectStructureGenomeDesc();
         case ReconnectorMode_FreeCell:
-            return ReconnectFreeCellGenomeDescription();
+            return ReconnectFreeCellGenomeDesc();
         case ReconnectorMode_Creature:
-            return ReconnectCreatureGenomeDescription();
+            return ReconnectCreatureGenomeDesc();
         default:
             CHECK(false);
         }
     }
 
-    MemoryModeGenomeDescription createMemoryModeGenomeDescription(MemoryMode mode)
+    MemoryModeGenomeDesc createMemoryModeGenomeDesc(MemoryMode mode)
     {
         switch (mode) {
         case MemoryMode_SignalDelay:
-            return SignalDelayGenomeDescription();
+            return SignalDelayGenomeDesc();
         case MemoryMode_SignalRecorder:
-            return SignalRecorderGenomeDescription();
+            return SignalRecorderGenomeDesc();
         case MemoryMode_SignalStorage:
-            return SignalStorageGenomeDescription();
+            return SignalStorageGenomeDesc();
         case MemoryMode_SignalIntegrator:
-            return SignalIntegratorGenomeDescription();
+            return SignalIntegratorGenomeDesc();
         default:
             CHECK(false);
         }
     }
 
-    CommunicatorModeGenomeDescription createCommunicatorModeGenomeDescription(CommunicatorMode mode)
+    CommunicatorModeGenomeDesc createCommunicatorModeGenomeDesc(CommunicatorMode mode)
     {
         switch (mode) {
         case CommunicatorMode_Sender:
-            return SenderGenomeDescription();
+            return SenderGenomeDesc();
         case CommunicatorMode_Receiver:
-            return ReceiverGenomeDescription();
+            return ReceiverGenomeDesc();
         default:
             CHECK(false);
         }
@@ -261,12 +261,12 @@ void _NodeEditorWidget::processNodeAttributes()
             // Type
             auto nodeType = node.getCellType();
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
-                node._cellType = createCellTypeGenomeDescription(nodeType);
+                node._cellType = createCellTypeGenomeDesc(nodeType);
             }
             if (nodeType == CellTypeGenome_Base) {
             } else if (nodeType == CellTypeGenome_Depot) {
                 AlienGui::BeginIndent();
-                auto& depot = std::get<DepotGenomeDescription>(node._cellType);
+                auto& depot = std::get<DepotGenomeDesc>(node._cellType);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Max energy for storage").textWidth(rightColumnWidth), depot._storageLimit);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Initial stored energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
@@ -276,7 +276,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Gene index
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 std::vector<std::string> genes;
                 for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
                     auto text = "No. " + std::to_string(index + 1);
@@ -311,14 +311,14 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Auto activation interval
-                auto& sensor = std::get<SensorGenomeDescription>(node._cellType);
+                auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 AlienGui::InputOptionalInt(
                     AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
                 // Mode selection
                 auto mode = sensor.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::SensorModeStrings).textWidth(rightColumnWidth), mode)) {
-                    sensor._mode = createSensorModeGenomeDescription(mode);
+                    sensor._mode = createSensorModeGenomeDesc(mode);
                 }
 
                 // Mode-specific parameters
@@ -326,7 +326,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     // No parameters
                 } else if (mode == SensorMode_DetectEnergy) {
                     AlienGui::BeginIndent();
-                    auto& detectEnergy = std::get<DetectEnergyGenomeDescription>(sensor._mode);
+                    auto& detectEnergy = std::get<DetectEnergyGenomeDesc>(sensor._mode);
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(rightColumnWidth), detectEnergy._minDensity);
                     AlienGui::EndIndent();
@@ -334,7 +334,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     // No parameters
                 } else if (mode == SensorMode_DetectFreeCell) {
                     AlienGui::BeginIndent();
-                    auto& detectFreeCell = std::get<DetectFreeCellGenomeDescription>(sensor._mode);
+                    auto& detectFreeCell = std::get<DetectFreeCellGenomeDesc>(sensor._mode);
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(rightColumnWidth),
                         detectFreeCell._minDensity);
@@ -343,7 +343,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::EndIndent();
                 } else if (mode == SensorMode_DetectCreature) {
                     AlienGui::BeginIndent();
-                    auto& detectCreature = std::get<DetectCreatureGenomeDescription>(sensor._mode);
+                    auto& detectCreature = std::get<DetectCreatureGenomeDesc>(sensor._mode);
                     AlienGui::InputOptionalInt(
                         AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), detectCreature._minNumCells);
                     AlienGui::InputOptionalInt(
@@ -369,7 +369,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Activation interval
-                auto& generator = std::get<GeneratorGenomeDescription>(node._cellType);
+                auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), generator._autoTriggerInterval);
 
                 // Pulse type
@@ -392,16 +392,16 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::BeginIndent();
 
-                auto& attacker = std::get<AttackerGenomeDescription>(node._cellType);
+                auto& attacker = std::get<AttackerGenomeDesc>(node._cellType);
                 auto mode = attacker.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::AttackerModeStrings).textWidth(rightColumnWidth), mode)) {
-                    attacker._mode = createAttackerModeGenomeDescription(mode);
+                    attacker._mode = createAttackerModeGenomeDesc(mode);
                 }
 
                 if (mode == AttackerMode_FreeCell) {
                     AlienGui::BeginIndent();
 
-                    auto& attackFreeCell = std::get<AttackFreeCellGenomeDescription>(attacker._mode);
+                    auto& attackFreeCell = std::get<AttackFreeCellGenomeDesc>(attacker._mode);
                     AlienGui::ComboOptionalColor(
                         AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackFreeCell._restrictToColor);
 
@@ -410,7 +410,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 } else if (mode == AttackerMode_Creature) {
                     AlienGui::BeginIndent();
 
-                    auto& attackCreature = std::get<AttackCreatureGenomeDescription>(attacker._mode);
+                    auto& attackCreature = std::get<AttackCreatureGenomeDesc>(attacker._mode);
                     AlienGui::InputOptionalInt(
                         AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), attackCreature._minNumCells);
                     AlienGui::InputOptionalInt(
@@ -430,7 +430,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Gene index
-                auto& injector = std::get<InjectorGenomeDescription>(node._cellType);
+                auto& injector = std::get<InjectorGenomeDesc>(node._cellType);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(rightColumnWidth), injector._geneIndex);
 
                 AlienGui::EndIndent();
@@ -440,17 +440,17 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Mode
-                auto& muscle = std::get<MuscleGenomeDescription>(node._cellType);
+                auto& muscle = std::get<MuscleGenomeDesc>(node._cellType);
                 auto mode = muscle.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::MuscleModeStrings).textWidth(rightColumnWidth), mode)) {
-                    muscle._mode = createMuscleModeGenomeDescription(mode);
+                    muscle._mode = createMuscleModeGenomeDesc(mode);
                 }
 
                 if (mode == MuscleMode_AutoBending) {
                     AlienGui::BeginIndent();
 
                     // Max angle deviation
-                    auto& autoBending = std::get<AutoBendingGenomeDescription>(muscle._mode);
+                    auto& autoBending = std::get<AutoBendingGenomeDesc>(muscle._mode);
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
                         autoBending._maxAngleDeviation);
@@ -466,7 +466,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
 
                     // Max angle deviation
-                    auto& manualBending = std::get<ManualBendingGenomeDescription>(muscle._mode);
+                    auto& manualBending = std::get<ManualBendingGenomeDesc>(muscle._mode);
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
                         manualBending._maxAngleDeviation);
@@ -482,7 +482,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
 
                     // Max angle deviation
-                    auto& angleBending = std::get<AngleBendingGenomeDescription>(muscle._mode);
+                    auto& angleBending = std::get<AngleBendingGenomeDesc>(muscle._mode);
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
                         angleBending._maxAngleDeviation);
@@ -498,7 +498,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
 
                     // Max angle deviation
-                    auto& autoCrawling = std::get<AutoCrawlingGenomeDescription>(muscle._mode);
+                    auto& autoCrawling = std::get<AutoCrawlingGenomeDesc>(muscle._mode);
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.01f).textWidth(rightColumnWidth),
                         autoCrawling._maxDistanceDeviation);
@@ -514,7 +514,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
 
                     // Max angle deviation
-                    auto& manualCrawling = std::get<ManualCrawlingGenomeDescription>(muscle._mode);
+                    auto& manualCrawling = std::get<ManualCrawlingGenomeDesc>(muscle._mode);
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.01f).textWidth(rightColumnWidth),
                         manualCrawling._maxDistanceDeviation);
@@ -536,7 +536,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Defender mode
-                auto& defender = std::get<DefenderGenomeDescription>(node._cellType);
+                auto& defender = std::get<DefenderGenomeDesc>(node._cellType);
                 AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::DefenderModeStrings).textWidth(rightColumnWidth), defender._mode);
 
                 AlienGui::EndIndent();
@@ -546,10 +546,10 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Mode selection
-                auto& reconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
+                auto& reconnector = std::get<ReconnectorGenomeDesc>(node._cellType);
                 auto mode = reconnector.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::ReconnectorModeStrings).textWidth(rightColumnWidth), mode)) {
-                    reconnector._mode = createReconnectorModeGenomeDescription(mode);
+                    reconnector._mode = createReconnectorModeGenomeDesc(mode);
                 }
 
                 // Mode-specific parameters
@@ -557,13 +557,13 @@ void _NodeEditorWidget::processNodeAttributes()
                     // No parameters
                 } else if (mode == ReconnectorMode_FreeCell) {
                     AlienGui::BeginIndent();
-                    auto& freeCell = std::get<ReconnectFreeCellGenomeDescription>(reconnector._mode);
+                    auto& freeCell = std::get<ReconnectFreeCellGenomeDesc>(reconnector._mode);
                     AlienGui::ComboOptionalColor(
                         AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), freeCell._restrictToColor);
                     AlienGui::EndIndent();
                 } else if (mode == ReconnectorMode_Creature) {
                     AlienGui::BeginIndent();
-                    auto& creature = std::get<ReconnectCreatureGenomeDescription>(reconnector._mode);
+                    auto& creature = std::get<ReconnectCreatureGenomeDesc>(reconnector._mode);
                     AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), creature._minNumCells);
                     AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), creature._maxNumCells);
                     AlienGui::ComboOptionalColor(
@@ -581,13 +581,13 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Countdown
-                auto& detonator = std::get<DetonatorGenomeDescription>(node._cellType);
+                auto& detonator = std::get<DetonatorGenomeDesc>(node._cellType);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth), detonator._countdown);
 
                 AlienGui::EndIndent();
             } else if (nodeType == CellTypeGenome_Digestor) {
                 AlienGui::BeginIndent();
-                auto& digestor = std::get<DigestorGenomeDescription>(node._cellType);
+                auto& digestor = std::get<DigestorGenomeDesc>(node._cellType);
                 AlienGui::SliderFloat(
                     AlienGui::SliderFloatParameters().name("Energy conductivity").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                     &digestor._rawEnergyConductivity);
@@ -602,36 +602,36 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Mode selection
-                auto& memory = std::get<MemoryGenomeDescription>(node._cellType);
+                auto& memory = std::get<MemoryGenomeDesc>(node._cellType);
                 auto mode = memory.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::MemoryModeStrings).textWidth(rightColumnWidth), mode)) {
-                    memory._mode = createMemoryModeGenomeDescription(mode);
+                    memory._mode = createMemoryModeGenomeDesc(mode);
                     if (mode == MemoryMode_SignalRecorder || mode == MemoryMode_SignalStorage) {
-                        memory._signalEntries.resize(8, SignalEntryGenomeDescription());
+                        memory._signalEntries.resize(8, SignalEntryGenomeDesc());
                     }
                 }
 
                 // Mode-specific parameters
                 if (mode == MemoryMode_SignalDelay) {
                     AlienGui::BeginIndent();
-                    auto& signalDelay = std::get<SignalDelayGenomeDescription>(memory._mode);
+                    auto& signalDelay = std::get<SignalDelayGenomeDesc>(memory._mode);
                     AlienGui::InputInt(AlienGui::InputIntParameters().name("Delay").textWidth(rightColumnWidth), signalDelay._delay);
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalRecorder) {
                     AlienGui::BeginIndent();
-                    auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
+                    auto& signalRecorder = std::get<SignalRecorderGenomeDesc>(memory._mode);
                     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalRecorder._readOnly);
                     AlienGui::SignalMemoryEditor(AlienGui::SignalMemoryEditorParameters().textWidth(rightColumnWidth), memory._signalEntries);
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalStorage) {
                     AlienGui::BeginIndent();
-                    auto& signalStorage = std::get<SignalStorageGenomeDescription>(memory._mode);
+                    auto& signalStorage = std::get<SignalStorageGenomeDesc>(memory._mode);
                     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalStorage._readOnly);
                     AlienGui::SignalMemoryEditor(AlienGui::SignalMemoryEditorParameters().textWidth(rightColumnWidth), memory._signalEntries);
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalIntegrator) {
                     AlienGui::BeginIndent();
-                    auto& signalIntegrator = std::get<SignalIntegratorGenomeDescription>(memory._mode);
+                    auto& signalIntegrator = std::get<SignalIntegratorGenomeDesc>(memory._mode);
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("New signal weight").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         &signalIntegrator._newSignalWeight);
@@ -659,22 +659,22 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
 
                 // Mode selection
-                auto& communicator = std::get<CommunicatorGenomeDescription>(node._cellType);
+                auto& communicator = std::get<CommunicatorGenomeDesc>(node._cellType);
                 auto mode = communicator.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::CommunicatorModeStrings).textWidth(rightColumnWidth), mode)) {
-                    communicator._mode = createCommunicatorModeGenomeDescription(mode);
+                    communicator._mode = createCommunicatorModeGenomeDesc(mode);
                 }
 
                 // Mode-specific parameters
                 if (mode == CommunicatorMode_Sender) {
                     AlienGui::BeginIndent();
-                    auto& sender = std::get<SenderGenomeDescription>(communicator._mode);
+                    auto& sender = std::get<SenderGenomeDesc>(communicator._mode);
                     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Range").format("%.1f").textWidth(rightColumnWidth), sender._range);
                     AlienGui::InputInt(AlienGui::InputIntParameters().name("Max times sent").textWidth(rightColumnWidth), sender._maxTimesSent);
                     AlienGui::EndIndent();
                 } else if (mode == CommunicatorMode_Receiver) {
                     AlienGui::BeginIndent();
-                    auto& receiver = std::get<ReceiverGenomeDescription>(communicator._mode);
+                    auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);
                     AlienGui::ComboOptionalColor(
                         AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), receiver._restrictToColor);
                     AlienGui::Combo(

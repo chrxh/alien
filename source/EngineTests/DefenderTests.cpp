@@ -2,7 +2,7 @@
 //
 //#include <EngineInterface/DescriptionEditService.h>
 //#include <EngineInterface/Description.h>
-//#include <EngineInterface/GenomeDescriptionConverterService.h>
+//#include <EngineInterface/GenomeDescConverterService.h>
 //#include <EngineInterface/SimulationFacade.h>
 //#include "IntegrationTestFramework.h"
 //
@@ -33,25 +33,25 @@
 //
 //TEST_F(DefenderTests, attackerVsAntiAttacker)
 //{
-//    Description data;
+//    Desc data;
 //    data.objects() = {
-//        ObjectDescription()
+//        ObjectDesc()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellType(AttackerDescription()),
-//        ObjectDescription()
+//            .cellType(AttackerDesc()),
+//        ObjectDesc()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDescription().autoTriggerInterval(1))
+//            .cellType(GeneratorDesc().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDescription()
+//        ObjectDesc()
 //            .id(3)
 //            .pos({9.0f, 10.0f})
-//            .cellType(GeneratorDescription()),
-//        ObjectDescription()
+//            .cellType(GeneratorDesc()),
+//        ObjectDesc()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
-//            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
+//            .cellType(DefenderDesc().mode(DefenderMode_DefendAgainstAttacker)),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
@@ -72,22 +72,22 @@
 //
 //TEST_F(DefenderTests, attackerVsAntiInjector)
 //{
-//    Description data;
+//    Desc data;
 //    data.objects() = {
-//        ObjectDescription()
+//        ObjectDesc()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellType(AttackerDescription()),
-//        ObjectDescription()
+//            .cellType(AttackerDesc()),
+//        ObjectDesc()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDescription().autoTriggerInterval(1))
+//            .cellType(GeneratorDesc().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDescription().id(3).pos({9.0f, 10.0f}).type(CellDescription().cellType(GeneratorDescription())),
-//        ObjectDescription()
+//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc())),
+//        ObjectDesc()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
-//            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
+//            .cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector)),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
@@ -108,24 +108,24 @@
 //
 //TEST_F(DefenderTests, injectorVsAntiAttacker)
 //{
-//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().objects({CellGenomeDescription()}));
+//    auto genome = GenomeDescConverterService::get().convertDescriptionToBytes(GenomeDesc().objects({CellGenomeDesc()}));
 //
-//    Description data;
+//    Desc data;
 //    data.objects() = {
-//        ObjectDescription()
+//        ObjectDesc()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
-//        ObjectDescription()
+//            .cellType(InjectorDesc().mode(InjectorMode_InjectAll).genome(genome)),
+//        ObjectDesc()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDescription().autoTriggerInterval(1))
+//            .cellType(GeneratorDesc().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDescription().id(3).pos({9.0f, 10.0f}).type(CellDescription().cellType(ConstructorDescription())),
-//        ObjectDescription()
+//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().cellType(ConstructorDesc())),
+//        ObjectDesc()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
-//            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
+//            .cellType(DefenderDesc().mode(DefenderMode_DefendAgainstAttacker)),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
@@ -138,13 +138,13 @@
 //    auto actualData = _simulationFacade->getSimulationData();
 //
 //    auto actualInjector = getCell(actualData, 1);
-//    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector.getCellRef()._cellType);
+//    auto actualInjectorFunc = std::get<InjectorDesc>(actualInjector.getCellRef()._cellType);
 //
 //    auto actualTarget = getCell(actualData, 3);
-//    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget.getCellRef()._cellType);
+//    auto actualTargetFunc = std::get<ConstructorDesc>(actualTarget.getCellRef()._cellType);
 //
 //    auto origInjector = getCell(data, 1);
-//    auto origInjectorFunc = std::get<InjectorDescription>(origInjector.getCellRef()._cellType);
+//    auto origInjectorFunc = std::get<InjectorDesc>(origInjector.getCellRef()._cellType);
 //
 //    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._signal._channels[0]));
 //    EXPECT_EQ(0, actualInjectorFunc._counter);
@@ -153,24 +153,24 @@
 //
 //TEST_F(DefenderTests, injectorVsAntiInjector)
 //{
-//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().objects({CellGenomeDescription()}));
+//    auto genome = GenomeDescConverterService::get().convertDescriptionToBytes(GenomeDesc().objects({CellGenomeDesc()}));
 //
-//    Description data;
+//    Desc data;
 //    data.objects() = {
-//        ObjectDescription()
+//        ObjectDesc()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
-//        ObjectDescription()
+//            .cellType(InjectorDesc().mode(InjectorMode_InjectAll).genome(genome)),
+//        ObjectDesc()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDescription().autoTriggerInterval(1))
+//            .cellType(GeneratorDesc().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDescription().id(3).pos({9.0f, 10.0f}).type(CellDescription().cellType(ConstructorDescription())),
-//        ObjectDescription()
+//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().cellType(ConstructorDesc())),
+//        ObjectDesc()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
-//            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
+//            .cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector)),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
@@ -183,16 +183,16 @@
 //    auto actualData = _simulationFacade->getSimulationData();
 //
 //    auto actualInjector = getCell(actualData, 1);
-//    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector.getCellRef()._cellType);
+//    auto actualInjectorFunc = std::get<InjectorDesc>(actualInjector.getCellRef()._cellType);
 //
 //    auto origTarget = getCell(data, 3);
-//    auto origTargetFunc = std::get<ConstructorDescription>(origTarget.getCellRef()._cellType);
+//    auto origTargetFunc = std::get<ConstructorDesc>(origTarget.getCellRef()._cellType);
 //
 //    auto actualTarget = getCell(actualData, 3);
-//    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget.getCellRef()._cellType);
+//    auto actualTargetFunc = std::get<ConstructorDesc>(actualTarget.getCellRef()._cellType);
 //
 //    auto origInjector = getCell(data, 1);
-//    auto origInjectorFunc = std::get<InjectorDescription>(origInjector.getCellRef()._cellType);
+//    auto origInjectorFunc = std::get<InjectorDesc>(origInjector.getCellRef()._cellType);
 //
 //    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._signal._channels[0]));
 //    EXPECT_EQ(4, actualInjectorFunc._counter);

@@ -21,7 +21,7 @@ public:
     virtual ~DescriptionEditTests() = default;
 
 protected:
-    bool areAngelsCorrect(Description const& data) const
+    bool areAngelsCorrect(Desc const& data) const
     {
         for (auto const& object : data._objects) {
             if (!object._connections.empty()) {
@@ -54,11 +54,11 @@ TEST_F(DescriptionEditTests, correctConnections)
 
 TEST_F(DescriptionEditTests, addThirdConnection1)
 {
-    auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({0, 0}),
-        ObjectDescription().id(2).pos({1, 0}),
-        ObjectDescription().id(3).pos({0, 1}),
-        ObjectDescription().id(4).pos({0, -1}),
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({0, 0}),
+        ObjectDesc().id(2).pos({1, 0}),
+        ObjectDesc().id(3).pos({0, 1}),
+        ObjectDesc().id(4).pos({0, -1}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -83,11 +83,11 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
 
 TEST_F(DescriptionEditTests, addThirdConnection2)
 {
-    auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({0, 0}),
-        ObjectDescription().id(2).pos({1, 0}),
-        ObjectDescription().id(3).pos({-1, 0}),
-        ObjectDescription().id(4).pos({0, 1}),
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({0, 0}),
+        ObjectDesc().id(2).pos({1, 0}),
+        ObjectDesc().id(3).pos({-1, 0}),
+        ObjectDesc().id(4).pos({0, 1}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -130,11 +130,11 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
 {
     // Create test data
-    Description data;
+    Desc data;
     if (GetParam() == CellsOnCreature::No) {
-        data._objects = {ObjectDescription().id(0), ObjectDescription().id(1)};
+        data._objects = {ObjectDesc().id(0), ObjectDesc().id(1)};
     } else {
-        data.addCreature({ObjectDescription().id(0), ObjectDescription().id(1)});
+        data.addCreature({ObjectDesc().id(0), ObjectDesc().id(1)});
     }
 
     // Perform action
@@ -154,9 +154,9 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
     // Create test data
     auto createCollection = [] {
         if (GetParam() == CellsOnCreature::No) {
-            return Description().objects({ObjectDescription().id(0), ObjectDescription().id(0)});
+            return Desc().objects({ObjectDesc().id(0), ObjectDesc().id(0)});
         } else {
-            return Description().addCreature({ObjectDescription().id(0), ObjectDescription().id(0)});
+            return Desc().addCreature({ObjectDesc().id(0), ObjectDesc().id(0)});
         }
     };
     auto data = createCollection();
@@ -175,16 +175,16 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
 TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
 {
     // Create test data
-    Description data;
+    Desc data;
     if (GetParam() == CellsOnCreature::No) {
         for (int i = 0; i < 10; ++i) {
-            data._objects.emplace_back(ObjectDescription().id(i).type(CellDescription().age(i)));
+            data._objects.emplace_back(ObjectDesc().id(i).type(CellDesc().age(i)));
         }
         std::sort(data._objects.begin(), data._objects.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
     } else {
-        std::vector<ObjectDescription> cells;
+        std::vector<ObjectDesc> cells;
         for (int i = 0; i < 10; ++i) {
-            cells.emplace_back(ObjectDescription().id(i).type(CellDescription().age(i)));
+            cells.emplace_back(ObjectDesc().id(i).type(CellDesc().age(i)));
         }
         std::sort(cells.begin(), cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
         data.addCreature(cells);
@@ -195,7 +195,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
 
     // Check result
     auto cells = GetParam() == CellsOnCreature::No ? data._objects : data.getObjectsForCreature(data._creatures.front()._id);
-    std::map<int, ObjectDescription> ageToCell;
+    std::map<int, ObjectDesc> ageToCell;
     for (auto const& object : cells) {
         ageToCell.insert_or_assign(object.getCellRef()._age, object);
     }
@@ -214,14 +214,14 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
 TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
 {
     // Create test data
-    auto data = Description()
+    auto data = Desc()
                     .addCreature({
-                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
-                        ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
+                        ObjectDesc().id(0).connections({ConnectionDesc().objectId(1)}),
+                        ObjectDesc().id(1).connections({ConnectionDesc().objectId(0)}),
                     })
                     .addCreature({
-                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
-                        ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
+                        ObjectDesc().id(0).connections({ConnectionDesc().objectId(1)}),
+                        ObjectDesc().id(1).connections({ConnectionDesc().objectId(0)}),
                     });
 
     // Perform action
@@ -254,13 +254,13 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
 TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 {
     // Create test data
-    auto data = Description()
+    auto data = Desc()
                     .addCreature({
-                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(2)}),
-                        ObjectDescription().id(1),
+                        ObjectDesc().id(0).connections({ConnectionDesc().objectId(2)}),
+                        ObjectDesc().id(1),
                     })
                     .addCreature({
-                        ObjectDescription().id(2).connections({ConnectionDescription().objectId(0)}),
+                        ObjectDesc().id(2).connections({ConnectionDesc().objectId(0)}),
                     });
 
     // Perform action
@@ -276,7 +276,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
     ASSERT_EQ(0, data.getNumObjectsWithoutCreature());
     ASSERT_EQ(2, data._creatures.size());
 
-    std::optional<CreatureDescription> smallCreature, largeCreature;
+    std::optional<CreatureDesc> smallCreature, largeCreature;
     for (auto const& creature : data._creatures) {
         if (data.getObjectsForCreature(creature._id).size() == 1) {
             smallCreature = creature;
@@ -293,7 +293,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
     auto connectedObjectId = smallCreatureCells.front()._connections.front()._objectId;
 
     auto largeCreatureCells = data.getObjectsForCreature(largeCreature->_id);
-    std::optional<ObjectDescription> cellWithoutConnection, cellWithConnection;
+    std::optional<ObjectDesc> cellWithoutConnection, cellWithConnection;
     for (auto const& object : largeCreatureCells) {
         if (object._connections.empty()) {
             cellWithoutConnection = object;
@@ -312,13 +312,13 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
 {
     // Create test data
-    auto data = Description()
+    auto data = Desc()
                     .addCreature({
-                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(3)}),
-                        ObjectDescription().id(1),
+                        ObjectDesc().id(0).connections({ConnectionDesc().objectId(3)}),
+                        ObjectDesc().id(1),
                     })
                     .addCreature({
-                        ObjectDescription().id(2).connections({ConnectionDescription().objectId(4)}),
+                        ObjectDesc().id(2).connections({ConnectionDesc().objectId(4)}),
                     });
     // Perform action
     data.assignNewIds();
@@ -334,7 +334,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     ASSERT_EQ(2, data._creatures.size());
 
     // Find the creature with two cells (the "larger" creature)
-    std::optional<CreatureDescription> largerCreature, smallerCreature;
+    std::optional<CreatureDesc> largerCreature, smallerCreature;
     for (auto const& creature : data._creatures) {
         if (data.getObjectsForCreature(creature._id).size() == 2) {
             largerCreature = creature;
@@ -346,7 +346,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     ASSERT_TRUE(smallerCreature.has_value());
 
     auto largerCreatureCells = data.getObjectsForCreature(largerCreature->_id);
-    std::optional<ObjectDescription> cellWithoutConnection, cellWithConnection;
+    std::optional<ObjectDesc> cellWithoutConnection, cellWithConnection;
     for (auto const& object : largerCreatureCells) {
         if (object._connections.empty()) {
             cellWithoutConnection = object;
@@ -370,9 +370,9 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_contained)
 {
     // Create test data
-    auto data = Description().addCreature({
-        ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(1))),
-        ObjectDescription().id(1),
+    auto data = Desc().addCreature({
+        ObjectDesc().id(0).type(CellDesc().cellType(ConstructorDesc().lastConstructedCellId(1))),
+        ObjectDesc().id(1),
     });
 
     // Perform action
@@ -388,7 +388,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
     ASSERT_EQ(2, data._objects.size());
     ASSERT_EQ(1, data._creatures.size());
 
-    std::optional<ObjectDescription> constructor, base;
+    std::optional<ObjectDesc> constructor, base;
     for (auto const& object : data._objects) {
         if (object.getCellRef().getCellType() == CellType_Constructor) {
             constructor = object;
@@ -400,15 +400,15 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
     ASSERT_TRUE(constructor.has_value());
     ASSERT_TRUE(base.has_value());
 
-    EXPECT_EQ(base->_id, std::get<ConstructorDescription>(constructor->getCellRef()._cellType)._lastConstructedCellId);
+    EXPECT_EQ(base->_id, std::get<ConstructorDesc>(constructor->getCellRef()._cellType)._lastConstructedCellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notContained)
 {
     // Create test data
-    auto data = Description().addCreature({
-        ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(2))),
-        ObjectDescription().id(1),
+    auto data = Desc().addCreature({
+        ObjectDesc().id(0).type(CellDesc().cellType(ConstructorDesc().lastConstructedCellId(2))),
+        ObjectDesc().id(1),
     });
 
     // Perform action
@@ -424,7 +424,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
     ASSERT_EQ(2, data._objects.size());
     ASSERT_EQ(1, data._creatures.size());
 
-    std::optional<ObjectDescription> constructor, base;
+    std::optional<ObjectDesc> constructor, base;
     for (auto const& object : data._objects) {
         if (object.getCellRef().getCellType() == CellType_Constructor) {
             constructor = object;
@@ -436,13 +436,13 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
     ASSERT_TRUE(constructor.has_value());
     ASSERT_TRUE(base.has_value());
 
-    EXPECT_EQ(2, std::get<ConstructorDescription>(constructor->getCellRef()._cellType)._lastConstructedCellId);
+    EXPECT_EQ(2, std::get<ConstructorDesc>(constructor->getCellRef()._cellType)._lastConstructedCellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)
 {
     // Create test data
-    auto data = Description().energies({EnergyDescription().id(0), EnergyDescription().id(1)});
+    auto data = Desc().energies({EnergyDesc().id(0), EnergyDesc().id(1)});
 
     // Perform action
     data.assignNewIds();
@@ -458,7 +458,7 @@ TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)
 TEST_F(DescriptionEditTests, assignNewIds_sameParticleIds)
 {
     // Create test data
-    auto data = Description().energies({EnergyDescription().id(0), EnergyDescription().id(0)});
+    auto data = Desc().energies({EnergyDesc().id(0), EnergyDesc().id(0)});
 
     // Perform action
     data.assignNewIds();
@@ -474,9 +474,9 @@ TEST_F(DescriptionEditTests, assignNewIds_sameParticleIds)
 TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 {
     // Create test data
-    auto data = Description()
-                    .addCreature({ObjectDescription().id(0), ObjectDescription().id(0)}, CreatureDescription().id(0))
-                    .addCreature({ObjectDescription().id(0), ObjectDescription().id(0)}, CreatureDescription().id(1));
+    auto data = Desc()
+                    .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(0))
+                    .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(1));
 
     // Perform action
     data.assignNewIds();
@@ -501,9 +501,9 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 {
     // Create test data
-    auto data = Description()
-                    .addCreature({ObjectDescription().id(0), ObjectDescription().id(0)}, CreatureDescription().id(0))
-                    .addCreature({ObjectDescription().id(0), ObjectDescription().id(0)}, CreatureDescription().id(0));
+    auto data = Desc()
+                    .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(0))
+                    .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(0));
 
     // Perform action
     EXPECT_THROW(data.assignNewIds(), std::runtime_error);
@@ -512,9 +512,9 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 {
     // Create test data
-    auto data = Description()
-                    .addCreature({ObjectDescription()}, CreatureDescription().id(2))
-                    .addCreature({ObjectDescription()}, CreatureDescription().id(3).ancestorId(2));
+    auto data = Desc()
+                    .addCreature({ObjectDesc()}, CreatureDesc().id(2))
+                    .addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(2));
 
     // Perform action
     data.assignNewIds();
@@ -526,7 +526,7 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
     }
     EXPECT_EQ(2, ids.size());
 
-    std::optional<CreatureDescription> offspring, ancestor;
+    std::optional<CreatureDesc> offspring, ancestor;
     for (auto const& creature : data._creatures) {
         if (creature._ancestorId.has_value()) {
             offspring = creature;
@@ -543,9 +543,9 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 {
     // Create test data
-    auto data = Description()
-                    .addCreature({ObjectDescription()}, CreatureDescription().id(2))
-                    .addCreature({ObjectDescription()}, CreatureDescription().id(3).ancestorId(1));
+    auto data = Desc()
+                    .addCreature({ObjectDesc()}, CreatureDesc().id(2))
+                    .addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(1));
 
     // Perform action
     data.assignNewIds();
@@ -557,7 +557,7 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
     }
     EXPECT_EQ(2, ids.size());
 
-    std::optional<CreatureDescription> offspring, ancestor;
+    std::optional<CreatureDesc> offspring, ancestor;
     for (auto const& creature : data._creatures) {
         if (creature._ancestorId.has_value()) {
             offspring = creature;
@@ -573,12 +573,12 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 
 TEST_F(DescriptionEditTests, adaptMaxIds)
 {
-    auto data = Description()
-                    .addCreature({ObjectDescription().id(5)}, CreatureDescription().id(3))
-                    .addCreature({ObjectDescription()})
+    auto data = Desc()
+                    .addCreature({ObjectDesc().id(5)}, CreatureDesc().id(3))
+                    .addCreature({ObjectDesc()})
                     .energies({
-                        EnergyDescription().id(7),
-                        EnergyDescription(),
+                        EnergyDesc().id(7),
+                        EnergyDesc(),
                     });
 
     EXPECT_LT(data._creatures.at(0)._id, data._creatures.at(1)._id);
@@ -594,11 +594,11 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
     auto const& WorldWidth = 346;
     auto const& WorldHeight = 100;
 
-    std::vector<ObjectDescription> cells;
+    std::vector<ObjectDesc> cells;
     for (int i = 0; i < 1000; ++i) {
-        cells.emplace_back(ObjectDescription().id(i).pos({toFloat((50 + i) % WorldWidth), toFloat((50 + i) % WorldHeight)}));
+        cells.emplace_back(ObjectDesc().id(i).pos({toFloat((50 + i) % WorldWidth), toFloat((50 + i) % WorldHeight)}));
     }
-    auto data = Description().addCreature(cells);
+    auto data = Desc().addCreature(cells);
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }
@@ -624,11 +624,11 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
     auto const& WorldWidth = 346;
     auto const& WorldHeight = 100;
 
-    std::vector<ObjectDescription> cells;
+    std::vector<ObjectDesc> cells;
     for (int i = 0; i < 1000; ++i) {
-        cells.emplace_back(ObjectDescription().id(i).pos({toFloat((50 - i + WorldWidth) % WorldWidth), toFloat((50 - i + WorldHeight) % WorldHeight)}));
+        cells.emplace_back(ObjectDesc().id(i).pos({toFloat((50 - i + WorldWidth) % WorldWidth), toFloat((50 - i + WorldHeight) % WorldHeight)}));
     }
-    auto data = Description().addCreature(cells);
+    auto data = Desc().addCreature(cells);
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }

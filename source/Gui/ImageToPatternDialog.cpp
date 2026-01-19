@@ -90,7 +90,7 @@ void ImageToPatternDialog::show()
         int width, height, nrChannels;
         unsigned char* dataImage = stbi_load(firstFilename.string().c_str(), &width, &height, &nrChannels, 0);
 
-        Description dataDesc;
+        Desc dataDesc;
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
                 auto address = (x + y * width) * nrChannels;
@@ -102,7 +102,7 @@ void ImageToPatternDialog::show()
                     int matchedCellColor;
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
-                    dataDesc._objects.emplace_back(ObjectDescription().id(NumberGenerator::get().createId()).pos({toFloat(x) + xOffset, toFloat(y)}).color(matchedCellColor).fixed(false).type(StructureDescription()));
+                    dataDesc._objects.emplace_back(ObjectDesc().id(NumberGenerator::get().createId()).pos({toFloat(x) + xOffset, toFloat(y)}).color(matchedCellColor).fixed(false).type(StructureDesc()));
                 }
             }
         }

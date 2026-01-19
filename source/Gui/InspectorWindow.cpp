@@ -58,9 +58,9 @@ void _InspectorWindow::process()
     if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto windowPos = ImGui::GetWindowPos();
         if (isCell()) {
-            processCell(std::get<ExtendedObjectDescription>(entity));
+            processCell(std::get<ExtendedObjectDesc>(entity));
         } else {
-            processParticle(std::get<EnergyDescription>(entity));
+            processParticle(std::get<EnergyDesc>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
@@ -88,7 +88,7 @@ uint64_t _InspectorWindow::getId() const
 bool _InspectorWindow::isCell() const
 {
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
-    return std::holds_alternative<ExtendedObjectDescription>(entity);
+    return std::holds_alternative<ExtendedObjectDesc>(entity);
 }
 
 std::string _InspectorWindow::generateTitle() const
@@ -103,7 +103,7 @@ std::string _InspectorWindow::generateTitle() const
     return ss.str();
 }
 
-void _InspectorWindow::processCell(ExtendedObjectDescription& extendedCell)
+void _InspectorWindow::processCell(ExtendedObjectDesc& extendedCell)
 {
     if (ImGui::BeginTabBar("##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto& object = extendedCell.object;
@@ -129,7 +129,7 @@ void _InspectorWindow::processCell(ExtendedObjectDescription& extendedCell)
     }
 }
 
-void _InspectorWindow::processCellGeneralTab(ExtendedObjectDescription& extendedCell)
+void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
 {
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -179,9 +179,9 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDescription& extended
                     object.getCellRef()._frontAngle = frontAngle;
                 }
                 if (object.getCellRef().getCellType() == CellType_Muscle) {
-                    auto& muscle = std::get<MuscleDescription>(object.getCellRef()._cellType);
+                    auto& muscle = std::get<MuscleDesc>(object.getCellRef()._cellType);
                     if (muscle.getMode() == MuscleMode_AutoBending) {
-                        auto& bending = std::get<AutoBendingDescription>(muscle._mode);
+                        auto& bending = std::get<AutoBendingDesc>(muscle._mode);
                         if (auto initialAngle = bending._initialAngle) {
                             AlienGui::InputFloat(
                                 AlienGui::InputFloatParameters().name("TEMP: initial angle").format("%.1f").textWidth(BaseTabTextWidth), initialAngle.value());
@@ -189,7 +189,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDescription& extended
                         }
                     }
                     if (muscle.getMode() == MuscleMode_ManualBending) {
-                        auto& bending = std::get<ManualBendingDescription>(muscle._mode);
+                        auto& bending = std::get<ManualBendingDesc>(muscle._mode);
                         if (auto initialAngle = bending._initialAngle) {
                             AlienGui::InputFloat(
                                 AlienGui::InputFloatParameters().name("TEMP: initial angle").format("%.1f").textWidth(BaseTabTextWidth), initialAngle.value());
@@ -274,7 +274,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDescription& extended
     }
 }
 
-void _InspectorWindow::processCellTypeTab(ObjectDescription& object)
+void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
 {
     if (ImGui::BeginTabItem("Function", nullptr, ImGuiTabItemFlags_None)) {
         int type = object.getCellRef().getCellType();
@@ -292,37 +292,37 @@ void _InspectorWindow::processCellTypeTab(ObjectDescription& object)
                         type)) {
                     switch (type) {
                     case CellType_Base: {
-                        object.getCellRef()._cellType = BaseDescription();
+                        object.getCellRef()._cellType = BaseDesc();
                     } break;
                     case CellType_Depot: {
-                        object.getCellRef()._cellType = DepotDescription();
+                        object.getCellRef()._cellType = DepotDesc();
                     } break;
                     case CellType_Constructor: {
-                        object.getCellRef()._cellType = ConstructorDescription();
+                        object.getCellRef()._cellType = ConstructorDesc();
                     } break;
                     case CellType_Sensor: {
-                        object.getCellRef()._cellType = SensorDescription();
+                        object.getCellRef()._cellType = SensorDesc();
                     } break;
                     case CellType_Generator: {
-                        object.getCellRef()._cellType = GeneratorDescription();
+                        object.getCellRef()._cellType = GeneratorDesc();
                     } break;
                     case CellType_Attacker: {
-                        object.getCellRef()._cellType = AttackerDescription();
+                        object.getCellRef()._cellType = AttackerDesc();
                     } break;
                     case CellType_Injector: {
-                        object.getCellRef()._cellType = InjectorDescription();
+                        object.getCellRef()._cellType = InjectorDesc();
                     } break;
                     case CellType_Muscle: {
-                        object.getCellRef()._cellType = MuscleDescription();
+                        object.getCellRef()._cellType = MuscleDesc();
                     } break;
                     case CellType_Defender: {
-                        object.getCellRef()._cellType = DefenderDescription();
+                        object.getCellRef()._cellType = DefenderDesc();
                     } break;
                     case CellType_Reconnector: {
-                        object.getCellRef()._cellType = ReconnectorDescription();
+                        object.getCellRef()._cellType = ReconnectorDesc();
                     } break;
                     case CellType_Detonator: {
-                        object.getCellRef()._cellType = DetonatorDescription();
+                        object.getCellRef()._cellType = DetonatorDesc();
                     } break;
                     }
                 }
@@ -361,7 +361,7 @@ void _InspectorWindow::processCellTypeTab(ObjectDescription& object)
     }
 }
 
-void _InspectorWindow::processCellTypePropertiesTab(ObjectDescription& object)
+void _InspectorWindow::processCellTypePropertiesTab(ObjectDesc& object)
 {
     if (object.getObjectType() == ObjectType_Structure || object.getObjectType() == ObjectType_FreeCell) {
         return;
@@ -374,34 +374,34 @@ void _InspectorWindow::processCellTypePropertiesTab(ObjectDescription& object)
             case CellType_Base: {
             } break;
             case CellType_Depot: {
-                processDepotContent(std::get<DepotDescription>(object.getCellRef()._cellType));
+                processDepotContent(std::get<DepotDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Constructor: {
-                processConstructorContent(std::get<ConstructorDescription>(object.getCellRef()._cellType));
+                processConstructorContent(std::get<ConstructorDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Sensor: {
-                processSensorContent(std::get<SensorDescription>(object.getCellRef()._cellType));
+                processSensorContent(std::get<SensorDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Generator: {
-                processGeneratorContent(std::get<GeneratorDescription>(object.getCellRef()._cellType));
+                processGeneratorContent(std::get<GeneratorDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Attacker: {
-                processAttackerContent(std::get<AttackerDescription>(object.getCellRef()._cellType));
+                processAttackerContent(std::get<AttackerDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Injector: {
-                processInjectorContent(std::get<InjectorDescription>(object.getCellRef()._cellType));
+                processInjectorContent(std::get<InjectorDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Muscle: {
-                processMuscleContent(std::get<MuscleDescription>(object.getCellRef()._cellType));
+                processMuscleContent(std::get<MuscleDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Defender: {
-                processDefenderContent(std::get<DefenderDescription>(object.getCellRef()._cellType));
+                processDefenderContent(std::get<DefenderDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Reconnector: {
-                processReconnectorContent(std::get<ReconnectorDescription>(object.getCellRef()._cellType));
+                processReconnectorContent(std::get<ReconnectorDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Detonator: {
-                processDetonatorContent(std::get<DetonatorDescription>(object.getCellRef()._cellType));
+                processDetonatorContent(std::get<DetonatorDesc>(object.getCellRef()._cellType));
             } break;
             }
         }
@@ -410,8 +410,8 @@ void _InspectorWindow::processCellTypePropertiesTab(ObjectDescription& object)
     }
 }
 
-template <typename Description>
-void _InspectorWindow::processCellGenomeTab(Description& desc)
+template <typename Desc>
+void _InspectorWindow::processCellGenomeTab(Desc& desc)
 {
     //auto const& parameters = _SimulationFacade::get()->getSimulationParameters();
 
@@ -427,21 +427,21 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         //    AlienGui::HelpMarker(Const::GenomePreviewTooltip);
         //    if (previewNodeResult) {
         //        if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        //            auto genomDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
-        //            auto previewDesc = PreviewDescriptionConverterService::get().convert(genomDesc, std::nullopt, parameters);
+        //            auto genomDesc = GenomeDescConverterService::get().convertBytesToDescription(desc._genome);
+        //            auto previewDesc = PreviewDescConverterService::get().convert(genomDesc, std::nullopt, parameters);
         //            std::optional<int> selectedNodeDummy;
-        //            AlienGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
+        //            AlienGui::ShowPreviewDesc(previewDesc, _genomeZoom, selectedNodeDummy);
         //        }
         //        ImGui::EndChild();
         //        if (AlienGui::Button("Edit")) {
-        //            GenomeEditorWindow::get().openTab(GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome));
+        //            GenomeEditorWindow::get().openTab(GenomeDescConverterService::get().convertBytesToDescription(desc._genome));
         //        }
 
         //        ImGui::SameLine();
         //        if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
         //            printOverlayMessage("Genome injected");
-        //            desc._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
-        //            if constexpr (std::is_same<Description, ConstructorDescription>()) {
+        //            desc._genome = GenomeDescConverterService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
+        //            if constexpr (std::is_same<Desc, ConstructorDesc>()) {
         //                desc._currentNodeIndex = 0;
         //                desc.numExpectedCells(0);
         //            }
@@ -450,7 +450,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         //    }
 
         //    if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
-        //        auto numNodes = toInt(GenomeDescriptionConverterService::get().getNumNodesRecursively(desc._genome, true));
+        //        auto numNodes = toInt(GenomeDescConverterService::get().getNumNodesRecursively(desc._genome, true));
         //        AlienGui::InputInt(
         //            AlienGui::InputIntParameters()
         //                .name("Number of cells")
@@ -471,7 +471,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
         //    if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
 
-        //        auto genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
+        //        auto genomeDesc = GenomeDescConverterService::get().convertBytesToDescription(desc._genome);
         //        auto numBranches = genomeDesc._header.getNumBranches();
         //        AlienGui::InputInt(
         //            AlienGui::InputIntParameters()
@@ -500,7 +500,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         //                .tooltip(Const::GenomeNumCellsTooltip),
         //            numNodes);
 
-        //        if constexpr (std::is_same<Description, ConstructorDescription>()) {
+        //        if constexpr (std::is_same<Desc, ConstructorDesc>()) {
         //            AlienGui::InputInt(
         //                AlienGui::InputIntParameters().name("Current branch index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
         //                desc._currentBranch);
@@ -523,7 +523,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 }
 
 
-void _InspectorWindow::processGeneratorContent(GeneratorDescription& _generator)
+void _InspectorWindow::processGeneratorContent(GeneratorDesc& _generator)
 {
     if (ImGui::TreeNodeEx("Properties###_generator", TreeNodeFlags)) {
 
@@ -545,7 +545,7 @@ void _InspectorWindow::processGeneratorContent(GeneratorDescription& _generator)
     }
 }
 
-void _InspectorWindow::processNeuronContent(ObjectDescription& object)
+void _InspectorWindow::processNeuronContent(ObjectDesc& object)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         //AlienGui::NeuralNetEditor(
@@ -557,7 +557,7 @@ void _InspectorWindow::processNeuronContent(ObjectDescription& object)
     }
 }
 
-void _InspectorWindow::processConstructorContent(ConstructorDescription& constructor)
+void _InspectorWindow::processConstructorContent(ConstructorDesc& constructor)
 {
     if (ImGui::TreeNodeEx("Properties###constructor", TreeNodeFlags)) {
         int constructorMode = constructor._autoTriggerInterval == 0 ? 0 : 1;
@@ -588,7 +588,7 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
     }
 }
 
-void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
+void _InspectorWindow::processInjectorContent(InjectorDesc& injector)
 {
     if (ImGui::TreeNodeEx("Properties###injector", TreeNodeFlags)) {
         AlienGui::InputInt(
@@ -597,19 +597,19 @@ void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
     }
 }
 
-void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
+void _InspectorWindow::processAttackerContent(AttackerDesc& attacker)
 {
     if (ImGui::TreeNodeEx("Properties###attacker", TreeNodeFlags)) {
         auto mode = attacker.getMode();
         ImGui::Text("Mode: %s", Const::AttackerModeStrings.at(mode).c_str());
 
         if (mode == AttackerMode_FreeCell) {
-            auto& attackFreeCell = std::get<AttackFreeCellDescription>(attacker._mode);
+            auto& attackFreeCell = std::get<AttackFreeCellDesc>(attacker._mode);
             if (attackFreeCell._restrictToColor.has_value()) {
                 ImGui::Text("Restrict to color: %d", *attackFreeCell._restrictToColor);
             }
         } else if (mode == AttackerMode_Creature) {
-            auto& attackCreature = std::get<AttackCreatureDescription>(attacker._mode);
+            auto& attackCreature = std::get<AttackCreatureDesc>(attacker._mode);
             if (attackCreature._minNumCells.has_value()) {
                 ImGui::Text("Min creature cells: %d", *attackCreature._minNumCells);
             }
@@ -624,7 +624,7 @@ void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
     }
 }
 
-void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
+void _InspectorWindow::processDefenderContent(DefenderDesc& defender)
 {
     if (ImGui::TreeNodeEx("Properties###defender", TreeNodeFlags)) {
         AlienGui::Combo(
@@ -638,14 +638,14 @@ void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
     }
 }
 
-void _InspectorWindow::processDepotContent(DepotDescription& transmitter)
+void _InspectorWindow::processDepotContent(DepotDesc& transmitter)
 {
     if (ImGui::TreeNodeEx("Properties###depot", TreeNodeFlags)) {
         ImGui::TreePop();
     }
 }
 
-void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
+void _InspectorWindow::processMuscleContent(MuscleDesc& muscle)
 {
     if (ImGui::TreeNodeEx("Properties###muscle", TreeNodeFlags)) {
         //AlienGui::Combo(
@@ -659,7 +659,7 @@ void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
     }
 }
 
-void _InspectorWindow::processSensorContent(SensorDescription& sensor)
+void _InspectorWindow::processSensorContent(SensorDesc& sensor)
 {
     if (ImGui::TreeNodeEx("Properties###sensor", TreeNodeFlags)) {
         int constructorMode = sensor._autoTriggerInterval == 0 ? 0 : 1;
@@ -687,7 +687,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         
         // Mode-specific parameters
         if (mode == SensorMode_DetectEnergy) {
-            auto& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
+            auto& detectEnergy = std::get<DetectEnergyDesc>(sensor._mode);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Min density")
@@ -699,7 +699,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         } else if (mode == SensorMode_DetectStructure) {
             // No parameters
         } else if (mode == SensorMode_DetectFreeCell) {
-            auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+            auto& detectFreeCell = std::get<DetectFreeCellDesc>(sensor._mode);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Min density")
@@ -712,7 +712,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
                 AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
                 detectFreeCell._restrictToColor);
         } else if (mode == SensorMode_DetectCreature) {
-            auto& detectCreature = std::get<DetectCreatureDescription>(sensor._mode);
+            auto& detectCreature = std::get<DetectCreatureDesc>(sensor._mode);
             AlienGui::InputOptionalInt(
                 AlienGui::InputIntParameters().name("Min num cells").textWidth(CellTypeTextWidth),
                 detectCreature._minNumCells);
@@ -738,7 +738,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
     }
 }
 
-void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconnector)
+void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
 {
     if (ImGui::TreeNodeEx("Properties###reconnector", TreeNodeFlags)) {
         // Mode selection
@@ -750,12 +750,12 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
 
         // Mode-specific parameters
         if (mode == ReconnectorMode_FreeCell) {
-            auto& freeCell = std::get<ReconnectFreeCellDescription>(reconnector._mode);
+            auto& freeCell = std::get<ReconnectFreeCellDesc>(reconnector._mode);
             AlienGui::ComboOptionalColor(
                 AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
                 freeCell._restrictToColor);
         } else if (mode == ReconnectorMode_Creature) {
-            auto& creature = std::get<ReconnectCreatureDescription>(reconnector._mode);
+            auto& creature = std::get<ReconnectCreatureDesc>(reconnector._mode);
             AlienGui::InputOptionalInt(
                 AlienGui::InputIntParameters().name("Min creature cells").textWidth(CellTypeTextWidth),
                 creature._minNumCells);
@@ -777,7 +777,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
     }
 }
 
-void _InspectorWindow::processDetonatorContent(DetonatorDescription& detonator)
+void _InspectorWindow::processDetonatorContent(DetonatorDesc& detonator)
 {
     if (ImGui::TreeNodeEx("Properties###detonator", TreeNodeFlags)) {
         AlienGui::Combo(
@@ -795,7 +795,7 @@ void _InspectorWindow::processDetonatorContent(DetonatorDescription& detonator)
     }
 }
 
-void _InspectorWindow::processParticle(EnergyDescription particle)
+void _InspectorWindow::processParticle(EnergyDesc particle)
 {
     auto origParticle = particle;
     auto energy = toFloat(particle._energy);
@@ -816,14 +816,14 @@ float _InspectorWindow::calcWindowWidth() const
     }
 }
 
-void _InspectorWindow::validateAndCorrect(ObjectDescription& object) const
+void _InspectorWindow::validateAndCorrect(ObjectDesc& object) const
 {
     object._stiffness = std::max(0.0f, std::min(1.0f, object._stiffness));
     if (object.getObjectType() == ObjectType_Cell) {
         object.getCellRef()._usableEnergy = std::max(0.0f, object.getCellRef()._usableEnergy);
         switch (object.getCellRef().getCellType()) {
         case CellType_Constructor: {
-            auto& constructor = std::get<ConstructorDescription>(object.getCellRef()._cellType);
+            auto& constructor = std::get<ConstructorDesc>(object.getCellRef()._cellType);
             //auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
             //if (numNodes > 0) {
             //    constructor._currentNodeIndex = ((constructor._currentNodeIndex % numNodes) + numNodes) % numNodes;
@@ -849,25 +849,25 @@ void _InspectorWindow::validateAndCorrect(ObjectDescription& object) const
             //constructor._generation = std::max(0, constructor._generation);
         } break;
         case CellType_Sensor: {
-            auto& sensor = std::get<SensorDescription>(object.getCellRef()._cellType);
+            auto& sensor = std::get<SensorDesc>(object.getCellRef()._cellType);
             auto mode = sensor.getMode();
             if (mode == SensorMode_DetectEnergy) {
-                auto& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
+                auto& detectEnergy = std::get<DetectEnergyDesc>(sensor._mode);
                 detectEnergy._minDensity = std::max(0.0f, std::min(1.0f, detectEnergy._minDensity));
             } else if (mode == SensorMode_DetectFreeCell) {
-                auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+                auto& detectFreeCell = std::get<DetectFreeCellDesc>(sensor._mode);
                 detectFreeCell._minDensity = std::max(0.0f, std::min(1.0f, detectFreeCell._minDensity));
             }
             sensor._minRange = std::max(0, std::min(255, sensor._minRange));
             sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
         } break;
         case CellType_Generator: {
-            auto& _generator = std::get<GeneratorDescription>(object.getCellRef()._cellType);
+            auto& _generator = std::get<GeneratorDesc>(object.getCellRef()._cellType);
             _generator._autoTriggerInterval = std::max(0, _generator._autoTriggerInterval);
             _generator._alternationInterval = std::max(0, _generator._alternationInterval);
         } break;
         case CellType_Detonator: {
-            auto& detonator = std::get<DetonatorDescription>(object.getCellRef()._cellType);
+            auto& detonator = std::get<DetonatorDesc>(object.getCellRef()._cellType);
             detonator._countdown = std::min(0xffff, std::max(0, detonator._countdown));
         } break;
         }

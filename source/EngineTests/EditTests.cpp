@@ -18,9 +18,9 @@ public:
 
 TEST_F(EditTests, getSelectionShallowData_noSelection)
 {
-    auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({50, 50}),
-        ObjectDescription().id(2).pos({51, 50}),
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({50, 50}),
+        ObjectDesc().id(2).pos({51, 50}),
     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
@@ -36,10 +36,10 @@ TEST_F(EditTests, getSelectionShallowData_noSelection)
 
 TEST_F(EditTests, getSelectionShallowData_selectCells)
 {
-    auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({50, 50}),
-        ObjectDescription().id(2).pos({51, 50}),
-        ObjectDescription().id(3).pos({52, 50}),
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({50, 50}),
+        ObjectDesc().id(2).pos({51, 50}),
+        ObjectDesc().id(3).pos({52, 50}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -56,13 +56,13 @@ TEST_F(EditTests, getSelectionShallowData_selectCells)
 
 TEST_F(EditTests, getSelectionShallowData_selectCreatures)
 {
-    auto data = Description()
+    auto data = Desc()
                     .addCreature({
-                        ObjectDescription().id(1).pos({50, 50}),
-                        ObjectDescription().id(2).pos({51, 50}),
+                        ObjectDesc().id(1).pos({50, 50}),
+                        ObjectDesc().id(2).pos({51, 50}),
                     })
                     .addCreature({
-                        ObjectDescription().id(3).pos({60, 50}),
+                        ObjectDesc().id(3).pos({60, 50}),
                     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
@@ -78,10 +78,10 @@ TEST_F(EditTests, getSelectionShallowData_selectCreatures)
 
 TEST_F(EditTests, getSelectionShallowData_selectParticles)
 {
-    auto data = Description().energies({
-        EnergyDescription().id(1).pos({50, 50}).energy(10.0f),
-        EnergyDescription().id(2).pos({51, 50}).energy(10.0f),
-        EnergyDescription().id(3).pos({70, 50}).energy(10.0f),
+    auto data = Desc().energies({
+        EnergyDesc().id(1).pos({50, 50}).energy(10.0f),
+        EnergyDesc().id(2).pos({51, 50}).energy(10.0f),
+        EnergyDesc().id(3).pos({70, 50}).energy(10.0f),
     });
     _simulationFacade->setSimulationData(data);
 
@@ -96,18 +96,18 @@ TEST_F(EditTests, getSelectionShallowData_selectParticles)
 
 TEST_F(EditTests, getSelectionShallowData_selectMixed)
 {
-    auto data = Description()
+    auto data = Desc()
                     .addObjects({
-                        ObjectDescription().id(1).pos({50, 50}).type(StructureDescription()),
-                        ObjectDescription().id(2).pos({51, 50}).type(StructureDescription()),
+                        ObjectDesc().id(1).pos({50, 50}).type(StructureDesc()),
+                        ObjectDesc().id(2).pos({51, 50}).type(StructureDesc()),
                     })
                     .energies({
-                        EnergyDescription().id(3).pos({52, 50}).energy(10.0f),
+                        EnergyDesc().id(3).pos({52, 50}).energy(10.0f),
                     })
                     .addCreature({
-                        ObjectDescription().id(4).pos({53, 50}),
-                        ObjectDescription().id(5).pos({54, 50}),
-                        ObjectDescription().id(6).pos({55, 50}),
+                        ObjectDesc().id(4).pos({53, 50}),
+                        ObjectDesc().id(5).pos({54, 50}),
+                        ObjectDesc().id(6).pos({55, 50}),
                     });
     data.addConnection(1, 2);
     data.addConnection(4, 5);
@@ -125,16 +125,16 @@ TEST_F(EditTests, getSelectionShallowData_selectMixed)
 
 TEST_F(EditTests, getSelectionShallowData_selectMultipleCreatures)
 {
-    auto data = Description()
+    auto data = Desc()
                     .addCreature({
-                        ObjectDescription().id(1).pos({50, 50}),
-                        ObjectDescription().id(2).pos({51, 50}),
+                        ObjectDesc().id(1).pos({50, 50}),
+                        ObjectDesc().id(2).pos({51, 50}),
                     })
                     .addCreature({
-                        ObjectDescription().id(3).pos({52, 50}),
+                        ObjectDesc().id(3).pos({52, 50}),
                     })
                     .addCreature({
-                        ObjectDescription().id(4).pos({70, 70}),
+                        ObjectDesc().id(4).pos({70, 70}),
                     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);

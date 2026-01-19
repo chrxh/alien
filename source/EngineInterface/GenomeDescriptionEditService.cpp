@@ -15,7 +15,7 @@ namespace
     auto constexpr PreviewColor = 0;
 }
 
-void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index, GeneDescription const& newGene) const
+void GenomeDescEditService::addGene(GenomeDesc& genome, int index, GeneDesc const& newGene) const
 {
     if (genome._genes.empty()) {
         genome._genes.emplace_back(newGene);
@@ -26,7 +26,7 @@ void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index,
         auto& gene = genome._genes[i];
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._geneIndex > index) {
                     ++constructor._geneIndex;
                 }
@@ -37,7 +37,7 @@ void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index,
     genome._genes.insert(genome._genes.begin() + index + 1, newGene);
 }
 
-void GenomeDescriptionEditService::removeGene(GenomeDescription& genome, int index) const
+void GenomeDescEditService::removeGene(GenomeDesc& genome, int index) const
 {
     for (int i = 0; i < genome._genes.size(); ++i) {
         if (i == index) {
@@ -46,7 +46,7 @@ void GenomeDescriptionEditService::removeGene(GenomeDescription& genome, int ind
         auto& gene = genome._genes[i];
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._geneIndex >= index) {
                     --constructor._geneIndex;
                 }
@@ -56,14 +56,14 @@ void GenomeDescriptionEditService::removeGene(GenomeDescription& genome, int ind
     genome._genes.erase(genome._genes.begin() + index);
 }
 
-void GenomeDescriptionEditService::swapGenes(GenomeDescription& genome, int index) const
+void GenomeDescEditService::swapGenes(GenomeDesc& genome, int index) const
 {
     std::swap(genome._genes.at(index), genome._genes.at(index + 1));
 
     for (auto& gene : genome._genes) {
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._geneIndex == index) {
                     constructor._geneIndex = index + 1;
                 } else if (constructor._geneIndex == index + 1) {
@@ -74,7 +74,7 @@ void GenomeDescriptionEditService::swapGenes(GenomeDescription& genome, int inde
     }
 }
 
-void GenomeDescriptionEditService::addNode(GeneDescription& gene, int index, NodeDescription const& node) const
+void GenomeDescEditService::addNode(GeneDesc& gene, int index, NodeDesc const& node) const
 {
     if (gene._nodes.empty()) {
         gene._nodes.emplace_back(node);
@@ -84,12 +84,12 @@ void GenomeDescriptionEditService::addNode(GeneDescription& gene, int index, Nod
     gene._nodes.insert(gene._nodes.begin() + index + 1, node);
 }
 
-void GenomeDescriptionEditService::removeNode(GeneDescription& gene, int index) const
+void GenomeDescEditService::removeNode(GeneDesc& gene, int index) const
 {
     gene._nodes.erase(gene._nodes.begin() + index);
 }
 
-void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index) const
+void GenomeDescEditService::swapNodes(GeneDesc& gene, int index) const
 {
     std::swap(gene._nodes.at(index), gene._nodes.at(index + 1));
 }
@@ -97,7 +97,7 @@ void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index) c
 namespace
 {
     // Returns true if genome has been trimmed
-    bool trimNodes(GenomeDescription& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
+    bool trimNodes(GenomeDesc& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
     {
         auto result = false;
         auto& gene = genome._genes.at(startGeneIndex);
@@ -109,7 +109,7 @@ namespace
             gene._numConcatenations = 1;
             for (auto& node : gene._nodes) {
                 if (node.getCellType() == CellTypeGenome_Constructor) {
-                    auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                    auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                     constructor._geneIndex = toInt(genome._genes.size());  // Castrate further construction
                 }
             }
@@ -128,7 +128,7 @@ namespace
         // Continue with constructor nodes
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._geneIndex < genome._genes.size()) {
                     result |= trimNodes(genome, nodeCounter, constructor._geneIndex, nodeLimit);
                 }
@@ -139,12 +139,12 @@ namespace
     }
 }
 
-std::vector<SubGenomeDescription> GenomeDescriptionEditService::createSubGenomesForPreview(
-    GenomeDescription const& genome,
+std::vector<SubGenomeDesc> GenomeDescEditService::createSubGenomesForPreview(
+    GenomeDesc const& genome,
     std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes,
     bool detailSimulation) const
 {
-    std::vector<SubGenomeDescription> result;
+    std::vector<SubGenomeDesc> result;
     for (auto const& geneIndicesForSubGenome : geneIndicesForSubGenomes) {
         auto subGenome = genome;
         adaptDescriptionForPreview(subGenome, geneIndicesForSubGenome, detailSimulation);
@@ -157,7 +157,7 @@ std::vector<SubGenomeDescription> GenomeDescriptionEditService::createSubGenomes
         auto subGenome = subGenomeWithStartGeneIndex.genome;
         auto startGeneIndex = subGenomeWithStartGeneIndex.startIndex;
 
-        auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome, startGeneIndex);
+        auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome, startGeneIndex);
         if (resultingCells != -1) {
             sumNumResultingCells += resultingCells;
         } else {
@@ -182,8 +182,8 @@ std::vector<SubGenomeDescription> GenomeDescriptionEditService::createSubGenomes
     return result;
 }
 
-auto GenomeDescriptionEditService::createSeedCollectionForPreview(
-    std::vector<SubGenomeDescription> const& subGenomes,
+auto GenomeDescEditService::createSeedCollectionForPreview(
+    std::vector<SubGenomeDesc> const& subGenomes,
     std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>> cache) const -> SeedCollectionResult
 {
     auto const& editService = DescriptionEditService::get();
@@ -193,7 +193,7 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
     SeedCollectionResult result;
 
     for (auto const& subGenome : subGenomes) {
-        std::optional<Description> cachedValue;
+        std::optional<Desc> cachedValue;
 
         // Try to get from cache if provided
         if (cache.has_value()) {
@@ -226,14 +226,14 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
     return result;
 }
 
-std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPreview(Description&& preview, std::vector<uint64_t> const& seedCreatureIds) const
+std::vector<Desc> GenomeDescEditService::extractPhenotypesFromPreview(Desc&& preview, std::vector<uint64_t> const& seedCreatureIds) const
 {
     std::unordered_map<uint64_t, int> creatureIdToIndex;
     for (auto const& [index, creatureId] : seedCreatureIds | boost::adaptors::indexed(0)) {
         creatureIdToIndex.insert_or_assign(creatureId, toInt(index));
     }
     auto cache = preview.createCache();
-    std::vector<Description> result(seedCreatureIds.size());
+    std::vector<Desc> result(seedCreatureIds.size());
     for (auto& creature : preview._creatures) {
         if (creature._generation == 0) {
             auto genomeIndex = cache->genomeIdToIndex.at(creature._genomeId);
@@ -260,7 +260,7 @@ std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPrev
     return result;
 }
 
-void GenomeDescriptionEditService::removeSeedFromPhenotype(Description& phenotype) const
+void GenomeDescEditService::removeSeedFromPhenotype(Desc& phenotype) const
 {
     std::set<uint64_t> seedCellIds;
     std::map<uint64_t, uint64_t> creatureIdToIndex;
@@ -278,23 +278,23 @@ void GenomeDescriptionEditService::removeSeedFromPhenotype(Description& phenotyp
     DescriptionEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& object) { return seedCellIds.contains(object._id); });
 }
 
-Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const
+Desc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome, RealVector2D const& pos) const
 {
-    Description result;
+    Desc result;
     result._genomes.emplace_back(subGenome.genome);
-    auto creature = CreatureDescription().genomeId(subGenome.genome._id);
+    auto creature = CreatureDesc().genomeId(subGenome.genome._id);
     result._creatures.emplace_back(creature);
-    result._objects.emplace_back(ObjectDescription()
+    result._objects.emplace_back(ObjectDesc()
                                    .color(PreviewColor)
                                    .stiffness(1.0f)
                                    .pos(pos)
-                                   .type(CellDescription().creatureId(creature._id).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))));
+                                   .type(CellDesc().creatureId(creature._id).cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))));
     return result;
 }
 
 namespace
 {
-    void castrate(GenomeDescription& genome, int geneIndex, std::set<int>& inspectedGeneIndices)
+    void castrate(GenomeDesc& genome, int geneIndex, std::set<int>& inspectedGeneIndices)
     {
         if (geneIndex >= genome._genes.size() || inspectedGeneIndices.contains(geneIndex)) {
             return;
@@ -303,7 +303,7 @@ namespace
         auto& gene = genome._genes.at(geneIndex);
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 if (constructor._geneIndex < genome._genes.size()) {
                     if (inspectedGeneIndices.contains(constructor._geneIndex)) {
                         constructor._geneIndex = genome._genes.size();  // Recursive part => perform castration
@@ -321,21 +321,21 @@ namespace
         inspectedGeneIndices.erase(geneIndex);
     }
 
-    void adaptNodeAttributesForPreview(GenomeDescription& genome, bool detailSimulation)
+    void adaptNodeAttributesForPreview(GenomeDesc& genome, bool detailSimulation)
     {
         for (auto& gene : genome._genes) {
             for (auto& node : gene._nodes) {
                 node._color = PreviewColor;
                 if (!detailSimulation) {
-                    node._neuralNetwork = NeuralNetworkGenomeDescription();
-                    node._signalRestriction = SignalRestrictionGenomeDescription();
+                    node._neuralNetwork = NeuralNetworkGenomeDesc();
+                    node._signalRestriction = SignalRestrictionGenomeDesc();
                 }
                 if (node.getCellType() != CellTypeGenome_Constructor) {
                     if (!detailSimulation) {
-                        node._cellType = BaseGenomeDescription();
+                        node._cellType = BaseGenomeDesc();
                     }
                 } else {
-                    auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                    auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
                     constructor._autoTriggerInterval = 75;
                     constructor._constructionActivationTime = 200;
                 }
@@ -343,7 +343,7 @@ namespace
         }
     }
 
-    void resetNames(GenomeDescription& genome)
+    void resetNames(GenomeDesc& genome)
     {
         genome._name.clear();
         for (auto& gene : genome._genes) {
@@ -351,18 +351,18 @@ namespace
         }
     }
 
-    void resetUnusedGenes(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices)
+    void resetUnusedGenes(GenomeDesc& genome, GeneIndicesForSubGenome const& geneIndices)
     {
         std::set<int> geneIndexSet(geneIndices.begin(), geneIndices.end());
         for (int i = 0, size = toInt(genome._genes.size()); i < size; ++i) {
             if (!geneIndexSet.contains(i)) {
-                genome._genes.at(i) = GeneDescription();
+                genome._genes.at(i) = GeneDesc();
             }
         }
     }
 }
 
-void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices, bool detailSimulation)
+void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneIndicesForSubGenome const& geneIndices, bool detailSimulation)
     const
 {
     auto startGeneIndex = geneIndices.front();

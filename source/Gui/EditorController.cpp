@@ -73,7 +73,7 @@ void EditorController::onCloseAllInspectorWindows()
 
 void EditorController::onInspectSelectedObjects()
 {
-    Description selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
+    Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
     if (!onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false)) {
         showMessage(
             "Inspection not possible",
@@ -83,7 +83,7 @@ void EditorController::onInspectSelectedObjects()
 
 void EditorController::onInspectSelectedGenomes()
 {
-    Description selectedData = _SimulationFacade::get()->getSelectedSimulationData(true);
+    Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(true);
     auto constructors = DescriptionEditService::get().getCreatureRepresentatives(selectedData);
     if (constructors.size() > 1) {
         constructors = {constructors.front()};
@@ -91,24 +91,24 @@ void EditorController::onInspectSelectedGenomes()
     onInspectObjects(constructors, true);
 }
 
-bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDescription> const& entities, bool selectGenomeTab)
+bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> const& entities, bool selectGenomeTab)
 {
     if (entities.empty()) {
         return true;
     }
 
     // Filter entities if cells are selected
-    std::vector<ExtendedObjectOrEnergyDescription> filteredEntities;
+    std::vector<ExtendedObjectOrEnergyDesc> filteredEntities;
     auto areCellsSelected = false;
     for (auto const& cellOrParticle : entities) {
-        if (std::holds_alternative<ExtendedObjectDescription>(cellOrParticle)) {
+        if (std::holds_alternative<ExtendedObjectDesc>(cellOrParticle)) {
             areCellsSelected = true;
             break;
         }
     }
     if (areCellsSelected) {
         for (auto const& cellOrParticle : entities) {
-            if (std::holds_alternative<ExtendedObjectDescription>(cellOrParticle)) {
+            if (std::holds_alternative<ExtendedObjectDesc>(cellOrParticle)) {
                 filteredEntities.emplace_back(cellOrParticle);
             }
         }
@@ -127,7 +127,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDescri
         inspectedIds.insert(DescriptionEditService::get().getId(entity));
     }
 
-    std::vector<ExtendedObjectOrEnergyDescription> newEntities;
+    std::vector<ExtendedObjectOrEnergyDesc> newEntities;
     for (auto const& entity : filteredEntities) {
         if (origInspectedIds.find(DescriptionEditService::get().getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
@@ -213,7 +213,7 @@ void EditorController::processInspectorWindows()
 
     //inspector windows closed?
     std::vector<InspectorWindow> inspectorWindows;
-    std::vector<ExtendedObjectOrEnergyDescription> inspectedEntities;
+    std::vector<ExtendedObjectOrEnergyDesc> inspectedEntities;
     for (auto const& inspectorWindow : _inspectorWindows) {
         if (!inspectorWindow->isClosed()) {
             inspectorWindows.emplace_back(inspectorWindow);

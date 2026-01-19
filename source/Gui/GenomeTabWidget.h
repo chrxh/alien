@@ -11,12 +11,12 @@ class _GenomeTabWidget
 public:
     static GenomeTabWidget createDraftTab(
         GenomeWindowEditData const& genomeEditData,
-        GenomeDescription const& creature,
+        GenomeDesc const& creature,
         GenomeTabLayoutData const& layoutData = nullptr);
     static GenomeTabWidget createCreatureTab(
         GenomeWindowEditData const& genomeEditData,
         uint64_t creatureId,
-        GenomeDescription const& genome,
+        GenomeDesc const& genome,
         GenomeTabLayoutData const& layoutData = nullptr);
 
     void process();
@@ -29,9 +29,9 @@ public:
 
     GenomeTabEditData const& getEditData() const;
     GenomeTabLayoutData const& getLayoutData() const;
-    GenomeDescription const& getGenomeDescription() const;
+    GenomeDesc const& getGenomeDesc() const;
 
-    void setGenomeDescription(GenomeDescription const& genome);
+    void setGenomeDesc(GenomeDesc const& genome);
 
     bool hasCreaturesGenomeBeChanged() const;
     uint64_t getCreatureId();
@@ -47,14 +47,14 @@ private:
     struct CreatureData
     {
         uint64_t creatureId = 0;
-        GenomeDescription origGenome;
+        GenomeDesc origGenome;
         bool changesMade = false;  // true = origCreature has been changed
     };
     using SpecificEditData = std::variant<DraftData, CreatureData>;
 
     _GenomeTabWidget(
         GenomeWindowEditData const& genomeEditData,
-        GenomeDescription const& genome,
+        GenomeDesc const& genome,
         SpecificEditData const& specificEditData,
         GenomeTabLayoutData const& layoutData = nullptr);
 

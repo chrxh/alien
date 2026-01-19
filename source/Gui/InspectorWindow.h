@@ -23,30 +23,30 @@ private:
     bool isCell() const;
     std::string generateTitle() const;
 
-    void processCell(ExtendedObjectDescription& creatureCell);
-    void processCellGeneralTab(ExtendedObjectDescription& creatureCell);
-    void processCellTypeTab(ObjectDescription& cell);
-    void processCellTypePropertiesTab(ObjectDescription& cell);
-    template <typename Description>
-    void processCellGenomeTab(Description& desc);
+    void processCell(ExtendedObjectDesc& creatureCell);
+    void processCellGeneralTab(ExtendedObjectDesc& creatureCell);
+    void processCellTypeTab(ObjectDesc& cell);
+    void processCellTypePropertiesTab(ObjectDesc& cell);
+    template <typename Desc>
+    void processCellGenomeTab(Desc& desc);
 
-    void processGeneratorContent(GeneratorDescription& generator);
-    void processNeuronContent(ObjectDescription& cell);
-    void processConstructorContent(ConstructorDescription& constructor);
-    void processInjectorContent(InjectorDescription& injector);
-    void processAttackerContent(AttackerDescription& attacker);
-    void processDefenderContent(DefenderDescription& defender);
-    void processDepotContent(DepotDescription& transmitter);
-    void processMuscleContent(MuscleDescription& muscle);
-    void processSensorContent(SensorDescription& sensor);
-    void processReconnectorContent(ReconnectorDescription& reconnector);
-    void processDetonatorContent(DetonatorDescription& detonator);
+    void processGeneratorContent(GeneratorDesc& generator);
+    void processNeuronContent(ObjectDesc& cell);
+    void processConstructorContent(ConstructorDesc& constructor);
+    void processInjectorContent(InjectorDesc& injector);
+    void processAttackerContent(AttackerDesc& attacker);
+    void processDefenderContent(DefenderDesc& defender);
+    void processDepotContent(DepotDesc& transmitter);
+    void processMuscleContent(MuscleDesc& muscle);
+    void processSensorContent(SensorDesc& sensor);
+    void processReconnectorContent(ReconnectorDesc& reconnector);
+    void processDetonatorContent(DetonatorDesc& detonator);
 
-    void processParticle(EnergyDescription particle);
+    void processParticle(EnergyDesc particle);
 
     float calcWindowWidth() const;
 
-    void validateAndCorrect(ObjectDescription& cell) const;
+    void validateAndCorrect(ObjectDesc& cell) const;
 
     RealVector2D _initialPos;
 

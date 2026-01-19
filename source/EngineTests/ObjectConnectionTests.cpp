@@ -27,7 +27,7 @@ TEST_F(ObjectConnectionTests, decay)
     auto origData = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
                                                                  .width(1)
                                                                  .height(1)
-                                                                 .objectType(FreeCellDescription().rawEnergy(_parameters.minCellEnergy.baseValue[0] / 2)));
+                                                                 .objectType(FreeCellDesc().rawEnergy(_parameters.minCellEnergy.baseValue[0] / 2)));
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);
@@ -39,9 +39,9 @@ TEST_F(ObjectConnectionTests, decay)
 
 TEST_F(ObjectConnectionTests, addFirstConnection)
 {
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({0, 0}).type(StructureDescription()),
-        ObjectDescription().id(2).pos({1, 0}).type(StructureDescription()),
+    auto data = Desc().objects({
+        ObjectDesc().id(1).pos({0, 0}).type(StructureDesc()),
+        ObjectDesc().id(2).pos({1, 0}).type(StructureDesc()),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -64,10 +64,10 @@ TEST_F(ObjectConnectionTests, addFirstConnection)
 
 TEST_F(ObjectConnectionTests, addSecondConnection)
 {
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({0, 0}).type(StructureDescription()),
-        ObjectDescription().id(2).pos({1, 0}).type(StructureDescription()),
-        ObjectDescription().id(3).pos({0, 1}).type(StructureDescription()),
+    auto data = Desc().objects({
+        ObjectDesc().id(1).pos({0, 0}).type(StructureDesc()),
+        ObjectDesc().id(2).pos({1, 0}).type(StructureDesc()),
+        ObjectDesc().id(3).pos({0, 1}).type(StructureDesc()),
     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
@@ -90,11 +90,11 @@ TEST_F(ObjectConnectionTests, addSecondConnection)
 
 TEST_F(ObjectConnectionTests, addThirdConnection1)
 {
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({0, 0}).type(StructureDescription()),
-        ObjectDescription().id(2).pos({1, 0}).type(StructureDescription()),
-        ObjectDescription().id(3).pos({0, 1}).type(StructureDescription()),
-        ObjectDescription().id(4).pos({0, -1}).type(StructureDescription()),
+    auto data = Desc().objects({
+        ObjectDesc().id(1).pos({0, 0}).type(StructureDesc()),
+        ObjectDesc().id(2).pos({1, 0}).type(StructureDesc()),
+        ObjectDesc().id(3).pos({0, 1}).type(StructureDesc()),
+        ObjectDesc().id(4).pos({0, -1}).type(StructureDesc()),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -123,11 +123,11 @@ TEST_F(ObjectConnectionTests, addThirdConnection1)
 
 TEST_F(ObjectConnectionTests, addThirdConnection2)
 {
-    auto data = Description().objects({
-        ObjectDescription().id(1).pos({0, 0}).type(StructureDescription()),
-        ObjectDescription().id(2).pos({1, 0}).type(StructureDescription()),
-        ObjectDescription().id(3).pos({-1, 0}).type(StructureDescription()),
-        ObjectDescription().id(4).pos({0, 1}).type(StructureDescription()),
+    auto data = Desc().objects({
+        ObjectDesc().id(1).pos({0, 0}).type(StructureDesc()),
+        ObjectDesc().id(2).pos({1, 0}).type(StructureDesc()),
+        ObjectDesc().id(3).pos({-1, 0}).type(StructureDesc()),
+        ObjectDesc().id(4).pos({0, 1}).type(StructureDesc()),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
