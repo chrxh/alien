@@ -1,5 +1,4 @@
-﻿#include "Entity.cuh"
-#include "Entities.cuh"
+﻿#include "Entities.cuh"
 
 void Entities::init()
 {

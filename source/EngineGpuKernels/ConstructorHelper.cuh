@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.cuh"
+#include "Entities.cuh"
 
 class ConstructorHelper
 {

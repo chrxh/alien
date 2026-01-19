@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Math.cuh"
-#include "Entity.cuh"
 #include <cuda_runtime.h>
 #include <vector_types.h>
 
+#include "Math.cuh"
+#include "Entities.cuh"
 
 class Physics
 {

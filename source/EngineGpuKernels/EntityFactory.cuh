@@ -6,7 +6,7 @@
 #include "Base.cuh"
 #include "ConstantMemory.cuh"
 #include "Map.cuh"
-#include "Entity.cuh"
+#include "Entities.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
 #include "TO.cuh"

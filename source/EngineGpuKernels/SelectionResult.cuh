@@ -3,7 +3,7 @@
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "Definitions.cuh"
-#include "Entity.cuh"
+#include "Entities.cuh"
 
 class SelectionResult
 {

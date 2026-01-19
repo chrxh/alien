@@ -31,7 +31,6 @@ add_library(EngineGpuKernels
     EditKernels.cu
     EditKernels.cuh
     EnergyProcessor.cuh
-    Entity.cuh
     Entities.cu
     Entities.cuh
     EntityFactory.cuh

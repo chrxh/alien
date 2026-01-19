@@ -4,7 +4,7 @@
 
 #include "ConstantMemory.cuh"
 #include "ConstructorHelper.cuh"
-#include "Entity.cuh"
+#include "Entities.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"

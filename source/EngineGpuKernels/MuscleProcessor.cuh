@@ -2,7 +2,7 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 
-#include "Entity.cuh"
+#include "Entities.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"

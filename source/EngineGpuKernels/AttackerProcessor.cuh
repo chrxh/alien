@@ -5,7 +5,7 @@
 
 #include "ObjectConnectionProcessor.cuh"
 #include "ConstantMemory.cuh"
-#include "Entity.cuh"
+#include "Entities.cuh"
 #include "ParameterCalculator.cuh"
 #include "EnergyProcessor.cuh"
 #include "SignalProcessor.cuh"

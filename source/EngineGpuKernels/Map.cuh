@@ -5,7 +5,7 @@
 #include "Array.cuh"
 #include "Base.cuh"
 #include "Math.cuh"
-#include "Entity.cuh"
+#include "Entities.cuh"
 
 class BaseMap
 {

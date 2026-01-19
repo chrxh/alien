@@ -3,7 +3,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 
 #include "ConstantMemory.cuh"
-#include "Entity.cuh"
+#include "Entities.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
