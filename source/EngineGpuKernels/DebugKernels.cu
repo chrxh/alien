@@ -53,7 +53,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 }
             }
             if (object->type == ObjectType_FreeCell) {
-                if (object->typeData.freeCell.rawEnergy < 0 || isnan(object->typeData.freeCell.rawEnergy)) {
+                if (object->typeData.freeCell.energy < 0 || isnan(object->typeData.freeCell.energy)) {
                     printf("raw cell energy invalid at %d", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }

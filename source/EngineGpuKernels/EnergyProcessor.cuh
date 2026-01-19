@@ -150,7 +150,7 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                         if (object->type == ObjectType_Cell) {
                             object->typeData.cell.rawEnergy += energyToTransfer;
                         } else {
-                            object->typeData.freeCell.rawEnergy += energyToTransfer;
+                            object->typeData.freeCell.energy += energyToTransfer;
                         }
                         particle->energy -= energyToTransfer;
                         bool killParticle = particle->energy < NEAR_ZERO;

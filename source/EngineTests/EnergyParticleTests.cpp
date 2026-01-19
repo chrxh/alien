@@ -51,7 +51,7 @@ TEST_F(EnergyParticleTests, particleToFreeCell_transformationAllowed)
     if (!actualData._objects.empty()) {
         auto const& object = actualData._objects.at(0);
         EXPECT_EQ(ObjectType_FreeCell, object.getObjectType());
-        EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, object.getFreeCellRef()._rawEnergy, 1.0f));
+        EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, object.getFreeCellRef()._energy, 1.0f));
         EXPECT_EQ(0, object._color);
     }
 }
@@ -136,7 +136,7 @@ TEST_F(EnergyParticleTests, particleAbsorptionForFreeCells)
     auto particleEnergy = 10.0f;
 
     auto data = Desc()
-                    .addObjects({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(FreeCellDesc().rawEnergy(cellEnergy))})
+                    .addObjects({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(FreeCellDesc().energy(cellEnergy))})
                     .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
     _simulationFacade->setSimulationData(data);
@@ -150,7 +150,7 @@ TEST_F(EnergyParticleTests, particleAbsorptionForFreeCells)
     EXPECT_EQ(1, actualData._objects.size());
 
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(cellEnergy + particleEnergy, object.getFreeCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(cellEnergy + particleEnergy, object.getFreeCellRef()._energy));
 }
 
 TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
@@ -193,7 +193,7 @@ TEST_F(EnergyParticleTests, freeCellToParticle_belowMinEnergy)
     auto data = Desc().addObjects({ObjectDesc()
                                                .pos({100.4f, 100.4f})
                                                .color(0)
-                                               .type(FreeCellDesc().rawEnergy(freeCellEnergy))});
+                                               .type(FreeCellDesc().energy(freeCellEnergy))});
 
     _simulationFacade->setSimulationData(data);
 

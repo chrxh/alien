@@ -459,13 +459,15 @@ struct SignalDesc
 struct StructureDesc
 {
     auto operator<=>(StructureDesc const&) const = default;
+
+    MEMBER(StructureDesc, float, energy, 100.0f);
 };
 
 struct FreeCellDesc
 {
     auto operator<=>(FreeCellDesc const&) const = default;
 
-    MEMBER(FreeCellDesc, float, rawEnergy, 100.0f);
+    MEMBER(FreeCellDesc, float, energy, 100.0f);
     MEMBER(FreeCellDesc, int, age, 0);
 };
 
@@ -526,6 +528,8 @@ struct ObjectDesc
 
     ObjectType getObjectType() const;
 
+    StructureDesc& getStructureRef();
+    StructureDesc const& getStructureRef() const;
     FreeCellDesc& getFreeCellRef();
     FreeCellDesc const& getFreeCellRef() const;
     CellDesc& getCellRef();

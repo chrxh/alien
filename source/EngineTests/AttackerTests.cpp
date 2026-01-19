@@ -766,7 +766,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should be attacked in FreeCell mode
-    EXPECT_TRUE(actualTarget.getFreeCellRef()._rawEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getFreeCellRef()._energy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
@@ -790,7 +790,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should be attacked because color matches restriction
-    EXPECT_TRUE(actualTarget.getFreeCellRef()._rawEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getFreeCellRef()._energy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
@@ -816,7 +816,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should NOT be attacked because color does not match restriction
-    EXPECT_TRUE(approxCompare(origTarget.getFreeCellRef()._rawEnergy, actualTarget.getFreeCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getFreeCellRef()._energy, actualTarget.getFreeCellRef()._energy));
 }
 
 TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
@@ -866,5 +866,5 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should NOT be attacked in Creature mode
-    EXPECT_TRUE(approxCompare(origTarget.getFreeCellRef()._rawEnergy, actualTarget.getFreeCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getFreeCellRef()._energy, actualTarget.getFreeCellRef()._energy));
 }

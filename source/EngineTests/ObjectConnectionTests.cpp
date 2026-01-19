@@ -27,7 +27,7 @@ TEST_F(ObjectConnectionTests, decay)
     auto origData = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
                                                                  .width(1)
                                                                  .height(1)
-                                                                 .objectType(FreeCellDesc().rawEnergy(_parameters.minCellEnergy.baseValue[0] / 2)));
+                                                                 .objectType(FreeCellDesc().energy(_parameters.minCellEnergy.baseValue[0] / 2)));
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);

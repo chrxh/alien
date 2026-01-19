@@ -454,6 +454,8 @@ struct Creature
 
 struct Structure
 {
+    float energy;
+
     // Cluster data
     uint32_t clusterIndex;
     int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
@@ -466,7 +468,7 @@ struct Structure
 
 struct FreeCell
 {
-    float rawEnergy;
+    float energy;
     uint32_t age;
 
     // Additional rendering data
@@ -596,12 +598,13 @@ struct Object
         if (type == ObjectType_Cell) {
             return typeData.cell.getEnergy();
         } else if (type == ObjectType_FreeCell) {
-            return typeData.freeCell.rawEnergy;
+            return typeData.freeCell.energy;
+        } else if (type == ObjectType_Structure) {
+            return typeData.structure.energy;
         } else {
             return 0;
         }
     }
-
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
         if ((connectionIndex1 - connectionIndex2 + numConnections) % numConnections == 0) {

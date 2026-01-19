@@ -450,7 +450,9 @@ void DescriptionEditService::randomizeEnergies(Desc& description, float minEnerg
                 object.getCellRef()._usableEnergy = it->second;
             }
         } else if (type == ObjectType_FreeCell) {
-            object.getFreeCellRef()._rawEnergy = nonCreatureEnergy;
+            object.getFreeCellRef()._energy = nonCreatureEnergy;
+        } else if (type == ObjectType_Structure) {
+            object.getStructureRef()._energy = nonCreatureEnergy;
         }
     }
 }

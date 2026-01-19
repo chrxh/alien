@@ -135,10 +135,10 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
             cellType = object->typeData.cell.cellType;
             signalState = object->typeData.cell.signalState;
         } else if (object->type == ObjectType_FreeCell) {
-            luminance = object->typeData.freeCell.rawEnergy / 300.0f;
+            luminance = object->typeData.freeCell.energy / 300.0f;
         } else {
-            // Structure - no energy concept
-            luminance = 1.0f;
+            // Structure - use energy for luminance if available
+            luminance = object->typeData.structure.energy / 300.0f;
         }
 
         auto white = luminance / 10.0f;

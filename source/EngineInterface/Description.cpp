@@ -196,6 +196,16 @@ ObjectType ObjectDesc::getObjectType() const
     CHECK(false);
 }
 
+StructureDesc& ObjectDesc::getStructureRef()
+{
+    return std::get<StructureDesc>(_type);
+}
+
+StructureDesc const& ObjectDesc::getStructureRef() const
+{
+    return std::get<StructureDesc>(_type);
+}
+
 FreeCellDesc& ObjectDesc::getFreeCellRef()
 {
     return std::get<FreeCellDesc>(_type);

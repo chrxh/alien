@@ -78,7 +78,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
 
                 // Only attack cells with energy above base value
-                auto energyToTransfer = atomicAdd(&otherFreeCell->rawEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color];
+                auto energyToTransfer = atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value[object->color];
 
                 if (energyToTransfer < 0) {
                     return;
@@ -96,14 +96,14 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     otherFreeCell->eventPos = object->pos;
 
                     // Absorb energy from attacked cell
-                    auto origEnergy = atomicAdd(&otherFreeCell->rawEnergy, -energyToTransfer);
+                    auto origEnergy = atomicAdd(&otherFreeCell->energy, -energyToTransfer);
                     if (origEnergy > energyToTransfer) {
                         sumEnergyToTransfer += energyToTransfer;
                     }
 
                     // Revert
                     else {
-                        atomicAdd(&otherFreeCell->rawEnergy, energyToTransfer);
+                        atomicAdd(&otherFreeCell->energy, energyToTransfer);
                     }
                 }
             }
