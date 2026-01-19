@@ -35,7 +35,7 @@ namespace
         }
     }
 
-    // Helper function to copy memory entries from Description to TO
+    // Helper function to copy memory entries from Desc to TO
     template <typename DescEntry, typename TOEntry>
     void copyMemoryEntriesToTO(TOEntry* target, std::vector<DescEntry> const& source)
     {
@@ -62,9 +62,9 @@ namespace
         return std::string(source, strnlen(source, 64));
     }
 
-    NeuralNetworkGenomeDescription convert(NeuralNetworkGenomeTO const& neuralNetworkGenomeTO)
+    NeuralNetworkGenomeDesc convert(NeuralNetworkGenomeTO const& neuralNetworkGenomeTO)
     {
-        NeuralNetworkGenomeDescription result;
+        NeuralNetworkGenomeDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result._weights[i] = neuralNetworkGenomeTO.weights[i];
         }
@@ -77,9 +77,9 @@ namespace
         return result;
     }
 
-    NeuralNetworkDescription convert(NeuralNetworkTO const& neuralNetworkTO)
+    NeuralNetworkDesc convert(NeuralNetworkTO const& neuralNetworkTO)
     {
-        NeuralNetworkDescription result;
+        NeuralNetworkDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result._weights[i] = neuralNetworkTO.weights[i];
         }
@@ -92,7 +92,7 @@ namespace
         return result;
     }
 
-    NeuralNetworkGenomeTO convert(NeuralNetworkGenomeDescription const& neuralNetworkDesc)
+    NeuralNetworkGenomeTO convert(NeuralNetworkGenomeDesc const& neuralNetworkDesc)
     {
         NeuralNetworkGenomeTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
@@ -107,7 +107,7 @@ namespace
         return result;
     }
 
-    NeuralNetworkTO convert(NeuralNetworkDescription const& neuralNetworkDesc)
+    NeuralNetworkTO convert(NeuralNetworkDesc const& neuralNetworkDesc)
     {
         NeuralNetworkTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
@@ -125,20 +125,20 @@ namespace
 
 }
 
-Description DescriptionConverterService::convertTOtoDescription(TO const& to) const
+Desc DescriptionConverterService::convertTOtoDescription(TO const& to) const
 {
-    Description result;
+    Desc result;
 
     // Genomes
     for (int i = 0; i < *to.numGenomes; ++i) {
-        auto genome = createGenomeDescription(to, i);
+        auto genome = createGenomeDesc(to, i);
         result._genomes.emplace_back(genome);
     }
 
     // Creatures
     std::unordered_map<uint64_t, uint64_t> creatureIdByTOIndex;
     for (int i = 0; i < *to.numCreatures; ++i) {
-        auto creature = createCreatureDescription(to, i);
+        auto creature = createCreatureDesc(to, i);
         auto genomeTOIndex = to.creatures[i].genomeArrayIndex;
         auto genomeId = to.genomes[genomeTOIndex].id;
         creature._genomeId = genomeId;
@@ -149,7 +149,7 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
 
     // Cells
     for (int i = 0; i < *to.numObjects; ++i) {
-        auto object = createObjectDescription(to, i);
+        auto object = createObjectDesc(to, i);
 
         // Only access cell data for Cell objects
         if (to.objects[i].type == ObjectType_Cell) {
@@ -161,13 +161,13 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
 
     // Particles
     for (int i = 0; i < *to.numEnergyParticles; ++i) {
-        result._energies.emplace_back(createEnergyDescription(to, i));
+        result._energies.emplace_back(createEnergyDesc(to, i));
     }
 
     return result;
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(Description const& description) const
+TO DescriptionConverterService::convertDescriptionToTO(Desc const& description) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<CreatureTO> creatureTOs;
@@ -201,7 +201,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, objectTOs, particleTOs, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(ObjectDescription const& object) const
+TO DescriptionConverterService::convertDescriptionToTO(ObjectDesc const& object) const
 {
     std::vector<ObjectTO> objectTOs;
     std::vector<uint8_t> heap;
@@ -213,7 +213,7 @@ TO DescriptionConverterService::convertDescriptionToTO(ObjectDescription const& 
     return provideDataTO({}, {}, {}, {}, objectTOs, {}, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(EnergyDescription const& particle) const
+TO DescriptionConverterService::convertDescriptionToTO(EnergyDesc const& particle) const
 {
     std::vector<EnergyTO> particleTOs;
     std::vector<uint8_t> heap;
@@ -222,7 +222,7 @@ TO DescriptionConverterService::convertDescriptionToTO(EnergyDescription const& 
     return provideDataTO({}, {}, {}, {}, {}, particleTOs, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const
+TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<CreatureTO> creatureTOs;
@@ -230,7 +230,7 @@ TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, Geno
     std::vector<NodeTO> nodeTOs;
     std::vector<uint8_t> heap;
 
-    auto wrapper = CreatureDescription().id(creatureId).genomeId(genome._id);
+    auto wrapper = CreatureDesc().id(creatureId).genomeId(genome._id);
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
     convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
@@ -246,9 +246,9 @@ DescriptionConverterService::DescriptionConverterService()
     _collectionTOProvider = std::make_shared<_TOProvider>();
 }
 
-ObjectDescription DescriptionConverterService::createObjectDescription(TO const& to, int objectIndex) const
+ObjectDesc DescriptionConverterService::createObjectDesc(TO const& to, int objectIndex) const
 {
-    ObjectDescription result(false);
+    ObjectDesc result(false);
 
     auto const& objectTO = to.objects[objectIndex];
     result._id = objectTO.id;
@@ -256,10 +256,10 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
     result._pos = RealVector2D{objectTO.pos.x, objectTO.pos.y};
     result._vel = RealVector2D{objectTO.vel.x, objectTO.vel.y};
     result._stiffness = objectTO.stiffness;
-    std::vector<ConnectionDescription> connections;
+    std::vector<ConnectionDesc> connections;
     for (int i = 0; i < objectTO.numConnections; ++i) {
         auto const& connectionTO = objectTO.connections[i];
-        ConnectionDescription connection;
+        ConnectionDesc connection;
         if (connectionTO.objectIndex != VALUE_NOT_SET_UINT64) {
             connection._objectId = to.objects[connectionTO.objectIndex].id;
         } else {
@@ -277,11 +277,11 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
 
     // Handle object type: Structure, FreeCell, or Cell
     if (objectTO.type == ObjectType_Structure) {
-        StructureDescription structureDesc;
+        StructureDesc structureDesc;
         result._type = structureDesc;
 
     } else if (objectTO.type == ObjectType_FreeCell) {
-        FreeCellDescription freeCellDesc;
+        FreeCellDesc freeCellDesc;
         freeCellDesc._rawEnergy = objectTO.typeData.freeCell.rawEnergy;
         freeCellDesc._age = objectTO.typeData.freeCell.age;
         result._type = freeCellDesc;
@@ -289,7 +289,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
     } else if (objectTO.type == ObjectType_Cell) {
 
         // ObjectType_Cell - access typeData.cell
-        CellDescription cellDesc;
+        CellDesc cellDesc;
         cellDesc._usableEnergy = objectTO.typeData.cell.usableEnergy;
         cellDesc._rawEnergy = objectTO.typeData.cell.rawEnergy;
         cellDesc._cellState = objectTO.typeData.cell.cellState;
@@ -303,17 +303,17 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
 
         switch (objectTO.typeData.cell.cellType) {
         case CellType_Base: {
-            BaseDescription base;
+            BaseDesc base;
             cellDesc._cellType = base;
         } break;
         case CellType_Depot: {
-            DepotDescription transmitter;
+            DepotDesc transmitter;
             transmitter._storageLimit = objectTO.typeData.cell.cellTypeData.depot.storageLimit;
             transmitter._storedUsableEnergy = objectTO.typeData.cell.cellTypeData.depot.storedUsableEnergy;
             cellDesc._cellType = transmitter;
         } break;
         case CellType_Constructor: {
-            ConstructorDescription constructor;
+            ConstructorDesc constructor;
             constructor._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.constructor.autoTriggerInterval > 0
                 ? std::make_optional(objectTO.typeData.cell.cellTypeData.constructor.autoTriggerInterval)
                 : std::nullopt;
@@ -330,7 +330,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             cellDesc._cellType = constructor;
         } break;
         case CellType_Sensor: {
-            SensorDescription sensor;
+            SensorDesc sensor;
             sensor._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval > 0
                 ? std::make_optional(objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval)
                 : std::nullopt;
@@ -338,24 +338,24 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             sensor._maxRange = objectTO.typeData.cell.cellTypeData.sensor.maxRange;
 
             if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_Telemetry) {
-                TelemetryDescription telemetry;
+                TelemetryDesc telemetry;
                 sensor._mode = telemetry;
             } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
-                DetectEnergyDescription detectEnergy;
+                DetectEnergyDesc detectEnergy;
                 detectEnergy._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 sensor._mode = detectEnergy;
             } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
-                DetectStructureDescription detectStructure;
+                DetectStructureDesc detectStructure;
                 sensor._mode = detectStructure;
             } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
-                DetectFreeCellDescription detectFreeCell;
+                DetectFreeCellDesc detectFreeCell;
                 detectFreeCell._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
                 detectFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
                     : std::nullopt;
                 sensor._mode = detectFreeCell;
             } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                DetectCreatureDescription detectCreature;
+                DetectCreatureDesc detectCreature;
                 detectCreature._minNumCells = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells > 0
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells))
                     : std::nullopt;
@@ -369,7 +369,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
                 sensor._mode = detectCreature;
             }
             if (objectTO.typeData.cell.cellTypeData.sensor.lastMatchAvailable) {
-                SensorLastMatchDescription lastMatchDesc;
+                SensorLastMatchDesc lastMatchDesc;
                 lastMatchDesc._creatureId = objectTO.typeData.cell.cellTypeData.sensor.lastMatch.creatureId;
                 lastMatchDesc._pos =
                     RealVector2D{objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos.x, objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos.y};
@@ -379,7 +379,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             cellDesc._cellType = sensor;
         } break;
         case CellType_Generator: {
-            GeneratorDescription generator;
+            GeneratorDesc generator;
             generator._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.generator.autoTriggerInterval;
             generator._pulseType = objectTO.typeData.cell.cellTypeData.generator.pulseType;
             generator._alternationInterval = objectTO.typeData.cell.cellTypeData.generator.alternationInterval;
@@ -387,15 +387,15 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             cellDesc._cellType = generator;
         } break;
         case CellType_Attacker: {
-            AttackerDescription attacker;
+            AttackerDesc attacker;
             if (objectTO.typeData.cell.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-                AttackFreeCellDescription attackFreeCell;
+                AttackFreeCellDesc attackFreeCell;
                 attackFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor != 255
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor))
                     : std::nullopt;
                 attacker._mode = attackFreeCell;
             } else if (objectTO.typeData.cell.cellTypeData.attacker.mode == AttackerMode_Creature) {
-                AttackCreatureDescription attackCreature;
+                AttackCreatureDesc attackCreature;
                 attackCreature._minNumCells = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells > 0
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells))
                     : std::nullopt;
@@ -411,14 +411,14 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             cellDesc._cellType = attacker;
         } break;
         case CellType_Injector: {
-            InjectorDescription injector;
+            InjectorDesc injector;
             injector._geneIndex = objectTO.typeData.cell.cellTypeData.injector.geneIndex;
             cellDesc._cellType = injector;
         } break;
         case CellType_Muscle: {
-            MuscleDescription muscle;
+            MuscleDesc muscle;
             if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
-                AutoBendingDescription bending;
+                AutoBendingDesc bending;
                 bending._maxAngleDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
                 bending._forwardBackwardRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
                 bending._initialAngle = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle != VALUE_NOT_SET_FLOAT
@@ -430,7 +430,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
                 bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
                 muscle._mode = bending;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
-                ManualBendingDescription bending;
+                ManualBendingDesc bending;
                 bending._maxAngleDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
                 bending._forwardBackwardRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
                 bending._initialAngle = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle != VALUE_NOT_SET_FLOAT
@@ -440,7 +440,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
                 bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
                 muscle._mode = bending;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
-                AngleBendingDescription bending;
+                AngleBendingDesc bending;
                 bending._maxAngleDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
                 bending._attractionRepulsionRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
                 bending._initialAngle = objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.initialAngle != VALUE_NOT_SET_FLOAT
@@ -448,7 +448,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
                     : std::nullopt;
                 muscle._mode = bending;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
-                AutoCrawlingDescription crawling;
+                AutoCrawlingDesc crawling;
                 crawling._maxDistanceDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
                 crawling._forwardBackwardRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
                 crawling._initialDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance != VALUE_NOT_SET_FLOAT
@@ -461,7 +461,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
                 crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
                 muscle._mode = crawling;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
-                ManualCrawlingDescription crawling;
+                ManualCrawlingDesc crawling;
                 crawling._maxDistanceDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
                 crawling._forwardBackwardRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
                 crawling._initialDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance != VALUE_NOT_SET_FLOAT
@@ -472,7 +472,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
                 crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
                 muscle._mode = crawling;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
-                DirectMovementDescription movement;
+                DirectMovementDesc movement;
                 muscle._mode = movement;
             }
 
@@ -481,23 +481,23 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             cellDesc._cellType = muscle;
         } break;
         case CellType_Defender: {
-            DefenderDescription defender;
+            DefenderDesc defender;
             defender._mode = objectTO.typeData.cell.cellTypeData.defender.mode;
             cellDesc._cellType = defender;
         } break;
         case CellType_Reconnector: {
-            ReconnectorDescription reconnector;
+            ReconnectorDesc reconnector;
             if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
-                ReconnectStructureDescription reconnectStructure;
+                ReconnectStructureDesc reconnectStructure;
                 reconnector._mode = reconnectStructure;
             } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-                ReconnectFreeCellDescription reconnectFreeCell;
+                ReconnectFreeCellDesc reconnectFreeCell;
                 reconnectFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor != 255
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor))
                     : std::nullopt;
                 reconnector._mode = reconnectFreeCell;
             } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
-                ReconnectCreatureDescription reconnectCreature;
+                ReconnectCreatureDesc reconnectCreature;
                 reconnectCreature._minNumCells = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells > 0
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells))
                     : std::nullopt;
@@ -513,38 +513,38 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             cellDesc._cellType = reconnector;
         } break;
         case CellType_Detonator: {
-            DetonatorDescription detonator;
+            DetonatorDesc detonator;
             detonator._state = objectTO.typeData.cell.cellTypeData.detonator.state;
             detonator._countdown = objectTO.typeData.cell.cellTypeData.detonator.countdown;
             cellDesc._cellType = detonator;
         } break;
         case CellType_Digestor: {
-            DigestorDescription digestor;
+            DigestorDesc digestor;
             digestor._rawEnergyConductivity = objectTO.typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
             cellDesc._cellType = digestor;
         } break;
         case CellType_Memory: {
-            MemoryDescription memory;
+            MemoryDesc memory;
             auto const& memoryTO = objectTO.typeData.cell.cellTypeData.memory;
             if (memoryTO.mode == MemoryMode_SignalDelay) {
-                SignalDelayDescription signalDelay;
+                SignalDelayDesc signalDelay;
                 signalDelay._delay = memoryTO.modeData.signalDelay.delay;
                 signalDelay._numSignalEntriesInitialized = memoryTO.modeData.signalDelay.numSignalEntriesInitialized;
                 signalDelay._ringBufferIndex = memoryTO.modeData.signalDelay.ringBufferIndex;
                 memory._mode = signalDelay;
             } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
-                SignalRecorderDescription signalRecorder;
+                SignalRecorderDesc signalRecorder;
                 signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
                 signalRecorder._state = memoryTO.modeData.signalRecorder.state;
                 signalRecorder._numWrittenSignalEntries = memoryTO.modeData.signalRecorder.numWrittenSignalEntries;
                 signalRecorder._numReadSignalEntries = memoryTO.modeData.signalRecorder.numReadSignalEntries;
                 memory._mode = signalRecorder;
             } else if (memoryTO.mode == MemoryMode_SignalStorage) {
-                SignalStorageDescription signalStorage;
+                SignalStorageDesc signalStorage;
                 signalStorage._readOnly = memoryTO.modeData.signalStorage.readOnly;
                 memory._mode = signalStorage;
             } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
-                SignalIntegratorDescription signalIntegrator;
+                SignalIntegratorDesc signalIntegrator;
                 signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
                 memory._mode = signalIntegrator;
             }
@@ -554,15 +554,15 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             cellDesc._cellType = memory;
         } break;
         case CellType_Communicator: {
-            CommunicatorDescription communicator;
+            CommunicatorDesc communicator;
             auto const& communicatorTO = objectTO.typeData.cell.cellTypeData.communicator;
             if (communicatorTO.mode == CommunicatorMode_Sender) {
-                SenderDescription sender;
+                SenderDesc sender;
                 sender._range = communicatorTO.modeData.sender.range;
                 sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
                 communicator._mode = sender;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
-                ReceiverDescription receiver;
+                ReceiverDesc receiver;
                 receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
                     ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColor))
                     : std::nullopt;
@@ -575,7 +575,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
-        SignalRestrictionDescription routingRestriction;
+        SignalRestrictionDesc routingRestriction;
         routingRestriction._mode = objectTO.typeData.cell.signalRestriction.mode;
         routingRestriction._baseAngle = objectTO.typeData.cell.signalRestriction.baseAngle;
         routingRestriction._openingAngle = objectTO.typeData.cell.signalRestriction.openingAngle;
@@ -597,9 +597,9 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
 }
 
 
-NodeDescription DescriptionConverterService::createNodeDescription(TO const& to, NodeTO const* nodeTO) const
+NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const* nodeTO) const
 {
-    NodeDescription nodeDesc;
+    NodeDesc nodeDesc;
     nodeDesc._referenceAngle = nodeTO->referenceAngle;
     nodeDesc._color = nodeTO->color;
     nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
@@ -611,17 +611,17 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
 
     switch (nodeTO->cellType) {
     case CellTypeGenome_Base: {
-        BaseGenomeDescription baseDesc;
+        BaseGenomeDesc baseDesc;
         nodeDesc._cellType = baseDesc;
     } break;
     case CellTypeGenome_Depot: {
-        DepotGenomeDescription depotDesc;
+        DepotGenomeDesc depotDesc;
         depotDesc._storageLimit = nodeTO->cellTypeData.depot.storageLimit;
         depotDesc._initialStoredUsableEnergy = nodeTO->cellTypeData.depot.initialStoredUsableEnergy;
         nodeDesc._cellType = depotDesc;
     } break;
     case CellTypeGenome_Constructor: {
-        ConstructorGenomeDescription constructorDesc;
+        ConstructorGenomeDesc constructorDesc;
         constructorDesc._autoTriggerInterval =
             nodeTO->cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructorDesc._geneIndex = nodeTO->cellTypeData.constructor.geneIndex;
@@ -631,31 +631,31 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         nodeDesc._cellType = constructorDesc;
     } break;
     case CellTypeGenome_Sensor: {
-        SensorGenomeDescription sensorDesc;
+        SensorGenomeDesc sensorDesc;
         sensorDesc._autoTriggerInterval =
             nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
         sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
         sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
 
         if (nodeTO->cellTypeData.sensor.mode == SensorMode_Telemetry) {
-            TelemetryGenomeDescription telemetry;
+            TelemetryGenomeDesc telemetry;
             sensorDesc._mode = telemetry;
         } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
-            DetectEnergyGenomeDescription detectEnergy;
+            DetectEnergyGenomeDesc detectEnergy;
             detectEnergy._minDensity = nodeTO->cellTypeData.sensor.modeData.detectEnergy.minDensity;
             sensorDesc._mode = detectEnergy;
         } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectStructure) {
-            DetectStructureGenomeDescription detectStructure;
+            DetectStructureGenomeDesc detectStructure;
             sensorDesc._mode = detectStructure;
         } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
-            DetectFreeCellGenomeDescription detectFreeCell;
+            DetectFreeCellGenomeDesc detectFreeCell;
             detectFreeCell._minDensity = nodeTO->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
             detectFreeCell._restrictToColor = nodeTO->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
                 : std::nullopt;
             sensorDesc._mode = detectFreeCell;
         } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-            DetectCreatureGenomeDescription detectCreature;
+            DetectCreatureGenomeDesc detectCreature;
             detectCreature._minNumCells = nodeTO->cellTypeData.sensor.modeData.detectCreature.minNumCells > 0
                 ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectCreature.minNumCells))
                 : std::nullopt;
@@ -672,22 +672,22 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         nodeDesc._cellType = sensorDesc;
     } break;
     case CellTypeGenome_Generator: {
-        GeneratorGenomeDescription generatorDesc;
+        GeneratorGenomeDesc generatorDesc;
         generatorDesc._autoTriggerInterval = nodeTO->cellTypeData.generator.autoTriggerInterval;
         generatorDesc._pulseType = nodeTO->cellTypeData.generator.pulseType;
         generatorDesc._alternationInterval = nodeTO->cellTypeData.generator.alternationInterval;
         nodeDesc._cellType = generatorDesc;
     } break;
     case CellTypeGenome_Attacker: {
-        AttackerGenomeDescription attackerDesc;
+        AttackerGenomeDesc attackerDesc;
         if (nodeTO->cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-            AttackFreeCellGenomeDescription attackFreeCell;
+            AttackFreeCellGenomeDesc attackFreeCell;
             attackFreeCell._restrictToColor = nodeTO->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor))
                 : std::nullopt;
             attackerDesc._mode = attackFreeCell;
         } else if (nodeTO->cellTypeData.attacker.mode == AttackerMode_Creature) {
-            AttackCreatureGenomeDescription attackCreature;
+            AttackCreatureGenomeDesc attackCreature;
             attackCreature._minNumCells = nodeTO->cellTypeData.attacker.modeData.attackCreature.minNumCells > 0
                 ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.modeData.attackCreature.minNumCells))
                 : std::nullopt;
@@ -703,68 +703,68 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         nodeDesc._cellType = attackerDesc;
     } break;
     case CellTypeGenome_Injector: {
-        InjectorGenomeDescription injectorDesc;
+        InjectorGenomeDesc injectorDesc;
         injectorDesc._geneIndex = nodeTO->cellTypeData.injector.geneIndex;
         nodeDesc._cellType = injectorDesc;
     } break;
     case CellTypeGenome_Muscle: {
-        MuscleGenomeDescription muscleDesc;
+        MuscleGenomeDesc muscleDesc;
         switch (nodeTO->cellTypeData.muscle.mode) {
         case MuscleMode_AutoBending: {
-            AutoBendingGenomeDescription bendingDesc;
+            AutoBendingGenomeDesc bendingDesc;
             bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
             bendingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
             muscleDesc._mode = bendingDesc;
         } break;
         case MuscleMode_ManualBending: {
-            ManualBendingGenomeDescription bendingDesc;
+            ManualBendingGenomeDesc bendingDesc;
             bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
             bendingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
             muscleDesc._mode = bendingDesc;
         } break;
         case MuscleMode_AngleBending: {
-            AngleBendingGenomeDescription bendingDesc;
+            AngleBendingGenomeDesc bendingDesc;
             bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
             bendingDesc._attractionRepulsionRatio = nodeTO->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
             muscleDesc._mode = bendingDesc;
         } break;
         case MuscleMode_AutoCrawling: {
-            AutoCrawlingGenomeDescription crawlingDesc;
+            AutoCrawlingGenomeDesc crawlingDesc;
             crawlingDesc._maxDistanceDeviation = nodeTO->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
             crawlingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
             muscleDesc._mode = crawlingDesc;
         } break;
         case MuscleMode_ManualCrawling: {
-            ManualCrawlingGenomeDescription crawlingDesc;
+            ManualCrawlingGenomeDesc crawlingDesc;
             crawlingDesc._maxDistanceDeviation = nodeTO->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
             crawlingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
             muscleDesc._mode = crawlingDesc;
         } break;
         case MuscleMode_DirectMovement: {
-            DirectMovementGenomeDescription movementDesc;
+            DirectMovementGenomeDesc movementDesc;
             muscleDesc._mode = movementDesc;
         } break;
         }
         nodeDesc._cellType = muscleDesc;
     } break;
     case CellTypeGenome_Defender: {
-        DefenderGenomeDescription defenderDesc;
+        DefenderGenomeDesc defenderDesc;
         defenderDesc._mode = nodeTO->cellTypeData.defender.mode;
         nodeDesc._cellType = defenderDesc;
     } break;
     case CellTypeGenome_Reconnector: {
-        ReconnectorGenomeDescription reconnectorDesc;
+        ReconnectorGenomeDesc reconnectorDesc;
         if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
-            ReconnectStructureGenomeDescription reconnectStructure;
+            ReconnectStructureGenomeDesc reconnectStructure;
             reconnectorDesc._mode = reconnectStructure;
         } else if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-            ReconnectFreeCellGenomeDescription reconnectFreeCell;
+            ReconnectFreeCellGenomeDesc reconnectFreeCell;
             reconnectFreeCell._restrictToColor = nodeTO->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor))
                 : std::nullopt;
             reconnectorDesc._mode = reconnectFreeCell;
         } else if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
-            ReconnectCreatureGenomeDescription reconnectCreature;
+            ReconnectCreatureGenomeDesc reconnectCreature;
             reconnectCreature._minNumCells = nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.minNumCells > 0
                 ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.minNumCells))
                 : std::nullopt;
@@ -780,33 +780,33 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         nodeDesc._cellType = reconnectorDesc;
     } break;
     case CellTypeGenome_Detonator: {
-        DetonatorGenomeDescription detonatorDesc;
+        DetonatorGenomeDesc detonatorDesc;
         detonatorDesc._countdown = nodeTO->cellTypeData.detonator.countdown;
         nodeDesc._cellType = detonatorDesc;
     } break;
     case CellTypeGenome_Digestor: {
-        DigestorGenomeDescription digestorDesc;
+        DigestorGenomeDesc digestorDesc;
         digestorDesc._rawEnergyConductivity = nodeTO->cellTypeData.digestor.rawEnergyConductivity;
         nodeDesc._cellType = digestorDesc;
     } break;
     case CellTypeGenome_Memory: {
-        MemoryGenomeDescription memoryDesc;
+        MemoryGenomeDesc memoryDesc;
         auto const& memoryTO = nodeTO->cellTypeData.memory;
         if (memoryTO.mode == MemoryMode_SignalDelay) {
-            SignalDelayGenomeDescription signalDelay;
+            SignalDelayGenomeDesc signalDelay;
             signalDelay._delay = memoryTO.modeData.signalDelay.delay;
             memoryDesc._mode = signalDelay;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
-            SignalRecorderGenomeDescription signalRecorder;
+            SignalRecorderGenomeDesc signalRecorder;
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
             signalRecorder._numWrittenSignalEntries = memoryTO.modeData.signalRecorder.numWrittenSignalEntries;
             memoryDesc._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
-            SignalStorageGenomeDescription signalStorage;
+            SignalStorageGenomeDesc signalStorage;
             signalStorage._readOnly = memoryTO.modeData.signalStorage.readOnly;
             memoryDesc._mode = signalStorage;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
-            SignalIntegratorGenomeDescription signalIntegrator;
+            SignalIntegratorGenomeDesc signalIntegrator;
             signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
             memoryDesc._mode = signalIntegrator;
         }
@@ -816,15 +816,15 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         nodeDesc._cellType = memoryDesc;
     } break;
     case CellTypeGenome_Communicator: {
-        CommunicatorGenomeDescription communicatorDesc;
+        CommunicatorGenomeDesc communicatorDesc;
         auto const& communicatorTO = nodeTO->cellTypeData.communicator;
         if (communicatorTO.mode == CommunicatorMode_Sender) {
-            SenderGenomeDescription sender;
+            SenderGenomeDesc sender;
             sender._range = communicatorTO.modeData.sender.range;
             sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
             communicatorDesc._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
-            ReceiverGenomeDescription receiver;
+            ReceiverGenomeDesc receiver;
             receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColor))
                 : std::nullopt;
@@ -837,11 +837,11 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
     return nodeDesc;
 }
 
-GenomeDescription DescriptionConverterService::createGenomeDescription(TO const& to, int genomeIndex) const
+GenomeDesc DescriptionConverterService::createGenomeDesc(TO const& to, int genomeIndex) const
 {
     auto const& genomeTO = to.genomes[genomeIndex];
 
-    GenomeDescription result;
+    GenomeDesc result;
     result._id = genomeTO.id;
     NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.id});
     result._name = char64ToString(genomeTO.name);
@@ -852,7 +852,7 @@ GenomeDescription DescriptionConverterService::createGenomeDescription(TO const&
     for (int j = 0; j < genomeTO.numGenes; ++j) {
         auto geneTO = to.genes + genomeTO.geneArrayIndex + j;
 
-        GeneDescription geneDesc;
+        GeneDesc geneDesc;
         geneDesc._name = char64ToString(geneTO->name);
         geneDesc._numBranches = geneTO->numBranches;
         geneDesc._separation = geneTO->separation;
@@ -865,7 +865,7 @@ GenomeDescription DescriptionConverterService::createGenomeDescription(TO const&
         CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
         for (int k = 0; k < geneTO->numNodes; ++k) {
             auto nodeTO = to.nodes + geneTO->nodeArrayIndex + k;
-            geneDesc._nodes.emplace_back(createNodeDescription(to, nodeTO));
+            geneDesc._nodes.emplace_back(createNodeDesc(to, nodeTO));
         }
 
         result._genes.emplace_back(geneDesc);
@@ -873,9 +873,9 @@ GenomeDescription DescriptionConverterService::createGenomeDescription(TO const&
     return result;
 }
 
-CreatureDescription DescriptionConverterService::createCreatureDescription(TO const& to, int creatureIndex) const
+CreatureDesc DescriptionConverterService::createCreatureDesc(TO const& to, int creatureIndex) const
 {
-    CreatureDescription result;
+    CreatureDesc result;
 
     auto const& creatureTO = to.creatures[creatureIndex];
     result._id = creatureTO.id;
@@ -890,11 +890,11 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
     return result;
 }
 
-EnergyDescription DescriptionConverterService::createEnergyDescription(TO const& to, int particleIndex) const
+EnergyDesc DescriptionConverterService::createEnergyDesc(TO const& to, int particleIndex) const
 {
     auto const& energyParticle = to.energyParticles[particleIndex];
     NumberGenerator::get().adaptMaxIds({.entityId = energyParticle.id});
-    return EnergyDescription()
+    return EnergyDesc()
         .id(energyParticle.id)
         .pos({energyParticle.pos.x, energyParticle.pos.y})
         .vel({energyParticle.vel.x, energyParticle.vel.y})
@@ -907,7 +907,7 @@ void DescriptionConverterService::convertGenomeToTO(
     std::vector<GeneTO>& geneTOs,
     std::vector<NodeTO>& nodeTOs,
     std::vector<uint8_t>& heap,
-    GenomeDescription const& genome,
+    GenomeDesc const& genome,
     std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const
 {
     auto genomeTOIndex = genomeTOs.size();
@@ -958,13 +958,13 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellTypeGenome_Base: {
             } break;
             case CellTypeGenome_Depot: {
-                auto const& depotDesc = std::get<DepotGenomeDescription>(nodeDesc._cellType);
+                auto const& depotDesc = std::get<DepotGenomeDesc>(nodeDesc._cellType);
                 auto& depotTO = nodeTO.cellTypeData.depot;
                 depotTO.storageLimit = depotDesc._storageLimit;
                 depotTO.initialStoredUsableEnergy = depotDesc._initialStoredUsableEnergy;
             } break;
             case CellTypeGenome_Constructor: {
-                auto const& constructorDesc = std::get<ConstructorGenomeDescription>(nodeDesc._cellType);
+                auto const& constructorDesc = std::get<ConstructorGenomeDesc>(nodeDesc._cellType);
                 auto& constructorTO = nodeTO.cellTypeData.constructor;
                 constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
                 constructorTO.geneIndex = constructorDesc._geneIndex;
@@ -973,7 +973,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 constructorTO.provideEnergy = constructorDesc._provideEnergy;
             } break;
             case CellTypeGenome_Sensor: {
-                auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellType);
+                auto const& sensorDesc = std::get<SensorGenomeDesc>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
                 sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
                 sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
@@ -981,20 +981,20 @@ void DescriptionConverterService::convertGenomeToTO(
                 sensorTO.mode = sensorDesc.getMode();
 
                 if (sensorTO.mode == SensorMode_Telemetry) {
-                    //auto const& telemetryDesc = std::get<TelemetryGenomeDescription>(sensorDesc._mode);
+                    //auto const& telemetryDesc = std::get<TelemetryGenomeDesc>(sensorDesc._mode);
                     //auto& telemetryTO = sensorTO.modeData.telemetry;
                 } else if (sensorTO.mode == SensorMode_DetectEnergy) {
-                    auto const& detectEnergyDesc = std::get<DetectEnergyGenomeDescription>(sensorDesc._mode);
+                    auto const& detectEnergyDesc = std::get<DetectEnergyGenomeDesc>(sensorDesc._mode);
                     auto& detectEnergyTO = sensorTO.modeData.detectEnergy;
                     detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
                 } else if (sensorTO.mode == SensorMode_DetectStructure) {
                 } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
-                    auto const& detectFreeCellDesc = std::get<DetectFreeCellGenomeDescription>(sensorDesc._mode);
+                    auto const& detectFreeCellDesc = std::get<DetectFreeCellGenomeDesc>(sensorDesc._mode);
                     auto& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
                     detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
                     detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
                 } else if (sensorTO.mode == SensorMode_DetectCreature) {
-                    auto const& detectCreatureDesc = std::get<DetectCreatureGenomeDescription>(sensorDesc._mode);
+                    auto const& detectCreatureDesc = std::get<DetectCreatureGenomeDesc>(sensorDesc._mode);
                     auto& detectCreatureTO = sensorTO.modeData.detectCreature;
                     detectCreatureTO.minNumCells = static_cast<uint32_t>(detectCreatureDesc._minNumCells.value_or(0));
                     detectCreatureTO.maxNumCells = static_cast<uint32_t>(detectCreatureDesc._maxNumCells.value_or(0));
@@ -1003,22 +1003,22 @@ void DescriptionConverterService::convertGenomeToTO(
                 }
             } break;
             case CellTypeGenome_Generator: {
-                auto const& generatorDesc = std::get<GeneratorGenomeDescription>(nodeDesc._cellType);
+                auto const& generatorDesc = std::get<GeneratorGenomeDesc>(nodeDesc._cellType);
                 auto& generatorTO = nodeTO.cellTypeData.generator;
                 generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
                 generatorTO.pulseType = generatorDesc._pulseType;
                 generatorTO.alternationInterval = generatorDesc._alternationInterval;
             } break;
             case CellTypeGenome_Attacker: {
-                auto const& attackerDesc = std::get<AttackerGenomeDescription>(nodeDesc._cellType);
+                auto const& attackerDesc = std::get<AttackerGenomeDesc>(nodeDesc._cellType);
                 auto& attackerTO = nodeTO.cellTypeData.attacker;
                 attackerTO.mode = attackerDesc.getMode();
                 if (attackerTO.mode == AttackerMode_FreeCell) {
-                    auto const& attackFreeCellDesc = std::get<AttackFreeCellGenomeDescription>(attackerDesc._mode);
+                    auto const& attackFreeCellDesc = std::get<AttackFreeCellGenomeDesc>(attackerDesc._mode);
                     auto& attackFreeCellTO = attackerTO.modeData.attackFreeCell;
                     attackFreeCellTO.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
                 } else if (attackerTO.mode == AttackerMode_Creature) {
-                    auto const& attackCreatureDesc = std::get<AttackCreatureGenomeDescription>(attackerDesc._mode);
+                    auto const& attackCreatureDesc = std::get<AttackCreatureGenomeDesc>(attackerDesc._mode);
                     auto& attackCreatureTO = attackerTO.modeData.attackCreature;
                     attackCreatureTO.minNumCells = static_cast<uint32_t>(attackCreatureDesc._minNumCells.value_or(0));
                     attackCreatureTO.maxNumCells = static_cast<uint32_t>(attackCreatureDesc._maxNumCells.value_or(0));
@@ -1027,41 +1027,41 @@ void DescriptionConverterService::convertGenomeToTO(
                 }
             } break;
             case CellTypeGenome_Injector: {
-                auto const& injectorDesc = std::get<InjectorGenomeDescription>(nodeDesc._cellType);
+                auto const& injectorDesc = std::get<InjectorGenomeDesc>(nodeDesc._cellType);
                 auto& injectorTO = nodeTO.cellTypeData.injector;
                 injectorTO.geneIndex = injectorDesc._geneIndex;
             } break;
             case CellTypeGenome_Muscle: {
-                auto const& muscleDesc = std::get<MuscleGenomeDescription>(nodeDesc._cellType);
+                auto const& muscleDesc = std::get<MuscleGenomeDesc>(nodeDesc._cellType);
                 auto& muscleTO = nodeTO.cellTypeData.muscle;
                 muscleTO.mode = muscleDesc.getMode();
                 switch (muscleDesc.getMode()) {
                 case MuscleMode_AutoBending: {
-                    auto const& autoBendingDesc = std::get<AutoBendingGenomeDescription>(muscleDesc._mode);
+                    auto const& autoBendingDesc = std::get<AutoBendingGenomeDesc>(muscleDesc._mode);
                     auto& autoBendingTO = muscleTO.modeData.autoBending;
                     autoBendingTO.maxAngleDeviation = autoBendingDesc._maxAngleDeviation;
                     autoBendingTO.forwardBackwardRatio = autoBendingDesc._forwardBackwardRatio;
                 } break;
                 case MuscleMode_ManualBending: {
-                    auto const& manualBendingDesc = std::get<ManualBendingGenomeDescription>(muscleDesc._mode);
+                    auto const& manualBendingDesc = std::get<ManualBendingGenomeDesc>(muscleDesc._mode);
                     auto& manualBendingTO = muscleTO.modeData.manualBending;
                     manualBendingTO.maxAngleDeviation = manualBendingDesc._maxAngleDeviation;
                     manualBendingTO.forwardBackwardRatio = manualBendingDesc._forwardBackwardRatio;
                 } break;
                 case MuscleMode_AngleBending: {
-                    auto const& angleBendingDesc = std::get<AngleBendingGenomeDescription>(muscleDesc._mode);
+                    auto const& angleBendingDesc = std::get<AngleBendingGenomeDesc>(muscleDesc._mode);
                     auto& angleBendingTO = muscleTO.modeData.angleBending;
                     angleBendingTO.maxAngleDeviation = angleBendingDesc._maxAngleDeviation;
                     angleBendingTO.attractionRepulsionRatio = angleBendingDesc._attractionRepulsionRatio;
                 } break;
                 case MuscleMode_AutoCrawling: {
-                    auto const& autoCrawlingDesc = std::get<AutoCrawlingGenomeDescription>(muscleDesc._mode);
+                    auto const& autoCrawlingDesc = std::get<AutoCrawlingGenomeDesc>(muscleDesc._mode);
                     auto& autoCrawlingTO = muscleTO.modeData.autoCrawling;
                     autoCrawlingTO.maxDistanceDeviation = autoCrawlingDesc._maxDistanceDeviation;
                     autoCrawlingTO.forwardBackwardRatio = autoCrawlingDesc._forwardBackwardRatio;
                 } break;
                 case MuscleMode_ManualCrawling: {
-                    auto const& manualCrawlingDesc = std::get<ManualCrawlingGenomeDescription>(muscleDesc._mode);
+                    auto const& manualCrawlingDesc = std::get<ManualCrawlingGenomeDesc>(muscleDesc._mode);
                     auto& manualCrawlingTO = muscleTO.modeData.manualCrawling;
                     manualCrawlingTO.maxDistanceDeviation = manualCrawlingDesc._maxDistanceDeviation;
                     manualCrawlingTO.forwardBackwardRatio = manualCrawlingDesc._forwardBackwardRatio;
@@ -1071,22 +1071,22 @@ void DescriptionConverterService::convertGenomeToTO(
                 }
             } break;
             case CellTypeGenome_Defender: {
-                auto const& defenderDesc = std::get<DefenderGenomeDescription>(nodeDesc._cellType);
+                auto const& defenderDesc = std::get<DefenderGenomeDesc>(nodeDesc._cellType);
                 auto& defenderTO = nodeTO.cellTypeData.defender;
                 defenderTO.mode = defenderDesc._mode;
             } break;
             case CellTypeGenome_Reconnector: {
-                auto const& reconnectorDesc = std::get<ReconnectorGenomeDescription>(nodeDesc._cellType);
+                auto const& reconnectorDesc = std::get<ReconnectorGenomeDesc>(nodeDesc._cellType);
                 auto& reconnectorTO = nodeTO.cellTypeData.reconnector;
                 reconnectorTO.mode = reconnectorDesc.getMode();
                 if (reconnectorTO.mode == ReconnectorMode_Structure) {
                     // No data to copy
                 } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
-                    auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellGenomeDescription>(reconnectorDesc._mode);
+                    auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellGenomeDesc>(reconnectorDesc._mode);
                     auto& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
                     reconnectFreeCellTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
                 } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
-                    auto const& reconnectCreatureDesc = std::get<ReconnectCreatureGenomeDescription>(reconnectorDesc._mode);
+                    auto const& reconnectCreatureDesc = std::get<ReconnectCreatureGenomeDesc>(reconnectorDesc._mode);
                     auto& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
                     reconnectCreatureTO.minNumCells = static_cast<uint32_t>(reconnectCreatureDesc._minNumCells.value_or(0));
                     reconnectCreatureTO.maxNumCells = static_cast<uint32_t>(reconnectCreatureDesc._maxNumCells.value_or(0));
@@ -1095,31 +1095,31 @@ void DescriptionConverterService::convertGenomeToTO(
                 }
             } break;
             case CellTypeGenome_Detonator: {
-                auto const& detonatorDesc = std::get<DetonatorGenomeDescription>(nodeDesc._cellType);
+                auto const& detonatorDesc = std::get<DetonatorGenomeDesc>(nodeDesc._cellType);
                 auto& detonatorTO = nodeTO.cellTypeData.detonator;
                 detonatorTO.countdown = detonatorDesc._countdown;
             } break;
             case CellTypeGenome_Digestor: {
-                auto const& digestorDesc = std::get<DigestorGenomeDescription>(nodeDesc._cellType);
+                auto const& digestorDesc = std::get<DigestorGenomeDesc>(nodeDesc._cellType);
                 auto& digestorTO = nodeTO.cellTypeData.digestor;
                 digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
             } break;
             case CellTypeGenome_Memory: {
-                auto const& memoryDesc = std::get<MemoryGenomeDescription>(nodeDesc._cellType);
+                auto const& memoryDesc = std::get<MemoryGenomeDesc>(nodeDesc._cellType);
                 auto& memoryTO = nodeTO.cellTypeData.memory;
                 memoryTO.mode = memoryDesc.getMode();
                 if (memoryTO.mode == MemoryMode_SignalDelay) {
-                    auto const& signalDelayDesc = std::get<SignalDelayGenomeDescription>(memoryDesc._mode);
+                    auto const& signalDelayDesc = std::get<SignalDelayGenomeDesc>(memoryDesc._mode);
                     memoryTO.modeData.signalDelay.delay = signalDelayDesc._delay;
                 } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
-                    auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDescription>(memoryDesc._mode);
+                    auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDesc>(memoryDesc._mode);
                     memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
                     memoryTO.modeData.signalRecorder.numWrittenSignalEntries = signalRecorderDesc._numWrittenSignalEntries;
                 } else if (memoryTO.mode == MemoryMode_SignalStorage) {
-                    auto const& signalStorageDesc = std::get<SignalStorageGenomeDescription>(memoryDesc._mode);
+                    auto const& signalStorageDesc = std::get<SignalStorageGenomeDesc>(memoryDesc._mode);
                     memoryTO.modeData.signalStorage.readOnly = signalStorageDesc._readOnly;
                 } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
-                    auto const& signalIntegratorDesc = std::get<SignalIntegratorGenomeDescription>(memoryDesc._mode);
+                    auto const& signalIntegratorDesc = std::get<SignalIntegratorGenomeDesc>(memoryDesc._mode);
                     memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
                 }
                 memoryTO.channelBitMask = memoryDesc._channelBitMask;
@@ -1130,15 +1130,15 @@ void DescriptionConverterService::convertGenomeToTO(
                 copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
             } break;
             case CellTypeGenome_Communicator: {
-                auto const& communicatorDesc = std::get<CommunicatorGenomeDescription>(nodeDesc._cellType);
+                auto const& communicatorDesc = std::get<CommunicatorGenomeDesc>(nodeDesc._cellType);
                 auto& communicatorTO = nodeTO.cellTypeData.communicator;
                 communicatorTO.mode = communicatorDesc.getMode();
                 if (communicatorTO.mode == CommunicatorMode_Sender) {
-                    auto const& senderDesc = std::get<SenderGenomeDescription>(communicatorDesc._mode);
+                    auto const& senderDesc = std::get<SenderGenomeDesc>(communicatorDesc._mode);
                     communicatorTO.modeData.sender.range = senderDesc._range;
                     communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
                 } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
-                    auto const& receiverDesc = std::get<ReceiverGenomeDescription>(communicatorDesc._mode);
+                    auto const& receiverDesc = std::get<ReceiverGenomeDesc>(communicatorDesc._mode);
                     communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
                     communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
                 }
@@ -1150,7 +1150,7 @@ void DescriptionConverterService::convertGenomeToTO(
 
 void DescriptionConverterService::convertCreatureToTO(
     std::vector<CreatureTO>& creatureTOs,
-    CreatureDescription const& creatureDesc,
+    CreatureDesc const& creatureDesc,
     std::unordered_map<uint64_t, uint64_t> const& genomeTOIndexById,
     std::unordered_map<uint64_t, uint64_t>& creatureTOIndexById) const
 {
@@ -1183,7 +1183,7 @@ void DescriptionConverterService::convertObjectToTO(
     std::vector<ObjectTO>& objectTOs,
     std::vector<uint8_t>& heap,
     std::unordered_map<uint64_t, uint64_t>& objectTOIndexById,
-    ObjectDescription const& objectDesc,
+    ObjectDesc const& objectDesc,
     std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const
 {
     auto objectIndex = objectTOs.size();
@@ -1207,13 +1207,13 @@ void DescriptionConverterService::convertObjectToTO(
     // Handle Structure and FreeCell object types
     if (objectTO.type == ObjectType_Structure) {
     } else if (objectTO.type == ObjectType_FreeCell) {
-        FreeCellDescription const& freeCellDesc = objectDesc.getFreeCellRef();
+        FreeCellDesc const& freeCellDesc = objectDesc.getFreeCellRef();
         objectTO.typeData.freeCell.rawEnergy = freeCellDesc._rawEnergy;
         objectTO.typeData.freeCell.age = freeCellDesc._age;
     } else if (objectTO.type == ObjectType_Cell) {
 
         // ObjectType_Cell - access cell data
-        CellDescription const& cellDesc = objectDesc.getCellRef();
+        CellDesc const& cellDesc = objectDesc.getCellRef();
 
         objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(cellDesc._creatureId.value());
         objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
@@ -1242,13 +1242,13 @@ void DescriptionConverterService::convertObjectToTO(
             objectTO.typeData.cell.cellTypeData.base = baseTO;
         } break;
         case CellType_Depot: {
-            auto const& depotDesc = std::get<DepotDescription>(cellDesc._cellType);
+            auto const& depotDesc = std::get<DepotDesc>(cellDesc._cellType);
             DepotTO& depotTO = objectTO.typeData.cell.cellTypeData.depot;
             depotTO.storageLimit = depotDesc._storageLimit;
             depotTO.storedUsableEnergy = depotDesc._storedUsableEnergy;
         } break;
         case CellType_Constructor: {
-            auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc._cellType);
+            auto const& constructorDesc = std::get<ConstructorDesc>(cellDesc._cellType);
             ConstructorTO& constructorTO = objectTO.typeData.cell.cellTypeData.constructor;
             constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
             constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
@@ -1261,7 +1261,7 @@ void DescriptionConverterService::convertObjectToTO(
             constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
         } break;
         case CellType_Sensor: {
-            auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellType);
+            auto const& sensorDesc = std::get<SensorDesc>(cellDesc._cellType);
             SensorTO& sensorTO = objectTO.typeData.cell.cellTypeData.sensor;
             sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
             sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
@@ -1269,20 +1269,20 @@ void DescriptionConverterService::convertObjectToTO(
             sensorTO.mode = sensorDesc.getMode();
 
             if (sensorTO.mode == SensorMode_Telemetry) {
-                //auto const& telemetryDesc = std::get<TelemetryDescription>(sensorDesc._mode);
+                //auto const& telemetryDesc = std::get<TelemetryDesc>(sensorDesc._mode);
                 //TelemetryTO& telemetryTO = sensorTO.modeData.telemetry;
             } else if (sensorTO.mode == SensorMode_DetectEnergy) {
-                auto const& detectEnergyDesc = std::get<DetectEnergyDescription>(sensorDesc._mode);
+                auto const& detectEnergyDesc = std::get<DetectEnergyDesc>(sensorDesc._mode);
                 DetectEnergyTO& detectEnergyTO = sensorTO.modeData.detectEnergy;
                 detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
             } else if (sensorTO.mode == SensorMode_DetectStructure) {
             } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
-                auto const& detectFreeCellDesc = std::get<DetectFreeCellDescription>(sensorDesc._mode);
+                auto const& detectFreeCellDesc = std::get<DetectFreeCellDesc>(sensorDesc._mode);
                 DetectFreeCellTO& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
                 detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
                 detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
             } else if (sensorTO.mode == SensorMode_DetectCreature) {
-                auto const& detectCreatureDesc = std::get<DetectCreatureDescription>(sensorDesc._mode);
+                auto const& detectCreatureDesc = std::get<DetectCreatureDesc>(sensorDesc._mode);
                 DetectCreatureTO& detectCreatureTO = sensorTO.modeData.detectCreature;
                 detectCreatureTO.minNumCells = static_cast<uint32_t>(detectCreatureDesc._minNumCells.value_or(0));
                 detectCreatureTO.maxNumCells = static_cast<uint32_t>(detectCreatureDesc._maxNumCells.value_or(0));
@@ -1296,7 +1296,7 @@ void DescriptionConverterService::convertObjectToTO(
             }
         } break;
         case CellType_Generator: {
-            auto const& generatorDesc = std::get<GeneratorDescription>(cellDesc._cellType);
+            auto const& generatorDesc = std::get<GeneratorDesc>(cellDesc._cellType);
             GeneratorTO& generatorTO = objectTO.typeData.cell.cellTypeData.generator;
             generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
             generatorTO.pulseType = generatorDesc._pulseType;
@@ -1304,14 +1304,14 @@ void DescriptionConverterService::convertObjectToTO(
             generatorTO.numPulses = generatorDesc._numPulses;
         } break;
         case CellType_Attacker: {
-            auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellType);
+            auto const& attackerDesc = std::get<AttackerDesc>(cellDesc._cellType);
             AttackerTO& attackerTO = objectTO.typeData.cell.cellTypeData.attacker;
             attackerTO.mode = attackerDesc.getMode();
             if (attackerTO.mode == AttackerMode_FreeCell) {
-                auto const& attackFreeCellDesc = std::get<AttackFreeCellDescription>(attackerDesc._mode);
+                auto const& attackFreeCellDesc = std::get<AttackFreeCellDesc>(attackerDesc._mode);
                 attackerTO.modeData.attackFreeCell.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
             } else if (attackerTO.mode == AttackerMode_Creature) {
-                auto const& attackCreatureDesc = std::get<AttackCreatureDescription>(attackerDesc._mode);
+                auto const& attackCreatureDesc = std::get<AttackCreatureDesc>(attackerDesc._mode);
                 attackerTO.modeData.attackCreature.minNumCells = static_cast<uint32_t>(attackCreatureDesc._minNumCells.value_or(0));
                 attackerTO.modeData.attackCreature.maxNumCells = static_cast<uint32_t>(attackCreatureDesc._maxNumCells.value_or(0));
                 attackerTO.modeData.attackCreature.restrictToColor = static_cast<uint8_t>(attackCreatureDesc._restrictToColor.value_or(255));
@@ -1319,16 +1319,16 @@ void DescriptionConverterService::convertObjectToTO(
             }
         } break;
         case CellType_Injector: {
-            auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellType);
+            auto const& injectorDesc = std::get<InjectorDesc>(cellDesc._cellType);
             InjectorTO& injectorTO = objectTO.typeData.cell.cellTypeData.injector;
             injectorTO.geneIndex = static_cast<uint16_t>(injectorDesc._geneIndex);
         } break;
         case CellType_Muscle: {
-            auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellType);
+            auto const& muscleDesc = std::get<MuscleDesc>(cellDesc._cellType);
             MuscleTO& muscleTO = objectTO.typeData.cell.cellTypeData.muscle;
             muscleTO.mode = muscleDesc.getMode();
             if (muscleTO.mode == MuscleMode_AutoBending) {
-                auto const& bendingDesc = std::get<AutoBendingDescription>(muscleDesc._mode);
+                auto const& bendingDesc = std::get<AutoBendingDesc>(muscleDesc._mode);
                 AutoBendingTO& bendingTO = muscleTO.modeData.autoBending;
                 bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
                 bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
@@ -1338,7 +1338,7 @@ void DescriptionConverterService::convertObjectToTO(
                 bendingTO.activationCountdown = bendingDesc._activationCountdown;
                 bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_ManualBending) {
-                auto const& bendingDesc = std::get<ManualBendingDescription>(muscleDesc._mode);
+                auto const& bendingDesc = std::get<ManualBendingDesc>(muscleDesc._mode);
                 ManualBendingTO& bendingTO = muscleTO.modeData.manualBending;
                 bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
                 bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
@@ -1346,13 +1346,13 @@ void DescriptionConverterService::convertObjectToTO(
                 bendingTO.lastAngleDelta = bendingDesc._lastAngleDelta;
                 bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_AngleBending) {
-                auto const& bendingDesc = std::get<AngleBendingDescription>(muscleDesc._mode);
+                auto const& bendingDesc = std::get<AngleBendingDesc>(muscleDesc._mode);
                 AngleBendingTO& bendingTO = muscleTO.modeData.angleBending;
                 bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
                 bendingTO.attractionRepulsionRatio = bendingDesc._attractionRepulsionRatio;
                 bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
             } else if (muscleTO.mode == MuscleMode_AutoCrawling) {
-                auto const& crawlingDesc = std::get<AutoCrawlingDescription>(muscleDesc._mode);
+                auto const& crawlingDesc = std::get<AutoCrawlingDesc>(muscleDesc._mode);
                 AutoCrawlingTO& crawlingTO = muscleTO.modeData.autoCrawling;
                 crawlingTO.maxDistanceDeviation = crawlingDesc._maxDistanceDeviation;
                 crawlingTO.forwardBackwardRatio = crawlingDesc._forwardBackwardRatio;
@@ -1363,7 +1363,7 @@ void DescriptionConverterService::convertObjectToTO(
                 crawlingTO.activationCountdown = crawlingDesc._activationCountdown;
                 crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_ManualCrawling) {
-                auto const& crawlingDesc = std::get<ManualCrawlingDescription>(muscleDesc._mode);
+                auto const& crawlingDesc = std::get<ManualCrawlingDesc>(muscleDesc._mode);
                 ManualCrawlingTO& crawlingTO = muscleTO.modeData.manualCrawling;
                 crawlingTO.maxDistanceDeviation = crawlingDesc._maxDistanceDeviation;
                 crawlingTO.forwardBackwardRatio = crawlingDesc._forwardBackwardRatio;
@@ -1377,22 +1377,22 @@ void DescriptionConverterService::convertObjectToTO(
             muscleTO.lastMovementY = muscleDesc._lastMovementY;
         } break;
         case CellType_Defender: {
-            auto const& defenderDesc = std::get<DefenderDescription>(cellDesc._cellType);
+            auto const& defenderDesc = std::get<DefenderDesc>(cellDesc._cellType);
             DefenderTO& defenderTO = objectTO.typeData.cell.cellTypeData.defender;
             defenderTO.mode = defenderDesc._mode;
         } break;
         case CellType_Reconnector: {
-            auto const& reconnectorDesc = std::get<ReconnectorDescription>(cellDesc._cellType);
+            auto const& reconnectorDesc = std::get<ReconnectorDesc>(cellDesc._cellType);
             ReconnectorTO& reconnectorTO = objectTO.typeData.cell.cellTypeData.reconnector;
             reconnectorTO.mode = reconnectorDesc.getMode();
             if (reconnectorTO.mode == ReconnectorMode_Structure) {
                 // No data to copy
             } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
-                auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellDescription>(reconnectorDesc._mode);
+                auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellDesc>(reconnectorDesc._mode);
                 ReconnectFreeCellTO& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
                 reconnectFreeCellTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
             } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
-                auto const& reconnectCreatureDesc = std::get<ReconnectCreatureDescription>(reconnectorDesc._mode);
+                auto const& reconnectCreatureDesc = std::get<ReconnectCreatureDesc>(reconnectorDesc._mode);
                 ReconnectCreatureTO& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
                 reconnectCreatureTO.minNumCells = static_cast<uint32_t>(reconnectCreatureDesc._minNumCells.value_or(0));
                 reconnectCreatureTO.maxNumCells = static_cast<uint32_t>(reconnectCreatureDesc._maxNumCells.value_or(0));
@@ -1401,36 +1401,36 @@ void DescriptionConverterService::convertObjectToTO(
             }
         } break;
         case CellType_Detonator: {
-            auto const& detonatorDesc = std::get<DetonatorDescription>(cellDesc._cellType);
+            auto const& detonatorDesc = std::get<DetonatorDesc>(cellDesc._cellType);
             DetonatorTO& detonatorTO = objectTO.typeData.cell.cellTypeData.detonator;
             detonatorTO.state = detonatorDesc._state;
             detonatorTO.countdown = detonatorDesc._countdown;
         } break;
         case CellType_Digestor: {
-            auto const& digestorDesc = std::get<DigestorDescription>(cellDesc._cellType);
+            auto const& digestorDesc = std::get<DigestorDesc>(cellDesc._cellType);
             DigestorTO& digestorTO = objectTO.typeData.cell.cellTypeData.digestor;
             digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
         } break;
         case CellType_Memory: {
-            auto const& memoryDesc = std::get<MemoryDescription>(cellDesc._cellType);
+            auto const& memoryDesc = std::get<MemoryDesc>(cellDesc._cellType);
             auto& memoryTO = objectTO.typeData.cell.cellTypeData.memory;
             memoryTO.mode = memoryDesc.getMode();
             if (memoryTO.mode == MemoryMode_SignalDelay) {
-                auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
+                auto const& signalDelayDesc = std::get<SignalDelayDesc>(memoryDesc._mode);
                 memoryTO.modeData.signalDelay.delay = signalDelayDesc._delay;
                 memoryTO.modeData.signalDelay.numSignalEntriesInitialized = signalDelayDesc._numSignalEntriesInitialized;
                 memoryTO.modeData.signalDelay.ringBufferIndex = signalDelayDesc._ringBufferIndex;
             } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
-                auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
+                auto const& signalRecorderDesc = std::get<SignalRecorderDesc>(memoryDesc._mode);
                 memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
                 memoryTO.modeData.signalRecorder.state = signalRecorderDesc._state;
                 memoryTO.modeData.signalRecorder.numWrittenSignalEntries = signalRecorderDesc._numWrittenSignalEntries;
                 memoryTO.modeData.signalRecorder.numReadSignalEntries = signalRecorderDesc._numReadSignalEntries;
             } else if (memoryTO.mode == MemoryMode_SignalStorage) {
-                auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
+                auto const& signalStorageDesc = std::get<SignalStorageDesc>(memoryDesc._mode);
                 memoryTO.modeData.signalStorage.readOnly = signalStorageDesc._readOnly;
             } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
-                auto const& signalIntegratorDesc = std::get<SignalIntegratorDescription>(memoryDesc._mode);
+                auto const& signalIntegratorDesc = std::get<SignalIntegratorDesc>(memoryDesc._mode);
                 memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
             }
             memoryTO.channelBitMask = memoryDesc._channelBitMask;
@@ -1441,15 +1441,15 @@ void DescriptionConverterService::convertObjectToTO(
             copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
         } break;
         case CellType_Communicator: {
-            auto const& communicatorDesc = std::get<CommunicatorDescription>(cellDesc._cellType);
+            auto const& communicatorDesc = std::get<CommunicatorDesc>(cellDesc._cellType);
             CommunicatorTO& communicatorTO = objectTO.typeData.cell.cellTypeData.communicator;
             communicatorTO.mode = communicatorDesc.getMode();
             if (communicatorTO.mode == CommunicatorMode_Sender) {
-                auto const& senderDesc = std::get<SenderDescription>(communicatorDesc._mode);
+                auto const& senderDesc = std::get<SenderDesc>(communicatorDesc._mode);
                 communicatorTO.modeData.sender.range = senderDesc._range;
                 communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
-                auto const& receiverDesc = std::get<ReceiverDescription>(communicatorDesc._mode);
+                auto const& receiverDesc = std::get<ReceiverDesc>(communicatorDesc._mode);
                 communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
                 communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
             }
@@ -1470,7 +1470,7 @@ void DescriptionConverterService::convertObjectToTO(
     }
 }
 
-void DescriptionConverterService::addParticle(std::vector<EnergyTO>& particleTOs, EnergyDescription const& particleDesc) const
+void DescriptionConverterService::addParticle(std::vector<EnergyTO>& particleTOs, EnergyDesc const& particleDesc) const
 {
     auto& particleTO = particleTOs.emplace_back();
 
@@ -1484,13 +1484,13 @@ void DescriptionConverterService::addParticle(std::vector<EnergyTO>& particleTOs
 
 void DescriptionConverterService::setConnections(
     std::vector<ObjectTO>& objectTOs,
-    ObjectDescription const& cellToAdd,
+    ObjectDesc const& cellToAdd,
     std::unordered_map<uint64_t, uint64_t> const& objectIndexByIds) const
 {
     int index = 0;
     auto& objectTO = objectTOs.at(objectIndexByIds.at(cellToAdd._id));
     float angleOffset = 0;
-    for (ConnectionDescription const& connection : cellToAdd._connections) {
+    for (ConnectionDesc const& connection : cellToAdd._connections) {
         objectTO.connections[index].objectIndex = objectIndexByIds.at(connection._objectId);
         objectTO.connections[index].distance = connection._distance;
         objectTO.connections[index].angleFromPrevious = connection._angleFromPrevious + angleOffset;

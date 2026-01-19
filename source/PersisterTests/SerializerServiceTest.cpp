@@ -14,7 +14,7 @@ public:
         _serializerService = &SerializerService::get();
     }
 
-    void testSerializationAndDeserialization(Description const& data)
+    void testSerializationAndDeserialization(Desc const& data)
     {
         DeserializedSimulation deserializedSimulationBefore{.mainData = data};
         SerializedSimulation serializedSimulation;
@@ -33,8 +33,8 @@ protected:
 
 TEST_F(SerializerServiceTests, singleEnergyParticle)
 {
-    Description data;
-    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
+    Desc data;
+    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDesc());
 
     testSerializationAndDeserialization(data);
 }
@@ -54,11 +54,11 @@ TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
 {
     auto objectParameter = GetParam();
 
-    Description data;
+    Desc data;
     if (objectParameter.objectType == ObjectType_Cell) {
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
-        data.objects({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)});
+        data.objects({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
     }
 
 
@@ -80,9 +80,9 @@ TEST_P(SerializerServiceTests_AllNodeTypes, objectWithNonEmptyGenome)
 {
     auto nodeParameter = GetParam();
 
-    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
-    auto data = Description().addCreature({ObjectDescription()}, creature, genome);
+    auto data = Desc().addCreature({ObjectDesc()}, creature, genome);
 
     testSerializationAndDeserialization(data);
 }

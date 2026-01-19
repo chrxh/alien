@@ -25,10 +25,10 @@ namespace
     }
 }
 
-ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription(
-    GenomeDescription const& genome,
+ConversionResult PreviewDescConverterService::convertToPreviewDesc(
+    GenomeDesc const& genome,
     int startGeneIndex,
-    Description&& phenotype,
+    Desc&& phenotype,
     std::optional<float> const& lastVisualFrontAngle) const
 {
     ConversionResult result;
@@ -59,13 +59,13 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     }
     CHECK(!cellIdsOnStartGene.empty());
     auto firstCell = phenotype.getObjectRef(getFirstElement(cellIdsOnStartGene));
-    std::optional<ObjectDescription> secondCell;
+    std::optional<ObjectDesc> secondCell;
     if (cellIdsOnStartGene.size() > 1) {
         secondCell = phenotype.getObjectRef(getSecondElement(cellIdsOnStartGene));
     } else {
         // Only 1 cell with start gene? => try cells of referenced gene
         if (firstCell.getCellRef().getCellType() == CellType_Constructor) {
-            auto refGeneIndex = std::get<ConstructorDescription>(firstCell.getCellRef()._cellType)._geneIndex;
+            auto refGeneIndex = std::get<ConstructorDesc>(firstCell.getCellRef()._cellType)._geneIndex;
             for (auto const& object : phenotype._objects) {
                 if (object.getCellRef()._geneIndex != refGeneIndex || object._id == firstCell._id) {
                     continue;
@@ -85,11 +85,11 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     }
 
     // Create preview cells
-    auto getNode = [&](ObjectDescription const& object) -> NodeDescription const& { return genome._genes.at(object.getCellRef()._geneIndex)._nodes.at(object.getCellRef()._nodeIndex); };
+    auto getNode = [&](ObjectDesc const& object) -> NodeDesc const& { return genome._genes.at(object.getCellRef()._geneIndex)._nodes.at(object.getCellRef()._nodeIndex); };
     for (auto const& object : phenotype._objects) {
         auto const& node = getNode(object);
         auto const& color = object.getCellRef()._cellState == CellState_Ready ? node._color : -1;
-        auto previewCell = CellPreviewDescription()
+        auto previewCell = CellPreviewDesc()
                                .id(object._id)
                                .pos(object._pos)
                                .color(color)
@@ -107,14 +107,14 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             auto baseAngle = Math::angleOfVector(otherObject._pos - object._pos) + 180.0f + node._signalRestriction._baseAngle;
             auto signalAngleRestrictionStart = Math::getNormalizedAngle(baseAngle - node._signalRestriction._openingAngle / 2, 0);
             auto signalAngleRestrictionEnd = Math::getNormalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
-            previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
+            previewCell._signalRestriction = SignalRestrictionPreviewDesc().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
         }
         if (object.getCellRef()._signalState == SignalState_Active) {
-            previewCell._signal = SignalPreviewDescription().channels(object.getCellRef()._signal._channels);
+            previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
         }
         if (object.getCellRef().getCellType() == CellType_Constructor) {
             if (!genome._genes.empty()) {
-                auto nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellType);
+                auto nodeConstructor = std::get<ConstructorGenomeDesc>(node._cellType);
                 previewCell._constructorGeneIndex = nodeConstructor._geneIndex;
             }
         }
@@ -165,7 +165,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
 
             bool arrowToObject1 = arrowFromCell1ToCell2.contains({objectId2, objectId1});
             bool arrowToObject2 = arrowFromCell1ToCell2.contains({objectId1, objectId2});
-            auto previewConnection = ConnectionPreviewDescription()
+            auto previewConnection = ConnectionPreviewDesc()
                                          .object1(phenotype.getObjectRef(objectId1, cache)._pos)
                                          .object2(phenotype.getObjectRef(objectId2, cache)._pos)
                                          .arrowToObject1(arrowToObject1)

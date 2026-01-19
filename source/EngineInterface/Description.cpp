@@ -7,7 +7,7 @@
 
 #include "NumberGenerator.h"
 
-NeuralNetworkDescription::NeuralNetworkDescription()
+NeuralNetworkDesc::NeuralNetworkDesc()
 {
     _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
     _biases.resize(MAX_CHANNELS, 0);
@@ -17,152 +17,152 @@ NeuralNetworkDescription::NeuralNetworkDescription()
     }
 }
 
-NeuralNetworkDescription& NeuralNetworkDescription::weight(int row, int col, float value)
+NeuralNetworkDesc& NeuralNetworkDesc::weight(int row, int col, float value)
 {
     _weights[row * MAX_CHANNELS + col] = value;
     return *this;
 }
 
-SignalDescription::SignalDescription()
+SignalDesc::SignalDesc()
 {
     _channels.resize(MAX_CHANNELS, 0);
 }
 
-SensorMode SensorDescription::getMode() const
+SensorMode SensorDesc::getMode() const
 {
-    if (std::holds_alternative<TelemetryDescription>(_mode)) {
+    if (std::holds_alternative<TelemetryDesc>(_mode)) {
         return SensorMode_Telemetry;
-    } else if (std::holds_alternative<DetectEnergyDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectEnergyDesc>(_mode)) {
         return SensorMode_DetectEnergy;
-    } else if (std::holds_alternative<DetectStructureDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectStructureDesc>(_mode)) {
         return SensorMode_DetectStructure;
-    } else if (std::holds_alternative<DetectFreeCellDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectFreeCellDesc>(_mode)) {
         return SensorMode_DetectFreeCell;
-    } else if (std::holds_alternative<DetectCreatureDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectCreatureDesc>(_mode)) {
         return SensorMode_DetectCreature;
     }
     THROW_NOT_IMPLEMENTED();
 }
 
-MuscleMode MuscleDescription::getMode() const
+MuscleMode MuscleDesc::getMode() const
 {
-    if (std::holds_alternative<AutoBendingDescription>(_mode)) {
+    if (std::holds_alternative<AutoBendingDesc>(_mode)) {
         return MuscleMode_AutoBending;
-    } else if (std::holds_alternative<ManualBendingDescription>(_mode)) {
+    } else if (std::holds_alternative<ManualBendingDesc>(_mode)) {
         return MuscleMode_ManualBending;
-    } else if (std::holds_alternative<AngleBendingDescription>(_mode)) {
+    } else if (std::holds_alternative<AngleBendingDesc>(_mode)) {
         return MuscleMode_AngleBending;
-    } else if (std::holds_alternative<AutoCrawlingDescription>(_mode)) {
+    } else if (std::holds_alternative<AutoCrawlingDesc>(_mode)) {
         return MuscleMode_AutoCrawling;
-    } else if (std::holds_alternative<ManualCrawlingDescription>(_mode)) {
+    } else if (std::holds_alternative<ManualCrawlingDesc>(_mode)) {
         return MuscleMode_ManualCrawling;
-    } else if (std::holds_alternative<DirectMovementDescription>(_mode)) {
+    } else if (std::holds_alternative<DirectMovementDesc>(_mode)) {
         return MuscleMode_DirectMovement;
     }
     THROW_NOT_IMPLEMENTED();
 }
 
-ReconnectorMode ReconnectorDescription::getMode() const
+ReconnectorMode ReconnectorDesc::getMode() const
 {
-    if (std::holds_alternative<ReconnectStructureDescription>(_mode)) {
+    if (std::holds_alternative<ReconnectStructureDesc>(_mode)) {
         return ReconnectorMode_Structure;
-    } else if (std::holds_alternative<ReconnectFreeCellDescription>(_mode)) {
+    } else if (std::holds_alternative<ReconnectFreeCellDesc>(_mode)) {
         return ReconnectorMode_FreeCell;
-    } else if (std::holds_alternative<ReconnectCreatureDescription>(_mode)) {
+    } else if (std::holds_alternative<ReconnectCreatureDesc>(_mode)) {
         return ReconnectorMode_Creature;
     }
     THROW_NOT_IMPLEMENTED();
 }
 
-SignalEntryDescription::SignalEntryDescription()
+SignalEntryDesc::SignalEntryDesc()
 {
     _channels.resize(MAX_CHANNELS, 0);
 }
 
-AttackerMode AttackerDescription::getMode() const
+AttackerMode AttackerDesc::getMode() const
 {
-    if (std::holds_alternative<AttackFreeCellDescription>(_mode)) {
+    if (std::holds_alternative<AttackFreeCellDesc>(_mode)) {
         return AttackerMode_FreeCell;
-    } else if (std::holds_alternative<AttackCreatureDescription>(_mode)) {
+    } else if (std::holds_alternative<AttackCreatureDesc>(_mode)) {
         return AttackerMode_Creature;
     }
     THROW_NOT_IMPLEMENTED();
 }
 
-MemoryMode MemoryDescription::getMode() const
+MemoryMode MemoryDesc::getMode() const
 {
-    if (std::holds_alternative<SignalDelayDescription>(_mode)) {
+    if (std::holds_alternative<SignalDelayDesc>(_mode)) {
         return MemoryMode_SignalDelay;
-    } else if (std::holds_alternative<SignalRecorderDescription>(_mode)) {
+    } else if (std::holds_alternative<SignalRecorderDesc>(_mode)) {
         return MemoryMode_SignalRecorder;
-    } else if (std::holds_alternative<SignalStorageDescription>(_mode)) {
+    } else if (std::holds_alternative<SignalStorageDesc>(_mode)) {
         return MemoryMode_SignalStorage;
-    } else if (std::holds_alternative<SignalIntegratorDescription>(_mode)) {
+    } else if (std::holds_alternative<SignalIntegratorDesc>(_mode)) {
         return MemoryMode_SignalIntegrator;
     }
     THROW_NOT_IMPLEMENTED();
 }
 
-CommunicatorMode CommunicatorDescription::getMode() const
+CommunicatorMode CommunicatorDesc::getMode() const
 {
-    if (std::holds_alternative<SenderDescription>(_mode)) {
+    if (std::holds_alternative<SenderDesc>(_mode)) {
         return CommunicatorMode_Sender;
-    } else if (std::holds_alternative<ReceiverDescription>(_mode)) {
+    } else if (std::holds_alternative<ReceiverDesc>(_mode)) {
         return CommunicatorMode_Receiver;
     }
     THROW_NOT_IMPLEMENTED();
 }
 
-InjectorDescription::InjectorDescription() {}
+InjectorDesc::InjectorDesc() {}
 
-CellType CellDescription::getCellType() const
+CellType CellDesc::getCellType() const
 {
-    if (std::holds_alternative<BaseDescription>(_cellType)) {
+    if (std::holds_alternative<BaseDesc>(_cellType)) {
         return CellType_Base;
-    } else if (std::holds_alternative<DepotDescription>(_cellType)) {
+    } else if (std::holds_alternative<DepotDesc>(_cellType)) {
         return CellType_Depot;
-    } else if (std::holds_alternative<ConstructorDescription>(_cellType)) {
+    } else if (std::holds_alternative<ConstructorDesc>(_cellType)) {
         return CellType_Constructor;
-    } else if (std::holds_alternative<SensorDescription>(_cellType)) {
+    } else if (std::holds_alternative<SensorDesc>(_cellType)) {
         return CellType_Sensor;
-    } else if (std::holds_alternative<GeneratorDescription>(_cellType)) {
+    } else if (std::holds_alternative<GeneratorDesc>(_cellType)) {
         return CellType_Generator;
-    } else if (std::holds_alternative<AttackerDescription>(_cellType)) {
+    } else if (std::holds_alternative<AttackerDesc>(_cellType)) {
         return CellType_Attacker;
-    } else if (std::holds_alternative<InjectorDescription>(_cellType)) {
+    } else if (std::holds_alternative<InjectorDesc>(_cellType)) {
         return CellType_Injector;
-    } else if (std::holds_alternative<MuscleDescription>(_cellType)) {
+    } else if (std::holds_alternative<MuscleDesc>(_cellType)) {
         return CellType_Muscle;
-    } else if (std::holds_alternative<DefenderDescription>(_cellType)) {
+    } else if (std::holds_alternative<DefenderDesc>(_cellType)) {
         return CellType_Defender;
-    } else if (std::holds_alternative<ReconnectorDescription>(_cellType)) {
+    } else if (std::holds_alternative<ReconnectorDesc>(_cellType)) {
         return CellType_Reconnector;
-    } else if (std::holds_alternative<DetonatorDescription>(_cellType)) {
+    } else if (std::holds_alternative<DetonatorDesc>(_cellType)) {
         return CellType_Detonator;
-    } else if (std::holds_alternative<DigestorDescription>(_cellType)) {
+    } else if (std::holds_alternative<DigestorDesc>(_cellType)) {
         return CellType_Digestor;
-    } else if (std::holds_alternative<MemoryDescription>(_cellType)) {
+    } else if (std::holds_alternative<MemoryDesc>(_cellType)) {
         return CellType_Memory;
-    } else if (std::holds_alternative<CommunicatorDescription>(_cellType)) {
+    } else if (std::holds_alternative<CommunicatorDesc>(_cellType)) {
         return CellType_Communicator;
     }
     CHECK(false);
 }
 
-CellDescription& CellDescription::signalAndState(std::vector<float> const& value)
+CellDesc& CellDesc::signalAndState(std::vector<float> const& value)
 {
     CHECK(value.size() == MAX_CHANNELS);
 
-    SignalDescription newSignal;
+    SignalDesc newSignal;
     newSignal._channels = value;
     _signal = newSignal;
     _signalState = SignalState_Active;
     return *this;
 }
 
-CellDescription& CellDescription::signalRestriction(float baseAngle, float openingAngle)
+CellDesc& CellDesc::signalRestriction(float baseAngle, float openingAngle)
 {
-    SignalRestrictionDescription routingRestriction;
+    SignalRestrictionDesc routingRestriction;
     routingRestriction._mode = SignalRestrictionMode_Active;
     routingRestriction._baseAngle = baseAngle;
     routingRestriction._openingAngle = openingAngle;
@@ -170,58 +170,58 @@ CellDescription& CellDescription::signalRestriction(float baseAngle, float openi
     return *this;
 }
 
-ObjectDescription::ObjectDescription(bool createIds)
+ObjectDesc::ObjectDesc(bool createIds)
 {
     if (createIds) {
         _id = NumberGenerator::get().createId();
     }
 }
 
-ObjectDescription ObjectDescription::id(uint64_t id)
+ObjectDesc ObjectDesc::id(uint64_t id)
 {
     NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
 
-ObjectType ObjectDescription::getObjectType() const
+ObjectType ObjectDesc::getObjectType() const
 {
-    if (std::holds_alternative<StructureDescription>(_type)) {
+    if (std::holds_alternative<StructureDesc>(_type)) {
         return ObjectType_Structure;
-    } else if (std::holds_alternative<FreeCellDescription>(_type)) {
+    } else if (std::holds_alternative<FreeCellDesc>(_type)) {
         return ObjectType_FreeCell;
-    } else if (std::holds_alternative<CellDescription>(_type)) {
+    } else if (std::holds_alternative<CellDesc>(_type)) {
         return ObjectType_Cell;
     }
     CHECK(false);
 }
 
-FreeCellDescription& ObjectDescription::getFreeCellRef()
+FreeCellDesc& ObjectDesc::getFreeCellRef()
 {
-    return std::get<FreeCellDescription>(_type);
+    return std::get<FreeCellDesc>(_type);
 }
 
-FreeCellDescription const& ObjectDescription::getFreeCellRef() const
+FreeCellDesc const& ObjectDesc::getFreeCellRef() const
 {
-    return std::get<FreeCellDescription>(_type);
+    return std::get<FreeCellDesc>(_type);
 }
 
-CellDescription& ObjectDescription::getCellRef()
+CellDesc& ObjectDesc::getCellRef()
 {
-    return std::get<CellDescription>(_type);
+    return std::get<CellDesc>(_type);
 }
 
-CellDescription const& ObjectDescription::getCellRef() const
+CellDesc const& ObjectDesc::getCellRef() const
 {
-    return std::get<CellDescription>(_type);
+    return std::get<CellDesc>(_type);
 }
 
-bool ObjectDescription::isConnectedTo(uint64_t id) const
+bool ObjectDesc::isConnectedTo(uint64_t id) const
 {
     return std::find_if(_connections.begin(), _connections.end(), [&id](auto const& connection) { return connection._objectId == id; }) != _connections.end();
 }
 
-float ObjectDescription::getAngleSpan(uint64_t connectedObjectId1, uint64_t connectedObjectId2) const
+float ObjectDesc::getAngleSpan(uint64_t connectedObjectId1, uint64_t connectedObjectId2) const
 {
     std::optional<float> result;
     auto numConnections = _connections.size();
@@ -240,31 +240,31 @@ float ObjectDescription::getAngleSpan(uint64_t connectedObjectId1, uint64_t conn
     CHECK(false);
 }
 
-EnergyDescription::EnergyDescription()
+EnergyDesc::EnergyDesc()
 {
     _id = NumberGenerator::get().createId();
 }
 
-EnergyDescription EnergyDescription::id(uint64_t id)
+EnergyDesc EnergyDesc::id(uint64_t id)
 {
     NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
 
-CreatureDescription::CreatureDescription()
+CreatureDesc::CreatureDesc()
 {
     _id = NumberGenerator::get().createId();
 }
 
-CreatureDescription CreatureDescription::id(uint64_t id)
+CreatureDesc CreatureDesc::id(uint64_t id)
 {
     NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
 
-void Description::clear()
+void Desc::clear()
 {
     _objects.clear();
     _energies.clear();
@@ -272,12 +272,12 @@ void Description::clear()
     _genomes.clear();
 }
 
-bool Description::isEmpty() const
+bool Desc::isEmpty() const
 {
     return _objects.empty() && _energies.empty();
 }
 
-Description& Description::add(Description&& other, bool assignNewIds /*= true*/)
+Desc& Desc::add(Desc&& other, bool assignNewIds /*= true*/)
 {
     if (assignNewIds) {
         other.assignNewIds();
@@ -289,7 +289,7 @@ Description& Description::add(Description&& other, bool assignNewIds /*= true*/)
     return *this;
 }
 
-bool Description::hasUniqueIds() const
+bool Desc::hasUniqueIds() const
 {
     std::unordered_set<uint64_t> cellIds;
     for (auto const& object : _objects) {
@@ -325,7 +325,7 @@ bool Description::hasUniqueIds() const
     return true;
 }
 
-void Description::assignNewIds()
+void Desc::assignNewIds()
 {
     // Create (index, oldCellId) vector sorted by cell id
     std::vector<std::pair<int, uint64_t>> indexToOldCellId;
@@ -413,7 +413,7 @@ void Description::assignNewIds()
             connection._objectId = findNewObjectId(creatureId, connection._objectId);
         }
         if (object.getObjectType() == ObjectType_Cell && object.getCellRef().getCellType() == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorDescription>(object.getCellRef()._cellType);
+            auto& constructor = std::get<ConstructorDesc>(object.getCellRef()._cellType);
             if (constructor._lastConstructedCellId.has_value()) {
                 constructor._lastConstructedCellId = findNewObjectId(creatureId, constructor._lastConstructedCellId.value());
             }
@@ -484,7 +484,7 @@ void Description::assignNewIds()
     }
 }
 
-Description& Description::addCreature(std::vector<ObjectDescription> const& objects, CreatureDescription const& creature, GenomeDescription const& genome)
+Desc& Desc::addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc const& creature, GenomeDesc const& genome)
 {
     // Add genome to genomes array if not already present
     auto genomeIt = std::find_if(_genomes.begin(), _genomes.end(), [&genome](auto const& g) { return g._id == genome._id; });
@@ -510,18 +510,18 @@ Description& Description::addCreature(std::vector<ObjectDescription> const& obje
     return *this;
 }
 
-Description& Description::addObjects(std::vector<ObjectDescription> const& objects)
+Desc& Desc::addObjects(std::vector<ObjectDesc> const& objects)
 {
     _objects.insert(_objects.end(), objects.begin(), objects.end());
     return *this;
 }
 
-size_t Description::getNumObjects() const
+size_t Desc::getNumObjects() const
 {
     return _objects.size();
 }
 
-size_t Description::getNumObjectsWithoutCreature() const
+size_t Desc::getNumObjectsWithoutCreature() const
 {
     return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) {
         if (object.getObjectType() != ObjectType_Cell) {
@@ -531,9 +531,9 @@ size_t Description::getNumObjectsWithoutCreature() const
     });
 }
 
-std::vector<ObjectDescription> Description::getObjectsForCreature(uint64_t creatureId) const
+std::vector<ObjectDesc> Desc::getObjectsForCreature(uint64_t creatureId) const
 {
-    std::vector<ObjectDescription> result;
+    std::vector<ObjectDesc> result;
     for (auto const& object : _objects) {
         if (object.getObjectType() != ObjectType_Cell) {
             continue;
@@ -545,9 +545,9 @@ std::vector<ObjectDescription> Description::getObjectsForCreature(uint64_t creat
     return result;
 }
 
-DescriptionCache Description::createCache() const
+DescCache Desc::createCache() const
 {
-    DescriptionCache result = std::make_shared<_DescriptionCache>();
+    DescCache result = std::make_shared<_DescCache>();
     for (auto const& [objectIndex, object] : _objects | boost::adaptors::indexed(0)) {
         result->objectIdToIndex.emplace(object._id, toInt(objectIndex));
     }
@@ -560,25 +560,25 @@ DescriptionCache Description::createCache() const
     return result;
 }
 
-Description& Description::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, DescriptionCache const& cache)
+Desc& Desc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, DescCache const& cache)
 {
     auto& object2 = getObjectRef(objectId2, cache);
     return addConnection(objectId1, objectId2, object2._pos, cache);
 }
 
-Description& Description::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, RealVector2D const& refPosCell2, DescriptionCache const& cache)
+Desc& Desc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, RealVector2D const& refPosCell2, DescCache const& cache)
 {
     auto& object1 = getObjectRef(objectId1, cache);
     auto& object2 = getObjectRef(objectId2, cache);
 
     auto addConnection = [this,
-                          &cache](ObjectDescription& object, ObjectDescription& otherObject, RealVector2D const& cellRefPos, RealVector2D const& otherObjectRefPos) {
+                          &cache](ObjectDesc& object, ObjectDesc& otherObject, RealVector2D const& cellRefPos, RealVector2D const& otherObjectRefPos) {
         CHECK(object._connections.size() < MAX_OBJECT_CONNECTIONS);
 
         auto newAngle = Math::angleOfVector(otherObjectRefPos - cellRefPos);
 
         if (object._connections.empty()) {
-            ConnectionDescription newConnection;
+            ConnectionDesc newConnection;
             newConnection._objectId = otherObject._id;
             newConnection._distance = toFloat(Math::length(otherObjectRefPos - cellRefPos));
             newConnection._angleFromPrevious = 360.0;
@@ -586,7 +586,7 @@ Description& Description::addConnection(uint64_t const& objectId1, uint64_t cons
             return;
         }
         if (1 == object._connections.size()) {
-            ConnectionDescription newConnection;
+            ConnectionDesc newConnection;
             newConnection._objectId = otherObject._id;
             newConnection._distance = toFloat(Math::length(otherObjectRefPos - cellRefPos));
 
@@ -626,7 +626,7 @@ Description& Description::addConnection(uint64_t const& objectId1, uint64_t cons
             }
         }
 
-        ConnectionDescription newConnection;
+        ConnectionDesc newConnection;
         newConnection._objectId = otherObject._id;
         newConnection._distance = toFloat(Math::length(otherObjectRefPos - cellRefPos));
 
@@ -655,7 +655,7 @@ Description& Description::addConnection(uint64_t const& objectId1, uint64_t cons
     return *this;
 }
 
-ObjectDescription const& Description::getObjectRef(uint64_t const& objectId, DescriptionCache const& cache) const
+ObjectDesc const& Desc::getObjectRef(uint64_t const& objectId, DescCache const& cache) const
 {
     if (cache != nullptr) {
         auto index = getObjectIndex(objectId, cache);
@@ -670,7 +670,7 @@ ObjectDescription const& Description::getObjectRef(uint64_t const& objectId, Des
     }
 }
 
-ObjectDescription& Description::getObjectRef(uint64_t const& objectId, DescriptionCache const& cache)
+ObjectDesc& Desc::getObjectRef(uint64_t const& objectId, DescCache const& cache)
 {
     if (cache != nullptr) {
         auto index = getObjectIndex(objectId, cache);
@@ -685,12 +685,12 @@ ObjectDescription& Description::getObjectRef(uint64_t const& objectId, Descripti
     }
 }
 
-ObjectDescription& Description::getOtherObjectRef(uint64_t id)
+ObjectDesc& Desc::getOtherObjectRef(uint64_t id)
 {
     return getOtherObjectRef(std::set<uint64_t>{id});
 }
 
-ObjectDescription& Description::getOtherObjectRef(std::set<uint64_t> const& ids)
+ObjectDesc& Desc::getOtherObjectRef(std::set<uint64_t> const& ids)
 {
     std::vector<uint64_t> matchingCells;
     for (auto& object : _objects) {
@@ -708,9 +708,9 @@ ObjectDescription& Description::getOtherObjectRef(std::set<uint64_t> const& ids)
     CHECK(false);
 }
 
-std::vector<ObjectDescription> Description::getOtherObjects(std::set<uint64_t> const& ids) const
+std::vector<ObjectDesc> Desc::getOtherObjects(std::set<uint64_t> const& ids) const
 {
-    std::vector<ObjectDescription> result;
+    std::vector<ObjectDesc> result;
     for (auto const& object : _objects) {
         if (!ids.contains(object._id)) {
             result.emplace_back(object);
@@ -719,7 +719,7 @@ std::vector<ObjectDescription> Description::getOtherObjects(std::set<uint64_t> c
     return result;
 }
 
-GenomeDescription const& Description::getGenomeRef(uint64_t const& genomeId, DescriptionCache const& cache) const
+GenomeDesc const& Desc::getGenomeRef(uint64_t const& genomeId, DescCache const& cache) const
 {
     if (cache != nullptr) {
         auto index = cache->genomeIdToIndex.at(genomeId);
@@ -734,7 +734,7 @@ GenomeDescription const& Description::getGenomeRef(uint64_t const& genomeId, Des
     }
 }
 
-bool Description::hasConnection(uint64_t id, uint64_t otherId) const
+bool Desc::hasConnection(uint64_t id, uint64_t otherId) const
 {
     auto const& object = getObjectRef(id);
     for (auto const& connection : object._connections) {
@@ -745,12 +745,12 @@ bool Description::hasConnection(uint64_t id, uint64_t otherId) const
     return false;
 }
 
-bool Description::hasConnection(ObjectDescription const& object1, ObjectDescription const& object2) const
+bool Desc::hasConnection(ObjectDesc const& object1, ObjectDesc const& object2) const
 {
     return hasConnection(object1._id, object2._id);
 }
 
-ConnectionDescription& Description::getConnectionRef(uint64_t id, uint64_t otherId)
+ConnectionDesc& Desc::getConnectionRef(uint64_t id, uint64_t otherId)
 {
     auto& object = getObjectRef(id);
     for (auto& connection : object._connections) {
@@ -761,7 +761,7 @@ ConnectionDescription& Description::getConnectionRef(uint64_t id, uint64_t other
     CHECK(false);
 }
 
-ConnectionDescription const& Description::getConnection(ObjectDescription const& object1, ObjectDescription const& object2) const
+ConnectionDesc const& Desc::getConnection(ObjectDesc const& object1, ObjectDesc const& object2) const
 {
     for (auto const& connection : object1._connections) {
         if (connection._objectId == object2._id) {
@@ -771,7 +771,7 @@ ConnectionDescription const& Description::getConnection(ObjectDescription const&
     CHECK(false);
 }
 
-CreatureDescription& Description::getCreatureRef(uint64_t id)
+CreatureDesc& Desc::getCreatureRef(uint64_t id)
 {
     for (auto& creature : _creatures) {
         if (creature._id == id) {
@@ -781,7 +781,7 @@ CreatureDescription& Description::getCreatureRef(uint64_t id)
     CHECK(false);
 }
 
-CreatureDescription& Description::getOtherCreatureRef(uint64_t id)
+CreatureDesc& Desc::getOtherCreatureRef(uint64_t id)
 {
     for (auto& creature : _creatures) {
         if (creature._id != id) {
@@ -791,7 +791,7 @@ CreatureDescription& Description::getOtherCreatureRef(uint64_t id)
     CHECK(false);
 }
 
-uint64_t Description::getObjectIndex(uint64_t const& objectId, DescriptionCache const& cache) const
+uint64_t Desc::getObjectIndex(uint64_t const& objectId, DescCache const& cache) const
 {
     auto findResult = cache->objectIdToIndex.find(objectId);
     if (findResult != cache->objectIdToIndex.end()) {

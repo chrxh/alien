@@ -98,7 +98,7 @@ void UploadSimulationDialog::processIntern()
     ImGui::PushID("description");
     AlienGui::InputTextMultiline(
         AlienGui::InputTextMultilineParameters()
-            .hint("Description (optional)")
+            .hint("Desc (optional)")
             .textWidth(0)
             .height(ImGui::GetContentRegionAvail().y - StyleRepository::get().scale(70.0f)),
         _resourceDescription);

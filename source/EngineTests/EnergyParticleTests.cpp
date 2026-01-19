@@ -33,8 +33,8 @@ TEST_F(EnergyParticleTests, particleToFreeCell_transformationAllowed)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     // Create a particle with energy above normalCellEnergy
-    Description data;
-    data._energies.emplace_back(EnergyDescription().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy + 10.0f).color(0));
+    Desc data;
+    data._energies.emplace_back(EnergyDesc().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy + 10.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
 
@@ -66,8 +66,8 @@ TEST_F(EnergyParticleTests, particleToCell_transformationDisabled)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     // Create a particle with energy above normalCellEnergy
-    Description data;
-    data._energies.emplace_back(EnergyDescription().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy + 10.0f).color(0));
+    Desc data;
+    data._energies.emplace_back(EnergyDesc().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy + 10.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
 
@@ -91,8 +91,8 @@ TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     // Create a particle with energy below normalCellEnergy
-    Description data;
-    data._energies.emplace_back(EnergyDescription().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy - 1.0f).color(0));
+    Desc data;
+    data._energies.emplace_back(EnergyDesc().id(1).pos({100.0f, 100.0f}).vel({0.1f, 0.1f}).energy(normalCellEnergy - 1.0f).color(0));
 
     _simulationFacade->setSimulationData(data);
 
@@ -111,9 +111,9 @@ TEST_F(EnergyParticleTests, particleAbsorptionForCells)
     auto cellEnergy = _parameters.normalCellEnergy.value[0];
     auto particleEnergy = 10.0f;
 
-    auto data = Description()
-                    .addCreature({ObjectDescription().pos({100.4f, 100.4f}).color(0).type(CellDescription().usableEnergy(cellEnergy))})
-                    .energies({EnergyDescription().pos({100.4f, 100.4f}).energy(particleEnergy)});
+    auto data = Desc()
+                    .addCreature({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(CellDesc().usableEnergy(cellEnergy))})
+                    .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
     _simulationFacade->setSimulationData(data);
 
@@ -135,9 +135,9 @@ TEST_F(EnergyParticleTests, particleAbsorptionForFreeCells)
     auto cellEnergy = _parameters.normalCellEnergy.value[0];
     auto particleEnergy = 10.0f;
 
-    auto data = Description()
-                    .addObjects({ObjectDescription().pos({100.4f, 100.4f}).color(0).type(FreeCellDescription().rawEnergy(cellEnergy))})
-                    .energies({EnergyDescription().pos({100.4f, 100.4f}).energy(particleEnergy)});
+    auto data = Desc()
+                    .addObjects({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(FreeCellDesc().rawEnergy(cellEnergy))})
+                    .energies({EnergyDesc().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
     _simulationFacade->setSimulationData(data);
 
@@ -161,10 +161,10 @@ TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
     auto cellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
     auto depotEnergy = 100.0f;
 
-    auto data = Description().addCreature({ObjectDescription()
+    auto data = Desc().addCreature({ObjectDesc()
                                                .pos({100.4f, 100.4f})
                                                .color(0)
-                                               .type(CellDescription().usableEnergy(cellEnergy).cellType(DepotDescription().storedUsableEnergy(depotEnergy)))});
+                                               .type(CellDesc().usableEnergy(cellEnergy).cellType(DepotDesc().storedUsableEnergy(depotEnergy)))});
 
     _simulationFacade->setSimulationData(data);
 
@@ -190,10 +190,10 @@ TEST_F(EnergyParticleTests, freeCellToParticle_belowMinEnergy)
 
     auto freeCellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
 
-    auto data = Description().addObjects({ObjectDescription()
+    auto data = Desc().addObjects({ObjectDesc()
                                                .pos({100.4f, 100.4f})
                                                .color(0)
-                                               .type(FreeCellDescription().rawEnergy(freeCellEnergy))});
+                                               .type(FreeCellDesc().rawEnergy(freeCellEnergy))});
 
     _simulationFacade->setSimulationData(data);
 

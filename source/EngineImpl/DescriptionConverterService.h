@@ -18,43 +18,43 @@ class DescriptionConverterService
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescriptionConverterService);
 
 public:
-    Description convertTOtoDescription(TO const& to) const;
-    TO convertDescriptionToTO(Description const& description) const;
-    TO convertDescriptionToTO(ObjectDescription const& cell) const;
-    TO convertDescriptionToTO(EnergyDescription const& particle) const;
-    TO convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const;
+    Desc convertTOtoDescription(TO const& to) const;
+    TO convertDescriptionToTO(Desc const& description) const;
+    TO convertDescriptionToTO(ObjectDesc const& cell) const;
+    TO convertDescriptionToTO(EnergyDesc const& particle) const;
+    TO convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const;
 
 private:
     DescriptionConverterService();
 
-    ObjectDescription createObjectDescription(TO const& to, int objectIndex) const;
-    NodeDescription createNodeDescription(TO const& to, NodeTO const* nodeTO) const;
-    GenomeDescription createGenomeDescription(TO const& to, int genomeIndex) const;
-    CreatureDescription createCreatureDescription(TO const& to, int creatureIndex) const;
-    EnergyDescription createEnergyDescription(TO const& to, int particleIndex) const;
+    ObjectDesc createObjectDesc(TO const& to, int objectIndex) const;
+    NodeDesc createNodeDesc(TO const& to, NodeTO const* nodeTO) const;
+    GenomeDesc createGenomeDesc(TO const& to, int genomeIndex) const;
+    CreatureDesc createCreatureDesc(TO const& to, int creatureIndex) const;
+    EnergyDesc createEnergyDesc(TO const& to, int particleIndex) const;
 
     void convertGenomeToTO(
         std::vector<GenomeTO>& genomeTOs,
         std::vector<GeneTO>& geneTOs,
         std::vector<NodeTO>& nodeTOs,
         std::vector<uint8_t>& heap,
-        GenomeDescription const& genome,
+        GenomeDesc const& genome,
         std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const;
 
     void convertCreatureToTO(
         std::vector<CreatureTO>& creatureTOs,
-        CreatureDescription const& creatureDesc,
+        CreatureDesc const& creatureDesc,
         std::unordered_map<uint64_t, uint64_t> const& genomeTOIndexById,
         std::unordered_map<uint64_t, uint64_t>& creatureTOIndexById) const;
     void convertObjectToTO(
         std::vector<ObjectTO>& objectTOs,
         std::vector<uint8_t>& heap,
         std::unordered_map<uint64_t, uint64_t>& objectTOIndexById,
-        ObjectDescription const& cellToAdd,
+        ObjectDesc const& cellToAdd,
         std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const;
-    void addParticle(std::vector<EnergyTO>& particleTOs, EnergyDescription const& particleDesc) const;
+    void addParticle(std::vector<EnergyTO>& particleTOs, EnergyDesc const& particleDesc) const;
 
-    void setConnections(std::vector<ObjectTO>& objectTOs, ObjectDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& objectIndexByIds) const;
+    void setConnections(std::vector<ObjectTO>& objectTOs, ObjectDesc const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& objectIndexByIds) const;
 
     TO provideDataTO(
         std::vector<CreatureTO> const& creatureTOs,

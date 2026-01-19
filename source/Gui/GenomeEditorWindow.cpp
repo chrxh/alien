@@ -25,7 +25,7 @@
 #include "GenomeWindowEditData.h"
 #include "OverlayController.h"
 
-void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed)
+void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDesc const& genome, bool openEditorIfClosed)
 {
     if (openEditorIfClosed) {
         setOn(false);
@@ -54,9 +54,9 @@ void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, Geno
     }
 }
 
-GenomeDescription GenomeEditorWindow::getCurrentGenome() const
+GenomeDesc GenomeEditorWindow::getCurrentGenome() const
 {
-    return _tabs.at(_selectedTabIndex)->getGenomeDescription();
+    return _tabs.at(_selectedTabIndex)->getGenomeDesc();
 }
 
 GenomeEditorWindow::GenomeEditorWindow()
@@ -244,7 +244,7 @@ void GenomeEditorWindow::onOpenGenome()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        GenomeDescription genome;
+        GenomeDesc genome;
         if (!SerializerService::get().deserializeGenomeFromFile(genome, firstFilename.string())) {
             GenericMessageDialog::get().information("Open genome", "The selected file could not be opened.");
         } else {
@@ -261,7 +261,7 @@ void GenomeEditorWindow::onSaveGenome()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         auto const& selectedTab = _tabs.at(_selectedTabIndex);
-        auto genome = selectedTab->getGenomeDescription();
+        auto genome = selectedTab->getGenomeDesc();
         if (!SerializerService::get().serializeGenomeToFile(firstFilename.string(), genome)) {
             GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
         }
@@ -280,13 +280,13 @@ void GenomeEditorWindow::onCopyGenome()
 
 void GenomeEditorWindow::onPasteGenome()
 {
-    _tabs.at(_selectedTabIndex)->setGenomeDescription(_copiedGenome.value());
+    _tabs.at(_selectedTabIndex)->setGenomeDesc(_copiedGenome.value());
 }
 
 void GenomeEditorWindow::onInjectGenome()
 {
     auto const& tab = _tabs.at(_selectedTabIndex);
-    auto success = _SimulationFacade::get()->changeCreature(tab->getCreatureId(), tab->getGenomeDescription());
+    auto success = _SimulationFacade::get()->changeCreature(tab->getCreatureId(), tab->getGenomeDesc());
     tab->onGenomeIntoCreatureInjected();
     if (success) {
         printOverlayMessage("Genome injected");
@@ -303,12 +303,12 @@ void GenomeEditorWindow::onCreateSeed()
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 
     auto tab = _tabs.at(_selectedTabIndex);
-    auto genome = tab->getGenomeDescription();
+    auto genome = tab->getGenomeDesc();
 
-    Description seed;
+    Desc seed;
     seed.addCreature(
-        {ObjectDescription().pos(pos).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
-        CreatureDescription().lineageId(toInt(NumberGenerator::get().createId() % 0x80000000)),
+        {ObjectDesc().pos(pos).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        CreatureDesc().lineageId(toInt(NumberGenerator::get().createId() % 0x80000000)),
         genome);
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(seed));
@@ -317,13 +317,13 @@ void GenomeEditorWindow::onCreateSeed()
     printOverlayMessage("Seed created");
 }
 
-void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome)
+void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDesc const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
     _tabToAdd = _GenomeTabWidget::createCreatureTab(_genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
 }
 
-void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDescription const& genome)
+void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDesc const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
     _tabToAdd = _GenomeTabWidget::createDraftTab(_genomeEditData, genome, currentTab->getLayoutData()->clone());
@@ -349,11 +349,11 @@ void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab
     }
 }
 
-GenomeDescription GenomeEditorWindow::getDefaultGenome()
+GenomeDesc GenomeEditorWindow::getDefaultGenome()
 {
-    return GenomeDescription()
+    return GenomeDesc()
         .name("Draft " + std::to_string(++_sequenceNumberForCreatedGenomes))
         .genes({
-            GeneDescription().name("Gene 1").nodes({NodeDescription()}).separation(true),
+            GeneDesc().name("Gene 1").nodes({NodeDesc()}).separation(true),
         });
 }

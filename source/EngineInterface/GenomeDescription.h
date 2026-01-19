@@ -13,426 +13,426 @@
 #include "EngineConstants.h"
 
 struct MakeGenomeCopy;
-struct BaseGenomeDescription;
+struct BaseGenomeDesc;
 
-struct NeuralNetworkGenomeDescription
+struct NeuralNetworkGenomeDesc
 {
-    NeuralNetworkGenomeDescription();
-    auto operator<=>(NeuralNetworkGenomeDescription const&) const = default;
+    NeuralNetworkGenomeDesc();
+    auto operator<=>(NeuralNetworkGenomeDesc const&) const = default;
 
-    NeuralNetworkGenomeDescription& weight(int row, int col, float value);
+    NeuralNetworkGenomeDesc& weight(int row, int col, float value);
 
-    MEMBER(NeuralNetworkGenomeDescription, std::vector<float>, weights, {});
-    MEMBER(NeuralNetworkGenomeDescription, std::vector<float>, biases, {});
-    MEMBER(NeuralNetworkGenomeDescription, std::vector<ActivationFunction>, activationFunctions, {});
+    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, weights, {});
+    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, biases, {});
+    MEMBER(NeuralNetworkGenomeDesc, std::vector<ActivationFunction>, activationFunctions, {});
 };
 
-struct BaseGenomeDescription
+struct BaseGenomeDesc
 {
-    auto operator<=>(BaseGenomeDescription const&) const = default;
+    auto operator<=>(BaseGenomeDesc const&) const = default;
 };
 
-struct DepotGenomeDescription
+struct DepotGenomeDesc
 {
-    auto operator<=>(DepotGenomeDescription const&) const = default;
+    auto operator<=>(DepotGenomeDesc const&) const = default;
 
-    MEMBER(DepotGenomeDescription, float, storageLimit, 200.0f);
-    MEMBER(DepotGenomeDescription, float, initialStoredUsableEnergy, 0.0f);
+    MEMBER(DepotGenomeDesc, float, storageLimit, 200.0f);
+    MEMBER(DepotGenomeDesc, float, initialStoredUsableEnergy, 0.0f);
 };
 
-struct ConstructorGenomeDescription
+struct ConstructorGenomeDesc
 {
-    auto operator<=>(ConstructorGenomeDescription const&) const = default;
+    auto operator<=>(ConstructorGenomeDesc const&) const = default;
 
-    MEMBER(ConstructorGenomeDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
-    MEMBER(ConstructorGenomeDescription, int, geneIndex, 0);
-    MEMBER(ConstructorGenomeDescription, int, constructionActivationTime, 100);
-    MEMBER(ConstructorGenomeDescription, float, constructionAngle, 0.0f);
-    MEMBER(ConstructorGenomeDescription, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
+    MEMBER(ConstructorGenomeDesc, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
+    MEMBER(ConstructorGenomeDesc, int, geneIndex, 0);
+    MEMBER(ConstructorGenomeDesc, int, constructionActivationTime, 100);
+    MEMBER(ConstructorGenomeDesc, float, constructionAngle, 0.0f);
+    MEMBER(ConstructorGenomeDesc, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
 };
 
-struct TelemetryGenomeDescription
+struct TelemetryGenomeDesc
 {
-    auto operator<=>(TelemetryGenomeDescription const&) const = default;
+    auto operator<=>(TelemetryGenomeDesc const&) const = default;
 };
 
-struct DetectEnergyGenomeDescription
+struct DetectEnergyGenomeDesc
 {
-    auto operator<=>(DetectEnergyGenomeDescription const&) const = default;
+    auto operator<=>(DetectEnergyGenomeDesc const&) const = default;
 
-    MEMBER(DetectEnergyGenomeDescription, float, minDensity, 1.0f);
+    MEMBER(DetectEnergyGenomeDesc, float, minDensity, 1.0f);
 };
 
-struct DetectStructureGenomeDescription
+struct DetectStructureGenomeDesc
 {
-    auto operator<=>(DetectStructureGenomeDescription const&) const = default;
+    auto operator<=>(DetectStructureGenomeDesc const&) const = default;
 };
 
-struct DetectFreeCellGenomeDescription
+struct DetectFreeCellGenomeDesc
 {
-    auto operator<=>(DetectFreeCellGenomeDescription const&) const = default;
+    auto operator<=>(DetectFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(DetectFreeCellGenomeDescription, float, minDensity, 0.5f);
-    MEMBER(DetectFreeCellGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectFreeCellGenomeDesc, float, minDensity, 0.5f);
+    MEMBER(DetectFreeCellGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
 };
 
-struct DetectCreatureGenomeDescription
+struct DetectCreatureGenomeDesc
 {
-    auto operator<=>(DetectCreatureGenomeDescription const&) const = default;
+    auto operator<=>(DetectCreatureGenomeDesc const&) const = default;
 
-    MEMBER(DetectCreatureGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
-    MEMBER(DetectCreatureGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(DetectCreatureGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(DetectCreatureGenomeDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+    MEMBER(DetectCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(DetectCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(DetectCreatureGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeGenomeDescription = std::variant<
-    TelemetryGenomeDescription,
-    DetectEnergyGenomeDescription,
-    DetectStructureGenomeDescription,
-    DetectFreeCellGenomeDescription,
-    DetectCreatureGenomeDescription>;
+using SensorModeGenomeDesc = std::variant<
+    TelemetryGenomeDesc,
+    DetectEnergyGenomeDesc,
+    DetectStructureGenomeDesc,
+    DetectFreeCellGenomeDesc,
+    DetectCreatureGenomeDesc>;
 
-struct SensorGenomeDescription
+struct SensorGenomeDesc
 {
-    auto operator<=>(SensorGenomeDescription const&) const = default;
+    auto operator<=>(SensorGenomeDesc const&) const = default;
 
-    MEMBER(SensorGenomeDescription, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
-    MEMBER(SensorGenomeDescription, SensorModeGenomeDescription, mode, DetectCreatureGenomeDescription());
-    MEMBER(SensorGenomeDescription, int, minRange, 0);
-    MEMBER(SensorGenomeDescription, int, maxRange, 255);
+    MEMBER(SensorGenomeDesc, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
+    MEMBER(SensorGenomeDesc, SensorModeGenomeDesc, mode, DetectCreatureGenomeDesc());
+    MEMBER(SensorGenomeDesc, int, minRange, 0);
+    MEMBER(SensorGenomeDesc, int, maxRange, 255);
 
     SensorMode getMode() const;
 };
 
-struct GeneratorGenomeDescription
+struct GeneratorGenomeDesc
 {
-    auto operator<=>(GeneratorGenomeDescription const&) const = default;
+    auto operator<=>(GeneratorGenomeDesc const&) const = default;
 
-    MEMBER(GeneratorGenomeDescription, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
-    MEMBER(GeneratorGenomeDescription, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
+    MEMBER(GeneratorGenomeDesc, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
+    MEMBER(GeneratorGenomeDesc, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
     MEMBER(
-        GeneratorGenomeDescription,
+        GeneratorGenomeDesc,
         int,
         alternationInterval,
         20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 };
 
-struct AttackFreeCellGenomeDescription
+struct AttackFreeCellGenomeDesc
 {
-    auto operator<=>(AttackFreeCellGenomeDescription const&) const = default;
+    auto operator<=>(AttackFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(AttackFreeCellGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackFreeCellGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
 };
 
-struct AttackCreatureGenomeDescription
+struct AttackCreatureGenomeDesc
 {
-    auto operator<=>(AttackCreatureGenomeDescription const&) const = default;
+    auto operator<=>(AttackCreatureGenomeDesc const&) const = default;
 
-    MEMBER(AttackCreatureGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
-    MEMBER(AttackCreatureGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(AttackCreatureGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(AttackCreatureGenomeDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+    MEMBER(AttackCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(AttackCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(AttackCreatureGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using AttackerModeGenomeDescription = std::variant<AttackFreeCellGenomeDescription, AttackCreatureGenomeDescription>;
+using AttackerModeGenomeDesc = std::variant<AttackFreeCellGenomeDesc, AttackCreatureGenomeDesc>;
 
-struct AttackerGenomeDescription
+struct AttackerGenomeDesc
 {
-    auto operator<=>(AttackerGenomeDescription const&) const = default;
+    auto operator<=>(AttackerGenomeDesc const&) const = default;
 
-    MEMBER(AttackerGenomeDescription, AttackerModeGenomeDescription, mode, AttackCreatureGenomeDescription());
+    MEMBER(AttackerGenomeDesc, AttackerModeGenomeDesc, mode, AttackCreatureGenomeDesc());
 
     AttackerMode getMode() const;
 };
 
-struct InjectorGenomeDescription
+struct InjectorGenomeDesc
 {
-    auto operator<=>(InjectorGenomeDescription const&) const = default;
+    auto operator<=>(InjectorGenomeDesc const&) const = default;
 
-    MEMBER(InjectorGenomeDescription, int, geneIndex, 0);
+    MEMBER(InjectorGenomeDesc, int, geneIndex, 0);
 };
 
 
-struct AutoBendingGenomeDescription
+struct AutoBendingGenomeDesc
 {
-    auto operator<=>(AutoBendingGenomeDescription const&) const = default;
+    auto operator<=>(AutoBendingGenomeDesc const&) const = default;
 
-    MEMBER(AutoBendingGenomeDescription, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
-    MEMBER(AutoBendingGenomeDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AutoBendingGenomeDesc, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
+    MEMBER(AutoBendingGenomeDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 };
 
-struct ManualBendingGenomeDescription
+struct ManualBendingGenomeDesc
 {
-    auto operator<=>(ManualBendingGenomeDescription const&) const = default;
+    auto operator<=>(ManualBendingGenomeDesc const&) const = default;
 
-    MEMBER(ManualBendingGenomeDescription, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
-    MEMBER(ManualBendingGenomeDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(ManualBendingGenomeDesc, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
+    MEMBER(ManualBendingGenomeDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 };
 
-struct AngleBendingGenomeDescription
+struct AngleBendingGenomeDesc
 {
-    auto operator<=>(AngleBendingGenomeDescription const&) const = default;
+    auto operator<=>(AngleBendingGenomeDesc const&) const = default;
 
-    MEMBER(AngleBendingGenomeDescription, float, maxAngleDeviation, 0.2f);         // Between 0 and 1
-    MEMBER(AngleBendingGenomeDescription, float, attractionRepulsionRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AngleBendingGenomeDesc, float, maxAngleDeviation, 0.2f);         // Between 0 and 1
+    MEMBER(AngleBendingGenomeDesc, float, attractionRepulsionRatio, 0.8f);  // Between 0 and 1
 };
 
-struct AutoCrawlingGenomeDescription
+struct AutoCrawlingGenomeDesc
 {
-    auto operator<=>(AutoCrawlingGenomeDescription const&) const = default;
+    auto operator<=>(AutoCrawlingGenomeDesc const&) const = default;
 
-    MEMBER(AutoCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(AutoCrawlingGenomeDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AutoCrawlingGenomeDesc, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER(AutoCrawlingGenomeDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 };
 
-struct ManualCrawlingGenomeDescription
+struct ManualCrawlingGenomeDesc
 {
-    auto operator<=>(ManualCrawlingGenomeDescription const&) const = default;
+    auto operator<=>(ManualCrawlingGenomeDesc const&) const = default;
 
-    MEMBER(ManualCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(ManualCrawlingGenomeDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(ManualCrawlingGenomeDesc, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER(ManualCrawlingGenomeDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 };
 
-struct DirectMovementGenomeDescription
+struct DirectMovementGenomeDesc
 {
-    auto operator<=>(DirectMovementGenomeDescription const&) const = default;
+    auto operator<=>(DirectMovementGenomeDesc const&) const = default;
 };
 
-using MuscleModeGenomeDescription = std::variant<
-    AutoBendingGenomeDescription,
-    ManualBendingGenomeDescription,
-    AngleBendingGenomeDescription,
-    AutoCrawlingGenomeDescription,
-    ManualCrawlingGenomeDescription,
-    DirectMovementGenomeDescription>;
+using MuscleModeGenomeDesc = std::variant<
+    AutoBendingGenomeDesc,
+    ManualBendingGenomeDesc,
+    AngleBendingGenomeDesc,
+    AutoCrawlingGenomeDesc,
+    ManualCrawlingGenomeDesc,
+    DirectMovementGenomeDesc>;
 
-struct MuscleGenomeDescription
+struct MuscleGenomeDesc
 {
-    auto operator<=>(MuscleGenomeDescription const&) const = default;
+    auto operator<=>(MuscleGenomeDesc const&) const = default;
 
-    MEMBER(MuscleGenomeDescription, MuscleModeGenomeDescription, mode, AutoBendingGenomeDescription());
+    MEMBER(MuscleGenomeDesc, MuscleModeGenomeDesc, mode, AutoBendingGenomeDesc());
 
     MuscleMode getMode() const;
 };
 
-struct DefenderGenomeDescription
+struct DefenderGenomeDesc
 {
-    auto operator<=>(DefenderGenomeDescription const&) const = default;
+    auto operator<=>(DefenderGenomeDesc const&) const = default;
 
-    MEMBER(DefenderGenomeDescription, DefenderMode, mode, DefenderMode_DefendAgainstAttacker);
+    MEMBER(DefenderGenomeDesc, DefenderMode, mode, DefenderMode_DefendAgainstAttacker);
 };
 
-struct ReconnectStructureGenomeDescription
+struct ReconnectStructureGenomeDesc
 {
-    auto operator<=>(ReconnectStructureGenomeDescription const&) const = default;
+    auto operator<=>(ReconnectStructureGenomeDesc const&) const = default;
 };
 
-struct ReconnectFreeCellGenomeDescription
+struct ReconnectFreeCellGenomeDesc
 {
-    auto operator<=>(ReconnectFreeCellGenomeDescription const&) const = default;
+    auto operator<=>(ReconnectFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(ReconnectFreeCellGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectFreeCellGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
 };
 
-struct ReconnectCreatureGenomeDescription
+struct ReconnectCreatureGenomeDesc
 {
-    auto operator<=>(ReconnectCreatureGenomeDescription const&) const = default;
+    auto operator<=>(ReconnectCreatureGenomeDesc const&) const = default;
 
-    MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
-    MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReconnectCreatureGenomeDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+    MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using ReconnectorModeGenomeDescription = std::variant<ReconnectStructureGenomeDescription, ReconnectFreeCellGenomeDescription, ReconnectCreatureGenomeDescription>;
+using ReconnectorModeGenomeDesc = std::variant<ReconnectStructureGenomeDesc, ReconnectFreeCellGenomeDesc, ReconnectCreatureGenomeDesc>;
 
-struct ReconnectorGenomeDescription
+struct ReconnectorGenomeDesc
 {
-    auto operator<=>(ReconnectorGenomeDescription const&) const = default;
+    auto operator<=>(ReconnectorGenomeDesc const&) const = default;
 
-    MEMBER(ReconnectorGenomeDescription, ReconnectorModeGenomeDescription, mode, ReconnectCreatureGenomeDescription());
+    MEMBER(ReconnectorGenomeDesc, ReconnectorModeGenomeDesc, mode, ReconnectCreatureGenomeDesc());
 
     ReconnectorMode getMode() const;
 };
 
-struct DetonatorGenomeDescription
+struct DetonatorGenomeDesc
 {
-    auto operator<=>(DetonatorGenomeDescription const&) const = default;
+    auto operator<=>(DetonatorGenomeDesc const&) const = default;
 
-    MEMBER(DetonatorGenomeDescription, int, countdown, 10);
+    MEMBER(DetonatorGenomeDesc, int, countdown, 10);
 };
 
-struct DigestorGenomeDescription
+struct DigestorGenomeDesc
 {
-    auto operator<=>(DigestorGenomeDescription const&) const = default;
+    auto operator<=>(DigestorGenomeDesc const&) const = default;
 
-    MEMBER(DigestorGenomeDescription, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
+    MEMBER(DigestorGenomeDesc, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
 
     float getRawEnergyConversionRate() const
     {
         return 1 - _rawEnergyConductivity;
     }
-    DigestorGenomeDescription& setRawEnergyConversionRate(float value)
+    DigestorGenomeDesc& setRawEnergyConversionRate(float value)
     {
         _rawEnergyConductivity = 1 - value;
         return *this;
     }
 };
 
-struct SignalEntryGenomeDescription
+struct SignalEntryGenomeDesc
 {
-    SignalEntryGenomeDescription();
-    auto operator<=>(SignalEntryGenomeDescription const&) const = default;
+    SignalEntryGenomeDesc();
+    auto operator<=>(SignalEntryGenomeDesc const&) const = default;
 
-    MEMBER(SignalEntryGenomeDescription, std::vector<float>, channels, {});
+    MEMBER(SignalEntryGenomeDesc, std::vector<float>, channels, {});
 };
 
-struct SignalDelayGenomeDescription
+struct SignalDelayGenomeDesc
 {
-    auto operator<=>(SignalDelayGenomeDescription const&) const = default;
+    auto operator<=>(SignalDelayGenomeDesc const&) const = default;
 
-    MEMBER(SignalDelayGenomeDescription, int, delay, 10);
+    MEMBER(SignalDelayGenomeDesc, int, delay, 10);
 };
 
-struct SignalRecorderGenomeDescription
+struct SignalRecorderGenomeDesc
 {
-    auto operator<=>(SignalRecorderGenomeDescription const&) const = default;
+    auto operator<=>(SignalRecorderGenomeDesc const&) const = default;
 
-    MEMBER(SignalRecorderGenomeDescription, bool, readOnly, true);
-    MEMBER(SignalRecorderGenomeDescription, int, numWrittenSignalEntries, 0);
+    MEMBER(SignalRecorderGenomeDesc, bool, readOnly, true);
+    MEMBER(SignalRecorderGenomeDesc, int, numWrittenSignalEntries, 0);
 };
 
-struct SignalStorageGenomeDescription
+struct SignalStorageGenomeDesc
 {
-    auto operator<=>(SignalStorageGenomeDescription const&) const = default;
+    auto operator<=>(SignalStorageGenomeDesc const&) const = default;
 
-    MEMBER(SignalStorageGenomeDescription, bool, readOnly, true);
+    MEMBER(SignalStorageGenomeDesc, bool, readOnly, true);
 };
 
-struct SignalIntegratorGenomeDescription
+struct SignalIntegratorGenomeDesc
 {
-    auto operator<=>(SignalIntegratorGenomeDescription const&) const = default;
+    auto operator<=>(SignalIntegratorGenomeDesc const&) const = default;
 
-    MEMBER(SignalIntegratorGenomeDescription, float, newSignalWeight, 0.5f);  // Between 0 and 1
+    MEMBER(SignalIntegratorGenomeDesc, float, newSignalWeight, 0.5f);  // Between 0 and 1
 };
 
-using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription, SignalIntegratorGenomeDescription>;
+using MemoryModeGenomeDesc = std::variant<SignalDelayGenomeDesc, SignalRecorderGenomeDesc, SignalStorageGenomeDesc, SignalIntegratorGenomeDesc>;
 
-struct MemoryGenomeDescription
+struct MemoryGenomeDesc
 {
-    auto operator<=>(MemoryGenomeDescription const&) const = default;
+    auto operator<=>(MemoryGenomeDesc const&) const = default;
 
-    MEMBER(MemoryGenomeDescription, MemoryModeGenomeDescription, mode, SignalDelayGenomeDescription());
-    MEMBER(MemoryGenomeDescription, std::vector<SignalEntryGenomeDescription>, signalEntries, {});
-    MEMBER(MemoryGenomeDescription, uint8_t, channelBitMask, 0b11111111);
+    MEMBER(MemoryGenomeDesc, MemoryModeGenomeDesc, mode, SignalDelayGenomeDesc());
+    MEMBER(MemoryGenomeDesc, std::vector<SignalEntryGenomeDesc>, signalEntries, {});
+    MEMBER(MemoryGenomeDesc, uint8_t, channelBitMask, 0b11111111);
 
     MemoryMode getMode() const;
 };
 
-struct SenderGenomeDescription
+struct SenderGenomeDesc
 {
-    auto operator<=>(SenderGenomeDescription const&) const = default;
+    auto operator<=>(SenderGenomeDesc const&) const = default;
 
-    MEMBER(SenderGenomeDescription, float, range, 100.0f);
-    MEMBER(SenderGenomeDescription, int, maxTimesSent, 4);
+    MEMBER(SenderGenomeDesc, float, range, 100.0f);
+    MEMBER(SenderGenomeDesc, int, maxTimesSent, 4);
 };
 
-struct ReceiverGenomeDescription
+struct ReceiverGenomeDesc
 {
-    auto operator<=>(ReceiverGenomeDescription const&) const = default;
+    auto operator<=>(ReceiverGenomeDesc const&) const = default;
 
-    MEMBER(ReceiverGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReceiverGenomeDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+    MEMBER(ReceiverGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReceiverGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using CommunicatorModeGenomeDescription = std::variant<SenderGenomeDescription, ReceiverGenomeDescription>;
+using CommunicatorModeGenomeDesc = std::variant<SenderGenomeDesc, ReceiverGenomeDesc>;
 
-struct CommunicatorGenomeDescription
+struct CommunicatorGenomeDesc
 {
-    auto operator<=>(CommunicatorGenomeDescription const&) const = default;
+    auto operator<=>(CommunicatorGenomeDesc const&) const = default;
 
-    MEMBER(CommunicatorGenomeDescription, CommunicatorModeGenomeDescription, mode, SenderGenomeDescription());
+    MEMBER(CommunicatorGenomeDesc, CommunicatorModeGenomeDesc, mode, SenderGenomeDesc());
 
     CommunicatorMode getMode() const;
 };
 
-using CellTypeGenomeDescription = std::variant<
-    BaseGenomeDescription,
-    DepotGenomeDescription,
-    ConstructorGenomeDescription,
-    SensorGenomeDescription,
-    GeneratorGenomeDescription,
-    AttackerGenomeDescription,
-    InjectorGenomeDescription,
-    MuscleGenomeDescription,
-    DefenderGenomeDescription,
-    ReconnectorGenomeDescription,
-    DetonatorGenomeDescription,
-    DigestorGenomeDescription,
-    MemoryGenomeDescription,
-    CommunicatorGenomeDescription>;
+using CellTypeGenomeDesc = std::variant<
+    BaseGenomeDesc,
+    DepotGenomeDesc,
+    ConstructorGenomeDesc,
+    SensorGenomeDesc,
+    GeneratorGenomeDesc,
+    AttackerGenomeDesc,
+    InjectorGenomeDesc,
+    MuscleGenomeDesc,
+    DefenderGenomeDesc,
+    ReconnectorGenomeDesc,
+    DetonatorGenomeDesc,
+    DigestorGenomeDesc,
+    MemoryGenomeDesc,
+    CommunicatorGenomeDesc>;
 
-struct SignalRestrictionGenomeDescription
+struct SignalRestrictionGenomeDesc
 {
-    auto operator<=>(SignalRestrictionGenomeDescription const&) const = default;
+    auto operator<=>(SignalRestrictionGenomeDesc const&) const = default;
 
-    MEMBER(SignalRestrictionGenomeDescription, SignalRestrictionMode, mode, SignalRestrictionMode_Inactive);
-    MEMBER(SignalRestrictionGenomeDescription, float, baseAngle, 0.0f);
-    MEMBER(SignalRestrictionGenomeDescription, float, openingAngle, 90.0f);
+    MEMBER(SignalRestrictionGenomeDesc, SignalRestrictionMode, mode, SignalRestrictionMode_Inactive);
+    MEMBER(SignalRestrictionGenomeDesc, float, baseAngle, 0.0f);
+    MEMBER(SignalRestrictionGenomeDesc, float, openingAngle, 90.0f);
 };
 
-struct NodeDescription
+struct NodeDesc
 {
-    auto operator<=>(NodeDescription const&) const = default;
+    auto operator<=>(NodeDesc const&) const = default;
 
-    MEMBER(NodeDescription, float, referenceAngle, 0.0f);
-    MEMBER(NodeDescription, int, color, 0);
-    MEMBER(NodeDescription, int, numAdditionalConnections, 0);
+    MEMBER(NodeDesc, float, referenceAngle, 0.0f);
+    MEMBER(NodeDesc, int, color, 0);
+    MEMBER(NodeDesc, int, numAdditionalConnections, 0);
 
-    MEMBER(NodeDescription, NeuralNetworkGenomeDescription, neuralNetwork, NeuralNetworkGenomeDescription());
-    MEMBER(NodeDescription, CellTypeGenomeDescription, cellType, BaseGenomeDescription());
-    MEMBER(NodeDescription, SignalRestrictionGenomeDescription, signalRestriction, SignalRestrictionGenomeDescription());
+    MEMBER(NodeDesc, NeuralNetworkGenomeDesc, neuralNetwork, NeuralNetworkGenomeDesc());
+    MEMBER(NodeDesc, CellTypeGenomeDesc, cellType, BaseGenomeDesc());
+    MEMBER(NodeDesc, SignalRestrictionGenomeDesc, signalRestriction, SignalRestrictionGenomeDesc());
 
     CellTypeGenome getCellType() const;
 };
 
-struct GeneDescription
+struct GeneDesc
 {
-    auto operator<=>(GeneDescription const&) const = default;
+    auto operator<=>(GeneDesc const&) const = default;
 
-    MEMBER(GeneDescription, std::string, name, "");
-    MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {});
-    MEMBER(GeneDescription, ConstructorShape, shape, ConstructorShape_Custom);
-    MEMBER(GeneDescription, bool, separation, false);
-    MEMBER(GeneDescription, int, numBranches, 1);        // For separation = false
-    MEMBER(GeneDescription, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
-    MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
-    MEMBER(GeneDescription, float, stiffness, 1.0f);
-    MEMBER(GeneDescription, float, connectionDistance, 1.0f);
+    MEMBER(GeneDesc, std::string, name, "");
+    MEMBER(GeneDesc, std::vector<NodeDesc>, nodes, {});
+    MEMBER(GeneDesc, ConstructorShape, shape, ConstructorShape_Custom);
+    MEMBER(GeneDesc, bool, separation, false);
+    MEMBER(GeneDesc, int, numBranches, 1);        // For separation = false
+    MEMBER(GeneDesc, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
+    MEMBER(GeneDesc, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
+    MEMBER(GeneDesc, float, stiffness, 1.0f);
+    MEMBER(GeneDesc, float, connectionDistance, 1.0f);
 
     static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
 
-struct GenomeDescription
+struct GenomeDesc
 {
-    GenomeDescription();
-    auto operator<=>(GenomeDescription const&) const = default;
+    GenomeDesc();
+    auto operator<=>(GenomeDesc const&) const = default;
 
     uint64_t _id = 0;
-    GenomeDescription id(uint64_t id);
-    MEMBER(GenomeDescription, std::string, name, "");
-    MEMBER(GenomeDescription, std::vector<GeneDescription>, genes, {})
-    MEMBER(GenomeDescription, float, frontAngle, 0.0f);
+    GenomeDesc id(uint64_t id);
+    MEMBER(GenomeDesc, std::string, name, "");
+    MEMBER(GenomeDesc, std::vector<GeneDesc>, genes, {})
+    MEMBER(GenomeDesc, float, frontAngle, 0.0f);
 };
 
-struct SubGenomeDescription
+struct SubGenomeDesc
 {
-    GenomeDescription genome;
+    GenomeDesc genome;
     int startIndex = 0;
     bool trimmed = false;
 
-    bool operator==(const SubGenomeDescription&) const = default;
+    bool operator==(const SubGenomeDesc&) const = default;
 };
 
 // Include hash specializations

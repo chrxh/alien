@@ -28,8 +28,8 @@ protected:
 
 //TEST_F(DataTransferTests, singleParticle)
 //{
-//    Description data;
-//    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDescription());
+//    Desc data;
+//    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDesc());
 //
 //    _simulationFacade->setSimulationData(data);
 //    auto actualData = _simulationFacade->getSimulationData();
@@ -39,13 +39,13 @@ protected:
 
 //TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
 //{
-//    auto genome = GenomeDescription().genes(
-//        {GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
-//         GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription()})});
+//    auto genome = GenomeDesc().genes(
+//        {GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+//         GeneDesc().separation(false).nodes({NodeDesc(), NodeDesc(), NodeDesc()})});
 //
-//    Description data;
-//    data.addCreature({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(BaseDescription())), ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(BaseDescription()))}, CreatureDescription(), genome);
-//    data.addCreature({ObjectDescription().id(3).pos({20.0f, 20.0f}).type(CellDescription().cellType(BaseDescription())), ObjectDescription().id(4).pos({21.0f, 20.0f}).type(CellDescription().cellType(BaseDescription()))}, CreatureDescription(), genome);
+//    Desc data;
+//    data.addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(BaseDesc())), ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(BaseDesc()))}, CreatureDesc(), genome);
+//    data.addCreature({ObjectDesc().id(3).pos({20.0f, 20.0f}).type(CellDesc().cellType(BaseDesc())), ObjectDesc().id(4).pos({21.0f, 20.0f}).type(CellDesc().cellType(BaseDesc()))}, CreatureDesc(), genome);
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
 //
@@ -70,14 +70,14 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes)
 {
     auto objectParameter = GetParam();
 
-    Description data;
+    Desc data;
     if (objectParameter.objectType == ObjectType_Cell) {
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
         data.objects(
-            {_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter),
-             _descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)});
+            {_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter),
+             _descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
     }
 
     _simulationFacade->setSimulationData(data);
@@ -90,14 +90,14 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes_preview)
 {
     auto objectParameter = GetParam();
 
-    Description data;
+    Desc data;
     if (objectParameter.objectType == ObjectType_Cell) {
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)}, CreatureDescription(), GenomeDescription());
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
         data.objects(
-            {_descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter),
-             _descriptionTestDataFactory->createNonDefaultObjectDescription(objectParameter)});
+            {_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter),
+             _descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
     }
 
     _simulationFacade->setPreviewData(data);
@@ -121,12 +121,12 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode)
 {
     auto nodeParameter = GetParam();
 
-    auto [creature1, genome1] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
-    auto [creature2, genome2] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    auto [creature1, genome1] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
+    auto [creature2, genome2] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
-    Description data;
-    data.addCreature({ObjectDescription()}, creature1, genome1);
-    data.addCreature({ObjectDescription()}, creature2, genome2);
+    Desc data;
+    data.addCreature({ObjectDesc()}, creature1, genome1);
+    data.addCreature({ObjectDesc()}, creature2, genome2);
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -138,10 +138,10 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
 {
     auto nodeParameter = GetParam();
 
-    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
-    Description data;
-    data.addCreature({ObjectDescription()}, creature, genome);
+    Desc data;
+    data.addCreature({ObjectDesc()}, creature, genome);
 
     _simulationFacade->setPreviewData(data);
     auto actualData = _simulationFacade->getPreviewData();
@@ -151,12 +151,12 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
 
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
-    auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDescription()));
+    auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDesc()));
 
 
-    auto data = Description().addCreature(hexagon._objects, CreatureDescription(), GenomeDescription().genes({
-            GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
-            GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
+    auto data = Desc().addCreature(hexagon._objects, CreatureDesc(), GenomeDesc().genes({
+            GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+            GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -167,11 +167,11 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 
 TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
-    auto data = Description()
-                    .objects({ObjectDescription().id(0).type(StructureDescription()), ObjectDescription().id(1).type(FreeCellDescription())})
-                    .energies({EnergyDescription().id(2), EnergyDescription().id(3)});
-    data.addCreature({ObjectDescription().id(5)}, CreatureDescription().id(4), GenomeDescription());
-    data.addCreature({ObjectDescription().id(6)}, CreatureDescription().id(5), GenomeDescription());
+    auto data = Desc()
+                    .objects({ObjectDesc().id(0).type(StructureDesc()), ObjectDesc().id(1).type(FreeCellDesc())})
+                    .energies({EnergyDesc().id(2), EnergyDesc().id(3)});
+    data.addCreature({ObjectDesc().id(5)}, CreatureDesc().id(4), GenomeDesc());
+    data.addCreature({ObjectDesc().id(6)}, CreatureDesc().id(5), GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->setSimulationData(data);
@@ -207,11 +207,11 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 
 TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
-    auto data = Description()
-                    .objects({ObjectDescription().id(0).type(FreeCellDescription()), ObjectDescription().id(1).type(FreeCellDescription())})
-                    .energies({EnergyDescription().id(2), EnergyDescription().id(3)});
-    data.addCreature({ObjectDescription().id(5)}, CreatureDescription().id(4), GenomeDescription());
-    data.addCreature({ObjectDescription().id(6)}, CreatureDescription().id(5), GenomeDescription());
+    auto data = Desc()
+                    .objects({ObjectDesc().id(0).type(FreeCellDesc()), ObjectDesc().id(1).type(FreeCellDesc())})
+                    .energies({EnergyDesc().id(2), EnergyDesc().id(3)});
+    data.addCreature({ObjectDesc().id(5)}, CreatureDesc().id(4), GenomeDesc());
+    data.addCreature({ObjectDesc().id(6)}, CreatureDesc().id(5), GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
@@ -239,11 +239,11 @@ TEST_F(DataTransferTests, changeGenome_successful)
 {
     auto const CreatureId = 1;
 
-    auto data = Description().addCreature({ObjectDescription()}, CreatureDescription().id(CreatureId), GenomeDescription());
+    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(CreatureId), GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
 
-    auto newGenome = GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
     auto result = _simulationFacade->changeCreature(CreatureId, newGenome);
     ASSERT_TRUE(result);
 
@@ -270,11 +270,11 @@ TEST_F(DataTransferTests, changeGenome_failed)
     auto constexpr CreatureId = 1;
     auto constexpr WrongCreatureId = 2;
 
-    auto data = Description().addCreature({ObjectDescription()}, CreatureDescription().id(CreatureId), GenomeDescription());
+    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(CreatureId), GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
 
-    auto newGenome = GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
     auto result = _simulationFacade->changeCreature(WrongCreatureId, newGenome);
     ASSERT_FALSE(result);
 }
@@ -284,8 +284,8 @@ TEST_F(DataTransferTests, getGenomeOfCreature_successful)
     auto constexpr CreatureId = 1;
 
     auto genome =
-        GenomeDescription().name("Test Genome").genes({GeneDescription().name("Gene1").separation(true).nodes({NodeDescription(), NodeDescription()})});
-    auto data = Description().addCreature({ObjectDescription(), ObjectDescription(), ObjectDescription(), ObjectDescription()}, CreatureDescription().id(CreatureId), genome);
+        GenomeDesc().name("Test Genome").genes({GeneDesc().name("Gene1").separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto data = Desc().addCreature({ObjectDesc(), ObjectDesc(), ObjectDesc(), ObjectDesc()}, CreatureDesc().id(CreatureId), genome);
 
     _simulationFacade->setSimulationData(data);
 
@@ -304,7 +304,7 @@ TEST_F(DataTransferTests, getGenomeOfCreature_nonExistentCreature)
     auto constexpr CreatureId = 1;
     auto constexpr WrongCreatureId = 2;
 
-    auto data = Description().addCreature({ObjectDescription()}, CreatureDescription().id(CreatureId), GenomeDescription());
+    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(CreatureId), GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
 
@@ -316,12 +316,12 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
 {
     auto constexpr CreatureId1 = 1;
     auto constexpr CreatureId2 = 2;
-    auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})});
-    auto genome2 = GenomeDescription();
+    auto genome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto genome2 = GenomeDesc();
 
-    Description data;
-    data.addCreature({ObjectDescription().id(1), ObjectDescription().id(2)}, CreatureDescription().id(CreatureId1), genome);
-    data.addCreature({ObjectDescription().id(3)}, CreatureDescription().id(CreatureId2), genome2);
+    Desc data;
+    data.addCreature({ObjectDesc().id(1), ObjectDesc().id(2)}, CreatureDesc().id(CreatureId1), genome);
+    data.addCreature({ObjectDesc().id(3)}, CreatureDesc().id(CreatureId2), genome2);
 
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -347,7 +347,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
 TEST_F(DataTransferTests, adaptIdGenerator_objects)
 {
     auto constexpr HighId = 1000000;
-    auto data = Description().objects({ObjectDescription().id(HighId).type(StructureDescription())});
+    auto data = Desc().objects({ObjectDesc().id(HighId).type(StructureDesc())});
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
@@ -360,7 +360,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_objects)
 TEST_F(DataTransferTests, adaptIdGenerator_energyParticles)
 {
     auto constexpr HighId = 1000000;
-    auto data = Description().energies({EnergyDescription().id(HighId)});
+    auto data = Desc().energies({EnergyDesc().id(HighId)});
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
@@ -373,7 +373,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_energyParticles)
 TEST_F(DataTransferTests, adaptIdGenerator_creatures)
 {
     auto constexpr HighId = 1000000;
-    auto data = Description().addCreature({ObjectDescription().id(1)}, CreatureDescription().id(HighId));
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().id(HighId));
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
@@ -386,7 +386,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_creatures)
 TEST_F(DataTransferTests, adaptIdGenerator_genomes)
 {
     auto constexpr HighId = 1000000;
-    auto data = Description().addCreature({ObjectDescription().id(2)}, CreatureDescription().id(1), GenomeDescription().id(HighId));
+    auto data = Desc().addCreature({ObjectDesc().id(2)}, CreatureDesc().id(1), GenomeDesc().id(HighId));
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});

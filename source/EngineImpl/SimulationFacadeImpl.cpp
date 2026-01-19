@@ -67,29 +67,29 @@ void _SimulationFacadeImpl::setSyncSimulationWithRenderingRatio(int value)
     _worker.setSyncSimulationWithRenderingRatio(value);
 }
 
-Description _SimulationFacadeImpl::getSimulationData()
+Desc _SimulationFacadeImpl::getSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-Description _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
+Desc _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
 {
     _worker.updateSelection();
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
-Description _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
+Desc _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
 {
     return _worker.getInspectedSimulationData(objectIds);
 }
 
-void _SimulationFacadeImpl::addAndSelectSimulationData(Description&& dataToAdd)
+void _SimulationFacadeImpl::addAndSelectSimulationData(Desc&& dataToAdd)
 {
     _worker.addAndSelectSimulationData(std::move(dataToAdd));
 }
 
-void _SimulationFacadeImpl::setSimulationData(Description const& dataToUpdate)
+void _SimulationFacadeImpl::setSimulationData(Desc const& dataToUpdate)
 {
     _worker.setSimulationData(dataToUpdate);
     _selectionNeedsUpdate = true;
@@ -141,22 +141,22 @@ void _SimulationFacadeImpl::setDetached(bool value)
     _worker.setDetached(value);
 }
 
-void _SimulationFacadeImpl::changeCell(ObjectDescription const& changedCell)
+void _SimulationFacadeImpl::changeCell(ObjectDesc const& changedCell)
 {
     _worker.changeCell(changedCell);
 }
 
-void _SimulationFacadeImpl::changeParticle(EnergyDescription const& changedParticle)
+void _SimulationFacadeImpl::changeParticle(EnergyDesc const& changedParticle)
 {
     _worker.changeParticle(changedParticle);
 }
 
-bool _SimulationFacadeImpl::changeCreature(uint64_t creatureId, GenomeDescription const& genome)
+bool _SimulationFacadeImpl::changeCreature(uint64_t creatureId, GenomeDesc const& genome)
 {
     return _worker.changeCreature(creatureId, genome);
 }
 
-std::optional<GenomeDescription> _SimulationFacadeImpl::getGenomeOfCreature(uint64_t creatureId)
+std::optional<GenomeDesc> _SimulationFacadeImpl::getGenomeOfCreature(uint64_t creatureId)
 {
     return _worker.getGenomeOfCreature(creatureId);
 }
@@ -347,12 +347,12 @@ float _SimulationFacadeImpl::getTps() const
     return _worker.getTps();
 }
 
-Description _SimulationFacadeImpl::getPreviewData()
+Desc _SimulationFacadeImpl::getPreviewData()
 {
     return _worker.getPreviewData();
 }
 
-void _SimulationFacadeImpl::setPreviewData(Description const& description)
+void _SimulationFacadeImpl::setPreviewData(Desc const& description)
 {
     _worker.setPreviewData(description);
 }

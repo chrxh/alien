@@ -2,7 +2,7 @@
 
 #include "EngineConstants.h"
 
-SignalPreviewDescription::SignalPreviewDescription()
+SignalPreviewDesc::SignalPreviewDesc()
 {
     _channels.resize(MAX_CHANNELS, 0);
 }

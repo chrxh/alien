@@ -31,9 +31,9 @@ protected:
     /**
      * Helper function to create a cell at a specific position with given energy and color
      */
-    ObjectDescription createCell(RealVector2D const& pos, float energy, int color = 0)
+    ObjectDesc createCell(RealVector2D const& pos, float energy, int color = 0)
     {
-        return ObjectDescription().pos(pos).color(color).vel({0, 0}).type(CellDescription().usableEnergy(energy));
+        return ObjectDesc().pos(pos).color(color).vel({0, 0}).type(CellDesc().usableEnergy(energy));
     }
 
     /**
@@ -87,7 +87,7 @@ TEST_F(LayerParameterTests, circularZone_minCellEnergy_cellsDieInsideZone)
     // - Cell inside zone with energy above layer minCellEnergy (should survive)
     // - Cell outside zone with energy below base minCellEnergy (should die)
     // - Cell outside zone with energy above base minCellEnergy (should survive)
-    auto data = Description().addCreature({
+    auto data = Desc().addCreature({
         createCell({500.0f, 500.0f}, 75.0f, 0),   // Inside zone, energy < layer min (should die)
         createCell({510.0f, 500.0f}, 120.0f, 0),  // Inside zone, energy > layer min (should survive)
         createCell({700.0f, 500.0f}, 40.0f, 0),   // Outside zone, energy < base min (should die)
@@ -143,7 +143,7 @@ TEST_F(LayerParameterTests, rectangularZone_minCellEnergy_cellsDieInsideZone)
     // - Inside rectangle with high energy (should survive)
     // - Outside rectangle with energy = half of base min (should die)
     // - Outside rectangle with high energy (should survive)
-    auto data = Description().addCreature({
+    auto data = Desc().addCreature({
         createCell({500.0f, 500.0f}, 50.0f, 0),   // Inside rect, energy = 0.5 * layer min (should die)
         createCell({520.0f, 510.0f}, 120.0f, 0),  // Inside rect, energy > layer min (should survive)
         createCell({700.0f, 500.0f}, 25.0f, 0),   // Outside rect, energy = 0.5 * base min (should die)
@@ -193,7 +193,7 @@ TEST_F(LayerParameterTests, multipleCircularZones_differentSizes)
     _simulationFacade->setSimulationParameters(_parameters);
 
     // Create test cells at different positions with very low energy for cells that should die
-    auto data = Description().addCreature({
+    auto data = Desc().addCreature({
         createCell({300.0f, 500.0f}, 10.0f, 0),   // Zone 1 center, very low energy (should die)
         createCell({305.0f, 500.0f}, 110.0f, 0),  // Zone 1, energy > 100 (should survive)
         createCell({700.0f, 500.0f}, 10.0f, 0),   // Zone 2 center, very low energy (should die)
@@ -248,7 +248,7 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
     // - Only in Zone 1
     // - In overlapping region (both zones)
     // - Only in Zone 2
-    auto data = Description().addCreature({
+    auto data = Desc().addCreature({
         createCell({450.0f, 500.0f}, 10.0f, 0),   // Only Zone 1, very low energy (should die)
         createCell({460.0f, 500.0f}, 110.0f, 0),  // Only Zone 1, energy > 100 (should survive)
         createCell({525.0f, 500.0f}, 10.0f, 0),   // Overlap, very low energy (should die)
@@ -288,7 +288,7 @@ TEST_F(LayerParameterTests, circularZone_fadeoutRadius_transitionBehavior)
 
     // Create cells at different distances from center to test fadeout behavior
     // Core radius: 80, fadeout: 60, so full transition ends at distance 140
-    auto data = Description().addCreature({
+    auto data = Desc().addCreature({
         createCell({500.0f, 500.0f}, 160.0f, 0),  // Center, full layer effect, energy > 150 (should survive)
         createCell({570.0f, 500.0f}, 75.0f, 0),   // In fadeout zone (distance ~70), energy = 0.5 * 150 (should die)
         createCell({650.0f, 500.0f}, 60.0f, 0),   // Outside fadeout (distance ~150), energy > 50 base (should survive)
@@ -324,7 +324,7 @@ TEST_F(LayerParameterTests, rectangularZone_dimensions_correctBoundaries)
     _simulationFacade->setSimulationParameters(_parameters);
 
     // Create cells to test horizontal and vertical boundaries
-    auto data = Description().addCreature({
+    auto data = Desc().addCreature({
         createCell({500.0f, 500.0f}, 110.0f, 0),  // Center, inside (survives)
         createCell({580.0f, 500.0f}, 110.0f, 0),  // Inside horizontally (survives)
         createCell({500.0f, 520.0f}, 50.0f, 0),   // Inside vertically, energy = 0.5 * 100 (dies)
@@ -375,7 +375,7 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
 
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().addCreature({
+    auto data = Desc().addCreature({
         createCell({300.0f, 500.0f}, 110.0f, 0),  // Circular zone, energy > 100 (survives)
         createCell({310.0f, 500.0f}, 10.0f, 0),   // Circular zone, very low energy (dies)
         createCell({700.0f, 500.0f}, 120.0f, 0),  // Rectangular zone, energy > 110 (survives)
@@ -419,7 +419,7 @@ TEST_F(LayerParameterTests, movingRectangularZone_cellsAffectedByMovingZone)
     // - Cell at zone's initial position (should die immediately)
     // - Cell ahead of zone's path (initially outside, will be inside after zone moves)
     // - Cell far from zone's path (should survive throughout)
-    auto data = Description().addCreature({
+    auto data = Desc().addCreature({
         createCell({300.0f, 500.0f}, 110.0f, 0),  // At initial zone center, dies (< 120)
         createCell({320.0f, 500.0f}, 125.0f, 0),  // Inside initial zone, survives (> 120)
         createCell({450.0f, 500.0f}, 110.0f, 0),  // Ahead of zone, initially safe but will be caught

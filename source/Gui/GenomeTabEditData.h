@@ -8,7 +8,7 @@
 struct _GenomeTabEditData
 {
     int id = 0;
-    GenomeDescription genome;
+    GenomeDesc genome;
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
     bool run = true;
@@ -43,9 +43,9 @@ struct _GenomeTabEditData
         }
     }
 
-    GeneDescription& getSelectedGeneRef() { return genome._genes.at(selectedGeneIndex.value()); }
+    GeneDesc& getSelectedGeneRef() { return genome._genes.at(selectedGeneIndex.value()); }
 
-    NodeDescription& getSelectedNodeRef()
+    NodeDesc& getSelectedNodeRef()
     {
         auto& gene = getSelectedGeneRef();
         auto nodeIndex = getSelectedNodeIndex();

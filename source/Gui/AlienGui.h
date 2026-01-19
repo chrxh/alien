@@ -453,7 +453,7 @@ public:
     {
         MEMBER(SignalMemoryEditorParameters, float, textWidth, 100);
     };
-    static void SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDescription>& entries);
+    static void SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDesc>& entries);
 
     static void DisabledField();
 

@@ -31,19 +31,19 @@ namespace
 
 
 CreaturePreviewWidget
-_CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex)
+_CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex)
 {
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(bool& phenotypeChanged, Description& phenotype, float width)
+void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, float width)
 {
     auto phenotypeWithoutSeed = phenotype;
-    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
+    GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
 
     auto geneStartIndex = _subGenome.startIndex;
 
-    auto conversionResult = PreviewDescriptionConverterService::get().convertToPreviewDescription(
+    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(
         _editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
     _visualFrontAngle = conversionResult.visualFrontAngle;
 
@@ -82,12 +82,12 @@ void _CreaturePreviewWidget::setGeneIndices(GeneIndicesForSubGenome const& value
     _geneIndices = value;
 }
 
-SubGenomeDescription const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
+SubGenomeDesc const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
 {
     return _subGenome;
 }
 
-void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDescription const& value)
+void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDesc const& value)
 {
     _subGenome = value;
 }
@@ -100,7 +100,7 @@ void _CreaturePreviewWidget::resetVisualFrontAngle()
 _CreaturePreviewWidget::_CreaturePreviewWidget(
     GenomeTabEditData const& editData,
     GeneIndicesForSubGenome const& geneIndices,
-    SubGenomeDescription const& genomeWithStartIndex)
+    SubGenomeDesc const& genomeWithStartIndex)
     : _editData(editData)
     , _geneIndices(geneIndices)
     , _subGenome(genomeWithStartIndex)
@@ -371,12 +371,12 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     _editData->setSelectedNodeIndex(selectedNode);
 }
 
-void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Description& phenotype, ConversionResult const& conversionResult)
+void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult)
 {
     if (_editData->run || !_editData->detailSimulation || !_selectedCellIdFromPreview.has_value()) {
         return;
     }
-    std::optional<CellPreviewDescription> selectedCell;
+    std::optional<CellPreviewDesc> selectedCell;
     for (auto const& object : conversionResult.description._objects) {
         if (object._id == _selectedCellIdFromPreview.value()) {
             selectedCell = object;
@@ -404,7 +404,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Descrip
             style.GrabMinSize = scale(8.0f);
 
             if (!selectedCell->_signal.has_value()) {
-                selectedCell->_signal = SignalPreviewDescription();
+                selectedCell->_signal = SignalPreviewDesc();
             }
             auto& channels = selectedCell->_signal->_channels;
             int index = 0;
@@ -515,13 +515,13 @@ void _CreaturePreviewWidget::moveCenter(
     _worldCenter = startWorldPosition - deltaWorldPos;
 }
 
-void _CreaturePreviewWidget::updatePhenotype(Description& phenotype, CellPreviewDescription const& editedCell) const
+void _CreaturePreviewWidget::updatePhenotype(Desc& phenotype, CellPreviewDesc const& editedCell) const
 {
     for (auto& object : phenotype._objects) {
         if (object._id == editedCell._id) {
             object.getCellRef()._signalState = editedCell._signalState;
             if (editedCell._signalState == SignalState_Active) {
-                auto signalDesc = SignalDescription().channels(editedCell._signal.value()._channels);
+                auto signalDesc = SignalDesc().channels(editedCell._signal.value()._channels);
                 object.getCellRef()._signal = signalDesc;
             }
         }

@@ -67,7 +67,7 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
 {
     auto activationFunction = GetParam();
 
-    NeuralNetworkDescription nn;
+    NeuralNetworkDesc nn;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         nn._activationFunctions[i] = activationFunction;
         for (int j = 0; j < MAX_CHANNELS; ++j) {
@@ -78,10 +78,10 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     nn.weight(2, 7, 0.5f);
     nn.weight(5, 3, -1.5f);
 
-    Description data;
+    Desc data;
     data.addCreature({
-        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
-        ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f})),
+        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
+        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f})),
     });
     data.addConnection(1, 2);
 
@@ -98,7 +98,7 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
 {
     auto activationFunction = GetParam();
 
-    NeuralNetworkDescription nn;
+    NeuralNetworkDesc nn;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         nn._activationFunctions[i] = activationFunction;
         for (int j = 0; j < MAX_CHANNELS; ++j) {
@@ -107,10 +107,10 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
     }
     nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
-    Description data;
+    Desc data;
     data.addCreature({
-        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
-        ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({0, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
+        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({0, 0, 0, 0, 0, 0, 0, 0})),
     });
     data.addConnection(1, 2);
 
@@ -125,15 +125,15 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
 
 TEST_F(NeuronTests, truncateSignal)
 {
-    NeuralNetworkDescription nn;
+    NeuralNetworkDesc nn;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         nn.weight(i, i, 2.0f);
     }
 
-    Description data;
+    Desc data;
     data.addCreature({
-        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
-        ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f})),
+        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
+        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f})),
     });
     data.addConnection(1, 2);
 

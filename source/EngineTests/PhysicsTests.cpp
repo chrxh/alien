@@ -78,10 +78,10 @@ TEST_P(PhysicsTests_TwoAngles, angularForces)
     auto pos2 = RealVector2D{100.0f, 100.0f};
     auto pos3 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle2) * 1.5f;
     auto pos3ref = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle1 + refAngle) * 1.5f;
-    auto data = Description().addCreature({
-        ObjectDescription().id(1).pos(pos1),
-        ObjectDescription().id(2).pos(pos2),
-        ObjectDescription().id(3).pos(pos3),
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos(pos1),
+        ObjectDesc().id(2).pos(pos2),
+        ObjectDesc().id(3).pos(pos3),
     });
     data.addConnection(2, 1);
     data.addConnection(2, 3, pos3ref);
@@ -108,10 +108,10 @@ TEST_F(PhysicsTests, noGhostRotations)
     auto pos2 = RealVector2D{100.0f, 100.0f};
     auto pos3 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle2);
     auto pos3ref = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle1 + RefAngle);
-    auto data = Description().addCreature({
-        ObjectDescription().id(1).pos(pos1),
-        ObjectDescription().id(2).pos(pos2),
-        ObjectDescription().id(3).pos(pos3),
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos(pos1),
+        ObjectDesc().id(2).pos(pos2),
+        ObjectDesc().id(3).pos(pos3),
     });
     data.addConnection(2, 1);
     data.addConnection(2, 3, pos3ref);

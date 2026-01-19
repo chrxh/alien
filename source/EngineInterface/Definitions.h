@@ -14,11 +14,11 @@ struct ExpertToggles;
 struct ColorTransitionRule;
 struct ParameterSpec;
 
-struct Description;
-struct ObjectDescription;
-struct EnergyDescription;
-struct GenomeDescription;
-struct GeneDescription;
+struct Desc;
+struct ObjectDesc;
+struct EnergyDesc;
+struct GenomeDesc;
+struct GeneDesc;
 
 struct CudaSettings;
 
@@ -40,7 +40,7 @@ class ShapeGeneratorResult;
 
 class StatisticsHistory;
 
-struct PreviewDescription;
+struct PreviewDesc;
 
 struct ConversionResult;
 

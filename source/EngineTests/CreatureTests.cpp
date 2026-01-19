@@ -31,88 +31,88 @@ public:
     ~CreatureTests() = default;
 
 protected:
-    GenomeDescription createGenomeForCreatureWithTwoLegs(MuscleMode const& muscleMode, Direction direction) const
+    GenomeDesc createGenomeForCreatureWithTwoLegs(MuscleMode const& muscleMode, Direction direction) const
     {
         auto muscleDesc = [&muscleMode, &direction] {
             if (muscleMode == MuscleMode_AutoBending) {
-                return MuscleGenomeDescription().mode(AutoBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+                return MuscleGenomeDesc().mode(AutoBendingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
             } else if (muscleMode == MuscleMode_ManualBending) {
-                return MuscleGenomeDescription().mode(ManualBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+                return MuscleGenomeDesc().mode(ManualBendingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
             } else if (muscleMode == MuscleMode_AngleBending) {
-                return MuscleGenomeDescription().mode(AngleBendingGenomeDescription().attractionRepulsionRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+                return MuscleGenomeDesc().mode(AngleBendingGenomeDesc().attractionRepulsionRatio(direction == Direction::Forward ? 0.8f : 0.2f));
             } else {
                 CHECK(false);
             }
         }();
         auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDescription().autoTriggerInterval(15)
-            : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
-        return GenomeDescription().genes({
-            GeneDescription().separation(true).nodes({
-                NodeDescription().cellType(generator),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
-                NodeDescription(),
+            ? GeneratorGenomeDesc().autoTriggerInterval(15)
+            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        return GenomeDesc().genes({
+            GeneDesc().separation(true).nodes({
+                NodeDesc().cellType(generator),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc().cellType(ConstructorGenomeDesc().geneIndex(1)),
+                NodeDesc(),
             }),
-            GeneDescription().numConcatenations(4).numBranches(2).nodes({NodeDescription().cellType(muscleDesc)}),
+            GeneDesc().numConcatenations(4).numBranches(2).nodes({NodeDesc().cellType(muscleDesc)}),
         });
     }
 
-    GenomeDescription createGenomeForCreatureWithOneLegAndSpikes(MuscleMode const& muscleMode, Direction direction) const
+    GenomeDesc createGenomeForCreatureWithOneLegAndSpikes(MuscleMode const& muscleMode, Direction direction) const
     {
         auto muscleDesc = [&muscleMode, &direction] {
             if (muscleMode == MuscleMode_AutoBending) {
-                return MuscleGenomeDescription().mode(AutoBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+                return MuscleGenomeDesc().mode(AutoBendingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
             } else if (muscleMode == MuscleMode_ManualBending) {
-                return MuscleGenomeDescription().mode(ManualBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+                return MuscleGenomeDesc().mode(ManualBendingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
             } else if (muscleMode == MuscleMode_AngleBending) {
-                return MuscleGenomeDescription().mode(AngleBendingGenomeDescription().attractionRepulsionRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+                return MuscleGenomeDesc().mode(AngleBendingGenomeDesc().attractionRepulsionRatio(direction == Direction::Forward ? 0.8f : 0.2f));
             } else {
                 CHECK(false);
             }
         }();
         auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDescription().autoTriggerInterval(15)
-            : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
-        return GenomeDescription().genes({
-            GeneDescription().separation(true).nodes({
-                NodeDescription().cellType(generator),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
-                NodeDescription(),
+            ? GeneratorGenomeDesc().autoTriggerInterval(15)
+            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        return GenomeDesc().genes({
+            GeneDesc().separation(true).nodes({
+                NodeDesc().cellType(generator),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc().cellType(ConstructorGenomeDesc().geneIndex(1)),
+                NodeDesc(),
             }),
-            GeneDescription().numConcatenations(2).numBranches(1).nodes(
-                {NodeDescription().color(1).cellType(muscleDesc), NodeDescription().color(1).cellType(ConstructorGenomeDescription().geneIndex(2))}),
-            GeneDescription().numConcatenations(1).numBranches(2).nodes({NodeDescription().color(2)}),
+            GeneDesc().numConcatenations(2).numBranches(1).nodes(
+                {NodeDesc().color(1).cellType(muscleDesc), NodeDesc().color(1).cellType(ConstructorGenomeDesc().geneIndex(2))}),
+            GeneDesc().numConcatenations(1).numBranches(2).nodes({NodeDesc().color(2)}),
         });
     }
 
-    GenomeDescription createGenomeForCrawlingCreature(MuscleMode const& muscleMode, Direction direction, float frontAngle) const
+    GenomeDesc createGenomeForCrawlingCreature(MuscleMode const& muscleMode, Direction direction, float frontAngle) const
     {
         auto muscleDesc = muscleMode == MuscleMode_AutoCrawling
-            ? MuscleGenomeDescription().mode(AutoCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
-            : MuscleGenomeDescription().mode(ManualCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
+            ? MuscleGenomeDesc().mode(AutoCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
+            : MuscleGenomeDesc().mode(ManualCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
         auto generator = muscleMode == MuscleMode_AutoCrawling
-            ? GeneratorGenomeDescription()
-            : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
-        return GenomeDescription()
+            ? GeneratorGenomeDesc()
+            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        return GenomeDesc()
             .frontAngle(frontAngle)
             .genes({
-                GeneDescription().separation(false).nodes({
-                    NodeDescription().cellType(generator),
-                    NodeDescription(),
-                    NodeDescription(),
-                    NodeDescription(),
-                    NodeDescription().cellType(muscleDesc),
-                    NodeDescription().cellType(muscleDesc),
-                    NodeDescription(),
-                    NodeDescription(),
-                    NodeDescription(),
-                    NodeDescription(),
+                GeneDesc().separation(false).nodes({
+                    NodeDesc().cellType(generator),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc().cellType(muscleDesc),
+                    NodeDesc().cellType(muscleDesc),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
                 }),
             });
     }
@@ -133,9 +133,9 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, Direction::Forward);
-    auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos({200.0f, 200.0f}).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
-        CreatureDescription(),
+    auto data = Desc().addCreature(
+        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        CreatureDesc(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -144,7 +144,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Check that the seed provides no energy anymore after the creature is constructed
-    auto constructor = std::get<ConstructorDescription>(actualData.getObjectRef(0).getCellRef()._cellType);
+    auto constructor = std::get<ConstructorDesc>(actualData.getObjectRef(0).getCellRef()._cellType);
     if (genome._genes[constructor._geneIndex]._separation) {
         EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
     }
@@ -157,15 +157,15 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     auto cells = actualData.getObjectsForCreature(creature._id);
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-    std::vector<ObjectDescription> body;
+    std::vector<ObjectDesc> body;
     for (int i = 0; i < 6; ++i) {
         body.emplace_back(cells.at(i));
     }
-    std::vector<ObjectDescription> leg1;
+    std::vector<ObjectDesc> leg1;
     for (int i = 6; i < 6 + 4; ++i) {
         leg1.emplace_back(cells.at(i));
     }
-    std::vector<ObjectDescription> leg2;
+    std::vector<ObjectDesc> leg2;
     for (int i = 6 + 4; i < 6 + 4 + 4; ++i) {
         leg2.emplace_back(cells.at(i));
     }
@@ -189,13 +189,13 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     }
 
     // Check angles without muscle distortions
-    auto getInitialAngle = [&muscleMode](ObjectDescription const& object) {
+    auto getInitialAngle = [&muscleMode](ObjectDesc const& object) {
         if (muscleMode == MuscleMode_AutoBending) {
-            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(object.getCellRef()._cellType)._mode)._initialAngle.value();
+            return std::get<AutoBendingDesc>(std::get<MuscleDesc>(object.getCellRef()._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_ManualBending) {
-            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(object.getCellRef()._cellType)._mode)._initialAngle.value();
+            return std::get<ManualBendingDesc>(std::get<MuscleDesc>(object.getCellRef()._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_AngleBending) {
-            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(object.getCellRef()._cellType)._mode)._initialAngle.value();
+            return std::get<AngleBendingDesc>(std::get<MuscleDesc>(object.getCellRef()._cellType)._mode)._initialAngle.value();
         } else {
             CHECK(false);
         }
@@ -216,9 +216,9 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCreatureWithOneLegAndSpikes(muscleMode, Direction::Forward);
-    auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos({200.0f, 200.0f}).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
-        CreatureDescription(),
+    auto data = Desc().addCreature(
+        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        CreatureDesc(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -227,7 +227,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Check that the seed provides no energy anymore after the creature is constructed
-    auto constructor = std::get<ConstructorDescription>(actualData.getObjectRef(0).getCellRef()._cellType);
+    auto constructor = std::get<ConstructorDesc>(actualData.getObjectRef(0).getCellRef()._cellType);
     if (genome._genes[constructor._geneIndex]._separation) {
         EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
     }
@@ -240,10 +240,10 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     auto cells = actualData.getObjectsForCreature(creature._id);
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-    std::vector<ObjectDescription> body;
-    std::vector<ObjectDescription> leg;
-    std::vector<ObjectDescription> spikes1;
-    std::vector<ObjectDescription> spikes2;
+    std::vector<ObjectDesc> body;
+    std::vector<ObjectDesc> leg;
+    std::vector<ObjectDesc> spikes1;
+    std::vector<ObjectDesc> spikes2;
     for (auto const& object : cells) {
         if (object._color == 0) {
             body.emplace_back(object);
@@ -275,13 +275,13 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     }
 
     // Check angles without muscle distortions
-    auto getInitialAngle = [&muscleMode](ObjectDescription const& object) {
+    auto getInitialAngle = [&muscleMode](ObjectDesc const& object) {
         if (muscleMode == MuscleMode_AutoBending) {
-            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(object.getCellRef()._cellType)._mode)._initialAngle.value();
+            return std::get<AutoBendingDesc>(std::get<MuscleDesc>(object.getCellRef()._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_ManualBending) {
-            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(object.getCellRef()._cellType)._mode)._initialAngle.value();
+            return std::get<ManualBendingDesc>(std::get<MuscleDesc>(object.getCellRef()._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_AngleBending) {
-            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(object.getCellRef()._cellType)._mode)._initialAngle.value();
+            return std::get<AngleBendingDesc>(std::get<MuscleDesc>(object.getCellRef()._cellType)._mode)._initialAngle.value();
         } else {
             CHECK(false);
         }
@@ -327,9 +327,9 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
     RealVector2D refPoint{500.0f, 500.0f};
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, direction);
-    auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos(refPoint).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
-        CreatureDescription(),
+    auto data = Desc().addCreature(
+        {ObjectDesc().id(0).pos(refPoint).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        CreatureDesc(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -385,9 +385,9 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
-    auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos({200.0f, 200.0f}).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
-        CreatureDescription(),
+    auto data = Desc().addCreature(
+        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        CreatureDesc(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -439,9 +439,9 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     RealVector2D refPoint{500.0f, 500.0f};
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
-    auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos(refPoint).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
-        CreatureDescription(),
+    auto data = Desc().addCreature(
+        {ObjectDesc().id(0).pos(refPoint).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        CreatureDesc(),
         genome);
 
     _simulationFacade->setSimulationData(data);

@@ -14,12 +14,12 @@
 #include "GenomeDescription.h"
 #include "SpaceCalculator.h"
 
-Description DescriptionEditService::createRect(CreateRectParameters const& parameters) const
+Desc DescriptionEditService::createRect(CreateRectParameters const& parameters) const
 {
-    Description result;
+    Desc result;
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
-            result._objects.emplace_back(ObjectDescription()
+            result._objects.emplace_back(ObjectDesc()
                                              .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                              .stiffness(parameters._stiffness)
                                              .color(parameters._color)
@@ -33,15 +33,15 @@ Description DescriptionEditService::createRect(CreateRectParameters const& param
     return result;
 }
 
-Description DescriptionEditService::createHex(CreateHexParameters const& parameters) const
+Desc DescriptionEditService::createHex(CreateHexParameters const& parameters) const
 {
-    Description result;
+    Desc result;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
     for (int j = 0; j < parameters._layers; ++j) {
         for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
 
             //create cell: upper layer
-            result._objects.emplace_back(ObjectDescription()
+            result._objects.emplace_back(ObjectDesc()
                                              .stiffness(parameters._stiffness)
                                              .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                              .color(parameters._color)
@@ -51,7 +51,7 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
-                result._objects.emplace_back(ObjectDescription()
+                result._objects.emplace_back(ObjectDesc()
                                                  .stiffness(parameters._stiffness)
                                                  .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
                                                  .color(parameters._color)
@@ -67,18 +67,18 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
     return result;
 }
 
-Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const
+Desc DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const
 {
-    Description result;
+    Desc result;
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
-        result._objects.emplace_back(ObjectDescription()
+        result._objects.emplace_back(ObjectDesc()
                                          .pos(parameters._center)
                                          .stiffness(parameters._stiffness)
                                          .color(parameters._color)
                                          .fixed(parameters._fixed)
                                          .sticky(parameters._sticky)
-                                         .type(StructureDescription()));
+                                         .type(StructureDesc()));
         return result;
     }
 
@@ -95,13 +95,13 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
             if (dxMod * dxMod + dy * dy > radiusRounded * radiusRounded + NEAR_ZERO) {
                 continue;
             }
-            result._objects.emplace_back(ObjectDescription()
+            result._objects.emplace_back(ObjectDesc()
                                              .stiffness(parameters._stiffness)
                                              .pos({parameters._center.x + dxMod, parameters._center.y + dy})
                                              .color(parameters._color)
                                              .fixed(parameters._fixed)
                                              .sticky(parameters._sticky)
-                                             .type(StructureDescription()));
+                                             .type(StructureDesc()));
         }
     }
     return result;
@@ -109,9 +109,9 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
 
 namespace
 {
-    void topologyCorrection(SpaceCalculator const& spaceCalc, Description& description, uint64_t creatureId)
+    void topologyCorrection(SpaceCalculator const& spaceCalc, Desc& description, uint64_t creatureId)
     {
-        ObjectDescription* refCell = nullptr;
+        ObjectDesc* refCell = nullptr;
         for (auto& object : description._objects) {
             if (object.getObjectType() != ObjectType_Cell) {
                 continue;
@@ -126,7 +126,7 @@ namespace
         }
     }
 
-    void correctConnectionsForNonCreatures(Description& description, IntVector2D const& worldSize)
+    void correctConnectionsForNonCreatures(Desc& description, IntVector2D const& worldSize)
     {
         auto threshold = std::min(worldSize.x, worldSize.y) / 3;
         auto cache = description.createCache();
@@ -135,7 +135,7 @@ namespace
             if (object.getObjectType() == ObjectType_Cell) {
                 continue;
             }
-            std::vector<ConnectionDescription> newConnections;
+            std::vector<ConnectionDesc> newConnections;
             float angleToAdd = 0;
             for (auto connection : object._connections) {
                 auto const& connectedObject = description.getObjectRef(connection._objectId, cache);
@@ -156,16 +156,16 @@ namespace
 
 }
 
-void DescriptionEditService::duplicate(Description& description, IntVector2D const& origSize, IntVector2D const& size) const
+void DescriptionEditService::duplicate(Desc& description, IntVector2D const& origSize, IntVector2D const& size) const
 {
     correctConnectionsForNonCreatures(description, origSize);
 
     SpaceCalculator spaceCalc(origSize);
 
-    Description result;
+    Desc result;
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
-            auto clone = Description(description);
+            auto clone = Desc(description);
             clone.assignNewIds();
             for (auto const& creature : clone._creatures) {
                 topologyCorrection(spaceCalc, clone, creature._id);
@@ -184,13 +184,13 @@ void DescriptionEditService::duplicate(Description& description, IntVector2D con
         }
     }
 
-    description = Description(result);
+    description = Desc(result);
 }
 
 namespace
 {
     std::vector<int> getObjectIndicesWithinRadius(
-        Description const& description,
+        Desc const& description,
         std::unordered_map<int, std::unordered_map<int, std::vector<int>>> const& objectIndicesBySlot,
         RealVector2D const& pos,
         float radius)
@@ -221,9 +221,9 @@ namespace
     }
 }
 
-Description DescriptionEditService::gridMultiply(Description const& input, GridMultiplyParameters const& parameters) const
+Desc DescriptionEditService::gridMultiply(Desc const& input, GridMultiplyParameters const& parameters) const
 {
-    Description result;
+    Desc result;
     auto clone = input;
     auto cloneTemplate = input;
     for (int i = 0; i < parameters._horizontalNumber; ++i) {
@@ -248,11 +248,11 @@ Description DescriptionEditService::gridMultiply(Description const& input, GridM
     return result;
 }
 
-Description DescriptionEditService::randomMultiply(
-    Description const& input,
+Desc DescriptionEditService::randomMultiply(
+    Desc const& input,
     RandomMultiplyParameters const& parameters,
     IntVector2D const& worldSize,
-    Description&& existentData,
+    Desc&& existentData,
     bool& overlappingCheckSuccessful) const
 {
     overlappingCheckSuccessful = true;
@@ -268,11 +268,11 @@ Description DescriptionEditService::randomMultiply(
     }
 
     // Do multiplication
-    Description result = input;
+    Desc result = input;
     auto& numberGen = NumberGenerator::get();
     for (int i = 0; i < parameters._number; ++i) {
         bool overlapping = false;
-        Description copy;
+        Desc copy;
         int attempts = 0;
         do {
             copy = input;
@@ -316,9 +316,9 @@ Description DescriptionEditService::randomMultiply(
 }
 
 void DescriptionEditService::addIfSpaceAvailable(
-    Description& result,
+    Desc& result,
     Occupancy& cellOccupancy,
-    Description const& toAdd,
+    Desc const& toAdd,
     float distance,
     IntVector2D const& worldSize) const
 {
@@ -332,7 +332,7 @@ void DescriptionEditService::addIfSpaceAvailable(
     }
 }
 
-void DescriptionEditService::flattenTopology(Description& description, IntVector2D const& worldSize) const
+void DescriptionEditService::flattenTopology(Desc& description, IntVector2D const& worldSize) const
 {
     SpaceCalculator space(worldSize);
     auto cache = description.createCache();
@@ -373,7 +373,7 @@ void DescriptionEditService::flattenTopology(Description& description, IntVector
     }
 }
 
-void DescriptionEditService::reconnectCells(Description& description, float maxDistance) const
+void DescriptionEditService::reconnectCells(Desc& description, float maxDistance) const
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 
@@ -398,7 +398,7 @@ void DescriptionEditService::reconnectCells(Description& description, float maxD
     }
 }
 
-void DescriptionEditService::randomizeCellColors(Description& description, std::vector<int> const& colorCodes) const
+void DescriptionEditService::randomizeCellColors(Desc& description, std::vector<int> const& colorCodes) const
 {
     // Step 1: Create random color value for each creature
     std::unordered_map<uint64_t, float> cellColorsByCreatureId;
@@ -420,7 +420,7 @@ void DescriptionEditService::randomizeCellColors(Description& description, std::
     }
 }
 
-void DescriptionEditService::randomizeGenomeColors(Description& description, std::vector<int> const& colorCodes) const
+void DescriptionEditService::randomizeGenomeColors(Desc& description, std::vector<int> const& colorCodes) const
 {
     for (auto& genome : description._genomes) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
@@ -432,7 +432,7 @@ void DescriptionEditService::randomizeGenomeColors(Description& description, std
     }
 }
 
-void DescriptionEditService::randomizeEnergies(Description& description, float minEnergy, float maxEnergy) const
+void DescriptionEditService::randomizeEnergies(Desc& description, float minEnergy, float maxEnergy) const
 {
     // Step 1: Create random energy value for each creature
     std::unordered_map<uint64_t, float> creatureEnergies;
@@ -455,7 +455,7 @@ void DescriptionEditService::randomizeEnergies(Description& description, float m
     }
 }
 
-void DescriptionEditService::randomizeAges(Description& description, int minAge, int maxAge) const
+void DescriptionEditService::randomizeAges(Desc& description, int minAge, int maxAge) const
 {
     // Step 1: Create random age value for each creature
     std::unordered_map<uint64_t, int> creatureAges;
@@ -478,7 +478,7 @@ void DescriptionEditService::randomizeAges(Description& description, int minAge,
     }
 }
 
-void DescriptionEditService::randomizeCountdowns(Description& description, int minValue, int maxValue) const
+void DescriptionEditService::randomizeCountdowns(Desc& description, int minValue, int maxValue) const
 {
     // Step 1: Create random countdown value for each creature
     std::unordered_map<uint64_t, int> creatureCountdowns;
@@ -496,30 +496,30 @@ void DescriptionEditService::randomizeCountdowns(Description& description, int m
             if (object.getCellRef()._creatureId.has_value()) {
                 auto it = creatureCountdowns.find(object.getCellRef()._creatureId.value());
                 if (it != creatureCountdowns.end()) {
-                    std::get<DetonatorDescription>(object.getCellRef()._cellType)._countdown = it->second;
+                    std::get<DetonatorDesc>(object.getCellRef()._cellType)._countdown = it->second;
                 }
             } else {
-                std::get<DetonatorDescription>(object.getCellRef()._cellType)._countdown = nonCreatureCountdown;
+                std::get<DetonatorDesc>(object.getCellRef()._cellType)._countdown = nonCreatureCountdown;
             }
         }
     }
 }
 
-void DescriptionEditService::randomizeLineageIds(Description& description) const
+void DescriptionEditService::randomizeLineageIds(Desc& description) const
 {
     for (auto& creature : description._creatures) {
         creature._lineageId = NumberGenerator::get().getRandomInt();
     }
 }
 
-void DescriptionEditService::setCenter(Description& description, RealVector2D const& center) const
+void DescriptionEditService::setCenter(Desc& description, RealVector2D const& center) const
 {
     auto origCenter = calcCenter(description);
     auto delta = center - origCenter;
     shift(description, delta);
 }
 
-RealVector2D DescriptionEditService::calcCenter(Description const& description) const
+RealVector2D DescriptionEditService::calcCenter(Desc const& description) const
 {
     RealVector2D result;
     auto numEntities = description._objects.size() + description._energies.size();
@@ -534,7 +534,7 @@ RealVector2D DescriptionEditService::calcCenter(Description const& description) 
     return result;
 }
 
-void DescriptionEditService::shift(Description& description, RealVector2D const& delta) const
+void DescriptionEditService::shift(Desc& description, RealVector2D const& delta) const
 {
     for (auto& object : description._objects) {
         object._pos += delta;
@@ -545,7 +545,7 @@ void DescriptionEditService::shift(Description& description, RealVector2D const&
     }
 }
 
-void DescriptionEditService::rotate(Description& description, float angle) const
+void DescriptionEditService::rotate(Desc& description, float angle) const
 {
     auto rotationMatrix = Math::calcRotationMatrix(angle);
     auto center = calcCenter(description);
@@ -563,7 +563,7 @@ void DescriptionEditService::rotate(Description& description, float angle) const
     }
 }
 
-void DescriptionEditService::accelerate(Description& description, RealVector2D const& velDelta, float angularVelDelta) const
+void DescriptionEditService::accelerate(Desc& description, RealVector2D const& velDelta, float angularVelDelta) const
 {
     auto center = calcCenter(description);
 
@@ -579,7 +579,7 @@ void DescriptionEditService::accelerate(Description& description, RealVector2D c
     }
 }
 
-void DescriptionEditService::removeCell(Description& description, uint64_t objectId) const
+void DescriptionEditService::removeCell(Desc& description, uint64_t objectId) const
 {
     std::erase_if(description._objects, [&](auto const& object) { return object._id == objectId; });
 
@@ -622,10 +622,10 @@ void DescriptionEditService::removeCell(Description& description, uint64_t objec
     }
 }
 
-void DescriptionEditService::removeCellIf(Description& description, std::function<bool(ObjectDescription const&)> const& predicate) const
+void DescriptionEditService::removeCellIf(Desc& description, std::function<bool(ObjectDesc const&)> const& predicate) const
 {
     std::unordered_set<uint64_t> removedCellIds;
-    auto extPredicate = [&](ObjectDescription const& object) {
+    auto extPredicate = [&](ObjectDesc const& object) {
         auto result = predicate(object);
         if (result) {
             removedCellIds.insert(object._id);
@@ -703,31 +703,31 @@ bool DescriptionEditService::isCellPresent(
     return false;
 }
 
-uint64_t DescriptionEditService::getId(ExtendedObjectOrEnergyDescription const& entity) const
+uint64_t DescriptionEditService::getId(ExtendedObjectOrEnergyDesc const& entity) const
 {
-    if (std::holds_alternative<ExtendedObjectDescription>(entity)) {
-        return std::get<ExtendedObjectDescription>(entity).object._id;
+    if (std::holds_alternative<ExtendedObjectDesc>(entity)) {
+        return std::get<ExtendedObjectDesc>(entity).object._id;
     }
-    return std::get<EnergyDescription>(entity)._id;
+    return std::get<EnergyDesc>(entity)._id;
 }
 
-RealVector2D DescriptionEditService::getPos(ExtendedObjectOrEnergyDescription const& entity) const
+RealVector2D DescriptionEditService::getPos(ExtendedObjectOrEnergyDesc const& entity) const
 {
-    if (std::holds_alternative<ExtendedObjectDescription>(entity)) {
-        return std::get<ExtendedObjectDescription>(entity).object._pos;
+    if (std::holds_alternative<ExtendedObjectDesc>(entity)) {
+        return std::get<ExtendedObjectDesc>(entity).object._pos;
     }
-    return std::get<EnergyDescription>(entity)._pos;
+    return std::get<EnergyDesc>(entity)._pos;
 }
 
-std::vector<ExtendedObjectOrEnergyDescription> DescriptionEditService::getObjects(Description const& description) const
+std::vector<ExtendedObjectOrEnergyDesc> DescriptionEditService::getObjects(Desc const& description) const
 {
-    std::vector<ExtendedObjectOrEnergyDescription> result;
+    std::vector<ExtendedObjectOrEnergyDesc> result;
     for (auto const& energyParticle : description._energies) {
         result.emplace_back(energyParticle);
     }
 
     // Build a map of creatureId to genome
-    std::unordered_map<uint64_t, GenomeDescription> genomeByCreatureId;
+    std::unordered_map<uint64_t, GenomeDesc> genomeByCreatureId;
     for (auto const& creature : description._creatures) {
         auto genomeIt =
             std::find_if(description._genomes.begin(), description._genomes.end(), [&creature](auto const& g) { return g._id == creature._genomeId; });
@@ -737,7 +737,7 @@ std::vector<ExtendedObjectOrEnergyDescription> DescriptionEditService::getObject
     }
 
     for (auto const& object : description._objects) {
-        ExtendedObjectDescription extObject;
+        ExtendedObjectDesc extObject;
         extObject.object = object;
         if (object.getObjectType() == ObjectType_Cell) {
             auto const& cell = object.getCellRef();
@@ -754,7 +754,7 @@ std::vector<ExtendedObjectOrEnergyDescription> DescriptionEditService::getObject
     return result;
 }
 
-std::vector<ExtendedObjectOrEnergyDescription> DescriptionEditService::getCreatureRepresentatives(Description const& description) const
+std::vector<ExtendedObjectOrEnergyDesc> DescriptionEditService::getCreatureRepresentatives(Desc const& description) const
 {
     return {};
 }

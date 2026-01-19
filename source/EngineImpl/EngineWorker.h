@@ -53,25 +53,25 @@ public:
     int getSyncSimulationWithRenderingRatio() const;
     void setSyncSimulationWithRenderingRatio(int value);
 
-    Description getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    Description getSelectedSimulationData(bool includeClusters);
-    Description getInspectedSimulationData(std::vector<uint64_t> objectsIds);
+    Desc getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    Desc getSelectedSimulationData(bool includeClusters);
+    Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     StatisticsRawData getStatisticsRawData() const;
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
 
-    void addAndSelectSimulationData(Description&& dataToUpdate);
-    void setSimulationData(Description const& dataToUpdate);
+    void addAndSelectSimulationData(Desc&& dataToUpdate);
+    void setSimulationData(Desc const& dataToUpdate);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeCell(ObjectDescription const& changedCell);
-    void changeParticle(EnergyDescription const& changedParticle);
-    bool changeCreature(uint64_t creatureId, GenomeDescription const& genome);
-    std::optional<GenomeDescription> getGenomeOfCreature(uint64_t creatureId);
+    void changeCell(ObjectDesc const& changedCell);
+    void changeParticle(EnergyDesc const& changedParticle);
+    bool changeCreature(uint64_t creatureId, GenomeDesc const& genome);
+    std::optional<GenomeDesc> getGenomeOfCreature(uint64_t creatureId);
 
     void calcTimesteps(uint64_t timesteps);
     void applyCataclysm(int power);
@@ -111,8 +111,8 @@ public:
     bool isSimulationRunning() const;
 
     // Simulated preview
-    Description getPreviewData();
-    void setPreviewData(Description const& description);
+    Desc getPreviewData();
+    void setPreviewData(Desc const& description);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation);
     void calcTimestepsForPreview(int numSteps, bool detailSimulation);
     uint64_t getCurrentTimestepForPreview();
