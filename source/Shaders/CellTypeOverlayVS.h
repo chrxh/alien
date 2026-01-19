@@ -25,9 +25,9 @@ uniform vec2 viewportSize;
 void main()
 {
     vColor = aColor;
-    // Unpack cellType (bits 0-7) and objectType (bits 24-31)
+    // Unpack cellType (bits 0-7) and objectType (bits 8-15)
     vCellType = aState & 0xFF;
-    vObjectType = (aState >> 24) & 0xFF;
+    vObjectType = (aState >> 8) & 0xFF;
     vWorldPos = aPos.xy;
     
     // Transform world position to normalized device coordinates

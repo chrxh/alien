@@ -167,8 +167,8 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
-        // Pack cellType (bits 0-7), signalState (bits 8-15), isInTriangleOrQuad (bit 16), and objectType (bits 24-31) into state field
-        objectData[index].state = cellType | (signalState << 8) | (isInTriangleOrQuad << 16) | (object->type << 24);
+        // Pack cellType (bits 0-7), objectType (bits 8-15), signalState (bits 16-23), and isInTriangleOrQuad (bit 24) into state field
+        objectData[index].state = cellType | (object->type << 8) | (signalState << 16) | (isInTriangleOrQuad << 24);
 
         // Store cell index for line extraction (just use the index directly)
         object->tempValue.as_uint64 = index;

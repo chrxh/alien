@@ -24,9 +24,9 @@ struct ObjectVertexData
     float pos[3];    // x, y, z position (z used for lighting)
     float color[3];  // r, g, b color
     int state;       // Bit 0..7 = cell type
-                     // Bit 8..15 = signal state (1= highlighted, 2 = strongly highlighted)
-                     // Bit 16 = occurrence in triangle or quad
-                     // Bit 24..31 = object type (ObjectType_Structure, ObjectType_FreeCell, ObjectType_Cell)
+                     // Bit 8..15 = object type (ObjectType_Structure, ObjectType_FreeCell, ObjectType_Cell)
+                     // Bit 16..23 = signal state (1= highlighted, 2 = strongly highlighted)
+                     // Bit 24 = occurrence in triangle or quad
 };
 
 struct EnergyVertexData
