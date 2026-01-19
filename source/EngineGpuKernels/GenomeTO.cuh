@@ -305,7 +305,7 @@ struct NodeTO
     int numAdditionalConnections;
 
     NeuralNetworkGenomeTO neuralNetwork;
-    CellTypeGenome cellType;
+    CellType cellType;
     CellTypeDataGenomeTO cellTypeData;
     SignalRestrictionGenomeTO signalRestriction;
 };

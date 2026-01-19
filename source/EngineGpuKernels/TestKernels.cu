@@ -123,7 +123,7 @@ namespace
                                     // Validate memory entries for memory nodes
                                     for (int nodeIdx = 0; nodeIdx < gene.numNodes; ++nodeIdx) {
                                         auto& node = gene.nodes[nodeIdx];
-                                        if (node.cellType == CellTypeGenome_Memory) {
+                                        if (node.cellType == CellType_Memory) {
                                             if (node.cellTypeData.memory.numSignalEntries > 0) {
                                                 auto signalEntries = node.cellTypeData.memory.signalEntries;
                                                 if (!isPointerValid(data, signalEntries)) {

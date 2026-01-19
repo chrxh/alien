@@ -610,17 +610,17 @@ NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const*
     nodeDesc._signalRestriction._openingAngle = nodeTO->signalRestriction.openingAngle;
 
     switch (nodeTO->cellType) {
-    case CellTypeGenome_Base: {
+    case CellType_Base: {
         BaseGenomeDesc baseDesc;
         nodeDesc._cellType = baseDesc;
     } break;
-    case CellTypeGenome_Depot: {
+    case CellType_Depot: {
         DepotGenomeDesc depotDesc;
         depotDesc._storageLimit = nodeTO->cellTypeData.depot.storageLimit;
         depotDesc._initialStoredUsableEnergy = nodeTO->cellTypeData.depot.initialStoredUsableEnergy;
         nodeDesc._cellType = depotDesc;
     } break;
-    case CellTypeGenome_Constructor: {
+    case CellType_Constructor: {
         ConstructorGenomeDesc constructorDesc;
         constructorDesc._autoTriggerInterval =
             nodeTO->cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
@@ -630,7 +630,7 @@ NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const*
         constructorDesc._provideEnergy = nodeTO->cellTypeData.constructor.provideEnergy;
         nodeDesc._cellType = constructorDesc;
     } break;
-    case CellTypeGenome_Sensor: {
+    case CellType_Sensor: {
         SensorGenomeDesc sensorDesc;
         sensorDesc._autoTriggerInterval =
             nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
@@ -671,14 +671,14 @@ NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const*
 
         nodeDesc._cellType = sensorDesc;
     } break;
-    case CellTypeGenome_Generator: {
+    case CellType_Generator: {
         GeneratorGenomeDesc generatorDesc;
         generatorDesc._autoTriggerInterval = nodeTO->cellTypeData.generator.autoTriggerInterval;
         generatorDesc._pulseType = nodeTO->cellTypeData.generator.pulseType;
         generatorDesc._alternationInterval = nodeTO->cellTypeData.generator.alternationInterval;
         nodeDesc._cellType = generatorDesc;
     } break;
-    case CellTypeGenome_Attacker: {
+    case CellType_Attacker: {
         AttackerGenomeDesc attackerDesc;
         if (nodeTO->cellTypeData.attacker.mode == AttackerMode_FreeCell) {
             AttackFreeCellGenomeDesc attackFreeCell;
@@ -702,12 +702,12 @@ NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const*
         }
         nodeDesc._cellType = attackerDesc;
     } break;
-    case CellTypeGenome_Injector: {
+    case CellType_Injector: {
         InjectorGenomeDesc injectorDesc;
         injectorDesc._geneIndex = nodeTO->cellTypeData.injector.geneIndex;
         nodeDesc._cellType = injectorDesc;
     } break;
-    case CellTypeGenome_Muscle: {
+    case CellType_Muscle: {
         MuscleGenomeDesc muscleDesc;
         switch (nodeTO->cellTypeData.muscle.mode) {
         case MuscleMode_AutoBending: {
@@ -747,12 +747,12 @@ NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const*
         }
         nodeDesc._cellType = muscleDesc;
     } break;
-    case CellTypeGenome_Defender: {
+    case CellType_Defender: {
         DefenderGenomeDesc defenderDesc;
         defenderDesc._mode = nodeTO->cellTypeData.defender.mode;
         nodeDesc._cellType = defenderDesc;
     } break;
-    case CellTypeGenome_Reconnector: {
+    case CellType_Reconnector: {
         ReconnectorGenomeDesc reconnectorDesc;
         if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
             ReconnectStructureGenomeDesc reconnectStructure;
@@ -779,17 +779,17 @@ NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const*
         }
         nodeDesc._cellType = reconnectorDesc;
     } break;
-    case CellTypeGenome_Detonator: {
+    case CellType_Detonator: {
         DetonatorGenomeDesc detonatorDesc;
         detonatorDesc._countdown = nodeTO->cellTypeData.detonator.countdown;
         nodeDesc._cellType = detonatorDesc;
     } break;
-    case CellTypeGenome_Digestor: {
+    case CellType_Digestor: {
         DigestorGenomeDesc digestorDesc;
         digestorDesc._rawEnergyConductivity = nodeTO->cellTypeData.digestor.rawEnergyConductivity;
         nodeDesc._cellType = digestorDesc;
     } break;
-    case CellTypeGenome_Memory: {
+    case CellType_Memory: {
         MemoryGenomeDesc memoryDesc;
         auto const& memoryTO = nodeTO->cellTypeData.memory;
         if (memoryTO.mode == MemoryMode_SignalDelay) {
@@ -815,7 +815,7 @@ NodeDesc DescriptionConverterService::createNodeDesc(TO const& to, NodeTO const*
         copyMemoryEntriesToDescription(memoryDesc._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
         nodeDesc._cellType = memoryDesc;
     } break;
-    case CellTypeGenome_Communicator: {
+    case CellType_Communicator: {
         CommunicatorGenomeDesc communicatorDesc;
         auto const& communicatorTO = nodeTO->cellTypeData.communicator;
         if (communicatorTO.mode == CommunicatorMode_Sender) {
@@ -955,15 +955,15 @@ void DescriptionConverterService::convertGenomeToTO(
 
             nodeTO.cellType = nodeDesc.getCellType();
             switch (nodeDesc.getCellType()) {
-            case CellTypeGenome_Base: {
+            case CellType_Base: {
             } break;
-            case CellTypeGenome_Depot: {
+            case CellType_Depot: {
                 auto const& depotDesc = std::get<DepotGenomeDesc>(nodeDesc._cellType);
                 auto& depotTO = nodeTO.cellTypeData.depot;
                 depotTO.storageLimit = depotDesc._storageLimit;
                 depotTO.initialStoredUsableEnergy = depotDesc._initialStoredUsableEnergy;
             } break;
-            case CellTypeGenome_Constructor: {
+            case CellType_Constructor: {
                 auto const& constructorDesc = std::get<ConstructorGenomeDesc>(nodeDesc._cellType);
                 auto& constructorTO = nodeTO.cellTypeData.constructor;
                 constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
@@ -972,7 +972,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 constructorTO.constructionAngle = constructorDesc._constructionAngle;
                 constructorTO.provideEnergy = constructorDesc._provideEnergy;
             } break;
-            case CellTypeGenome_Sensor: {
+            case CellType_Sensor: {
                 auto const& sensorDesc = std::get<SensorGenomeDesc>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
                 sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
@@ -1002,14 +1002,14 @@ void DescriptionConverterService::convertGenomeToTO(
                     detectCreatureTO.restrictToLineage = detectCreatureDesc._restrictToLineage;
                 }
             } break;
-            case CellTypeGenome_Generator: {
+            case CellType_Generator: {
                 auto const& generatorDesc = std::get<GeneratorGenomeDesc>(nodeDesc._cellType);
                 auto& generatorTO = nodeTO.cellTypeData.generator;
                 generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
                 generatorTO.pulseType = generatorDesc._pulseType;
                 generatorTO.alternationInterval = generatorDesc._alternationInterval;
             } break;
-            case CellTypeGenome_Attacker: {
+            case CellType_Attacker: {
                 auto const& attackerDesc = std::get<AttackerGenomeDesc>(nodeDesc._cellType);
                 auto& attackerTO = nodeTO.cellTypeData.attacker;
                 attackerTO.mode = attackerDesc.getMode();
@@ -1026,12 +1026,12 @@ void DescriptionConverterService::convertGenomeToTO(
                     attackCreatureTO.restrictToLineage = attackCreatureDesc._restrictToLineage;
                 }
             } break;
-            case CellTypeGenome_Injector: {
+            case CellType_Injector: {
                 auto const& injectorDesc = std::get<InjectorGenomeDesc>(nodeDesc._cellType);
                 auto& injectorTO = nodeTO.cellTypeData.injector;
                 injectorTO.geneIndex = injectorDesc._geneIndex;
             } break;
-            case CellTypeGenome_Muscle: {
+            case CellType_Muscle: {
                 auto const& muscleDesc = std::get<MuscleGenomeDesc>(nodeDesc._cellType);
                 auto& muscleTO = nodeTO.cellTypeData.muscle;
                 muscleTO.mode = muscleDesc.getMode();
@@ -1070,12 +1070,12 @@ void DescriptionConverterService::convertGenomeToTO(
                 } break;
                 }
             } break;
-            case CellTypeGenome_Defender: {
+            case CellType_Defender: {
                 auto const& defenderDesc = std::get<DefenderGenomeDesc>(nodeDesc._cellType);
                 auto& defenderTO = nodeTO.cellTypeData.defender;
                 defenderTO.mode = defenderDesc._mode;
             } break;
-            case CellTypeGenome_Reconnector: {
+            case CellType_Reconnector: {
                 auto const& reconnectorDesc = std::get<ReconnectorGenomeDesc>(nodeDesc._cellType);
                 auto& reconnectorTO = nodeTO.cellTypeData.reconnector;
                 reconnectorTO.mode = reconnectorDesc.getMode();
@@ -1094,17 +1094,17 @@ void DescriptionConverterService::convertGenomeToTO(
                     reconnectCreatureTO.restrictToLineage = reconnectCreatureDesc._restrictToLineage;
                 }
             } break;
-            case CellTypeGenome_Detonator: {
+            case CellType_Detonator: {
                 auto const& detonatorDesc = std::get<DetonatorGenomeDesc>(nodeDesc._cellType);
                 auto& detonatorTO = nodeTO.cellTypeData.detonator;
                 detonatorTO.countdown = detonatorDesc._countdown;
             } break;
-            case CellTypeGenome_Digestor: {
+            case CellType_Digestor: {
                 auto const& digestorDesc = std::get<DigestorGenomeDesc>(nodeDesc._cellType);
                 auto& digestorTO = nodeTO.cellTypeData.digestor;
                 digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
             } break;
-            case CellTypeGenome_Memory: {
+            case CellType_Memory: {
                 auto const& memoryDesc = std::get<MemoryGenomeDesc>(nodeDesc._cellType);
                 auto& memoryTO = nodeTO.cellTypeData.memory;
                 memoryTO.mode = memoryDesc.getMode();
@@ -1129,7 +1129,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto signalEntriesTO = reinterpret_cast<SignalEntryGenomeTO*>(heap.data() + memoryTO.signalEntriesDataIndex);
                 copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
             } break;
-            case CellTypeGenome_Communicator: {
+            case CellType_Communicator: {
                 auto const& communicatorDesc = std::get<CommunicatorGenomeDesc>(nodeDesc._cellType);
                 auto& communicatorTO = nodeTO.cellTypeData.communicator;
                 communicatorTO.mode = communicatorDesc.getMode();

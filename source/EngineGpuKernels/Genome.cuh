@@ -303,7 +303,7 @@ struct Node
     int numAdditionalConnections;
 
     NeuralNetworkGenome neuralNetwork;
-    CellTypeGenome cellType;
+    CellType cellType;
     CellTypeDataGenome cellTypeData;
     SignalRestrictionGenome signalRestriction;
 };

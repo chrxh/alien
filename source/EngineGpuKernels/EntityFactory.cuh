@@ -130,20 +130,20 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TO const& to, in
             node.cellType = nodeTO.cellType;
 
             switch (nodeTO.cellType) {
-            case CellTypeGenome_Base:
+            case CellType_Base:
                 break;
-            case CellTypeGenome_Depot:
+            case CellType_Depot:
                 node.cellTypeData.depot.storageLimit = nodeTO.cellTypeData.depot.storageLimit;
                 node.cellTypeData.depot.initialStoredUsableEnergy = nodeTO.cellTypeData.depot.initialStoredUsableEnergy;
                 break;
-            case CellTypeGenome_Constructor:
+            case CellType_Constructor:
                 node.cellTypeData.constructor.autoTriggerInterval = nodeTO.cellTypeData.constructor.autoTriggerInterval;
                 node.cellTypeData.constructor.geneIndex = nodeTO.cellTypeData.constructor.geneIndex;
                 node.cellTypeData.constructor.constructionActivationTime = nodeTO.cellTypeData.constructor.constructionActivationTime;
                 node.cellTypeData.constructor.constructionAngle = nodeTO.cellTypeData.constructor.constructionAngle;
                 node.cellTypeData.constructor.provideEnergy = nodeTO.cellTypeData.constructor.provideEnergy;
                 break;
-            case CellTypeGenome_Sensor:
+            case CellType_Sensor:
                 node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
                 node.cellTypeData.sensor.maxRange = nodeTO.cellTypeData.sensor.maxRange;
@@ -162,12 +162,12 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                 }
                 break;
-            case CellTypeGenome_Generator:
+            case CellType_Generator:
                 node.cellTypeData.generator.autoTriggerInterval = nodeTO.cellTypeData.generator.autoTriggerInterval;
                 node.cellTypeData.generator.pulseType = nodeTO.cellTypeData.generator.pulseType;
                 node.cellTypeData.generator.alternationInterval = nodeTO.cellTypeData.generator.alternationInterval;
                 break;
-            case CellTypeGenome_Attacker:
+            case CellType_Attacker:
                 node.cellTypeData.attacker.mode = nodeTO.cellTypeData.attacker.mode;
                 if (nodeTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
                     node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
@@ -178,10 +178,10 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.attacker.modeData.attackCreature.restrictToLineage = nodeTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
                 }
                 break;
-            case CellTypeGenome_Injector:
+            case CellType_Injector:
                 node.cellTypeData.injector.geneIndex = nodeTO.cellTypeData.injector.geneIndex;
                 break;
-            case CellTypeGenome_Muscle:
+            case CellType_Muscle:
                 node.cellTypeData.muscle.mode = nodeTO.cellTypeData.muscle.mode;
                 switch (nodeTO.cellTypeData.muscle.mode) {
                 case MuscleMode_AutoBending:
@@ -212,10 +212,10 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TO const& to, in
                     break;
                 }
                 break;
-            case CellTypeGenome_Defender:
+            case CellType_Defender:
                 node.cellTypeData.defender.mode = nodeTO.cellTypeData.defender.mode;
                 break;
-            case CellTypeGenome_Reconnector:
+            case CellType_Reconnector:
                 node.cellTypeData.reconnector.mode = nodeTO.cellTypeData.reconnector.mode;
                 if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
                 } else if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
@@ -227,13 +227,13 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage = nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
                 }
                 break;
-            case CellTypeGenome_Detonator:
+            case CellType_Detonator:
                 node.cellTypeData.detonator.countdown = nodeTO.cellTypeData.detonator.countdown;
                 break;
-            case CellTypeGenome_Digestor:
+            case CellType_Digestor:
                 node.cellTypeData.digestor.rawEnergyConductivity = nodeTO.cellTypeData.digestor.rawEnergyConductivity;
                 break;
-            case CellTypeGenome_Memory: {
+            case CellType_Memory: {
                 node.cellTypeData.memory.mode = nodeTO.cellTypeData.memory.mode;
                 node.cellTypeData.memory.numSignalEntries = nodeTO.cellTypeData.memory.numSignalEntries;
                 node.cellTypeData.memory.channelBitMask = nodeTO.cellTypeData.memory.channelBitMask;
@@ -257,7 +257,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TO const& to, in
                     }
                 }
             } break;
-            case CellTypeGenome_Communicator:
+            case CellType_Communicator:
                 node.cellTypeData.communicator.mode = nodeTO.cellTypeData.communicator.mode;
                 if (nodeTO.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                     node.cellTypeData.communicator.modeData.sender.range = nodeTO.cellTypeData.communicator.modeData.sender.range;
@@ -736,15 +736,15 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.event = CellEvent_No;
 
     switch (node->cellType) {
-    case CellTypeGenome_Base: {
+    case CellType_Base: {
         cell.cellType = CellType_Base;
     } break;
-    case CellTypeGenome_Depot: {
+    case CellType_Depot: {
         cell.cellType = CellType_Depot;
         cell.cellTypeData.depot.storageLimit = node->cellTypeData.depot.storageLimit;
         cell.cellTypeData.depot.storedUsableEnergy = node->cellTypeData.depot.initialStoredUsableEnergy;
     } break;
-    case CellTypeGenome_Constructor: {
+    case CellType_Constructor: {
         cell.cellType = CellType_Constructor;
         auto const& nodeConstructor = node->cellTypeData.constructor;
         auto& constructor = cell.cellTypeData.constructor;
@@ -760,7 +760,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.isReady = true;
         constructor.offspring = nullptr;
     } break;
-    case CellTypeGenome_Sensor: {
+    case CellType_Sensor: {
         cell.cellType = CellType_Sensor;
         auto const& nodeSensor = node->cellTypeData.sensor;
         auto& sensor = cell.cellTypeData.sensor;
@@ -783,7 +783,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         }
         sensor.lastMatchAvailable = false;
     } break;
-    case CellTypeGenome_Generator: {
+    case CellType_Generator: {
         cell.cellType = CellType_Generator;
         auto const& nodeGenerator = node->cellTypeData.generator;
         auto& generator = cell.cellTypeData.generator;
@@ -792,7 +792,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         generator.alternationInterval = nodeGenerator.alternationInterval;
         generator.numPulses = 0;
     } break;
-    case CellTypeGenome_Attacker: {
+    case CellType_Attacker: {
         cell.cellType = CellType_Attacker;
         auto const& nodeAttacker = node->cellTypeData.attacker;
         auto& attacker = cell.cellTypeData.attacker;
@@ -806,13 +806,13 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             attacker.modeData.attackCreature.restrictToLineage = nodeAttacker.modeData.attackCreature.restrictToLineage;
         }
     } break;
-    case CellTypeGenome_Injector: {
+    case CellType_Injector: {
         cell.cellType = CellType_Injector;
         auto const& nodeInjector = node->cellTypeData.injector;
         auto& injector = cell.cellTypeData.injector;
         injector.geneIndex = nodeInjector.geneIndex;
     } break;
-    case CellTypeGenome_Muscle: {
+    case CellType_Muscle: {
         cell.cellType = CellType_Muscle;
         auto const& nodeMuscle = node->cellTypeData.muscle;
         auto& muscle = cell.cellTypeData.muscle;
@@ -863,13 +863,13 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         } break;
         }
     } break;
-    case CellTypeGenome_Defender: {
+    case CellType_Defender: {
         cell.cellType = CellType_Defender;
         auto const& nodeDefender = node->cellTypeData.defender;
         auto& defender = cell.cellTypeData.defender;
         defender.mode = nodeDefender.mode;
     } break;
-    case CellTypeGenome_Reconnector: {
+    case CellType_Reconnector: {
         cell.cellType = CellType_Reconnector;
         auto const& nodeReconnector = node->cellTypeData.reconnector;
         auto& reconnector = cell.cellTypeData.reconnector;
@@ -884,20 +884,20 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             reconnector.modeData.reconnectCreature.restrictToLineage = nodeReconnector.modeData.reconnectCreature.restrictToLineage;
         }
     } break;
-    case CellTypeGenome_Detonator: {
+    case CellType_Detonator: {
         cell.cellType = CellType_Detonator;
         auto const& nodeDetonator = node->cellTypeData.detonator;
         auto& detonator = cell.cellTypeData.detonator;
         detonator.state = DetonatorState_Ready;
         detonator.countdown = nodeDetonator.countdown;
     } break;
-    case CellTypeGenome_Digestor: {
+    case CellType_Digestor: {
         cell.cellType = CellType_Digestor;
         auto const& nodeDigestor = node->cellTypeData.digestor;
         auto& digestor = cell.cellTypeData.digestor;
         digestor.rawEnergyConductivity = nodeDigestor.rawEnergyConductivity;
     } break;
-    case CellTypeGenome_Memory: {
+    case CellType_Memory: {
         cell.cellType = CellType_Memory;
         auto const& nodeMemory = node->cellTypeData.memory;
         auto& memory = cell.cellTypeData.memory;
@@ -925,7 +925,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             }
         }
     } break;
-    case CellTypeGenome_Communicator: {
+    case CellType_Communicator: {
         cell.cellType = CellType_Communicator;
         auto const& nodeCommunicator = node->cellTypeData.communicator;
         auto& communicator = cell.cellTypeData.communicator;

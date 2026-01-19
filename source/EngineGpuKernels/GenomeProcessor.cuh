@@ -17,7 +17,7 @@ __inline__ __device__ float GenomeProcessor::getRequiredEnergyForNodes(Gene* gen
     for (int i = 0, j = gene->numNodes; i < j; ++i) {
         auto const& node = &gene->nodes[i];
         result += cudaSimulationParameters.normalCellEnergy.value[node->color];
-        if (node->cellType == CellTypeGenome_Depot) {
+        if (node->cellType == CellType_Depot) {
             result += node->cellTypeData.depot.initialStoredUsableEnergy;
         }
     }

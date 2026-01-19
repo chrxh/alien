@@ -180,10 +180,10 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_start)
     GenomeDescEditService::get().addNode(gene, 0, NodeDesc());
 
     ASSERT_EQ(4, gene._nodes.size());
-    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
-    EXPECT_EQ(CellTypeGenome_Base, gene._nodes.at(1).getCellType());
-    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(2).getCellType());
-    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(3).getCellType());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Base, gene._nodes.at(1).getCellType());
+    EXPECT_EQ(CellType_Constructor, gene._nodes.at(2).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(3).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, addEmptyNode_middle)
@@ -196,10 +196,10 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_middle)
     GenomeDescEditService::get().addNode(gene, 1, NodeDesc());
 
     ASSERT_EQ(4, gene._nodes.size());
-    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
-    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(1).getCellType());
-    EXPECT_EQ(CellTypeGenome_Base, gene._nodes.at(2).getCellType());
-    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(3).getCellType());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Constructor, gene._nodes.at(1).getCellType());
+    EXPECT_EQ(CellType_Base, gene._nodes.at(2).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(3).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, addEmptyNode_end)
@@ -212,10 +212,10 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_end)
     GenomeDescEditService::get().addNode(gene, 2, NodeDesc());
 
     ASSERT_EQ(4, gene._nodes.size());
-    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
-    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(1).getCellType());
-    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(2).getCellType());
-    EXPECT_EQ(CellTypeGenome_Base, gene._nodes.at(3).getCellType());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Constructor, gene._nodes.at(1).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(2).getCellType());
+    EXPECT_EQ(CellType_Base, gene._nodes.at(3).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, removeNode_start)
@@ -228,8 +228,8 @@ TEST_F(GenomeDescEditServiceTests, removeNode_start)
     GenomeDescEditService::get().removeNode(gene, 0);
 
     ASSERT_EQ(2, gene._nodes.size());
-    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(0).getCellType());
-    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(1).getCellType());
+    EXPECT_EQ(CellType_Constructor, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, removeNode_middle)
@@ -242,8 +242,8 @@ TEST_F(GenomeDescEditServiceTests, removeNode_middle)
     GenomeDescEditService::get().removeNode(gene, 1);
 
     ASSERT_EQ(2, gene._nodes.size());
-    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
-    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(1).getCellType());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, removeNode_end)
@@ -256,8 +256,8 @@ TEST_F(GenomeDescEditServiceTests, removeNode_end)
     GenomeDescEditService::get().removeNode(gene, 2);
 
     ASSERT_EQ(2, gene._nodes.size());
-    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
-    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(1).getCellType());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Constructor, gene._nodes.at(1).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, swapNodes)
@@ -270,9 +270,9 @@ TEST_F(GenomeDescEditServiceTests, swapNodes)
     GenomeDescEditService::get().swapNodes(gene, 1);
 
     ASSERT_EQ(3, gene._nodes.size());
-    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
-    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(1).getCellType());
-    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(2).getCellType());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1).getCellType());
+    EXPECT_EQ(CellType_Constructor, gene._nodes.at(2).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_emptyGenome)
@@ -300,7 +300,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_invalidGeneReferen
 
     ASSERT_EQ(1, subGenome._genes.size());
     ASSERT_EQ(2, subGenome._genes.at(0)._nodes.size());
-    ASSERT_EQ(CellTypeGenome_Constructor, subGenome._genes.at(0)._nodes.at(0).getCellType());
+    ASSERT_EQ(CellType_Constructor, subGenome._genes.at(0)._nodes.at(0).getCellType());
     // Invalid reference should remain unchanged (the castrate method has bounds checking)
     EXPECT_EQ(5, std::get<ConstructorGenomeDesc>(subGenome._genes.at(0)._nodes.at(0)._cellType)._geneIndex);
 }
@@ -332,7 +332,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
     auto const& subGenome = subGenomes.at(0).genome;
     auto const& gene0 = subGenome._genes.at(0);
     for (auto const& [index, node] : gene0._nodes | boost::adaptors::indexed(0)) {
-        EXPECT_EQ(index == 0 ? CellTypeGenome_Constructor : CellTypeGenome_Base, node.getCellType());
+        EXPECT_EQ(index == 0 ? CellType_Constructor : CellType_Base, node.getCellType());
     }
     EXPECT_EQ(NeuralNetworkGenomeDesc(), gene0._nodes.front()._neuralNetwork);
     EXPECT_EQ(SignalRestrictionGenomeDesc(), gene0._nodes.front()._signalRestriction);
@@ -670,7 +670,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_construct
     // Check that constructor nodes have been castrated (gene index set beyond genome size)
     bool foundCastratedConstructor = false;
     for (auto const& node : subGenome._genes.at(0)._nodes) {
-        if (node.getCellType() == CellTypeGenome_Constructor) {
+        if (node.getCellType() == CellType_Constructor) {
             auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
             if (constructor._geneIndex >= static_cast<int>(subGenome._genes.size())) {
                 foundCastratedConstructor = true;
