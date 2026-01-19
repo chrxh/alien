@@ -13,7 +13,6 @@ layout (location = 2) in int aState;
 out vec3 vColor;
 out int vCellType;
 out int vObjectType;
-out int vSignalState;
 out vec2 vWorldPos;
 
 uniform vec2 worldSize;
@@ -26,7 +25,7 @@ uniform vec2 viewportSize;
 void main()
 {
     vColor = aColor;
-    // Unpack cellType (bits 0-7), signalState (bits 8-15), and objectType (bits 24-31)
+    // Unpack cellType (bits 0-7) and objectType (bits 24-31)
     vCellType = aState & 0xFF;
     vObjectType = (aState >> 24) & 0xFF;
     vWorldPos = aPos.xy;
