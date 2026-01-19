@@ -54,14 +54,12 @@ TEST_F(DescriptionEditTests, correctConnections)
 
 TEST_F(DescriptionEditTests, addThirdConnection1)
 {
-    auto data = Description().addCreature(
-        {
-            ObjectDescription().id(1).pos({0, 0}),
-            ObjectDescription().id(2).pos({1, 0}),
-            ObjectDescription().id(3).pos({0, 1}),
-            ObjectDescription().id(4).pos({0, -1}),
-        },
-        CreatureDescription());
+    auto data = Description().addCreature({
+        ObjectDescription().id(1).pos({0, 0}),
+        ObjectDescription().id(2).pos({1, 0}),
+        ObjectDescription().id(3).pos({0, 1}),
+        ObjectDescription().id(4).pos({0, -1}),
+    });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(1, 4);
@@ -85,14 +83,12 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
 
 TEST_F(DescriptionEditTests, addThirdConnection2)
 {
-    auto data = Description().addCreature(
-        {
-            ObjectDescription().id(1).pos({0, 0}),
-            ObjectDescription().id(2).pos({1, 0}),
-            ObjectDescription().id(3).pos({-1, 0}),
-            ObjectDescription().id(4).pos({0, 1}),
-        },
-        CreatureDescription());
+    auto data = Description().addCreature({
+        ObjectDescription().id(1).pos({0, 0}),
+        ObjectDescription().id(2).pos({1, 0}),
+        ObjectDescription().id(3).pos({-1, 0}),
+        ObjectDescription().id(4).pos({0, 1}),
+    });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(1, 4);
@@ -138,7 +134,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
     if (GetParam() == CellsOnCreature::No) {
         data._objects = {ObjectDescription().id(0), ObjectDescription().id(1)};
     } else {
-        data.addCreature({ObjectDescription().id(0), ObjectDescription().id(1)}, CreatureDescription());
+        data.addCreature({ObjectDescription().id(0), ObjectDescription().id(1)});
     }
 
     // Perform action
@@ -160,7 +156,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
         if (GetParam() == CellsOnCreature::No) {
             return Description().objects({ObjectDescription().id(0), ObjectDescription().id(0)});
         } else {
-            return Description().addCreature({ObjectDescription().id(0), ObjectDescription().id(0)}, CreatureDescription());
+            return Description().addCreature({ObjectDescription().id(0), ObjectDescription().id(0)});
         }
     };
     auto data = createCollection();
@@ -191,7 +187,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
             cells.emplace_back(ObjectDescription().id(i).type(CellDescription().age(i)));
         }
         std::sort(cells.begin(), cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
-        data.addCreature(cells, CreatureDescription());
+        data.addCreature(cells);
     }
 
     // Perform action
@@ -219,18 +215,14 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(
-                        {
-                            ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
-                            ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
-                        },
-                        CreatureDescription())
-                    .addCreature(
-                        {
-                            ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
-                            ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
-                        },
-                        CreatureDescription());
+                    .addCreature({
+                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
+                        ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
+                    })
+                    .addCreature({
+                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(1)}),
+                        ObjectDescription().id(1).connections({ConnectionDescription().objectId(0)}),
+                    });
 
     // Perform action
     data.assignNewIds();
@@ -263,17 +255,13 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(
-                        {
-                            ObjectDescription().id(0).connections({ConnectionDescription().objectId(2)}),
-                            ObjectDescription().id(1),
-                        },
-                        CreatureDescription())
-                    .addCreature(
-                        {
-                            ObjectDescription().id(2).connections({ConnectionDescription().objectId(0)}),
-                        },
-                        CreatureDescription());
+                    .addCreature({
+                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(2)}),
+                        ObjectDescription().id(1),
+                    })
+                    .addCreature({
+                        ObjectDescription().id(2).connections({ConnectionDescription().objectId(0)}),
+                    });
 
     // Perform action
     data.assignNewIds();
@@ -325,17 +313,13 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(
-                        {
-                            ObjectDescription().id(0).connections({ConnectionDescription().objectId(3)}),
-                            ObjectDescription().id(1),
-                        },
-                        CreatureDescription())
-                    .addCreature(
-                        {
-                            ObjectDescription().id(2).connections({ConnectionDescription().objectId(4)}),
-                        },
-                        CreatureDescription());
+                    .addCreature({
+                        ObjectDescription().id(0).connections({ConnectionDescription().objectId(3)}),
+                        ObjectDescription().id(1),
+                    })
+                    .addCreature({
+                        ObjectDescription().id(2).connections({ConnectionDescription().objectId(4)}),
+                    });
     // Perform action
     data.assignNewIds();
 
@@ -386,12 +370,10 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_contained)
 {
     // Create test data
-    auto data = Description().addCreature(
-        {
-            ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(1))),
-            ObjectDescription().id(1),
-        },
-        CreatureDescription());
+    auto data = Description().addCreature({
+        ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(1))),
+        ObjectDescription().id(1),
+    });
 
     // Perform action
     data.assignNewIds();
@@ -424,12 +406,10 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notContained)
 {
     // Create test data
-    auto data = Description().addCreature(
-        {
-            ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(2))),
-            ObjectDescription().id(1),
-        },
-        CreatureDescription());
+    auto data = Description().addCreature({
+        ObjectDescription().id(0).type(CellDescription().cellType(ConstructorDescription().lastConstructedCellId(2))),
+        ObjectDescription().id(1),
+    });
 
     // Perform action
     data.assignNewIds();
@@ -595,7 +575,7 @@ TEST_F(DescriptionEditTests, adaptMaxIds)
 {
     auto data = Description()
                     .addCreature({ObjectDescription().id(5)}, CreatureDescription().id(3))
-                    .addCreature({ObjectDescription()}, CreatureDescription())
+                    .addCreature({ObjectDescription()})
                     .energies({
                         EnergyDescription().id(7),
                         EnergyDescription(),
@@ -618,7 +598,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
     for (int i = 0; i < 1000; ++i) {
         cells.emplace_back(ObjectDescription().id(i).pos({toFloat((50 + i) % WorldWidth), toFloat((50 + i) % WorldHeight)}));
     }
-    auto data = Description().addCreature(cells, CreatureDescription());
+    auto data = Description().addCreature(cells);
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }
@@ -648,7 +628,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
     for (int i = 0; i < 1000; ++i) {
         cells.emplace_back(ObjectDescription().id(i).pos({toFloat((50 - i + WorldWidth) % WorldWidth), toFloat((50 - i + WorldHeight) % WorldHeight)}));
     }
-    auto data = Description().addCreature(cells, CreatureDescription());
+    auto data = Description().addCreature(cells);
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }

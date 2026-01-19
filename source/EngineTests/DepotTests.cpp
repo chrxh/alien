@@ -26,17 +26,15 @@ public:
 protected:
     Description createDepotWithIncomingPositiveSignal(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 200.0f)
     {
-        auto data = Description().addCreature(
-            {
-                ObjectDescription()
-                    .id(1)
-                    .pos({100.0f, 100.0f})
-                    .type(CellDescription()
-                              .cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit))
-                              .usableEnergy(usableEnergy)),
-                ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
-            },
-            CreatureDescription());
+        auto data = Description().addCreature({
+            ObjectDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription()
+                          .cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit))
+                          .usableEnergy(usableEnergy)),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+        });
         data.addConnection(1, 2);
         return data;
     }
@@ -44,15 +42,13 @@ protected:
     Description createDepotWithIncomingNegativeSignal(float usableEnergy, float storedUsableEnergy = 0.0f)
     {
         // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
-        auto data = Description().addCreature(
-            {
-                ObjectDescription()
-                    .id(1)
-                    .pos({100.0f, 100.0f})
-                    .type(CellDescription().cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
-                ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),
-            },
-            CreatureDescription());
+        auto data = Description().addCreature({
+            ObjectDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDescription().cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),
+        });
         data.addConnection(1, 2);
         return data;
     }
@@ -64,14 +60,12 @@ TEST_F(DepotTests, noSignal_noChange)
     auto initialUsableEnergy = normalCellEnergy + 20.0f;
 
     // Create depot without a cell carrying a signal => no signal will be sent
-    auto data = Description().addCreature(
-        {
-            ObjectDescription()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .type(CellDescription().cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
-        },
-        CreatureDescription());
+    auto data = Description().addCreature({
+        ObjectDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .type(CellDescription().cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

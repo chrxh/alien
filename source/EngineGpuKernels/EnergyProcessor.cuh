@@ -103,6 +103,9 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
             }
         } else {
             if (auto object = data.objectMap.getFirst(particle->pos + particle->vel)) {
+                if (object->type == ObjectType_Structure) {
+                    continue;
+                }
                 if (object->fixed) {
                     auto vr = particle->vel - object->vel;
                     auto r = data.objectMap.getCorrectedDirection(particle->pos - object->pos);
@@ -144,7 +147,11 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                         if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
                             energyToTransfer = particle->energy;
                         }
-                        object->typeData.cell.rawEnergy += energyToTransfer;
+                        if (object->type == ObjectType_Cell) {
+                            object->typeData.cell.rawEnergy += energyToTransfer;
+                        } else {
+                            object->typeData.freeCell.rawEnergy += energyToTransfer;
+                        }
                         particle->energy -= energyToTransfer;
                         bool killParticle = particle->energy < NEAR_ZERO;
 

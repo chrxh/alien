@@ -455,13 +455,11 @@ TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
                      .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())))),
                  ObjectDescription().id(2).pos({101.0f, 100.0f})},
                 CreatureDescription().id(0))
-            .addCreature(
-                {
-                    // Create a different creature with a connection that would cross the ray path
-                    ObjectDescription().id(10).pos({100.0f, 99.0f}),
-                    ObjectDescription().id(11).pos({101.0f, 99.0f}),
-                },
-                CreatureDescription());
+            .addCreature({
+                // Create a different creature with a connection that would cross the ray path
+                ObjectDescription().id(10).pos({100.0f, 99.0f}),
+                ObjectDescription().id(11).pos({101.0f, 99.0f}),
+            });
     data.addConnection(1, 2);    // Sensor creature
     data.addConnection(10, 11);  // Different creature
 
@@ -976,13 +974,13 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
                 .pos({100.0f, 100.0f})
                 .type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription()))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription()),
-        }, CreatureDescription().id(0));
+        },
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add many non-structure cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
-        data.addCreature(
-            {ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription())});
+        data.addCreature({ObjectDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDescription())});
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1033,7 +1031,8 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
                 .type(CellDescription().frontAngle(0.0f).cellType(
                     SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1)))),
             ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0),
-        }, CreatureDescription().id(0));
+        },
+        CreatureDescription().id(0));
     data.addConnection(1, 2);
 
     // Add free cells with wrong color (color 0) closer

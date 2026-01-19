@@ -41,10 +41,7 @@ public:
 INSTANTIATE_TEST_SUITE_P(
     CellStateTransitionTests,
     CellStateTransitionTests,
-    ::testing::Values(
-        CellDeathConsequences_None,
-        CellDeathConsequences_DetachedPartsDie,
-        CellDeathConsequences_CreatureDies));
+    ::testing::Values(CellDeathConsequences_None, CellDeathConsequences_DetachedPartsDie, CellDeathConsequences_CreatureDies));
 
 TEST_P(CellStateTransitionTests, ready_ready)
 {
@@ -73,12 +70,10 @@ TEST_P(CellStateTransitionTests, ready_dying)
     _simulationFacade->setSimulationParameters(_parameters);
 
     Description data;
-    data.addCreature(
-        {
-            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Ready)),
-            ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Dying)),
-        },
-        CreatureDescription());
+    data.addCreature({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Ready)),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Dying)),
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -221,12 +216,10 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     _simulationFacade->setSimulationParameters(_parameters);
 
     Description data;
-    data.addCreature(
-        {
-            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
-            ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Reviving)),
-        },
-        CreatureDescription());
+    data.addCreature({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Detaching)),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Reviving)),
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -252,12 +245,10 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     _simulationFacade->setSimulationParameters(_parameters);
 
     Description data;
-    data.addCreature(
-        {
-            ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Constructing)),
-            ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Activating)),
-        },
-        CreatureDescription());
+    data.addCreature({
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellState(CellState_Constructing)),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellState(CellState_Activating)),
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -276,7 +267,7 @@ TEST_P(CellStateTransitionTests, noDyingForFixedCells)
     _parameters.cellDeathConsequences.value = deathConsequences;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().addCreature({ObjectDescription().id(1).fixed(true).pos({10.0f, 10.0f}).type(CellDescription())}, CreatureDescription());
+    auto data = Description().addCreature({ObjectDescription().id(1).fixed(true).pos({10.0f, 10.0f}).type(CellDescription())});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

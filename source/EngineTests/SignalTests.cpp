@@ -20,7 +20,7 @@ TEST_F(SignalTests, noSignal)
 {
     auto data = Description().addCreature({
         ObjectDescription().id(1),
-    }, CreatureDescription());
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -37,7 +37,7 @@ TEST_F(SignalTests, forwardSignal)
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signal(SignalDescription().channels(signal).numTimesSent(3)).signalState(SignalState_Active)),
         ObjectDescription().id(2).pos({1, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -61,7 +61,7 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signalAndState(signal)),
         ObjectDescription().id(2).pos({1, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setPreviewData(data);
@@ -83,7 +83,7 @@ TEST_F(SignalTests, vanishSignal_singleCell)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signalAndState(signal)),
-    }, CreatureDescription());
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -99,7 +99,7 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signal(SignalDescription().channels(signal))),
         ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalState(1)),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -118,7 +118,7 @@ TEST_F(SignalTests, mergeSignals)
         ObjectDescription().id(1).pos({0, 0}).type(CellDescription().signal(SignalDescription().channels(signal1).numTimesSent(7)).signalState(SignalState_Active)),
         ObjectDescription().id(2).pos({1, 0}),
         ObjectDescription().id(3).pos({2, 0}).type(CellDescription().signal(SignalDescription().channels(signal2).numTimesSent(3)).signalState(SignalState_Active)),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -153,7 +153,7 @@ TEST_F(SignalTests, forkSignals)
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signal(SignalDescription().channels(signal).numTimesSent(5)).signalState(SignalState_Active)),
         ObjectDescription().id(3).pos({2, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -199,7 +199,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal).signalRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f)),
         ObjectDescription().id(3).pos({2, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -229,7 +229,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
         ObjectDescription().id(1).pos({0, 0}),
         ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal).signalRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f)),
         ObjectDescription().id(3).pos({2, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -264,7 +264,7 @@ TEST_F(SignalTests, conditionalMode_outsideCone_alwaysBlocked)
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -291,7 +291,7 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -318,7 +318,7 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -346,7 +346,7 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
@@ -374,7 +374,7 @@ TEST_F(SignalTests, inactiveMode_noRestriction)
         ObjectDescription().id(1).pos({0, 0}),
         cell2Desc,
         ObjectDescription().id(3).pos({2, 0}),
-    }, CreatureDescription());
+    });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 

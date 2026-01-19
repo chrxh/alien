@@ -79,12 +79,10 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     nn.weight(5, 3, -1.5f);
 
     Description data;
-    data.addCreature(
-        {
-            ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
-            ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f})),
-        },
-        CreatureDescription());
+    data.addCreature({
+        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
+        ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f})),
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -92,8 +90,8 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(
-        approxCompare(applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualData._objects.at(0).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(
+        applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualData.getObjectRef(1).getCellRef()._signal._channels));
 }
 
 TEST_P(NeuronTests_AllActivationFunctions, bias)
@@ -110,12 +108,10 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
     nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
     Description data;
-    data.addCreature(
-        {
-            ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
-            ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({0, 0, 0, 0, 0, 0, 0, 0})),
-        },
-        CreatureDescription());
+    data.addCreature({
+        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
+        ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({0, 0, 0, 0, 0, 0, 0, 0})),
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -123,5 +119,30 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1}), actualData._objects.at(0).getCellRef()._signal._channels));
+    EXPECT_TRUE(
+        approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1}), actualData.getObjectRef(1).getCellRef()._signal._channels));
+}
+
+TEST_F(NeuronTests, truncateSignal)
+{
+    NeuralNetworkDescription nn;
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        nn.weight(i, i, 2.0f);
+    }
+
+    Description data;
+    data.addCreature({
+        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
+        ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f})),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(approxCompare(
+        std::vector<float>{2, 0, 0, -2, 0, 0, 0, 2},
+        actualData.getObjectRef(1).getCellRef()._signal._channels));
 }

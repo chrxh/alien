@@ -951,7 +951,10 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
 
             bool objectDestruction = false;
             if (object->typeData.freeCell.rawEnergy < minCellEnergy) {
-                objectDestruction = true;
+                auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, object->pos, object->color);
+                if (data.primaryNumberGen.random() <= cellDeathProbability) {
+                    objectDestruction = true;
+                }
             }
 
             // Free cell age radiation

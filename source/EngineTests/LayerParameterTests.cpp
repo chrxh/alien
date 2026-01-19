@@ -92,7 +92,7 @@ TEST_F(LayerParameterTests, circularZone_minCellEnergy_cellsDieInsideZone)
         createCell({510.0f, 500.0f}, 120.0f, 0),  // Inside zone, energy > layer min (should survive)
         createCell({700.0f, 500.0f}, 40.0f, 0),   // Outside zone, energy < base min (should die)
         createCell({710.0f, 500.0f}, 60.0f, 0),   // Outside zone, energy > base min (should survive)
-    }, CreatureDescription().id(1));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
@@ -148,7 +148,7 @@ TEST_F(LayerParameterTests, rectangularZone_minCellEnergy_cellsDieInsideZone)
         createCell({520.0f, 510.0f}, 120.0f, 0),  // Inside rect, energy > layer min (should survive)
         createCell({700.0f, 500.0f}, 25.0f, 0),   // Outside rect, energy = 0.5 * base min (should die)
         createCell({710.0f, 500.0f}, 70.0f, 0),   // Outside rect, energy > base min (should survive)
-    }, CreatureDescription().id(1));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
@@ -200,7 +200,7 @@ TEST_F(LayerParameterTests, multipleCircularZones_differentSizes)
         createCell({710.0f, 500.0f}, 130.0f, 0),  // Zone 2, energy > 120 (should survive)
         createCell({900.0f, 500.0f}, 10.0f, 0),   // Outside both zones, very low energy (should die)
         createCell({910.0f, 500.0f}, 70.0f, 0),   // Outside both zones, energy > 50 (should survive)
-    }, CreatureDescription().id(1));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
@@ -257,7 +257,7 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
         createCell({620.0f, 500.0f}, 140.0f, 0),  // Only Zone 2, energy > 120 (should survive)
         createCell({300.0f, 500.0f}, 10.0f, 0),   // Outside zones, very low energy (should die)
         createCell({310.0f, 500.0f}, 70.0f, 0),   // Outside zones, energy > 50 (should survive)
-    }, CreatureDescription().id(1));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
@@ -292,7 +292,7 @@ TEST_F(LayerParameterTests, circularZone_fadeoutRadius_transitionBehavior)
         createCell({500.0f, 500.0f}, 160.0f, 0),  // Center, full layer effect, energy > 150 (should survive)
         createCell({570.0f, 500.0f}, 75.0f, 0),   // In fadeout zone (distance ~70), energy = 0.5 * 150 (should die)
         createCell({650.0f, 500.0f}, 60.0f, 0),   // Outside fadeout (distance ~150), energy > 50 base (should survive)
-    }, CreatureDescription().id(1));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
@@ -331,7 +331,7 @@ TEST_F(LayerParameterTests, rectangularZone_dimensions_correctBoundaries)
         createCell({500.0f, 560.0f}, 60.0f, 0),   // Outside vertically, energy > 50 (survives)
         createCell({710.0f, 500.0f}, 25.0f, 0),   // Outside horizontally, energy = 0.5 * 50 (dies)
         createCell({720.0f, 500.0f}, 60.0f, 0),   // Outside horizontally, energy > 50 (survives)
-    }, CreatureDescription().id(1));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
@@ -382,7 +382,7 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
         createCell({710.0f, 500.0f}, 10.0f, 0),   // Rectangular zone, very low energy (dies)
         createCell({900.0f, 500.0f}, 10.0f, 0),   // Outside both, very low energy (dies)
         createCell({910.0f, 500.0f}, 70.0f, 0),   // Outside both, energy > 50 (survives)
-    }, CreatureDescription().id(1));
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(10);
@@ -425,7 +425,7 @@ TEST_F(LayerParameterTests, movingRectangularZone_cellsAffectedByMovingZone)
         createCell({450.0f, 500.0f}, 110.0f, 0),  // Ahead of zone, initially safe but will be caught
         createCell({460.0f, 500.0f}, 130.0f, 0),  // Ahead of zone, will survive when caught
         createCell({300.0f, 650.0f}, 55.0f, 0),   // Far outside zone path, survives (> 50 base)
-    }, CreatureDescription().id(1));
+    });
 
     _simulationFacade->setSimulationData(data);
 

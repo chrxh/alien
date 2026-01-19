@@ -82,7 +82,7 @@ TEST_P(PhysicsTests_TwoAngles, angularForces)
         ObjectDescription().id(1).pos(pos1),
         ObjectDescription().id(2).pos(pos2),
         ObjectDescription().id(3).pos(pos3),
-    }, CreatureDescription());
+    });
     data.addConnection(2, 1);
     data.addConnection(2, 3, pos3ref);
 
@@ -112,7 +112,7 @@ TEST_F(PhysicsTests, noGhostRotations)
         ObjectDescription().id(1).pos(pos1),
         ObjectDescription().id(2).pos(pos2),
         ObjectDescription().id(3).pos(pos3),
-    }, CreatureDescription());
+    });
     data.addConnection(2, 1);
     data.addConnection(2, 3, pos3ref);
 

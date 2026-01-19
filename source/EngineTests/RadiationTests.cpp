@@ -32,7 +32,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
 
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDescription().usableEnergy(initialEnergy))
-    }, CreatureDescription());
+    });
 
     _simulationFacade->setSimulationData(data);
 
@@ -54,7 +54,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
 {
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(StructureDescription()));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(StructureDescription()));
 
     _simulationFacade->setSimulationData(data);
 
@@ -78,7 +78,7 @@ TEST_F(RadiationTests, baseCells_shouldRadiate)
 
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(BaseDescription()))
-    }, CreatureDescription());
+    });
 
     _simulationFacade->setSimulationData(data);
 
@@ -96,8 +96,6 @@ TEST_F(RadiationTests, baseCells_shouldRadiate)
 
 TEST_F(RadiationTests, freeCells_shouldRadiate)
 {
-    auto initialEnergy = 200.0f;
-
     Description data;
     data._objects.emplace_back(
         ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(FreeCellDescription()));
@@ -122,7 +120,7 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
 
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(ConstructorDescription()))
-    }, CreatureDescription());
+    });
 
     _simulationFacade->setSimulationData(data);
 
@@ -136,27 +134,4 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-}
-
-TEST_F(RadiationTests, fixedStructureObject_shouldNotRadiate)
-{
-    // Test that a cell that is both fixed AND a structure cell does not radiate
-    Description data;
-    data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(StructureDescription()));
-
-    _simulationFacade->setSimulationData(data);
-
-    // Run simulation for many timesteps
-    _simulationFacade->calcTimesteps(1000);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    // Verify no particles were created (no radiation emitted)
-    EXPECT_EQ(0, actualData._energies.size());
-
-    // Verify the cell is still present
-    EXPECT_EQ(1, actualData._objects.size());
-    auto const& object = actualData._objects.at(0);
-    EXPECT_EQ(ObjectType_Structure, object.getObjectType());
 }
