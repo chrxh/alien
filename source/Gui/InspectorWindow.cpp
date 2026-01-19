@@ -113,10 +113,10 @@ void _InspectorWindow::processCell(ExtendedObjectDesc& extendedCell)
             processCellTypeTab(object);
             processCellTypePropertiesTab(object);
             if (object.getCellRef().getCellType() == CellType_Constructor) {
-                processCellGenomeTab(std::get<ConstructorDescription>(object.getCellRef()._cellType));
+                processCellGenomeTab(std::get<ConstructorDesc>(object.getCellRef()._cellType));
             }
             if (object.getCellRef().getCellType() == CellType_Injector) {
-                processCellGenomeTab(std::get<InjectorDescription>(object.getCellRef()._cellType));
+                processCellGenomeTab(std::get<InjectorDesc>(object.getCellRef()._cellType));
             }
         }
         validateAndCorrect(object);
