@@ -121,8 +121,6 @@ CellType NodeDesc::getCellType() const
         return CellType_Base;
     } else if (std::holds_alternative<DepotGenomeDesc>(_cellType)) {
         return CellType_Depot;
-    } else if (std::holds_alternative<ConstructorGenomeDesc>(_cellType)) {
-        return CellType_Constructor;
     } else if (std::holds_alternative<SensorGenomeDesc>(_cellType)) {
         return CellType_Sensor;
     } else if (std::holds_alternative<GeneratorGenomeDesc>(_cellType)) {

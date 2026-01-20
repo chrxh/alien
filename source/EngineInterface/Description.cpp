@@ -121,8 +121,6 @@ CellType CellDesc::getCellType() const
         return CellType_Base;
     } else if (std::holds_alternative<DepotDesc>(_cellType)) {
         return CellType_Depot;
-    } else if (std::holds_alternative<ConstructorDesc>(_cellType)) {
-        return CellType_Constructor;
     } else if (std::holds_alternative<SensorDesc>(_cellType)) {
         return CellType_Sensor;
     } else if (std::holds_alternative<GeneratorDesc>(_cellType)) {
@@ -422,8 +420,8 @@ void Desc::assignNewIds()
         for (auto& connection : object._connections) {
             connection._objectId = findNewObjectId(creatureId, connection._objectId);
         }
-        if (object.getObjectType() == ObjectType_Cell && object.getCellRef().getCellType() == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorDesc>(object.getCellRef()._cellType);
+        if (object.getObjectType() == ObjectType_Cell && object.getCellRef()._constructor.has_value()) {
+            auto& constructor = object.getCellRef()._constructor.value();
             if (constructor._lastConstructedCellId.has_value()) {
                 constructor._lastConstructedCellId = findNewObjectId(creatureId, constructor._lastConstructedCellId.value());
             }
