@@ -11,7 +11,6 @@
 
 class CellStateTransitionTests
     : public IntegrationTestFramework
-    , public testing::WithParamInterface<CellDeathConsequences>
 {
 public:
     CellStateTransitionTests()
@@ -38,12 +37,18 @@ public:
     }
 };
 
+class CellStateTransitionTests_CellDeathConsequences
+    : public CellStateTransitionTests
+    , public testing::WithParamInterface<CellDeathConsequences>
+{};
+
+
 INSTANTIATE_TEST_SUITE_P(
-    CellStateTransitionTests,
-    CellStateTransitionTests,
+    CellStateTransitionTests_CellDeathConsequences,
+    CellStateTransitionTests_CellDeathConsequences,
     ::testing::Values(CellDeathConsequences_None, CellDeathConsequences_DetachedPartsDie, CellDeathConsequences_CreatureDies));
 
-TEST_P(CellStateTransitionTests, ready_ready)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, ready_ready)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -63,7 +68,7 @@ TEST_P(CellStateTransitionTests, ready_ready)
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
-TEST_P(CellStateTransitionTests, ready_dying)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, ready_dying)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -83,7 +88,7 @@ TEST_P(CellStateTransitionTests, ready_dying)
     EXPECT_EQ(CellState_Dying, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
-TEST_P(CellStateTransitionTests, ready_detaching)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, ready_detaching)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -109,7 +114,7 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     }
 }
 
-TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, ready_detaching_onHeadCell)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -146,7 +151,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
     }
 }
 
-TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, ready_detaching_onNonHeadCell)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -182,7 +187,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
     }
 }
 
-TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, ready_detaching_differentCreature)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -209,7 +214,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     }
 }
 
-TEST_P(CellStateTransitionTests, detaching_reviving)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, detaching_reviving)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -238,7 +243,7 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     }
 }
 
-TEST_P(CellStateTransitionTests, underConstruction_activating)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, underConstruction_activating)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -261,7 +266,7 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
-TEST_P(CellStateTransitionTests, noDyingForFixedCells)
+TEST_P(CellStateTransitionTests_CellDeathConsequences, noDyingForFixedCells)
 {
     auto deathConsequences = GetParam();
     _parameters.cellDeathConsequences.value = deathConsequences;
@@ -273,4 +278,76 @@ TEST_P(CellStateTransitionTests, noDyingForFixedCells)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+}
+
+class CellStateTransitionTests_CellDeathConsequences_AllStates
+    : public CellStateTransitionTests
+    , public testing::WithParamInterface<std::pair<CellDeathConsequences, CellState>>
+{};
+
+
+INSTANTIATE_TEST_SUITE_P(
+    CellStateTransitionTests_CellDeathConsequences_AllStates,
+    CellStateTransitionTests_CellDeathConsequences_AllStates,
+    ::testing::Values(
+        std::make_pair(CellDeathConsequences_None, CellState_Ready),
+        std::make_pair(CellDeathConsequences_None, CellState_Constructing),
+        std::make_pair(CellDeathConsequences_None, CellState_Activating),
+        std::make_pair(CellDeathConsequences_None, CellState_Reviving),
+        std::make_pair(CellDeathConsequences_None, CellState_Dying)));
+
+TEST_P(CellStateTransitionTests_CellDeathConsequences_AllStates, structure_cell)
+{
+    auto [deathConsequences, cellState] = GetParam();
+    _parameters.cellDeathConsequences.value = deathConsequences;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto data = Desc()
+                    .addObjects({
+                        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(StructureDesc()),
+                    })
+                    .addCreature({
+                        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellState(cellState)),
+                    })
+                    .addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    if (cellState == CellState_Activating) {
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else if (cellState == CellState_Reviving) {
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else {
+        EXPECT_EQ(cellState, actualData.getObjectRef(2).getCellRef()._cellState);
+    }
+}
+
+TEST_P(CellStateTransitionTests_CellDeathConsequences_AllStates, freeCell_cell)
+{
+    auto [deathConsequences, cellState] = GetParam();
+    _parameters.cellDeathConsequences.value = deathConsequences;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto data = Desc()
+                    .addObjects({
+                        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(FreeCellDesc()),
+                    })
+                    .addCreature({
+                        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellState(cellState)),
+                    })
+                    .addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    if (cellState == CellState_Activating) {
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else if (cellState == CellState_Reviving) {
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
+    } else {
+        EXPECT_EQ(cellState, actualData.getObjectRef(2).getCellRef()._cellState);
+    }
 }
