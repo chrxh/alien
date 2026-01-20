@@ -31,8 +31,8 @@ namespace
         auto numBranches = gene._separation ? 1 : gene._numBranches;
         auto result = gene._nodes.size() * gene._numConcatenations * numBranches;
         for (auto const& node : gene._nodes) {
-            if (node.getCellType() == CellType_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
+            if (node._constructor.has_value()) {
+                auto const& constructor = node._constructor.value();
                 if (constructor._geneIndex != 0) {  // First gene is for self-replication and should not be counted
                     auto numNodes = numBranches * countNodes(genome, constructor._geneIndex, lastGenes);
                     if (numNodes == -1) {
@@ -60,8 +60,8 @@ std::vector<int> GenomeDescInfoService::getReferences(GeneDesc const& gene) cons
 {
     std::vector<int> result;
     for (auto const& node : gene._nodes) {
-        if (node.getCellType() == CellType_Constructor) {
-            auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
+        if (node._constructor.has_value()) {
+            auto const& constructor = node._constructor.value();
             result.emplace_back(constructor._geneIndex);
         }
     }
@@ -74,8 +74,8 @@ std::vector<int> GenomeDescInfoService::getReferencedBy(GenomeDesc const& genome
     for (int i = 0; i < genome._genes.size(); ++i) {
         auto const& gene = genome._genes[i];
         for (auto const& node : gene._nodes) {
-            if (node.getCellType() == CellType_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
+            if (node._constructor.has_value()) {
+                auto const& constructor = node._constructor.value();
                 if (constructor._geneIndex == geneIndex) {
                     result.emplace_back(i);
                 }

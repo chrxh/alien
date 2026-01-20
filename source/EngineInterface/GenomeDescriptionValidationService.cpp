@@ -47,17 +47,6 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 depot._storageLimit = std::clamp(depot._storageLimit, 0.0f, 1000.0f);
                 depot._initialStoredUsableEnergy = std::clamp(depot._initialStoredUsableEnergy, 0.0f, depot._storageLimit);
 
-            } else if (nodeType == CellType_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
-                if (constructor._autoTriggerInterval.has_value()) {
-                    auto& value = constructor._autoTriggerInterval.value();
-                    value = std::max(value, 1);
-                }
-                constructor._geneIndex = std::max(constructor._geneIndex, 0);
-                constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, MAX_ACTIVATION_TIME);
-                constructor._provideEnergy =
-                    std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_FreeGeneration));
-
             } else if (nodeType == CellType_Sensor) {
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 if (sensor._autoTriggerInterval.has_value()) {
