@@ -371,7 +371,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 {
     // Create test data
     auto data = Desc().addCreature({
-        ObjectDesc().id(0).type(CellDesc().cellType(ConstructorDesc().lastConstructedCellId(1))),
+        ObjectDesc().id(0).type(CellDesc().constructor(ConstructorDesc().lastConstructedCellId(1))),
         ObjectDesc().id(1),
     });
 

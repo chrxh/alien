@@ -53,7 +53,7 @@ protected:
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
-                NodeDesc().cellType(ConstructorGenomeDesc().geneIndex(1)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
                 NodeDesc(),
             }),
             GeneDesc().numConcatenations(4).numBranches(2).nodes({NodeDesc().cellType(muscleDesc)}),
@@ -82,11 +82,11 @@ protected:
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
-                NodeDesc().cellType(ConstructorGenomeDesc().geneIndex(1)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
                 NodeDesc(),
             }),
             GeneDesc().numConcatenations(2).numBranches(1).nodes(
-                {NodeDesc().color(1).cellType(muscleDesc), NodeDesc().color(1).cellType(ConstructorGenomeDesc().geneIndex(2))}),
+                {NodeDesc().color(1).cellType(muscleDesc), NodeDesc().color(1).constructor(ConstructorGenomeDesc().geneIndex(2))}),
             GeneDesc().numConcatenations(1).numBranches(2).nodes({NodeDesc().color(2)}),
         });
     }
@@ -134,7 +134,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, Direction::Forward);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -144,7 +144,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Check that the seed provides no energy anymore after the creature is constructed
-    auto constructor = std::get<ConstructorDesc>(actualData.getObjectRef(0).getCellRef()._cellType);
+    auto constructor = actualData.getObjectRef(0).getCellRef()._constructor.value();
     if (genome._genes[constructor._geneIndex]._separation) {
         EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
     }
@@ -217,7 +217,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
 
     auto genome = createGenomeForCreatureWithOneLegAndSpikes(muscleMode, Direction::Forward);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -227,7 +227,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Check that the seed provides no energy anymore after the creature is constructed
-    auto constructor = std::get<ConstructorDesc>(actualData.getObjectRef(0).getCellRef()._cellType);
+    auto constructor = actualData.getObjectRef(0).getCellRef()._constructor.value();
     if (genome._genes[constructor._geneIndex]._separation) {
         EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
     }
@@ -328,7 +328,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, direction);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos(refPoint).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc().id(0).pos(refPoint).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -386,7 +386,7 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -440,7 +440,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos(refPoint).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc().id(0).pos(refPoint).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 

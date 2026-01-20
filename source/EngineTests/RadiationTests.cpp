@@ -119,7 +119,7 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
     auto initialEnergy = 200.0f;
 
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDesc().usableEnergy(initialEnergy).cellType(ConstructorDesc()))
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDesc().usableEnergy(initialEnergy).constructor(ConstructorDesc()))
     });
 
     _simulationFacade->setSimulationData(data);

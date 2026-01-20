@@ -40,7 +40,7 @@ protected:
     Desc createTargetCreatureWithConstructor(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f)
     {
         auto data = Desc().addCreature({
-            ObjectDesc().id(100).pos(pos).color(color).type(CellDesc().usableEnergy(usableEnergy).cellType(ConstructorDesc())),
+            ObjectDesc().id(100).pos(pos).color(color).type(CellDesc().usableEnergy(usableEnergy).constructor(ConstructorDesc())),
             ObjectDesc().id(101).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().usableEnergy(usableEnergy)),
         }, CreatureDesc().id(creatureId));
         data.addConnection(100, 101);
@@ -88,7 +88,7 @@ TEST_F(InjectorTests, successfulInjection)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
-    auto actualTargetConstructor = std::get<ConstructorDesc>(actualData.getObjectRef(100).getCellRef()._cellType);
+    auto actualTargetConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Injector should have a signal with success value > 0
     ASSERT_TRUE(actualInjector.getCellRef()._signalState == SignalState_Active);
@@ -108,18 +108,18 @@ TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(InjectorDesc().geneIndex(3))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
-        ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().cellType(ConstructorDesc().geneIndex(0))),  // Same creature
+        ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),  // Same creature
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
-    auto origConstructor = std::get<ConstructorDesc>(data.getObjectRef(3).getCellRef()._cellType);
+    auto origConstructor = data.getObjectRef(3).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualConstructor = std::get<ConstructorDesc>(actualData.getObjectRef(3).getCellRef()._cellType);
+    auto actualConstructor = actualData.getObjectRef(3).getCellRef()._constructor.value();
 
     // Constructor's geneIndex should remain unchanged
     EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
@@ -135,18 +135,18 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
 
     // Add target creature with fixed constructor
     data.addCreature({
-        ObjectDesc().id(100).pos({100.0f, 103.0f}).fixed(true).type(CellDesc().cellType(ConstructorDesc().geneIndex(0))),
+        ObjectDesc().id(100).pos({100.0f, 103.0f}).fixed(true).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
         ObjectDesc().id(101).pos({101.0f, 103.0f}).fixed(true),
     }, CreatureDesc().id(2));
     data.addConnection(100, 101);
 
-    auto origConstructor = std::get<ConstructorDesc>(data.getObjectRef(100).getCellRef()._cellType);
+    auto origConstructor = data.getObjectRef(100).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualConstructor = std::get<ConstructorDesc>(actualData.getObjectRef(100).getCellRef()._cellType);
+    auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Constructor's geneIndex should remain unchanged
     EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
@@ -173,18 +173,18 @@ TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
 
     // Add target creature below (ray to target is blocked by connection 3-4)
     data.addCreature({
-        ObjectDesc().id(100).pos({100.0f, 97.0f}).type(CellDesc().cellType(ConstructorDesc().geneIndex(0))),
+        ObjectDesc().id(100).pos({100.0f, 97.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
         ObjectDesc().id(101).pos({101.0f, 97.0f}),
     }, CreatureDesc().id(2));
     data.addConnection(100, 101);
 
-    auto origConstructor = std::get<ConstructorDesc>(data.getObjectRef(100).getCellRef()._cellType);
+    auto origConstructor = data.getObjectRef(100).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualConstructor = std::get<ConstructorDesc>(actualData.getObjectRef(100).getCellRef()._cellType);
+    auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Constructor's geneIndex should remain unchanged because ray is blocked
     EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
@@ -200,7 +200,7 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
 
     // Add target creature with constructor that has some progress
     data.addCreature({
-        ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().cellType(ConstructorDesc().geneIndex(5).currentNodeIndex(3).currentConcatenation(2))),
+        ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(5).currentNodeIndex(3).currentConcatenation(2))),
         ObjectDesc().id(101).pos({101.0f, 103.0f}),
     }, CreatureDesc().id(2));
     data.addConnection(100, 101);
@@ -209,7 +209,7 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualConstructor = std::get<ConstructorDesc>(actualData.getObjectRef(100).getCellRef()._cellType);
+    auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Constructor's geneIndex should be the injector's geneIndex
     EXPECT_EQ(2, actualConstructor._geneIndex);

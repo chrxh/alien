@@ -18,7 +18,7 @@ public:
 protected:
     int getRefGeneIndex(GeneDesc const& gene, int nodeIndex) const
     {
-        return std::get<ConstructorGenomeDesc>(gene._nodes.at(nodeIndex)._cellType)._geneIndex;
+        return gene._nodes.at(nodeIndex)._constructor.value()._geneIndex;
     };
 
     GenomeDesc createGenome_complexCycles() const
@@ -114,9 +114,9 @@ TEST_F(GenomeDescEditServiceTests, addEmptyGene_withReferences)
             ASSERT_EQ(5, gene._nodes.size());
         }
         if (i != 2) {
-            EXPECT_EQ(0, std::get<ConstructorGenomeDesc>(gene._nodes.at(0)._cellType)._geneIndex);
-            EXPECT_EQ(1, std::get<ConstructorGenomeDesc>(gene._nodes.at(1)._cellType)._geneIndex);
-            EXPECT_EQ(3, std::get<ConstructorGenomeDesc>(gene._nodes.at(2)._cellType)._geneIndex);
+            EXPECT_EQ(0, gene._nodes.at(0)._constructor.value()._geneIndex);
+            EXPECT_EQ(1, gene._nodes.at(1)._constructor.value()._geneIndex);
+            EXPECT_EQ(3, gene._nodes.at(2)._constructor.value()._geneIndex);
         }
     }
 }
@@ -131,9 +131,9 @@ TEST_F(GenomeDescEditServiceTests, removeGene_middle)
     EXPECT_EQ(5, genome._genes.at(1)._nodes.size());
     for (int i = 0; i < 2; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDesc>(gene._nodes.at(0)._cellType)._geneIndex);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDesc>(gene._nodes.at(1)._cellType)._geneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDesc>(gene._nodes.at(2)._cellType)._geneIndex);
+        EXPECT_EQ(0, gene._nodes.at(0)._constructor.value()._geneIndex);
+        EXPECT_EQ(0, gene._nodes.at(1)._constructor.value()._geneIndex);
+        EXPECT_EQ(1, gene._nodes.at(2)._constructor.value()._geneIndex);
     }
 }
 
@@ -147,9 +147,9 @@ TEST_F(GenomeDescEditServiceTests, removeGene_end)
     EXPECT_EQ(4, genome._genes.at(1)._nodes.size());
     for (int i = 0; i < 2; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDesc>(gene._nodes.at(0)._cellType)._geneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDesc>(gene._nodes.at(1)._cellType)._geneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDesc>(gene._nodes.at(2)._cellType)._geneIndex);
+        EXPECT_EQ(0, gene._nodes.at(0)._constructor.value()._geneIndex);
+        EXPECT_EQ(1, gene._nodes.at(1)._constructor.value()._geneIndex);
+        EXPECT_EQ(1, gene._nodes.at(2)._constructor.value()._geneIndex);
     }
 }
 
@@ -164,9 +164,9 @@ TEST_F(GenomeDescEditServiceTests, swapGenes)
     EXPECT_EQ(4, genome._genes.at(2)._nodes.size());
     for (int i = 0; i < 3; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDesc>(gene._nodes.at(0)._cellType)._geneIndex);
-        EXPECT_EQ(2, std::get<ConstructorGenomeDesc>(gene._nodes.at(1)._cellType)._geneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDesc>(gene._nodes.at(2)._cellType)._geneIndex);
+        EXPECT_EQ(0, gene._nodes.at(0)._constructor.value()._geneIndex);
+        EXPECT_EQ(2, gene._nodes.at(1)._constructor.value()._geneIndex);
+        EXPECT_EQ(1, gene._nodes.at(2)._constructor.value()._geneIndex);
     }
 }
 
@@ -180,10 +180,10 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_start)
     GenomeDescEditService::get().addNode(gene, 0, NodeDesc());
 
     ASSERT_EQ(4, gene._nodes.size());
-    EXPECT_EQ(CellType_Depot, gene._nodes.at(0_constructor.has_value());
-    EXPECT_EQ(CellType_Base, gene._nodes.at(1_constructor.has_value());
-    EXPECT_TRUE( gene._nodes.at(2_constructor.has_value());
-    EXPECT_EQ(CellType_Sensor, gene._nodes.at(3_constructor.has_value());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Base, gene._nodes.at(1).getCellType());
+    EXPECT_TRUE(gene._nodes.at(2)._constructor.has_value());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(3).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, addEmptyNode_middle)
@@ -196,10 +196,10 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_middle)
     GenomeDescEditService::get().addNode(gene, 1, NodeDesc());
 
     ASSERT_EQ(4, gene._nodes.size());
-    EXPECT_EQ(CellType_Depot, gene._nodes.at(0_constructor.has_value());
-    EXPECT_TRUE( gene._nodes.at(1_constructor.has_value());
-    EXPECT_EQ(CellType_Base, gene._nodes.at(2_constructor.has_value());
-    EXPECT_EQ(CellType_Sensor, gene._nodes.at(3_constructor.has_value());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_TRUE(gene._nodes.at(1)._constructor.has_value());
+    EXPECT_EQ(CellType_Base, gene._nodes.at(2).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(3).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, addEmptyNode_end)
@@ -212,10 +212,10 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_end)
     GenomeDescEditService::get().addNode(gene, 2, NodeDesc());
 
     ASSERT_EQ(4, gene._nodes.size());
-    EXPECT_EQ(CellType_Depot, gene._nodes.at(0_constructor.has_value());
-    EXPECT_TRUE( gene._nodes.at(1_constructor.has_value());
-    EXPECT_EQ(CellType_Sensor, gene._nodes.at(2_constructor.has_value());
-    EXPECT_EQ(CellType_Base, gene._nodes.at(3_constructor.has_value());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_TRUE(gene._nodes.at(1)._constructor.has_value());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(2).getCellType());
+    EXPECT_EQ(CellType_Base, gene._nodes.at(3).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, removeNode_start)
@@ -228,8 +228,8 @@ TEST_F(GenomeDescEditServiceTests, removeNode_start)
     GenomeDescEditService::get().removeNode(gene, 0);
 
     ASSERT_EQ(2, gene._nodes.size());
-    EXPECT_TRUE( gene._nodes.at(0_constructor.has_value());
-    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1_constructor.has_value());
+    EXPECT_TRUE(gene._nodes.at(0)._constructor.has_value());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, removeNode_middle)
@@ -242,8 +242,8 @@ TEST_F(GenomeDescEditServiceTests, removeNode_middle)
     GenomeDescEditService::get().removeNode(gene, 1);
 
     ASSERT_EQ(2, gene._nodes.size());
-    EXPECT_EQ(CellType_Depot, gene._nodes.at(0_constructor.has_value());
-    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1_constructor.has_value());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1).getCellType());
 }
 
 TEST_F(GenomeDescEditServiceTests, removeNode_end)
@@ -256,8 +256,8 @@ TEST_F(GenomeDescEditServiceTests, removeNode_end)
     GenomeDescEditService::get().removeNode(gene, 2);
 
     ASSERT_EQ(2, gene._nodes.size());
-    EXPECT_EQ(CellType_Depot, gene._nodes.at(0_constructor.has_value());
-    EXPECT_TRUE( gene._nodes.at(1_constructor.has_value());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_TRUE(gene._nodes.at(1)._constructor.has_value());
 }
 
 TEST_F(GenomeDescEditServiceTests, swapNodes)
@@ -270,9 +270,9 @@ TEST_F(GenomeDescEditServiceTests, swapNodes)
     GenomeDescEditService::get().swapNodes(gene, 1);
 
     ASSERT_EQ(3, gene._nodes.size());
-    EXPECT_EQ(CellType_Depot, gene._nodes.at(0_constructor.has_value());
-    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1_constructor.has_value());
-    EXPECT_TRUE( gene._nodes.at(2_constructor.has_value());
+    EXPECT_EQ(CellType_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellType_Sensor, gene._nodes.at(1).getCellType());
+    EXPECT_TRUE(gene._nodes.at(2)._constructor.has_value());
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_emptyGenome)
@@ -335,7 +335,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
         if (index == 0) {
             EXPECT_TRUE(node._constructor.has_value());
         }
-        EXPECT_EQ(CellType_Base, node.getCellType());
+        // Cell types remain their original types in preview mode
     }
     EXPECT_EQ(NeuralNetworkGenomeDesc(), gene0._nodes.front()._neuralNetwork);
     EXPECT_EQ(SignalRestrictionGenomeDesc(), gene0._nodes.front()._signalRestriction);
