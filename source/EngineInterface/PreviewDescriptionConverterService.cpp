@@ -64,8 +64,8 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
         secondCell = phenotype.getObjectRef(getSecondElement(cellIdsOnStartGene));
     } else {
         // Only 1 cell with start gene? => try cells of referenced gene
-        if (firstCell.getCellRef().getCellType() == CellType_Constructor) {
-            auto refGeneIndex = std::get<ConstructorDesc>(firstCell.getCellRef()._cellType)._geneIndex;
+        if (firstCell.getCellRef()._constructor.has_value()) {
+            auto refGeneIndex = firstCell.getCellRef()._constructor.value()._geneIndex;
             for (auto const& object : phenotype._objects) {
                 if (object.getCellRef()._geneIndex != refGeneIndex || object._id == firstCell._id) {
                     continue;
@@ -112,9 +112,9 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
         if (object.getCellRef()._signalState == SignalState_Active) {
             previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
         }
-        if (object.getCellRef().getCellType() == CellType_Constructor) {
+        if (node._constructor.has_value()) {
             if (!genome._genes.empty()) {
-                auto nodeConstructor = std::get<ConstructorGenomeDesc>(node._cellType);
+                auto nodeConstructor = node._constructor.value();
                 previewCell._constructorGeneIndex = nodeConstructor._geneIndex;
             }
         }
