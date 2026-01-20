@@ -136,13 +136,6 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.depot.storageLimit = nodeTO.cellTypeData.depot.storageLimit;
                 node.cellTypeData.depot.initialStoredUsableEnergy = nodeTO.cellTypeData.depot.initialStoredUsableEnergy;
                 break;
-            case CellType_Constructor:
-                node.cellTypeData.constructor.autoTriggerInterval = nodeTO.cellTypeData.constructor.autoTriggerInterval;
-                node.cellTypeData.constructor.geneIndex = nodeTO.cellTypeData.constructor.geneIndex;
-                node.cellTypeData.constructor.constructionActivationTime = nodeTO.cellTypeData.constructor.constructionActivationTime;
-                node.cellTypeData.constructor.constructionAngle = nodeTO.cellTypeData.constructor.constructionAngle;
-                node.cellTypeData.constructor.provideEnergy = nodeTO.cellTypeData.constructor.provideEnergy;
-                break;
             case CellType_Sensor:
                 node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
@@ -394,20 +387,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         case CellType_Depot: {
             cell->cellTypeData.depot.storageLimit = cellTO.cellTypeData.depot.storageLimit;
             cell->cellTypeData.depot.storedUsableEnergy = cellTO.cellTypeData.depot.storedUsableEnergy;
-        } break;
-        case CellType_Constructor: {
-            cell->cellTypeData.constructor.autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
-            cell->cellTypeData.constructor.constructionActivationTime =
-                cellTO.cellTypeData.constructor.constructionActivationTime;
-            cell->cellTypeData.constructor.constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
-            cell->cellTypeData.constructor.provideEnergy = cellTO.cellTypeData.constructor.provideEnergy;
-            cell->cellTypeData.constructor.geneIndex = cellTO.cellTypeData.constructor.geneIndex;
-            cell->cellTypeData.constructor.lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
-            cell->cellTypeData.constructor.currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
-            cell->cellTypeData.constructor.currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
-            cell->cellTypeData.constructor.currentBranch = cellTO.cellTypeData.constructor.currentBranch;
-            cell->cellTypeData.constructor.isReady = true;
-            cell->cellTypeData.constructor.offspring = nullptr;
         } break;
         case CellType_Sensor: {
             cell->cellTypeData.sensor.autoTriggerInterval = cellTO.cellTypeData.sensor.autoTriggerInterval;
@@ -773,22 +752,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         cell.cellType = CellType_Depot;
         cell.cellTypeData.depot.storageLimit = node->cellTypeData.depot.storageLimit;
         cell.cellTypeData.depot.storedUsableEnergy = node->cellTypeData.depot.initialStoredUsableEnergy;
-    } break;
-    case CellType_Constructor: {
-        cell.cellType = CellType_Constructor;
-        auto const& nodeConstructor = node->cellTypeData.constructor;
-        auto& constructor = cell.cellTypeData.constructor;
-        constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
-        constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
-        constructor.constructionAngle = nodeConstructor.constructionAngle;
-        constructor.provideEnergy = nodeConstructor.provideEnergy;
-        constructor.geneIndex = nodeConstructor.geneIndex;
-        constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
-        constructor.currentNodeIndex = 0;
-        constructor.currentConcatenation = 0;
-        constructor.currentBranch = 0;
-        constructor.isReady = true;
-        constructor.offspring = nullptr;
     } break;
     case CellType_Sensor: {
         cell.cellType = CellType_Sensor;
