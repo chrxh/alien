@@ -305,6 +305,8 @@ struct Node
     NeuralNetworkGenome neuralNetwork;
     CellType cellType;
     CellTypeDataGenome cellTypeData;
+    bool constructorAvailable;  // If true, constructor holds valid data
+    ConstructorGenome constructor;  // Optional constructor data
     SignalRestrictionGenome signalRestriction;
 };
 

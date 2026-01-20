@@ -392,6 +392,7 @@ struct NodeDesc
 
     MEMBER(NodeDesc, NeuralNetworkGenomeDesc, neuralNetwork, NeuralNetworkGenomeDesc());
     MEMBER(NodeDesc, CellTypeGenomeDesc, cellType, BaseGenomeDesc());
+    MEMBER(NodeDesc, std::optional<ConstructorGenomeDesc>, constructor, std::nullopt);
     MEMBER(NodeDesc, SignalRestrictionGenomeDesc, signalRestriction, SignalRestrictionGenomeDesc());
 
     CellType getCellType() const;

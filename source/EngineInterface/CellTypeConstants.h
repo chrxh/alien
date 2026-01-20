@@ -303,6 +303,7 @@ enum ProvideEnergy_
     ProvideEnergy_CellOnly,
     ProvideEnergy_CellAndGene,
     ProvideEnergy_FreeGeneration,
+    ProvideEnergy_Count,
 };
 
 namespace Const

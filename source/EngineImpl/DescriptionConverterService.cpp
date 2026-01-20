@@ -576,6 +576,26 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
             cellDesc._cellType = communicator;
         } break;
         }
+
+        // Handle optional constructor field
+        if (objectTO.typeData.cell.constructorAvailable) {
+            ConstructorDesc constructor;
+            constructor._autoTriggerInterval = objectTO.typeData.cell.constructor.autoTriggerInterval > 0
+                ? std::make_optional(objectTO.typeData.cell.constructor.autoTriggerInterval)
+                : std::nullopt;
+            constructor._constructionActivationTime = objectTO.typeData.cell.constructor.constructionActivationTime;
+            constructor._constructionAngle = objectTO.typeData.cell.constructor.constructionAngle;
+            constructor._provideEnergy = objectTO.typeData.cell.constructor.provideEnergy;
+            constructor._geneIndex = objectTO.typeData.cell.constructor.geneIndex;
+            constructor._lastConstructedCellId = objectTO.typeData.cell.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
+                ? std::make_optional(objectTO.typeData.cell.constructor.lastConstructedCellId)
+                : std::nullopt;
+            constructor._currentNodeIndex = objectTO.typeData.cell.constructor.currentNodeIndex;
+            constructor._currentConcatenation = objectTO.typeData.cell.constructor.currentConcatenation;
+            constructor._currentBranch = objectTO.typeData.cell.constructor.currentBranch;
+            cellDesc._constructor = constructor;
+        }
+
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
@@ -838,6 +858,19 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
         nodeDesc._cellType = communicatorDesc;
     } break;
     }
+
+    // Handle optional constructor field
+    if (nodeTO->constructorAvailable) {
+        ConstructorGenomeDesc constructorDesc;
+        constructorDesc._autoTriggerInterval =
+            nodeTO->constructor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->constructor.autoTriggerInterval) : std::nullopt;
+        constructorDesc._geneIndex = nodeTO->constructor.geneIndex;
+        constructorDesc._constructionActivationTime = nodeTO->constructor.constructionActivationTime;
+        constructorDesc._constructionAngle = nodeTO->constructor.constructionAngle;
+        constructorDesc._provideEnergy = nodeTO->constructor.provideEnergy;
+        nodeDesc._constructor = constructorDesc;
+    }
+
     return nodeDesc;
 }
 
@@ -1147,6 +1180,17 @@ void DescriptionConverterService::convertGenomeToTO(
                     communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
                 }
             } break;
+            }
+
+            // Handle optional constructor field
+            nodeTO.constructorAvailable = nodeDesc._constructor.has_value();
+            if (nodeDesc._constructor.has_value()) {
+                auto const& constructorDesc = nodeDesc._constructor.value();
+                nodeTO.constructor.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
+                nodeTO.constructor.geneIndex = constructorDesc._geneIndex;
+                nodeTO.constructor.constructionActivationTime = constructorDesc._constructionActivationTime;
+                nodeTO.constructor.constructionAngle = constructorDesc._constructionAngle;
+                nodeTO.constructor.provideEnergy = constructorDesc._provideEnergy;
             }
         }
     }
@@ -1464,6 +1508,23 @@ void DescriptionConverterService::convertObjectToTO(
             }
         } break;
         }
+
+        // Handle optional constructor field
+        objectTO.typeData.cell.constructorAvailable = cellDesc._constructor.has_value();
+        if (cellDesc._constructor.has_value()) {
+            auto const& constructorDesc = cellDesc._constructor.value();
+            ConstructorTO& constructorTO = objectTO.typeData.cell.constructor;
+            constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
+            constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
+            constructorTO.constructionAngle = constructorDesc._constructionAngle;
+            constructorTO.provideEnergy = constructorDesc._provideEnergy;
+            constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
+            constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
+            constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
+            constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);
+            constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
+        }
+
         objectTO.typeData.cell.signalRestriction.mode = cellDesc._signalRestriction._mode;
         objectTO.typeData.cell.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
         objectTO.typeData.cell.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;

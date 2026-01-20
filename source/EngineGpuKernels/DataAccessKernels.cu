@@ -227,6 +227,16 @@ namespace
                         }
                         break;
                     }
+
+                    // Handle optional constructor field
+                    nodeTO.constructorAvailable = node.constructorAvailable;
+                    if (node.constructorAvailable) {
+                        nodeTO.constructor.autoTriggerInterval = node.constructor.autoTriggerInterval;
+                        nodeTO.constructor.geneIndex = node.constructor.geneIndex;
+                        nodeTO.constructor.constructionActivationTime = node.constructor.constructionActivationTime;
+                        nodeTO.constructor.constructionAngle = node.constructor.constructionAngle;
+                        nodeTO.constructor.provideEnergy = node.constructor.provideEnergy;
+                    }
                 }
             }
 
@@ -508,6 +518,20 @@ namespace
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = cell.cellTypeData.communicator.modeData.receiver.restrictToLineage;
                 }
             } break;
+            }
+
+            // Handle optional constructor field
+            cellTO.constructorAvailable = cell.constructorAvailable;
+            if (cell.constructorAvailable) {
+                cellTO.constructor.autoTriggerInterval = cell.constructor.autoTriggerInterval;
+                cellTO.constructor.constructionActivationTime = cell.constructor.constructionActivationTime;
+                cellTO.constructor.constructionAngle = cell.constructor.constructionAngle;
+                cellTO.constructor.provideEnergy = cell.constructor.provideEnergy;
+                cellTO.constructor.geneIndex = cell.constructor.geneIndex;
+                cellTO.constructor.lastConstructedCellId = cell.constructor.lastConstructedCellId;
+                cellTO.constructor.currentNodeIndex = cell.constructor.currentNodeIndex;
+                cellTO.constructor.currentConcatenation = cell.constructor.currentConcatenation;
+                cellTO.constructor.currentBranch = cell.constructor.currentBranch;
             }
         }
     }
