@@ -33,6 +33,7 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     for (int i = CellType_Base; i < CellType_Count; ++i) {
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
+    data.constructorOperations.setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
 
     data.entities.saveNumEntries();

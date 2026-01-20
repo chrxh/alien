@@ -360,7 +360,6 @@ struct CommunicatorGenomeDesc
 using CellTypeGenomeDesc = std::variant<
     BaseGenomeDesc,
     DepotGenomeDesc,
-    ConstructorGenomeDesc,
     SensorGenomeDesc,
     GeneratorGenomeDesc,
     AttackerGenomeDesc,

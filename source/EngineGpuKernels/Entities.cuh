@@ -396,7 +396,6 @@ union CellTypeData
 {
     Base base;
     Depot depot;
-    Constructor constructor;
     Sensor sensor;
     Generator generator;
     Attacker attacker;

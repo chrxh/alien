@@ -276,7 +276,6 @@ union CellTypeDataGenomeTO
 {
     BaseGenomeTO base;
     DepotGenomeTO depot;
-    ConstructorGenomeTO constructor;
     SensorGenomeTO sensor;
     GeneratorGenomeTO generator;
     AttackerGenomeTO attacker;

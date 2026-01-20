@@ -35,6 +35,7 @@ struct SimulationData
     Heap processMemory;
     UnmanagedArray<StructuralOperation> structuralOperations;
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
+    UnmanagedArray<CellTypeOperation> constructorOperations;  // Separate array for cells with constructorAvailable == true
 
     // Number generators
     CudaNumberGenerator primaryNumberGen;
