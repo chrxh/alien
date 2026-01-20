@@ -307,11 +307,8 @@ __inline__ __device__ Object* EntityFactory::createObjectFromTO(TOs const& to, i
     object->scheduledOperationIndex = -1;
     object->numConnections = objectTO.numConnections;
     if (object->type == ObjectType_Cell) {
-        object->typeData.cell.event = CellEvent_No;
         auto const& genomeTO = to.creatures[objectTO.typeData.cell.creatureIndex];
         object->typeData.cell.creature = &_data->entities.heap.atType<Creature>(genomeTO.creatureIndexOnGpu);
-    } else if (object->type == ObjectType_FreeCell) {
-        object->typeData.freeCell.event = CellEvent_No;
     }
     object->density = 1.0f;
     for (int i = 0; i < object->numConnections; ++i) {
@@ -340,6 +337,9 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
     } else if (objectTO.type == ObjectType_FreeCell) {
         object->typeData.freeCell.energy = objectTO.typeData.freeCell.energy; 
         object->typeData.freeCell.age= objectTO.typeData.freeCell.age;
+        object->typeData.freeCell.event = CellEvent_No;
+        object->typeData.freeCell.eventCounter = 0;
+        object->typeData.freeCell.eventPos = {0, 0};
     } else if (objectTO.type == ObjectType_Cell) {
         auto const& cell = &object->typeData.cell;
         auto const& cellTO = objectTO.typeData.cell;
@@ -356,6 +356,9 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->geneIndex = cellTO.geneIndex;
         cell->frontAngleId = cellTO.frontAngleId;
         cell->headCell = cellTO.headCell;
+        cell->event = cellTO.event;
+        cell->eventCounter = cellTO.eventCounter;
+        cell->eventPos = cellTO.eventPos;
 
         cell->signalRestriction.mode = cellTO.signalRestriction.mode;
         cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;

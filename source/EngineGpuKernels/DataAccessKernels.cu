@@ -323,6 +323,9 @@ namespace
             cellTO.geneIndex = cell.geneIndex;
             cellTO.frontAngleId = cell.frontAngleId;
             cellTO.headCell = cell.headCell;
+            cellTO.event = cell.event;
+            cellTO.eventCounter = cell.eventCounter;
+            cellTO.eventPos = cell.eventPos;
 
             if (cell.neuralNetwork != nullptr) {
                 int targetSize;  //not used
