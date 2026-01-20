@@ -301,6 +301,9 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
         cellDesc._geneIndex = objectTO.typeData.cell.geneIndex;
         cellDesc._frontAngleId = objectTO.typeData.cell.frontAngleId;
         cellDesc._headCell = objectTO.typeData.cell.headCell;
+        cellDesc._event = objectTO.typeData.cell.event;
+        cellDesc._eventCounter = objectTO.typeData.cell.eventCounter;
+        cellDesc._eventPos = {objectTO.typeData.cell.eventPos.x, objectTO.typeData.cell.eventPos.y};
 
         switch (objectTO.typeData.cell.cellType) {
         case CellType_Base: {
@@ -1232,6 +1235,9 @@ void DescriptionConverterService::convertObjectToTO(
         objectTO.typeData.cell.headCell = cellDesc._headCell;
         objectTO.typeData.cell.age = cellDesc._age;
         objectTO.typeData.cell.activationTime = cellDesc._activationTime;
+        objectTO.typeData.cell.event = cellDesc._event;
+        objectTO.typeData.cell.eventCounter = cellDesc._eventCounter;
+        objectTO.typeData.cell.eventPos = {cellDesc._eventPos.x, cellDesc._eventPos.y};
 
         objectTO.typeData.cell.neuralNetworkDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(NeuralNetworkTO));

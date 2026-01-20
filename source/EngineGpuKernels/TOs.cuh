@@ -428,6 +428,11 @@ struct CellTO
     // Process data
     uint32_t frontAngleId;
     bool headCell;
+
+    // Additional rendering data
+    CellEvent event;
+    uint8_t eventCounter;
+    float2 eventPos;
 };
 
 union ObjectTypeDataTO

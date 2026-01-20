@@ -76,6 +76,9 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}).numTimesSent(5))
                       .signalState(SignalState_Active)
                       .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
+                      .event(CellEvent_Attacking)
+                      .eventCounter(3)
+                      .eventPos({1.5f, 2.5f})
                       .cellType(cellTypeDesc));
     }
     default:
