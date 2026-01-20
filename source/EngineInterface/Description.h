@@ -494,7 +494,7 @@ struct CellDesc
     // Cell type-specific data
     MEMBER(CellDesc, NeuralNetworkDesc, neuralNetwork, NeuralNetworkDesc());
     MEMBER(CellDesc, CellTypeDesc, cellType, BaseDesc());
-    MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);  // Optional constructor data
+    MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
     MEMBER(CellDesc, SignalState, signalState, SignalState_Inactive);
     MEMBER(CellDesc, SignalDesc, signal, SignalDesc());  // For signalState == SignalState_Active
     MEMBER(CellDesc, SignalRestrictionDesc, signalRestriction, SignalRestrictionDesc());

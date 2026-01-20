@@ -1,6 +1,7 @@
 #include "DescriptionTestDataFactory.h"
 
 #include <algorithm>
+
 #include <boost/range/combine.hpp>
 
 #include "TestHelper.h"
@@ -44,8 +45,6 @@ std::vector<DescriptionTestDataFactory::ObjectParameter> DescriptionTestDataFact
 
 ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objectParameter) const
 {
-    ObjectDesc defaultCell;
-
     switch (objectParameter.objectType) {
     case ObjectType_Structure:
         return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(StructureDesc().energy(42.0f));
@@ -76,7 +75,15 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}).numTimesSent(5))
                       .signalState(SignalState_Active)
                       .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
-                      .constructor(ConstructorDesc().autoTriggerInterval(55).geneIndex(1).constructionActivationTime(95).constructionAngle(25.0f).provideEnergy(ProvideEnergy_CellOnly).currentNodeIndex(2).currentConcatenation(1).currentBranch(0))
+                      .constructor(ConstructorDesc()
+                                       .autoTriggerInterval(55)
+                                       .geneIndex(1)
+                                       .constructionActivationTime(95)
+                                       .constructionAngle(25.0f)
+                                       .provideEnergy(ProvideEnergy_CellAndGene)
+                                       .currentNodeIndex(2)
+                                       .currentConcatenation(1)
+                                       .currentBranch(0))
                       .event(CellEvent_Attacking)
                       .eventCounter(3)
                       .eventPos({1.5f, 2.5f})
@@ -89,7 +96,6 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
 
 EnergyDesc DescriptionTestDataFactory::createNonDefaultEnergyDesc() const
 {
-    EnergyDesc defaultParticle;
     return EnergyDesc().id(1).pos({0.3f, 0.9f}).vel({-0.6f, 0.2f}).energy(75.0f).color(5);
 }
 
@@ -130,8 +136,6 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
 
 NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParameter) const
 {
-    NodeDesc defaultNode;
-
     NeuralNetworkGenomeDesc nn;
     nn.weight(4, 3, 0.8f);
     nn._biases.at(3) = -0.5f;
@@ -140,7 +144,8 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
     return NodeDesc()
         .neuralNetwork(nn)
         .cellType(createNonDefaultCellTypeGenomeDesc(nodeParameter))
-        .constructor(ConstructorGenomeDesc().autoTriggerInterval(55).geneIndex(1).constructionActivationTime(95).constructionAngle(25.0f).provideEnergy(ProvideEnergy_CellOnly))
+        .constructor(ConstructorGenomeDesc().autoTriggerInterval(55).geneIndex(1).constructionActivationTime(95).constructionAngle(25.0f).provideEnergy(
+            ProvideEnergy_FreeGeneration))
         .color(4)
         .numAdditionalConnections(3)
         .referenceAngle(90.0f)
@@ -149,8 +154,6 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
 
 std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
 {
-    GeneDesc defaultGene;
-
     auto genome = GenomeDesc()
                       .name("Test Genome")
                       .frontAngle(270.0f)
@@ -633,10 +636,14 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
 CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter objectParameter) const
 {
     auto const& type = objectParameter.cellType;
-    auto muscleMode = std::holds_alternative<MuscleModeWrapper>(objectParameter.mode) ? std::get<MuscleModeWrapper>(objectParameter.mode).value : MuscleMode_AutoBending;
-    auto sensorMode = std::holds_alternative<SensorModeWrapper>(objectParameter.mode) ? std::get<SensorModeWrapper>(objectParameter.mode).value : SensorMode_DetectEnergy;
-    auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value : ReconnectorMode_Structure;
-    auto memoryMode = std::holds_alternative<MemoryModeWrapper>(objectParameter.mode) ? std::get<MemoryModeWrapper>(objectParameter.mode).value : MemoryMode_SignalDelay;
+    auto muscleMode =
+        std::holds_alternative<MuscleModeWrapper>(objectParameter.mode) ? std::get<MuscleModeWrapper>(objectParameter.mode).value : MuscleMode_AutoBending;
+    auto sensorMode =
+        std::holds_alternative<SensorModeWrapper>(objectParameter.mode) ? std::get<SensorModeWrapper>(objectParameter.mode).value : SensorMode_DetectEnergy;
+    auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value
+                                                                                                : ReconnectorMode_Structure;
+    auto memoryMode =
+        std::holds_alternative<MemoryModeWrapper>(objectParameter.mode) ? std::get<MemoryModeWrapper>(objectParameter.mode).value : MemoryMode_SignalDelay;
 
     switch (type) {
     case CellType_Base:
@@ -671,8 +678,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
             sensorModeDesc = DetectFreeCellDesc().minDensity(0.25f).restrictToColor(2);
             break;
         case SensorMode_DetectCreature:
-            sensorModeDesc =
-                DetectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_SameLineage);
+            sensorModeDesc = DetectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_SameLineage);
             break;
         default:
             sensorModeDesc = SensorModeDesc();
@@ -689,12 +695,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         return GeneratorDesc().autoTriggerInterval(60).alternationInterval(3).numPulses(5);
     }
     case CellType_Attacker:
-        return AttackerDesc()
-            .mode(AttackCreatureDesc()
-                      .minNumCells(4)
-                      .maxNumCells(15)
-                      .restrictToColor(1)
-                      .restrictToLineage(LineageRestriction_OtherLineage));
+        return AttackerDesc().mode(AttackCreatureDesc().minNumCells(4).maxNumCells(15).restrictToColor(1).restrictToLineage(LineageRestriction_OtherLineage));
     case CellType_Injector:
         return InjectorDesc().geneIndex(3);
     case CellType_Muscle: {
@@ -712,8 +713,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         } break;
         case MuscleMode_ManualBending:
             muscleModeDesc =
-                ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f).impulseAlreadyApplied(
-                    true);
+                ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f).impulseAlreadyApplied(true);
             break;
         case MuscleMode_AngleBending:
             muscleModeDesc = AngleBendingDesc().maxAngleDeviation(0.7f).attractionRepulsionRatio(0.6f).initialAngle(315.0f);
@@ -759,8 +759,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
             reconnectorModeDesc = ReconnectFreeCellDesc().restrictToColor(2);
             break;
         case ReconnectorMode_Creature:
-            reconnectorModeDesc =
-                ReconnectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_SameLineage);
+            reconnectorModeDesc = ReconnectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_SameLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeDesc();
@@ -824,10 +823,14 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
 CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeParameter objectParameter) const
 {
     auto const& type = objectParameter.cellTypeGenome;
-    auto muscleMode = std::holds_alternative<MuscleModeWrapper>(objectParameter.mode) ? std::get<MuscleModeWrapper>(objectParameter.mode).value : MuscleMode_AutoBending;
-    auto sensorMode = std::holds_alternative<SensorModeWrapper>(objectParameter.mode) ? std::get<SensorModeWrapper>(objectParameter.mode).value : SensorMode_DetectEnergy;
-    auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value : ReconnectorMode_Structure;
-    auto memoryMode = std::holds_alternative<MemoryModeWrapper>(objectParameter.mode) ? std::get<MemoryModeWrapper>(objectParameter.mode).value : MemoryMode_SignalDelay;
+    auto muscleMode =
+        std::holds_alternative<MuscleModeWrapper>(objectParameter.mode) ? std::get<MuscleModeWrapper>(objectParameter.mode).value : MuscleMode_AutoBending;
+    auto sensorMode =
+        std::holds_alternative<SensorModeWrapper>(objectParameter.mode) ? std::get<SensorModeWrapper>(objectParameter.mode).value : SensorMode_DetectEnergy;
+    auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value
+                                                                                                : ReconnectorMode_Structure;
+    auto memoryMode =
+        std::holds_alternative<MemoryModeWrapper>(objectParameter.mode) ? std::get<MemoryModeWrapper>(objectParameter.mode).value : MemoryMode_SignalDelay;
     switch (type) {
     case CellType_Base:
         return BaseGenomeDesc();
@@ -855,8 +858,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
             sensorModeDesc = DetectFreeCellGenomeDesc().minDensity(0.20f).restrictToColor(6);
             break;
         case SensorMode_DetectCreature:
-            sensorModeDesc = DetectCreatureGenomeDesc().minNumCells(3).maxNumCells(15).restrictToColor(4).restrictToLineage(
-                LineageRestriction_OtherLineage);
+            sensorModeDesc = DetectCreatureGenomeDesc().minNumCells(3).maxNumCells(15).restrictToColor(4).restrictToLineage(LineageRestriction_OtherLineage);
             break;
         default:
             sensorModeDesc = SensorModeGenomeDesc();
@@ -867,12 +869,8 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
     case CellType_Generator:
         return GeneratorGenomeDesc().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
     case CellType_Attacker:
-        return AttackerGenomeDesc()
-            .mode(AttackCreatureGenomeDesc()
-                      .minNumCells(5)
-                      .maxNumCells(18)
-                      .restrictToColor(2)
-                      .restrictToLineage(LineageRestriction_SameLineage));
+        return AttackerGenomeDesc().mode(
+            AttackCreatureGenomeDesc().minNumCells(5).maxNumCells(18).restrictToColor(2).restrictToLineage(LineageRestriction_SameLineage));
     case CellType_Injector:
         return InjectorGenomeDesc().geneIndex(3);
     case CellType_Muscle: {
