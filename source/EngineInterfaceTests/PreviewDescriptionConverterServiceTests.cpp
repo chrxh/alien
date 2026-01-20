@@ -344,7 +344,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_oneNode_multipl
 TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multipleConcatenations)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({NodeDesc().color(2).cellType(ConstructorGenomeDesc().geneIndex(1))}),
+        GeneDesc().separation(false).nodes({NodeDesc().color(2).constructor(ConstructorGenomeDesc().geneIndex(1))}),
         GeneDesc().separation(false).numConcatenations(7).nodes({NodeDesc().color(3)}),
     });
 
@@ -357,7 +357,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
         ObjectDesc().id(6).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
         ObjectDesc().id(7).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
         ObjectDesc().id(8).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).cellType(ConstructorDesc().geneIndex(1))),
+        ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1))),
         },
         CreatureDesc(),
         genome);
@@ -441,20 +441,20 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGenes_twoNode_multip
 TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc().cellType(ConstructorGenomeDesc().geneIndex(1))}),
-        GeneDesc().separation(true).nodes({NodeDesc().cellType(ConstructorGenomeDesc().geneIndex(0))}),
+        GeneDesc().separation(true).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
+        GeneDesc().separation(true).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0))}),
     });
 
     Desc inputCreature1;
     inputCreature1.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).cellType(ConstructorDesc().geneIndex(2))),
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2))),
         },
         CreatureDesc(),
         genome);
 
     Desc inputCreature2;
     inputCreature2.addCreature({
-        ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).cellType(ConstructorDesc().geneIndex(2))),
+        ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2))),
         },
         CreatureDesc(),
         genome);
@@ -481,14 +481,14 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
 TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withoutSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({NodeDesc().cellType(ConstructorGenomeDesc().geneIndex(1))}),
-        GeneDesc().separation(false).nodes({NodeDesc().cellType(ConstructorGenomeDesc().geneIndex(0))}),
+        GeneDesc().separation(false).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
+        GeneDesc().separation(false).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0))}),
     });
 
     Desc input;
     input.addCreature({
-        ObjectDesc().id(0).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).cellType(ConstructorDesc().geneIndex(1))),
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).cellType(ConstructorDesc().geneIndex(0))),
+        ObjectDesc().id(0).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1))),
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(0))),
         },
         CreatureDesc(),
         genome);

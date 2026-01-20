@@ -490,7 +490,6 @@ struct std::hash<CellTypeGenomeDesc>
         return variant_hasher<
             BaseGenomeDesc,
             DepotGenomeDesc,
-            ConstructorGenomeDesc,
             SensorGenomeDesc,
             GeneratorGenomeDesc,
             AttackerGenomeDesc,
