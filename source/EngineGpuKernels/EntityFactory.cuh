@@ -268,6 +268,16 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 }
                 break;
             }
+
+            // Handle optional constructor field
+            node.constructorAvailable = nodeTO.constructorAvailable;
+            if (nodeTO.constructorAvailable) {
+                node.constructor.autoTriggerInterval = nodeTO.constructor.autoTriggerInterval;
+                node.constructor.geneIndex = nodeTO.constructor.geneIndex;
+                node.constructor.constructionActivationTime = nodeTO.constructor.constructionActivationTime;
+                node.constructor.constructionAngle = nodeTO.constructor.constructionAngle;
+                node.constructor.provideEnergy = nodeTO.constructor.provideEnergy;
+            }
         }
     }
     return genome;
@@ -595,6 +605,22 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
             }
         } break;
+        }
+
+        // Handle optional constructor field
+        cell->constructorAvailable = cellTO.constructorAvailable;
+        if (cellTO.constructorAvailable) {
+            cell->constructor.autoTriggerInterval = cellTO.constructor.autoTriggerInterval;
+            cell->constructor.constructionActivationTime = cellTO.constructor.constructionActivationTime;
+            cell->constructor.constructionAngle = cellTO.constructor.constructionAngle;
+            cell->constructor.provideEnergy = cellTO.constructor.provideEnergy;
+            cell->constructor.geneIndex = cellTO.constructor.geneIndex;
+            cell->constructor.lastConstructedCellId = cellTO.constructor.lastConstructedCellId;
+            cell->constructor.currentNodeIndex = cellTO.constructor.currentNodeIndex;
+            cell->constructor.currentConcatenation = cellTO.constructor.currentConcatenation;
+            cell->constructor.currentBranch = cellTO.constructor.currentBranch;
+            cell->constructor.isReady = true;
+            cell->constructor.offspring = nullptr;
         }
     }
 }
@@ -943,6 +969,25 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         }
     } break;
     }
+
+    // Handle optional constructor field
+    cell.constructorAvailable = node->constructorAvailable;
+    if (node->constructorAvailable) {
+        auto const& nodeConstructor = node->constructor;
+        auto& constructor = cell.constructor;
+        constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
+        constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
+        constructor.constructionAngle = nodeConstructor.constructionAngle;
+        constructor.provideEnergy = nodeConstructor.provideEnergy;
+        constructor.geneIndex = nodeConstructor.geneIndex;
+        constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
+        constructor.currentNodeIndex = 0;
+        constructor.currentConcatenation = 0;
+        constructor.currentBranch = 0;
+        constructor.isReady = true;
+        constructor.offspring = nullptr;
+    }
+
     return object;
 }
 

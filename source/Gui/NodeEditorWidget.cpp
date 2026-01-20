@@ -686,6 +686,52 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
             }
+
+            // Optional constructor field (available for all node types)
+            table.next();
+            bool hasConstructor = node._constructor.has_value();
+            if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(rightColumnWidth), hasConstructor)) {
+                if (hasConstructor) {
+                    node._constructor = ConstructorGenomeDesc();
+                } else {
+                    node._constructor = std::nullopt;
+                }
+            }
+            if (hasConstructor) {
+                AlienGui::BeginIndent();
+                auto& constructor = node._constructor.value();
+
+                // Gene index
+                std::vector<std::string> genes;
+                for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
+                    auto text = "No. " + std::to_string(index + 1);
+                    if (index == 0) {
+                        text += " (root)";
+                    }
+                    genes.emplace_back(text);
+                }
+                AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._geneIndex);
+
+                // Auto activation interval
+                AlienGui::InputOptionalInt(
+                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
+
+                // Construction activation time
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Offspring trigger time").textWidth(rightColumnWidth), constructor._constructionActivationTime);
+
+                // Construction angle
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
+
+                // Provide energy at construction
+                auto provideEnergy = constructor._provideEnergy == ProvideEnergy_CellAndGene;
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Provide energy").textWidth(rightColumnWidth), provideEnergy);
+                constructor._provideEnergy = provideEnergy ? ProvideEnergy_CellAndGene : ProvideEnergy_CellOnly;
+
+                AlienGui::EndIndent();
+            }
+
             table.next();
             table.end();
         }

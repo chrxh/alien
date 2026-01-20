@@ -496,6 +496,8 @@ struct Cell
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
     CellType cellType;
     CellTypeData cellTypeData;
+    bool constructorAvailable;  // If true, constructor holds valid data
+    Constructor constructor;    // Optional constructor data
     SignalState signalState;  // For signalState == SignalState_Active
     Signal signal;
     SignalRestriction signalRestriction;

@@ -710,7 +710,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._neuralNetwork, data._cellType, data._signalRestriction);
+        ar(data._neuralNetwork, data._cellType, data._constructor, data._signalRestriction);
     }
     SPLIT_SERIALIZATION(NodeDesc)
 
@@ -1492,7 +1492,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
+        ar(data._cellType, data._constructor, data._signal, data._signalRestriction, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
 

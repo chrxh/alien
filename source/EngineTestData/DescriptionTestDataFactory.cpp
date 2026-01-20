@@ -76,6 +76,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}).numTimesSent(5))
                       .signalState(SignalState_Active)
                       .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
+                      .constructor(ConstructorDesc().autoTriggerInterval(55).geneIndex(1).constructionActivationTime(95).constructionAngle(25.0f).provideEnergy(ProvideEnergy_CellOnly).currentNodeIndex(2).currentConcatenation(1).currentBranch(0))
                       .event(CellEvent_Attacking)
                       .eventCounter(3)
                       .eventPos({1.5f, 2.5f})
@@ -139,6 +140,7 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
     return NodeDesc()
         .neuralNetwork(nn)
         .cellType(createNonDefaultCellTypeGenomeDesc(nodeParameter))
+        .constructor(ConstructorGenomeDesc().autoTriggerInterval(55).geneIndex(1).constructionActivationTime(95).constructionAngle(25.0f).provideEnergy(ProvideEnergy_CellOnly))
         .color(4)
         .numAdditionalConnections(3)
         .referenceAngle(90.0f)
@@ -600,6 +602,31 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     default:
         return false;
     }
+
+    // Compare optional constructor fields
+    if (cell._constructor.has_value() != node._constructor.has_value()) {
+        return false;
+    }
+    if (cell._constructor.has_value()) {
+        auto const& constructor = cell._constructor.value();
+        auto const& nodeConstructor = node._constructor.value();
+        if (constructor._autoTriggerInterval != nodeConstructor._autoTriggerInterval) {
+            return false;
+        }
+        if (constructor._geneIndex != nodeConstructor._geneIndex) {
+            return false;
+        }
+        if (constructor._constructionActivationTime != nodeConstructor._constructionActivationTime) {
+            return false;
+        }
+        if (constructor._constructionAngle != nodeConstructor._constructionAngle) {
+            return false;
+        }
+        if (constructor._provideEnergy != nodeConstructor._provideEnergy) {
+            return false;
+        }
+    }
+
     return true;
 }
 

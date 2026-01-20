@@ -234,6 +234,19 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                     receiver._restrictToLineage = std::clamp(receiver._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
             }
+
+            // Validate optional constructor field
+            if (node._constructor.has_value()) {
+                auto& constructor = node._constructor.value();
+                if (constructor._autoTriggerInterval.has_value()) {
+                    auto& value = constructor._autoTriggerInterval.value();
+                    value = std::max(value, 1);
+                }
+                constructor._geneIndex = std::max(constructor._geneIndex, 0);
+                constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, MAX_ACTIVATION_TIME);
+                constructor._provideEnergy =
+                    std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_FreeGeneration));
+            }
         }
     }
 }

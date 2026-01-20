@@ -529,6 +529,11 @@ struct std::hash<NodeDesc>
         hash_combine(seed, desc._numAdditionalConnections);
         hash_combine(seed, std::hash<NeuralNetworkGenomeDesc>{}(desc._neuralNetwork));
         hash_combine(seed, std::hash<CellTypeGenomeDesc>{}(desc._cellType));
+        if (desc._constructor.has_value()) {
+            hash_combine(seed, std::hash<ConstructorGenomeDesc>{}(desc._constructor.value()));
+        } else {
+            hash_combine(seed, -1);
+        }
         hash_combine(seed, std::hash<SignalRestrictionGenomeDesc>{}(desc._signalRestriction));
         return seed;
     }

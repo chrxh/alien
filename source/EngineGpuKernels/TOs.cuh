@@ -420,6 +420,8 @@ struct CellTO
     uint64_t neuralNetworkDataIndex;  // May be invalid (not used for structure and base cells)
     CellType cellType;
     CellTypeDataTO cellTypeData;
+    bool constructorAvailable;  // If true, constructor holds valid data
+    ConstructorTO constructor;  // Optional constructor data
     SignalState signalState;
     SignalTO signal;  // For signalState == SignalState_Active
     SignalRestrictionTO signalRestriction;
