@@ -260,6 +260,7 @@ namespace
             creatureTO.generation = creature->generation;
             creatureTO.lineageId = creature->lineageId;
             creatureTO.numObjects = creature->numObjects;
+            creatureTO.haveMutationsApplied = creature->haveMutationsApplied;
             creatureTO.frontAngleId = creature->frontAngleId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 

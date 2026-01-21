@@ -895,6 +895,7 @@ CreatureDesc DescriptionConverterService::createCreatureDesc(TOs const& to, int 
     result._lineageId = creatureTO.lineageId;
     NumberGenerator::get().adaptMaxIds({.entityId = creatureTO.lineageId});
     result._numObjects = creatureTO.numObjects;
+    result._haveMutationsApplied = creatureTO.haveMutationsApplied;
     result._frontAngleId = creatureTO.frontAngleId;
 
     return result;
@@ -1178,6 +1179,7 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.lineageId = creatureDesc._lineageId;
     creatureTO.frontAngleId = creatureDesc._frontAngleId;
     creatureTO.numObjects = creatureDesc._numObjects;
+    creatureTO.haveMutationsApplied = creatureDesc._haveMutationsApplied;
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
 }
 
