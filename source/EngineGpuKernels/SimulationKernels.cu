@@ -147,6 +147,10 @@ __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStat
     ConstructorProcessor::process(data, statistics, forPreview);
 }
 
+__global__ void cudaNextTimestep_applyMutations(SimulationData data, SimulationStatistics statistics)
+{
+}
+
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)
 {
     InjectorProcessor::process(data, statistics);

@@ -105,6 +105,7 @@ void SimulationKernelsService::launchTimestepKernels(
     }
 
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, false);
+    STREAM_KERNEL_CALL(cudaNextTimestep_applyMutations, _stream, numBlocks, data, statistics);
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_injector, _stream, numBlocks, data, statistics);
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, _stream, numBlocks, 4, data, statistics);
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_depot, _stream, numBlocks, 4, data, statistics);

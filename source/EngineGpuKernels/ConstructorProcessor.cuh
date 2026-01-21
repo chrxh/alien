@@ -2,8 +2,6 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 
-#include <EngineImpl/SimulationCudaFacade.cuh>
-
 #include "CellProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "ConstructorHelper.cuh"
@@ -52,7 +50,7 @@ private:
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
 
     __inline__ __device__ static Object* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
-    __inline__ __device__ static void tryApplyMutations(SimulationData& data, SimulationStatistics& statistics, Object* hostObject);
+    __inline__ __device__ static void tryApplyMutations(SimulationData& data, Object* hostObject);
 
     __inline__ __device__ static Object* getLastConstructedCellOnBranch(Object* hostObject);
     __inline__ __device__ static Object*
@@ -146,7 +144,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         auto constructionData = createConstructionData(object);
         if (tryConstructCell(data, statistics, object, constructionData)) {
-            tryApplyMutations(data, statistics, object);
+            tryApplyMutations(data, object);
 
             object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
@@ -318,14 +316,14 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::tryApplyMutations(SimulationData& data, SimulationStatistics& statistics, Object* hostObject)
+__inline__ __device__ void ConstructorProcessor::tryApplyMutations(SimulationData& data, Object* hostObject)
 {
     auto& creature = hostObject->typeData.cell.creature;
-    auto origValue = atomicExch(&creature->haveMutationsApplied, 1);
+    int origValue = atomicCAS(&creature->haveMutationsApplied, 0, 1);
     if (origValue == 0) {
         EntityFactory factory;
         factory.init(&data);
-        creature->genome = factory.cloneGenome(creature->genome);
+        creature->mutatedGenome = factory.cloneGenome(creature->genome);
     }
 }
 

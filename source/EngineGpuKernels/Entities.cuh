@@ -443,7 +443,7 @@ struct Creature
     uint32_t numObjects;
 
     Genome* genome;
-    int haveMutationsApplied;
+    int haveMutationsApplied;  // 0 = no, 1 = mutatedGenome available, 2 = mutations applied to genome
 
     // Process data
     uint32_t frontAngleId;
