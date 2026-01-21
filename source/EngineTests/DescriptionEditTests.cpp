@@ -429,7 +429,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
         if (object.getCellRef()._constructor.has_value()) {
             constructorCell = object;
         }
-        if (object.getCellRef().getCellType() == CellType_Base && !object.getCellRef()._constructor.has_value()) {
+        if (!object.getCellRef()._constructor.has_value()) {
             base = object;
         }
     }
