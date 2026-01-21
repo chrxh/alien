@@ -50,8 +50,8 @@ private:
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
 
-    __inline__ __device__ static Object*
-    tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
+    __inline__ __device__ static Object* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
+    __inline__ __device__ static void tryApplyMutations(SimulationData& data, SimulationStatistics& statistics, Object* hostObject);
 
     __inline__ __device__ static Object* getLastConstructedCellOnBranch(Object* hostObject);
     __inline__ __device__ static Object*
@@ -145,6 +145,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         auto constructionData = createConstructionData(object);
         if (tryConstructCell(data, statistics, object, constructionData)) {
+            tryApplyMutations(data, statistics, object);
 
             object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
@@ -313,6 +314,17 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
         constructionData.lastConstructionObject->releaseLock();
         hostObject->releaseLock();
         return newObject;
+    }
+}
+
+__inline__ __device__ void ConstructorProcessor::tryApplyMutations(SimulationData& data, SimulationStatistics& statistics, Object* hostObject)
+{
+    auto& creature = hostObject->typeData.cell.creature;
+    auto origValue = atomicExch(&creature->haveMutationsApplied, 1);
+    if (origValue == 0) {
+        EntityFactory factory;
+        factory.init(&data);
+        creature->genome = factory.cloneGenome(creature->genome);
     }
 }
 

@@ -26,6 +26,7 @@ public:
     __inline__ __device__ Object* createFreeCell(float energy, float2 const& pos, float2 const& vel);
 
     __inline__ __device__ Creature* cloneCreature(Creature* creature);
+    __inline__ __device__ Genome* cloneGenome(Genome* genome);
 
     __inline__ __device__ Object* createCellFromNode(
         uint64_t& objectIndex,
@@ -36,6 +37,8 @@ public:
         float2 pos,
         float2 vel,
         float energy);
+
+    __inline__ __device__ Genome* createEmptyGenome();
     __inline__ __device__ Creature* createEmptyCreature();
     __inline__ __device__ Gene* createEmptyGenes(int numGenes);
     __inline__ __device__ Node* createEmptyNodes(int numNodes);
@@ -682,6 +685,15 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
     return newCreature;
 }
 
+__inline__ __device__ Genome* EntityFactory::cloneGenome(Genome* genome)
+{
+    auto newGenome = createEmptyGenome();
+    auto newId = newGenome->id;
+    *newGenome = *genome;
+    newGenome->id = newId;
+    return newGenome;
+}
+
 __inline__ __device__ Object* EntityFactory::createCellFromNode(
     uint64_t& objectIndex,
     Creature* creature,
@@ -952,6 +964,13 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     }
 
     return object;
+}
+
+__inline__ __device__ Genome* EntityFactory::createEmptyGenome()
+{
+    auto genome = _data->entities.heap.getTypedSubArray<Genome>(1);
+    genome->id = _data->primaryNumberGen.createId();
+    return genome;
 }
 
 __inline__ __device__ Creature* EntityFactory::createEmptyCreature()
