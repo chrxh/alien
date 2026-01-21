@@ -118,6 +118,9 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
         if (object->type != ObjectType_Cell) {
             continue;
         }   
+        if (!object->typeData.cell.constructorAvailable) {
+            continue;
+        }
         processCell(data, statistics, object, isPreview);
     }
 }
@@ -230,17 +233,15 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.lastConstructionObject = getLastConstructedCellOnBranch(object);
     result.angle = result.node->referenceAngle;
     result.cellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-    if (result.node->constructorAvailable) {
-        auto const& constructorNode = result.node->constructor;
-        if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
-            auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
-            if (!referencedGene.separation) {
-                auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
-                if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
-                    result.cellEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
-                } else {
-                    result.cellEnergy += requiredEnergyForNodes;
-                }
+    auto const& constructorNode = result.node->constructor;
+    if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
+        auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
+        if (!referencedGene.separation) {
+            auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
+            if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
+                result.cellEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
+            } else {
+                result.cellEnergy += requiredEnergyForNodes;
             }
         }
     }
@@ -750,7 +751,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     constructor.lastConstructedCellId = result->id;
 
     // Inherit free energy provision from parent in case that offspring constructs a non-separating gene
-    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration && result->typeData.cell.constructorAvailable) {
+    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
         auto const& offspringConstructor = result->typeData.cell.constructor;
         auto const& offspringGenome = constructionData.creature->genome;
         if (offspringConstructor.geneIndex < offspringGenome->numGenes) {
