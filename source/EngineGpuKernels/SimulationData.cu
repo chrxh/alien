@@ -26,7 +26,6 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     for (int i = 0; i < CellType_Count; ++i) {
         cellTypeOperations[i].init();
     }
-    constructorOperations.init();
 }
 
 namespace
@@ -103,7 +102,6 @@ void SimulationData::free()
     for (int i = 0; i < CellType_Count; ++i) {
         cellTypeOperations[i].free();
     }
-    constructorOperations.free();
 }
 
 void SimulationData::resizeAuxiliaryData()
@@ -114,7 +112,7 @@ void SimulationData::resizeAuxiliaryData()
     energyMap.resize(estimatedMaxActiveParticles);
 
     auto upperBoundDynamicMemory =
-        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * (CellType_Count + 1) + 200) * (estimatedMaxActiveCells + 1000);  // Heuristic (+1 for constructorOperations)
+        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristics
     processMemory.resize(upperBoundDynamicMemory);
 }
 

@@ -441,16 +441,16 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
     }
 
     // Process selected energy particles
-    auto const& particles = data.entities.energies;
-    auto numEnergyParticles = particles.getNumEntries();
+    auto const& energies = data.entities.energies;
+    auto numEnergies = energies.getNumEntries();
 
-    for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numEnergyParticles; index += blockDim.x * gridDim.x) {
-        auto const& particle = particles.at(index);
-        if (particle->selected == 1) {
+    for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numEnergies; index += blockDim.x * gridDim.x) {
+        auto const& energy = energies.at(index);
+        if (energy->selected == 1) {
             auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
             if (selectedObjectData != nullptr) {
-                selectedObjectData[outputIndex].pos[0] = particle->pos.x;
-                selectedObjectData[outputIndex].pos[1] = particle->pos.y;
+                selectedObjectData[outputIndex].pos[0] = energy->pos.x;
+                selectedObjectData[outputIndex].pos[1] = energy->pos.y;
                 selectedObjectData[outputIndex].hasSignalRestriction = 0;
                 selectedObjectData[outputIndex].startAngle = 0.0f;
                 selectedObjectData[outputIndex].endAngle = 0.0f;

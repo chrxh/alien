@@ -112,10 +112,13 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
 
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
-    auto& operations = data.constructorOperations;
-    auto partition = calcSystemThreadPartition(operations.getNumEntries());
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, statistics, operations.at(i).object, isPreview);
+        auto object = data.entities.objects.at(i);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }   
+        processCell(data, statistics, object, isPreview);
     }
 }
 

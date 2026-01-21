@@ -40,12 +40,6 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
                 data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object});
             }
         }
-        // Also collect cells with constructorAvailable for constructor operations
-        if (object->type == ObjectType_Cell && object->typeData.cell.constructorAvailable) {
-            if (object->typeData.cell.cellState != CellState_Constructing && object->typeData.cell.cellState != CellState_Activating && object->typeData.cell.activationTime == 0) {
-                data.constructorOperations.tryAddEntry(CellTypeOperation{object});
-            }
-        }
     }
 }
 
