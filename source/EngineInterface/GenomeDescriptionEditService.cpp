@@ -329,6 +329,7 @@ namespace
                 if (!detailSimulation) {
                     node._neuralNetwork = NeuralNetworkGenomeDesc();
                     node._signalRestriction = SignalRestrictionGenomeDesc();
+                    node._cellType = BaseGenomeDesc();
                 }
                 if (node._constructor.has_value()) {
                     auto& constructor = node._constructor.value();

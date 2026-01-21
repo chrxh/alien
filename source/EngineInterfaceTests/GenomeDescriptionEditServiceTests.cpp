@@ -332,6 +332,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
     auto const& subGenome = subGenomes.at(0).genome;
     auto const& gene0 = subGenome._genes.at(0);
     for (auto const& [index, node] : gene0._nodes | boost::adaptors::indexed(0)) {
+        EXPECT_EQ(CellType_Base, node.getCellType());
         if (index == 0) {
             EXPECT_TRUE(node._constructor.has_value());
         }
