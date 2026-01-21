@@ -30,7 +30,6 @@ namespace Const
     std::map<CellType, std::string> const CellTypeToStringMap = {
         {CellType_Base, "Base"},
         {CellType_Depot, "Depot"},
-        {CellType_Constructor, "Constructor"},
         {CellType_Sensor, "Sensor"},
         {CellType_Generator, "Generator"},
         {CellType_Attacker, "Attacker"},

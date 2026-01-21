@@ -13,7 +13,6 @@ std::vector<DescriptionTestDataFactory::ObjectParameter> DescriptionTestDataFact
         ObjectParameter{ObjectType_FreeCell},
         ObjectParameter{ObjectType_Cell, CellType_Base},
         ObjectParameter{ObjectType_Cell, CellType_Depot},
-        ObjectParameter{ObjectType_Cell, CellType_Constructor},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
@@ -104,7 +103,6 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
     return {
         NodeParameter{CellType_Base},
         NodeParameter{CellType_Depot},
-        NodeParameter{CellType_Constructor},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
@@ -241,22 +239,6 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         auto const& depot = std::get<DepotDesc>(cell._cellType);
         auto const& nodeDepot = std::get<DepotGenomeDesc>(node._cellType);
         if (depot._storageLimit != nodeDepot._storageLimit) {
-            return false;
-        }
-    } break;
-    case CellType_Constructor: {
-        if (nodeType != CellType_Constructor) {
-            return false;
-        }
-        auto const& constructor = std::get<ConstructorDesc>(cell._cellType);
-        auto const& nodeConstructor = std::get<ConstructorGenomeDesc>(node._cellType);
-        if (constructor._autoTriggerInterval != nodeConstructor._autoTriggerInterval) {
-            return false;
-        }
-        if (constructor._geneIndex != nodeConstructor._geneIndex) {
-            return false;
-        }
-        if (constructor._constructionActivationTime != nodeConstructor._constructionActivationTime) {
             return false;
         }
     } break;
@@ -650,18 +632,6 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         return BaseDesc();
     case CellType_Depot:
         return DepotDesc().storageLimit(300.0f).storedUsableEnergy(50.0f);
-    case CellType_Constructor: {
-        return ConstructorDesc()
-            .autoTriggerInterval(50)
-            .constructionActivationTime(75)
-            .constructionAngle(42.0f)
-            .provideEnergy(ProvideEnergy_FreeGeneration)
-            .geneIndex(2)
-            .lastConstructedCellId(123)
-            .currentNodeIndex(1)
-            .currentBranch(3)
-            .currentConcatenation(2);
-    }
     case CellType_Sensor: {
         SensorModeDesc sensorModeDesc;
         switch (sensorMode) {
@@ -836,12 +806,6 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         return BaseGenomeDesc();
     case CellType_Depot:
         return DepotGenomeDesc().storageLimit(350.0f).initialStoredUsableEnergy(100.0f);
-    case CellType_Constructor:
-        return ConstructorGenomeDesc()
-            .autoTriggerInterval(45)
-            .constructionActivationTime(85)
-            .provideEnergy(ProvideEnergy_FreeGeneration)
-            .constructionAngle(30.0f);
     case CellType_Sensor: {
         SensorModeGenomeDesc sensorModeDesc;
         switch (sensorMode) {

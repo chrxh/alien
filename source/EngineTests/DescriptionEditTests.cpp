@@ -371,7 +371,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 {
     // Create test data
     auto data = Desc().addCreature({
-        ObjectDesc().id(0).type(CellDesc().cellType(ConstructorDesc().lastConstructedCellId(1))),
+        ObjectDesc().id(0).type(CellDesc().constructor(ConstructorDesc().lastConstructedCellId(1))),
         ObjectDesc().id(1),
     });
 
@@ -388,26 +388,26 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
     ASSERT_EQ(2, data._objects.size());
     ASSERT_EQ(1, data._creatures.size());
 
-    std::optional<ObjectDesc> constructor, base;
+    std::optional<ObjectDesc> constructorCell, base;
     for (auto const& object : data._objects) {
-        if (object.getCellRef().getCellType() == CellType_Constructor) {
-            constructor = object;
+        if (object.getCellRef()._constructor.has_value()) {
+            constructorCell = object;
         }
-        if (object.getCellRef().getCellType() == CellType_Base) {
+        if (object.getCellRef().getCellType() == CellType_Base && !object.getCellRef()._constructor.has_value()) {
             base = object;
         }
     }
-    ASSERT_TRUE(constructor.has_value());
+    ASSERT_TRUE(constructorCell.has_value());
     ASSERT_TRUE(base.has_value());
 
-    EXPECT_EQ(base->_id, std::get<ConstructorDesc>(constructor->getCellRef()._cellType)._lastConstructedCellId);
+    EXPECT_EQ(base->_id, constructorCell->getCellRef()._constructor.value()._lastConstructedCellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notContained)
 {
     // Create test data
     auto data = Desc().addCreature({
-        ObjectDesc().id(0).type(CellDesc().cellType(ConstructorDesc().lastConstructedCellId(2))),
+        ObjectDesc().id(0).type(CellDesc().constructor(ConstructorDesc().lastConstructedCellId(2))),
         ObjectDesc().id(1),
     });
 
@@ -424,19 +424,19 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
     ASSERT_EQ(2, data._objects.size());
     ASSERT_EQ(1, data._creatures.size());
 
-    std::optional<ObjectDesc> constructor, base;
+    std::optional<ObjectDesc> constructorCell, base;
     for (auto const& object : data._objects) {
-        if (object.getCellRef().getCellType() == CellType_Constructor) {
-            constructor = object;
+        if (object.getCellRef()._constructor.has_value()) {
+            constructorCell = object;
         }
-        if (object.getCellRef().getCellType() == CellType_Base) {
+        if (!object.getCellRef()._constructor.has_value()) {
             base = object;
         }
     }
-    ASSERT_TRUE(constructor.has_value());
+    ASSERT_TRUE(constructorCell.has_value());
     ASSERT_TRUE(base.has_value());
 
-    EXPECT_EQ(2, std::get<ConstructorDesc>(constructor->getCellRef()._cellType)._lastConstructedCellId);
+    EXPECT_EQ(2, constructorCell->getCellRef()._constructor.value()._lastConstructedCellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)

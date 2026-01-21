@@ -47,8 +47,8 @@ __global__ void cudaCleanupCellsStep2(Array<Object*> cellPointers, Heap newHeap)
                 connectedObject = reinterpret_cast<Object*>(newHeapStart + connectedObject->tempValue.as_uint64);
             }
             if (object->type == ObjectType_Cell) {
-                if (object->typeData.cell.cellType == CellType_Constructor) {
-                    object->typeData.cell.cellTypeData.constructor.offspring = nullptr;
+                if (object->typeData.cell.constructorAvailable) {
+                    object->typeData.cell.constructor.offspring = nullptr;
                 }
             }
         }

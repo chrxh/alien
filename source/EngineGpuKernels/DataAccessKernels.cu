@@ -78,13 +78,6 @@ namespace
                     case CellType_Depot:
                         nodeTO.cellTypeData.depot.storageLimit = node.cellTypeData.depot.storageLimit;
                         break;
-                    case CellType_Constructor:
-                        nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
-                        nodeTO.cellTypeData.constructor.geneIndex = node.cellTypeData.constructor.geneIndex;
-                        nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
-                        nodeTO.cellTypeData.constructor.constructionAngle = node.cellTypeData.constructor.constructionAngle;
-                        nodeTO.cellTypeData.constructor.provideEnergy = node.cellTypeData.constructor.provideEnergy;
-                        break;
                     case CellType_Sensor:
                         nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
@@ -349,17 +342,6 @@ namespace
             case CellType_Depot: {
                 cellTO.cellTypeData.depot.storageLimit = cell.cellTypeData.depot.storageLimit;
                 cellTO.cellTypeData.depot.storedUsableEnergy = cell.cellTypeData.depot.storedUsableEnergy;
-            } break;
-            case CellType_Constructor: {
-                cellTO.cellTypeData.constructor.autoTriggerInterval = cell.cellTypeData.constructor.autoTriggerInterval;
-                cellTO.cellTypeData.constructor.constructionActivationTime = cell.cellTypeData.constructor.constructionActivationTime;
-                cellTO.cellTypeData.constructor.constructionAngle = cell.cellTypeData.constructor.constructionAngle;
-                cellTO.cellTypeData.constructor.provideEnergy = cell.cellTypeData.constructor.provideEnergy;
-                cellTO.cellTypeData.constructor.geneIndex = cell.cellTypeData.constructor.geneIndex;
-                cellTO.cellTypeData.constructor.lastConstructedCellId = cell.cellTypeData.constructor.lastConstructedCellId;
-                cellTO.cellTypeData.constructor.currentNodeIndex = cell.cellTypeData.constructor.currentNodeIndex;
-                cellTO.cellTypeData.constructor.currentConcatenation = cell.cellTypeData.constructor.currentConcatenation;
-                cellTO.cellTypeData.constructor.currentBranch = cell.cellTypeData.constructor.currentBranch;
             } break;
             case CellType_Sensor: {
                 cellTO.cellTypeData.sensor.autoTriggerInterval = cell.cellTypeData.sensor.autoTriggerInterval;
@@ -1007,8 +989,8 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TOs to, Ob
     }
     __syncthreads();
 
-    auto particlePartition = calcSystemThreadPartition(*to.numEnergyParticles);
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    auto energyPartition = calcSystemThreadPartition(*to.numEnergyParticles);
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto particle = factory.createParticleFromTO(to.energyParticles[index]);
         if (selectNewData) {
             particle->selected = 1;

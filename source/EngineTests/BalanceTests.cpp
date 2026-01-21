@@ -25,7 +25,7 @@ public:
         auto& numberGen = NumberGenerator::get();
         return Desc().addCreature(
             {
-                ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
+                ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDesc().lineageId(0),
             GenomeDesc().genes({
@@ -36,7 +36,7 @@ public:
                         NodeDesc().cellType(DigestorGenomeDesc()),
                         NodeDesc().cellType(AttackerGenomeDesc()),
                         NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
-                        NodeDesc().cellType(ConstructorGenomeDesc()),
+                        NodeDesc().constructor(ConstructorGenomeDesc()),
                         NodeDesc().cellType(
                             SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_OtherLineage))),
                         NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
@@ -57,7 +57,7 @@ public:
         auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 1.0f : 0.0f;
         return Desc().addCreature(
             {
-                ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().cellType(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
+                ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDesc().lineageId(1),
             GenomeDesc().genes({
@@ -79,7 +79,7 @@ public:
                         NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
                         NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
                         NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDesc().cellType(ConstructorGenomeDesc()),
+                        NodeDesc().constructor(ConstructorGenomeDesc()),
                         NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
                         NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
                         NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),

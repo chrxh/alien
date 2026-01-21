@@ -425,7 +425,6 @@ struct CommunicatorDesc
 using CellTypeDesc = std::variant<
     BaseDesc,
     DepotDesc,
-    ConstructorDesc,
     SensorDesc,
     GeneratorDesc,
     AttackerDesc,

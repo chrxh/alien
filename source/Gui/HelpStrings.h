@@ -374,8 +374,6 @@ namespace Const
             return Const::NeuronTooltip;
         case CellType_Depot:
             return Const::TransmitterTooltip;
-        case CellType_Constructor:
-            return Const::ConstructorTooltip;
         case CellType_Sensor:
             return Const::SensorTooltip;
         case CellType_Generator:

@@ -47,7 +47,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherObject->fixed) {
                 return;
             }
-            if (otherObject->typeData.cell.cellType != CellType_Constructor) {
+            if (!otherObject->typeData.cell.constructorAvailable) {
                 return;
             }
             // Only inject to other cells which are in a visible cone with respect to the injector cell
@@ -70,11 +70,11 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             auto cloneCreature = factory.cloneCreature(object->typeData.cell.creature);
             cloneCreature->numObjects = 1;
             injectedCell->typeData.cell.creature = cloneCreature;
-            injectedCell->typeData.cell.cellTypeData.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
-            injectedCell->typeData.cell.cellTypeData.constructor.currentNodeIndex = 0;
-            injectedCell->typeData.cell.cellTypeData.constructor.currentConcatenation = 0;
-            injectedCell->typeData.cell.cellTypeData.constructor.currentBranch = 0;
-            injectedCell->typeData.cell.cellTypeData.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
+            injectedCell->typeData.cell.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
+            injectedCell->typeData.cell.constructor.currentNodeIndex = 0;
+            injectedCell->typeData.cell.constructor.currentConcatenation = 0;
+            injectedCell->typeData.cell.constructor.currentBranch = 0;
+            injectedCell->typeData.cell.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
             object->typeData.cell.signal.channels[Channels::InjectorSuccess] = 1;
 
             if (injectorEnergyCost > 0) {

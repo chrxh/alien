@@ -363,7 +363,6 @@ union CellTypeDataTO
 {
     BaseTO base;
     DepotTO depot;
-    ConstructorTO constructor;
     SensorTO sensor;
     GeneratorTO generator;
     AttackerTO attacker;

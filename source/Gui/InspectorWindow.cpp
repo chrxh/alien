@@ -112,8 +112,8 @@ void _InspectorWindow::processCell(ExtendedObjectDesc& extendedCell)
             processCellGeneralTab(extendedCell);
             processCellTypeTab(object);
             processCellTypePropertiesTab(object);
-            if (object.getCellRef().getCellType() == CellType_Constructor) {
-                processCellGenomeTab(std::get<ConstructorDesc>(object.getCellRef()._cellType));
+            if (object.getCellRef()._constructor.has_value()) {
+                processCellGenomeTab(object.getCellRef()._constructor.value());
             }
             if (object.getCellRef().getCellType() == CellType_Injector) {
                 processCellGenomeTab(std::get<InjectorDesc>(object.getCellRef()._cellType));
@@ -297,9 +297,6 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
                     case CellType_Depot: {
                         object.getCellRef()._cellType = DepotDesc();
                     } break;
-                    case CellType_Constructor: {
-                        object.getCellRef()._cellType = ConstructorDesc();
-                    } break;
                     case CellType_Sensor: {
                         object.getCellRef()._cellType = SensorDesc();
                     } break;
@@ -375,9 +372,6 @@ void _InspectorWindow::processCellTypePropertiesTab(ObjectDesc& object)
             } break;
             case CellType_Depot: {
                 processDepotContent(std::get<DepotDesc>(object.getCellRef()._cellType));
-            } break;
-            case CellType_Constructor: {
-                processConstructorContent(std::get<ConstructorDesc>(object.getCellRef()._cellType));
             } break;
             case CellType_Sensor: {
                 processSensorContent(std::get<SensorDesc>(object.getCellRef()._cellType));
@@ -821,9 +815,10 @@ void _InspectorWindow::validateAndCorrect(ObjectDesc& object) const
     object._stiffness = std::max(0.0f, std::min(1.0f, object._stiffness));
     if (object.getObjectType() == ObjectType_Cell) {
         object.getCellRef()._usableEnergy = std::max(0.0f, object.getCellRef()._usableEnergy);
-        switch (object.getCellRef().getCellType()) {
-        case CellType_Constructor: {
-            auto& constructor = std::get<ConstructorDesc>(object.getCellRef()._cellType);
+        
+        // Validate optional constructor field
+        if (object.getCellRef()._constructor.has_value()) {
+            auto& constructor = object.getCellRef()._constructor.value();
             //auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
             //if (numNodes > 0) {
             //    constructor._currentNodeIndex = ((constructor._currentNodeIndex % numNodes) + numNodes) % numNodes;
@@ -847,7 +842,9 @@ void _InspectorWindow::validateAndCorrect(ObjectDesc& object) const
                 constructor._autoTriggerInterval = 0;
             }
             //constructor._generation = std::max(0, constructor._generation);
-        } break;
+        }
+        
+        switch (object.getCellRef().getCellType()) {
         case CellType_Sensor: {
             auto& sensor = std::get<SensorDesc>(object.getCellRef()._cellType);
             auto mode = sensor.getMode();

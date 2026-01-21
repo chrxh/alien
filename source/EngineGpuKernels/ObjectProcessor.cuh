@@ -1032,8 +1032,8 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
             auto needsEnergy = [](Object* obj) {
                 return (obj->typeData.cell.cellState == CellState_Ready || obj->typeData.cell.cellState == CellState_Detaching
                         || obj->typeData.cell.cellState == CellState_Reviving)
-                    && obj->typeData.cell.cellType == CellType_Constructor && obj->typeData.cell.creature
-                    && !ConstructorHelper::isFinished(obj->typeData.cell.cellTypeData.constructor, *obj->typeData.cell.creature->genome);
+                    && obj->typeData.cell.constructorAvailable && obj->typeData.cell.creature
+                    && !ConstructorHelper::isFinished(obj->typeData.cell.constructor, *obj->typeData.cell.creature->genome);
             };
             auto lowEnergy = [&](Object* obj) { return obj->typeData.cell.usableEnergy < cellNormalEnergy; };
 

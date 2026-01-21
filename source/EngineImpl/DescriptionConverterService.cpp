@@ -316,23 +316,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
             transmitter._storedUsableEnergy = objectTO.typeData.cell.cellTypeData.depot.storedUsableEnergy;
             cellDesc._cellType = transmitter;
         } break;
-        case CellType_Constructor: {
-            ConstructorDesc constructor;
-            constructor._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.constructor.autoTriggerInterval > 0
-                ? std::make_optional(objectTO.typeData.cell.cellTypeData.constructor.autoTriggerInterval)
-                : std::nullopt;
-            constructor._constructionActivationTime = objectTO.typeData.cell.cellTypeData.constructor.constructionActivationTime;
-            constructor._constructionAngle = objectTO.typeData.cell.cellTypeData.constructor.constructionAngle;
-            constructor._provideEnergy = objectTO.typeData.cell.cellTypeData.constructor.provideEnergy;
-            constructor._geneIndex = objectTO.typeData.cell.cellTypeData.constructor.geneIndex;
-            constructor._lastConstructedCellId = objectTO.typeData.cell.cellTypeData.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
-                ? std::make_optional(objectTO.typeData.cell.cellTypeData.constructor.lastConstructedCellId)
-                : std::nullopt;
-            constructor._currentNodeIndex = objectTO.typeData.cell.cellTypeData.constructor.currentNodeIndex;
-            constructor._currentConcatenation = objectTO.typeData.cell.cellTypeData.constructor.currentConcatenation;
-            constructor._currentBranch = objectTO.typeData.cell.cellTypeData.constructor.currentBranch;
-            cellDesc._cellType = constructor;
-        } break;
         case CellType_Sensor: {
             SensorDesc sensor;
             sensor._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval > 0
@@ -643,16 +626,6 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
         depotDesc._storageLimit = nodeTO->cellTypeData.depot.storageLimit;
         depotDesc._initialStoredUsableEnergy = nodeTO->cellTypeData.depot.initialStoredUsableEnergy;
         nodeDesc._cellType = depotDesc;
-    } break;
-    case CellType_Constructor: {
-        ConstructorGenomeDesc constructorDesc;
-        constructorDesc._autoTriggerInterval =
-            nodeTO->cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
-        constructorDesc._geneIndex = nodeTO->cellTypeData.constructor.geneIndex;
-        constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
-        constructorDesc._constructionAngle = nodeTO->cellTypeData.constructor.constructionAngle;
-        constructorDesc._provideEnergy = nodeTO->cellTypeData.constructor.provideEnergy;
-        nodeDesc._cellType = constructorDesc;
     } break;
     case CellType_Sensor: {
         SensorGenomeDesc sensorDesc;
@@ -1000,15 +973,6 @@ void DescriptionConverterService::convertGenomeToTO(
                 depotTO.storageLimit = depotDesc._storageLimit;
                 depotTO.initialStoredUsableEnergy = depotDesc._initialStoredUsableEnergy;
             } break;
-            case CellType_Constructor: {
-                auto const& constructorDesc = std::get<ConstructorGenomeDesc>(nodeDesc._cellType);
-                auto& constructorTO = nodeTO.cellTypeData.constructor;
-                constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
-                constructorTO.geneIndex = constructorDesc._geneIndex;
-                constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
-                constructorTO.constructionAngle = constructorDesc._constructionAngle;
-                constructorTO.provideEnergy = constructorDesc._provideEnergy;
-            } break;
             case CellType_Sensor: {
                 auto const& sensorDesc = std::get<SensorGenomeDesc>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
@@ -1299,19 +1263,6 @@ void DescriptionConverterService::convertObjectToTO(
             DepotTO& depotTO = objectTO.typeData.cell.cellTypeData.depot;
             depotTO.storageLimit = depotDesc._storageLimit;
             depotTO.storedUsableEnergy = depotDesc._storedUsableEnergy;
-        } break;
-        case CellType_Constructor: {
-            auto const& constructorDesc = std::get<ConstructorDesc>(cellDesc._cellType);
-            ConstructorTO& constructorTO = objectTO.typeData.cell.cellTypeData.constructor;
-            constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
-            constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
-            constructorTO.constructionAngle = constructorDesc._constructionAngle;
-            constructorTO.provideEnergy = constructorDesc._provideEnergy;
-            constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
-            constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
-            constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
-            constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);
-            constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
         } break;
         case CellType_Sensor: {
             auto const& sensorDesc = std::get<SensorDesc>(cellDesc._cellType);

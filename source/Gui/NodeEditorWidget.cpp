@@ -60,8 +60,6 @@ namespace
             return BaseGenomeDesc();
         case CellType_Depot:
             return DepotGenomeDesc();
-        case CellType_Constructor:
-            return ConstructorGenomeDesc();
         case CellType_Sensor:
             return SensorGenomeDesc();
         case CellType_Generator:
@@ -271,41 +269,6 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Initial stored energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
                 AlienGui::EndIndent();
-            } else if (nodeType == CellType_Constructor) {
-
-                AlienGui::BeginIndent();
-
-                // Gene index
-                auto& constructor = std::get<ConstructorGenomeDesc>(node._cellType);
-                std::vector<std::string> genes;
-                for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
-                    auto text = "No. " + std::to_string(index + 1);
-                    if (index == 0) {
-                        text += " (root)";
-                    }
-                    genes.emplace_back(text);
-                }
-                AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._geneIndex);
-
-                // Auto activation interval
-                AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
-
-                // Construction activation time
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Offspring trigger time").textWidth(rightColumnWidth), constructor._constructionActivationTime);
-
-                // Construction angle
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
-
-                // Provide energy at construction
-                auto provideEnergy = constructor._provideEnergy == ProvideEnergy_CellAndGene;
-                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Provide energy").textWidth(rightColumnWidth), provideEnergy);
-                constructor._provideEnergy = provideEnergy ? ProvideEnergy_CellAndGene : ProvideEnergy_CellOnly;
-
-                AlienGui::EndIndent();
-
             } else if (nodeType == CellType_Sensor) {
 
                 AlienGui::BeginIndent();

@@ -10,8 +10,8 @@ __global__ void cudaColorSelectedObjects(SimulationData data, unsigned char colo
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
             particle->color = color;
@@ -310,8 +310,8 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
             particle->pos = particle->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
@@ -331,8 +331,8 @@ __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
             particle->vel = velocity;
@@ -426,9 +426,9 @@ __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
         }
     }
     {
-        auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+        auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
-        for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+        for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
             auto const& particle = data.entities.energies.at(index);
             auto const& pos = particle->pos;
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
@@ -532,9 +532,9 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refOb
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (0 != particle->selected) {
             result.collectParticle(particle, refPos, data.objectMap);

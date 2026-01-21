@@ -29,7 +29,6 @@ enum CellType_
 {
     CellType_Base,
     CellType_Depot,
-    CellType_Constructor,
     CellType_Sensor,
     CellType_Generator,
     CellType_Attacker,
@@ -49,7 +48,6 @@ namespace Const
     std::vector<std::string> const CellTypeStrings = {
         "Base",
         "Depot",
-        "Constructor",
         "Sensor",
         "Generator",
         "Attacker",

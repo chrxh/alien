@@ -121,7 +121,7 @@
 //            .pos({11.0f, 10.0f})
 //            .cellType(GeneratorDesc().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().cellType(ConstructorDesc())),
+//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().constructor(ConstructorDesc())),
 //        ObjectDesc()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
@@ -166,7 +166,7 @@
 //            .pos({11.0f, 10.0f})
 //            .cellType(GeneratorDesc().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().cellType(ConstructorDesc())),
+//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().constructor(ConstructorDesc())),
 //        ObjectDesc()
 //            .id(4)
 //            .pos({7.0f, 10.0f})

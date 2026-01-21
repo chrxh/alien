@@ -61,7 +61,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
     for (int i = 0; i < 20; ++i) {
         auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            object.getCellRef()._cellType = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(0);
+            object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(0);
         }
         cells.push_back(object);
     }
@@ -107,7 +107,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
             auto id = i + j * 20 + 1;
             auto object = ObjectDesc().id(id).pos({100.0f + toFloat(i), 100.0f});
             if (id == constructorId1 || id == constructorId2) {
-                object.getCellRef()._cellType = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(0);
+                object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(0);
             }
             cells.push_back(object);
         }
@@ -152,7 +152,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
     for (int i = 0; i < 20; ++i) {
         auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            object.getCellRef()._cellType = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(1);
+            object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(1);
         }
         cells.push_back(object);
     }
@@ -218,14 +218,14 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
-             .type(CellDesc().cellType(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
+             .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
         CreatureDesc(),
         genome);
     data.addCreature(
         {ObjectDesc()
              .id(2)
              .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
-             .type(CellDesc().cellState(CellState_Constructing).cellType(ConstructorDesc().currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
+             .type(CellDesc().cellState(CellState_Constructing).constructor(ConstructorDesc().currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
         CreatureDesc(),
         genome);
     data.addConnection(1, 2);
@@ -254,14 +254,14 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
-             .type(CellDesc().cellType(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
+             .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
         CreatureDesc(),
         genome);
     data.addCreature(
         {ObjectDesc()
              .id(2)
              .pos({101.0f, 100.0f})
-             .type(CellDesc().cellType(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
+             .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
         CreatureDesc(),
         genome);
     data.addConnection(1, 2);

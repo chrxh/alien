@@ -11,9 +11,9 @@ __global__ void cudaRemoveSelection(SimulationData data, bool onlyClusterSelecti
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (!onlyClusterSelection || particle->selected == 2) {
             particle->selected = 0;
@@ -35,8 +35,8 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (data.energyMap.getDistance(pos, particle->pos) < radius) {
             particle->selected = 1 - particle->selected;
@@ -55,9 +55,9 @@ __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (1 == particle->selected && data.objectMap.getDistance(pointData.pos, particle->pos) < pointData.radius) {
             atomicExch(result, 1);
@@ -78,9 +78,9 @@ __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (data.energyMap.getDistance(pos, particle->pos) < radius) {
             particle->selected = 1;
@@ -104,8 +104,8 @@ __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData
         }
     }
 
-    auto const particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    auto const energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto const& particle = data.entities.energies.at(index);
         if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), particle->pos.x, toFloat(data.worldSize.x))
             && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), particle->pos.y, toFloat(data.worldSize.y))) {

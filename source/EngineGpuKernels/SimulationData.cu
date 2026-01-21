@@ -112,7 +112,7 @@ void SimulationData::resizeAuxiliaryData()
     energyMap.resize(estimatedMaxActiveParticles);
 
     auto upperBoundDynamicMemory =
-        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristic
+        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristics
     processMemory.resize(upperBoundDynamicMemory);
 }
 
