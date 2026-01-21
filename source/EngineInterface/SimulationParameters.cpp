@@ -467,94 +467,21 @@ ParametersSpec const& SimulationParameters::getSpec()
                                      "constructor cell for self-replication die."),
                 }),
             ParameterGroupSpec()
+                .name("Cell construction")
+                .parameters({
+                    ParameterSpec()
+                        .name("Connection distance")
+                        .reference(FloatSpec().member(&SimulationParameters::constructorConnectingCellDistance).min(0.1f).max(3.0f))
+                        .description("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
+                }),
+            ParameterGroupSpec()
                 .name("Genome copy mutations")
                 .parameters({
                     ParameterSpec()
-                        .name("Neural nets")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationNeuronData).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                        .name("Neural network")
+                        .reference(FloatSpec().member(&SimulationParameters::mutationNeuralNetwork).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                         .description(
-                            "This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded "
-                            "in the "
-                            "genome."),
-                    ParameterSpec()
-                        .name("Cell properties")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationCellProperties).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
-                            "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
-                            "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
-                    ParameterSpec()
-                        .name("Geometry")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationGeometry).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation changes the geometry type, connection distance, stiffness and single construction flag. The probability of "
-                            "a change is given by the specified value times the number of coded cells in the genome."),
-                    ParameterSpec()
-                        .name("Custom geometry")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationCustomGeometry).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation only changes angles and required connections of custom geometries. The probability of a change is given by "
-                            "the specified value times the number of coded cells in the genome."),
-                    ParameterSpec()
-                        .name("Cell function type")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationCellType).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation changes the type of cell function. The changed cell function will have random properties. The probability "
-                            "of a change is given by the specified value times the number of coded cells in the genome. If the flag 'Preserve "
-                            "self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
-                            "something else or vice versa."),
-                    ParameterSpec()
-                        .name("Insertion")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationInsertion).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation inserts a new cell description to the genome at a random position. The probability of a change is given by "
-                            "the specified value times the number of coded cells in the genome."),
-                    ParameterSpec()
-                        .name("Deletion")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationDeletion).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation deletes a cell description from the genome at a random position. The probability of a change is given by "
-                            "the specified value times the number of coded cells in the genome."),
-                    ParameterSpec()
-                        .name("Translation")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationTranslation).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description("This type of mutation moves a block of cell descriptions from the genome at a random position to a new random position."),
-                    ParameterSpec()
-                        .name("Duplication")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationDuplication).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
-                    ParameterSpec()
-                        .name("Individual cell color")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationCellColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions. The "
-                            "probability of a change is given by the specified value times the number of coded cells in the genome."),
-                    ParameterSpec()
-                        .name("Sub-genome color")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationSubgenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description(
-                            "This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
-                    ParameterSpec()
-                        .name("Genome color")
-                        .reference(FloatSpec().member(&SimulationParameters::copyMutationGenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description("This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
-                    ParameterSpec()
-                        .name("Color transitions")
-                        .reference(BoolSpec().member(&SimulationParameters::copyMutationColorTransitions))
-                        .description(
-                            "The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
-                            "color."),
-                    ParameterSpec()
-                        .name("Prevent genome depth increase")
-                        .reference(BoolSpec().member(&SimulationParameters::copyMutationPreventDepthIncrease))
-                        .description("A genome has a tree-like structure because it can contain sub-genomes. If this flag is activated, the mutations will "
-                                     "not increase the depth of the genome structure."),
-                    ParameterSpec()
-                        .name("Mutate self-replication")
-                        .reference(BoolSpec().member(&SimulationParameters::copyMutationSelfReplication))
-                        .description("If activated, a mutation can also alter self-replication capabilities in the genome by changing a constructor cell to "
-                                     "something else or vice versa."),
+                            "This type of mutation can change the weights, biases and activation functions of neural networks of node."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")
@@ -592,20 +519,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Max raw energy conversion")
                         .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConversion).min(0.0f).max(1.0f).format("%.3f")),
-                }),
-            ParameterGroupSpec()
-                .name("Cell type: Constructor")
-                .parameters({
-                    ParameterSpec()
-                        .name("Connection distance")
-                        .reference(FloatSpec().member(&SimulationParameters::constructorConnectingCellDistance).min(0.1f).max(3.0f))
-                        .description("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
-                    ParameterSpec()
-                        .name("Completeness check")
-                        .reference(BoolSpec().member(&SimulationParameters::constructorCompletenessCheck))
-                        .description(
-                            "If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell network are "
-                            "finished."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Defender")

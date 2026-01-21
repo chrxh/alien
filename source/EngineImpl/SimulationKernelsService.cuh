@@ -16,7 +16,6 @@ struct CudaGraphConfig
     int counterMod3;         // Not every kernel needs to be executed each time
     int motionType;          // MotionType_Fluid or MotionType_Collision
     bool hasLayers;          // settings.simulationParameters.numLayers > 0
-    bool constructorCheck;   // settings.simulationParameters.constructorCompletenessCheck.value
     bool rigidityEnabled;    // isRigidityUpdateEnabled(settings)
     int fluidKernelThreads;  // calcOptimalThreadsForFluidKernel result
     int numBlocks;           // gpuSettings.numBlocks

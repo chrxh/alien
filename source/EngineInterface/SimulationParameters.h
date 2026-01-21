@@ -121,29 +121,12 @@ struct SimulationParameters
     BaseLayerParameter<ColorVector<float>> cellDeathProbability = {.baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
     BaseParameter<CellDeathConsequences> cellDeathConsequences = {CellDeathConsequences_DetachedPartsDie};
 
+    // Cell constructor
+    BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};
+    static float constexpr constructorAdditionalOffspringDistance = 0.8f;
+
     // Mutations
-    BaseLayerParameter<ColorVector<float>> copyMutationNeuronData = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationCellProperties = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationCustomGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationCellType = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationInsertion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationDeletion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationTranslation = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationDuplication = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationCellColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationSubgenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorVector<float>> copyMutationGenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseParameter<ColorMatrix<bool>> copyMutationColorTransitions = {
-        {{true, true, true, true, true, true, true},
-         {true, true, true, true, true, true, true},
-         {true, true, true, true, true, true, true},
-         {true, true, true, true, true, true, true},
-         {true, true, true, true, true, true, true},
-         {true, true, true, true, true, true, true},
-         {true, true, true, true, true, true, true}}};
-    BaseParameter<bool> copyMutationPreventDepthIncrease = {false};
-    BaseParameter<bool> copyMutationSelfReplication = {false};
+    BaseParameter<float> mutationNeuralNetwork = {0};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
@@ -164,11 +147,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> maxRawEnergyConductivity = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     BaseParameter<ColorVector<float>> maxRawEnergyConversion = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
     static float constexpr maxRawEnergyThresholdForConduction = 100.0f;
-
-    // Cell type: Constructor
-    BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};
-    BaseParameter<bool> constructorCompletenessCheck = {false};
-    static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Cell type: Defender
     BaseParameter<ColorVector<float>> defenderAntiAttackerStrength = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};

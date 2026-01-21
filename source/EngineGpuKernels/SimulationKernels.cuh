@@ -18,7 +18,6 @@ __global__ void cudaNextTimestep_energyFlow(SimulationData data);
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data);
 __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data);
 __global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStatistics statistics, bool forPreview);
 __global__ void cudaNextTimestep_applyMutations(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics);

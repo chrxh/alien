@@ -362,9 +362,9 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
         return nullptr;
     }
 
-    if (cudaSimulationParameters.constructorCompletenessCheck.value && !constructor.isReady) {
-        return nullptr;
-    }
+    //if (cudaSimulationParameters.constructorCompletenessCheck.value && !constructor.isReady) {
+    //    return nullptr;
+    //}
 
     if (!checkAndReduceHostEnergy(data, hostObject, constructionData)) {
         return nullptr;
