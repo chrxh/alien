@@ -85,8 +85,8 @@ __inline__ __device__ void ObjectProcessor::init(SimulationData& data)
 __inline__ __device__ void ObjectProcessor::updateMap(SimulationData& data)
 {
     auto const partition = calcBlockPartition(data.entities.objects.getNumEntries());
-    Object** cellPointers = &data.entities.objects.at(partition.startIndex);
-    data.objectMap.set_block(partition.numElements(), cellPointers);
+    Object** objectPointers = &data.entities.objects.at(partition.startIndex);
+    data.objectMap.set_block(partition.numElements(), objectPointers);
 }
 
 __inline__ __device__ void ObjectProcessor::clearDensityMap(SimulationData& data)
