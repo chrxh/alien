@@ -450,6 +450,7 @@ struct Creature
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
+    Genome* mutatedGenome;
 };
 
 struct Structure
