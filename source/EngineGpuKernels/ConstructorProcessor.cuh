@@ -121,6 +121,9 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
         if (!object->typeData.cell.constructorAvailable) {
             continue;
         }
+        if (!SignalProcessor::isCellReady(data, object)) {
+            continue;
+        }
         processCell(data, statistics, object, isPreview);
     }
 }

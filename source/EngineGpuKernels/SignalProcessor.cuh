@@ -19,6 +19,7 @@ public:
     __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Object* object, uint32_t autoTriggerInterval, bool isPreview = false);
     __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Object* object);
     __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview = false);
+    __inline__ __device__ static bool isCellReady(SimulationData& data, Object* object);
 };
 
 /************************************************************************/
@@ -36,7 +37,7 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
         if (object->type == ObjectType_Cell && object->typeData.cell.cellType != CellType_Base) {
             if (object->typeData.cell.cellType == CellType_Detonator && object->typeData.cell.cellTypeData.detonator.state == DetonatorState_Activated) {
                 data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object});
-            } else if (object->typeData.cell.cellState != CellState_Constructing && object->typeData.cell.cellState != CellState_Activating && object->typeData.cell.activationTime == 0) {
+            } else if (isCellReady(data, object)) {
                 data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object});
             }
         }
@@ -185,4 +186,10 @@ __inline__ __device__ bool SignalProcessor::isAutoOrManuallyTriggered(Simulation
         }
     }
     return true;
+}
+
+__inline__ __device__ bool SignalProcessor::isCellReady(SimulationData& data, Object* object)
+{
+    return object->typeData.cell.cellState != CellState_Constructing && object->typeData.cell.cellState != CellState_Activating
+        && object->typeData.cell.activationTime == 0;
 }
