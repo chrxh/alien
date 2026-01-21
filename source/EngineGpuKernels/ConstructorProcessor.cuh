@@ -319,8 +319,8 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
 __inline__ __device__ void ConstructorProcessor::tryApplyMutations(SimulationData& data, Object* hostObject)
 {
     auto& creature = hostObject->typeData.cell.creature;
-    int origValue = atomicCAS(&creature->haveMutationsApplied, 0, 1);
-    if (origValue == 0) {
+    int origMutationState = atomicCAS(&creature->mutationState, MutationState_NotMutated, MutationState_MutationInProgress);
+    if (origMutationState == MutationState_NotMutated) {
         EntityFactory factory;
         factory.init(&data);
         creature->mutatedGenome = factory.cloneGenome(creature->genome);

@@ -142,9 +142,84 @@ namespace Const
     std::vector<std::string> const SignalRestrictionModeStrings = {"Inactive", "Active", "Conditional"};
 }
 
+//*************************
+//* Constructor constants *
+//*************************
+namespace Channels
+{
+    auto constexpr ConstructorSuccess = 1;
+}
+
+using ConstructorAngleAlignment = int;
+enum ConstructorAlignment_
+{
+    ConstructorAngleAlignment_None = 0,
+    ConstructorAngleAlignment_180 = 1,
+    ConstructorAngleAlignment_120 = 2,
+    ConstructorAngleAlignment_90 = 3,
+    ConstructorAngleAlignment_72 = 4,
+    ConstructorAngleAlignment_60 = 5,
+    ConstructorAngleAlignment_Count = 6,
+};
+
+namespace Const
+{
+    std::vector<std::string> const ConstructorAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
+}
+
+using ConstructorShape = int;
+enum ConstructorShape_
+{
+    ConstructorShape_Custom,
+    ConstructorShape_Segment,
+    ConstructorShape_Triangle,
+    ConstructorShape_Rectangle,
+    ConstructorShape_Hexagon,
+    ConstructorShape_Loop,
+    ConstructorShape_Tube,
+    ConstructorShape_Lolli,
+    ConstructorShape_SmallLolli,
+    ConstructorShape_Zigzag,
+    ConstructorShape_Count,
+};
+
+using ProvideEnergy = uint8_t;
+enum ProvideEnergy_
+{
+    ProvideEnergy_CellOnly,
+    ProvideEnergy_CellAndGene,
+    ProvideEnergy_FreeGeneration,
+    ProvideEnergy_Count,
+};
+
+namespace Const
+{
+    std::vector<std::string> const ConstructorShapeStrings =
+        {"Custom", "Segment", "Triangle", "Rectangle", "Hexagon", "Loop", "Tube", "Lolli", "Small Lolli", "Zigzag"};
+}
+
+//**********************
+//* Mutation constants *
+//**********************
+using MutationState = int;
+enum MutationState_
+{
+    MutationState_NotMutated,
+    MutationState_MutationInProgress,
+    MutationState_Mutated,
+};
+
+
 //************************
 //* Generator constants *
 //************************
+using GeneratorPulseType = int;
+enum GeneratorPulseType_
+{
+    GeneratorPulseType_Positive,
+    GeneratorPulseType_Alternation,
+    GeneratorPulseType_Count,
+};
 
 //*******************
 //* Depot constants *
@@ -253,73 +328,6 @@ namespace Const
 {
     std::vector<std::string> const DefenderModeStrings = {"Anti-attacker", "Anti-injector"};
 }
-
-//*************************
-//* Constructor constants *
-//*************************
-namespace Channels
-{
-    auto constexpr ConstructorSuccess = 1;
-}
-
-using ConstructorAngleAlignment = int;
-enum ConstructorAlignment_
-{
-    ConstructorAngleAlignment_None = 0,
-    ConstructorAngleAlignment_180 = 1,
-    ConstructorAngleAlignment_120 = 2,
-    ConstructorAngleAlignment_90 = 3,
-    ConstructorAngleAlignment_72 = 4,
-    ConstructorAngleAlignment_60 = 5,
-    ConstructorAngleAlignment_Count = 6,
-};
-
-namespace Const
-{
-    std::vector<std::string> const ConstructorAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
-}
-
-using ConstructorShape = int;
-enum ConstructorShape_
-{
-    ConstructorShape_Custom,
-    ConstructorShape_Segment,
-    ConstructorShape_Triangle,
-    ConstructorShape_Rectangle,
-    ConstructorShape_Hexagon,
-    ConstructorShape_Loop,
-    ConstructorShape_Tube,
-    ConstructorShape_Lolli,
-    ConstructorShape_SmallLolli,
-    ConstructorShape_Zigzag,
-    ConstructorShape_Count,
-};
-
-using ProvideEnergy = uint8_t;
-enum ProvideEnergy_
-{
-    ProvideEnergy_CellOnly,
-    ProvideEnergy_CellAndGene,
-    ProvideEnergy_FreeGeneration,
-    ProvideEnergy_Count,
-};
-
-namespace Const
-{
-    std::vector<std::string> const ConstructorShapeStrings =
-        {"Custom", "Segment", "Triangle", "Rectangle", "Hexagon", "Loop", "Tube", "Lolli", "Small Lolli", "Zigzag"};
-}
-
-//************************
-//* Generator constants *
-//************************
-using GeneratorPulseType = int;
-enum GeneratorPulseType_
-{
-    GeneratorPulseType_Positive,
-    GeneratorPulseType_Alternation,
-    GeneratorPulseType_Count,
-};
 
 //**********************
 //* Injector constants *

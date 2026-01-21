@@ -28,8 +28,8 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
             continue;
         }
         auto& creature = object->typeData.cell.creature;
-        int origValue = atomicCAS(&creature->haveMutationsApplied, 1, 2);
-        if (origValue == 1) {
+        int origMutationState = atomicCAS(&creature->mutationState, MutationState_MutationInProgress, MutationState_Mutated);
+        if (origMutationState == MutationState_MutationInProgress) {
             
             // Apply mutations to genome
         }

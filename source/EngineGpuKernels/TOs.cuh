@@ -472,7 +472,7 @@ struct CreatureTO
     uint32_t numObjects;
 
     uint64_t genomeArrayIndex;
-    uint32_t haveMutationsApplied;
+    MutationState mutationState;
 
     // Process data
     uint32_t frontAngleId;

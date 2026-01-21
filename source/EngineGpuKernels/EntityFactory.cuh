@@ -290,7 +290,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creature->generation = creatureTO.generation;
     creature->lineageId = creatureTO.lineageId;
     creature->numObjects = creatureTO.numObjects;
-    creature->haveMutationsApplied = creatureTO.haveMutationsApplied;
+    creature->mutationState = creatureTO.mutationState;
     creature->frontAngleId = creatureTO.frontAngleId;
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];

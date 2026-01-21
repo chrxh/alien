@@ -1527,7 +1527,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_NumCells, data._numObjects, defaultObject._numObjects);
         loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
-        loadSave(task, auxiliaries, Id_Creature_HaveMutationsApplied, data._haveMutationsApplied, defaultObject._haveMutationsApplied);
+        loadSave(task, auxiliaries, Id_Creature_HaveMutationsApplied, data._mutationState, defaultObject._mutationState);
 
         processLoadSaveMap(task, ar, auxiliaries);
     }
