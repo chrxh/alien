@@ -4,6 +4,7 @@
 
 #include <EngineImpl/SimulationCudaFacade.cuh>
 
+#include "CellProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "ConstructorHelper.cuh"
 #include "CudaShapeGenerator.cuh"
@@ -121,7 +122,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
         if (!object->typeData.cell.constructorAvailable) {
             continue;
         }
-        if (!SignalProcessor::isCellReady(data, object)) {
+        if (!CellProcessor::isCellReady(data, object)) {
             continue;
         }
         processCell(data, statistics, object, isPreview);
