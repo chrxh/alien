@@ -170,7 +170,7 @@ std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefault
                               }),
                       });
 
-    auto creature = CreatureDesc().ancestorId(1001).lineageId(502).generation(7).numObjects(25).frontAngleId(42).haveMutationsApplied(3).genomeId(genome._id);
+    auto creature = CreatureDesc().ancestorId(1001).lineageId(502).generation(7).numObjects(25).frontAngleId(42).haveMutationsApplied(1).genomeId(genome._id);
 
     return {creature, genome};
 }
