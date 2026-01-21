@@ -264,22 +264,22 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     }
 }
 
-__global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyVertexData* energyParticleData)
+__global__ void cudaExtractEnergyData(SimulationData data, EnergyVertexData* energyParticleData)
 {
     // Process energy particles - each particle goes to its index position
-    auto const& particlePartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
-        auto const& particle = data.entities.energies.at(index);
-        if (!particle) {
+    auto const& energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
+        auto const& energy = data.entities.energies.at(index);
+        if (!energy) {
             continue;
         }
 
-        auto pos = particle->pos;
+        auto pos = energy->pos;
 
         // Light yellow color for energy particles
-        float intensity = (particle->energy + 5.0f) / 200.0f;
+        float intensity = (energy->energy + 5.0f) / 200.0f;
         //max(min((particle->energy + 10.0f) * 5, 450.0f), 20.0f) / 1000.0f;
-        if (particle->selected) {
+        if (energy->selected) {
             intensity *= 2.5f;
         }
 
@@ -620,6 +620,9 @@ __global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEv
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
 
         // Only process cells that have detonation event
         if (object->typeData.cell.eventCounter > 0 && object->typeData.cell.event == CellEvent_Detonation) {

@@ -117,7 +117,7 @@ void GeometryKernelsService::extractObjectData(
         size_t energyParticleBufferSize;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedEnergyParticleBuffer), &energyParticleBufferSize, renderingData.energyParticleBuffer));
-        KERNEL_CALL(cudaExtractEnergyParticleData, data, mappedEnergyParticleBuffer);
+        KERNEL_CALL(cudaExtractEnergyData, data, mappedEnergyParticleBuffer);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
@@ -186,7 +186,7 @@ void GeometryKernelsService::extractObjectData(
         // No-interop mode: extract to device buffers
         KERNEL_CALL(cudaExtractCellData, data, renderingData.deviceObjectBuffer);
 
-        KERNEL_CALL(cudaExtractEnergyParticleData, data, renderingData.deviceEnergyBuffer);
+        KERNEL_CALL(cudaExtractEnergyData, data, renderingData.deviceEnergyBuffer);
 
         setValueToDevice(_numLocations, static_cast<uint64_t>(0));
         KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);

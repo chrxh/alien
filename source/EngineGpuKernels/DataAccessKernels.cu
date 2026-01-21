@@ -989,8 +989,8 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TOs to, Ob
     }
     __syncthreads();
 
-    auto particlePartition = calcSystemThreadPartition(*to.numEnergyParticles);
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
+    auto energyPartition = calcSystemThreadPartition(*to.numEnergyParticles);
+    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
         auto particle = factory.createParticleFromTO(to.energyParticles[index]);
         if (selectNewData) {
             particle->selected = 1;
