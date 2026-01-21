@@ -753,7 +753,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     constructor.lastConstructedCellId = result->id;
 
     // Inherit free energy provision from parent in case that offspring constructs a non-separating gene
-    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
+    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration && result->typeData.cell.constructorAvailable) {
         auto const& offspringConstructor = result->typeData.cell.constructor;
         auto const& offspringGenome = constructionData.creature->genome;
         if (offspringConstructor.geneIndex < offspringGenome->numGenes) {
