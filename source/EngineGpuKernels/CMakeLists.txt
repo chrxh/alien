@@ -4,6 +4,7 @@ add_library(EngineGpuKernels
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
+    CellProcessor.cuh
     ClusterProcessor.cuh
     CommunicatorProcessor.cuh
     ConstantMemory.cu

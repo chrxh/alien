@@ -1,4 +1,5 @@
 #include "AttackerProcessor.cuh"
+#include "CellProcessor.cuh"
 #include "ObjectProcessor.cuh"
 #include "ClusterProcessor.cuh"
 #include "CommunicatorProcessor.cuh"
@@ -113,22 +114,22 @@ __global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, Simu
 
 __global__ void cudaNextTimestep_energyFlow(SimulationData data)
 {
-    ObjectProcessor::performEnergyFlow(data);
+    CellProcessor::performEnergyFlow(data);
 }
 
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 {
-    ObjectProcessor::aging(data);
-    ObjectProcessor::cellStateTransition_calcFutureState(data);
-    ObjectProcessor::frontAngleUpdate_calcFutureValue(data);
+    CellProcessor::aging(data);
+    CellProcessor::cellStateTransition_calcFutureState(data);
+    CellProcessor::frontAngleUpdate_calcFutureValue(data);
 }
 
 __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
 {
-    SignalProcessor::collectCellTypeOperations(data);
-    ObjectProcessor::cellStateTransition_applyNextState(data);
-    ObjectProcessor::frontAngleUpdate_applyFutureValue(data);
-    ObjectProcessor::updateCellEvents(data);
+    CellProcessor::collectCellTypeOperations(data);
+    CellProcessor::cellStateTransition_applyNextState(data);
+    CellProcessor::frontAngleUpdate_applyFutureValue(data);
+    CellProcessor::updateCellEvents(data);
 }
 
 __global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics)
