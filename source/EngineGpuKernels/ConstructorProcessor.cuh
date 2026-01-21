@@ -233,15 +233,17 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.lastConstructionObject = getLastConstructedCellOnBranch(object);
     result.angle = result.node->referenceAngle;
     result.cellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-    auto const& constructorNode = result.node->constructor;
-    if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
-        auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
-        if (!referencedGene.separation) {
-            auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
-            if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
-                result.cellEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
-            } else {
-                result.cellEnergy += requiredEnergyForNodes;
+    if (result.node->constructorAvailable) {
+        auto const& constructorNode = result.node->constructor;
+        if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
+            auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
+            if (!referencedGene.separation) {
+                auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
+                if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
+                    result.cellEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
+                } else {
+                    result.cellEnergy += requiredEnergyForNodes;
+                }
             }
         }
     }
