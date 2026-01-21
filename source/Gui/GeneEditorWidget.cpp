@@ -155,9 +155,10 @@ void _GeneEditorWidget::processNodeList()
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-        if (ImGui::BeginTable("Node list", 5, flags, ImVec2(-1, -1), 0.0f)) {
+        if (ImGui::BeginTable("Node list", 6, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("No.", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(30.0f));
             ImGui::TableSetupColumn("Node type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
+            ImGui::TableSetupColumn("Construction", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
             ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
             ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
             ImGui::TableSetupColumn("Signal restriction", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
@@ -203,25 +204,28 @@ void _GeneEditorWidget::processNodeList()
                     {
                         auto nodeType = node.getCellType();
                         auto text = Const::CellTypeStrings.at(nodeType);
-                        if (node._constructor.has_value()) {
-                            auto const& constructor = node._constructor.value();
-                            text += " + Constructor (Gene " + std::to_string(constructor._geneIndex + 1) + ")";
-                        }
                         AlienGui::Text(text);
                     }
 
-                    // Column 2: Angle
+                    // Column 2: Construction
+                    ImGui::TableNextColumn();
+                    {
+                        auto text = node._constructor.has_value() ? "Gene " + std::to_string(node._constructor->_geneIndex + 1) : std::string();
+                        AlienGui::Text(text);
+                    }
+
+                    // Column 3: Angle
                     ImGui::TableNextColumn();
                     AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
 
-                    // Column 3: Color
+                    // Column 4: Color
                     ImGui::TableNextColumn();
                     if (ImGui::BeginChild("color", {0, ImGui::GetTextLineHeight()}, 0, ImGuiWindowFlags_NoInputs)) {
                         AlienGui::ColorField(Const::IndividualObjectColors[node._color], 40.0f, ImGui::GetTextLineHeight());
                     }
                     ImGui::EndChild();
 
-                    // Column 4: Signal restriction
+                    // Column 5: Signal restriction
                     ImGui::TableNextColumn();
                     bool hasRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
                                            node._signalRestriction._mode == SignalRestrictionMode_Conditional);
