@@ -50,7 +50,7 @@ private:
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
 
     __inline__ __device__ static Object* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
-    __inline__ __device__ static void tryApplyMutations(SimulationData& data, Object* hostObject);
+    __inline__ __device__ static void tryScheduleMutations(SimulationData& data, Object* hostObject);
 
     __inline__ __device__ static Object* getLastConstructedCellOnBranch(Object* hostObject);
     __inline__ __device__ static Object*
@@ -144,7 +144,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         auto constructionData = createConstructionData(object);
         if (tryConstructCell(data, statistics, object, constructionData)) {
-            tryApplyMutations(data, object);
+            tryScheduleMutations(data, object);
 
             object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
@@ -316,15 +316,9 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::tryApplyMutations(SimulationData& data, Object* hostObject)
+__inline__ __device__ void ConstructorProcessor::tryScheduleMutations(SimulationData& data, Object* hostObject)
 {
-    auto& creature = hostObject->typeData.cell.creature;
-    int origMutationState = atomicCAS(&creature->mutationState, MutationState_NotMutated, MutationState_MutationInProgress);
-    if (origMutationState == MutationState_NotMutated) {
-        EntityFactory factory;
-        factory.init(&data);
-        creature->mutatedGenome = factory.cloneGenome(creature->genome);
-    }
+    atomicCAS(&hostObject->typeData.cell.creature->mutationState, MutationState_NotMutated, MutationState_MutationInProgress);
 }
 
 __inline__ __device__ Object* ConstructorProcessor::getLastConstructedCellOnBranch(Object* hostObject)

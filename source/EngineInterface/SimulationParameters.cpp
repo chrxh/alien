@@ -484,6 +484,48 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "This type of mutation can change the weights, biases and activation functions of neural networks of node."),
                 }),
             ParameterGroupSpec()
+                .name("Customize neuron mutations")
+                .expertToggle(&SimulationParameters::customizeNeuralNetworkMutationsToggle)
+                .parameters({
+                    ParameterSpec()
+                        .name("Affected weights")
+                        .reference(FloatSpec().member(&SimulationParameters::neuralNetworkMutationWeight).min(0.0f).max(1.0f).format("%.3f"))
+                        .description(
+                            "The proportion of weights in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
+                    ParameterSpec()
+                        .name("Affected biases")
+                        .reference(FloatSpec().member(&SimulationParameters::neuralNetworkMutationBias).min(0.0f).max(1.0f).format("%.3f"))
+                        .description(
+                            "The proportion of biases in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
+                    ParameterSpec()
+                        .name("Affected activation functions")
+                        .reference(FloatSpec().member(&SimulationParameters::neuralNetworkMutationActivationFunction).min(0.0f).max(1.0f).format("%.3f"))
+                        .description(
+                            "The proportion of activation functions in the neuronal network of a cell that are changed within a neuron mutation. The default "
+                            "is 0.05."),
+                    ParameterSpec()
+                        .name("Reinforcement factor")
+                        .reference(FloatSpec().member(&SimulationParameters::neuralNetworkMutationReinforcement).min(1.0f).max(2.0f).format("%.3f"))
+                        .description(
+                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
+                            "offset. "
+                            "The factor that is used for reinforcement is defined here. The default is 1.05."),
+                    ParameterSpec()
+                        .name("Damping factor")
+                        .reference(FloatSpec().member(&SimulationParameters::neuralNetworkMutationDamping).min(1.0f).max(2.0f).format("%.3f"))
+                        .description(
+                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
+                            "offset. "
+                            "The factor that is used for weakening is defined here. The default is 1.05."),
+                    ParameterSpec()
+                        .name("Offset")
+                        .reference(FloatSpec().member(&SimulationParameters::neuralNetworkMutationOffset).min(0.0f).max(1.0f).format("%.3f"))
+                        .description(
+                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
+                            "offset. "
+                            "The value that is used for the offset is defined here. The default is 0.05."),
+                }),
+            ParameterGroupSpec()
                 .name("Cell type: Attacker")
                 .parameters({
                     ParameterSpec()
@@ -683,48 +725,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description(
                             "The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The "
                             "default is 0."),
-                }),
-            ParameterGroupSpec()
-                .name("Customize neuron mutations")
-                .expertToggle(&SimulationParameters::customizeNeuronMutationsToggle)
-                .parameters({
-                    ParameterSpec()
-                        .name("Affected weights")
-                        .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataWeight).min(0.0f).max(1.0f).format("%.3f"))
-                        .description(
-                            "The proportion of weights in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
-                    ParameterSpec()
-                        .name("Affected biases")
-                        .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataBias).min(0.0f).max(1.0f).format("%.3f"))
-                        .description(
-                            "The proportion of biases in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
-                    ParameterSpec()
-                        .name("Affected activation functions")
-                        .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataActivationFunction).min(0.0f).max(1.0f).format("%.3f"))
-                        .description(
-                            "The proportion of activation functions in the neuronal network of a cell that are changed within a neuron mutation. The default "
-                            "is 0.05."),
-                    ParameterSpec()
-                        .name("Reinforcement factor")
-                        .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataReinforcement).min(1.0f).max(2.0f).format("%.3f"))
-                        .description(
-                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
-                            "offset. "
-                            "The factor that is used for reinforcement is defined here. The default is 1.05."),
-                    ParameterSpec()
-                        .name("Damping factor")
-                        .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataDamping).min(1.0f).max(2.0f).format("%.3f"))
-                        .description(
-                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
-                            "offset. "
-                            "The factor that is used for weakening is defined here. The default is 1.05."),
-                    ParameterSpec()
-                        .name("Offset")
-                        .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataOffset).min(0.0f).max(1.0f).format("%.3f"))
-                        .description(
-                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
-                            "offset. "
-                            "The value that is used for the offset is defined here. The default is 0.05."),
                 }),
             ParameterGroupSpec()
                 .name("External energy control")

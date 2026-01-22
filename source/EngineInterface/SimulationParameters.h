@@ -128,6 +128,15 @@ struct SimulationParameters
     // Mutations
     BaseParameter<float> mutationNeuralNetwork = {0};
 
+    // Expert settings: Customize neuron mutations setting
+    ExpertToggle customizeNeuralNetworkMutationsToggle = {false};
+    BaseParameter<float> neuralNetworkMutationWeight = {0.2f};
+    BaseParameter<float> neuralNetworkMutationBias = {0.2f};
+    BaseParameter<float> neuralNetworkMutationActivationFunction = {0.05f};
+    BaseParameter<float> neuralNetworkMutationReinforcement = {1.05f};
+    BaseParameter<float> neuralNetworkMutationDamping = {1.05f};
+    BaseParameter<float> neuralNetworkMutationOffset = {0.05f};
+
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
     BaseLayerParameter<ColorMatrix<float>> attackerFoodChainColorMatrix = {
@@ -209,15 +218,6 @@ struct SimulationParameters
     // Expert settings: Customize deletion mutations setting
     ExpertToggle customizeDeletionMutationsToggle = {false};
     BaseParameter<int> cellCopyMutationDeletionMinSize = {0};
-
-    // Expert settings: Customize neuron mutations setting
-    ExpertToggle customizeNeuronMutationsToggle = {false};
-    BaseParameter<float> cellCopyMutationNeuronDataWeight = {0.2f};
-    BaseParameter<float> cellCopyMutationNeuronDataBias = {0.2f};
-    BaseParameter<float> cellCopyMutationNeuronDataActivationFunction = {0.05f};
-    BaseParameter<float> cellCopyMutationNeuronDataReinforcement = {1.05f};
-    BaseParameter<float> cellCopyMutationNeuronDataDamping = {1.05f};
-    BaseParameter<float> cellCopyMutationNeuronDataOffset = {0.05f};
 
     // Expert settings: External energy settings
     ExpertToggle externalEnergyControlToggle = {false};

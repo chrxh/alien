@@ -692,6 +692,20 @@ __inline__ __device__ Genome* EntityFactory::cloneGenome(Genome* genome)
     auto newId = newGenome->id;
     *newGenome = *genome;
     newGenome->id = newId;
+
+    auto newGenes = createEmptyGenes(genome->numGenes);
+    for (int i = 0, numGenes = genome->numGenes; i < numGenes; ++i) {
+        auto gene = &genome->genes[i];
+        newGenes[i] = *gene;
+        auto newNodes = createEmptyNodes(gene->numNodes);
+        for (int j = 0, numNodes = gene->numNodes; j < numNodes; ++j) {
+            auto node = &gene->nodes[j];
+            newNodes[j] = *node;
+        }
+        newGenes[i].nodes = newNodes;
+    }
+    newGenome->genes = newGenes;
+
     return newGenome;
 }
 
@@ -983,12 +997,10 @@ __inline__ __device__ Creature* EntityFactory::createEmptyCreature()
 
 __inline__ __device__ Gene* EntityFactory::createEmptyGenes(int numGenes)
 {
-    auto genes = _data->entities.heap.getTypedSubArray<Gene>(numGenes);
-    return genes;
+    return _data->entities.heap.getTypedSubArray<Gene>(numGenes);
 }
 
 __inline__ __device__ Node* EntityFactory::createEmptyNodes(int numNodes)
 {
-    auto nodes = _data->entities.heap.getTypedSubArray<Node>(numNodes);
-    return nodes;
+    return _data->entities.heap.getTypedSubArray<Node>(numNodes);
 }

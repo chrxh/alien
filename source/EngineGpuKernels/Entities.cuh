@@ -1,15 +1,12 @@
 #pragma once
 
 #include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/EngineConstants.h>
 
 #include "Array.cuh"
 #include "Base.cuh"
 #include "Definitions.cuh"
-
-#include <EngineInterface/CellTypeConstants.h>
-#include <EngineInterface/EngineConstants.h>
-
-#include "Base.cuh"
 #include "Genome.cuh"
 #include "Math.cuh"
 
@@ -450,7 +447,6 @@ struct Creature
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
-    Genome* mutatedGenome;
 };
 
 struct Structure
