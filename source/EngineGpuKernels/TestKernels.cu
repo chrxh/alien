@@ -2,6 +2,8 @@
 #include "SimulationData.cuh"
 #include "TestKernels.cuh"
 
+#include "MutationProcessor.cuh"
+
 __global__ void cudaTestMutate(SimulationData data, uint64_t objectId, MutationType mutationType)
 {
     auto& objects = data.entities.objects;
@@ -9,46 +11,15 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId, MutationT
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        //if (object->id == objectId) {
-        //    switch (mutationType) {
-        //    case MutationType::Properties:
-        //        MutationProcessor::propertiesMutation(data, object);
-        //        break;
-        //    case MutationType::NeuronData:
-        //        MutationProcessor::neuronDataMutation(data, object);
-        //        break;
-        //    case MutationType::Geometry:
-        //        MutationProcessor::geometryMutation(data, object);
-        //        break;
-        //    case MutationType::CustomGeometry:
-        //        MutationProcessor::customGeometryMutation(data, object);
-        //        break;
-        //    case MutationType::CellType:
-        //        MutationProcessor::cellTypeMutation(data, object);
-        //        break;
-        //    case MutationType::Insertion:
-        //        MutationProcessor::insertMutation(data, object);
-        //        break;
-        //    case MutationType::Deletion:
-        //        MutationProcessor::deleteMutation(data, object);
-        //        break;
-        //    case MutationType::Translation:
-        //        MutationProcessor::translateMutation(data, object);
-        //        break;
-        //    case MutationType::Duplication:
-        //        MutationProcessor::duplicateMutation(data, object);
-        //        break;
-        //    case MutationType::CellColor:
-        //        MutationProcessor::cellColorMutation(data, object);
-        //        break;
-        //    case MutationType::SubgenomeColor:
-        //        MutationProcessor::subgenomeColorMutation(data, object);
-        //        break;
-        //    case MutationType::GenomeColor:
-        //        MutationProcessor::genomeColorMutation(data, object);
-        //        break;
-        //    }
-        //}
+        CUDA_CHECK(object->type == ObjectType_Cell);
+
+        if (object->id == objectId) {
+            switch (mutationType) {
+            case MutationType::NeuralNetwork: {
+                MutationProcessor::applyMutations_neuralNetwork(data, object->typeData.cell.creature->genome);
+            } break;
+            }
+        }
     }
 }
 

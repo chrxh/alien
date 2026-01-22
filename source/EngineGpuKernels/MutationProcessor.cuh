@@ -15,9 +15,10 @@ class MutationProcessor
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
+    __inline__ __device__ static void applyMutations_neuralNetwork(SimulationData& data, Genome* genome);
+
 private:
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
-    __inline__ __device__ static void applyMutations_neuralNetwork(SimulationData& data, Genome* genome);
 };
 
 /************************************************************************/
@@ -46,15 +47,6 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
             // Apply mutations to cloned genome
             applyMutations_neuralNetwork(data, mutatedGenome);
         }
-    }
-}
-
-__inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)
-{
-    if (probability > 0.001f) {
-        return data.primaryNumberGen.random() < probability;
-    } else {
-        return data.primaryNumberGen.random() < probability * 1000 && data.secondaryNumberGen.random() < 0.001f;
     }
 }
 
@@ -124,5 +116,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_neuralNetwork(Simul
                 }
             }
         }
+    }
+}
+
+__inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)
+{
+    if (probability > 0.001f) {
+        return data.primaryNumberGen.random() < probability;
+    } else {
+        return data.primaryNumberGen.random() < probability * 1000 && data.secondaryNumberGen.random() < 0.001f;
     }
 }
