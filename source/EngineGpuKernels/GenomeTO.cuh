@@ -333,6 +333,7 @@ struct GenomeTO
     int numGenes;
     uint64_t geneArrayIndex;
 
+    uint32_t lineageId;
     float frontAngle;
 
     // Temporary data

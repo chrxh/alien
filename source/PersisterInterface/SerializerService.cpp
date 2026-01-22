@@ -137,6 +137,7 @@ namespace
     auto constexpr Id_Genome_Id = 0;
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
+    auto constexpr Id_Genome_LineageId = 3;
 
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
@@ -740,6 +741,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Genome_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
+        loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         processLoadSaveMap(task, ar, auxiliaries);
 
@@ -762,7 +764,6 @@ namespace
     auto constexpr Id_Creature_Id = 0;
     auto constexpr Id_Creature_AncestorId = 1;
     auto constexpr Id_Creature_Generation = 2;
-    auto constexpr Id_Creature_LineageId = 3;
     auto constexpr Id_Creature_NumCells = 4;
     auto constexpr Id_Creature_FrontAngleId = 5;
     auto constexpr Id_Creature_GenomeId = 6;
@@ -1523,7 +1524,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
-        loadSave(task, auxiliaries, Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Creature_NumCells, data._numObjects, defaultObject._numObjects);
         loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);

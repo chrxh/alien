@@ -86,6 +86,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     auto genome = _data->entities.heap.getTypedSubArray<Genome>(1);
     genomeTO.genomeIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->entities.heap.getArray());
     genome->id = genomeTO.id;
+    genome->lineageId = genomeTO.lineageId;
     genome->frontAngle = genomeTO.frontAngle;
     genome->numGenes = genomeTO.numGenes;
     for (int i = 0; i < sizeof(genomeTO.name); ++i) {
@@ -288,7 +289,6 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creature->id = creatureTO.id;
     creature->ancestorId = creatureTO.ancestorId;
     creature->generation = creatureTO.generation;
-    creature->lineageId = creatureTO.lineageId;
     creature->numObjects = creatureTO.numObjects;
     creature->mutationState = creatureTO.mutationState;
     creature->frontAngleId = creatureTO.frontAngleId;

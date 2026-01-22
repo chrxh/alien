@@ -27,8 +27,8 @@ public:
             {
                 ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
-            CreatureDesc().lineageId(0),
-            GenomeDesc().genes({
+            CreatureDesc(),
+            GenomeDesc().lineageId(0).genes({
                 GeneDesc()
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
@@ -59,8 +59,8 @@ public:
             {
                 ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
-            CreatureDesc().lineageId(1),
-            GenomeDesc().genes({
+            CreatureDesc(),
+            GenomeDesc().lineageId(1).genes({
                 GeneDesc()
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
@@ -108,12 +108,19 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
     _simulationFacade->calcTimesteps(100000);
     auto actualData = _simulationFacade->getSimulationData();
 
+    // Create a map of genomeId to lineageId
+    std::unordered_map<uint64_t, int> genomeIdToLineageId;
+    for (auto const& genome : actualData._genomes) {
+        genomeIdToLineageId[genome._id] = genome._lineageId;
+    }
+
     int numSmallCreatures = 0;
     int numLargeCreatures = 0;
     for (auto const& creature : actualData._creatures) {
-        if (creature._lineageId == 0) {
+        auto lineageId = genomeIdToLineageId.at(creature._genomeId);
+        if (lineageId == 0) {
             ++numSmallCreatures;
-        } else if (creature._lineageId == 1) {
+        } else if (lineageId == 1) {
             ++numLargeCreatures;
         } else {
             CHECK(false);
@@ -143,12 +150,19 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
     _simulationFacade->calcTimesteps(100000);
     auto actualData = _simulationFacade->getSimulationData();
 
+    // Create a map of genomeId to lineageId
+    std::unordered_map<uint64_t, int> genomeIdToLineageId;
+    for (auto const& genome : actualData._genomes) {
+        genomeIdToLineageId[genome._id] = genome._lineageId;
+    }
+
     int numSmallCreatures = 0;
     int numLargeCreatures = 0;
     for (auto const& creature : actualData._creatures) {
-        if (creature._lineageId == 0) {
+        auto lineageId = genomeIdToLineageId.at(creature._genomeId);
+        if (lineageId == 0) {
             ++numSmallCreatures;
-        } else if (creature._lineageId == 1) {
+        } else if (lineageId == 1) {
             ++numLargeCreatures;
         } else {
             CHECK(false);

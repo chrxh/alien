@@ -331,6 +331,7 @@ struct Genome
     int numGenes;
     Gene* genes;
 
+    uint32_t lineageId;
     float frontAngle;
 
     // Temporary data

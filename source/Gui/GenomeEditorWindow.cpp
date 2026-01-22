@@ -304,11 +304,12 @@ void GenomeEditorWindow::onCreateSeed()
 
     auto tab = _tabs.at(_selectedTabIndex);
     auto genome = tab->getGenomeDesc();
+    genome._lineageId = toInt(NumberGenerator::get().createId() % 0x80000000);
 
     Desc seed;
     seed.addCreature(
         {ObjectDesc().pos(pos).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
-        CreatureDesc().lineageId(toInt(NumberGenerator::get().createId() % 0x80000000)),
+        CreatureDesc(),
         genome);
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(seed));

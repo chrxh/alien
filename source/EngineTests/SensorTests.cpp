@@ -1270,12 +1270,12 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
                     SensorDesc().autoTriggerInterval(3).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_SameLineage)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
         },
-        CreatureDesc().id(0).lineageId(42));
+        CreatureDesc().id(0), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Create a large creature with same lineage
     auto creatureData = createLargeCreature();
-    creatureData._creatures.front()._lineageId = 42;
+    creatureData._genomes.front()._lineageId = 42;
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
@@ -1299,12 +1299,12 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
                     SensorDesc().autoTriggerInterval(3).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_SameLineage)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
         },
-        CreatureDesc().id(0).lineageId(42));
+        CreatureDesc().id(0), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Create a large creature with different lineage
     auto creatureData = createLargeCreature();
-    creatureData._creatures.front()._lineageId = 41;
+    creatureData._genomes.front()._lineageId = 41;
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
@@ -1327,12 +1327,12 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
                     SensorDesc().autoTriggerInterval(3).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_OtherLineage)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
         },
-        CreatureDesc().id(0).lineageId(42));
+        CreatureDesc().id(0), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Create a large creature with different lineage
     auto creatureData = createLargeCreature();
-    creatureData._creatures.front()._lineageId = 41;
+    creatureData._genomes.front()._lineageId = 41;
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
@@ -1356,12 +1356,12 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
                     SensorDesc().autoTriggerInterval(3).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_OtherLineage)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
         },
-        CreatureDesc().id(0).lineageId(42));
+        CreatureDesc().id(0), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Create a large creature with same lineage
     auto creatureData = createLargeCreature();
-    creatureData._creatures.front()._lineageId = 42;
+    creatureData._genomes.front()._lineageId = 42;
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);

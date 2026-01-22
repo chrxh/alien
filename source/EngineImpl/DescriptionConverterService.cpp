@@ -855,6 +855,8 @@ GenomeDesc DescriptionConverterService::createGenomeDesc(TOs const& to, int geno
     result._id = genomeTO.id;
     NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.id});
     result._name = char64ToString(genomeTO.name);
+    result._lineageId = genomeTO.lineageId;
+    NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.lineageId});
     result._frontAngle = genomeTO.frontAngle;
     result._genes.reserve(genomeTO.numGenes);
 
@@ -892,8 +894,6 @@ CreatureDesc DescriptionConverterService::createCreatureDesc(TOs const& to, int 
     NumberGenerator::get().adaptMaxIds({.entityId = creatureTO.id});
     result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
     result._generation = creatureTO.generation;
-    result._lineageId = creatureTO.lineageId;
-    NumberGenerator::get().adaptMaxIds({.entityId = creatureTO.lineageId});
     result._numObjects = creatureTO.numObjects;
     result._mutationState = creatureTO.mutationState;
     result._frontAngleId = creatureTO.frontAngleId;
@@ -932,6 +932,7 @@ void DescriptionConverterService::convertGenomeToTO(
 
     stringToChar64(genomeTO.name, genome._name);
     genomeTO.id = genome._id;
+    genomeTO.lineageId = genome._lineageId;
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
@@ -1176,7 +1177,6 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.id = creatureDesc._id;
     creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
     creatureTO.generation = creatureDesc._generation;
-    creatureTO.lineageId = creatureDesc._lineageId;
     creatureTO.frontAngleId = creatureDesc._frontAngleId;
     creatureTO.numObjects = creatureDesc._numObjects;
     creatureTO.mutationState = creatureDesc._mutationState;

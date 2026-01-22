@@ -468,7 +468,6 @@ struct CreatureTO
     uint64_t ancestorId;
 
     uint32_t generation;
-    uint32_t lineageId;
     uint32_t numObjects;
 
     uint64_t genomeArrayIndex;

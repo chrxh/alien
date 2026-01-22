@@ -436,7 +436,6 @@ struct Creature
     uint64_t ancestorId;  // May be invalid
 
     uint32_t generation;
-    uint32_t lineageId;
     uint32_t numObjects;
 
     Genome* genome;

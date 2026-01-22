@@ -145,11 +145,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 // Filter by lineage restriction
                 if (restrictToLineage != LineageRestriction_No) {
                     if (restrictToLineage == LineageRestriction_SameLineage) {
-                        if (cell->creature->lineageId != otherCell->creature->lineageId) {
+                        if (cell->creature->genome->lineageId != otherCell->creature->genome->lineageId) {
                             return;
                         }
                     } else if (restrictToLineage == LineageRestriction_OtherLineage) {
-                        if (cell->creature->lineageId == otherCell->creature->lineageId) {
+                        if (cell->creature->genome->lineageId == otherCell->creature->genome->lineageId) {
                             return;
                         }
                     }
