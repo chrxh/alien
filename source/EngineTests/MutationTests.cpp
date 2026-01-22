@@ -34,18 +34,16 @@ protected:
         auto nodeParameters = factory.getAllNodeParameters();
 
         std::vector<GeneDesc> genes;
+        // nodesPerGene keeps gene size small for predictable mutation timing while covering all node parameters; the last gene may be smaller.
         constexpr size_t nodesPerGene = 4;
         for (size_t index = 0; index < nodeParameters.size(); index += nodesPerGene) {
+            const auto nodeCount = std::min(nodesPerGene, nodeParameters.size() - index);
             std::vector<NodeDesc> nodes;
-            for (size_t offset = 0; offset < nodesPerGene && index + offset < nodeParameters.size(); ++offset) {
+            nodes.reserve(nodeCount);
+            for (size_t offset = 0; offset < nodeCount; ++offset) {
                 nodes.push_back(factory.createNonDefaultNodeDesc(nodeParameters.at(index + offset)));
             }
-            if (nodes.size() < 2 && !genes.empty()) {
-                auto& lastNodes = genes.back()._nodes;
-                lastNodes.insert(lastNodes.end(), nodes.begin(), nodes.end());
-            } else {
-                genes.emplace_back(GeneDesc().nodes(nodes));
-            }
+            genes.emplace_back(GeneDesc().nodes(nodes));
         }
 
         return GenomeDesc().genes(genes);
@@ -72,17 +70,18 @@ protected:
 
 TEST_F(MutationTests, neuralNetworkMutation)
 {
+    constexpr uint64_t kTestObjectId = 1;
     auto genome = createTestGenome();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc().id(1), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(kTestObjectId).type(CellDesc())}, CreatureDesc().id(kTestObjectId), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
-        _simulationFacade->testOnly_mutate(1, MutationType::NeuralNetwork);
+        _simulationFacade->testOnly_mutate(kTestObjectId, MutationType::NeuralNetwork);
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCell = actualData.getObjectRef(kTestObjectId).getCellRef();
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
