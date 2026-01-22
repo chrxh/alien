@@ -33,23 +33,26 @@ protected:
         auto const& factory = DescriptionTestDataFactory::get();
         auto nodeParameters = factory.getAllNodeParameters();
 
-        auto gene1 = GeneDesc().nodes({
-            factory.createNonDefaultNodeDesc(nodeParameters.at(0)),
-            factory.createNonDefaultNodeDesc(nodeParameters.at(1)),
-            factory.createNonDefaultNodeDesc(nodeParameters.at(2)),
-        });
-        auto gene2 = GeneDesc().nodes({
-            factory.createNonDefaultNodeDesc(nodeParameters.at(10)),
-            factory.createNonDefaultNodeDesc(nodeParameters.at(16)),
-            factory.createNonDefaultNodeDesc(nodeParameters.at(22)),
-        });
+        std::vector<GeneDesc> genes;
+        constexpr size_t nodesPerGene = 4;
+        for (size_t index = 0; index < nodeParameters.size(); index += nodesPerGene) {
+            std::vector<NodeDesc> nodes;
+            for (size_t offset = 0; offset < nodesPerGene && index + offset < nodeParameters.size(); ++offset) {
+                nodes.push_back(factory.createNonDefaultNodeDesc(nodeParameters.at(index + offset)));
+            }
+            if (nodes.size() < 2 && !genes.empty()) {
+                auto& lastNodes = genes.back()._nodes;
+                lastNodes.insert(lastNodes.end(), nodes.begin(), nodes.end());
+            } else {
+                genes.emplace_back(GeneDesc().nodes(nodes));
+            }
+        }
 
-        return GenomeDesc().genes({gene1, gene2});
+        return GenomeDesc().genes(genes);
     }
 
     bool compareExceptNeuralNetwork(GenomeDesc expected, GenomeDesc actual)
     {
-        // compare genomes except neural network, good strategy: set all neural network properties of `expected` and `actual` to 0, then compare both
         auto resetNeuralNetwork = [](GenomeDesc& genome) {
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
@@ -71,7 +74,7 @@ TEST_F(MutationTests, neuralNetworkMutation)
 {
     auto genome = createTestGenome();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())});
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc().id(1), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {

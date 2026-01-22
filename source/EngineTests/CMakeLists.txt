@@ -25,6 +25,7 @@ PUBLIC
     LayerParameterTests.cpp
     MemoryTests.cpp
     MuscleTests.cpp
+    MutationTests.cpp
     NeuronTests.cpp
     ObjectConnectionTests.cpp
     PhysicsTests.cpp
