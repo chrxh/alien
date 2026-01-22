@@ -304,7 +304,8 @@ void GenomeEditorWindow::onCreateSeed()
 
     auto tab = _tabs.at(_selectedTabIndex);
     auto genome = tab->getGenomeDesc();
-    genome._lineageId = toInt(NumberGenerator::get().createId() % 0x80000000);
+    genome._lineageId = 0;
+    //toInt(NumberGenerator::get().createId() % 0x80000000);
 
     Desc seed;
     seed.addCreature(
