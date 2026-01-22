@@ -31,6 +31,7 @@ namespace
             }
             auto& genomeTO = to.genomes[genomeTOIndex];
             genomeTO.id = genome->id;
+            genomeTO.lineageId = genome->lineageId;
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
@@ -258,7 +259,6 @@ namespace
             creatureTO.id = creature->id;
             creatureTO.ancestorId = creature->ancestorId;
             creatureTO.generation = creature->generation;
-            creatureTO.lineageId = creature->lineageId;
             creatureTO.numObjects = creature->numObjects;
             creatureTO.mutationState = creature->mutationState;
             creatureTO.frontAngleId = creature->frontAngleId;

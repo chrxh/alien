@@ -55,17 +55,17 @@ __inline__ __device__ void MutationProcessor::applyMutations_neuralNetwork(Simul
     auto mutationNeuralNetwork = cudaSimulationParameters.mutationNeuralNetwork.value;
 
     auto neuralNetworkMutationWeight =
-        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle ? cudaSimulationParameters.neuralNetworkMutationWeight : 0.2f;
+        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationWeight.value : 0.2f;
     auto neuralNetworkMutationBias =
-        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle ? cudaSimulationParameters.neuralNetworkMutationBias : 0.2f;
+        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationBias.value : 0.2f;
     auto neuralNetworkMutationActivationFunction =
-        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle ? cudaSimulationParameters.neuralNetworkMutationActivationFunction : 0.05f;
+        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationActivationFunction.value : 0.05f;
     auto neuralNetworkMutationReinforcement =
-        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle ? cudaSimulationParameters.neuralNetworkMutationReinforcement : 1.05f;
+        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationReinforcement.value : 1.05f;
     auto neuralNetworkMutationDamping =
-        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle ? cudaSimulationParameters.neuralNetworkMutationDamping : 1.05f;
+        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationDamping.value : 1.05f;
     auto neuralNetworkMutationOffset =
-        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle ? cudaSimulationParameters.neuralNetworkMutationOffset : 0.05f;
+        cudaSimulationParameters.customizeNeuralNetworkMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationOffset.value : 0.05f;
 
     for (int i = 0, numGenes = genome->numGenes; i < numGenes; ++i) {
         auto gene = &genome->genes[i];

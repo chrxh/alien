@@ -560,14 +560,14 @@ TEST_F(AttackerTests, restrictToLineage_sameLineage_matching)
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc().restrictToLineage(LineageRestriction_SameLineage)))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
-    }, CreatureDesc().id(1).lineageId(42));
+    }, CreatureDesc().id(1), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with same lineage (42)
     data.addCreature({
         ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
         ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
-    }, CreatureDesc().id(2).lineageId(42));
+    }, CreatureDesc().id(2), GenomeDesc().lineageId(42));
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
@@ -586,14 +586,14 @@ TEST_F(AttackerTests, restrictToLineage_sameLineage_notMatching)
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc().restrictToLineage(LineageRestriction_SameLineage)))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
-    }, CreatureDesc().id(1).lineageId(42));
+    }, CreatureDesc().id(1), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with different lineage (43)
     data.addCreature({
         ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
         ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
-    }, CreatureDesc().id(2).lineageId(43));
+    }, CreatureDesc().id(2), GenomeDesc().lineageId(43));
     data.addConnection(100, 101);
 
     auto origTarget = data.getObjectRef(100);
@@ -614,14 +614,14 @@ TEST_F(AttackerTests, restrictToLineage_otherLineage_matching)
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc().restrictToLineage(LineageRestriction_OtherLineage)))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
-    }, CreatureDesc().id(1).lineageId(42));
+    }, CreatureDesc().id(1), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with different lineage (43)
     data.addCreature({
         ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
         ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
-    }, CreatureDesc().id(2).lineageId(43));
+    }, CreatureDesc().id(2), GenomeDesc().lineageId(43));
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
@@ -640,14 +640,14 @@ TEST_F(AttackerTests, restrictToLineage_otherLineage_notMatching)
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc().restrictToLineage(LineageRestriction_OtherLineage)))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
-    }, CreatureDesc().id(1).lineageId(42));
+    }, CreatureDesc().id(1), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with same lineage (42)
     data.addCreature({
         ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
         ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
-    }, CreatureDesc().id(2).lineageId(42));
+    }, CreatureDesc().id(2), GenomeDesc().lineageId(42));
     data.addConnection(100, 101);
 
     auto origTarget = data.getObjectRef(100);
@@ -668,14 +668,14 @@ TEST_F(AttackerTests, restrictToLineage_noRestriction)
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc()))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
-    }, CreatureDesc().id(1).lineageId(42));
+    }, CreatureDesc().id(1), GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
     // Add target creature with different lineage (43)
     data.addCreature({
         ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
         ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
-    }, CreatureDesc().id(2).lineageId(43));
+    }, CreatureDesc().id(2), GenomeDesc().lineageId(43));
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);

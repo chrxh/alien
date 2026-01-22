@@ -154,6 +154,7 @@ std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefault
 {
     auto genome = GenomeDesc()
                       .name("Test Genome")
+                      .lineageId(502)
                       .frontAngle(270.0f)
                       .genes({
                           GeneDesc()
@@ -171,7 +172,7 @@ std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefault
                       });
 
     auto creature =
-        CreatureDesc().ancestorId(1001).lineageId(502).generation(7).numObjects(25).frontAngleId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
+        CreatureDesc().ancestorId(1001).generation(7).numObjects(25).frontAngleId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
 
     return {creature, genome};
 }

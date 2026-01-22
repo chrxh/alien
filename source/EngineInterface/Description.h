@@ -566,7 +566,6 @@ struct CreatureDesc
     CreatureDesc id(uint64_t id);
     MEMBER(CreatureDesc, std::optional<uint64_t>, ancestorId, std::nullopt);
     MEMBER(CreatureDesc, int, generation, 0);
-    MEMBER(CreatureDesc, int, lineageId, 0);
     MEMBER(CreatureDesc, int, numObjects, 0);
     MEMBER(CreatureDesc, uint64_t, genomeId, 0);
     MEMBER(CreatureDesc, MutationState, mutationState, MutationState_NotMutated);

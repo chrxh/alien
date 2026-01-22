@@ -423,6 +423,7 @@ struct GenomeDesc
     GenomeDesc id(uint64_t id);
     MEMBER(GenomeDesc, std::string, name, "");
     MEMBER(GenomeDesc, std::vector<GeneDesc>, genes, {})
+    MEMBER(GenomeDesc, int, lineageId, 0);
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
 };
 

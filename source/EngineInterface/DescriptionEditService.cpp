@@ -509,8 +509,8 @@ void DescriptionEditService::randomizeCountdowns(Desc& description, int minValue
 
 void DescriptionEditService::randomizeLineageIds(Desc& description) const
 {
-    for (auto& creature : description._creatures) {
-        creature._lineageId = NumberGenerator::get().getRandomInt();
+    for (auto& genome : description._genomes) {
+        genome._lineageId = NumberGenerator::get().getRandomInt();
     }
 }
 

@@ -33,7 +33,7 @@ protected:
         auto data = Desc().addCreature({
             ObjectDesc().id(1).pos(pos).color(color).type(CellDesc().cellType(ReconnectorDesc().mode(mode))),
             ObjectDesc().id(2).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
-        }, CreatureDesc().lineageId(lineageId));
+        }, CreatureDesc(), GenomeDesc().lineageId(lineageId));
         data.addConnection(1, 2);
         return data;
     }
@@ -47,7 +47,7 @@ protected:
         auto data = Desc().addCreature({
             ObjectDesc().id(1).pos(pos).color(color).type(CellDesc().cellType(ReconnectorDesc().mode(mode))),
             ObjectDesc().id(2).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
-        }, CreatureDesc().lineageId(lineageId));
+        }, CreatureDesc(), GenomeDesc().lineageId(lineageId));
         data.addConnection(1, 2);
         return data;
     }
@@ -367,7 +367,7 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_success)
     data.addCreature({
         ObjectDesc().id(10).pos({99.0f, 100.0f}),
         ObjectDesc().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDesc().lineageId(5));
+    }, CreatureDesc(), GenomeDesc().lineageId(5));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -387,7 +387,7 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_failed)
     data.addCreature({
         ObjectDesc().id(10).pos({99.0f, 100.0f}),
         ObjectDesc().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDesc().lineageId(6));
+    }, CreatureDesc(), GenomeDesc().lineageId(6));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -407,7 +407,7 @@ TEST_F(ReconnectorTests, creatureMode_otherLineage_success)
     data.addCreature({
         ObjectDesc().id(10).pos({99.0f, 100.0f}),
         ObjectDesc().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDesc().lineageId(6));
+    }, CreatureDesc(), GenomeDesc().lineageId(6));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -427,7 +427,7 @@ TEST_F(ReconnectorTests, creatureMode_otherLineage_failed)
     data.addCreature({
         ObjectDesc().id(10).pos({99.0f, 100.0f}),
         ObjectDesc().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDesc().lineageId(5));
+    }, CreatureDesc(), GenomeDesc().lineageId(5));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);

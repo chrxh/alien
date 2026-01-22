@@ -370,11 +370,11 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                     }
                     if (matches && restrictToLineage != LineageRestriction_No) {
                         if (restrictToLineage == LineageRestriction_SameLineage) {
-                            if (object->typeData.cell.creature->lineageId != otherObject->typeData.cell.creature->lineageId) {
+                            if (object->typeData.cell.creature->genome->lineageId != otherObject->typeData.cell.creature->genome->lineageId) {
                                 matches = false;
                             }
                         } else if (restrictToLineage == LineageRestriction_OtherLineage) {
-                            if (object->typeData.cell.creature->lineageId == otherObject->typeData.cell.creature->lineageId) {
+                            if (object->typeData.cell.creature->genome->lineageId == otherObject->typeData.cell.creature->genome->lineageId) {
                                 matches = false;
                             }
                         }
