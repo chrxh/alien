@@ -1231,7 +1231,7 @@ void DescriptionConverterService::convertObjectToTO(
         // ObjectType_Cell - access cell data
         CellDesc const& cellDesc = objectDesc.getCellRef();
 
-        objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(cellDesc._creatureId.value());
+        objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(cellDesc._creatureId);
         objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
         checkAndCorrectInvalidEnergy(objectTO.typeData.cell.usableEnergy);
         objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;

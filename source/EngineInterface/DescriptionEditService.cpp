@@ -410,7 +410,7 @@ void DescriptionEditService::randomizeCellColors(Desc& description, std::vector<
     auto nonCreatureColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
     for (auto& object : description._objects) {
         if (object.getObjectType() == ObjectType_Cell) {
-            auto it = cellColorsByCreatureId.find(object.getCellRef()._creatureId.value());
+            auto it = cellColorsByCreatureId.find(object.getCellRef()._creatureId);
             if (it != cellColorsByCreatureId.end()) {
                 object._color = it->second;
             }
@@ -445,7 +445,7 @@ void DescriptionEditService::randomizeEnergies(Desc& description, float minEnerg
     for (auto& object : description._objects) {
         auto type = object.getObjectType();
         if (type == ObjectType_Cell) {
-            auto it = creatureEnergies.find(object.getCellRef()._creatureId.value());
+            auto it = creatureEnergies.find(object.getCellRef()._creatureId);
             if (it != creatureEnergies.end()) {
                 object.getCellRef()._usableEnergy = it->second;
             }
@@ -470,7 +470,7 @@ void DescriptionEditService::randomizeAges(Desc& description, int minAge, int ma
     for (auto& object : description._objects) {
         auto type = object.getObjectType();
         if (type == ObjectType_Cell) {
-            auto it = creatureAges.find(object.getCellRef()._creatureId.value());
+            auto it = creatureAges.find(object.getCellRef()._creatureId);
             if (it != creatureAges.end()) {
                 object.getCellRef()._age = it->second;
             }
@@ -495,13 +495,9 @@ void DescriptionEditService::randomizeCountdowns(Desc& description, int minValue
             continue;
         }
         if (object.getCellRef().getCellType() == CellType_Detonator) {
-            if (object.getCellRef()._creatureId.has_value()) {
-                auto it = creatureCountdowns.find(object.getCellRef()._creatureId.value());
-                if (it != creatureCountdowns.end()) {
-                    std::get<DetonatorDesc>(object.getCellRef()._cellType)._countdown = it->second;
-                }
-            } else {
-                std::get<DetonatorDesc>(object.getCellRef()._cellType)._countdown = nonCreatureCountdown;
+            auto it = creatureCountdowns.find(object.getCellRef()._creatureId);
+            if (it != creatureCountdowns.end()) {
+                std::get<DetonatorDesc>(object.getCellRef()._cellType)._countdown = it->second;
             }
         }
     }
@@ -589,7 +585,7 @@ void DescriptionEditService::removeCell(Desc& description, uint64_t objectId) co
     std::unordered_set<uint64_t> creaturesWithCells;
     for (auto const& object : description._objects) {
         if (object.getObjectType() == ObjectType_Cell) {
-            creaturesWithCells.insert(object.getCellRef()._creatureId.value());
+            creaturesWithCells.insert(object.getCellRef()._creatureId);
         }
     }
     std::erase_if(description._creatures, [&](auto const& creature) { return !creaturesWithCells.contains(creature._id); });
@@ -641,7 +637,7 @@ void DescriptionEditService::removeCellIf(Desc& description, std::function<bool(
     std::unordered_set<uint64_t> creaturesWithCells;
     for (auto const& object : description._objects) {
         if (object.getObjectType() == ObjectType_Cell) {
-            creaturesWithCells.insert(object.getCellRef()._creatureId.value());
+            creaturesWithCells.insert(object.getCellRef()._creatureId);
         }
     }
     std::erase_if(description._creatures, [&](auto const& creature) { return !creaturesWithCells.contains(creature._id); });
@@ -744,11 +740,9 @@ std::vector<ExtendedObjectOrEnergyDesc> DescriptionEditService::getObjects(Desc 
         if (object.getObjectType() == ObjectType_Cell) {
             auto const& cell = object.getCellRef();
             extObject.creatureId = cell._creatureId;
-            if (cell._creatureId.has_value()) {
-                auto genomeIt = genomeByCreatureId.find(cell._creatureId.value());
-                if (genomeIt != genomeByCreatureId.end()) {
-                    extObject.genome = genomeIt->second;
-                }
+            auto genomeIt = genomeByCreatureId.find(cell._creatureId);
+            if (genomeIt != genomeByCreatureId.end()) {
+                extObject.genome = genomeIt->second;
             }
         }
         result.emplace_back(extObject);

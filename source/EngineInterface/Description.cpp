@@ -445,12 +445,10 @@ void Desc::assignNewIds()
         if (object.getObjectType() != ObjectType_Cell) {
             continue;
         }
-        if (object.getCellRef()._creatureId.has_value()) {
-            CHECK(!nonUniqueCreatureIds.contains(object.getCellRef()._creatureId.value()));
-            auto findResult = oldToNewCreatureId.find(object.getCellRef()._creatureId.value());
-            if (findResult != oldToNewCreatureId.end()) {
-                object.getCellRef()._creatureId = findResult->second;
-            }
+        CHECK(!nonUniqueCreatureIds.contains(object.getCellRef()._creatureId));
+        auto findResult = oldToNewCreatureId.find(object.getCellRef()._creatureId);
+        if (findResult != oldToNewCreatureId.end()) {
+            object.getCellRef()._creatureId = findResult->second;
         }
     }
 
@@ -532,10 +530,7 @@ size_t Desc::getNumObjects() const
 size_t Desc::getNumObjectsWithoutCreature() const
 {
     return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) {
-        if (object.getObjectType() != ObjectType_Cell) {
-            return true;  // Structure and FreeCell objects don't have creatures
-        }
-        return !object.getCellRef()._creatureId.has_value();
+        return object.getObjectType() != ObjectType_Cell;
     });
 }
 
@@ -546,7 +541,7 @@ std::vector<ObjectDesc> Desc::getObjectsForCreature(uint64_t creatureId) const
         if (object.getObjectType() != ObjectType_Cell) {
             continue;
         }
-        if (object.getCellRef()._creatureId.has_value() && object.getCellRef()._creatureId.value() == creatureId) {
+        if (object.getCellRef()._creatureId == creatureId) {
             result.push_back(object);
         }
     }

@@ -485,7 +485,7 @@ struct CellDesc
     MEMBER(CellDesc, CellState, cellState, CellState_Ready);
 
     // Creature/genome data
-    MEMBER(CellDesc, std::optional<uint64_t>, creatureId, std::nullopt);
+    MEMBER(CellDesc, uint64_t, creatureId, 0);
     MEMBER(CellDesc, int, nodeIndex, 0);
     MEMBER(CellDesc, int, parentNodeIndex, 0);
     MEMBER(CellDesc, int, geneIndex, 0);
