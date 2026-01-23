@@ -34,10 +34,9 @@ protected:
         auto nodeParameters = factory.getAllNodeParameters();
 
         std::vector<GeneDesc> genes;
-        // nodesPerGene keeps gene size small for predictable mutation timing while covering all node parameters; the last gene may be smaller.
-        constexpr size_t nodesPerGene = 4;
+        size_t constexpr nodesPerGene = 4;
         for (size_t index = 0; index < nodeParameters.size(); index += nodesPerGene) {
-            const auto nodeCount = std::min(nodesPerGene, nodeParameters.size() - index);
+            auto nodeCount = std::min(nodesPerGene, nodeParameters.size() - index);
             std::vector<NodeDesc> nodes;
             nodes.reserve(nodeCount);
             for (size_t offset = 0; offset < nodeCount; ++offset) {
@@ -49,7 +48,7 @@ protected:
         return GenomeDesc().genes(genes);
     }
 
-    bool compareExceptNeuralNetwork(GenomeDesc expected, GenomeDesc actual)
+    bool compareAllExceptNeuralNetwork(GenomeDesc expected, GenomeDesc actual)
     {
         auto resetNeuralNetwork = [](GenomeDesc& genome) {
             for (auto& gene : genome._genes) {
@@ -70,21 +69,21 @@ protected:
 
 TEST_F(MutationTests, neuralNetworkMutation)
 {
-    constexpr uint64_t kTestObjectId = 1;
+    uint64_t constexpr kTestObjectId = 1;
     auto genome = createTestGenome();
 
-    auto data = Desc().addCreature({ObjectDesc().id(kTestObjectId).type(CellDesc())}, CreatureDesc().id(kTestObjectId), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
-        _simulationFacade->testOnly_mutate(kTestObjectId, MutationType::NeuralNetwork);
+        _simulationFacade->testOnly_mutate(1, MutationType::NeuralNetwork);
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(kTestObjectId).getCellRef();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
     // Mutated genome must be equal to original genome except the neural network properties
-    EXPECT_TRUE(compareExceptNeuralNetwork(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptNeuralNetwork(genome, actualGenome));
 }
