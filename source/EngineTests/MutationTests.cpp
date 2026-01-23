@@ -69,7 +69,6 @@ protected:
 
 TEST_F(MutationTests, neuralNetworkMutation)
 {
-    uint64_t constexpr kTestObjectId = 1;
     auto genome = createTestGenome();
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
