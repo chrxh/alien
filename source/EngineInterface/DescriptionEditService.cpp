@@ -733,13 +733,14 @@ std::vector<ExtendedObjectOrEnergyDesc> DescriptionEditService::getObjects(Desc 
             genomeByCreatureId.emplace(creature._id, *genomeIt);
         }
     }
-
+    auto cache = description.createCache();
+    
     for (auto const& object : description._objects) {
         ExtendedObjectDesc extObject;
         extObject.object = object;
         if (object.getObjectType() == ObjectType_Cell) {
             auto const& cell = object.getCellRef();
-            extObject.creatureId = cell._creatureId;
+            extObject.creature = description.getCreatureRef(cell._creatureId, cache);
             auto genomeIt = genomeByCreatureId.find(cell._creatureId);
             if (genomeIt != genomeByCreatureId.end()) {
                 extObject.genome = genomeIt->second;

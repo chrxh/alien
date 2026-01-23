@@ -18,6 +18,7 @@
 #include "SensorProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationKernels.cuh"
+#include "MutationProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data)
 {
@@ -144,6 +145,7 @@ __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStat
 
 __global__ void cudaNextTimestep_applyMutations(SimulationData data, SimulationStatistics statistics)
 {
+    MutationProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)

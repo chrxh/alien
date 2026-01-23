@@ -221,14 +221,13 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
             }
 
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
-                if (genome.has_value()) {
-                    std::stringstream ss;
-                    ss << "0x" << std::hex << std::uppercase << extendedCell.creatureId.value();
-                    auto creatureId = ss.str();
-                    AlienGui::InputText(
-                        AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),
-                        creatureId);
-                }
+                std::stringstream ss;
+                ss << "0x" << std::hex << std::uppercase << extendedCell.creature->_id;
+                auto creatureId = ss.str();
+                AlienGui::InputText(
+                    AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),
+                    creatureId);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Generation").textWidth(BaseTabTextWidth), extendedCell.creature->_generation);
                 ImGui::TreePop();
             }
             if (ImGui::TreeNodeEx("Genome", TreeNodeFlags)) {

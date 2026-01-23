@@ -722,6 +722,50 @@ std::vector<ObjectDesc> Desc::getOtherObjects(std::set<uint64_t> const& ids) con
     return result;
 }
 
+CreatureDesc const& Desc::getCreatureRef(uint64_t id, DescCache const& cache) const
+{
+    if (cache != nullptr) {
+        auto findResult = cache->creatureIdToIndex.find(id);
+        if (findResult != cache->creatureIdToIndex.end()) {
+            return _creatures.at(findResult->second);
+        }
+    } else {
+        for (auto& creature : _creatures) {
+            if (creature._id == id) {
+                return creature;
+            }
+        }
+    }
+    CHECK(false);
+}
+
+CreatureDesc& Desc::getCreatureRef(uint64_t id, DescCache const& cache)
+{
+    if (cache != nullptr) {
+        auto findResult = cache->creatureIdToIndex.find(id);
+        if (findResult != cache->creatureIdToIndex.end()) {
+            return _creatures.at(findResult->second);
+        }
+    } else {
+        for (auto& creature : _creatures) {
+            if (creature._id == id) {
+                return creature;
+            }
+        }
+    }
+    CHECK(false);
+}
+
+CreatureDesc& Desc::getOtherCreatureRef(uint64_t id)
+{
+    for (auto& creature : _creatures) {
+        if (creature._id != id) {
+            return creature;
+        }
+    }
+    CHECK(false);
+}
+
 GenomeDesc const& Desc::getGenomeRef(uint64_t const& genomeId, DescCache const& cache) const
 {
     if (cache != nullptr) {
@@ -769,26 +813,6 @@ ConnectionDesc const& Desc::getConnection(ObjectDesc const& object1, ObjectDesc 
     for (auto const& connection : object1._connections) {
         if (connection._objectId == object2._id) {
             return connection;
-        }
-    }
-    CHECK(false);
-}
-
-CreatureDesc& Desc::getCreatureRef(uint64_t id)
-{
-    for (auto& creature : _creatures) {
-        if (creature._id == id) {
-            return creature;
-        }
-    }
-    CHECK(false);
-}
-
-CreatureDesc& Desc::getOtherCreatureRef(uint64_t id)
-{
-    for (auto& creature : _creatures) {
-        if (creature._id != id) {
-            return creature;
         }
     }
     CHECK(false);

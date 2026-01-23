@@ -683,6 +683,7 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
     newCreature->id = newId;
     newCreature->ancestorId = creature->id;
     newCreature->generation = creature->generation + 1;
+    newCreature->mutationState = MutationState_NotMutated;
     return newCreature;
 }
 

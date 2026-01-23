@@ -620,14 +620,16 @@ struct Desc
     ObjectDesc& getOtherObjectRef(std::set<uint64_t> const& ids);
     std::vector<ObjectDesc> getOtherObjects(std::set<uint64_t> const& ids) const;
 
+    CreatureDesc const& getCreatureRef(uint64_t id, DescCache const& cache = nullptr) const;
+    CreatureDesc& getCreatureRef(uint64_t id, DescCache const& cache = nullptr);
+    CreatureDesc& getOtherCreatureRef(uint64_t id);
+
     GenomeDesc const& getGenomeRef(uint64_t const& genomeId, DescCache const& cache = nullptr) const;
 
     bool hasConnection(uint64_t id, uint64_t otherId) const;
     bool hasConnection(ObjectDesc const& object1, ObjectDesc const& object2) const;
     ConnectionDesc& getConnectionRef(uint64_t id, uint64_t otherId);
     ConnectionDesc const& getConnection(ObjectDesc const& object1, ObjectDesc const& object2) const;
-    CreatureDesc& getCreatureRef(uint64_t id);
-    CreatureDesc& getOtherCreatureRef(uint64_t id);
 
 private:
     uint64_t getObjectIndex(uint64_t const& objectId, DescCache const& cache) const;
@@ -637,6 +639,7 @@ struct ExtendedObjectDesc
 {
     ObjectDesc object;
     std::optional<uint64_t> creatureId;
+    std::optional<CreatureDesc> creature;
     std::optional<GenomeDesc> genome;
 };
 using ExtendedObjectOrEnergyDesc = std::variant<ExtendedObjectDesc, EnergyDesc>;

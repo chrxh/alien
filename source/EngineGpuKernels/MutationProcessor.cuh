@@ -46,6 +46,9 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
 
             // Apply mutations to cloned genome
             applyMutations_neuralNetwork(data, mutatedGenome);
+
+            // Update genome
+            creature->genome = mutatedGenome;
         }
     }
 }
@@ -73,7 +76,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_neuralNetwork(Simul
             if (!isRandomEvent(data, mutationNeuralNetwork)) {
                 continue;
             }
-
             auto node = &gene->nodes[j];
             auto neuronMutationType = data.primaryNumberGen.random(3);
 
