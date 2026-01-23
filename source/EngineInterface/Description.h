@@ -557,6 +557,14 @@ struct EnergyDesc
     MEMBER(EnergyDesc, int, color, 0);
 };
 
+struct TargetDesc
+{
+    auto operator<=>(TargetDesc const&) const = default;
+
+    MEMBER(TargetDesc, uint64_t, detectedBy, 0);
+    MEMBER(TargetDesc, uint64_t, creatureId, 0);
+};
+
 struct CreatureDesc
 {
     CreatureDesc();
@@ -572,6 +580,8 @@ struct CreatureDesc
 
     // Process data
     MEMBER(CreatureDesc, int, frontAngleId, 0);
+    MEMBER(CreatureDesc, std::vector<TargetDesc>, targets, {});
+    MEMBER(CreatureDesc, int, targetIndex, 0);
 };
 
 struct _DescCache

@@ -263,6 +263,7 @@ EnergyDesc EnergyDesc::id(uint64_t id)
 CreatureDesc::CreatureDesc()
 {
     _id = NumberGenerator::get().createId();
+    _targets.resize(MAX_TARGETS_PER_CREATURE, TargetDesc());
 }
 
 CreatureDesc CreatureDesc::id(uint64_t id)

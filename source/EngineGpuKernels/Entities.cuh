@@ -430,6 +430,12 @@ union TempValue
     uint32_float as_uint32_float;
 };
 
+struct Target
+{
+    uint64_t detectedBy;
+    uint64_t creatureId;
+};
+
 struct Creature
 {
     uint64_t id;
@@ -443,6 +449,8 @@ struct Creature
 
     // Process data
     uint32_t frontAngleId;
+    Target targets[MAX_TARGETS_PER_CREATURE];
+    uint8_t targetIndex;
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid

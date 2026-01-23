@@ -7,6 +7,7 @@ auto constexpr MAX_OBJECT_CONNECTIONS = 6;
 auto constexpr MAX_CHANNELS = 8;
 auto constexpr MAX_COLORS = 7;
 auto constexpr MAX_CELL_MEMORY_ENTRIES = 32;
+auto constexpr MAX_TARGETS_PER_CREATURE = 8;
 
 auto constexpr MAX_LAYERS = 20;
 auto constexpr MAX_SOURCES = 40;
