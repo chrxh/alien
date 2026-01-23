@@ -2585,10 +2585,11 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
             EXPECT_EQ(ProvideEnergy_FreeGeneration, newConstructor._provideEnergy);
         }
     } else {
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell.getCellRef()._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2), actualConstructedCell.getCellRef()._rawEnergy));
         } else {
-            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
+            EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
         }
     }
 }
@@ -2682,10 +2683,11 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
     } else {
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 + 1), actualConstructedCell.getCellRef()._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * 2, actualConstructedCell.getCellRef()._rawEnergy));
         } else {
-            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
+            EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
         }
     }
 }
