@@ -262,6 +262,11 @@ namespace
             creatureTO.numObjects = creature->numObjects;
             creatureTO.mutationState = creature->mutationState;
             creatureTO.frontAngleId = creature->frontAngleId;
+            for (int i = 0; i < MAX_TARGETS_PER_CREATURE; ++i) {
+                creatureTO.targets[i].detectedBy = creature->targets[i].detectedBy;
+                creatureTO.targets[i].creatureId = creature->targets[i].creatureId;
+            }
+            creatureTO.targetIndex = creature->targetIndex;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
             alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, creatureTOIndex);

@@ -897,6 +897,14 @@ CreatureDesc DescriptionConverterService::createCreatureDesc(TOs const& to, int 
     result._numObjects = creatureTO.numObjects;
     result._mutationState = creatureTO.mutationState;
     result._frontAngleId = creatureTO.frontAngleId;
+    result._targets.clear();  // Clear the default-initialized targets before adding from TO
+    for (int i = 0; i < MAX_TARGETS_PER_CREATURE; ++i) {
+        auto const& targetTO = creatureTO.targets[i];
+        if (targetTO.detectedBy != 0 || targetTO.creatureId != 0) {
+            result._targets.push_back(TargetDesc().detectedBy(targetTO.detectedBy).creatureId(targetTO.creatureId));
+        }
+    }
+    result._targetIndex = creatureTO.targetIndex;
 
     return result;
 }
@@ -1178,6 +1186,16 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
     creatureTO.generation = creatureDesc._generation;
     creatureTO.frontAngleId = creatureDesc._frontAngleId;
+    for (int i = 0; i < MAX_TARGETS_PER_CREATURE; ++i) {
+        if (i < static_cast<int>(creatureDesc._targets.size())) {
+            creatureTO.targets[i].detectedBy = creatureDesc._targets[i]._detectedBy;
+            creatureTO.targets[i].creatureId = creatureDesc._targets[i]._creatureId;
+        } else {
+            creatureTO.targets[i].detectedBy = 0;
+            creatureTO.targets[i].creatureId = 0;
+        }
+    }
+    creatureTO.targetIndex = creatureDesc._targetIndex;
     creatureTO.numObjects = creatureDesc._numObjects;
     creatureTO.mutationState = creatureDesc._mutationState;
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
