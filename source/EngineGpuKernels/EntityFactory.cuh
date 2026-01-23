@@ -293,6 +293,11 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creature->numObjects = creatureTO.numObjects;
     creature->mutationState = creatureTO.mutationState;
     creature->frontAngleId = creatureTO.frontAngleId;
+    for (int i = 0; i < MAX_TARGETS_PER_CREATURE; ++i) {
+        creature->targets[i].detectedBy = creatureTO.targets[i].detectedBy;
+        creature->targets[i].creatureId = creatureTO.targets[i].creatureId;
+    }
+    creature->targetIndex = creatureTO.targetIndex;
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     creature->genome = &_data->entities.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
