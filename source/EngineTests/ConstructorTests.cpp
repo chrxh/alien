@@ -2586,7 +2586,8 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
         }
     } else {
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell.getCellRef()._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2), actualConstructedCell.getCellRef()._rawEnergy));
         } else {
             EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
         }
@@ -2611,7 +2612,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto constructorEnergy =
-        provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No ? normalCellEnergy * (2 * 3 * 2 + 2) - 1.0f : normalCellEnergy * 2 - 1.0f;
+        provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No ? normalCellEnergy * 2 - 1.0f : normalCellEnergy * 2 - 1.0f;
     auto data = Desc().addCreature({
             ObjectDesc().id(0).pos({10.0f, 10.0f}).type(CellDesc().usableEnergy(constructorEnergy).constructor(
                     ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1))),
@@ -2683,7 +2684,8 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
     } else {
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 + 1), actualConstructedCell.getCellRef()._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * 2, actualConstructedCell.getCellRef()._rawEnergy));
         } else {
             EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
         }
