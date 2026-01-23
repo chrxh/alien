@@ -11,6 +11,8 @@
 #include <EngineInterface/DescriptionEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
+#include <EngineTestData/DescriptionTestDataFactory.h>
+
 #include "IntegrationTestFramework.h"
 
 class MutationTests : public IntegrationTestFramework
@@ -28,21 +30,49 @@ public:
 protected:
     GenomeDesc createTestGenome() const
     {
-        // TODO create a genome with multiple genes where each has multiple nodes of different type, use DescriptionTestDataFactory::createNonDefaultNodeDesc
+        auto const& factory = DescriptionTestDataFactory::get();
+        auto nodeParameters = factory.getAllNodeParameters();
+
+        std::vector<GeneDesc> genes;
+        size_t constexpr nodesPerGene = 4;
+        for (size_t index = 0; index < nodeParameters.size(); index += nodesPerGene) {
+            auto nodeCount = std::min(nodesPerGene, nodeParameters.size() - index);
+            std::vector<NodeDesc> nodes;
+            nodes.reserve(nodeCount);
+            for (size_t offset = 0; offset < nodeCount; ++offset) {
+                nodes.push_back(factory.createNonDefaultNodeDesc(nodeParameters.at(index + offset)));
+            }
+            genes.emplace_back(GeneDesc().nodes(nodes));
+        }
+
+        return GenomeDesc().genes(genes);
     }
 
-    bool compareExceptNeuralNetwork(GenomeDesc expected, GenomeDesc actual)
+    bool compareAllExceptNeuralNetwork(GenomeDesc expected, GenomeDesc actual)
     {
-        // compare genomes except neural network, good strategy: set all neural network properties of `expected` and `actual` to 0, then compare both
-        return true;
+        auto resetNeuralNetwork = [](GenomeDesc& genome) {
+            for (auto& gene : genome._genes) {
+                for (auto& node : gene._nodes) {
+                    std::fill(node._neuralNetwork._weights.begin(), node._neuralNetwork._weights.end(), 0.0f);
+                    std::fill(node._neuralNetwork._biases.begin(), node._neuralNetwork._biases.end(), 0.0f);
+                    std::fill(node._neuralNetwork._activationFunctions.begin(), node._neuralNetwork._activationFunctions.end(), ActivationFunction{0});
+                }
+            }
+        };
+
+        resetNeuralNetwork(expected);
+        resetNeuralNetwork(actual);
+
+        return expected == actual;
     }
 };
 
 TEST_F(MutationTests, neuralNetworkMutation)
 {
+    uint64_t constexpr kTestObjectId = 1;
     auto genome = createTestGenome();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())});
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -55,5 +85,5 @@ TEST_F(MutationTests, neuralNetworkMutation)
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
     // Mutated genome must be equal to original genome except the neural network properties
-    EXPECT_TRUE(compareExceptNeuralNetwork(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptNeuralNetwork(genome, actualGenome));
 }
