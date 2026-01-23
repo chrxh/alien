@@ -897,7 +897,6 @@ CreatureDesc DescriptionConverterService::createCreatureDesc(TOs const& to, int 
     result._numObjects = creatureTO.numObjects;
     result._mutationState = creatureTO.mutationState;
     result._frontAngleId = creatureTO.frontAngleId;
-    result._targets.clear();  // Clear the default-initialized targets before adding from TO
     for (int i = 0; i < MAX_TARGETS_PER_CREATURE; ++i) {
         auto const& targetTO = creatureTO.targets[i];
         if (targetTO.detectedBy != 0 || targetTO.creatureId != 0) {
