@@ -263,12 +263,20 @@ EnergyDesc EnergyDesc::id(uint64_t id)
 CreatureDesc::CreatureDesc()
 {
     _id = NumberGenerator::get().createId();
+    _targets.resize(MAX_TARGETS_PER_CREATURE, TargetDesc());
 }
 
 CreatureDesc CreatureDesc::id(uint64_t id)
 {
     NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
+    return *this;
+}
+
+CreatureDesc& CreatureDesc::targets(std::vector<TargetDesc> const& value)
+{
+    CHECK(value.size() == MAX_TARGETS_PER_CREATURE);
+    _targets = value;
     return *this;
 }
 

@@ -179,7 +179,11 @@ std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefault
             .frontAngleId(42)
             .mutationState(MutationState_MutationInProgress)
             .genomeId(genome._id)
-            .targets({TargetDesc().detectedBy(100).creatureId(200), TargetDesc().detectedBy(101).creatureId(201)})
+                        .targets(
+                            {TargetDesc().detectedBy(100).creatureId(200),
+                             TargetDesc().detectedBy(101).creatureId(201),
+                             TargetDesc().detectedBy(11).creatureId(21),
+                             TargetDesc().detectedBy(12).creatureId(501)})
             .targetIndex(3);
 
     return {creature, genome};

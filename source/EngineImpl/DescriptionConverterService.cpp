@@ -899,9 +899,7 @@ CreatureDesc DescriptionConverterService::createCreatureDesc(TOs const& to, int 
     result._frontAngleId = creatureTO.frontAngleId;
     for (int i = 0; i < MAX_TARGETS_PER_CREATURE; ++i) {
         auto const& targetTO = creatureTO.targets[i];
-        if (targetTO.detectedBy != 0 || targetTO.creatureId != 0) {
-            result._targets.push_back(TargetDesc().detectedBy(targetTO.detectedBy).creatureId(targetTO.creatureId));
-        }
+        result._targets.at(i) = TargetDesc().detectedBy(targetTO.detectedBy).creatureId(targetTO.creatureId);
     }
     result._targetIndex = creatureTO.targetIndex;
 
@@ -1186,13 +1184,8 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.generation = creatureDesc._generation;
     creatureTO.frontAngleId = creatureDesc._frontAngleId;
     for (int i = 0; i < MAX_TARGETS_PER_CREATURE; ++i) {
-        if (i < static_cast<int>(creatureDesc._targets.size())) {
-            creatureTO.targets[i].detectedBy = creatureDesc._targets[i]._detectedBy;
-            creatureTO.targets[i].creatureId = creatureDesc._targets[i]._creatureId;
-        } else {
-            creatureTO.targets[i].detectedBy = 0;
-            creatureTO.targets[i].creatureId = 0;
-        }
+        creatureTO.targets[i].detectedBy = creatureDesc._targets.at(i)._detectedBy;
+        creatureTO.targets[i].creatureId = creatureDesc._targets.at(i)._creatureId;
     }
     creatureTO.targetIndex = creatureDesc._targetIndex;
     creatureTO.numObjects = creatureDesc._numObjects;
