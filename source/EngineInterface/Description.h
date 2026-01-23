@@ -638,7 +638,6 @@ private:
 struct ExtendedObjectDesc
 {
     ObjectDesc object;
-    std::optional<uint64_t> creatureId;
     std::optional<CreatureDesc> creature;
     std::optional<GenomeDesc> genome;
 };
