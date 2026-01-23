@@ -36,7 +36,8 @@ public:
         int parentNodeIndex,
         float2 pos,
         float2 vel,
-        float energy);
+        float usableEnergy,
+        float rawEnergy);
 
     __inline__ __device__ Genome* createEmptyGenome();
     __inline__ __device__ Creature* createEmptyCreature();
@@ -718,7 +719,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     int parentNodeIndex,
     float2 pos,
     float2 vel,
-    float energy)
+    float usableEnergy,
+    float rawEnergy)
 {
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
@@ -744,8 +746,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
 
     auto& cell = object->typeData.cell;
     cell.frontAngle = VALUE_NOT_SET_FLOAT;
-    cell.usableEnergy = energy;
-    cell.rawEnergy = 0;
+    cell.usableEnergy = usableEnergy;
+    cell.rawEnergy = rawEnergy;
     cell.age = 0;
     cell.cellState = CellState_Constructing;
     cell.creature = creature;

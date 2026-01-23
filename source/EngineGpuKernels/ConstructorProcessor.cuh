@@ -36,15 +36,13 @@ private:
         // Construction data
         Object* lastConstructionObject;
         float angle;
-        float cellEnergy;
+        float usableEnergy;
+        float rawEnergy;
         float depotEnergy;
         int numAdditionalConnections;  // -1 = none
         int requiredNodeId1;           // -1 = none
         int requiredNodeId2;           // -1 = none
     };
-    //
-    //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Object* object);
-    //
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
@@ -100,15 +98,6 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data)
-{
-    //auto& operations = data.cellTypeOperations[CellType_Constructor];
-    //auto partition = calcAllThreadsPartition(operations.getNumEntries());
-    //for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-    //    completenessCheck(data, statistics, operations.at(i).object);
-    //}
-}
-
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
@@ -235,7 +224,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
     result.lastConstructionObject = getLastConstructedCellOnBranch(object);
     result.angle = result.node->referenceAngle;
-    result.cellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
+    result.usableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
+    result.rawEnergy = 0;
     if (result.node->constructorAvailable) {
         auto const& constructorNode = result.node->constructor;
         if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
@@ -243,9 +233,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
             if (!referencedGene.separation) {
                 auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
                 if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
-                    result.cellEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
+                    result.rawEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
                 } else {
-                    result.cellEnergy += requiredEnergyForNodes;
+                    result.rawEnergy += requiredEnergyForNodes;
                 }
             }
         }
@@ -755,7 +745,8 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         hostObject->typeData.cell.nodeIndex,
         posOfNewObject,
         hostObject->vel,
-        constructionData.cellEnergy);
+        constructionData.usableEnergy,
+        constructionData.rawEnergy);
     result->typeData.cell.frontAngleId = hostObject->typeData.cell.frontAngleId;
 
     constructor.lastConstructedCellId = result->id;
@@ -802,7 +793,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return true;
     }
 
-    auto requiredEnergy = constructionData.cellEnergy + constructionData.depotEnergy;
+    auto requiredEnergy = constructionData.usableEnergy + constructionData.depotEnergy;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
 
     if (cudaSimulationParameters.externalEnergyControlToggle.value && hostObject->typeData.cell.usableEnergy < requiredEnergy + normalCellEnergy
