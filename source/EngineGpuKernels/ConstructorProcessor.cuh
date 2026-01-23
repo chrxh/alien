@@ -793,7 +793,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return true;
     }
 
-    auto requiredEnergy = constructionData.usableEnergy + constructionData.depotEnergy;
+    auto requiredEnergy = constructionData.usableEnergy + constructionData.rawEnergy + constructionData.depotEnergy;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
 
     if (cudaSimulationParameters.externalEnergyControlToggle.value && hostObject->typeData.cell.usableEnergy < requiredEnergy + normalCellEnergy
