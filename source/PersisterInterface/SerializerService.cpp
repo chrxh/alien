@@ -768,10 +768,6 @@ namespace
     auto constexpr Id_Creature_FrontAngleId = 5;
     auto constexpr Id_Creature_GenomeId = 6;
     auto constexpr Id_Creature_HaveMutationsApplied = 7;
-    auto constexpr Id_Creature_TargetIndex = 8;
-
-    auto constexpr Id_Target_DetectedBy = 0;
-    auto constexpr Id_Target_CreatureId = 1;
 
     auto constexpr Id_Structure_Energy = 0;
 
@@ -1521,17 +1517,6 @@ namespace cereal
     SPLIT_SERIALIZATION(ObjectDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, TargetDesc& data)
-    {
-        TargetDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Target_DetectedBy, data._detectedBy, defaultObject._detectedBy);
-        loadSave(task, auxiliaries, Id_Target_CreatureId, data._creatureId, defaultObject._creatureId);
-        processLoadSaveMap(task, ar, auxiliaries);
-    }
-    SPLIT_SERIALIZATION(TargetDesc)
-
-    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CreatureDesc& data)
     {
         CreatureDesc defaultObject;
@@ -1543,11 +1528,8 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
         loadSave(task, auxiliaries, Id_Creature_HaveMutationsApplied, data._mutationState, defaultObject._mutationState);
-        loadSave(task, auxiliaries, Id_Creature_TargetIndex, data._targetIndex, defaultObject._targetIndex);
 
         processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data._targets);
     }
     SPLIT_SERIALIZATION(CreatureDesc)
 

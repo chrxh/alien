@@ -172,19 +172,7 @@ std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefault
                       });
 
     auto creature =
-        CreatureDesc()
-            .ancestorId(1001)
-            .generation(7)
-            .numObjects(25)
-            .frontAngleId(42)
-            .mutationState(MutationState_MutationInProgress)
-            .genomeId(genome._id)
-                        .targets(
-                            {TargetDesc().detectedBy(100).creatureId(200),
-                             TargetDesc().detectedBy(101).creatureId(201),
-                             TargetDesc().detectedBy(11).creatureId(21),
-                             TargetDesc().detectedBy(12).creatureId(501)})
-            .targetIndex(3);
+        CreatureDesc().ancestorId(1001).generation(7).numObjects(25).frontAngleId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
 
     return {creature, genome};
 }

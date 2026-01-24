@@ -273,13 +273,6 @@ CreatureDesc CreatureDesc::id(uint64_t id)
     return *this;
 }
 
-CreatureDesc& CreatureDesc::targets(std::vector<TargetDesc> const& value)
-{
-    CHECK(value.size() == MAX_TARGETS_PER_CREATURE);
-    _targets = value;
-    return *this;
-}
-
 void Desc::clear()
 {
     _objects.clear();

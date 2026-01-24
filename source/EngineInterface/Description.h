@@ -580,10 +580,8 @@ struct CreatureDesc
 
     // Process data
     MEMBER(CreatureDesc, int, frontAngleId, 0);
-    CreatureDesc& targets(std::vector<TargetDesc> const& value);
+    MEMBER(CreatureDesc, std::vector<TargetDesc>, targets, {});
     MEMBER(CreatureDesc, int, targetIndex, 0);
-
-    std::vector<TargetDesc> _targets;
 };
 
 struct _DescCache
