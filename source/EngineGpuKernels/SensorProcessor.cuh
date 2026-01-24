@@ -35,7 +35,7 @@ private:
 
     __inline__ __device__ static float calcCreatureDensityFromNumCells(uint32_t numCells);
 
-    static int constexpr NumScanAngles = 64;
+    static int constexpr NumScanRays = 64;
     static float constexpr ScanStep = 8.0f;
     static int constexpr MaxSameNearCreatureCells = 9 * 9;
     static float constexpr RayBlockingTestLength = 10.0f;
