@@ -187,10 +187,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 if (energyToTransfer > NEAR_ZERO) {
 
                     // Notify attacked cell
-
-                    if (otherCell->signalState != SignalState_Active) {
-                        SignalProcessor::createEmptySignal(otherObject);
-                    }
                     atomicAdd(&otherCell->signal.channels[Channels::AttackerNotify], 1.0f);
                     otherCell->event = CellEvent_Attacked;
                     otherCell->eventCounter = 10;
