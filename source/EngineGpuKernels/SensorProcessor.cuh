@@ -140,10 +140,12 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     __shared__ Object* nearSameCreatureCells[MaxSameNearCreatureCells];
     __shared__ int numNearSameCreatureCells;
     __shared__ float seedAngle;
+    __shared__ int matchFound;
 
     if (threadIdx.x == 0) {
         lookupResult = 0xffffffffffffffff;
         seedAngle = data.primaryNumberGen.random(360.0f);
+        matchFound = 0;
 
         data.objectMap.getMatchingObjects(
             nearSameCreatureCells, MaxSameNearCreatureCells, numNearSameCreatureCells, object->pos, 4.0f, object->detached, [&](Object* const& otherObject) {
@@ -168,6 +170,11 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
         // Each thread scans different positions in parallel
         for (int idx = threadIdx.x; idx < totalPositions; idx += blockDim.x) {
+            // Early exit if any thread found a match (benign race for optimization)
+            if (matchFound) {
+                break;
+            }
+
             auto dx = toFloat((idx % diameter) - nearDistance);
             auto dy = toFloat((idx / diameter) - nearDistance);
 
@@ -182,6 +189,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             if (matchInfo != 0xffffffffffffffff) {
                 if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)) {
                     alienAtomicMin64(&lookupResult, matchInfo);
+                    atomicOr(&matchFound, 1);
                 }
             }
         }
@@ -199,8 +207,16 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             auto seedDistance = data.primaryNumberGen.random(0, ScanStep);
 
             if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)) {
+                // Cache the ray direction to avoid recalculating for each distance step
+                auto rayDirection = Math::unitVectorOfAngle(angle);
+
                 for (float distance = seedDistance; distance <= endRadius; distance += ScanStep) {
-                    auto delta = Math::unitVectorOfAngle(angle) * distance;
+                    // Early exit if any thread found a match (benign race for optimization)
+                    if (matchFound) {
+                        break;
+                    }
+
+                    auto delta = rayDirection * distance;
                     auto scanPos = object->pos + delta;
                     data.objectMap.correctPosition(scanPos);
 
@@ -208,6 +224,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                         uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
                         if (matchInfo != 0xffffffffffffffff) {
                             alienAtomicMin64(&lookupResult, matchInfo);
+                            atomicOr(&matchFound, 1);
                             break;
                         }
                     }
@@ -263,10 +280,12 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
     __shared__ uint64_t lookupResult;
     __shared__ float refAngle;
+    __shared__ int matchFound;
 
     if (threadIdx.x == 0) {
         lookupResult = 0xffffffffffffffff;
         refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, object));
+        matchFound = 0;
     }
     __syncthreads();
 
@@ -274,9 +293,18 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
     // Each thread handles multiple columns (deltaX values)
     for (int colIdx = threadIdx.x; colIdx < searchDiameter; colIdx += blockDim.x) {
+        // Early exit if any thread found a match (benign race for optimization)
+        if (matchFound) {
+            break;
+        }
+
         int deltaX = colIdx - RelocationSearchRadius;
 
         for (int deltaY = -RelocationSearchRadius; deltaY < RelocationSearchRadius; ++deltaY) {
+            // Early exit if any thread found a match (benign race for optimization)
+            if (matchFound) {
+                break;
+            }
 
             auto delta = float2{toFloat(deltaX), toFloat(deltaY)};
             auto scanPos = centerScanPos + delta;
@@ -285,6 +313,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::RelocateLastMatch);
             if (matchInfo != 0xffffffffffffffff) {
                 alienAtomicMin64(&lookupResult, matchInfo);
+                atomicOr(&matchFound, 1);
                 break;
             }
         }
