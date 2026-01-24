@@ -36,6 +36,7 @@ private:
     __inline__ __device__ static float calcCreatureDensityFromNumCells(uint32_t numCells);
 
     static int constexpr NumScanRays = 64;
+    static int constexpr RelocationSearchRadius = 32;  // Search grid is (2*radius) x (2*radius) = 64x64
     static float constexpr ScanStep = 8.0f;
     static int constexpr MaxSameNearCreatureCells = 9 * 9;
     static float constexpr RayBlockingTestLength = 10.0f;
@@ -202,42 +203,46 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     // 2. Long range scan
     if (lookupResult == 0xffffffffffffffff) {
 
-        // First check if ray is blocked by connections of nearby same-creature cells
-        auto rayBlocked = false;
-        auto angle = 360.0f * toFloat(threadIdx.x) / toFloat(blockDim.x) + seedAngle;
-        auto seedDistance = data.primaryNumberGen.random(0, ScanStep);
-        for (int i = 0; i < numNearSameCreatureCells; ++i) {
-            auto nearObject = nearSameCreatureCells[i];
-            for (int j = 0, k = nearObject->numConnections; j < k; ++j) {
-                auto& connectedNearObject = nearObject->connections[j].object;
-                if (Math::crossing(
-                        nearObject->pos, connectedNearObject->pos, object->pos, object->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
-                    rayBlocked = true;
-                    break;
-                }
-            }
-            if (rayBlocked) {
-                break;
-            }
-        }
+        // Each thread processes multiple rays if blockDim.x < NumScanRays
+        for (int rayIdx = threadIdx.x; rayIdx < NumScanRays; rayIdx += blockDim.x) {
 
-        if (!rayBlocked) {
-            for (float distance = seedDistance; distance <= endRadius; distance += ScanStep) {
-                auto delta = Math::unitVectorOfAngle(angle) * distance;
-                auto scanPos = object->pos + delta;
-                data.objectMap.correctPosition(scanPos);
-
-                if (distance > startRadius) {
-                    uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
-                    if (matchInfo != 0xffffffffffffffff) {
-                        alienAtomicMin64(&lookupResult, matchInfo);
+            // First check if ray is blocked by connections of nearby same-creature cells
+            auto rayBlocked = false;
+            auto angle = 360.0f * toFloat(rayIdx) / toFloat(NumScanRays) + seedAngle;
+            auto seedDistance = data.primaryNumberGen.random(0, ScanStep);
+            for (int i = 0; i < numNearSameCreatureCells; ++i) {
+                auto nearObject = nearSameCreatureCells[i];
+                for (int j = 0, k = nearObject->numConnections; j < k; ++j) {
+                    auto& connectedNearObject = nearObject->connections[j].object;
+                    if (Math::crossing(
+                            nearObject->pos, connectedNearObject->pos, object->pos, object->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
+                        rayBlocked = true;
                         break;
                     }
                 }
-
-                // Block ray if it encounters structure cells
-                if (densityMap.getStructureDensity(scanPos) > 0) {
+                if (rayBlocked) {
                     break;
+                }
+            }
+
+            if (!rayBlocked) {
+                for (float distance = seedDistance; distance <= endRadius; distance += ScanStep) {
+                    auto delta = Math::unitVectorOfAngle(angle) * distance;
+                    auto scanPos = object->pos + delta;
+                    data.objectMap.correctPosition(scanPos);
+
+                    if (distance > startRadius) {
+                        uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
+                        if (matchInfo != 0xffffffffffffffff) {
+                            alienAtomicMin64(&lookupResult, matchInfo);
+                            break;
+                        }
+                    }
+
+                    // Block ray if it encounters structure cells
+                    if (densityMap.getStructureDensity(scanPos) > 0) {
+                        break;
+                    }
                 }
             }
         }
@@ -279,9 +284,9 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
 __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    int radius = toInt(blockDim.x) / 2;
-    CUDA_CHECK(32 == radius);
-    int deltaX = toInt(threadIdx.x) - radius;
+    // Search grid is (2*RelocationSearchRadius) x (2*RelocationSearchRadius)
+    // Each thread handles multiple columns if blockDim.x < (2*RelocationSearchRadius)
+    int searchDiameter = 2 * RelocationSearchRadius;
     
     __shared__ uint64_t lookupResult;
     __shared__ float refAngle;
@@ -293,16 +298,22 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
     __syncthreads();
     
     auto centerScanPos = object->typeData.cell.cellTypeData.sensor.lastMatch.pos;
-    for (int deltaY = -radius; deltaY < radius; ++deltaY) {
+    
+    // Each thread handles multiple columns (deltaX values)
+    for (int colIdx = threadIdx.x; colIdx < searchDiameter; colIdx += blockDim.x) {
+        int deltaX = colIdx - RelocationSearchRadius;
+        
+        for (int deltaY = -RelocationSearchRadius; deltaY < RelocationSearchRadius; ++deltaY) {
 
-        auto delta = float2{toFloat(deltaX), toFloat(deltaY)};
-        auto scanPos = centerScanPos + delta;
-        auto distance = Math::length(delta);
-        auto angle = Math::angleOfVector(delta);
-        uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::RelocateLastMatch);
-        if (matchInfo != 0xffffffffffffffff) {
-            alienAtomicMin64(&lookupResult, matchInfo);
-            break;
+            auto delta = float2{toFloat(deltaX), toFloat(deltaY)};
+            auto scanPos = centerScanPos + delta;
+            auto distance = Math::length(delta);
+            auto angle = Math::angleOfVector(delta);
+            uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::RelocateLastMatch);
+            if (matchInfo != 0xffffffffffffffff) {
+                alienAtomicMin64(&lookupResult, matchInfo);
+                break;
+            }
         }
     }
     __syncthreads();
