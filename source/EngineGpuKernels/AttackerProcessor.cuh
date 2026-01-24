@@ -254,7 +254,7 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
 __inline__ __device__ bool AttackerProcessor::isTargetCreatureId(uint64_t const* targetCreatureIds, int numTargets, uint64_t creatureId)
 {
     // The sensor stores only the lower 16 bits of the creatureId (creatureIdPart)
-    auto creatureIdPart = static_cast<uint64_t>(creatureId & 0xffff);
+    auto creatureIdPart = creatureId & 0xffff;
     for (int i = 0; i < numTargets; ++i) {
         if (targetCreatureIds[i] == creatureIdPart) {
             return true;
