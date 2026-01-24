@@ -199,7 +199,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     }
     __syncthreads();
 
-    // 2. Far range scan
+    // 2. Long range scan
     if (lookupResult == 0xffffffffffffffff) {
 
         // First check if ray is blocked by connections of nearby same-creature cells
