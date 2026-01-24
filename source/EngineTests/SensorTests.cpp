@@ -733,6 +733,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
     actualSensor = actualData.getObjectRef(1);
 
     // Sensor received signal from generator but did not find a target
+    EXPECT_EQ(SignalState_Active, actualSensor.getCellRef()._signalState);
     EXPECT_FALSE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Verify lastMatch was cleared
@@ -794,6 +795,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
     actualSensor = actualData.getObjectRef(1);
 
     // Sensor received signal from generator but did not find a target
+    EXPECT_EQ(SignalState_Active, actualSensor.getCellRef()._signalState);
     EXPECT_FALSE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Verify lastMatch was cleared
@@ -804,7 +806,6 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
 TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forceInitialScan)
 {
     // First scan - target is detected and position stored
-    // Using negative signal in channel #0 to enable relocation via connected generator cell
     auto data = Desc().addCreature(
         {
             ObjectDesc()
@@ -812,7 +813,6 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
                           .frontAngle(0.0f)
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, -1.0f))
                           .cellType(SensorDesc().autoTriggerInterval(std::nullopt).mode(createModeWithDensity(GetParam())))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
         },
@@ -830,11 +830,8 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     CHECK(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Move the target by deleting and re-adding at a new position
-    // Change the neural network weight to positive so relocation is disabled (forces initial scan)
-    // but sensor still triggers (positive activation)
     actualData = _simulationFacade->getSimulationData();
     auto sensorCell = actualData.getObjectRef(1);
-    sensorCell.getCellRef()._neuralNetwork._weights[0 * MAX_CHANNELS + 0] = 1.0f;  // Set positive weight to disable relocation but still trigger
     auto auxCell = actualData.getObjectRef(2);
     auto creature = actualData.getCreatureRef(0);
     auto genome = actualData.getGenomeRef(creature._genomeId);
@@ -912,6 +909,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
     actualSensor = actualData.getObjectRef(1);
 
     // Sensor received signal from generator but did not find a target
+    EXPECT_EQ(SignalState_Active, actualSensor.getCellRef()._signalState);
     EXPECT_FALSE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Verify lastMatch was cleared
@@ -960,6 +958,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     actualSensor = actualData.getObjectRef(1);
 
     // Sensor received signal from generator but did not find a target (blocked)
+    EXPECT_EQ(SignalState_Active, actualSensor.getCellRef()._signalState);
     EXPECT_FALSE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Verify lastMatch was cleared
@@ -1674,7 +1673,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_120cells)
     EXPECT_TRUE(density > 0.95f);
 }
 
-TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_relocation)
+TEST_F(SensorTests, detectCreature_relocation_densityOutputReflectsCellCount)
 {
     // First scan - target creature is detected
     // Using negative signal in channel #0 to enable relocation via connected generator cell
