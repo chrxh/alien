@@ -1,5 +1,7 @@
 #include "NeuralNetEditorWidget.h"
 
+#include <glad/glad.h>
+
 #include <imgui.h>
 
 #include <Base/Math.h>
@@ -13,6 +15,16 @@
 namespace
 {
     auto constexpr WidgetTextColumnWidth = 60.0f;
+
+    void enableAdditiveBlending(const ImDrawList*, const ImDrawCmd*)
+    {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+
+    void disableAdditiveBlending(const ImDrawList*, const ImDrawCmd*)
+    {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
 }
 
 NeuralNetEditorWidget _NeuralNetEditorWidget::create()
@@ -95,6 +107,7 @@ void _NeuralNetEditorWidget::processNetwork(
                 return ImColor::HSV(0.0f, 0.0f, 0.1f);
             }
         };
+        drawList->AddCallback(enableAdditiveBlending, nullptr);
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             auto inputPos = calcInputPos(i);
             for (int j = 0; j < MAX_CHANNELS; ++j) {
@@ -110,6 +123,7 @@ void _NeuralNetEditorWidget::processNetwork(
                     thickness);
             }
         }
+        drawList->AddCallback(disableAdditiveBlending, nullptr);
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             auto outputPos = calcOutputPos(i);
             if (i == selectionData.outputNeuronIndex) {
