@@ -170,6 +170,34 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     }
 
     if (!rayBlocked) {
+
+        // 1. Near range scan
+        if (object->typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+
+            // Calculate the total number of scan positions in the [-range, range] x [-range, range] region
+            auto const nearDistance = toInt(ScanStep);
+            int diameter = 2 * nearDistance + 1;
+            int totalPositions = diameter * diameter;
+
+            // Each thread scans different positions in parallel
+            for (int idx = threadIdx.x; idx < totalPositions; idx += blockDim.x) {
+                int dx = (idx % diameter) - nearDistance;
+                int dy = (idx / diameter) - nearDistance;
+
+                float2 scanPos = {object->pos.x + static_cast<float>(dx), object->pos.y + static_cast<float>(dy)};
+                data.objectMap.correctPosition(scanPos);
+
+                // Check all cells at this position (including overlapping cells)
+                float distSquared = static_cast<float>(dx * dx + dy * dy);
+                auto distange = sqrtf(distSquared);
+                uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distange, ScanType::LocateMatch);
+                if (matchInfo != 0xffffffffffffffff) {
+                    alienAtomicMin64(&lookupResult, matchInfo);
+                }
+            }
+        }
+
+        // 2. Far range scan
         for (float distance = seedDistance; distance <= endRadius; distance += ScanStep) {
             auto delta = Math::unitVectorOfAngle(angle) * distance;
             auto scanPos = object->pos + delta;
@@ -456,6 +484,8 @@ __inline__ __device__ float SensorProcessor::calcCreatureDensityFromNumCells(uin
     if (numCells == 0) {
         return 0.0f;
     }
+    numCells = max(8, numCells);  // Below 8 cells formular would yield negative density
     float density = 0.25f * log2f(static_cast<float>(numCells) / 30.0f) + 0.5f;
+
     return min(1.0f, max(0.0f, density));
 }

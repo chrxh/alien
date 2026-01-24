@@ -125,8 +125,8 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         int dy = (idx / diameter) - rangeInt;
 
         // Check if within circular range
-        float distSq = static_cast<float>(dx * dx + dy * dy);
-        if (distSq > range * range) {
+        float distSquared = static_cast<float>(dx * dx + dy * dy);
+        if (distSquared > range * range) {
             continue;
         }
 

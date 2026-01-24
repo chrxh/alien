@@ -386,10 +386,6 @@ namespace cereal
     {
         AttackCreatureGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackCreatureGenomeDesc)
@@ -1149,10 +1145,6 @@ namespace cereal
     {
         AttackCreatureDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_AttackerMode_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        loadSave(task, auxiliaries, Id_AttackerMode_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        loadSave(task, auxiliaries, Id_AttackerMode_Creature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_AttackerMode_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackCreatureDesc)

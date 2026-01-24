@@ -111,13 +111,6 @@ namespace
                         if (node.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
                             nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor =
                                 node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
-                        } else if (node.cellTypeData.attacker.mode == AttackerMode_Creature) {
-                            nodeTO.cellTypeData.attacker.modeData.attackCreature.minNumCells = node.cellTypeData.attacker.modeData.attackCreature.minNumCells;
-                            nodeTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells = node.cellTypeData.attacker.modeData.attackCreature.maxNumCells;
-                            nodeTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor =
-                                node.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-                            nodeTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage =
-                                node.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
                         }
                         break;
                     case CellType_Injector:
@@ -376,12 +369,6 @@ namespace
                 cellTO.cellTypeData.attacker.mode = cell.cellTypeData.attacker.mode;
                 if (cell.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
                     cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
-                } else if (cell.cellTypeData.attacker.mode == AttackerMode_Creature) {
-                    cellTO.cellTypeData.attacker.modeData.attackCreature.minNumCells = cell.cellTypeData.attacker.modeData.attackCreature.minNumCells;
-                    cellTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells = cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells;
-                    cellTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor = cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-                    cellTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage =
-                        cell.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
                 }
             } break;
             case CellType_Injector: {

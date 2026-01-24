@@ -601,17 +601,6 @@ void _InspectorWindow::processAttackerContent(AttackerDesc& attacker)
             if (attackFreeCell._restrictToColor.has_value()) {
                 ImGui::Text("Restrict to color: %d", *attackFreeCell._restrictToColor);
             }
-        } else if (mode == AttackerMode_Creature) {
-            auto& attackCreature = std::get<AttackCreatureDesc>(attacker._mode);
-            if (attackCreature._minNumCells.has_value()) {
-                ImGui::Text("Min creature cells: %d", *attackCreature._minNumCells);
-            }
-            if (attackCreature._maxNumCells.has_value()) {
-                ImGui::Text("Max creature cells: %d", *attackCreature._maxNumCells);
-            }
-            if (attackCreature._restrictToColor.has_value()) {
-                ImGui::Text("Restrict to color: %d", *attackCreature._restrictToColor);
-            }
         }
         ImGui::TreePop();
     }
