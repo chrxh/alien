@@ -7,6 +7,7 @@
 #include <EngineInterface/GenomeDescription.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
+#include <PersisterInterface/SerializerService.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -54,7 +55,7 @@ public:
     {
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto& numberGen = NumberGenerator::get();
-        auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 1.0f : 0.0f;
+        auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 0.8f : 0.2f;
         return Desc().addCreature(
             {
                 ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
@@ -65,7 +66,7 @@ public:
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
                     .nodes({
-                        NodeDesc().cellType(GeneratorGenomeDesc().autoTriggerInterval(15)),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
                         NodeDesc().cellType(DigestorGenomeDesc()),
                         NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
                         NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
@@ -73,17 +74,17 @@ public:
                         NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
                         NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
                         NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_OtherLineage))),
                         NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
-                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
                         NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_OtherLineage))),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
                         NodeDesc().constructor(ConstructorGenomeDesc()),
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
-                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
                         NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_OtherLineage))),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
                     }),
             }));
     }
@@ -92,20 +93,20 @@ public:
 // Test that small creatures dominates if large creatures have few digestion capabilities
 TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCapabilities)
 {
-    _parameters.attackerRadius.value[0] = 4.0f;
+    _parameters.attackerRadius.value[0] = 3.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     Desc data;
     for (int i = 0; i < 300; ++i) {
         data.add(createSmallCreatureSeed());
     }
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 15; ++i) {
         data.add(createLargeCreatureSeed(DigestionCapability::Low));
     }
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(100000);
+    _simulationFacade->calcTimesteps(25000);
     auto actualData = _simulationFacade->getSimulationData();
 
     // Create a map of genomeId to lineageId
@@ -134,20 +135,20 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
 // Test that large creatures dominates if large creatures have high digestion capabilities
 TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionCapabilities)
 {
-    _parameters.attackerRadius.value[0] = 4.0f;
+    _parameters.attackerRadius.value[0] = 3.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     Desc data;
     for (int i = 0; i < 300; ++i) {
         data.add(createSmallCreatureSeed());
     }
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 15; ++i) {
         data.add(createLargeCreatureSeed(DigestionCapability::High));
     }
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(100000);
+    _simulationFacade->calcTimesteps(25000);
     auto actualData = _simulationFacade->getSimulationData();
 
     // Create a map of genomeId to lineageId
@@ -168,5 +169,5 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
             CHECK(false);
         }
     }
-    EXPECT_LT(15, numLargeCreatures);
+    EXPECT_LT(25, numLargeCreatures);
 }

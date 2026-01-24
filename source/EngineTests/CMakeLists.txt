@@ -40,6 +40,7 @@ target_link_libraries(EngineTests Base)
 target_link_libraries(EngineTests EngineGpuKernels)
 target_link_libraries(EngineTests EngineImpl)
 target_link_libraries(EngineTests EngineInterface)
+target_link_libraries(EngineTests PersisterInterface)
 target_link_libraries(EngineTests EngineTestData)
 
 target_include_directories(EngineTests
