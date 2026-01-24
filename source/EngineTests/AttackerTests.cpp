@@ -57,7 +57,12 @@ protected:
     {
         auto data = Desc().addCreature({
             ObjectDesc().id(100).pos(pos).color(color).fixed(fixed).type(CellDesc().usableEnergy(usableEnergy)),
-            ObjectDesc().id(101).pos({pos.x + 1.0f, pos.y}).color(color).fixed(fixed).type(CellDesc().usableEnergy(usableEnergy)),
+                ObjectDesc()
+                    .id(101)
+                    .pos({pos.x + 1.0f, pos.y})
+                    .color(color)
+                    .fixed(fixed)
+                    .type(CellDesc().usableEnergy(usableEnergy).signalAndState({0, 0, 0, 0, 0, 0, 0, 0})),
         }, CreatureDesc().id(creatureId));
         data.addConnection(100, 101);
         return data;
@@ -164,6 +169,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
 
     // Attack should happen at full strength
     EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_EQ(1.0f, actualTarget.getCellRef()._signal._channels.at(Channels::AttackerNotify));  // Notify attacked cell
 }
 
 TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
