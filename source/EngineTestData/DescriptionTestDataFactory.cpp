@@ -337,20 +337,6 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
             }
         } break;
         case AttackerMode_Creature: {
-            auto const& creatureMode = std::get<AttackCreatureDesc>(attacker._mode);
-            auto const& nodeCreatureMode = std::get<AttackCreatureGenomeDesc>(nodeAttacker._mode);
-            if (creatureMode._minNumCells != nodeCreatureMode._minNumCells) {
-                return false;
-            }
-            if (creatureMode._maxNumCells != nodeCreatureMode._maxNumCells) {
-                return false;
-            }
-            if (creatureMode._restrictToColor != nodeCreatureMode._restrictToColor) {
-                return false;
-            }
-            if (creatureMode._restrictToLineage != nodeCreatureMode._restrictToLineage) {
-                return false;
-            }
         } break;
         }
     } break;
@@ -667,7 +653,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         return GeneratorDesc().autoTriggerInterval(60).alternationInterval(3).numPulses(5);
     }
     case CellType_Attacker:
-        return AttackerDesc().mode(AttackCreatureDesc().minNumCells(4).maxNumCells(15).restrictToColor(1).restrictToLineage(LineageRestriction_OtherLineage));
+        return AttackerDesc().mode(AttackCreatureDesc());
     case CellType_Injector:
         return InjectorDesc().geneIndex(3);
     case CellType_Muscle: {
@@ -835,8 +821,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
     case CellType_Generator:
         return GeneratorGenomeDesc().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
     case CellType_Attacker:
-        return AttackerGenomeDesc().mode(
-            AttackCreatureGenomeDesc().minNumCells(5).maxNumCells(18).restrictToColor(2).restrictToLineage(LineageRestriction_SameLineage));
+        return AttackerGenomeDesc().mode(AttackCreatureGenomeDesc());
     case CellType_Injector:
         return InjectorGenomeDesc().geneIndex(3);
     case CellType_Muscle: {

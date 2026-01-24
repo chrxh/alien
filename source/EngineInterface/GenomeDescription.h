@@ -128,11 +128,6 @@ struct AttackFreeCellGenomeDesc
 struct AttackCreatureGenomeDesc
 {
     auto operator<=>(AttackCreatureGenomeDesc const&) const = default;
-
-    MEMBER(AttackCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
-    MEMBER(AttackCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(AttackCreatureGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(AttackCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
 using AttackerModeGenomeDesc = std::variant<AttackFreeCellGenomeDesc, AttackCreatureGenomeDesc>;

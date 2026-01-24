@@ -2,6 +2,7 @@
 
 
 #include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/SimulationParameters.h>
 
 #include "ObjectConnectionProcessor.cuh"
 #include "ConstantMemory.cuh"
@@ -21,6 +22,10 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
+
+    __inline__ __device__ static bool isTargetCreatureId(uint64_t const* targetCreatureIds, int numTargets, uint64_t creatureId);
+
+    static constexpr int MaxSensorTargets = 32;
 };
 
 /************************************************************************/
@@ -49,6 +54,41 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         auto const& attackerMode = cell->cellTypeData.attacker.mode;
+
+        // For AttackCreature mode: collect creatureIds from sensor lastMatches in vicinity
+        uint64_t targetCreatureIds[MaxSensorTargets];
+        int numTargetCreatureIds = 0;
+        if (attackerMode == AttackerMode_Creature) {
+            auto creatureId = cell->creature->id;
+            data.objectMap.executeForEach(
+                object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached, [&](auto const& nearObject) {
+                    if (nearObject->type != ObjectType_Cell) {
+                        return;
+                    }
+                    auto const& nearCell = &nearObject->typeData.cell;
+                    // Only consider sensor cells from the same creature
+                    if (nearCell->creature->id != creatureId) {
+                        return;
+                    }
+                    if (nearCell->cellType != CellType_Sensor) {
+                        return;
+                    }
+                    // Check if sensor has a valid lastMatch
+                    if (!nearCell->cellTypeData.sensor.lastMatchAvailable) {
+                        return;
+                    }
+                    // Add creatureId if not already in the list and we have room
+                    auto matchCreatureId = nearCell->cellTypeData.sensor.lastMatch.creatureId;
+                    for (int i = 0; i < numTargetCreatureIds; ++i) {
+                        if (targetCreatureIds[i] == matchCreatureId) {
+                            return;  // Already in list
+                        }
+                    }
+                    if (numTargetCreatureIds < MaxSensorTargets) {
+                        targetCreatureIds[numTargetCreatureIds++] = matchCreatureId;
+                    }
+                });
+        }
 
         auto sumEnergyToTransfer = 0.0f;
         data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
@@ -122,37 +162,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     return;
                 }
 
-                // Filter by color restriction
-                auto const& restrictToColor = cell->cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-                if (restrictToColor != 255 && otherObject->color != restrictToColor) {
+                // Check if target creature is in the list of sensor-detected targets
+                auto otherCreatureId = otherCell->creature->id;
+                if (!isTargetCreatureId(targetCreatureIds, numTargetCreatureIds, otherCreatureId)) {
                     return;
-                }
-
-                auto const& minNumCells = cell->cellTypeData.attacker.modeData.attackCreature.minNumCells;
-                auto const& maxNumCells = cell->cellTypeData.attacker.modeData.attackCreature.maxNumCells;
-                auto const& restrictToLineage = cell->cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
-
-                // Filter by minimum number of cells in creature
-                if (minNumCells > 0 && otherCell->creature->numObjects < minNumCells) {
-                    return;
-                }
-
-                // Filter by maximum number of cells in creature
-                if (maxNumCells > 0 && otherCell->creature->numObjects > maxNumCells) {
-                    return;
-                }
-
-                // Filter by lineage restriction
-                if (restrictToLineage != LineageRestriction_No) {
-                    if (restrictToLineage == LineageRestriction_SameLineage) {
-                        if (cell->creature->genome->lineageId != otherCell->creature->genome->lineageId) {
-                            return;
-                        }
-                    } else if (restrictToLineage == LineageRestriction_OtherLineage) {
-                        if (cell->creature->genome->lineageId == otherCell->creature->genome->lineageId) {
-                            return;
-                        }
-                    }
                 }
 
                 // Only attack cells with energy above base value
@@ -236,4 +249,16 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
         }
     }
     return result;
+}
+
+__inline__ __device__ bool AttackerProcessor::isTargetCreatureId(uint64_t const* targetCreatureIds, int numTargets, uint64_t creatureId)
+{
+    // The sensor stores only the lower 16 bits of the creatureId (creatureIdPart)
+    auto creatureIdPart = static_cast<uint64_t>(creatureId & 0xffff);
+    for (int i = 0; i < numTargets; ++i) {
+        if (targetCreatureIds[i] == creatureIdPart) {
+            return true;
+        }
+    }
+    return false;
 }

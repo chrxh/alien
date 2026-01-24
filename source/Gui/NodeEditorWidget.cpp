@@ -370,21 +370,6 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     AlienGui::EndIndent();
 
-                } else if (mode == AttackerMode_Creature) {
-                    AlienGui::BeginIndent();
-
-                    auto& attackCreature = std::get<AttackCreatureGenomeDesc>(attacker._mode);
-                    AlienGui::InputOptionalInt(
-                        AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), attackCreature._minNumCells);
-                    AlienGui::InputOptionalInt(
-                        AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), attackCreature._maxNumCells);
-                    AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackCreature._restrictToColor);
-                    AlienGui::Combo(
-                        AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
-                        attackCreature._restrictToLineage);
-
-                    AlienGui::EndIndent();
                 }
 
                 AlienGui::EndIndent();

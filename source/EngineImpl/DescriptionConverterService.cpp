@@ -383,16 +383,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                 attacker._mode = attackFreeCell;
             } else if (objectTO.typeData.cell.cellTypeData.attacker.mode == AttackerMode_Creature) {
                 AttackCreatureDesc attackCreature;
-                attackCreature._minNumCells = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells > 0
-                    ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells))
-                    : std::nullopt;
-                attackCreature._maxNumCells = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells > 0
-                    ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells))
-                    : std::nullopt;
-                attackCreature._restrictToColor = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor != 255
-                    ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor))
-                    : std::nullopt;
-                attackCreature._restrictToLineage = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
                 attacker._mode = attackCreature;
             }
             cellDesc._cellType = attacker;
@@ -685,16 +675,6 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
             attackerDesc._mode = attackFreeCell;
         } else if (nodeTO->cellTypeData.attacker.mode == AttackerMode_Creature) {
             AttackCreatureGenomeDesc attackCreature;
-            attackCreature._minNumCells = nodeTO->cellTypeData.attacker.modeData.attackCreature.minNumCells > 0
-                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.modeData.attackCreature.minNumCells))
-                : std::nullopt;
-            attackCreature._maxNumCells = nodeTO->cellTypeData.attacker.modeData.attackCreature.maxNumCells > 0
-                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.modeData.attackCreature.maxNumCells))
-                : std::nullopt;
-            attackCreature._restrictToColor = nodeTO->cellTypeData.attacker.modeData.attackCreature.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.modeData.attackCreature.restrictToColor))
-                : std::nullopt;
-            attackCreature._restrictToLineage = nodeTO->cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
             attackerDesc._mode = attackCreature;
         }
         nodeDesc._cellType = attackerDesc;
@@ -1020,13 +1000,6 @@ void DescriptionConverterService::convertGenomeToTO(
                     auto const& attackFreeCellDesc = std::get<AttackFreeCellGenomeDesc>(attackerDesc._mode);
                     auto& attackFreeCellTO = attackerTO.modeData.attackFreeCell;
                     attackFreeCellTO.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
-                } else if (attackerTO.mode == AttackerMode_Creature) {
-                    auto const& attackCreatureDesc = std::get<AttackCreatureGenomeDesc>(attackerDesc._mode);
-                    auto& attackCreatureTO = attackerTO.modeData.attackCreature;
-                    attackCreatureTO.minNumCells = static_cast<uint32_t>(attackCreatureDesc._minNumCells.value_or(0));
-                    attackCreatureTO.maxNumCells = static_cast<uint32_t>(attackCreatureDesc._maxNumCells.value_or(0));
-                    attackCreatureTO.restrictToColor = static_cast<uint8_t>(attackCreatureDesc._restrictToColor.value_or(255));
-                    attackCreatureTO.restrictToLineage = attackCreatureDesc._restrictToLineage;
                 }
             } break;
             case CellType_Injector: {
@@ -1316,12 +1289,6 @@ void DescriptionConverterService::convertObjectToTO(
             if (attackerTO.mode == AttackerMode_FreeCell) {
                 auto const& attackFreeCellDesc = std::get<AttackFreeCellDesc>(attackerDesc._mode);
                 attackerTO.modeData.attackFreeCell.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
-            } else if (attackerTO.mode == AttackerMode_Creature) {
-                auto const& attackCreatureDesc = std::get<AttackCreatureDesc>(attackerDesc._mode);
-                attackerTO.modeData.attackCreature.minNumCells = static_cast<uint32_t>(attackCreatureDesc._minNumCells.value_or(0));
-                attackerTO.modeData.attackCreature.maxNumCells = static_cast<uint32_t>(attackCreatureDesc._maxNumCells.value_or(0));
-                attackerTO.modeData.attackCreature.restrictToColor = static_cast<uint8_t>(attackCreatureDesc._restrictToColor.value_or(255));
-                attackerTO.modeData.attackCreature.restrictToLineage = attackCreatureDesc._restrictToLineage;
             }
         } break;
         case CellType_Injector: {
