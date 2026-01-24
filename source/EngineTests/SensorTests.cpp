@@ -74,29 +74,18 @@ protected:
     }
 };
 
+/**
+ * Parameterized tests that work across all sensor modes
+ */
 class SensorTests_AllDetectionModes
     : public SensorTests
     , public testing::WithParamInterface<SensorMode>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    SensorModes,
+    SensorTests_AllDetectionModes,
     SensorTests_AllDetectionModes,
     ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectStructure, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
-
-class SensorTests_AllDetectionModesExceptStructure
-    : public SensorTests
-    , public testing::WithParamInterface<SensorMode>
-{};
-
-INSTANTIATE_TEST_SUITE_P(
-    SensorModes,
-    SensorTests_AllDetectionModesExceptStructure,
-    ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
-
-/**
- * Parameterized tests that work across all sensor modes
- */
 
 TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
 {
@@ -474,6 +463,17 @@ TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
     // Ray should NOT be blocked by different creature connections
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
+
+class SensorTests_AllDetectionModesExceptStructure
+    : public SensorTests
+    , public testing::WithParamInterface<SensorMode>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    SensorTests_AllDetectionModesExceptStructure,
+    SensorTests_AllDetectionModesExceptStructure,
+    ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
+
 
 TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObjects)
 {
@@ -1090,6 +1090,56 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
 /**
  * Tests for SensorMode_DetectCreature (mode-specific tests)
  */
+namespace
+{
+    std::vector<float> getAllAngles()
+    {
+        std::vector<float> result;
+        for (float angle = 0; angle < 360.0f; angle += 5.0f) {
+            result.emplace_back(angle);
+        }
+        return result;
+    }
+}
+
+class SensorTests_AllAngles
+    : public SensorTests
+    , public testing::WithParamInterface<float>
+{};
+
+INSTANTIATE_TEST_SUITE_P(SensorTests_AllAngles, SensorTests_AllAngles, ::testing::ValuesIn(getAllAngles()));
+
+TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
+{
+    auto angle = GetParam();
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTriggerInterval(3).mode(createModeWithDensity(SensorMode_DetectCreature)))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+
+    // Add detection targets near around the sensor
+    addDetectionTargets(data, SensorMode_DetectCreature, RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle) * 6.0f, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getObjectRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
+
+    // TODO check angles and distances
+}
+    
+
 TEST_F(SensorTests, detectCreature_restrictToColor_found)
 {
     auto data = Desc().addCreature(
