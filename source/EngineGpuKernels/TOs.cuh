@@ -462,12 +462,6 @@ struct ObjectTO
     uint8_t selected;
 };
 
-struct TargetTO
-{
-    uint64_t detectedBy;
-    uint64_t creatureId;
-};
-
 struct CreatureTO
 {
     uint64_t id;
@@ -481,8 +475,6 @@ struct CreatureTO
 
     // Process data
     uint32_t frontAngleId;
-    TargetTO targets[MAX_TARGETS_PER_CREATURE];
-    uint8_t targetIndex;
 
     // Temporary data
     uint64_t creatureIndexOnGpu;
