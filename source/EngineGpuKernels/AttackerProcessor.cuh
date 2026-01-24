@@ -25,7 +25,7 @@ private:
 
     __inline__ __device__ static bool isTargetCreatureId(uint64_t const* targetCreatureIds, int numTargets, uint64_t creatureId);
 
-    static constexpr int MaxSensorTargets = 32;
+    static constexpr int MaxSensorTargets = 8;
 };
 
 /************************************************************************/
@@ -168,12 +168,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     return;
                 }
 
-                // Only attack cells with energy above base value
+                // Calculate energy gain
                 auto energyToTransfer = atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color];
-
-                if (energyToTransfer < 0) {
-                    return;
-                }
 
                 auto color = calcMod(object->color, MAX_COLORS);
                 auto otherColor = calcMod(otherObject->color, MAX_COLORS);
