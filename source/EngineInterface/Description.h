@@ -422,7 +422,7 @@ using CellTypeDesc = std::variant<
     DepotDesc,
     SensorDesc,
     GeneratorDesc,
-    AttackerDesc,
+    AttackerDesc,   
     InjectorDesc,
     MuscleDesc,
     DefenderDesc,
