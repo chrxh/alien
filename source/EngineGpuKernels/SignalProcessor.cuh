@@ -60,6 +60,8 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
             if (restrictionMode == SignalRestrictionMode_Active || restrictionMode == SignalRestrictionMode_Conditional) {
                 float signalAngleRestrictionStart = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle - connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
                 float signalAngleRestrictionEnd = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle + connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
+                signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
+                signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
                 float connectionAngle = 0;
                 for (int k = 0, l = connectedObject->numConnections; k < l; ++k) {

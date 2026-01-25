@@ -386,3 +386,114 @@ TEST_F(SignalTests, inactiveMode_noRestriction)
     EXPECT_TRUE(cell3.getCellRef()._signalState == SignalState_Active);  // Signal passes through
     EXPECT_TRUE(approxCompare(signal, cell3.getCellRef()._signal._channels));
 }
+
+// Tests for edge cases with baseAngle normalization
+// These test cases verify that signal propagation works correctly when baseAngle
+// causes the restriction cone to wrap around angle boundaries (e.g., negative angles
+// or angles > 360)
+
+TEST_F(SignalTests, signalRestriction_largeBaseAngle_signalPasses_toFirstConnection)
+{
+    // baseAngle = 170 with openingAngle = 90 should allow signal to cell 1
+    // Unnormalized cone range: 180 + 170 - 45 = 305 to 180 + 170 + 45 = 395
+    // Normalized cone range: 305 to 35 (wrapping around 0)
+    // Connection to cell 1 is at connectionAngle 0 (first connection), which is inside the cone
+    //
+    // NOTE: Without normalization, isAngleInBetween(305, 395, 0) incorrectly returns false
+    // because the algorithm doesn't handle angle2 > 360 properly for the candidate angle check.
+    // With normalization to (305, 35), isAngleInBetween correctly returns true.
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
+
+    auto cell2Desc = ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal));
+    cell2Desc.getCellRef()._signalRestriction._mode = SignalRestrictionMode_Active;
+    cell2Desc.getCellRef()._signalRestriction._baseAngle = 170.0f;
+    cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
+
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({0, 0}),
+        cell2Desc,
+        ObjectDesc().id(3).pos({2, 0}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell1 = actualData.getObjectRef(1);
+    EXPECT_TRUE(cell1.getCellRef()._signalState == SignalState_Active);  // Signal should pass to cell 1
+    EXPECT_TRUE(approxCompare(signal, cell1.getCellRef()._signal._channels));
+
+    // Cell 3 should NOT receive signal (connectionAngle 180 is outside cone 305-35)
+    auto cell3 = actualData.getObjectRef(3);
+    EXPECT_FALSE(cell3.getCellRef()._signalState == SignalState_Active);
+}
+
+TEST_F(SignalTests, signalRestriction_largeNegativeBaseAngle_signalPasses_toFirstConnection)
+{
+    // baseAngle = -170 with openingAngle = 90 should allow signal to cell 1
+    // Unnormalized cone range: 180 + (-170) - 45 = -35 to 180 + (-170) + 45 = 55
+    // Normalized cone range: 325 to 55 (wrapping around 0)
+    // Connection to cell 1 is at connectionAngle 0 (first connection), which is inside the cone
+    //
+    // NOTE: Without normalization, isAngleInBetween(-35, 55, 0) may give incorrect results
+    // because the algorithm assumes angle1 is in range [0, 360).
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
+
+    auto cell2Desc = ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal));
+    cell2Desc.getCellRef()._signalRestriction._mode = SignalRestrictionMode_Active;
+    cell2Desc.getCellRef()._signalRestriction._baseAngle = -170.0f;
+    cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
+
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({0, 0}),
+        cell2Desc,
+        ObjectDesc().id(3).pos({2, 0}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell1 = actualData.getObjectRef(1);
+    EXPECT_TRUE(cell1.getCellRef()._signalState == SignalState_Active);  // Signal should pass to cell 1
+    EXPECT_TRUE(approxCompare(signal, cell1.getCellRef()._signal._channels));
+
+    // Cell 3 should NOT receive signal (connectionAngle 180 is outside cone 325-55)
+    auto cell3 = actualData.getObjectRef(3);
+    EXPECT_FALSE(cell3.getCellRef()._signalState == SignalState_Active);
+}
+
+TEST_F(SignalTests, signalRestriction_largeBaseAngle_signalBlocked)
+{
+    // baseAngle = 90 with openingAngle = 90 should block signal to cell 1
+    // Cone range: 180 + 90 - 45 = 225 to 180 + 90 + 45 = 315
+    // Connection to cell 1 is at connectionAngle 0 (first connection), which is outside the cone
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
+
+    auto cell2Desc = ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal));
+    cell2Desc.getCellRef()._signalRestriction._mode = SignalRestrictionMode_Active;
+    cell2Desc.getCellRef()._signalRestriction._baseAngle = 90.0f;
+    cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
+
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({0, 0}),
+        cell2Desc,
+        ObjectDesc().id(3).pos({2, 0}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell1 = actualData.getObjectRef(1);
+    EXPECT_FALSE(cell1.getCellRef()._signalState == SignalState_Active);  // Signal should be blocked
+
+    auto cell3 = actualData.getObjectRef(3);
+    EXPECT_FALSE(cell3.getCellRef()._signalState == SignalState_Active);  // Also blocked
+}
