@@ -276,7 +276,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Auto activation interval
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
+                    AlienGui::InputIntParameters().name("Auto trigger interval###1").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
                 // Mode selection
                 auto mode = sensor.getMode();
@@ -662,7 +662,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 // Auto activation interval
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
+                    AlienGui::InputIntParameters().name("Auto trigger interval###2").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
 
                 // Construction activation time
                 AlienGui::InputInt(
