@@ -494,7 +494,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             if (object->type == ObjectType_FreeCell && cudaSimulationParameters.cellAgeLimiterToggle.value) {
                 cellMaxAge = cudaSimulationParameters.freeCellMaxAge.value[object->color];
             }
-            if (cellMaxAge > 0 && object->typeData.cell.age > cellMaxAge) {
+            if (cellMaxAge > 0 && object->typeData.freeCell.age > cellMaxAge) {
                 objectDestruction = true;
             }
 
