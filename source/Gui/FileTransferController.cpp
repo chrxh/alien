@@ -14,6 +14,8 @@
 #include <EngineInterface/SimulationFacade.h>
 #include <PersisterInterface/PersisterFacade.h>
 
+#include "PersisterInterface/SerializerService.h"
+
 void FileTransferController::onOpenSimulationDialog()
 {
     GenericFileDialog::get().showOpenFileDialog(
@@ -89,6 +91,38 @@ void FileTransferController::onSaveSimulationDialog()
             [](auto const&) {},
             [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
     });
+}
+
+void FileTransferController::onOpenGenomeDialog(std::function<void(GenomeDesc const&)> const& openFunc)
+{
+    GenericFileDialog::get().showOpenFileDialog(
+        "Open genome",
+        "Genome (*.genome){.genome},.*",
+        _referencePath,
+        [&, openFunc = openFunc](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _referencePath = firstFilenameCopy.remove_filename().string();
+            GenomeDesc genome;
+            if (!SerializerService::get().deserializeGenomeFromFile(genome, firstFilename.string())) {
+                GenericMessageDialog::get().information("Open genome", "The selected file could not be opened.");
+            } else {
+                openFunc(genome);
+            }
+        });
+}
+
+void FileTransferController::onSaveGenomeDialog(GenomeDesc const& genome)
+{
+    GenericFileDialog::get().showSaveFileDialog(
+        "Save genome", "Genome (*.genome){.genome},.*", _referencePath, [&, genome = genome](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _referencePath = firstFilenameCopy.remove_filename().string();
+            if (!SerializerService::get().serializeGenomeToFile(firstFilename.string(), genome)) {
+                GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
+            }
+        });
 }
 
 void FileTransferController::init()

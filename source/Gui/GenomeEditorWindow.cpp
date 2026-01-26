@@ -233,33 +233,14 @@ void GenomeEditorWindow::processTabWidget()
 
 void GenomeEditorWindow::onOpenGenome()
 {
-    GenericFileDialog::get().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", FileTransferController::get().getReferencePath(), [&](std::filesystem::path const& path) {
-        auto firstFilename = ifd::FileDialog::Instance().GetResult();
-        auto firstFilenameCopy = firstFilename;
-        FileTransferController::get().setReferencePath(firstFilenameCopy.remove_filename().string());
-
-        GenomeDesc genome;
-        if (!SerializerService::get().deserializeGenomeFromFile(genome, firstFilename.string())) {
-            GenericMessageDialog::get().information("Open genome", "The selected file could not be opened.");
-        } else {
-            openTab(std::nullopt, genome, false);
-        }
-    });
+    FileTransferController::get().onOpenGenomeDialog([this](GenomeDesc const& genome) { openTab(std::nullopt, genome, false); });
 }
 
 void GenomeEditorWindow::onSaveGenome()
 {
-    GenericFileDialog::get().showSaveFileDialog("Save genome", "Genome (*.genome){.genome},.*", FileTransferController::get().getReferencePath(), [&](std::filesystem::path const& path) {
-        auto firstFilename = ifd::FileDialog::Instance().GetResult();
-        auto firstFilenameCopy = firstFilename;
-        FileTransferController::get().setReferencePath(firstFilenameCopy.remove_filename().string());
-
-        auto const& selectedTab = _tabs.at(_selectedTabIndex);
-        auto genome = selectedTab->getGenomeDesc();
-        if (!SerializerService::get().serializeGenomeToFile(firstFilename.string(), genome)) {
-            GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
-        }
-    });
+    auto const& selectedTab = _tabs.at(_selectedTabIndex);
+    auto genome = selectedTab->getGenomeDesc();
+    FileTransferController::get().onSaveGenomeDialog(genome);
 }
 
 void GenomeEditorWindow::onCloneGenome()
