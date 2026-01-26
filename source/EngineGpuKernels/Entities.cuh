@@ -473,6 +473,7 @@ struct Cell
     // General
     float usableEnergy;
     float rawEnergy;
+    float reservedEnergy;
     float frontAngle;  // May be invalid
     uint32_t age;
     CellState cellState;

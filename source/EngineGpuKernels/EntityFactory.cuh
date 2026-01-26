@@ -350,6 +350,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->cellState = cellTO.cellState;
         cell->usableEnergy = cellTO.usableEnergy;
         cell->rawEnergy = cellTO.rawEnergy;
+        cell->reservedEnergy = cellTO.reservedEnergy;
         cell->cellType = cellTO.cellType;
         cell->age = cellTO.age;
         cell->frontAngle = cellTO.frontAngle;
@@ -734,6 +735,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.frontAngle = VALUE_NOT_SET_FLOAT;
     cell.usableEnergy = usableEnergy;
     cell.rawEnergy = rawEnergy;
+    cell.reservedEnergy = 0.0f;
     cell.age = 0;
     cell.cellState = CellState_Constructing;
     cell.creature = creature;

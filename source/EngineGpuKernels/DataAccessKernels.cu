@@ -303,6 +303,7 @@ namespace
             cellTO.creatureIndex = cell.creature->creatureIndex;
             cellTO.usableEnergy = cell.usableEnergy;
             cellTO.rawEnergy = cell.rawEnergy;
+            cellTO.reservedEnergy = cell.reservedEnergy;
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
