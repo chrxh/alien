@@ -19,6 +19,9 @@ public:
 
     void onSaveSimulationDialog();
 
+    std::string getReferencePath() const { return _referencePath; }
+    void setReferencePath(std::string const& path) { _referencePath = path; }
+
 private:
     void init() override;
     void process() override;

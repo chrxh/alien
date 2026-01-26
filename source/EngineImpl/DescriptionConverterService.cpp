@@ -1204,7 +1204,9 @@ void DescriptionConverterService::convertObjectToTO(
         // ObjectType_Cell - access cell data
         CellDesc const& cellDesc = objectDesc.getCellRef();
 
-        objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(cellDesc._creatureId);
+        // When changing a single cell, creatureTOIndexById may be empty - set to 0 as placeholder
+        auto creatureIt = creatureTOIndexById.find(cellDesc._creatureId);
+        objectTO.typeData.cell.creatureIndex = (creatureIt != creatureTOIndexById.end()) ? creatureIt->second : 0;
         objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
         checkAndCorrectInvalidEnergy(objectTO.typeData.cell.usableEnergy);
         objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;

@@ -18,6 +18,7 @@
 #include "ChangeColorDialog.h"
 #include "EditorController.h"
 #include "EditorModel.h"
+#include "FileTransferController.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "GenomeTabLayoutData.h"
@@ -69,19 +70,12 @@ void GenomeEditorWindow::initIntern()
 
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
-    auto path = std::filesystem::current_path();
-    if (path.has_parent_path()) {
-        path = path.parent_path();
-    }
-    _startingPath = GlobalSettings::get().getValue("windows.genome editor.starting path", path.string());
-
     // Initialize the first tab with a draft creature
     _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_genomeEditData, getDefaultGenome()));
 }
 
 void GenomeEditorWindow::shutdownIntern()
 {
-    GlobalSettings::get().setValue("windows.genome editor.starting path", _startingPath);
 }
 
 void GenomeEditorWindow::processIntern()
@@ -239,10 +233,10 @@ void GenomeEditorWindow::processTabWidget()
 
 void GenomeEditorWindow::onOpenGenome()
 {
-    GenericFileDialog::get().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
+    GenericFileDialog::get().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", FileTransferController::get().getReferencePath(), [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
-        _startingPath = firstFilenameCopy.remove_filename().string();
+        FileTransferController::get().setReferencePath(firstFilenameCopy.remove_filename().string());
 
         GenomeDesc genome;
         if (!SerializerService::get().deserializeGenomeFromFile(genome, firstFilename.string())) {
@@ -255,10 +249,10 @@ void GenomeEditorWindow::onOpenGenome()
 
 void GenomeEditorWindow::onSaveGenome()
 {
-    GenericFileDialog::get().showSaveFileDialog("Save genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
+    GenericFileDialog::get().showSaveFileDialog("Save genome", "Genome (*.genome){.genome},.*", FileTransferController::get().getReferencePath(), [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
-        _startingPath = firstFilenameCopy.remove_filename().string();
+        FileTransferController::get().setReferencePath(firstFilenameCopy.remove_filename().string());
 
         auto const& selectedTab = _tabs.at(_selectedTabIndex);
         auto genome = selectedTab->getGenomeDesc();
