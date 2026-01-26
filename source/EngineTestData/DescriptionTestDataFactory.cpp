@@ -64,6 +64,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .neuralNetwork(nn)
                       .usableEnergy(150.0f)
                       .rawEnergy(12.5f)
+                      .reservedEnergy(5.5f)
                       .age(42)
                       .cellState(false)
                       .geneIndex(42)

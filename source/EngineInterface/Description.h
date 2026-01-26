@@ -471,6 +471,7 @@ struct CellDesc
 
     MEMBER(CellDesc, float, usableEnergy, 100.0f);
     MEMBER(CellDesc, float, rawEnergy, 0.0f);
+    MEMBER(CellDesc, float, reservedEnergy, 0.0f);
     MEMBER(
         CellDesc,
         std::optional<float>,

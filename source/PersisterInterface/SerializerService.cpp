@@ -772,6 +772,7 @@ namespace
 
     auto constexpr Id_Cell_UsableEnergy = 0;
     auto constexpr Id_Cell_RawEnergy = 1;
+    auto constexpr Id_Cell_ReservedEnergy = 17;
     auto constexpr Id_Cell_Age = 2;
     auto constexpr Id_Cell_CellState = 3;
     auto constexpr Id_Cell_ActivationTime = 4;
@@ -1470,6 +1471,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Cell_UsableEnergy, data._usableEnergy, defaultObject._usableEnergy);
         loadSave(task, auxiliaries, Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        loadSave(task, auxiliaries, Id_Cell_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
         loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
         loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);

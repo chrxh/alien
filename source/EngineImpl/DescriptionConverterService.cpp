@@ -293,6 +293,7 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
         CellDesc cellDesc;
         cellDesc._usableEnergy = objectTO.typeData.cell.usableEnergy;
         cellDesc._rawEnergy = objectTO.typeData.cell.rawEnergy;
+        cellDesc._reservedEnergy = objectTO.typeData.cell.reservedEnergy;
         cellDesc._cellState = objectTO.typeData.cell.cellState;
         cellDesc._age = objectTO.typeData.cell.age;
         cellDesc._frontAngle = objectTO.typeData.cell.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(objectTO.typeData.cell.frontAngle) : std::nullopt;
@@ -1208,6 +1209,7 @@ void DescriptionConverterService::convertObjectToTO(
         objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
         checkAndCorrectInvalidEnergy(objectTO.typeData.cell.usableEnergy);
         objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;
+        objectTO.typeData.cell.reservedEnergy = cellDesc._reservedEnergy;
         objectTO.typeData.cell.cellState = cellDesc._cellState;
         objectTO.typeData.cell.cellType = cellDesc.getCellType();
         objectTO.typeData.cell.nodeIndex = cellDesc._nodeIndex;
