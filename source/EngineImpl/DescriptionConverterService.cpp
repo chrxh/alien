@@ -201,16 +201,30 @@ TOs DescriptionConverterService::convertDescriptionToTO(Desc const& description)
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, objectTOs, particleTOs, heap);
 }
 
-TOs DescriptionConverterService::convertDescriptionToTO(ObjectDesc const& object) const
+TOs DescriptionConverterService::convertDescriptionToTO(ExtendedObjectDesc const& extendedObject) const
 {
     std::vector<ObjectTO> objectTOs;
+    std::vector<GenomeTO> genomeTOs;
+    std::vector<CreatureTO> creatureTOs;
+    std::vector<GeneTO> geneTOs;
+    std::vector<NodeTO> nodeTOs;
     std::vector<uint8_t> heap;
 
-    std::unordered_map<uint64_t, uint64_t> objectIndexTOById;
+    std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    convertObjectToTO(objectTOs, heap, objectIndexTOById, object, creatureTOIndexById);
 
-    return provideDataTO({}, {}, {}, {}, objectTOs, {}, heap);
+    // Convert genome and creature if available
+    if (extendedObject.genome.has_value()) {
+        convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, extendedObject.genome.value(), genomeTOIndexById);
+    }
+    if (extendedObject.creature.has_value()) {
+        convertCreatureToTO(creatureTOs, extendedObject.creature.value(), genomeTOIndexById, creatureTOIndexById);
+    }
+
+    std::unordered_map<uint64_t, uint64_t> objectIndexTOById;
+    convertObjectToTO(objectTOs, heap, objectIndexTOById, extendedObject.object, creatureTOIndexById);
+
+    return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, objectTOs, {}, heap);
 }
 
 TOs DescriptionConverterService::convertDescriptionToTO(EnergyDesc const& particle) const
@@ -1204,9 +1218,7 @@ void DescriptionConverterService::convertObjectToTO(
         // ObjectType_Cell - access cell data
         CellDesc const& cellDesc = objectDesc.getCellRef();
 
-        // When changing a single cell, creatureTOIndexById may be empty - set to 0 as placeholder
-        auto creatureIt = creatureTOIndexById.find(cellDesc._creatureId);
-        objectTO.typeData.cell.creatureIndex = (creatureIt != creatureTOIndexById.end()) ? creatureIt->second : 0;
+        objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(cellDesc._creatureId);
         objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
         checkAndCorrectInvalidEnergy(objectTO.typeData.cell.usableEnergy);
         objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;

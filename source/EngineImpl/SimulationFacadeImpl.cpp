@@ -141,7 +141,7 @@ void _SimulationFacadeImpl::setDetached(bool value)
     _worker.setDetached(value);
 }
 
-void _SimulationFacadeImpl::changeCell(ObjectDesc const& changedCell)
+void _SimulationFacadeImpl::changeCell(ExtendedObjectDesc const& changedCell)
 {
     _worker.changeCell(changedCell);
 }

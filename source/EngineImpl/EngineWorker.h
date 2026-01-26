@@ -68,7 +68,7 @@ public:
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeCell(ObjectDesc const& changedCell);
+    void changeCell(ExtendedObjectDesc const& changedCell);
     void changeParticle(EnergyDesc const& changedParticle);
     bool changeCreature(uint64_t creatureId, GenomeDesc const& genome);
     std::optional<GenomeDesc> getGenomeOfCreature(uint64_t creatureId);

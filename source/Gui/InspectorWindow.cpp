@@ -124,7 +124,7 @@ void _InspectorWindow::processCell(ExtendedObjectDesc& extendedCell)
         ImGui::EndTabBar();
 
         if (object != origCell) {
-            _SimulationFacade::get()->changeCell(object);
+            _SimulationFacade::get()->changeCell(extendedCell);
         }
     }
 }

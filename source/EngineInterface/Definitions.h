@@ -16,6 +16,7 @@ struct ParameterSpec;
 
 struct Desc;
 struct ObjectDesc;
+struct ExtendedObjectDesc;
 struct EnergyDesc;
 struct GenomeDesc;
 struct GeneDesc;

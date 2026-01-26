@@ -46,7 +46,7 @@ public:
     void colorSelectedObjects(unsigned char color, bool includeClusters) override;
     void reconnectSelectedObjects() override;
     void setDetached(bool value) override;
-    void changeCell(ObjectDesc const& changedCell) override;
+    void changeCell(ExtendedObjectDesc const& changedCell) override;
     void changeParticle(EnergyDesc const& changedParticle) override;
     bool changeCreature(uint64_t creatureId, GenomeDesc const& genome) override;
     std::optional<GenomeDesc> getGenomeOfCreature(uint64_t creatureId) override;
