@@ -149,11 +149,13 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                 AlienGui::ComboColor(
                     AlienGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), object._color);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Usable energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip), object.getCellRef()._usableEnergy);
+                    AlienGui::InputFloatParameters().name("Usable energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._usableEnergy);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Raw energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip),
-                    object.getCellRef()._rawEnergy);
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), object.getCellRef()._age);
+                    AlienGui::InputFloatParameters().name("Raw energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._rawEnergy);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._reservedEnergy);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), object.getCellRef()._age);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(BaseTabTextWidth), object._pos.x);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(BaseTabTextWidth), object._pos.y);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(BaseTabTextWidth), object._vel.x);

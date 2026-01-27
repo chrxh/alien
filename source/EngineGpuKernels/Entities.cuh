@@ -510,7 +510,7 @@ struct Cell
 
     __device__ __inline__ float getEnergy() const
     {
-        auto result = usableEnergy + rawEnergy;
+        auto result = usableEnergy + rawEnergy + reservedEnergy;
         if (cellType == CellType_Depot) {
             result += cellTypeData.depot.storedUsableEnergy;
         }

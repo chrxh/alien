@@ -36,8 +36,8 @@ private:
         // Construction data
         Object* lastConstructionObject;
         float angle;
-        float usableEnergy;
-        float rawEnergy;
+        float neededUsableEnergy;
+        float neededReservedEnergy;
         float depotEnergy;
         int numAdditionalConnections;  // -1 = none
         int requiredNodeId1;           // -1 = none
@@ -224,8 +224,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
     result.lastConstructionObject = getLastConstructedCellOnBranch(object);
     result.angle = result.node->referenceAngle;
-    result.usableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-    result.rawEnergy = 0;
+    result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
+    result.neededReservedEnergy = 0;
     if (result.node->constructorAvailable) {
         auto const& constructorNode = result.node->constructor;
         if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
@@ -233,9 +233,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
             if (!referencedGene.separation) {
                 auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
                 if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
-                    result.rawEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
+                    result.neededReservedEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
                 } else {
-                    result.rawEnergy += requiredEnergyForNodes;
+                    result.neededReservedEnergy += requiredEnergyForNodes;
                 }
             }
         }
@@ -745,8 +745,8 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         hostObject->typeData.cell.nodeIndex,
         posOfNewObject,
         hostObject->vel,
-        constructionData.usableEnergy,
-        constructionData.rawEnergy);
+        constructionData.neededUsableEnergy,
+        constructionData.neededReservedEnergy);
     result->typeData.cell.frontAngleId = hostObject->typeData.cell.frontAngleId;
 
     constructor.lastConstructedCellId = result->id;
@@ -793,7 +793,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return true;
     }
 
-    auto requiredEnergy = constructionData.usableEnergy + constructionData.rawEnergy + constructionData.depotEnergy;
+    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.depotEnergy;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
 
     if (cudaSimulationParameters.externalEnergyControlToggle.value && hostObject->typeData.cell.usableEnergy < requiredEnergy + normalCellEnergy
@@ -836,19 +836,28 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     auto energyNeededFromHost =
         max(0.0f, requiredEnergy - normalCellEnergy) + min(requiredEnergy, normalCellEnergy) * (1.0f - externalEnergyConditionalInflowFactor);
 
-    if (externalEnergyConditionalInflowFactor < 1.0f && hostObject->typeData.cell.usableEnergy < normalCellEnergy + energyNeededFromHost) {
+    if (externalEnergyConditionalInflowFactor < 1.0f
+        && hostObject->typeData.cell.usableEnergy + hostObject->typeData.cell.reservedEnergy < normalCellEnergy + energyNeededFromHost) {
         return false;
     }
     auto energyNeededFromExternalSource = requiredEnergy - energyNeededFromHost;
     auto orig = atomicAdd(data.externalEnergy, -energyNeededFromExternalSource);
+
+    float finalEnergyNeededFromHost;
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
-        if (hostObject->typeData.cell.usableEnergy < normalCellEnergy + requiredEnergy) {
+        if (hostObject->typeData.cell.usableEnergy + hostObject->typeData.cell.reservedEnergy < normalCellEnergy + requiredEnergy) {
             return false;
         }
-        hostObject->typeData.cell.usableEnergy -= requiredEnergy;
+        finalEnergyNeededFromHost = requiredEnergy;
     } else {
-        hostObject->typeData.cell.usableEnergy -= energyNeededFromHost;
+        finalEnergyNeededFromHost = energyNeededFromHost;
+    }
+
+    hostObject->typeData.cell.reservedEnergy -= finalEnergyNeededFromHost;
+    if (hostObject->typeData.cell.reservedEnergy < 0) {
+        hostObject->typeData.cell.usableEnergy += hostObject->typeData.cell.reservedEnergy;
+        hostObject->typeData.cell.reservedEnergy = 0.0f;
     }
     return true;
 }
