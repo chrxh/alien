@@ -57,7 +57,7 @@ public:
     virtual void colorSelectedObjects(unsigned char color, bool includeClusters) = 0;
     virtual void reconnectSelectedObjects() = 0;
     virtual void setDetached(bool value) = 0;
-    virtual void changeCell(ObjectDesc const& changedCell) = 0;
+    virtual void changeCell(ExtendedObjectDesc const& changedCell) = 0;
     virtual void changeParticle(EnergyDesc const& changedParticle) = 0;
     virtual bool changeCreature(uint64_t creatureId, GenomeDesc const& genome) = 0;
     virtual std::optional<GenomeDesc> getGenomeOfCreature(uint64_t creatureId) = 0;

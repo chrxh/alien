@@ -20,7 +20,7 @@ class DescriptionConverterService
 public:
     Desc convertTOtoDescription(TOs const& to) const;
     TOs convertDescriptionToTO(Desc const& description) const;
-    TOs convertDescriptionToTO(ObjectDesc const& cell) const;
+    TOs convertDescriptionToTO(ExtendedObjectDesc const& extendedObject) const;
     TOs convertDescriptionToTO(EnergyDesc const& particle) const;
     TOs convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const;
 

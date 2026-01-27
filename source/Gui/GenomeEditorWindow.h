@@ -45,7 +45,6 @@ private:
     std::vector<GenomeTabWidget> _tabs;
     int _selectedTabIndex = 0;
     int _sequenceNumberForCreatedGenomes = 0;
-    std::string _startingPath;
     std::optional<int> _lastSessionId;
     std::optional<GenomeDesc> _copiedGenome;
 

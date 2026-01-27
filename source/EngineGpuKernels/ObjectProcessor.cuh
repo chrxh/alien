@@ -43,7 +43,6 @@ public:
     __inline__ __device__ static void applyFriction(SimulationData& data);
 
     __inline__ __device__ static void radiation(SimulationData& data);
-    __inline__ __device__ static void decay(SimulationData& data);
 
     __inline__ __device__ static void resetDensity(SimulationData& data);
 
@@ -675,78 +674,6 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
                 } else if (object->type == ObjectType_FreeCell) {
                     object->typeData.freeCell.energy -= radiation2;
                 }
-            }
-        }
-    }
-}
-
-__inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
-{
-    auto& objects = data.entities.objects;
-    auto partition = calcSystemThreadPartition(objects.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = objects.at(index);
-        if (object->fixed) {
-            continue;
-        }
-
-        if (object->type == ObjectType_Cell) {
-            auto minCellEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
-
-            if (object->typeData.cell.cellState == CellState_Dying || object->typeData.cell.cellState == CellState_Detaching) {
-                auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, object->pos, object->color);
-                if (data.primaryNumberGen.random() <= cellDeathProbability) {
-                    ObjectConnectionProcessor::scheduleDeleteObject(data, index);
-                }
-            }
-
-            bool cellDestruction = false;
-            if (object->typeData.cell.usableEnergy < minCellEnergy) {
-                cellDestruction = true;
-            }
-
-            // Cell age radiation
-            auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[object->color];
-            if (cellMaxAge > 0 && object->typeData.cell.age > cellMaxAge) {
-                cellDestruction = true;
-            }
-
-            if (cellDestruction) {
-                auto orig = atomicExch(&object->typeData.cell.cellState, CellState_Dying);
-                if (orig != CellState_Dying) {
-                    for (int i = 0; i < object->numConnections; ++i) {
-                        auto const& connectedObject = object->connections[i].object;
-                        auto origConnected = atomicExch(&connectedObject->typeData.cell.cellState, CellState_Detaching);
-                        if (origConnected == CellState_Dying) {
-                            atomicExch(&connectedObject->typeData.cell.cellState, CellState_Dying);
-                        }
-                    }
-                }
-            }
-        }
-        if (object->type == ObjectType_FreeCell) {
-            auto minCellEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
-
-            bool objectDestruction = false;
-            if (object->typeData.freeCell.energy < minCellEnergy) {
-                auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, object->pos, object->color);
-                if (data.primaryNumberGen.random() <= cellDeathProbability) {
-                    objectDestruction = true;
-                }
-            }
-
-            // Free cell age radiation
-            auto cellMaxAge = Infinity<int>::value;
-            if (object->type == ObjectType_FreeCell && cudaSimulationParameters.cellAgeLimiterToggle.value) {
-                cellMaxAge = cudaSimulationParameters.freeCellMaxAge.value[object->color];
-            }
-            if (cellMaxAge > 0 && object->typeData.cell.age > cellMaxAge) {
-                objectDestruction = true;
-            }
-
-            if (objectDestruction) {
-                ObjectConnectionProcessor::scheduleDeleteObject(data, index);
             }
         }
     }
