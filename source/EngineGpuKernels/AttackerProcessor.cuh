@@ -43,6 +43,9 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
+    if (object->fixed) {
+        return;
+    }
     auto const& cell = &object->typeData.cell;
     if (SignalProcessor::isManuallyTriggered(data, object) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
 
