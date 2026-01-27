@@ -13,14 +13,12 @@ namespace cg = cooperative_groups;
 using namespace nvcuda;
 
 // WMMA configuration for tensor core operations (requires compute capability 7.0+)
-// Using 16x16x16 matrix dimensions with half precision input and float accumulator
-// We batch 2 cells together: each 8x8 weight matrix is placed in block-diagonal pattern
-// within a 16x16 matrix A. Input signals are placed on the diagonal of matrix B.
-// After C = A × B, summing each row gives the dot product results.
+// With MAX_CHANNELS = 16, we use 16x16x16 matrix dimensions directly - optimal for tensor cores
+// Each cell is processed with a single WMMA operation: C = weights × diag(inputs)
+// Row sums of C give the dot product results (weights × inputs)
 constexpr int WMMA_M = 16;
 constexpr int WMMA_N = 16;
 constexpr int WMMA_K = 16;
-constexpr int CELLS_PER_WMMA_BATCH = 2;  // 2 cells processed in parallel
 
 class NeuronProcessor
 {
@@ -29,12 +27,8 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    // Process a batch of up to 2 cells using tensor cores (WMMA)
-    __inline__ __device__ static void processCellBatchWMMA(
-        SimulationData& data,
-        SimulationStatistics& statistics,
-        Object* cells[CELLS_PER_WMMA_BATCH],
-        int numCells);
+    // Process a single cell using tensor cores (WMMA) - optimal for 16x16 matrix
+    __inline__ __device__ static void processCellWMMA(SimulationData& data, SimulationStatistics& statistics, Object* cell);
 
     __inline__ __device__ static float applyActivationFunction(ActivationFunction activationFunction, float x);
 };
@@ -45,98 +39,51 @@ private:
 
 __device__ __inline__ void NeuronProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto block = cg::this_thread_block();
     auto& objects = data.entities.objects;
     auto partition = calcBlockPartition(objects.getNumEntries());
-
-    // Shared memory for cell batch coordination (only thread 0 manages batching)
-    __shared__ Object* cellBatch[CELLS_PER_WMMA_BATCH];
-    __shared__ int batchCount;
-
-    if (block.thread_rank() == 0) {
-        batchCount = 0;
-    }
-    block.sync();
 
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto& object = objects.at(i);
         if (object->type == ObjectType_Cell && object->typeData.cell.signalState == SignalState_Active) {
-            // Thread 0 manages the batch collection
-            if (block.thread_rank() == 0) {
-                cellBatch[batchCount++] = object;
-            }
-            block.sync();
-
-            // All threads check if batch is full and process together
-            if (batchCount == CELLS_PER_WMMA_BATCH) {
-                processCellBatchWMMA(data, statistics, cellBatch, batchCount);
-                if (block.thread_rank() == 0) {
-                    batchCount = 0;
-                }
-                block.sync();
-            }
+            processCellWMMA(data, statistics, object);
         }
-    }
-
-    // Process remaining cells in partial batch
-    block.sync();
-    if (batchCount > 0) {
-        processCellBatchWMMA(data, statistics, cellBatch, batchCount);
     }
 }
 
-__inline__ __device__ void NeuronProcessor::processCellBatchWMMA(
-    SimulationData& data,
-    SimulationStatistics& statistics,
-    Object* cells[CELLS_PER_WMMA_BATCH],
-    int numCells)
+__inline__ __device__ void NeuronProcessor::processCellWMMA(SimulationData& data, SimulationStatistics& statistics, Object* cell)
 {
     auto block = cg::this_thread_block();
     const int laneId = block.thread_rank();
 
+    auto* nn = cell->typeData.cell.neuralNetwork;
+    auto& signal = cell->typeData.cell.signal;
+
     // Shared memory for half-precision matrices (16x16 layout)
-    // Matrix A: 16x16 block diagonal weights
-    //   - Cell 0 weights (8x8) in top-left quadrant (rows 0-7, cols 0-7)
-    //   - Cell 1 weights (8x8) in bottom-right quadrant (rows 8-15, cols 8-15)
+    // Matrix A: 16x16 weight matrix (direct fit - no padding needed!)
     // Matrix B: 16x16 diagonal matrix with inputs on diagonal
-    //   - Cell 0 inputs on diagonal positions 0-7
-    //   - Cell 1 inputs on diagonal positions 8-15
+    // Matrix C: 16x16 output matrix
     __shared__ __align__(32) half sharedA[WMMA_M * WMMA_K];  // Weights (16x16)
     __shared__ __align__(32) half sharedB[WMMA_K * WMMA_N];  // Diagonal inputs (16x16)
     __shared__ __align__(32) float sharedC[WMMA_M * WMMA_N]; // Outputs (16x16)
 
-    // Initialize shared memory to zero (parallel across 32 threads)
-    for (int i = laneId; i < WMMA_M * WMMA_K; i += 32) {
-        sharedA[i] = __float2half(0.0f);
-    }
+    // Initialize B matrix to zero (A is fully written, C is initialized by fill_fragment)
     for (int i = laneId; i < WMMA_K * WMMA_N; i += 32) {
         sharedB[i] = __float2half(0.0f);
     }
     block.sync();
 
-    // Load weight matrices from cells into block-diagonal pattern
-    for (int cellIdx = 0; cellIdx < numCells; ++cellIdx) {
-        auto* nn = cells[cellIdx]->typeData.cell.neuralNetwork;
-        auto& signal = cells[cellIdx]->typeData.cell.signal;
+    // Load 16x16 weight matrix directly - perfect fit for tensor cores!
+    // Each thread loads 8 elements (256 total / 32 threads)
+    for (int elem = laneId; elem < MAX_CHANNELS * MAX_CHANNELS; elem += 32) {
+        sharedA[elem] = __float2half(nn->weights[elem]);
+    }
 
-        // Cell 0: rows 0-7, cols 0-7 | Cell 1: rows 8-15, cols 8-15
-        int blockOffset = cellIdx * MAX_CHANNELS;
-
-        // Load 8x8 weight matrix into diagonal block
-        for (int elem = laneId; elem < MAX_CHANNELS * MAX_CHANNELS; elem += 32) {
-            int r = elem / MAX_CHANNELS;
-            int c = elem % MAX_CHANNELS;
-            int globalRow = blockOffset + r;
-            int globalCol = blockOffset + c;
-            sharedA[globalRow * WMMA_K + globalCol] = __float2half(nn->weights[elem]);
-        }
-
-        // Load input signals onto the diagonal of B matrix
-        // B[k][k] = input[k] for the appropriate cell's channels
-        for (int ch = laneId; ch < MAX_CHANNELS; ch += 32) {
-            int diagIdx = blockOffset + ch;
-            sharedB[diagIdx * WMMA_N + diagIdx] = __float2half(signal.channels[ch]);
-        }
+    // Load input signals onto the diagonal of B matrix
+    // B[k][k] = input[k], all other elements are 0
+    // This makes C = A × B equivalent to each column k of C being A[:,k] × input[k]
+    // Summing row i gives: sum_k(A[i][k] × input[k]) = dot(weights[i], input)
+    for (int ch = laneId; ch < MAX_CHANNELS; ch += 32) {
+        sharedB[ch * WMMA_N + ch] = __float2half(signal.channels[ch]);
     }
     block.sync();
 
@@ -152,47 +99,37 @@ __inline__ __device__ void NeuronProcessor::processCellBatchWMMA(
     wmma::load_matrix_sync(fragA, sharedA, WMMA_K);
     wmma::load_matrix_sync(fragB, sharedB, WMMA_N);
 
-    // Perform tensor core matrix multiply-accumulate: C = A * B + C
+    // Perform tensor core matrix multiply-accumulate: C = A × B
     wmma::mma_sync(fragC, fragA, fragB, fragC);
 
     // Store result back to shared memory
     wmma::store_matrix_sync(sharedC, fragC, WMMA_N, wmma::mem_row_major);
     block.sync();
 
-    // Extract results: sum each row within the cell's block to get the dot product result
+    // Extract results: sum each row to get the dot product result
     // Then apply biases and activation functions
-    for (int cellIdx = 0; cellIdx < numCells; ++cellIdx) {
-        auto* nn = cells[cellIdx]->typeData.cell.neuralNetwork;
-        auto& signal = cells[cellIdx]->typeData.cell.signal;
-
-        int blockOffset = cellIdx * MAX_CHANNELS;
-
-        // Each thread processes some output channels
-        for (int ch = laneId; ch < MAX_CHANNELS; ch += 32) {
-            // Sum across the 8 relevant columns for this cell's dot product
-            float sum = 0.0f;
-            int outputRow = blockOffset + ch;
-            for (int k = 0; k < MAX_CHANNELS; ++k) {
-                sum += sharedC[outputRow * WMMA_N + blockOffset + k];
-            }
-
-            // Add bias
-            sum += nn->biases[ch];
-
-            // Apply activation function and clamp
-            float output = applyActivationFunction(nn->activationFunctions[ch], sum);
-            output = max(-2.0f, min(2.0f, output));
-
-            signal.channels[ch] = output;
+    // Each thread processes some output channels (16 channels / 32 threads = some threads do 1, some do 0)
+    for (int ch = laneId; ch < MAX_CHANNELS; ch += 32) {
+        // Sum across all 16 columns for this row's dot product
+        float sum = 0.0f;
+        for (int k = 0; k < MAX_CHANNELS; ++k) {
+            sum += sharedC[ch * WMMA_N + k];
         }
+
+        // Add bias
+        sum += nn->biases[ch];
+
+        // Apply activation function and clamp
+        float output = applyActivationFunction(nn->activationFunctions[ch], sum);
+        output = max(-2.0f, min(2.0f, output));
+
+        signal.channels[ch] = output;
     }
     block.sync();
 
     // Update statistics (only thread 0)
     if (laneId == 0) {
-        for (int cellIdx = 0; cellIdx < numCells; ++cellIdx) {
-            statistics.incNumNeuronActivities(cells[cellIdx]->color);
-        }
+        statistics.incNumNeuronActivities(cell->color);
     }
 }
 

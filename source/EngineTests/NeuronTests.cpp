@@ -81,7 +81,7 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     Desc data;
     data.addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
-        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f})),
+        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0})),
     });
     data.addConnection(1, 2);
 
@@ -91,7 +91,7 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(approxCompare(
-        applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualData.getObjectRef(1).getCellRef()._signal._channels));
+        applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}), actualData.getObjectRef(1).getCellRef()._signal._channels));
 }
 
 TEST_P(NeuronTests_AllActivationFunctions, bias)
@@ -105,12 +105,12 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
             nn.weight(i, j, 0.0f);
         }
     }
-    nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
+    nn._biases = {0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0};
 
     Desc data;
     data.addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
-        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({0, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
     });
     data.addConnection(1, 2);
 
@@ -120,7 +120,7 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(
-        approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1}), actualData.getObjectRef(1).getCellRef()._signal._channels));
+        approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0}), actualData.getObjectRef(1).getCellRef()._signal._channels));
 }
 
 TEST_F(NeuronTests, truncateSignal)
@@ -133,7 +133,7 @@ TEST_F(NeuronTests, truncateSignal)
     Desc data;
     data.addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(nn)),
-        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f})),
+        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signalAndState({1.5f, 0, 0, -1.5f, 0, 0, 0, 1.7f, 0, 0, 0, 0, 0, 0, 0, 0})),
     });
     data.addConnection(1, 2);
 
@@ -143,6 +143,6 @@ TEST_F(NeuronTests, truncateSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(approxCompare(
-        std::vector<float>{2, 0, 0, -2, 0, 0, 0, 2},
+        std::vector<float>{2, 0, 0, -2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0},
         actualData.getObjectRef(1).getCellRef()._signal._channels));
 }
