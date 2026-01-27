@@ -78,6 +78,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _cudaPreviewStatistics = std::make_shared<SimulationStatistics>();
     _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 
+    _simulationTimestep = timestep;
     _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
     _cudaPreviewData->init({_settingsForPreview.worldSizeX, _settingsForPreview.worldSizeY}, 0);
     _cudaSimulationStatistics->init();
