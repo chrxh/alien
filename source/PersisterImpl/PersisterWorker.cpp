@@ -214,7 +214,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
         deserializedData.auxiliaryData.center = requestData.center;
         deserializedData.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
         deserializedData.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
-        deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+        deserializedData.auxiliaryData.timestep = _SimulationFacade::get()->getCurrentTimestep();
         deserializedData.mainData = _SimulationFacade::get()->getSimulationData();
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
@@ -404,7 +404,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (resourceType == NetworkResourceType_Simulation) {
         try {
             auto simulationData = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+            deserializedSim.auxiliaryData.timestep = _SimulationFacade::get()->getCurrentTimestep();
             deserializedSim.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
             deserializedSim.auxiliaryData.zoom = simulationData.zoom;
             deserializedSim.auxiliaryData.center = simulationData.center;
@@ -493,7 +493,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (resourceType == NetworkResourceType_Simulation) {
         try {
             auto simulationData = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+            deserializedSim.auxiliaryData.timestep = _SimulationFacade::get()->getCurrentTimestep();
             deserializedSim.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
             deserializedSim.auxiliaryData.zoom = simulationData.zoom;
             deserializedSim.auxiliaryData.center = simulationData.center;
