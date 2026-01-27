@@ -159,6 +159,7 @@ namespace
     auto constexpr Id_NeuralNetworkGenome_Weights = 0;
     auto constexpr Id_NeuralNetworkGenome_Biases = 1;
     auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 2;
+    auto constexpr Id_NeuralNetworkGenome_ConnectionWeights = 3;
 
     auto constexpr Id_DepotGenome_storageLimit = 0;
     auto constexpr Id_DepotGenome_InitialStoredUsableEnergy = 1;
@@ -255,6 +256,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Weights, data._weights, defaultObject._weights);
         loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Biases, data._biases, defaultObject._biases);
         loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NeuralNetworkGenomeDesc)
@@ -810,6 +812,7 @@ namespace
     auto constexpr Id_NeuralNetwork_Weights = 0;
     auto constexpr Id_NeuralNetwork_Biases = 1;
     auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
+    auto constexpr Id_NeuralNetwork_ConnectionWeights = 3;
 
     auto constexpr Id_Constructor_AutoTriggerInterval = 0;
     auto constexpr Id_Constructor_ConstructionActivationTime = 1;
@@ -1001,6 +1004,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_NeuralNetwork_Weights, data._weights, defaultObject._weights);
         loadSave(task, auxiliaries, Id_NeuralNetwork_Biases, data._biases, defaultObject._biases);
         loadSave(task, auxiliaries, Id_NeuralNetwork_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        loadSave(task, auxiliaries, Id_NeuralNetwork_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NeuralNetworkDesc)

@@ -25,6 +25,7 @@ struct NeuralNetworkGenomeDesc
     MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, weights, {});
     MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, biases, {});
     MEMBER(NeuralNetworkGenomeDesc, std::vector<ActivationFunction>, activationFunctions, {});
+    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, connectionWeights, {});
 };
 
 struct BaseGenomeDesc

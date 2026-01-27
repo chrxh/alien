@@ -69,6 +69,9 @@ namespace
                         nodeTO.neuralNetwork.biases[i] = node.neuralNetwork.biases[i];
                         nodeTO.neuralNetwork.activationFunctions[i] = node.neuralNetwork.activationFunctions[i];
                     }
+                    for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+                        nodeTO.neuralNetwork.connectionWeights[i] = node.neuralNetwork.connectionWeights[i];
+                    }
                     nodeTO.signalRestriction.mode = node.signalRestriction.mode;
                     nodeTO.signalRestriction.baseAngle = node.signalRestriction.baseAngle;
                     nodeTO.signalRestriction.openingAngle = node.signalRestriction.openingAngle;
