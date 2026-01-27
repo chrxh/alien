@@ -328,9 +328,25 @@ namespace
             cellTO.eventCounter = cell.eventCounter;
             cellTO.eventPos = cell.eventPos;
 
+            // Convert NeuralNetwork (half weights) to NeuralNetworkTO (float weights)
             if (cell.neuralNetwork != nullptr) {
-                int targetSize;  //not used
-                copyDataToHeap<int>(sizeof(NeuralNetwork), reinterpret_cast<uint8_t*>(cell.neuralNetwork), targetSize, cellTO.neuralNetworkDataIndex, to);
+                uint64_t size = sizeof(NeuralNetworkTO);
+                cellTO.neuralNetworkDataIndex = alienAtomicAdd64(to.heapSize, size);
+                if (cellTO.neuralNetworkDataIndex + size > to.capacities.heap) {
+                    printf("Insufficient heap memory for NeuralNetworkTO.\n");
+                    ABORT();
+                }
+                auto* nnTO = reinterpret_cast<NeuralNetworkTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
+                for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                    nnTO->weights[i] = __half2float(cell.neuralNetwork->weights[i]);
+                }
+                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                    nnTO->biases[i] = cell.neuralNetwork->biases[i];
+                    nnTO->activationFunctions[i] = cell.neuralNetwork->activationFunctions[i];
+                }
+                for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+                    nnTO->connectionWeights[i] = cell.neuralNetwork->connectionWeights[i];
+                }
             }
 
             cellTO.cellType = cell.cellType;

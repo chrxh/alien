@@ -379,11 +379,21 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
 
         cell->cellType = cellTO.cellType;
 
-        copyDataToHeap(
-            sizeof(NeuralNetworkTO),
-            cellTO.neuralNetworkDataIndex,
-            to.heap,
-            reinterpret_cast<uint8_t*&>(cell->neuralNetwork));
+        // Convert NeuralNetworkTO (float weights) to NeuralNetwork (half weights)
+        {
+            auto* nnTO = reinterpret_cast<NeuralNetworkTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
+            cell->neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNetwork>(1);
+            for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                cell->neuralNetwork->weights[i] = __float2half(nnTO->weights[i]);
+            }
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                cell->neuralNetwork->biases[i] = nnTO->biases[i];
+                cell->neuralNetwork->activationFunctions[i] = nnTO->activationFunctions[i];
+            }
+            for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+                cell->neuralNetwork->connectionWeights[i] = nnTO->connectionWeights[i];
+            }
+        }
 
         switch (cellTO.cellType) {
         case CellType_Base: {
@@ -750,7 +760,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNetwork>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-        cell.neuralNetwork->weights[i] = node->neuralNetwork.weights[i];
+        cell.neuralNetwork->weights[i] = __float2half(node->neuralNetwork.weights[i]);
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell.neuralNetwork->biases[i] = node->neuralNetwork.biases[i];

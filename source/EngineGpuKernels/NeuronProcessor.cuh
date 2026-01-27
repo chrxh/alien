@@ -74,9 +74,10 @@ __inline__ __device__ void NeuronProcessor::processCellWMMA(SimulationData& data
     block.sync();
 
     // Load 16x16 weight matrix directly - perfect fit for tensor cores!
+    // Weights are already stored as half precision - no conversion needed!
     // Each thread loads 8 elements (256 total / 32 threads)
     for (int elem = laneId; elem < MAX_CHANNELS * MAX_CHANNELS; elem += 32) {
-        sharedA[elem] = __float2half(nn->weights[elem]);
+        sharedA[elem] = nn->weights[elem];  // Direct copy, already half precision
     }
 
     // Load input signals onto the diagonal of B matrix
