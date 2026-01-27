@@ -66,7 +66,8 @@ __inline__ __device__ void NeuronProcessor::processCellWMMA(SimulationData& data
     __shared__ __align__(32) half sharedB[WMMA_K * WMMA_N];  // Diagonal inputs (16x16)
     __shared__ __align__(32) float sharedC[WMMA_M * WMMA_N]; // Outputs (16x16)
 
-    // Initialize B matrix to zero (A is fully written, C is initialized by fill_fragment)
+    // Initialize B matrix to zero (only diagonal elements will be set to inputs)
+    // Note: A will be fully overwritten below, C is initialized by fill_fragment
     for (int i = laneId; i < WMMA_K * WMMA_N; i += 32) {
         sharedB[i] = __float2half(0.0f);
     }
