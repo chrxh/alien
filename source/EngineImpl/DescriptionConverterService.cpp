@@ -7,6 +7,8 @@
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
+#include <cuda_fp16.h>
+
 #include <Base/Exceptions.h>
 
 #include <EngineInterface/Description.h>
@@ -84,7 +86,7 @@ namespace
     {
         NeuralNetworkDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result._weights[i] = neuralNetworkTO.weights[i];
+            result._weights[i] = __half2float(neuralNetworkTO.weights[i]);  // Convert half to float
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._biases[i] = neuralNetworkTO.biases[i];
@@ -120,7 +122,7 @@ namespace
     {
         NeuralNetworkTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result.weights[i] = neuralNetworkDesc._weights[i];
+            result.weights[i] = __float2half(neuralNetworkDesc._weights[i]);  // Convert float to half
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result.biases[i] = neuralNetworkDesc._biases[i];

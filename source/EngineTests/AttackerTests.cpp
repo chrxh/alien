@@ -46,7 +46,7 @@ protected:
                     .id(2)
                     .pos({attackerPos.x + 1.0f, attackerPos.y})
                     .color(attackerColor)
-                    .type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0}).cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch))),
+                    .type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch))),
         }, CreatureDesc().id(1));
         data.addConnection(1, 2);
         return data;
@@ -62,7 +62,7 @@ protected:
                     .pos({pos.x + 1.0f, pos.y})
                     .color(color)
                     .fixed(fixed)
-                    .type(CellDesc().usableEnergy(usableEnergy).signalAndState({0, 0, 0, 0, 0, 0, 0, 0})),
+                    .type(CellDesc().usableEnergy(usableEnergy).signalAndState({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         }, CreatureDesc().id(creatureId));
         data.addConnection(100, 101);
         return data;
@@ -228,7 +228,7 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
             ObjectDesc()
                 .id(2)
                 .pos({101.0f, 100.0f})
-                .type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0}).cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch))),
+                .type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch))),
         ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),  // Same creature, in attack range
         ObjectDesc().id(4).pos({100.5f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),  // Same creature, in attack range
     }, CreatureDesc().id(1));
@@ -337,7 +337,7 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
     // Create attacker with connections that block the attack ray
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().lastMatch(lastMatch)).signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().lastMatch(lastMatch)).signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         // Create a connection that crosses the ray path to target at (100, 99)
         ObjectDesc().id(3).pos({99.0f, 99.0f}),
         ObjectDesc().id(4).pos({101.0f, 99.0f}),
@@ -379,7 +379,7 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
             ObjectDesc()
                 .id(2)
                 .pos({101.0f, 100.0f})
-                .type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch2)).signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+                .type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch2)).signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
             ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch1))),
         },
         CreatureDesc().id(1));
@@ -422,7 +422,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
             ObjectDesc()
                 .id(2)
                 .pos({101.0f, 100.0f})
-                .type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch)).signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+                .type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch)).signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
             // Connections that don't intersect the ray to target
             ObjectDesc().id(3).pos({102.0f, 99.0f}),
             ObjectDesc().id(4).pos({103.0f, 99.0f}),
@@ -497,7 +497,7 @@ TEST_F(AttackerTests, sensorTargeting_noSensorWithLastMatch)
                 .pos({100.0f, 100.0f})
                 .color(0)
                 .type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -533,7 +533,7 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
             ObjectDesc()
                 .id(2)
                 .pos({101.0f, 100.0f})
-                .type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch2)).signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+                .type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch2)).signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
             ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch1))),
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -566,7 +566,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
     // Create attacker creature in FreeCell mode
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
 
@@ -590,7 +590,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     // Create attacker creature in FreeCell mode with color restriction to color 1
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).color(0).type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColor(1)))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
 
@@ -614,7 +614,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
     // Create attacker creature in FreeCell mode with color restriction to color 1
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).color(0).type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColor(1)))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
 
@@ -640,7 +640,7 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
     // Create attacker creature in FreeCell mode
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
 
@@ -664,7 +664,7 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
     // Create attacker creature in Creature mode
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
 

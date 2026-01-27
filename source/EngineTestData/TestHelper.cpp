@@ -1,5 +1,46 @@
 #include "TestHelper.h"
 
+namespace
+{
+    // Compare NeuralNetworkDesc with tolerance for FP16 precision loss
+    bool compareNeuralNetwork(NeuralNetworkDesc const& left, NeuralNetworkDesc const& right)
+    {
+        constexpr float halfPrecisionTolerance = 0.01f;  // FP16 has ~3 decimal digits of precision
+        if (left._weights.size() != right._weights.size()) {
+            return false;
+        }
+        for (size_t i = 0; i < left._weights.size(); ++i) {
+            if (!TestHelper::approxCompare(left._weights[i], right._weights[i], halfPrecisionTolerance)) {
+                return false;
+            }
+        }
+        if (left._biases != right._biases) {
+            return false;
+        }
+        if (left._activationFunctions != right._activationFunctions) {
+            return false;
+        }
+        if (left._connectionWeights != right._connectionWeights) {
+            return false;
+        }
+        return true;
+    }
+
+    // Compare CellDesc with special handling for NeuralNetwork (FP16 tolerance)
+    bool compareCellDesc(CellDesc const& left, CellDesc const& right)
+    {
+        if (!compareNeuralNetwork(left._neuralNetwork, right._neuralNetwork)) {
+            return false;
+        }
+        // Compare all other fields using a modified CellDesc with zeroed weights
+        CellDesc leftCopy = left;
+        CellDesc rightCopy = right;
+        leftCopy._neuralNetwork._weights.clear();
+        rightCopy._neuralNetwork._weights.clear();
+        return leftCopy == rightCopy;
+    }
+}
+
 bool TestHelper::approxCompare(double expected, double actual, float precision /* = 0.001f*/)
 {
     return approxCompare(toFloat(expected), toFloat(actual), precision);
@@ -47,6 +88,21 @@ bool TestHelper::compare(Desc left, Desc right)
     std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._genomes.begin(), left._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._genomes.begin(), right._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    
+    // Compare objects with special handling for FP16 weights
+    if (left._objects.size() != right._objects.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < left._objects.size(); ++i) {
+        if (!compare(left._objects[i], right._objects[i])) {
+            return false;
+        }
+    }
+    
+    // Clear objects to avoid double comparison
+    left._objects.clear();
+    right._objects.clear();
+    
     return left == right;
 }
 
@@ -54,6 +110,16 @@ bool TestHelper::compare(ObjectDesc left, ObjectDesc right)
 {
     left._id = 0;
     right._id = 0;
+    
+    // For cells, use special comparison that handles FP16 precision loss in weights
+    if (left.getObjectType() == ObjectType_Cell && right.getObjectType() == ObjectType_Cell) {
+        if (!compareCellDesc(left.getCellRef(), right.getCellRef())) {
+            return false;
+        }
+        // Clear neural network weights to avoid double comparison in operator==
+        left.getCellRef()._neuralNetwork._weights.clear();
+        right.getCellRef()._neuralNetwork._weights.clear();
+    }
     return left == right;
 }
 

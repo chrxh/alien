@@ -74,7 +74,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .frontAngleId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}).numTimesSent(5))
+                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).numTimesSent(5))
                       .signalState(SignalState_Active)
                       .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
                       .constructor(ConstructorDesc()
@@ -209,8 +209,11 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     }
     auto const& cell = object.getCellRef();
 
+    // Use approximate comparison for weights due to half-precision (FP16) storage
+    // FP16 has ~3 decimal digits of precision, so use a relaxed tolerance
+    constexpr float halfPrecisionTolerance = 0.01f;
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-        if (cell._neuralNetwork._weights[i] != node._neuralNetwork._weights[i]) {
+        if (!TestHelper::approxCompare(cell._neuralNetwork._weights[i], node._neuralNetwork._weights[i], halfPrecisionTolerance)) {
             return false;
         }
     }

@@ -379,12 +379,12 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
 
         cell->cellType = cellTO.cellType;
 
-        // Convert NeuralNetworkTO (float weights) to NeuralNetwork (half weights)
+        // Copy NeuralNetworkTO (half weights) to NeuralNetwork (half weights) - direct copy
         {
             auto* nnTO = reinterpret_cast<NeuralNetworkTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
             cell->neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNetwork>(1);
             for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-                cell->neuralNetwork->weights[i] = __float2half(nnTO->weights[i]);
+                cell->neuralNetwork->weights[i] = nnTO->weights[i];  // Both are half, direct copy
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->neuralNetwork->biases[i] = nnTO->biases[i];

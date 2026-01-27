@@ -338,7 +338,7 @@ namespace
                 }
                 auto* nnTO = reinterpret_cast<NeuralNetworkTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
                 for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-                    nnTO->weights[i] = __half2float(cell.neuralNetwork->weights[i]);
+                    nnTO->weights[i] = cell.neuralNetwork->weights[i];  // Both are half, direct copy
                 }
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
                     nnTO->biases[i] = cell.neuralNetwork->biases[i];

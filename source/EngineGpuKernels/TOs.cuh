@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cuda_fp16.h>
+
 #include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
@@ -27,9 +29,11 @@ struct ConnectionTO
     float angleFromPrevious;
 };
 
+// NeuralNetworkTO weights stored as half precision (FP16) for memory efficiency
+// and consistency with NeuralNetwork runtime structure
 struct NeuralNetworkTO
 {
-    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
