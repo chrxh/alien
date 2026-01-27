@@ -12,6 +12,7 @@ NeuralNetworkDesc::NeuralNetworkDesc()
     _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
     _biases.resize(MAX_CHANNELS, 0);
     _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
+    _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         _weights[i * MAX_CHANNELS + i] = 1.0f;
     }

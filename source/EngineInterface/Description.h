@@ -29,6 +29,7 @@ struct NeuralNetworkDesc
     MEMBER(NeuralNetworkDesc, std::vector<float>, weights, {});
     MEMBER(NeuralNetworkDesc, std::vector<float>, biases, {});
     MEMBER(NeuralNetworkDesc, std::vector<ActivationFunction>, activationFunctions, {});
+    MEMBER(NeuralNetworkDesc, std::vector<float>, connectionWeights, {});
 
     NeuralNetworkDesc& weight(int row, int col, float value);
 };

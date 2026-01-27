@@ -22,6 +22,9 @@ struct std::hash<NeuralNetworkGenomeDesc>
         for (const auto& func : desc._activationFunctions) {
             hash_combine(seed, static_cast<int>(func));
         }
+        for (const auto& connectionWeight : desc._connectionWeights) {
+            hash_combine(seed, connectionWeight);
+        }
         return seed;
     }
 };

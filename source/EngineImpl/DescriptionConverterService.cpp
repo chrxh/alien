@@ -74,6 +74,9 @@ namespace
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._activationFunctions[i] = neuralNetworkGenomeTO.activationFunctions[i];
         }
+        for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+            result._connectionWeights[i] = neuralNetworkGenomeTO.connectionWeights[i];
+        }
         return result;
     }
 
@@ -88,6 +91,9 @@ namespace
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._activationFunctions[i] = neuralNetworkTO.activationFunctions[i];
+        }
+        for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+            result._connectionWeights[i] = neuralNetworkTO.connectionWeights[i];
         }
         return result;
     }
@@ -104,6 +110,9 @@ namespace
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
+        for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+            result.connectionWeights[i] = neuralNetworkDesc._connectionWeights[i];
+        }
         return result;
     }
 
@@ -118,6 +127,9 @@ namespace
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
+        }
+        for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+            result.connectionWeights[i] = neuralNetworkDesc._connectionWeights[i];
         }
         return result;
     }

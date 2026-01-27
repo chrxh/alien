@@ -55,6 +55,8 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
         nn.weight(2, 1, 0.7f);
         nn._biases.at(1) = -0.4f;
         nn._activationFunctions.at(5) = 2 % ActivationFunction_Count;
+        nn._connectionWeights.at(0) = 0.5f;
+        nn._connectionWeights.at(2) = -0.3f;
         return ObjectDesc()
             .pos({0.5f, 0.8f})
             .vel({-0.3f, 0.7f})
@@ -139,6 +141,8 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
     nn.weight(4, 3, 0.8f);
     nn._biases.at(3) = -0.5f;
     nn._activationFunctions.at(2) = 1;
+    nn._connectionWeights.at(1) = 0.6f;
+    nn._connectionWeights.at(3) = -0.4f;
 
     return NodeDesc()
         .neuralNetwork(nn)

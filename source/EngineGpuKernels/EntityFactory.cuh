@@ -128,6 +128,9 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.neuralNetwork.biases[i] = nodeTO.neuralNetwork.biases[i];
                 node.neuralNetwork.activationFunctions[i] = nodeTO.neuralNetwork.activationFunctions[i];
             }
+            for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+                node.neuralNetwork.connectionWeights[i] = nodeTO.neuralNetwork.connectionWeights[i];
+            }
             node.signalRestriction.mode = nodeTO.signalRestriction.mode;
             node.signalRestriction.baseAngle = nodeTO.signalRestriction.baseAngle;
             node.signalRestriction.openingAngle = nodeTO.signalRestriction.openingAngle;
@@ -754,6 +757,9 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell.neuralNetwork->activationFunctions[i] = node->neuralNetwork.activationFunctions[i];
+    }
+    for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+        cell.neuralNetwork->connectionWeights[i] = node->neuralNetwork.connectionWeights[i];
     }
     cell.signalRestriction.mode = node->signalRestriction.mode;
     cell.signalRestriction.baseAngle = node->signalRestriction.baseAngle;

@@ -10,6 +10,7 @@ struct NeuralNetworkGenome
     float weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
+    float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
 struct BaseGenome
