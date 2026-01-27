@@ -155,12 +155,7 @@ struct AttackFreeCell
 };
 
 struct AttackCreature
-{
-    uint32_t minNumCells;     // 0 = no restriction
-    uint32_t maxNumCells;     // 0 = no restriction
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    LineageRestriction restrictToLineage;
-};
+{};
 
 union AttackerModeData
 {
@@ -478,6 +473,7 @@ struct Cell
     // General
     float usableEnergy;
     float rawEnergy;
+    float reservedEnergy;
     float frontAngle;  // May be invalid
     uint32_t age;
     CellState cellState;
@@ -514,7 +510,7 @@ struct Cell
 
     __device__ __inline__ float getEnergy() const
     {
-        auto result = usableEnergy + rawEnergy;
+        auto result = usableEnergy + rawEnergy + reservedEnergy;
         if (cellType == CellType_Depot) {
             result += cellTypeData.depot.storedUsableEnergy;
         }

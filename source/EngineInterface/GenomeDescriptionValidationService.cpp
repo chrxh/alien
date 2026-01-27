@@ -101,21 +101,6 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                         auto& value = freeCell._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
-                } else if (attackerMode == AttackerMode_Creature) {
-                    auto& creature = std::get<AttackCreatureGenomeDesc>(attacker._mode);
-                    if (creature._minNumCells.has_value()) {
-                        auto& value = creature._minNumCells.value();
-                        value = std::max(value, 0);
-                    }
-                    if (creature._maxNumCells.has_value()) {
-                        auto& value = creature._maxNumCells.value();
-                        value = std::max(value, 0);
-                    }
-                    if (creature._restrictToColor.has_value()) {
-                        auto& value = creature._restrictToColor.value();
-                        value = std::clamp(value, 0, MAX_COLORS - 1);
-                    }
-                    creature._restrictToLineage = std::clamp(creature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellType_Injector) {

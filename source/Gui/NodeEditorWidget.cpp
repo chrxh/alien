@@ -276,7 +276,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Auto activation interval
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
+                    AlienGui::InputIntParameters().name("Auto trigger interval###1").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
                 // Mode selection
                 auto mode = sensor.getMode();
@@ -370,21 +370,6 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     AlienGui::EndIndent();
 
-                } else if (mode == AttackerMode_Creature) {
-                    AlienGui::BeginIndent();
-
-                    auto& attackCreature = std::get<AttackCreatureGenomeDesc>(attacker._mode);
-                    AlienGui::InputOptionalInt(
-                        AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), attackCreature._minNumCells);
-                    AlienGui::InputOptionalInt(
-                        AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), attackCreature._maxNumCells);
-                    AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackCreature._restrictToColor);
-                    AlienGui::Combo(
-                        AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
-                        attackCreature._restrictToLineage);
-
-                    AlienGui::EndIndent();
                 }
 
                 AlienGui::EndIndent();
@@ -677,7 +662,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 // Auto activation interval
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
+                    AlienGui::InputIntParameters().name("Auto trigger interval###2").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
 
                 // Construction activation time
                 AlienGui::InputInt(

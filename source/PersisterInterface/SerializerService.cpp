@@ -386,10 +386,6 @@ namespace cereal
     {
         AttackCreatureGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackCreatureGenomeDesc)
@@ -776,6 +772,7 @@ namespace
 
     auto constexpr Id_Cell_UsableEnergy = 0;
     auto constexpr Id_Cell_RawEnergy = 1;
+    auto constexpr Id_Cell_ReservedEnergy = 17;
     auto constexpr Id_Cell_Age = 2;
     auto constexpr Id_Cell_CellState = 3;
     auto constexpr Id_Cell_ActivationTime = 4;
@@ -1149,10 +1146,6 @@ namespace cereal
     {
         AttackCreatureDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_AttackerMode_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        loadSave(task, auxiliaries, Id_AttackerMode_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        loadSave(task, auxiliaries, Id_AttackerMode_Creature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_AttackerMode_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackCreatureDesc)
@@ -1478,6 +1471,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Cell_UsableEnergy, data._usableEnergy, defaultObject._usableEnergy);
         loadSave(task, auxiliaries, Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        loadSave(task, auxiliaries, Id_Cell_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
         loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
         loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);

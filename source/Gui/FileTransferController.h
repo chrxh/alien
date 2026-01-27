@@ -16,8 +16,10 @@ class FileTransferController : public MainLoopEntity
 public:
     void onOpenSimulationDialog();
     void onOpenSimulation(std::filesystem::path const& filename);
-
     void onSaveSimulationDialog();
+
+    void onOpenGenomeDialog(std::function<void(GenomeDesc const&)> const& openFunc);
+    void onSaveGenomeDialog(GenomeDesc const& genome);
 
 private:
     void init() override;

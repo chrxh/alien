@@ -51,7 +51,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
         for (int i = 0, j = object->numConnections; i < j; ++i) {
             auto connectedObject = object->connections[i].object;
             // Skip Structure and FreeCell objects for signal propagation
-            if (connectedObject->type != ObjectType_Cell ) {
+            if (connectedObject->type != ObjectType_Cell) {
                 continue;
             }
             if (connectedObject->typeData.cell.cellState == CellState_Constructing || connectedObject->typeData.cell.signalState != SignalState_Active) {
@@ -61,7 +61,8 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
             auto restrictionMode = connectedObject->typeData.cell.signalRestriction.mode;
             
             if (restrictionMode == SignalRestrictionMode_Active || restrictionMode == SignalRestrictionMode_Conditional) {
-                float signalAngleRestrictionStart = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle - connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
+                float signalAngleRestrictionStart =
+                    180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle - connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
                 float signalAngleRestrictionEnd = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle + connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
 
                 float connectionAngle = 0;
@@ -79,7 +80,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
                         }
                         break;
                     }
-                    connectionAngle += connectedObject->connections[k].angleFromPrevious;
+                    connectionAngle += connectedObject->getConnection(k + 1).angleFromPrevious;
                 }
                 if (skip) {
                     continue;
@@ -103,7 +104,7 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
+        if (object->type != ObjectType_Cell) {
             continue;
         }
 

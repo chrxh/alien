@@ -183,7 +183,7 @@ void EngineWorker::setBarrier(bool value, bool includeClusters)
     _simulationCudaFacade->setBarrier(value, includeClusters);
 }
 
-void EngineWorker::changeCell(ObjectDesc const& changedCell)
+void EngineWorker::changeCell(ExtendedObjectDesc const& changedCell)
 {
     EngineWorkerGuard access(this);
 

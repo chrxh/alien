@@ -101,6 +101,9 @@ __device__ __inline__ void MuscleProcessor::restoreInitialAngleFromPrevious(Obje
 
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
+    if (object->fixed) {
+        return;
+    }
     object->typeData.cell.cellTypeData.muscle.lastMovementX = 0;
     object->typeData.cell.cellTypeData.muscle.lastMovementY = 0;
 

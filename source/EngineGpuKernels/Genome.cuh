@@ -86,12 +86,7 @@ struct AttackFreeCellGenome
 };
 
 struct AttackCreatureGenome
-{
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    LineageRestriction restrictToLineage;
-};
+{};
 
 union AttackerModeGenome
 {

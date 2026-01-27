@@ -2575,9 +2575,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
     auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
 
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
+        EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
+        EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._reservedEnergy));
         auto newConstructor = actualConstructedCell.getCellRef()._constructor.value();
         if (separation == Separation::Yes) {
             EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
@@ -2585,11 +2588,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
             EXPECT_EQ(ProvideEnergy_FreeGeneration, newConstructor._provideEnergy);
         }
     } else {
-        EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2), actualConstructedCell.getCellRef()._rawEnergy));
+            EXPECT_TRUE(approxCompare(0, actualConstructedCell.getCellRef()._rawEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2), actualConstructedCell.getCellRef()._reservedEnergy));
         } else {
             EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
+            EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._reservedEnergy));
         }
     }
 }
@@ -2679,17 +2683,65 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
     auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(0, actualConstructedCell.getCellRef()._rawEnergy));
+
+    EXPECT_TRUE(approxCompare(0, actualData.getObjectRef(0).getCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(0, actualData.getObjectRef(0).getCellRef()._reservedEnergy));
 
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
+        EXPECT_TRUE(approxCompare(0, actualConstructedCell.getCellRef()._reservedEnergy));
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
     } else {
-        EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * 2, actualConstructedCell.getCellRef()._rawEnergy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * 2, actualConstructedCell.getCellRef()._reservedEnergy));
         } else {
-            EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
+            EXPECT_TRUE(approxCompare(0, actualConstructedCell.getCellRef()._reservedEnergy));
         }
     }
+}
+
+TEST_F(ConstructorTests, constructWithReservedEnergy)
+{
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = Desc().addCreature(
+        {ObjectDesc()
+             .pos({100.0f, 100.0f})
+             .type(CellDesc()
+                       .usableEnergy(normalCellEnergy * 1.5)
+                       .reservedEnergy(normalCellEnergy / 2 + NEAR_ZERO)
+                       .constructor(ConstructorDesc().autoTriggerInterval(3)))},
+        CreatureDesc().id(0),
+        GenomeDesc().genes({
+            GeneDesc().separation(true).nodes({NodeDesc()}),
+        }));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(2, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    auto hostCreature = actualData.getCreatureRef(0);
+    ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
+    EXPECT_EQ(1, hostCreature._numObjects);
+
+    auto newCreature = actualData.getOtherCreatureRef(0);
+    ASSERT_EQ(1, actualData.getObjectsForCreature(newCreature._id).size());
+    EXPECT_EQ(1, newCreature._numObjects);
+
+    auto hostObject = actualData.getObjectsForCreature(hostCreature._id).front();
+    auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
+    EXPECT_TRUE(approxCompare(normalCellEnergy, hostObject.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(0, hostObject.getCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(0, hostObject.getCellRef()._reservedEnergy));
+
+    EXPECT_TRUE(approxCompare(normalCellEnergy, newObject.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(0, newObject.getCellRef()._rawEnergy));
+    EXPECT_TRUE(approxCompare(0, newObject.getCellRef()._reservedEnergy));
 }
 
 class ConstructorTests_ProvideEnergy

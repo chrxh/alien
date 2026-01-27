@@ -78,6 +78,42 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
     EXPECT_EQ(2, object2.getCellRef()._signalState);
 }
 
+TEST_F(SignalTests, forwardSignal_withOtherConnections)
+{
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
+    auto data = Desc().addCreature({
+        ObjectDesc()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .type(CellDesc()
+                      .nodeIndex(15)
+                      .signal(SignalDesc().channels(signal))
+                      .signalState(SignalState_Active)
+                      .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).openingAngle(90.0f).baseAngle(0))),
+        ObjectDesc().id(2).pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(120.0f)).type(CellDesc()),
+        ObjectDesc().id(3).pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(300.0f)).type(CellDesc().nodeIndex(16)),
+        ObjectDesc()
+            .id(4)
+            .pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(0))
+            .type(CellDesc()
+                      .signal(SignalDesc().channels(signal))
+                      .signalState(SignalState_Active)
+                      .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).openingAngle(0).baseAngle(0))),
+        ObjectDesc().id(5).pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(60.0f)).type(CellDesc().signalState(SignalState_Fading)),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+    data.addConnection(1, 4);
+    data.addConnection(1, 5);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto object2 = actualData.getObjectRef(3);
+    EXPECT_EQ(SignalState_Active, object2.getCellRef()._signalState);
+}
+
 TEST_F(SignalTests, vanishSignal_singleCell)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};

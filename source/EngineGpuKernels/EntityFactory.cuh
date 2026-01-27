@@ -37,7 +37,7 @@ public:
         float2 pos,
         float2 vel,
         float usableEnergy,
-        float rawEnergy);
+        float reservedEnergy);
 
     __inline__ __device__ Genome* createEmptyGenome();
     __inline__ __device__ Creature* createEmptyCreature();
@@ -169,11 +169,6 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.attacker.mode = nodeTO.cellTypeData.attacker.mode;
                 if (nodeTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
                     node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
-                } else if (nodeTO.cellTypeData.attacker.mode == AttackerMode_Creature) {
-                    node.cellTypeData.attacker.modeData.attackCreature.minNumCells = nodeTO.cellTypeData.attacker.modeData.attackCreature.minNumCells;
-                    node.cellTypeData.attacker.modeData.attackCreature.maxNumCells = nodeTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells;
-                    node.cellTypeData.attacker.modeData.attackCreature.restrictToColor = nodeTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-                    node.cellTypeData.attacker.modeData.attackCreature.restrictToLineage = nodeTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
                 }
                 break;
             case CellType_Injector:
@@ -355,6 +350,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->cellState = cellTO.cellState;
         cell->usableEnergy = cellTO.usableEnergy;
         cell->rawEnergy = cellTO.rawEnergy;
+        cell->reservedEnergy = cellTO.reservedEnergy;
         cell->cellType = cellTO.cellType;
         cell->age = cellTO.age;
         cell->frontAngle = cellTO.frontAngle;
@@ -433,15 +429,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             if (cellTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
                 cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor =
                     cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
-            } else if (cellTO.cellTypeData.attacker.mode == AttackerMode_Creature) {
-                cell->cellTypeData.attacker.modeData.attackCreature.minNumCells =
-                    cellTO.cellTypeData.attacker.modeData.attackCreature.minNumCells;
-                cell->cellTypeData.attacker.modeData.attackCreature.maxNumCells =
-                    cellTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells;
-                cell->cellTypeData.attacker.modeData.attackCreature.restrictToColor =
-                    cellTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-                cell->cellTypeData.attacker.modeData.attackCreature.restrictToLineage =
-                    cellTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
             }
         } break;
         case CellType_Injector: {
@@ -720,7 +707,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     float2 pos,
     float2 vel,
     float usableEnergy,
-    float rawEnergy)
+    float reservedEnergy)
 {
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
@@ -747,7 +734,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     auto& cell = object->typeData.cell;
     cell.frontAngle = VALUE_NOT_SET_FLOAT;
     cell.usableEnergy = usableEnergy;
-    cell.rawEnergy = rawEnergy;
+    cell.rawEnergy = 0.0f;
+    cell.reservedEnergy = reservedEnergy;
     cell.age = 0;
     cell.cellState = CellState_Constructing;
     cell.creature = creature;
@@ -822,11 +810,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         attacker.mode = nodeAttacker.mode;
         if (nodeAttacker.mode == AttackerMode_FreeCell) {
             attacker.modeData.attackFreeCell.restrictToColor = nodeAttacker.modeData.attackFreeCell.restrictToColor;
-        } else if (nodeAttacker.mode == AttackerMode_Creature) {
-            attacker.modeData.attackCreature.minNumCells = nodeAttacker.modeData.attackCreature.minNumCells;
-            attacker.modeData.attackCreature.maxNumCells = nodeAttacker.modeData.attackCreature.maxNumCells;
-            attacker.modeData.attackCreature.restrictToColor = nodeAttacker.modeData.attackCreature.restrictToColor;
-            attacker.modeData.attackCreature.restrictToLineage = nodeAttacker.modeData.attackCreature.restrictToLineage;
         }
     } break;
     case CellType_Injector: {

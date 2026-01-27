@@ -124,7 +124,7 @@ void _InspectorWindow::processCell(ExtendedObjectDesc& extendedCell)
         ImGui::EndTabBar();
 
         if (object != origCell) {
-            _SimulationFacade::get()->changeCell(object);
+            _SimulationFacade::get()->changeCell(extendedCell);
         }
     }
 }
@@ -149,11 +149,13 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                 AlienGui::ComboColor(
                     AlienGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), object._color);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Usable energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip), object.getCellRef()._usableEnergy);
+                    AlienGui::InputFloatParameters().name("Usable energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._usableEnergy);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Raw energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip),
-                    object.getCellRef()._rawEnergy);
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), object.getCellRef()._age);
+                    AlienGui::InputFloatParameters().name("Raw energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._rawEnergy);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._reservedEnergy);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), object.getCellRef()._age);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(BaseTabTextWidth), object._pos.x);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(BaseTabTextWidth), object._pos.y);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(BaseTabTextWidth), object._vel.x);
@@ -600,17 +602,6 @@ void _InspectorWindow::processAttackerContent(AttackerDesc& attacker)
             auto& attackFreeCell = std::get<AttackFreeCellDesc>(attacker._mode);
             if (attackFreeCell._restrictToColor.has_value()) {
                 ImGui::Text("Restrict to color: %d", *attackFreeCell._restrictToColor);
-            }
-        } else if (mode == AttackerMode_Creature) {
-            auto& attackCreature = std::get<AttackCreatureDesc>(attacker._mode);
-            if (attackCreature._minNumCells.has_value()) {
-                ImGui::Text("Min creature cells: %d", *attackCreature._minNumCells);
-            }
-            if (attackCreature._maxNumCells.has_value()) {
-                ImGui::Text("Max creature cells: %d", *attackCreature._maxNumCells);
-            }
-            if (attackCreature._restrictToColor.has_value()) {
-                ImGui::Text("Restrict to color: %d", *attackCreature._restrictToColor);
             }
         }
         ImGui::TreePop();

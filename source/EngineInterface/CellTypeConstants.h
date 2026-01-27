@@ -230,7 +230,7 @@ enum GeneratorPulseType_
 //********************
 namespace Channels
 {
-    auto constexpr SensorForceInitialScan = 0;
+    auto constexpr SensorWithRelocationScan = 0;
     auto constexpr SensorFoundResult = 0;
     auto constexpr SensorAngle = 1;
     auto constexpr SensorMass = 2;  // numCells for SensorMode_DetectCreature and density for other modes except SensorMode_Telemetry

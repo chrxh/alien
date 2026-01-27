@@ -549,7 +549,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "influenced by other factors adjustable within the attacker's simulation parameters."),
                     ParameterSpec()
                         .name("Attack radius")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0.0f).max(3.0f))
+                        .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0.0f).max(4.0f))
                         .description("The maximum distance over which an attacker cell can attack another cell."),
                 }),
             ParameterGroupSpec()
