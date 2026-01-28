@@ -8,8 +8,6 @@
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
-// NeuralNetworkGenomeTO weights stored as half precision (FP16) for memory efficiency
-// and consistency with NeuralNetwork/NeuralNetworkTO runtime structures
 struct NeuralNetworkGenomeTO
 {
     half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores
@@ -250,7 +248,7 @@ struct MemoryGenomeTO
 
     uint8_t numSignalEntries;
     uint16_t channelBitMask;
-    uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
+    uint64_t signalEntriesDataIndex;
 };
 
 struct SenderGenomeTO

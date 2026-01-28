@@ -53,7 +53,7 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
 __inline__ __device__ void NeuronProcessor::processCellWMMA(SimulationData& data, SimulationStatistics& statistics, Object* cell)
 {
     auto block = cg::this_thread_block();
-    const int laneId = block.thread_rank();
+    auto laneId = block.thread_rank();
 
     auto* nn = cell->typeData.cell.neuralNetwork;
     auto& signal = cell->typeData.cell.signal;
@@ -66,22 +66,18 @@ __inline__ __device__ void NeuronProcessor::processCellWMMA(SimulationData& data
     __shared__ __align__(32) half sharedB[WMMA_K * WMMA_N];  // Diagonal inputs (16x16)
     __shared__ __align__(32) float sharedC[WMMA_M * WMMA_N]; // Outputs (16x16)
 
-    // Initialize B matrix to zero (only diagonal elements will be set to inputs)
-    // Note: A will be fully overwritten below, C is initialized by fill_fragment
+    // Init matrix B to zero
     for (int i = laneId; i < WMMA_K * WMMA_N; i += 32) {
         sharedB[i] = __float2half(0.0f);
     }
     block.sync();
 
-    // Load 16x16 weight matrix directly - perfect fit for tensor cores!
-    // Weights are already stored as half precision - no conversion needed!
-    // Each thread loads 8 elements (256 total / 32 threads)
+    // Init matrix A with weights
     for (int elem = laneId; elem < MAX_CHANNELS * MAX_CHANNELS; elem += 32) {
-        sharedA[elem] = nn->weights[elem];  // Direct copy, already half precision
+        sharedA[elem] = nn->weights[elem];
     }
 
-    // Load input signals onto the diagonal of B matrix
-    // B[k][k] = input[k], all other elements are 0
+    // Init matrix B as diagonal matrix:
     // This makes C = A × B equivalent to each column k of C being A[:,k] × input[k]
     // Summing row i gives: sum_k(A[i][k] × input[k]) = dot(weights[i], input)
     for (int ch = laneId; ch < MAX_CHANNELS; ch += 32) {
@@ -121,7 +117,6 @@ __inline__ __device__ void NeuronProcessor::processCellWMMA(SimulationData& data
         // Add bias
         sum += nn->biases[ch];
 
-        // Apply activation function and clamp
         float output = applyActivationFunction(nn->activationFunctions[ch], sum);
         output = max(-2.0f, min(2.0f, output));
 

@@ -50,9 +50,6 @@ struct ObjectConnection
     float angleFromPrevious;
 };
 
-// NeuralNetwork weights stored as half precision (FP16) for memory efficiency
-// and optimal tensor core usage. Saves 50% memory compared to float storage.
-// With MAX_CHANNELS=16: weights = 256 half = 512 bytes (was 1024 bytes with float)
 struct NeuralNetwork
 {
     half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores

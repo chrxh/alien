@@ -7,8 +7,6 @@
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
-// NeuralNetworkGenome weights stored as half precision (FP16) for memory efficiency
-// and consistency with NeuralNetwork/NeuralNetworkTO/NeuralNetworkGenomeTO
 struct NeuralNetworkGenome
 {
     half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores

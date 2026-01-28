@@ -29,8 +29,6 @@ struct ConnectionTO
     float angleFromPrevious;
 };
 
-// NeuralNetworkTO weights stored as half precision (FP16) for memory efficiency
-// and consistency with NeuralNetwork runtime structure
 struct NeuralNetworkTO
 {
     half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores
