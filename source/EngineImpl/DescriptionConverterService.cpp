@@ -69,7 +69,7 @@ namespace
     {
         NeuralNetworkGenomeDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result._weights[i] = neuralNetworkGenomeTO.weights[i];
+            result._weights[i] = __half2float(neuralNetworkGenomeTO.weights[i]);  // Convert half to float
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._biases[i] = neuralNetworkGenomeTO.biases[i];
@@ -109,7 +109,8 @@ namespace
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             auto col = i / MAX_CHANNELS;
             auto row = i % MAX_CHANNELS;
-            result.weights[i] = col < numInputChannels && row < numInputChannels ? neuralNetworkDesc._weights[row + col * numInputChannels] : 0.0f;
+            float value = col < numInputChannels && row < numInputChannels ? neuralNetworkDesc._weights[row + col * numInputChannels] : 0.0f;
+            result.weights[i] = __float2half(value);  // Convert float to half
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result.biases[i] = i < numInputChannels ? neuralNetworkDesc._biases[i] : 0.0f;

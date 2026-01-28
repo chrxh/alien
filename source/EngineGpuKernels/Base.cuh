@@ -2,7 +2,10 @@
 
 #include <vector>
 
+#include <cuda_fp16.h>
+
 #include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/EngineConstants.h>
 
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
@@ -317,5 +320,33 @@ __device__ __inline__ void bubbleSort(Container& container, int size, LessFunc l
         } else {
             break;
         }
+    }
+}
+
+// Efficient channel copy using unrolled loop
+// Copies MAX_CHANNELS floats from src to dst
+__device__ __forceinline__ void copyChannels(float* __restrict__ dst, float const* __restrict__ src)
+{
+    #pragma unroll
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        dst[i] = src[i];
+    }
+}
+
+// Efficient channel copy with accumulation (dst[i] += src[i])
+__device__ __forceinline__ void addChannels(float* __restrict__ dst, float const* __restrict__ src)
+{
+    #pragma unroll
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        dst[i] += src[i];
+    }
+}
+
+// Efficient channel clear (set all to zero)
+__device__ __forceinline__ void clearChannels(float* __restrict__ dst)
+{
+    #pragma unroll
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        dst[i] = 0.0f;
     }
 }
