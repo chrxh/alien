@@ -249,7 +249,7 @@ struct MemoryGenomeTO
     MemoryModeDataGenomeTO modeData;
 
     uint8_t numSignalEntries;
-    uint8_t channelBitMask;
+    uint16_t channelBitMask;
     uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
 };
 

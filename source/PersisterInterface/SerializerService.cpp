@@ -286,7 +286,6 @@ namespace
     auto constexpr Id_SenderGenome_Range = 0;
     auto constexpr Id_SenderGenome_MaxTimesSent = 1;
 
-    auto constexpr Id_ReceiverGenome_ChannelBitMask = 0;
     auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
     auto constexpr Id_ReceiverGenome_RestrictToLineage = 2;
 }

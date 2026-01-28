@@ -594,6 +594,10 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::MultiCheckboxesParameters().name("Channel mask bit 0-3").textWidth(rightColumnWidth), bit[0], bit[1], bit[2], bit[3]);
                 AlienGui::MultiCheckboxes(
                     AlienGui::MultiCheckboxesParameters().name("Channel mask bit 4-7").textWidth(rightColumnWidth), bit[4], bit[5], bit[6], bit[7]);
+                AlienGui::MultiCheckboxes(
+                    AlienGui::MultiCheckboxesParameters().name("Channel mask bit 8-11").textWidth(rightColumnWidth), bit[8], bit[9], bit[10], bit[11]);
+                AlienGui::MultiCheckboxes(
+                    AlienGui::MultiCheckboxesParameters().name("Channel mask bit 12-15").textWidth(rightColumnWidth), bit[12], bit[13], bit[14], bit[15]);
                 memory._channelBitMask = 0;
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
                     if (bit[i]) {

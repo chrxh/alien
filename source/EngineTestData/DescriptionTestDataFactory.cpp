@@ -754,7 +754,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         default:
             memoryModeDesc = MemoryModeDesc();
         }
-        auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b01010101);
+        auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 10; ++i) {
             SignalEntryDesc entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
@@ -902,7 +902,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         default:
             memoryModeDesc = MemoryModeGenomeDesc();
         }
-        auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b10101010);
+        auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 5; ++i) {
             SignalEntryGenomeDesc entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {

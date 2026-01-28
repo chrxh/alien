@@ -386,7 +386,7 @@ struct MemoryDesc
 
     MEMBER(MemoryDesc, MemoryModeDesc, mode, SignalDelayDesc());
     MEMBER(MemoryDesc, std::vector<SignalEntryDesc>, signalEntries, {});
-    MEMBER(MemoryDesc, uint8_t, channelBitMask, 0b11111111);
+    MEMBER(MemoryDesc, uint16_t, channelBitMask, 0b1111111111111111);
 
     MemoryMode getMode() const;
 };
