@@ -74,7 +74,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .frontAngleId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}).numTimesSent(5))
+                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).numTimesSent(5))
                       .signalState(SignalState_Active)
                       .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
                       .constructor(ConstructorDesc()
@@ -209,8 +209,11 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     }
     auto const& cell = object.getCellRef();
 
+    // Use approximate comparison for weights due to int8_t serialization
+    // Weights are stored as int8_t with scale factor of 32, giving ~0.03 quantization step
+    constexpr float weightSerializationTolerance = 0.04f;
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-        if (cell._neuralNetwork._weights[i] != node._neuralNetwork._weights[i]) {
+        if (!TestHelper::approxCompare(cell._neuralNetwork._weights[i], node._neuralNetwork._weights[i], weightSerializationTolerance)) {
             return false;
         }
     }
@@ -751,7 +754,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         default:
             memoryModeDesc = MemoryModeDesc();
         }
-        auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b01010101);
+        auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 10; ++i) {
             SignalEntryDesc entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
@@ -899,7 +902,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         default:
             memoryModeDesc = MemoryModeGenomeDesc();
         }
-        auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b10101010);
+        auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 5; ++i) {
             SignalEntryGenomeDesc entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {

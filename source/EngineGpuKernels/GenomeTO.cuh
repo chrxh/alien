@@ -2,13 +2,15 @@
 
 #include <cstdint>
 
+#include <cuda_fp16.h>
+
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
 struct NeuralNetworkGenomeTO
 {
-    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
@@ -245,8 +247,8 @@ struct MemoryGenomeTO
     MemoryModeDataGenomeTO modeData;
 
     uint8_t numSignalEntries;
-    uint8_t channelBitMask;
-    uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
+    uint16_t channelBitMask;
+    uint64_t signalEntriesDataIndex;
 };
 
 struct SenderGenomeTO

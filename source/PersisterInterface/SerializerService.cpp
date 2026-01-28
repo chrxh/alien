@@ -1,5 +1,6 @@
 #include "SerializerService.h"
 
+#include <cmath>
 #include <filesystem>
 #include <optional>
 #include <sstream>
@@ -114,6 +115,50 @@ namespace cereal
     {
         if (task == SerializationTask::Save) {
             ar(loadSaveMap);
+        }
+    }
+
+    // Specialized loadSave for neural network weights: converts float to int8_t for compact storage
+    // Assumes weights are in range [-4, 4], maps to [-128, 127]
+    // This reduces file size by 4x for weights (4 bytes per float -> 1 byte per weight)
+    void loadSaveWeights(
+        SerializationTask task,
+        std::unordered_map<int, VariantData>& loadSaveMap,
+        int key,
+        std::vector<float>& value,
+        std::vector<float> const& defaultValue)
+    {
+        constexpr float scale = 32.0f;  // Range [-4, 4] maps to [-128, 127]
+        if (task == SerializationTask::Load) {
+            auto findResult = loadSaveMap.find(key);
+            if (findResult != loadSaveMap.end()) {
+                auto& variantData = findResult->second;
+                // Check if the stored data is already in compressed int8_t format
+                if (std::holds_alternative<std::vector<int8_t>>(variantData)) {
+                    auto& compressedWeights = std::get<std::vector<int8_t>>(variantData);
+                    value.resize(compressedWeights.size());
+                    for (size_t i = 0; i < compressedWeights.size(); ++i) {
+                        value[i] = static_cast<float>(compressedWeights[i]) / scale;
+                    }
+                } else if (std::holds_alternative<std::vector<float>>(variantData)) {
+                    // Legacy format: floats stored directly (for backward compatibility)
+                    value = std::get<std::vector<float>>(variantData);
+                } else {
+                    value = defaultValue;
+                }
+            } else {
+                value = defaultValue;
+            }
+        } else {
+            // Save: convert floats to int8_t
+            std::vector<int8_t> compressedWeights(value.size());
+            for (size_t i = 0; i < value.size(); ++i) {
+                float scaled = value[i] * scale;
+                // Clamp to int8_t range
+                scaled = std::max(-128.0f, std::min(127.0f, scaled));
+                compressedWeights[i] = static_cast<int8_t>(std::round(scaled));
+            }
+            loadSaveMap.emplace(key, compressedWeights);
         }
     }
 
@@ -241,7 +286,6 @@ namespace
     auto constexpr Id_SenderGenome_Range = 0;
     auto constexpr Id_SenderGenome_MaxTimesSent = 1;
 
-    auto constexpr Id_ReceiverGenome_ChannelBitMask = 0;
     auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
     auto constexpr Id_ReceiverGenome_RestrictToLineage = 2;
 }
@@ -253,7 +297,7 @@ namespace cereal
     {
         NeuralNetworkGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Weights, data._weights, defaultObject._weights);
+        loadSaveWeights(task, auxiliaries, Id_NeuralNetworkGenome_Weights, data._weights, defaultObject._weights);
         loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Biases, data._biases, defaultObject._biases);
         loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
         loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
@@ -1001,7 +1045,7 @@ namespace cereal
     {
         NeuralNetworkDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_Weights, data._weights, defaultObject._weights);
+        loadSaveWeights(task, auxiliaries, Id_NeuralNetwork_Weights, data._weights, defaultObject._weights);
         loadSave(task, auxiliaries, Id_NeuralNetwork_Biases, data._biases, defaultObject._biases);
         loadSave(task, auxiliaries, Id_NeuralNetwork_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
         loadSave(task, auxiliaries, Id_NeuralNetwork_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);

@@ -50,7 +50,7 @@ TEST_F(DetonatorTests, activateDetonator)
 {
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(DetonatorDesc().countdown(10))),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc()).signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc()).signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
     });
     data.addConnection(1, 2);
 

@@ -321,7 +321,7 @@ struct MemoryGenomeDesc
 
     MEMBER(MemoryGenomeDesc, MemoryModeGenomeDesc, mode, SignalDelayGenomeDesc());
     MEMBER(MemoryGenomeDesc, std::vector<SignalEntryGenomeDesc>, signalEntries, {});
-    MEMBER(MemoryGenomeDesc, uint8_t, channelBitMask, 0b11111111);
+    MEMBER(MemoryGenomeDesc, uint16_t, channelBitMask, 0b1111111111111111);
 
     MemoryMode getMode() const;
 };

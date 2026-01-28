@@ -33,7 +33,7 @@ TEST_F(SignalTests, noSignal)
 
 TEST_F(SignalTests, forwardSignal)
 {
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal).numTimesSent(3)).signalState(SignalState_Active)),
         ObjectDesc().id(2).pos({1, 0}),
@@ -57,7 +57,7 @@ TEST_F(SignalTests, forwardSignal)
 
 TEST_F(SignalTests, forwardSignal_detailedPreview)
 {
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signalAndState(signal)),
         ObjectDesc().id(2).pos({1, 0}),
@@ -80,7 +80,7 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
 
 TEST_F(SignalTests, forwardSignal_withOtherConnections)
 {
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc()
             .id(1)
@@ -116,7 +116,7 @@ TEST_F(SignalTests, forwardSignal_withOtherConnections)
 
 TEST_F(SignalTests, vanishSignal_singleCell)
 {
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signalAndState(signal)),
     });
@@ -131,7 +131,7 @@ TEST_F(SignalTests, vanishSignal_singleCell)
 
 TEST_F(SignalTests, vanishSignal_relaxationNeeded)
 {
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal))),
         ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalState(1)),
@@ -148,8 +148,8 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
 
 TEST_F(SignalTests, mergeSignals)
 {
-    std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, -1.0f, 0.0f};
-    std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f};
+    std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, -1.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
+    std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal1).numTimesSent(7)).signalState(SignalState_Active)),
         ObjectDesc().id(2).pos({1, 0}),
@@ -184,7 +184,7 @@ TEST_F(SignalTests, mergeSignals)
 
 TEST_F(SignalTests, forkSignals)
 {
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}),
         ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signal(SignalDesc().channels(signal).numTimesSent(5)).signalState(SignalState_Active)),
@@ -230,7 +230,7 @@ INSTANTIATE_TEST_SUITE_P(SignalTests_BothSides, SignalTests_BothSides, ::testing
 TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
 {
     auto side = GetParam();
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}),
         ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal).signalRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f)),
@@ -260,7 +260,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
 TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
 {
     auto side = GetParam();
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}),
         ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal).signalRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f)),
@@ -288,7 +288,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
 TEST_F(SignalTests, conditionalMode_outsideCone_alwaysBlocked)
 {
     // Conditional mode: signals outside the cone are always blocked, regardless of channel[0]
-    std::vector<float> signal = {0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0.5 >= 0
+    std::vector<float> signal = {0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};  // channel[0] = 0.5 >= 0
 
     // Cell 2 has conditional restriction - signal to cell 3 is outside the cone
     auto cell2Desc = ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal));
@@ -315,7 +315,7 @@ TEST_F(SignalTests, conditionalMode_outsideCone_alwaysBlocked)
 TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
 {
     // Conditional mode: signals inside the cone are blocked if channel[0] < 0
-    std::vector<float> signal = {-0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = -0.5 < 0
+    std::vector<float> signal = {-0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};  // channel[0] = -0.5 < 0
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone but channel[0] < 0
     auto cell2Desc = ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal));
@@ -342,7 +342,7 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
 TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
 {
     // Conditional mode: signals inside the cone pass if channel[0] >= 0
-    std::vector<float> signal = {0.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0 >= 0
+    std::vector<float> signal = {0.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};  // channel[0] = 0 >= 0
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone and channel[0] >= 0
     auto cell2Desc = ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal));
@@ -370,7 +370,7 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
 TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
 {
     // Conditional mode: signals inside the cone pass if channel[0] >= 0
-    std::vector<float> signal = {0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0.5 >= 0
+    std::vector<float> signal = {0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};  // channel[0] = 0.5 >= 0
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone and channel[0] >= 0
     auto cell2Desc = ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal));
@@ -398,7 +398,7 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
 TEST_F(SignalTests, inactiveMode_noRestriction)
 {
     // Inactive mode means no restriction regardless of angles
-    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
 
     // Cell 2 has inactive restriction - signal should pass even with restrictive angles
     auto cell2Desc = ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalAndState(signal));

@@ -89,7 +89,7 @@ void SimulationKernelsService::launchTimestepKernels(
     // Signal processing
     STREAM_KERNEL_CALL(cudaNextTimestep_signal_calcFutureSignals, _stream, numBlocks, data);
     STREAM_KERNEL_CALL(cudaNextTimestep_signal_updateSignals, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, _stream, numBlocks, MAX_CHANNELS * MAX_CHANNELS, data, statistics);
+    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, _stream, numBlocks, 32, data, statistics);  // 32 threads (one warp) for WMMA tensor core operations
 
     // Energy flow
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
@@ -256,7 +256,7 @@ void SimulationKernelsService::launchPreviewKernels(
         // Signal processing
         STREAM_KERNEL_CALL(cudaNextTimestep_signal_calcFutureSignals, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_signal_updateSignals, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, _stream, numBlocks, MAX_CHANNELS * MAX_CHANNELS, data, statistics);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, _stream, numBlocks, 32, data, statistics);  // 32 threads (one warp) for WMMA tensor core operations
 
         // Energy flow
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);

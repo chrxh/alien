@@ -26,7 +26,7 @@ namespace
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
-    auto constexpr SignalTextWidth = 25.0f;
+    auto constexpr SignalTextWidth = 40.0f;
 }
 
 
@@ -386,9 +386,9 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
     CHECK(selectedCell.has_value());
 
 
-    ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(220.0f), ImGui::GetScrollY() + scale(13.0f)});
+    ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(440.0f), ImGui::GetScrollY() + scale(13.0f)});
     auto height = selectedCell->_signalState == SignalState_Active ? scale(168.0f) : scale(67.0f);
-    if (ImGui::BeginChild("signalEditor", ImVec2(scale(190), height), ImGuiChildFlags_FrameStyle)) {
+    if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), height), ImGuiChildFlags_FrameStyle)) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
         int signalState = selectedCell->_signalState; 
@@ -408,24 +408,28 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
             }
             auto& channels = selectedCell->_signal->_channels;
             int index = 0;
-            if (ImGui::BeginChild("1", ImVec2(scale(85), scale(0)))) {
-                for (auto& channel : channels | std::views::take(4)) {
-                    phenotypeChanged |= AlienGui::SliderFloat(
-                        AlienGui::SliderFloatParameters().name("#" + std::to_string(index)).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f), &channel);
-                    ++index;
+            for (int i = 0; i < MAX_CHANNELS / 4; ++i) {
+                ImGui::PushID(i);
+                if (ImGui::BeginChild("", ImVec2(scale(95), scale(0)))) {
+                    for (int j = 0; j < 4; ++j) {
+                        auto& channel = channels.at(i * 4 + j);
+                        phenotypeChanged |= AlienGui::SliderFloat(
+                            AlienGui::SliderFloatParameters()
+                                .name("#" + std::to_string(index))
+                                .format("%.3f")
+                                .textWidth(SignalTextWidth)
+                                .min(-2.0f)
+                                .max(2.0f),
+                            &channel);
+                        ++index;
+                }
+                }
+                ImGui::EndChild();
+                ImGui::PopID();
+                if (i < MAX_CHANNELS / 4 - 1) {
+                    ImGui::SameLine();
                 }
             }
-            ImGui::EndChild();
-            ImGui::SameLine();
-            if (ImGui::BeginChild("2", ImVec2(scale(85), scale(0)))) {
-                for (auto& channel : channels | std::views::drop(4)) {
-                    phenotypeChanged |= AlienGui::SliderFloat(
-                        AlienGui::SliderFloatParameters().name("#" + std::to_string(index)).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f),
-                        &channel);
-                    ++index;
-                }
-            }
-            ImGui::EndChild();
 
             style.GrabMinSize = originalGrabMinSize; 
             ImGui::PopStyleColor();

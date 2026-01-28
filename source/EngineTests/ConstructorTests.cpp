@@ -202,7 +202,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 {
     auto data = Desc().addCreature({
             ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))),  // Not enough energy
-            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         }, CreatureDesc().id(0), GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
     data.addConnection(0, 1);
 
@@ -232,7 +232,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 {
     auto data = Desc().addCreature({
             ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))),
-            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         }, CreatureDesc().id(0), GenomeDesc().genes({GeneDesc().separation(false).nodes({NodeDesc()})}));
     data.addConnection(0, 1);
 

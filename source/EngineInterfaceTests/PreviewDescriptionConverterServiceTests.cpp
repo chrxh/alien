@@ -512,7 +512,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
         GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
     });
 
-    std::vector<float> signal{0.2f, 0.2f, 0.2f, 0.8f, 0.2f, -1.2f, 0.2f, -0.2f};
+    std::vector<float> signal{0.2f, 0.2f, 0.2f, 0.8f, 0.2f, -1.2f, 0.2f, -0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
     Desc input;
     input.addCreature({

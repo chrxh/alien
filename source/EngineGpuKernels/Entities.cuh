@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cuda_fp16.h>
+
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
@@ -50,7 +52,7 @@ struct ObjectConnection
 
 struct NeuralNetwork
 {
-    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
@@ -357,7 +359,7 @@ struct Memory
     MemoryModeData modeData;
 
     uint8_t numSignalEntries;
-    uint8_t channelBitMask;
+    uint16_t channelBitMask;
     SignalEntry* signalEntries;  // Pointer to SignalEntry[MAX_CELL_MEMORY_ENTRIES] in heap
 };
 

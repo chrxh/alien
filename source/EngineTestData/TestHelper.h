@@ -8,6 +8,7 @@
 #include <Base/Math.h>
 
 #include <EngineInterface/Description.h>
+#include <EngineInterface/GenomeDescription.h>
 
 class TestHelper
 {
@@ -21,4 +22,5 @@ public:
     static bool compare(Desc left, Desc right);
     static bool compare(ObjectDesc left, ObjectDesc right);
     static bool compare(EnergyDesc left, EnergyDesc right);
+    static bool compare(GenomeDesc const& left, GenomeDesc const& right);
 };

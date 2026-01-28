@@ -7,6 +7,8 @@
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
+#include <cuda_fp16.h>
+
 #include <Base/Exceptions.h>
 
 #include <EngineInterface/Description.h>
@@ -40,7 +42,8 @@ namespace
     void copyMemoryEntriesToTO(TOEntry* target, std::vector<DescEntry> const& source)
     {
         for (int i = 0, j = toInt(source.size()); i < j; ++i) {
-            for (int k = 0; k < MAX_CHANNELS; ++k) {
+            auto numChannels = source[i]._channels.size();
+            for (int k = 0; k < MAX_CHANNELS && k < numChannels; ++k) {
                 target[i].channels[k] = source[i]._channels[k];
             }
         }
@@ -66,7 +69,7 @@ namespace
     {
         NeuralNetworkGenomeDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result._weights[i] = neuralNetworkGenomeTO.weights[i];
+            result._weights[i] = __half2float(neuralNetworkGenomeTO.weights[i]);  // Convert half to float
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._biases[i] = neuralNetworkGenomeTO.biases[i];
@@ -84,7 +87,7 @@ namespace
     {
         NeuralNetworkDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result._weights[i] = neuralNetworkTO.weights[i];
+            result._weights[i] = __half2float(neuralNetworkTO.weights[i]);  // Convert half to float
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._biases[i] = neuralNetworkTO.biases[i];
@@ -100,15 +103,20 @@ namespace
 
     NeuralNetworkGenomeTO convert(NeuralNetworkGenomeDesc const& neuralNetworkDesc)
     {
+        auto numInputChannels = neuralNetworkDesc._biases.size();
+
         NeuralNetworkGenomeTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result.weights[i] = neuralNetworkDesc._weights[i];
+            auto col = i / MAX_CHANNELS;
+            auto row = i % MAX_CHANNELS;
+            float value = col < numInputChannels && row < numInputChannels ? neuralNetworkDesc._weights[row + col * numInputChannels] : 0.0f;
+            result.weights[i] = __float2half(value);  // Convert float to half
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result.biases[i] = neuralNetworkDesc._biases[i];
+            result.biases[i] = i < numInputChannels ? neuralNetworkDesc._biases[i] : 0.0f;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
+            result.activationFunctions[i] = i < numInputChannels ? neuralNetworkDesc._activationFunctions[i] : 0;
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
             result.connectionWeights[i] = neuralNetworkDesc._connectionWeights[i];
@@ -118,15 +126,20 @@ namespace
 
     NeuralNetworkTO convert(NeuralNetworkDesc const& neuralNetworkDesc)
     {
+        auto numInputChannels = neuralNetworkDesc._biases.size();
+
         NeuralNetworkTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result.weights[i] = neuralNetworkDesc._weights[i];
+            auto col = i / MAX_CHANNELS;
+            auto row = i % MAX_CHANNELS;
+            result.weights[i] = __float2half(
+                col < numInputChannels && row < numInputChannels ? neuralNetworkDesc._weights[row + col * numInputChannels] : 0.0f);  // Convert float to half
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result.biases[i] = neuralNetworkDesc._biases[i];
+            result.biases[i] = i < numInputChannels ? neuralNetworkDesc._biases[i] : 0.0f;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
+            result.activationFunctions[i] = i < numInputChannels ? neuralNetworkDesc._activationFunctions[i] : 0;
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
             result.connectionWeights[i] = neuralNetworkDesc._connectionWeights[i];
@@ -1478,7 +1491,8 @@ void DescriptionConverterService::convertObjectToTO(
         objectTO.typeData.cell.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
         objectTO.typeData.cell.signalState = cellDesc._signalState;
         if (cellDesc._signalState == SignalState_Active) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
+            auto numChannels = cellDesc._signal._channels.size();
+            for (int i = 0; i < MAX_CHANNELS && i < numChannels; ++i) {
                 objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
             }
             objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;

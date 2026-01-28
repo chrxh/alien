@@ -159,9 +159,7 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
 
     if (shouldTransmit) {
         // Copy signal to receiver with incremented numTimesSent
-        for (int k = 0; k < MAX_CHANNELS; ++k) {
-            receiverObject->typeData.cell.signal.channels[k] = senderObject->typeData.cell.signal.channels[k];
-        }
+        copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
         receiverObject->typeData.cell.signal.numTimesSent = newNumTimesSent;
         receiverObject->typeData.cell.signalState = SignalState_Active;
 
