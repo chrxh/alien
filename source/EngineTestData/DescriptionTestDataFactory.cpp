@@ -209,11 +209,11 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     }
     auto const& cell = object.getCellRef();
 
-    // Use approximate comparison for weights due to half-precision (FP16) storage
-    // FP16 has ~3 decimal digits of precision, so use a relaxed tolerance
-    constexpr float halfPrecisionTolerance = 0.01f;
+    // Use approximate comparison for weights due to int8_t serialization
+    // Weights are stored as int8_t with scale factor of 32, giving ~0.03 quantization step
+    constexpr float weightSerializationTolerance = 0.04f;
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-        if (!TestHelper::approxCompare(cell._neuralNetwork._weights[i], node._neuralNetwork._weights[i], halfPrecisionTolerance)) {
+        if (!TestHelper::approxCompare(cell._neuralNetwork._weights[i], node._neuralNetwork._weights[i], weightSerializationTolerance)) {
             return false;
         }
     }
