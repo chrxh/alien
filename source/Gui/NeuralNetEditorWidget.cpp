@@ -55,7 +55,7 @@ void _NeuralNetEditorWidget::processNetwork(
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions)
 {
-    if (ImGui::BeginChild("Network", ImVec2(ImGui::GetContentRegionAvail().x / 2, scale(200.0f)))) {
+    if (ImGui::BeginChild("Network", ImVec2(ImGui::GetContentRegionAvail().x / 2, scale(400.0f)))) {
         // #TODO GCC incompatibily:
         // auto weights_span = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         auto pushDefaultColors = [] {

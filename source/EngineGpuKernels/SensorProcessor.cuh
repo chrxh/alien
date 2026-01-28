@@ -445,17 +445,18 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
 __inline__ __device__ bool
 SensorProcessor::isRayBlockedByCreatureConnections(Object** nearSameCreatureCells, int numNearSameCreatureCells, float2 const& rayOrigin, float angle)
 {
-    auto rayEnd = rayOrigin + Math::unitVectorOfAngle(angle) * RayBlockingTestLength;
-    for (int i = 0; i < numNearSameCreatureCells; ++i) {
-        auto nearObject = nearSameCreatureCells[i];
-        for (int j = 0, k = nearObject->numConnections; j < k; ++j) {
-            auto& connectedNearObject = nearObject->connections[j].object;
-            if (Math::crossing(nearObject->pos, connectedNearObject->pos, rayOrigin, rayEnd)) {
-                return true;
-            }
-        }
-    }
     return false;
+    //auto rayEnd = rayOrigin + Math::unitVectorOfAngle(angle) * RayBlockingTestLength;
+    //for (int i = 0; i < numNearSameCreatureCells; ++i) {
+    //    auto nearObject = nearSameCreatureCells[i];
+    //    for (int j = 0, k = nearObject->numConnections; j < k; ++j) {
+    //        auto& connectedNearObject = nearObject->connections[j].object;
+    //        if (Math::crossing(nearObject->pos, connectedNearObject->pos, rayOrigin, rayEnd)) {
+    //            return true;
+    //        }
+    //    }
+    //}
+    //return false;
 }
 
 __inline__ __device__ uint64_t SensorProcessor::pack(float distance, float angle, float density, uint16_t misc)

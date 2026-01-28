@@ -127,12 +127,6 @@ __inline__ __device__ void NeuronProcessor::processCellWMMA(SimulationData& data
 
         signal.channels[ch] = output;
     }
-    block.sync();
-
-    // Update statistics (only thread 0)
-    if (laneId == 0) {
-        statistics.incNumNeuronActivities(cell->color);
-    }
 }
 
 __inline__ __device__ float NeuronProcessor::applyActivationFunction(ActivationFunction activationFunction, float x)
