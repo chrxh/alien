@@ -82,7 +82,6 @@ __inline__ __device__ void SignalProcessor::createEmptySignal(Object* object)
         object->typeData.cell.signal.channels[i] = 0;
     }
     object->typeData.cell.signal.numTimesSent = 0;
-    object->typeData.cell.signalState = SignalState_Active;
 }
 
 __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationData& data, Object* object)
@@ -97,7 +96,7 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
 {
     CUDA_CHECK(object->type == ObjectType_Cell);
 
-    auto triggerInterval = max(SignalState_Count, autoTriggerInterval);
+    auto triggerInterval = max(3, autoTriggerInterval);
     if (isPreview) {
         return *data.timestep % triggerInterval == 0;
     } else {
@@ -107,9 +106,6 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
 
 __inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& data, Object* object)
 {
-    if (object->typeData.cell.signalState != SignalState_Active) {
-        return false;
-    }
     if (abs(object->typeData.cell.signal.channels[Channels::CellTypeActivation]) < TRIGGER_THRESHOLD) {
         return false;
     }

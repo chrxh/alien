@@ -141,7 +141,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         return;
     }
     // Activation
-    if (object->typeData.cell.signalState == SignalState_Active) {
+    if (bending.activationCountdown == 0) {
         bending.activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
         auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
         auto targetAngleRelToConnection0 = Math::getNormalizedAngle(targetAngle + object->typeData.cell.frontAngle, -180.0f);
@@ -164,9 +164,6 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         bending.activation *= angleFactor * angleFactor * angleFactor;
 
         bending.activationCountdown = cudaSimulationParameters.muscleActivationCountdown;
-    }
-    if (bending.activationCountdown == 0) {
-        return;
     }
 
     // Initialization
@@ -440,10 +437,8 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
 
     // Activation
-    if (object->typeData.cell.signalState == SignalState_Active) {
-        crawling.activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
-        crawling.activationCountdown = cudaSimulationParameters.muscleActivationCountdown;
-    }
+    crawling.activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    crawling.activationCountdown = cudaSimulationParameters.muscleActivationCountdown;
     if (crawling.activationCountdown == 0) {
         return;
     }

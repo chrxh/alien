@@ -37,7 +37,6 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 {
     __shared__ bool shouldProcess;
     if (threadIdx.x == 0) {
-        // Process if signal is Active or Fading (signal has been or is being processed this timestep)
         shouldProcess = SignalProcessor::isManuallyTriggered(data, object);
     }
     __syncthreads();
@@ -148,20 +147,12 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
 {
     receiverObject->getLock();
 
-    // Check if we should override existing signal
-    bool shouldTransmit = false;
-    if (receiverObject->typeData.cell.signalState != SignalState_Active) {
-        shouldTransmit = true;
-    } else if (newNumTimesSent < receiverObject->typeData.cell.signal.numTimesSent) {
-        // Override only if new signal has fewer transmission hops
-        shouldTransmit = true;
-    }
+    bool shouldTransmit = newNumTimesSent < receiverObject->typeData.cell.signal.numTimesSent;
 
     if (shouldTransmit) {
         // Copy signal to receiver with incremented numTimesSent
         copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
         receiverObject->typeData.cell.signal.numTimesSent = newNumTimesSent;
-        receiverObject->typeData.cell.signalState = SignalState_Active;
 
         // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
         // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
