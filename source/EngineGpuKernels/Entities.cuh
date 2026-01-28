@@ -404,13 +404,6 @@ union CellTypeData
     Communicator communicator;
 };
 
-struct SignalRestriction
-{
-    SignalRestrictionMode mode;
-    float baseAngle;
-    float openingAngle;
-};
-
 struct Signal
 {
     float channels[MAX_CHANNELS];
@@ -493,13 +486,10 @@ struct Cell
     CellTypeData cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     Constructor constructor;    // Optional constructor data
-    SignalState signalState;  // For signalState == SignalState_Active
     Signal signal;
-    SignalRestriction signalRestriction;
     uint32_t activationTime;
 
     // Process data
-    SignalState futureSignalState;
     Signal futureSignal;
     uint32_t frontAngleId;
     bool headCell;

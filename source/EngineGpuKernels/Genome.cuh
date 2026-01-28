@@ -286,13 +286,6 @@ union CellTypeDataGenome
     CommunicatorGenome communicator;
 };
 
-struct SignalRestrictionGenome
-{
-    SignalRestrictionMode mode;
-    float baseAngle;
-    float openingAngle;
-};
-
 struct Node
 {
     float referenceAngle;
@@ -304,7 +297,6 @@ struct Node
     CellTypeDataGenome cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorGenome constructor;  // Optional constructor data
-    SignalRestrictionGenome signalRestriction;
 };
 
 struct Gene

@@ -1332,8 +1332,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
                             ObjectDesc()
                                 .id(1)
                                 .pos({100.0f, 100.0f})
-                                .type(CellDesc().frontAngle(0.0f).cellType(
-                                    SensorDesc().autoTriggerInterval(3).mode(DetectCreatureDesc().maxNumCells(99)))),
+                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTriggerInterval(3).mode(DetectCreatureDesc().maxNumCells(99)))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
                         },
                         CreatureDesc().id(0))

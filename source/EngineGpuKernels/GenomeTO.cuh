@@ -292,14 +292,6 @@ union CellTypeDataGenomeTO
     CommunicatorGenomeTO communicator;
 };
 
-struct SignalRestrictionGenomeTO
-{
-    SignalRestrictionMode mode;
-    float baseAngle;
-    float openingAngle;
-};
-
-
 struct NodeTO
 {
     float referenceAngle;
@@ -311,7 +303,6 @@ struct NodeTO
     CellTypeDataGenomeTO cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorGenomeTO constructor;  // Optional constructor data
-    SignalRestrictionGenomeTO signalRestriction;
 };
 
 struct GeneTO

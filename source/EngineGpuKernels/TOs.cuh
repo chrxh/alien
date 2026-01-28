@@ -374,13 +374,6 @@ union CellTypeDataTO
     CommunicatorTO communicator;
 };
 
-struct SignalRestrictionTO
-{
-    SignalRestrictionMode mode;
-    float baseAngle;
-    float openingAngle;
-};
-
 struct SignalTO
 {
     float channels[MAX_CHANNELS];
@@ -420,9 +413,7 @@ struct CellTO
     CellTypeDataTO cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorTO constructor;  // Optional constructor data
-    SignalState signalState;
     SignalTO signal;  // For signalState == SignalState_Active
-    SignalRestrictionTO signalRestriction;
     uint32_t activationTime;
 
     // Process data

@@ -105,36 +105,11 @@ enum CellEvent_
     CellEvent_Detonation,
 };
 
-using CellTriggered = uint8_t;
-enum CellTriggered_
-{
-    CellTriggered_No,
-    CellTriggered_Yes,
-};
-
-using SignalState = uint8_t;
-enum SignalState_
-{
-    SignalState_Inactive,
-    SignalState_Fading,
-    SignalState_Active,
-    SignalState_Count,
-};
-
 using SignalOrigin = uint8_t;
 enum SignalOrigin_
 {
     SignalOrigin_Unknown,
     SignalOrigin_Sensor,
-};
-
-using SignalRestrictionMode = uint8_t;
-enum SignalRestrictionMode_
-{
-    SignalRestrictionMode_Inactive,
-    SignalRestrictionMode_Active,
-    SignalRestrictionMode_Conditional,
-    SignalRestrictionMode_Count,
 };
 
 namespace Const

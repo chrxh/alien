@@ -342,6 +342,15 @@ __device__ __forceinline__ void addChannels(float* __restrict__ dst, float const
     }
 }
 
+// Efficient channel copy with weighted accumulation (dst[i] += src[i])
+__device__ __forceinline__ void addChannelsWithWeight(float* __restrict__ dst, float const* __restrict__ src, float weight)
+{
+#pragma unroll
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        dst[i] += src[i] * weight;
+    }
+}
+
 // Efficient channel clear (set all to zero)
 __device__ __forceinline__ void clearChannels(float* __restrict__ dst)
 {

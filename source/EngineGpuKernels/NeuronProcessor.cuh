@@ -12,7 +12,7 @@
 namespace cg = cooperative_groups;
 using namespace nvcuda;
 
-// WMMA configuration for tensor core operations (requires compute capability 7.0+)
+// WMMA configuration for tensor core operations
 // With MAX_CHANNELS = 16, we use 16x16x16 matrix dimensions directly - optimal for tensor cores
 // Each cell is processed with a single WMMA operation: C = weights × diag(inputs)
 // Row sums of C give the dot product results (weights × inputs)
