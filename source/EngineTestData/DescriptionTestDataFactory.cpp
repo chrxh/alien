@@ -74,9 +74,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .frontAngleId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).numTimesSent(5))
-                      .signalState(SignalState_Active)
-                      .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
+                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
                       .constructor(ConstructorDesc()
                                        .autoTriggerInterval(55)
                                        .geneIndex(1)
@@ -151,8 +149,7 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
             ProvideEnergy_FreeGeneration))
         .color(4)
         .numAdditionalConnections(3)
-        .referenceAngle(90.0f)
-        .signalRestriction(SignalRestrictionGenomeDesc().mode(SignalRestrictionMode_Active).baseAngle(60.0f).openingAngle(180.0f));
+        .referenceAngle(90.0f);
 }
 
 std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
@@ -224,15 +221,6 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         if (cell._neuralNetwork._activationFunctions[i] != node._neuralNetwork._activationFunctions[i]) {
             return false;
         }
-    }
-    if (cell._signalRestriction._mode != node._signalRestriction._mode) {
-        return false;
-    }
-    if (cell._signalRestriction._baseAngle != node._signalRestriction._baseAngle) {
-        return false;
-    }
-    if (cell._signalRestriction._openingAngle != node._signalRestriction._openingAngle) {
-        return false;
     }
 
     auto nodeType = node.getCellType();
@@ -564,9 +552,6 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
             if (sender._range != nodeSender._range) {
                 return false;
             }
-            if (sender._maxTimesSent != nodeSender._maxTimesSent) {
-                return false;
-            }
         } break;
         case CommunicatorMode_Receiver: {
             auto const& receiver = std::get<ReceiverDesc>(communicator._mode);
@@ -771,7 +756,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         CommunicatorModeDesc communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderDesc().range(150.0f).maxTimesSent(6);
+            communicatorModeDesc = SenderDesc().range(150.0f);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverDesc().restrictToColor(2).restrictToLineage(LineageRestriction_OtherLineage);

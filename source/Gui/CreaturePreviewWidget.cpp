@@ -217,40 +217,13 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
-    // Draw signal restrictions
+    // Draw cells background
     if (_zoom > ZoomLevelForConnections) {
         for (auto const& object : desc._objects) {
             auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
             float radius = cellSize * 0.33f;
 
-            if (!object._signalRestriction.has_value()) {
-                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
-            } else {
-                auto startAngle = Math::getNormalizedAngle(object._signalRestriction->_startAngle, 0);
-                auto endAngle = Math::getNormalizedAngle(object._signalRestriction->_endAngle, 0);
-
-                // Draw filled ring sector (annular sector) between startAngle and endAngle
-                const int numSegments = 32;  // Increase for smoother arc
-                float startRad = Math::getNormalizedAngle(startAngle * Const::DegToRad, 0);
-                float endRad = Math::getNormalizedAngle(endAngle * Const::DegToRad, 0);
-                if (startRad > endRad) {
-                    endRad += 2 * Const::Pi;  // If the angle wraps around, we need to adjust the end angle
-                }
-                float angleStep = (endRad - startRad) / numSegments;
-
-                std::vector<ImVec2> ringPoints;
-                ringPoints.reserve((numSegments + 1) * 2);
-
-                // Outer arc (from start to end)
-                for (int i = 0; i <= numSegments; ++i) {
-                    float angle = startRad + i * angleStep;
-                    ringPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
-                }
-                ringPoints.push_back(ImVec2(cellPos.x, cellPos.y));
-
-                // Draw filled polygon (ring sector)
-                drawList->AddConcavePolyFilled(ringPoints.data(), ringPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
-            }
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
         }
     }
 

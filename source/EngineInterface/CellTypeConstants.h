@@ -112,11 +112,6 @@ enum SignalOrigin_
     SignalOrigin_Sensor,
 };
 
-namespace Const
-{
-    std::vector<std::string> const SignalRestrictionModeStrings = {"Inactive", "Active", "Conditional"};
-}
-
 //*************************
 //* Constructor constants *
 //*************************

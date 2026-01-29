@@ -326,7 +326,6 @@ namespace
                 node._color = PreviewColor;
                 if (!detailSimulation) {
                     node._neuralNetwork = NeuralNetworkGenomeDesc();
-                    node._signalRestriction = SignalRestrictionGenomeDesc();
                     node._cellType = BaseGenomeDesc();
                 }
                 if (node._constructor.has_value()) {

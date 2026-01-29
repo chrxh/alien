@@ -155,17 +155,6 @@ CellDesc& CellDesc::signalAndState(std::vector<float> const& value)
     SignalDesc newSignal;
     newSignal._channels = value;
     _signal = newSignal;
-    _signalState = SignalState_Active;
-    return *this;
-}
-
-CellDesc& CellDesc::signalRestriction(float baseAngle, float openingAngle)
-{
-    SignalRestrictionDesc routingRestriction;
-    routingRestriction._mode = SignalRestrictionMode_Active;
-    routingRestriction._baseAngle = baseAngle;
-    routingRestriction._openingAngle = openingAngle;
-    _signalRestriction = routingRestriction;
     return *this;
 }
 

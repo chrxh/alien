@@ -130,8 +130,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
-                          .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(0).openingAngle(0))
-                          .cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+                          .cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f)))),
             ObjectDesc().id(2).pos({110.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc()))),
         },
         CreatureDesc().id(1));

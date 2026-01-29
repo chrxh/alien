@@ -7,14 +7,6 @@
 
 #include "CellTypeConstants.h"
 
-struct SignalRestrictionPreviewDesc
-{
-    auto operator<=>(SignalRestrictionPreviewDesc const&) const = default;
-
-    MEMBER(SignalRestrictionPreviewDesc, float, startAngle, 0);
-    MEMBER(SignalRestrictionPreviewDesc, float, endAngle, 0);
-};
-
 struct SignalPreviewDesc
 {
     SignalPreviewDesc();

@@ -131,9 +131,6 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
                 node.neuralNetwork.connectionWeights[i] = nodeTO.neuralNetwork.connectionWeights[i];
             }
-            node.signalRestriction.mode = nodeTO.signalRestriction.mode;
-            node.signalRestriction.baseAngle = nodeTO.signalRestriction.baseAngle;
-            node.signalRestriction.openingAngle = nodeTO.signalRestriction.openingAngle;
 
             node.cellType = nodeTO.cellType;
 
@@ -367,11 +364,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->eventCounter = cellTO.eventCounter;
         cell->eventPos = cellTO.eventPos;
 
-        cell->signalRestriction.mode = cellTO.signalRestriction.mode;
-        cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;
-        cell->signalRestriction.openingAngle = cellTO.signalRestriction.openingAngle;
-
-        cell->signalState = cellTO.signalState;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cell->signal.channels[i] = cellTO.signal.channels[i];
         }
@@ -580,8 +572,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->cellTypeData.communicator.mode = cellTO.cellTypeData.communicator.mode;
             if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                 cell->cellTypeData.communicator.modeData.sender.range = cellTO.cellTypeData.communicator.modeData.sender.range;
-                cell->cellTypeData.communicator.modeData.sender.maxTimesSent =
-                    cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
             } else if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                 cell->cellTypeData.communicator.modeData.receiver.restrictToColor =
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
@@ -771,10 +761,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
         cell.neuralNetwork->connectionWeights[i] = node->neuralNetwork.connectionWeights[i];
     }
-    cell.signalRestriction.mode = node->signalRestriction.mode;
-    cell.signalRestriction.baseAngle = node->signalRestriction.baseAngle;
-    cell.signalRestriction.openingAngle = node->signalRestriction.openingAngle;
-    cell.signalState = 0;
     cell.activationTime = 0;
     cell.event = CellEvent_No;
 
@@ -954,7 +940,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         communicator.mode = nodeCommunicator.mode;
         if (nodeCommunicator.mode == CommunicatorMode_Sender) {
             communicator.modeData.sender.range = nodeCommunicator.modeData.sender.range;
-            communicator.modeData.sender.maxTimesSent = nodeCommunicator.modeData.sender.maxTimesSent;
         } else if (nodeCommunicator.mode == CommunicatorMode_Receiver) {
             communicator.modeData.receiver.restrictToColor = nodeCommunicator.modeData.receiver.restrictToColor;
             communicator.modeData.receiver.restrictToLineage = nodeCommunicator.modeData.receiver.restrictToLineage;

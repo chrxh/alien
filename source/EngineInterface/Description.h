@@ -494,7 +494,6 @@ struct CellDesc
 
     CellType getCellType() const;
     CellDesc& signalAndState(std::vector<float> const& value);
-    CellDesc& signalRestriction(float baseAngle, float openingAngle);
 };
 
 using ObjectTypeDesc = std::variant<StructureDesc, FreeCellDesc, CellDesc>;

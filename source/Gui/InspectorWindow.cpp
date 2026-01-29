@@ -202,26 +202,6 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                 ImGui::TreePop();
             }
 
-            if (ImGui::TreeNodeEx("Signal routing", TreeNodeFlags)) {
-                int modeAsInt = static_cast<int>(object.getCellRef()._signalRestriction._mode);
-                if (AlienGui::Switcher(
-                    AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(BaseTabTextWidth),
-                    modeAsInt)) {
-                    object.getCellRef()._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
-                }
-                bool restrictionActive = (object.getCellRef()._signalRestriction._mode == SignalRestrictionMode_Active || 
-                                          object.getCellRef()._signalRestriction._mode == SignalRestrictionMode_Conditional);
-                if (restrictionActive) {
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
-                        object.getCellRef()._signalRestriction._baseAngle);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
-                        object.getCellRef()._signalRestriction._openingAngle);
-                }
-                ImGui::TreePop();
-            }
-
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
                 std::stringstream ss;
                 ss << "0x" << std::hex << std::uppercase << extendedCell.creature->_id;

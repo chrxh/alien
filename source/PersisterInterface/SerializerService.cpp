@@ -707,41 +707,38 @@ namespace cereal
     }
     SPLIT_SERIALIZATION(CommunicatorGenomeDesc)
 
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDesc& data)
+    // Dummy struct for backward compatibility with old files that have SignalRestrictionGenomeDesc
+    struct SignalRestrictionGenomeDescLegacy
     {
-        SignalRestrictionGenomeDesc defaultObject;
+        uint8_t _mode = 0;
+        float _baseAngle = 0.0f;
+        float _openingAngle = 0.0f;
+    };
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDescLegacy& data)
+    {
+        SignalRestrictionGenomeDescLegacy defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         
-        // Backward compatibility: old files stored a bool at key 0 (true = active, false = inactive)
-        // New files store a SignalRestrictionMode (uint8_t) at the same key
+        // For backward compatibility, read any mode format but discard
         if (task == SerializationTask::Load) {
             auto findResult = auxiliaries.find(Id_SignalRestrictionGenome_Mode);
             if (findResult != auxiliaries.end()) {
                 auto& variantData = findResult->second;
                 if (std::holds_alternative<bool>(variantData)) {
-                    // Old file format: bool (true = active, false = inactive)
-                    data._mode = std::get<bool>(variantData) ? SignalRestrictionMode_Active : SignalRestrictionMode_Inactive;
+                    data._mode = std::get<bool>(variantData) ? 1 : 0;
                 } else if (std::holds_alternative<uint8_t>(variantData)) {
-                    // New file format: SignalRestrictionMode (uint8_t)
-                    auto modeValue = std::get<uint8_t>(variantData);
-                    data._mode = (modeValue < SignalRestrictionMode_Count) ? modeValue : defaultObject._mode;
-                } else {
-                    data._mode = defaultObject._mode;
+                    data._mode = std::get<uint8_t>(variantData);
                 }
-            } else {
-                data._mode = defaultObject._mode;
             }
-        } else {
-            // Save using the new uint8_t format
-            auxiliaries.emplace(Id_SignalRestrictionGenome_Mode, data._mode);
         }
         
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SignalRestrictionGenomeDesc)
+    SPLIT_SERIALIZATION(SignalRestrictionGenomeDescLegacy)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NodeDesc& data)
@@ -753,7 +750,9 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._neuralNetwork, data._cellType, data._constructor, data._signalRestriction);
+        // For backward compatibility, read the legacy signal restriction and discard
+        SignalRestrictionGenomeDescLegacy legacySignalRestriction;
+        ar(data._neuralNetwork, data._cellType, data._constructor, legacySignalRestriction);
     }
     SPLIT_SERIALIZATION(NodeDesc)
 
@@ -999,46 +998,45 @@ namespace cereal
         SignalDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Signal_Channels, data._channels, defaultObject._channels);
-        loadSave(task, auxiliaries, Id_Signal_NumTimesSent, data._numTimesSent, defaultObject._numTimesSent);
+        // NumTimesSent was removed - read for backward compatibility but discard
+        int dummyNumTimesSent = 0;
+        loadSave(task, auxiliaries, Id_Signal_NumTimesSent, dummyNumTimesSent, 0);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDesc)
 
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionDesc& data)
+    // Dummy struct for backward compatibility with old files that have SignalRestrictionDesc
+    struct SignalRestrictionDescLegacy
     {
-        SignalRestrictionDesc defaultObject;
+        uint8_t _mode = 0;
+        float _baseAngle = 0.0f;
+        float _openingAngle = 0.0f;
+    };
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionDescLegacy& data)
+    {
+        SignalRestrictionDescLegacy defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         
-        // Backward compatibility: old files stored a bool at key 0 (true = active, false = inactive)
-        // New files store a SignalRestrictionMode (uint8_t) at the same key
+        // For backward compatibility, read any mode format but discard
         if (task == SerializationTask::Load) {
             auto findResult = auxiliaries.find(Id_SignalRestriction_Mode);
             if (findResult != auxiliaries.end()) {
                 auto& variantData = findResult->second;
                 if (std::holds_alternative<bool>(variantData)) {
-                    // Old file format: bool (true = active, false = inactive)
-                    data._mode = std::get<bool>(variantData) ? SignalRestrictionMode_Active : SignalRestrictionMode_Inactive;
+                    data._mode = std::get<bool>(variantData) ? 1 : 0;
                 } else if (std::holds_alternative<uint8_t>(variantData)) {
-                    // New file format: SignalRestrictionMode (uint8_t)
-                    auto modeValue = std::get<uint8_t>(variantData);
-                    data._mode = (modeValue < SignalRestrictionMode_Count) ? modeValue : defaultObject._mode;
-                } else {
-                    data._mode = defaultObject._mode;
+                    data._mode = std::get<uint8_t>(variantData);
                 }
-            } else {
-                data._mode = defaultObject._mode;
             }
-        } else {
-            // Save using the new uint8_t format
-            auxiliaries.emplace(Id_SignalRestriction_Mode, data._mode);
         }
         
         loadSave(task, auxiliaries, Id_SignalRestriction_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestriction_OpeningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SignalRestrictionDesc)
+    SPLIT_SERIALIZATION(SignalRestrictionDescLegacy)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetworkDesc& data)
@@ -1464,7 +1462,9 @@ namespace cereal
         SenderDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Sender_Range, data._range, defaultObject._range);
-        loadSave(task, auxiliaries, Id_Sender_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
+        // MaxTimesSent was removed - read for backward compatibility but discard
+        int dummyMaxTimesSent = 0;
+        loadSave(task, auxiliaries, Id_Sender_MaxTimesSent, dummyMaxTimesSent, 0);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SenderDesc)
@@ -1527,7 +1527,9 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        loadSave(task, auxiliaries, Id_Cell_SignalState, data._signalState, defaultObject._signalState);
+        // SignalState was removed - read for backward compatibility but discard
+        int dummySignalState = 0;
+        loadSave(task, auxiliaries, Id_Cell_SignalState, dummySignalState, 0);
         loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
         loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
@@ -1536,7 +1538,9 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._cellType, data._constructor, data._signal, data._signalRestriction, data._neuralNetwork);
+        // For backward compatibility, read the legacy signal restriction and discard
+        SignalRestrictionDescLegacy legacySignalRestriction;
+        ar(data._cellType, data._constructor, data._signal, legacySignalRestriction, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
 

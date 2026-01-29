@@ -576,7 +576,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
             if (communicatorTO.mode == CommunicatorMode_Sender) {
                 SenderDesc sender;
                 sender._range = communicatorTO.modeData.sender.range;
-                sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
                 communicator._mode = sender;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 ReceiverDesc receiver;
@@ -612,17 +611,8 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
-        SignalRestrictionDesc routingRestriction;
-        routingRestriction._mode = objectTO.typeData.cell.signalRestriction.mode;
-        routingRestriction._baseAngle = objectTO.typeData.cell.signalRestriction.baseAngle;
-        routingRestriction._openingAngle = objectTO.typeData.cell.signalRestriction.openingAngle;
-        cellDesc._signalRestriction = routingRestriction;
-        cellDesc._signalState = objectTO.typeData.cell.signalState;
-        if (objectTO.typeData.cell.signalState == SignalState_Active) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
-            }
-            cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
@@ -642,9 +632,6 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
     nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
 
     nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
-    nodeDesc._signalRestriction._mode = nodeTO->signalRestriction.mode;
-    nodeDesc._signalRestriction._baseAngle = nodeTO->signalRestriction.baseAngle;
-    nodeDesc._signalRestriction._openingAngle = nodeTO->signalRestriction.openingAngle;
 
     switch (nodeTO->cellType) {
     case CellType_Base: {
@@ -980,9 +967,6 @@ void DescriptionConverterService::convertGenomeToTO(
             nodeTO.referenceAngle = nodeDesc._referenceAngle;
             nodeTO.color = nodeDesc._color;
             nodeTO.numAdditionalConnections = nodeDesc._numAdditionalConnections;
-            nodeTO.signalRestriction.mode = nodeDesc._signalRestriction._mode;
-            nodeTO.signalRestriction.baseAngle = nodeDesc._signalRestriction._baseAngle;
-            nodeTO.signalRestriction.openingAngle = nodeDesc._signalRestriction._openingAngle;
             nodeTO.neuralNetwork = convert(nodeDesc._neuralNetwork);
 
             nodeTO.cellType = nodeDesc.getCellType();
@@ -1461,7 +1445,6 @@ void DescriptionConverterService::convertObjectToTO(
             if (communicatorTO.mode == CommunicatorMode_Sender) {
                 auto const& senderDesc = std::get<SenderDesc>(communicatorDesc._mode);
                 communicatorTO.modeData.sender.range = senderDesc._range;
-                communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 auto const& receiverDesc = std::get<ReceiverDesc>(communicatorDesc._mode);
                 communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
@@ -1486,16 +1469,9 @@ void DescriptionConverterService::convertObjectToTO(
             constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
         }
 
-        objectTO.typeData.cell.signalRestriction.mode = cellDesc._signalRestriction._mode;
-        objectTO.typeData.cell.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
-        objectTO.typeData.cell.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
-        objectTO.typeData.cell.signalState = cellDesc._signalState;
-        if (cellDesc._signalState == SignalState_Active) {
-            auto numChannels = cellDesc._signal._channels.size();
-            for (int i = 0; i < MAX_CHANNELS && i < numChannels; ++i) {
-                objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
-            }
-            objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
+        auto numChannels = cellDesc._signal._channels.size();
+        for (int i = 0; i < MAX_CHANNELS && i < numChannels; ++i) {
+            objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
         }
     } else {
         CHECK(false);

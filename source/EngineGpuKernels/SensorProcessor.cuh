@@ -98,11 +98,6 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
 {
     if (threadIdx.x == 0) {
 
-        // Create signal if not already existing
-        if (object->typeData.cell.signalState != SignalState_Active) {
-            SignalProcessor::createEmptySignal(object);
-        }
-
         // Measure cell energy level
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
         auto energyAboveMin = max(object->typeData.cell.usableEnergy - cellMinEnergy, 0.0f);
@@ -225,10 +220,6 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-            // Create signal if not already existing
-            if (object->typeData.cell.signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(object);
-            }
 
             float distance, absAngle, density;
             uint16_t creatureIdPart;
@@ -328,11 +319,6 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-
-            // Create signal if not already existing
-            if (object->typeData.cell.signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(object);
-            }
 
             auto targetPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - object->typeData.cell.frontAngle, -180.0f);

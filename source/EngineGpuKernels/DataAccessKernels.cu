@@ -72,9 +72,6 @@ namespace
                     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
                         nodeTO.neuralNetwork.connectionWeights[i] = node.neuralNetwork.connectionWeights[i];
                     }
-                    nodeTO.signalRestriction.mode = node.signalRestriction.mode;
-                    nodeTO.signalRestriction.baseAngle = node.signalRestriction.baseAngle;
-                    nodeTO.signalRestriction.openingAngle = node.signalRestriction.openingAngle;
                     nodeTO.cellType = node.cellType;
                     switch (node.cellType) {
                     case CellType_Base:
@@ -310,10 +307,6 @@ namespace
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
-            cellTO.signalRestriction.mode = cell.signalRestriction.mode;
-            cellTO.signalRestriction.baseAngle = cell.signalRestriction.baseAngle;
-            cellTO.signalRestriction.openingAngle = cell.signalRestriction.openingAngle;
-            cellTO.signalState = cell.signalState;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cellTO.signal.channels[i] = cell.signal.channels[i];
             }
@@ -502,7 +495,6 @@ namespace
                 cellTO.cellTypeData.communicator.mode = cell.cellTypeData.communicator.mode;
                 if (cell.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                     cellTO.cellTypeData.communicator.modeData.sender.range = cell.cellTypeData.communicator.modeData.sender.range;
-                    cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent = cell.cellTypeData.communicator.modeData.sender.maxTimesSent;
                 } else if (cell.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor = cell.cellTypeData.communicator.modeData.receiver.restrictToColor;
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = cell.cellTypeData.communicator.modeData.receiver.restrictToLineage;
