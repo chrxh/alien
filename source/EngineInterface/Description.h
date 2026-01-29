@@ -480,7 +480,7 @@ struct CellDesc
     MEMBER(CellDesc, NeuralNetworkDesc, neuralNetwork, NeuralNetworkDesc());
     MEMBER(CellDesc, CellTypeDesc, cellType, BaseDesc());
     MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
-    MEMBER(CellDesc, SignalDesc, signal, SignalDesc());  // For signalState == SignalState_Active
+    MEMBER(CellDesc, SignalDesc, signal, SignalDesc());
     MEMBER(CellDesc, int, activationTime, 0);
 
     // Process data

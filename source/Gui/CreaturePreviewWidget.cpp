@@ -366,19 +366,19 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
     CHECK(selectedCell.has_value());
 
     // Check if signal has non-zero values
-    bool hasActiveSignal = selectedCell->_signal.has_value() && !selectedCell->_signal->_channels.empty();
+    bool hasSignalChannels = selectedCell->_signal.has_value() && !selectedCell->_signal->_channels.empty();
 
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(440.0f), ImGui::GetScrollY() + scale(13.0f)});
-    auto height = hasActiveSignal ? scale(168.0f) : scale(67.0f);
+    auto height = hasSignalChannels ? scale(168.0f) : scale(67.0f);
     if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), height), ImGuiChildFlags_FrameStyle)) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
-        int hasSignal = hasActiveSignal ? 1 : 0; 
-        bool signalStateChanged = AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Signal"}).textWidth(0), hasSignal);
+        int signalEnabled = hasSignalChannels ? 1 : 0; 
+        bool signalStateChanged = AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Signal"}).textWidth(0), signalEnabled);
         phenotypeChanged |= signalStateChanged;
         
         if (signalStateChanged) {
-            if (hasSignal == 1) {
+            if (signalEnabled == 1) {
                 // Enable signal with default channels
                 selectedCell->_signal = SignalPreviewDesc();
             } else {
@@ -387,7 +387,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
             }
         }
 
-        if (hasSignal == 1 && selectedCell->_signal.has_value()) {
+        if (signalEnabled == 1 && selectedCell->_signal.has_value()) {
 
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));  // Transparent background
             ImGuiStyle& style = ImGui::GetStyle();

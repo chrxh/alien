@@ -322,8 +322,8 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
             }
         }
         // Check if signal has non-zero values
-        bool hasActiveSignal = !object.getCellRef()._signal._channels.empty();
-        if (hasActiveSignal) {
+        bool hasSignalChannels = !object.getCellRef()._signal._channels.empty();
+        if (hasSignalChannels) {
             bool hasNonZeroChannel = false;
             for (auto const& ch : object.getCellRef()._signal._channels) {
                 if (ch != 0.0f) {

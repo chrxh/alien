@@ -154,7 +154,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
 
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    // Sensor detected something (signal has non-zero values)
+    // Sensor found nothing (no target in range) - result should be 0
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
