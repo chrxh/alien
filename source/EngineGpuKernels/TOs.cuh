@@ -336,7 +336,6 @@ struct MemoryTO
 struct SenderTO
 {
     float range;
-    int maxTimesSent;
 };
 
 struct ReceiverTO

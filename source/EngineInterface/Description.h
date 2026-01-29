@@ -396,7 +396,6 @@ struct SenderDesc
     auto operator<=>(SenderDesc const&) const = default;
 
     MEMBER(SenderDesc, float, range, 15.0f);
-    MEMBER(SenderDesc, int, maxTimesSent, 4);
 };
 
 struct ReceiverDesc
@@ -433,22 +432,12 @@ using CellTypeDesc = std::variant<
     MemoryDesc,
     CommunicatorDesc>;
 
-struct SignalRestrictionDesc
-{
-    auto operator<=>(SignalRestrictionDesc const&) const = default;
-
-    MEMBER(SignalRestrictionDesc, SignalRestrictionMode, mode, SignalRestrictionMode_Inactive);
-    MEMBER(SignalRestrictionDesc, float, baseAngle, 0);
-    MEMBER(SignalRestrictionDesc, float, openingAngle, 90.0f);
-};
-
 struct SignalDesc
 {
     SignalDesc();
     auto operator<=>(SignalDesc const&) const = default;
 
     MEMBER(SignalDesc, std::vector<float>, channels, {});
-    MEMBER(SignalDesc, int, numTimesSent, 0);
 };
 
 struct StructureDesc
@@ -491,9 +480,7 @@ struct CellDesc
     MEMBER(CellDesc, NeuralNetworkDesc, neuralNetwork, NeuralNetworkDesc());
     MEMBER(CellDesc, CellTypeDesc, cellType, BaseDesc());
     MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
-    MEMBER(CellDesc, SignalState, signalState, SignalState_Inactive);
     MEMBER(CellDesc, SignalDesc, signal, SignalDesc());  // For signalState == SignalState_Active
-    MEMBER(CellDesc, SignalRestrictionDesc, signalRestriction, SignalRestrictionDesc());
     MEMBER(CellDesc, int, activationTime, 0);
 
     // Process data

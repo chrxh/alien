@@ -366,7 +366,6 @@ struct Memory
 struct Sender
 {
     float range;
-    int maxTimesSent;
 };
 
 struct Receiver

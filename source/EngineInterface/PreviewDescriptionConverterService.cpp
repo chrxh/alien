@@ -94,24 +94,9 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
                                .pos(object._pos)
                                .color(color)
                                .geneIndex(object.getCellRef()._geneIndex)
-                               .nodeIndex(object.getCellRef()._nodeIndex)
-                               .signalState(object.getCellRef()._signalState);
+                               .nodeIndex(object.getCellRef()._nodeIndex);
 
-        // Render as active if mode is Active or Conditional
-        bool hasRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
-                               node._signalRestriction._mode == SignalRestrictionMode_Conditional) && 
-                              !object._connections.empty();
-        if (hasRestriction) {
-            auto otherObjectId = object._connections.front()._objectId;
-            auto const& otherObject = phenotype.getObjectRef(otherObjectId, cache);
-            auto baseAngle = Math::angleOfVector(otherObject._pos - object._pos) + 180.0f + node._signalRestriction._baseAngle;
-            auto signalAngleRestrictionStart = Math::getNormalizedAngle(baseAngle - node._signalRestriction._openingAngle / 2, 0);
-            auto signalAngleRestrictionEnd = Math::getNormalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
-            previewCell._signalRestriction = SignalRestrictionPreviewDesc().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
-        }
-        if (object.getCellRef()._signalState == SignalState_Active) {
-            previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
-        }
+        previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
         if (node._constructor.has_value()) {
             if (!genome._genes.empty()) {
                 auto nodeConstructor = node._constructor.value();
@@ -123,32 +108,6 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
 
     // Determine arrow directions for each cell
     std::set<std::pair<uint64_t, uint64_t>> arrowFromCell1ToCell2;
-    for (auto const& object : phenotype._objects) {
-        auto const& node = getNode(object);
-        auto signalAngleRestrictionStart = 180.0f + node._signalRestriction._baseAngle - node._signalRestriction._openingAngle / 2;
-        auto signalAngleRestrictionEnd = 180.0f + node._signalRestriction._baseAngle + node._signalRestriction._openingAngle / 2;
-        signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
-        signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
-
-        // For rendering, Active and Conditional modes are treated as having restriction
-        bool hasNodeRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
-                                   node._signalRestriction._mode == SignalRestrictionMode_Conditional);
-
-        auto summedAngle = 0.0f;
-        for (int i = 0; i < object._connections.size(); ++i) {
-            if (i > 0) {
-                summedAngle += object._connections[i]._angleFromPrevious;
-            }
-            auto connectedObjectId = object._connections[i]._objectId;
-
-            bool shouldAddArrow =
-                !hasNodeRestriction || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
-
-            if (shouldAddArrow) {
-                arrowFromCell1ToCell2.insert({object._id, connectedObjectId});
-            }
-        }
-    }
 
     // Create preview connections
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;

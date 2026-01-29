@@ -37,9 +37,6 @@ __device__ __inline__ void MemoryProcessor::process(SimulationData& data, Simula
 
 __device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (object->typeData.cell.signalState != SignalState_Active) {
-        return;
-    }
     auto const& mode = object->typeData.cell.cellTypeData.memory.mode;
     if (mode == MemoryMode_SignalDelay) {
         processDelay(data, statistics, object);

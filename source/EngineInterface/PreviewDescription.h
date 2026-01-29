@@ -33,8 +33,6 @@ struct CellPreviewDesc
     MEMBER(CellPreviewDesc, int, geneIndex, 0);
     MEMBER(CellPreviewDesc, int, nodeIndex, 0);
     MEMBER(CellPreviewDesc, std::optional<SignalPreviewDesc>, signal, std::nullopt);
-    MEMBER(CellPreviewDesc, std::optional<SignalRestrictionPreviewDesc>, signalRestriction, std::nullopt);
-    MEMBER(CellPreviewDesc, SignalState, signalState, 0);
     MEMBER(CellPreviewDesc, std::optional<int>, constructorGeneIndex, std::nullopt);
 };
 

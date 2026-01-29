@@ -55,23 +55,16 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     __shared__ float range;
-    __shared__ int maxTimesSent;
     __shared__ int currentNumTimesSent;
     __shared__ float2 senderPos;
 
     if (threadIdx.x == 0) {
         auto& sender = object->typeData.cell.cellTypeData.communicator.modeData.sender;
         range = sender.range;
-        maxTimesSent = sender.maxTimesSent;
         currentNumTimesSent = object->typeData.cell.signal.numTimesSent;
         senderPos = object->pos;
     }
     __syncthreads();
-
-    // Check if signal can still be forwarded
-    if (currentNumTimesSent >= maxTimesSent) {
-        return;
-    }
 
     auto const newNumTimesSent = currentNumTimesSent + 1;
     int rangeInt = static_cast<int>(ceilf(range));

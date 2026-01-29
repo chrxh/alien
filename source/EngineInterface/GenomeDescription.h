@@ -368,15 +368,6 @@ using CellTypeGenomeDesc = std::variant<
     MemoryGenomeDesc,
     CommunicatorGenomeDesc>;
 
-struct SignalRestrictionGenomeDesc
-{
-    auto operator<=>(SignalRestrictionGenomeDesc const&) const = default;
-
-    MEMBER(SignalRestrictionGenomeDesc, SignalRestrictionMode, mode, SignalRestrictionMode_Inactive);
-    MEMBER(SignalRestrictionGenomeDesc, float, baseAngle, 0.0f);
-    MEMBER(SignalRestrictionGenomeDesc, float, openingAngle, 90.0f);
-};
-
 struct NodeDesc
 {
     auto operator<=>(NodeDesc const&) const = default;
@@ -388,7 +379,6 @@ struct NodeDesc
     MEMBER(NodeDesc, NeuralNetworkGenomeDesc, neuralNetwork, NeuralNetworkGenomeDesc());
     MEMBER(NodeDesc, CellTypeGenomeDesc, cellType, BaseGenomeDesc());
     MEMBER(NodeDesc, std::optional<ConstructorGenomeDesc>, constructor, std::nullopt);
-    MEMBER(NodeDesc, SignalRestrictionGenomeDesc, signalRestriction, SignalRestrictionGenomeDesc());
 
     CellType getCellType() const;
 };

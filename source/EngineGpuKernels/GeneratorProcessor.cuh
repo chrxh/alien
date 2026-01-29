@@ -28,10 +28,8 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
         auto const& object = operation.object;
 
         auto& generator = object->typeData.cell.cellTypeData.generator;
-        if (SignalProcessor::isAutoTriggered(data, object, max(1, generator.autoTriggerInterval))) {
-            if (object->typeData.cell.signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(object);
-            }
+        if (SignalProcessor::isAutoTriggered(data, object, generator.autoTriggerInterval)) {
+            SignalProcessor::createEmptySignal(object);
             statistics.incNumGeneratorPulses(object->color);
             if (generator.pulseType == GeneratorPulseType_Positive) {
                 object->typeData.cell.signal.channels[Channels::CellTypeActivation] += 1.0f;

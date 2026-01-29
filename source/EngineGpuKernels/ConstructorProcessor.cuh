@@ -7,7 +7,6 @@
 #include "ConstructorHelper.cuh"
 #include "CudaShapeGenerator.cuh"
 #include "Genome.cuh"
-#include "GenomeProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
@@ -93,6 +92,8 @@ private:
     //  No angle correction
     //
     __inline__ __device__ static void correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* object3);
+
+    __inline__ __device__ static float getRequiredEnergyForNodes(Gene* gene);
 };
 
 /************************************************************************/
@@ -231,7 +232,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
             auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
             if (!referencedGene.separation) {
-                auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
+                auto requiredEnergyForNodes = getRequiredEnergyForNodes(&referencedGene);
                 if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
                     result.neededReservedEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
                 } else {
@@ -998,4 +999,17 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ob
     } else {
         object3->increaseAngle(object2Index, -angleCorrection);
     }
+}
+
+__inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Gene* gene)
+{
+    auto result = 0.0f;
+    for (int i = 0, j = gene->numNodes; i < j; ++i) {
+        auto const& node = &gene->nodes[i];
+        result += cudaSimulationParameters.normalCellEnergy.value[node->color];
+        if (node->cellType == CellType_Depot) {
+            result += node->cellTypeData.depot.initialStoredUsableEnergy;
+        }
+    }
+    return result;
 }
