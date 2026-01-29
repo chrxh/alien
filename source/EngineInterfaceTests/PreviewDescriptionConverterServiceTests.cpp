@@ -32,8 +32,8 @@ public:
     {
         RealVector2D object1;
         RealVector2D object2;
-        bool arrowToObject1 = true;
-        bool arrowToObject2 = true;
+        bool arrowToObject1 = false;  // No signal restrictions anymore, arrows are always false
+        bool arrowToObject2 = false;
     };
     void checkConnections(PreviewDesc const& preview, std::vector<ConnectionCheckDescription> const& expectedConnections)
     {
