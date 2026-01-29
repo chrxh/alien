@@ -321,8 +321,17 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
                 ImGui::TreePop();
             }
         }
-        if (object.getCellRef()._signalState == SignalState_Active) {
-            if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
+        // Check if signal has non-zero values
+        bool hasActiveSignal = !object.getCellRef()._signal._channels.empty();
+        if (hasActiveSignal) {
+            bool hasNonZeroChannel = false;
+            for (auto const& ch : object.getCellRef()._signal._channels) {
+                if (ch != 0.0f) {
+                    hasNonZeroChannel = true;
+                    break;
+                }
+            }
+            if (hasNonZeroChannel && ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
                 int index = 0;
                 for (auto& channel : object.getCellRef()._signal._channels) {
                     AlienGui::InputFloat(

@@ -173,7 +173,6 @@ TEST_F(MemoryTests, signalDelay_firstSignal_storesSignalInMemory)
     EXPECT_TRUE(approxCompare(signal, memory._signalEntries[0]._channels));
 
     // Verify the output signal (buffer not full yet, so signal should be unchanged)
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -194,7 +193,6 @@ TEST_F(MemoryTests, signalDelay_delayOf0_outputsSameCycleSignal)
     EXPECT_EQ(0, signalDelay._numSignalEntriesInitialized);
 
     // Verify the output signal
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -223,7 +221,6 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
     EXPECT_EQ(1, signalDelay._numSignalEntriesInitialized);
 
     // The output signal should be signal1 (the first signal, delayed by 2)
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -256,7 +253,6 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     auto memoryCell = actualData.getObjectRef(1);
     auto& signalDelay = std::get<SignalDelayDesc>(std::get<MemoryDesc>(memoryCell.getCellRef()._cellType)._mode);
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 
     // Waiting
@@ -270,7 +266,6 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
 
     actualData = _simulationFacade->getSimulationData();
     memoryCell = actualData.getObjectRef(1);
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -310,7 +305,6 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
 
     // Signal should still be the incoming signal2 (not modified by delay output)
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._signal._channels));
 }
 

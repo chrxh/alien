@@ -28,14 +28,15 @@ TEST_F(SignalTests, noSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_FALSE(generator.getCellRef()._signalState == SignalState_Active);
+    // Cell should have no active signal (all channels zero)
+    EXPECT_TRUE(approxCompare(0.0f, generator.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(SignalTests, forwardSignal)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal).numTimesSent(3)).signalState(SignalState_Active)),
+        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal))),
         ObjectDesc().id(2).pos({1, 0}),
     });
     data.addConnection(1, 2);
@@ -44,15 +45,8 @@ TEST_F(SignalTests, forwardSignal)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
-
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_TRUE(object2.getCellRef()._signalState == SignalState_Active);
     EXPECT_EQ(signal, object2.getCellRef()._signal._channels);
-    EXPECT_EQ(3, object2.getCellRef()._signal._numTimesSent);
-    EXPECT_EQ(1, object1.getCellRef()._signalState);
-    EXPECT_EQ(2, object2.getCellRef()._signalState);
 }
 
 TEST_F(SignalTests, forwardSignal_detailedPreview)
@@ -68,14 +62,8 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
     _simulationFacade->calcTimestepsForPreview(1, true);
     auto actualData = _simulationFacade->getPreviewData();
 
-    auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
-
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_TRUE(object2.getCellRef()._signalState == SignalState_Active);
     EXPECT_EQ(signal, object2.getCellRef()._signal._channels);
-    EXPECT_EQ(1, object1.getCellRef()._signalState);
-    EXPECT_EQ(2, object2.getCellRef()._signalState);
 }
 
 TEST_F(SignalTests, forwardSignal_withOtherConnections)
@@ -87,17 +75,15 @@ TEST_F(SignalTests, forwardSignal_withOtherConnections)
             .pos({10.0f, 10.0f})
             .type(CellDesc()
                       .nodeIndex(15)
-                      .signal(SignalDesc().channels(signal))
-                      .signalState(SignalState_Active)),
+                      .signal(SignalDesc().channels(signal))),
         ObjectDesc().id(2).pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(120.0f)).type(CellDesc()),
         ObjectDesc().id(3).pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(300.0f)).type(CellDesc().nodeIndex(16)),
         ObjectDesc()
             .id(4)
             .pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(0))
             .type(CellDesc()
-                      .signal(SignalDesc().channels(signal))
-                      .signalState(SignalState_Active)),
-        ObjectDesc().id(5).pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(60.0f)).type(CellDesc().signalState(SignalState_Fading)),
+                      .signal(SignalDesc().channels(signal))),
+        ObjectDesc().id(5).pos(RealVector2D{10.0f, 10.0f} + Math::unitVectorOfAngle(60.0f)).type(CellDesc()),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -110,7 +96,7 @@ TEST_F(SignalTests, forwardSignal_withOtherConnections)
 
     // Without signal restrictions, signals flow to all connected cells
     auto object3 = actualData.getObjectRef(3);
-    EXPECT_EQ(SignalState_Active, object3.getCellRef()._signalState);
+    EXPECT_EQ(signal, object3.getCellRef()._signal._channels);
 }
 
 TEST_F(SignalTests, vanishSignal_singleCell)
@@ -125,7 +111,8 @@ TEST_F(SignalTests, vanishSignal_singleCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
+    // Signal should have been cleared for a single cell with no propagation target
+    EXPECT_TRUE(approxCompare(0.0f, object1.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(SignalTests, vanishSignal_relaxationNeeded)
@@ -133,7 +120,7 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal))),
-        ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signalState(1)),
+        ObjectDesc().id(2).pos({1, 0}),
     });
     data.addConnection(1, 2);
 
@@ -141,8 +128,9 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
+    // Signal should have propagated from object1 to object2
+    auto object2 = actualData.getObjectRef(2);
+    EXPECT_EQ(signal, object2.getCellRef()._signal._channels);
 }
 
 TEST_F(SignalTests, mergeSignals)
@@ -150,9 +138,9 @@ TEST_F(SignalTests, mergeSignals)
     std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, -1.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal1).numTimesSent(7)).signalState(SignalState_Active)),
+        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal1))),
         ObjectDesc().id(2).pos({1, 0}),
-        ObjectDesc().id(3).pos({2, 0}).type(CellDesc().signal(SignalDesc().channels(signal2).numTimesSent(3)).signalState(SignalState_Active)),
+        ObjectDesc().id(3).pos({2, 0}).type(CellDesc().signal(SignalDesc().channels(signal2))),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -161,24 +149,13 @@ TEST_F(SignalTests, mergeSignals)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
-
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_TRUE(object2.getCellRef()._signalState == SignalState_Active);
-
-    auto cell3 = actualData.getObjectRef(3);
-    EXPECT_FALSE(cell3.getCellRef()._signalState == SignalState_Active);
 
     std::vector<float> sumSignal(signal1.size());
     for (size_t i = 0; i < signal1.size(); ++i) {
         sumSignal[i] = signal1[i] + signal2[i];
     }
     EXPECT_TRUE(approxCompare(sumSignal, object2.getCellRef()._signal._channels));
-    EXPECT_EQ(3, object2.getCellRef()._signal._numTimesSent);  // Takes minimum of 7 and 3
-    EXPECT_EQ(1, object1.getCellRef()._signalState);
-    EXPECT_EQ(2, object2.getCellRef()._signalState);
-    EXPECT_EQ(1, cell3.getCellRef()._signalState);
 }
 
 TEST_F(SignalTests, forkSignals)
@@ -186,7 +163,7 @@ TEST_F(SignalTests, forkSignals)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({0, 0}),
-        ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signal(SignalDesc().channels(signal).numTimesSent(5)).signalState(SignalState_Active)),
+        ObjectDesc().id(2).pos({1, 0}).type(CellDesc().signal(SignalDesc().channels(signal))),
         ObjectDesc().id(3).pos({2, 0}),
     });
     data.addConnection(1, 2);
@@ -197,19 +174,9 @@ TEST_F(SignalTests, forkSignals)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_TRUE(object1.getCellRef()._signalState == SignalState_Active);
     EXPECT_TRUE(approxCompare(signal, object1.getCellRef()._signal._channels));
-    EXPECT_EQ(5, object1.getCellRef()._signal._numTimesSent);
-    EXPECT_EQ(2, object1.getCellRef()._signalState);
-
-    auto object2 = actualData.getObjectRef(2);
-    EXPECT_FALSE(object2.getCellRef()._signalState == SignalState_Active);
-    EXPECT_EQ(1, object2.getCellRef()._signalState);
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_TRUE(cell3.getCellRef()._signalState == SignalState_Active);
     EXPECT_TRUE(approxCompare(signal, cell3.getCellRef()._signal._channels));
-    EXPECT_EQ(5, cell3.getCellRef()._signal._numTimesSent);
-    EXPECT_EQ(2, cell3.getCellRef()._signalState);
 }
 
