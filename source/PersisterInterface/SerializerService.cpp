@@ -126,7 +126,7 @@ namespace cereal
                 auto& int8Vec = std::get<std::vector<int8_t>>(variantData);
                 value.resize(int8Vec.size());
                 for (size_t i = 0; i < int8Vec.size(); ++i) {
-                    value[i] = NeuralNetWeight(int8Vec[i]);
+                    value[i] = NeuralNetWeight::fromRawValue(static_cast<uint8_t>(int8Vec[i]));
                 }
             } else {
                 value = defaultValue;
