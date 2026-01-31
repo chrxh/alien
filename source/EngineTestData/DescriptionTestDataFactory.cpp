@@ -74,9 +74,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .frontAngleId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).numTimesSent(5))
-                      .signalState(SignalState_Active)
-                      .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
+                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
                       .constructor(ConstructorDesc()
                                        .autoTriggerInterval(55)
                                        .geneIndex(1)
@@ -151,8 +149,7 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
             ProvideEnergy_FreeGeneration))
         .color(4)
         .numAdditionalConnections(3)
-        .referenceAngle(90.0f)
-        .signalRestriction(SignalRestrictionGenomeDesc().mode(SignalRestrictionMode_Active).baseAngle(60.0f).openingAngle(180.0f));
+        .referenceAngle(90.0f);
 }
 
 std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
@@ -209,11 +206,8 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     }
     auto const& cell = object.getCellRef();
 
-    // Use approximate comparison for weights due to int8_t serialization
-    // Weights are stored as int8_t with scale factor of 32, giving ~0.03 quantization step
-    constexpr float weightSerializationTolerance = 0.04f;
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-        if (!TestHelper::approxCompare(cell._neuralNetwork._weights[i], node._neuralNetwork._weights[i], weightSerializationTolerance)) {
+        if (cell._neuralNetwork._weights[i] != node._neuralNetwork._weights[i]) {
             return false;
         }
     }
@@ -224,15 +218,6 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         if (cell._neuralNetwork._activationFunctions[i] != node._neuralNetwork._activationFunctions[i]) {
             return false;
         }
-    }
-    if (cell._signalRestriction._mode != node._signalRestriction._mode) {
-        return false;
-    }
-    if (cell._signalRestriction._baseAngle != node._signalRestriction._baseAngle) {
-        return false;
-    }
-    if (cell._signalRestriction._openingAngle != node._signalRestriction._openingAngle) {
-        return false;
     }
 
     auto nodeType = node.getCellType();

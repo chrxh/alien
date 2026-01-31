@@ -26,35 +26,6 @@ protected:
     DescriptionTestDataFactory* _descriptionTestDataFactory;
 };
 
-//TEST_F(DataTransferTests, singleParticle)
-//{
-//    Desc data;
-//    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDesc());
-//
-//    _simulationFacade->setSimulationData(data);
-//    auto actualData = _simulationFacade->getSimulationData();
-//
-//    EXPECT_TRUE(compare(data, actualData));
-//}
-
-//TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
-//{
-//    auto genome = GenomeDesc().genes(
-//        {GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
-//         GeneDesc().separation(false).nodes({NodeDesc(), NodeDesc(), NodeDesc()})});
-//
-//    Desc data;
-//    data.addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(BaseDesc())), ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(BaseDesc()))}, CreatureDesc(), genome);
-//    data.addCreature({ObjectDesc().id(3).pos({20.0f, 20.0f}).type(CellDesc().cellType(BaseDesc())), ObjectDesc().id(4).pos({21.0f, 20.0f}).type(CellDesc().cellType(BaseDesc()))}, CreatureDesc(), genome);
-//    data.addConnection(1, 2);
-//    data.addConnection(3, 4);
-//
-//    _simulationFacade->setSimulationData(data);
-//    auto actualData = _simulationFacade->getSimulationData();
-//
-//    EXPECT_TRUE(compare(data, actualData));
-//}
-
 using ObjectParameter = DescriptionTestDataFactory::ObjectParameter;
 class DataTransferTests_AllObjectTypes
     : public DataTransferTests

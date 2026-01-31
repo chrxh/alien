@@ -7,10 +7,11 @@
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/SimulationParametersTypes.h>
+#include <EngineInterface/NeuralNetWeight.h>
 
 struct NeuralNetworkGenomeTO
 {
-    half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores
+    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];

@@ -9,7 +9,7 @@
 #include "Entities.cuh"
 #include "ParameterCalculator.cuh"
 #include "EnergyProcessor.cuh"
-#include "SignalProcessor.cuh"
+#include "NeuronProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -47,7 +47,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         return;
     }
     auto const& cell = &object->typeData.cell;
-    if (SignalProcessor::isManuallyTriggered(data, object) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
+    if (NeuronProcessor::isManuallyTriggered(data, object) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
 
         auto attackerEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, object->pos, object->color);
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);

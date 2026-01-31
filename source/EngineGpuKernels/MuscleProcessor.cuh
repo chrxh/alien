@@ -3,7 +3,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 
 #include "Entities.cuh"
-#include "SignalProcessor.cuh"
+#include "NeuronProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -194,7 +194,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     }
 
     // Process auto bending
-    if (SignalProcessor::isAutoTriggered(data, object, AutoTriggerInterval)) {
+    if (NeuronProcessor::isAutoTriggered(data, object, AutoTriggerInterval)) {
 
         auto forwardBackwardRatio = isLeftSide(object) ? bending.forwardBackwardRatio : 1.0f - bending.forwardBackwardRatio;
 
@@ -301,7 +301,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     }
 
     // Process manual bending
-    if (SignalProcessor::isManuallyTriggered(data, object)) {
+    if (NeuronProcessor::isManuallyTriggered(data, object)) {
 
         auto bendingInfo = getBendingInfo(object);
         auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
@@ -384,7 +384,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     }
 
     // Process angle bending
-    if (SignalProcessor::isManuallyTriggered(data, object)) {
+    if (NeuronProcessor::isManuallyTriggered(data, object)) {
 
         auto bendingInfo = getBendingInfo(object);
         auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
@@ -452,7 +452,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
 
     // Process auto crawling
-    if (SignalProcessor::isAutoTriggered(data, object, AutoTriggerInterval)) {
+    if (NeuronProcessor::isAutoTriggered(data, object, AutoTriggerInterval)) {
 
         auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
         auto activation = crawling.activation * toFloat(crawling.activationCountdown) / cudaSimulationParameters.muscleActivationCountdown;
@@ -539,7 +539,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     }
 
     // Process manual crawling
-    if (SignalProcessor::isManuallyTriggered(data, object)) {
+    if (NeuronProcessor::isManuallyTriggered(data, object)) {
 
         auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
         auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
@@ -605,8 +605,8 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
     if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
     }
-    if (SignalProcessor::isManuallyTriggered(data, object)) {
-        auto direction = SignalProcessor::calcReferenceDirection(data, object);
+    if (NeuronProcessor::isManuallyTriggered(data, object)) {
+        auto direction = ObjectConnectionProcessor::calcReferenceDirection(data, object);
         auto angle = Math::getNormalizedAngle(object->typeData.cell.frontAngle + max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
         direction = Math::rotateClockwise(direction, angle);
 

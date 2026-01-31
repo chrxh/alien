@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 
 class InjectorProcessor
@@ -28,7 +27,7 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (SignalProcessor::isManuallyTriggered(data, object)) {
+    if (NeuronProcessor::isManuallyTriggered(data, object)) {
         auto injectorEnergyCost = cudaSimulationParameters.injectorEnergyCost.value[object->color];
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 

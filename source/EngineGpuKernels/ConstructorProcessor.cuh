@@ -8,7 +8,6 @@
 #include "CudaShapeGenerator.cuh"
 #include "Genome.cuh"
 #include "MuscleProcessor.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 
 class ConstructorProcessor
@@ -120,7 +119,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
     auto& constructor = object->typeData.cell.constructor;
-    if (SignalProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
+    if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
         constructor.offspring = findOrCreateNewCreature(data, object);
 
         if (ConstructorHelper::isFinished(constructor, *constructor.offspring->genome)) {

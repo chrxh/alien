@@ -7,7 +7,6 @@
 #include "ConstantMemory.cuh"
 #include "Entities.cuh"
 #include "EnergyProcessor.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -36,7 +35,7 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& detonator = object->typeData.cell.cellTypeData.detonator;
-    if (SignalProcessor::isManuallyTriggered(data, object) && detonator.state == DetonatorState_Ready) {
+    if (NeuronProcessor::isManuallyTriggered(data, object) && detonator.state == DetonatorState_Ready) {
         detonator.state = DetonatorState_Activated;
     }
     if (detonator.state == DetonatorState_Activated) {

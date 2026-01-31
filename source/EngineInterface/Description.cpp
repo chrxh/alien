@@ -1,5 +1,8 @@
 #include "Description.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include <boost/range/adaptors.hpp>
 
 #include <Base/Math.h>
@@ -9,24 +12,41 @@
 
 NeuralNetworkDesc::NeuralNetworkDesc()
 {
-    _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
-    _biases.resize(MAX_CHANNELS, 0);
-    _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-    _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
+    _weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         _weights[i * MAX_CHANNELS + i] = 1.0f;
     }
+
+    _biases.resize(MAX_CHANNELS, 0);
+    _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
+    
+    _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
+    _connectionWeights.at(0) = 1.0f;
 }
 
-NeuralNetworkDesc& NeuralNetworkDesc::weight(int row, int col, float value)
+NeuralNetworkDesc& NeuralNetworkDesc::weight(int row, int col, NeuralNetWeight value)
 {
     _weights[row * MAX_CHANNELS + col] = value;
+    return *this;
+}
+
+NeuralNetworkDesc& NeuralNetworkDesc::connectionWeight(int connectionIndex, float value)
+{
+    CHECK(connectionIndex < MAX_OBJECT_CONNECTIONS);
+    _connectionWeights[connectionIndex] = value;
     return *this;
 }
 
 SignalDesc::SignalDesc()
 {
     _channels.resize(MAX_CHANNELS, 0);
+}
+
+SignalDesc& SignalDesc::channels(std::vector<float> const& value)
+{
+    CHECK(value.size() == MAX_CHANNELS);
+    _channels = value;
+    return *this;
 }
 
 SensorMode SensorDesc::getMode() const
@@ -148,24 +168,13 @@ CellType CellDesc::getCellType() const
     CHECK(false);
 }
 
-CellDesc& CellDesc::signalAndState(std::vector<float> const& value)
+CellDesc& CellDesc::signal(std::vector<float> const& value)
 {
     CHECK(value.size() == MAX_CHANNELS);
 
     SignalDesc newSignal;
     newSignal._channels = value;
     _signal = newSignal;
-    _signalState = SignalState_Active;
-    return *this;
-}
-
-CellDesc& CellDesc::signalRestriction(float baseAngle, float openingAngle)
-{
-    SignalRestrictionDesc routingRestriction;
-    routingRestriction._mode = SignalRestrictionMode_Active;
-    routingRestriction._baseAngle = baseAngle;
-    routingRestriction._openingAngle = openingAngle;
-    _signalRestriction = routingRestriction;
     return *this;
 }
 

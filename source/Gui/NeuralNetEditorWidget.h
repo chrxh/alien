@@ -9,7 +9,7 @@ class _NeuralNetEditorWidget
 public:
     static NeuralNetEditorWidget create();
 
-    void process(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
+    void process(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
 private:
     _NeuralNetEditorWidget();
@@ -20,14 +20,17 @@ private:
         int outputNeuronIndex = 0;
     };
 
-    void
-    processNetwork(SelectionData& selectionData, std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
-    void processEditWidgets(
+    void processNetwork(
         SelectionData& selectionData,
-        std::vector<float>& weights,
+        std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions);
-    void processActionButtons(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
+    void processEditWidgets(
+        SelectionData& selectionData,
+        std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions);
+    void processActionButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     template <typename T>
     SelectionData& getValueRef(std::unordered_map<unsigned int, T>& idToValueMap);
@@ -36,7 +39,7 @@ private:
 
     struct NetData
     {
-        std::vector<float> weights;
+        std::vector<NeuralNetWeight> weights;
         std::vector<float> biases;
         std::vector<ActivationFunction> activationFunctions;
     };

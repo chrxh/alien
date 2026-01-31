@@ -122,7 +122,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             node.color = nodeTO.color;
             node.numAdditionalConnections = nodeTO.numAdditionalConnections;
             for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-                node.neuralNetwork.weights[i] = nodeTO.neuralNetwork.weights[i];  // Both are half, direct copy
+                node.neuralNetwork.weights[i] = nodeTO.neuralNetwork.weights[i];
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 node.neuralNetwork.biases[i] = nodeTO.neuralNetwork.biases[i];
@@ -131,9 +131,6 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
                 node.neuralNetwork.connectionWeights[i] = nodeTO.neuralNetwork.connectionWeights[i];
             }
-            node.signalRestriction.mode = nodeTO.signalRestriction.mode;
-            node.signalRestriction.baseAngle = nodeTO.signalRestriction.baseAngle;
-            node.signalRestriction.openingAngle = nodeTO.signalRestriction.openingAngle;
 
             node.cellType = nodeTO.cellType;
 
@@ -367,11 +364,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->eventCounter = cellTO.eventCounter;
         cell->eventPos = cellTO.eventPos;
 
-        cell->signalRestriction.mode = cellTO.signalRestriction.mode;
-        cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;
-        cell->signalRestriction.openingAngle = cellTO.signalRestriction.openingAngle;
-
-        cell->signalState = cellTO.signalState;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cell->signal.channels[i] = cellTO.signal.channels[i];
         }
@@ -379,12 +371,12 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
 
         cell->cellType = cellTO.cellType;
 
-        // Copy NeuralNetworkTO (half weights) to NeuralNetwork (half weights) - direct copy
+        // Copy NeuralNetworkTO to NeuralNetwork
         {
             auto* nnTO = reinterpret_cast<NeuralNetworkTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
             cell->neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNetwork>(1);
             for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-                cell->neuralNetwork->weights[i] = nnTO->weights[i];  // Both are half, direct copy
+                cell->neuralNetwork->weights[i] = nnTO->weights[i];
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->neuralNetwork->biases[i] = nnTO->biases[i];
@@ -580,8 +572,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->cellTypeData.communicator.mode = cellTO.cellTypeData.communicator.mode;
             if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                 cell->cellTypeData.communicator.modeData.sender.range = cellTO.cellTypeData.communicator.modeData.sender.range;
-                cell->cellTypeData.communicator.modeData.sender.maxTimesSent =
-                    cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
+                cell->cellTypeData.communicator.modeData.sender.maxTimesSent = cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
             } else if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                 cell->cellTypeData.communicator.modeData.receiver.restrictToColor =
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
@@ -760,7 +751,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNetwork>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-        cell.neuralNetwork->weights[i] = node->neuralNetwork.weights[i];  // Both are half, direct copy
+        cell.neuralNetwork->weights[i] = node->neuralNetwork.weights[i];
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell.neuralNetwork->biases[i] = node->neuralNetwork.biases[i];
@@ -771,10 +762,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
         cell.neuralNetwork->connectionWeights[i] = node->neuralNetwork.connectionWeights[i];
     }
-    cell.signalRestriction.mode = node->signalRestriction.mode;
-    cell.signalRestriction.baseAngle = node->signalRestriction.baseAngle;
-    cell.signalRestriction.openingAngle = node->signalRestriction.openingAngle;
-    cell.signalState = 0;
     cell.activationTime = 0;
     cell.event = CellEvent_No;
 

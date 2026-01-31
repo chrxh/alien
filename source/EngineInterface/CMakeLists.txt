@@ -30,6 +30,7 @@ add_library(EngineInterface
     LocationHelper.cpp
     LocationHelper.h
     MutationType.h
+    NeuralNetWeight.h
     NumberGenerator.cpp
     NumberGenerator.h
     ParametersEditService.cpp

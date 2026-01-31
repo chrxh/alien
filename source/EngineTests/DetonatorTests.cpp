@@ -41,7 +41,7 @@ TEST_F(DetonatorTests, doNothing)
 
     EXPECT_EQ(1, actualData._objects.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_FALSE(actualDetonatorCell.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell.getCellRef()._signal._channels[0]));
     EXPECT_EQ(14, std::get<DetonatorDesc>(actualDetonatorCell.getCellRef()._cellType)._countdown);
     EXPECT_EQ(DetonatorState_Ready, std::get<DetonatorDesc>(actualDetonatorCell.getCellRef()._cellType)._state);
 }
@@ -50,7 +50,7 @@ TEST_F(DetonatorTests, activateDetonator)
 {
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(DetonatorDesc().countdown(10))),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc()).signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc()).signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
     });
     data.addConnection(1, 2);
 
@@ -83,7 +83,7 @@ TEST_F(DetonatorTests, explosion)
 
     EXPECT_EQ(2, actualData._objects.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_FALSE(actualDetonatorCell.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell.getCellRef()._signal._channels[0]));
     EXPECT_EQ(0, std::get<DetonatorDesc>(actualDetonatorCell.getCellRef()._cellType)._countdown);
     EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDesc>(actualDetonatorCell.getCellRef()._cellType)._state);
     EXPECT_TRUE(Math::length(actualOtherObject._vel) > NEAR_ZERO);

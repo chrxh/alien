@@ -34,7 +34,7 @@ protected:
     {
         auto data = Desc().addCreature({
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().mode(mode).signalEntries(signalEntries))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState(signal)),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(signal)),
         });
         data.addConnection(1, 2);
         return data;
@@ -76,7 +76,7 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
             .type(CellDesc().cellType(MemoryDesc()
                                                  .mode(SignalIntegratorDesc().newSignalWeight(newSignalWeight))
                                                  .signalEntries({SignalEntryDesc().channels(storedSignal)}))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState(incomingSignal)),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
     });
     data.addConnection(1, 2);
 
@@ -106,7 +106,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
             .type(CellDesc().cellType(MemoryDesc()
                                                  .mode(SignalIntegratorDesc().newSignalWeight(1.0f))
                                                  .signalEntries({SignalEntryDesc().channels(storedSignal)}))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState(incomingSignal)),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
     });
     data.addConnection(1, 2);
 
@@ -133,7 +133,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfZero_preservesStoredSignal)
             .type(CellDesc().cellType(MemoryDesc()
                                                  .mode(SignalIntegratorDesc().newSignalWeight(0.0f))
                                                  .signalEntries({SignalEntryDesc().channels(storedSignal)}))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState(incomingSignal)),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
     });
     data.addConnection(1, 2);
 
@@ -173,7 +173,6 @@ TEST_F(MemoryTests, signalDelay_firstSignal_storesSignalInMemory)
     EXPECT_TRUE(approxCompare(signal, memory._signalEntries[0]._channels));
 
     // Verify the output signal (buffer not full yet, so signal should be unchanged)
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -194,7 +193,6 @@ TEST_F(MemoryTests, signalDelay_delayOf0_outputsSameCycleSignal)
     EXPECT_EQ(0, signalDelay._numSignalEntriesInitialized);
 
     // Verify the output signal
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -210,7 +208,7 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
     // Second signal
     std::vector<float> signal2 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signalAndState(signal2);
+    actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -223,7 +221,6 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
     EXPECT_EQ(1, signalDelay._numSignalEntriesInitialized);
 
     // The output signal should be signal1 (the first signal, delayed by 2)
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -241,13 +238,13 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
 
     // Second signal
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signalAndState(signal2);
+    actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(3);
 
     // Third signal
     actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signalAndState(signal3);
+    actualData.getObjectRef(2).getCellRef().signal(signal3);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -256,7 +253,6 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     auto memoryCell = actualData.getObjectRef(1);
     auto& signalDelay = std::get<SignalDelayDesc>(std::get<MemoryDesc>(memoryCell.getCellRef()._cellType)._mode);
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 
     // Waiting
@@ -264,13 +260,12 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     actualData = _simulationFacade->getSimulationData();
 
     // Fourth signal - should output signal2
-    actualData.getObjectRef(2).getCellRef().signalAndState(signal4);
+    actualData.getObjectRef(2).getCellRef().signal(signal4);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
     actualData = _simulationFacade->getSimulationData();
     memoryCell = actualData.getObjectRef(1);
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -298,7 +293,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     actualData = _simulationFacade->getSimulationData();
 
     // Second signal
-    actualData.getObjectRef(2).getCellRef().signalAndState(signal2);
+    actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -310,7 +305,6 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
 
     // Signal should still be the incoming signal2 (not modified by delay output)
-    EXPECT_EQ(SignalState_Active, memoryCell.getCellRef()._signalState);
     EXPECT_TRUE(approxCompare(signal2, memoryCell.getCellRef()._signal._channels));
 }
 
@@ -352,7 +346,7 @@ TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
 
     // Second signal - should record and complete
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signalAndState(signal2);
+    actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -410,7 +404,7 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
 
     // Second read - should read second entry and complete
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signalAndState(triggerSignal);
+    actualData.getObjectRef(2).getCellRef().signal(triggerSignal);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -455,7 +449,7 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
 
     // Send negative signal - should continue recording, not switch to reading
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getObjectRef(2).getCellRef().signalAndState(negativeSignal);
+    actualData.getObjectRef(2).getCellRef().signal(negativeSignal);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 

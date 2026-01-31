@@ -69,7 +69,7 @@ namespace
     {
         NeuralNetworkGenomeDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result._weights[i] = __half2float(neuralNetworkGenomeTO.weights[i]);  // Convert half to float
+            result._weights[i] = neuralNetworkGenomeTO.weights[i];
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._biases[i] = neuralNetworkGenomeTO.biases[i];
@@ -87,7 +87,7 @@ namespace
     {
         NeuralNetworkDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result._weights[i] = __half2float(neuralNetworkTO.weights[i]);  // Convert half to float
+            result._weights[i] = neuralNetworkTO.weights[i];
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._biases[i] = neuralNetworkTO.biases[i];
@@ -103,20 +103,15 @@ namespace
 
     NeuralNetworkGenomeTO convert(NeuralNetworkGenomeDesc const& neuralNetworkDesc)
     {
-        auto numInputChannels = neuralNetworkDesc._biases.size();
-
         NeuralNetworkGenomeTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            auto col = i / MAX_CHANNELS;
-            auto row = i % MAX_CHANNELS;
-            float value = col < numInputChannels && row < numInputChannels ? neuralNetworkDesc._weights[row + col * numInputChannels] : 0.0f;
-            result.weights[i] = __float2half(value);  // Convert float to half
+            result.weights[i] = neuralNetworkDesc._weights[i];
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result.biases[i] = i < numInputChannels ? neuralNetworkDesc._biases[i] : 0.0f;
+            result.biases[i] = neuralNetworkDesc._biases[i];
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result.activationFunctions[i] = i < numInputChannels ? neuralNetworkDesc._activationFunctions[i] : 0;
+            result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
             result.connectionWeights[i] = neuralNetworkDesc._connectionWeights[i];
@@ -126,20 +121,20 @@ namespace
 
     NeuralNetworkTO convert(NeuralNetworkDesc const& neuralNetworkDesc)
     {
-        auto numInputChannels = neuralNetworkDesc._biases.size();
+        CHECK(neuralNetworkDesc._weights.size() == MAX_CHANNELS * MAX_CHANNELS);
+        CHECK(neuralNetworkDesc._biases.size() == MAX_CHANNELS);
+        CHECK(neuralNetworkDesc._activationFunctions.size() == MAX_CHANNELS);
+        CHECK(neuralNetworkDesc._connectionWeights.size() == MAX_OBJECT_CONNECTIONS);
 
         NeuralNetworkTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            auto col = i / MAX_CHANNELS;
-            auto row = i % MAX_CHANNELS;
-            result.weights[i] = __float2half(
-                col < numInputChannels && row < numInputChannels ? neuralNetworkDesc._weights[row + col * numInputChannels] : 0.0f);  // Convert float to half
+            result.weights[i] = neuralNetworkDesc._weights[i];
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result.biases[i] = i < numInputChannels ? neuralNetworkDesc._biases[i] : 0.0f;
+            result.biases[i] = neuralNetworkDesc._biases[i];
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result.activationFunctions[i] = i < numInputChannels ? neuralNetworkDesc._activationFunctions[i] : 0;
+            result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
             result.connectionWeights[i] = neuralNetworkDesc._connectionWeights[i];
@@ -612,17 +607,8 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
-        SignalRestrictionDesc routingRestriction;
-        routingRestriction._mode = objectTO.typeData.cell.signalRestriction.mode;
-        routingRestriction._baseAngle = objectTO.typeData.cell.signalRestriction.baseAngle;
-        routingRestriction._openingAngle = objectTO.typeData.cell.signalRestriction.openingAngle;
-        cellDesc._signalRestriction = routingRestriction;
-        cellDesc._signalState = objectTO.typeData.cell.signalState;
-        if (objectTO.typeData.cell.signalState == SignalState_Active) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
-            }
-            cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
@@ -642,9 +628,6 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
     nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
 
     nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
-    nodeDesc._signalRestriction._mode = nodeTO->signalRestriction.mode;
-    nodeDesc._signalRestriction._baseAngle = nodeTO->signalRestriction.baseAngle;
-    nodeDesc._signalRestriction._openingAngle = nodeTO->signalRestriction.openingAngle;
 
     switch (nodeTO->cellType) {
     case CellType_Base: {
@@ -980,9 +963,6 @@ void DescriptionConverterService::convertGenomeToTO(
             nodeTO.referenceAngle = nodeDesc._referenceAngle;
             nodeTO.color = nodeDesc._color;
             nodeTO.numAdditionalConnections = nodeDesc._numAdditionalConnections;
-            nodeTO.signalRestriction.mode = nodeDesc._signalRestriction._mode;
-            nodeTO.signalRestriction.baseAngle = nodeDesc._signalRestriction._baseAngle;
-            nodeTO.signalRestriction.openingAngle = nodeDesc._signalRestriction._openingAngle;
             nodeTO.neuralNetwork = convert(nodeDesc._neuralNetwork);
 
             nodeTO.cellType = nodeDesc.getCellType();
@@ -1486,16 +1466,9 @@ void DescriptionConverterService::convertObjectToTO(
             constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
         }
 
-        objectTO.typeData.cell.signalRestriction.mode = cellDesc._signalRestriction._mode;
-        objectTO.typeData.cell.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
-        objectTO.typeData.cell.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
-        objectTO.typeData.cell.signalState = cellDesc._signalState;
-        if (cellDesc._signalState == SignalState_Active) {
-            auto numChannels = cellDesc._signal._channels.size();
-            for (int i = 0; i < MAX_CHANNELS && i < numChannels; ++i) {
-                objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
-            }
-            objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
+        auto numChannels = cellDesc._signal._channels.size();
+        for (int i = 0; i < MAX_CHANNELS && i < numChannels; ++i) {
+            objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
         }
     } else {
         CHECK(false);

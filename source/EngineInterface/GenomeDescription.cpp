@@ -1,10 +1,13 @@
 #include "GenomeDescription.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include "NumberGenerator.h"
 
 NeuralNetworkGenomeDesc::NeuralNetworkGenomeDesc()
 {
-    _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
+    _weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     _biases.resize(MAX_CHANNELS, 0);
     _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
     _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
@@ -13,7 +16,7 @@ NeuralNetworkGenomeDesc::NeuralNetworkGenomeDesc()
     }
 }
 
-NeuralNetworkGenomeDesc& NeuralNetworkGenomeDesc::weight(int row, int col, float value)
+NeuralNetworkGenomeDesc& NeuralNetworkGenomeDesc::weight(int row, int col, NeuralNetWeight value)
 {
     _weights[row * MAX_CHANNELS + col] = value;
     return *this;

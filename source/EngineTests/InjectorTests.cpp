@@ -66,9 +66,7 @@ TEST_F(InjectorTests, noTargetFound)
     auto actualInjector = actualData.getObjectRef(1);
 
     // Injector should have a signal with success value = 0
-    if (actualInjector.getCellRef()._signalState == SignalState_Active) {
-        EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
-    }
+    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
 }
 
 /**
@@ -91,7 +89,6 @@ TEST_F(InjectorTests, successfulInjection)
     auto actualTargetConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Injector should have a signal with success value > 0
-    ASSERT_TRUE(actualInjector.getCellRef()._signalState == SignalState_Active);
     EXPECT_TRUE(actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess] > NEAR_ZERO);
 
     // Target constructor should have the injector's geneIndex

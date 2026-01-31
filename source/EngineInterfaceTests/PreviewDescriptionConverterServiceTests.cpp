@@ -32,8 +32,8 @@ public:
     {
         RealVector2D object1;
         RealVector2D object2;
-        bool arrowToObject1 = true;
-        bool arrowToObject2 = true;
+        bool arrowToObject1 = false;  // No signal restrictions anymore, arrows are always false
+        bool arrowToObject2 = false;
     };
     void checkConnections(PreviewDesc const& preview, std::vector<ConnectionCheckDescription> const& expectedConnections)
     {
@@ -165,44 +165,6 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withoutSeparatio
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
     checkConnections(result.description, {{object1._pos, object2._pos}});
-}
-
-TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_separated_withSignalRestrictions)
-{
-    auto constexpr BaseAngle = 10.0f;
-    auto constexpr OpeningAngle = 90.0f;
-
-    auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().color(2).signalRestriction(SignalRestrictionGenomeDesc().mode(SignalRestrictionMode_Active).baseAngle(BaseAngle).openingAngle(OpeningAngle)),
-            NodeDesc().color(3),
-        }),
-    });
-
-    Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        },
-        CreatureDesc(),
-        genome);
-    input.addConnection(1, 2);
-
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
-
-    ASSERT_EQ(2, result.description._objects.size());
-    ASSERT_EQ(1, result.description._connections.size());
-
-    auto object1 = getPreviewCell(result.description, 0, 0);
-    auto object2 = getPreviewCell(result.description, 0, 1);
-    ASSERT_TRUE(object1._signalRestriction.has_value());
-    EXPECT_TRUE(
-        std::abs(Math::getNormalizedAngle(Math::subtractAngle(180.0f + BaseAngle - OpeningAngle / 2, object1._signalRestriction->_startAngle), -180.0f))
-        < NEAR_ZERO);
-    EXPECT_TRUE(
-        std::abs(Math::getNormalizedAngle(Math::subtractAngle(180.0f + BaseAngle + OpeningAngle / 2, object1._signalRestriction->_endAngle), -180.0f))
-        < NEAR_ZERO);
-    checkConnections(result.description, {{object1._pos, object2._pos, true, false}});
 }
 
 TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
@@ -516,8 +478,8 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
 
     Desc input;
     input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).signalAndState(signal)),
-        ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1).signalState(SignalState_Fading)),
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).signal(signal)),
+        ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),
         genome);
@@ -529,10 +491,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
     ASSERT_EQ(1, result.description._connections.size());
 
     auto object1 = getPreviewCell(result.description, 0, 0);
-    auto object2 = getPreviewCell(result.description, 0, 1);
 
-    EXPECT_EQ(SignalState_Active, object1._signalState);
-    EXPECT_TRUE(object1._signalState == SignalState_Active);
+    EXPECT_TRUE(object1._signal.has_value());
     EXPECT_EQ(signal, object1._signal->_channels);
-    EXPECT_EQ(SignalState_Fading, object2._signalState);
 }

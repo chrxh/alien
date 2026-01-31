@@ -16,7 +16,6 @@
 #include "EnergyProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "SensorProcessor.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationKernels.cuh"
 #include "MutationProcessor.cuh"
 
@@ -98,19 +97,14 @@ __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData dat
     ObjectProcessor::verletVelocityUpdate(data);
 }
 
-__global__ void cudaNextTimestep_signal_calcFutureSignals(SimulationData data)
+__global__ void cudaNextTimestep_signal_calcSignal(SimulationData data, SimulationStatistics statistics)
 {
-    SignalProcessor::calcFutureSignals(data);
+    NeuronProcessor::calcSignal(data, statistics);
 }
 
-__global__ void cudaNextTimestep_signal_updateSignals(SimulationData data)
+__global__ void cudaNextTimestep_signal_setSignal(SimulationData data)
 {
-    SignalProcessor::updateSignals(data);
-}
-
-__global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, SimulationStatistics statistics)
-{
-    NeuronProcessor::process(data, statistics);
+    NeuronProcessor::setSignal(data);
 }
 
 __global__ void cudaNextTimestep_energyFlow(SimulationData data)

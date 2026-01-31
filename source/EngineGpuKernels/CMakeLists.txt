@@ -69,7 +69,6 @@ add_library(EngineGpuKernels
     SelectionKernels.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
-    SignalProcessor.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu

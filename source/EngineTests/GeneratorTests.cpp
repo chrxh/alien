@@ -30,7 +30,8 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_FALSE(generator.getCellRef()._signalState == SignalState_Active);
+    // Signal should not be active yet (channels should be zero)
+    EXPECT_TRUE(approxCompare(0.0f, generator.getCellRef()._signal._channels.at(0)));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
@@ -47,7 +48,6 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    ASSERT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
     EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
 }
 
@@ -64,7 +64,6 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailedPreview)
     auto actualData = _simulationFacade->getPreviewData();
 
     auto generator = actualData.getObjectRef(1);
-    ASSERT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
     EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
 }
 
@@ -82,7 +81,6 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
     EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
 }
 
@@ -100,7 +98,8 @@ TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_FALSE(generator.getCellRef()._signalState == SignalState_Active);
+    // Signal should have been consumed after the pulse
+    EXPECT_TRUE(approxCompare(0.0f, generator.getCellRef()._signal._channels.at(0)));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
@@ -118,7 +117,6 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
     EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
 }
 
@@ -137,7 +135,6 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
     EXPECT_EQ(-1.0f, generator.getCellRef()._signal._channels.at(0));
 }
 
@@ -158,7 +155,6 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
     EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
 }
 
@@ -182,16 +178,12 @@ TEST_F(GeneratorTests, generatePulse_triangularNetwork)
         auto actualData = _simulationFacade->getSimulationData();
 
         auto generator = actualData.getObjectRef(1);
-        EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
         EXPECT_TRUE(approxCompare(1.0f, generator.getCellRef()._signal._channels.at(0)));
-        EXPECT_EQ(2, generator.getCellRef()._signalState);
 
         auto base1 = actualData.getObjectRef(2);
-        EXPECT_FALSE(base1.getCellRef()._signalState == SignalState_Active);
-        EXPECT_EQ(0, base1.getCellRef()._signalState);
+        EXPECT_TRUE(approxCompare(0.0f, base1.getCellRef()._signal._channels.at(0)));
 
         auto base2 = actualData.getObjectRef(3);
-        EXPECT_FALSE(base2.getCellRef()._signalState == SignalState_Active);
-        EXPECT_EQ(0, base2.getCellRef()._signalState);
+        EXPECT_TRUE(approxCompare(0.0f, base2.getCellRef()._signal._channels.at(0)));
     }
 }

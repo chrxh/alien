@@ -5,6 +5,7 @@
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/NeuralNetWeight.h>
 
 #include "Array.cuh"
 #include "Base.cuh"
@@ -50,9 +51,9 @@ struct ObjectConnection
     float angleFromPrevious;
 };
 
-struct NeuralNetwork
+struct __align__(16) NeuralNetwork
 {
-    half weights[MAX_CHANNELS * MAX_CHANNELS];  // FP16 for tensor cores
+    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
@@ -348,7 +349,7 @@ union MemoryModeData
     SignalIntegrator signalIntegrator;
 };
 
-struct SignalEntry
+struct __align__(16) SignalEntry
 {
     float channels[MAX_CHANNELS];
 };
@@ -366,6 +367,7 @@ struct Memory
 struct Sender
 {
     float range;
+    int maxTimesSent;
 };
 
 struct Receiver
@@ -403,7 +405,7 @@ union CellTypeData
     Communicator communicator;
 };
 
-struct Signal
+struct __align__(16) Signal
 {
     float channels[MAX_CHANNELS];
     int numTimesSent;

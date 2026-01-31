@@ -3,6 +3,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/SimulationParameters.h>
+#include <EngineInterface/NeuralNetWeight.h>
 
 #include "ConstantMemory.cuh"
 #include "CellProcessor.cuh"
@@ -79,10 +80,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_neuralNetwork(Simul
             auto node = &gene->nodes[j];
             auto neuronMutationType = data.primaryNumberGen.random(3);
 
-            // Mutate weights (convert to float for mutation, then back to half)
             for (int k = 0; k < MAX_CHANNELS * MAX_CHANNELS; ++k) {
                 if (data.primaryNumberGen.random() < neuralNetworkMutationWeight) {
-                    float property = __half2float(node->neuralNetwork.weights[k]);
+                    float property = node->neuralNetwork.weights[k].getValue();
                     if (neuronMutationType == 0) {
                         property *= neuralNetworkMutationReinforcement;
                     } else if (neuronMutationType == 1) {
@@ -92,7 +92,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neuralNetwork(Simul
                     } else if (neuronMutationType == 3) {
                         property -= neuralNetworkMutationOffset;
                     }
-                    node->neuralNetwork.weights[k] = __float2half(property);
+                    node->neuralNetwork.weights[k] = property;
                 }
             }
 

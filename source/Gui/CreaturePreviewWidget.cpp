@@ -217,40 +217,13 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
-    // Draw signal restrictions
+    // Draw cells background
     if (_zoom > ZoomLevelForConnections) {
         for (auto const& object : desc._objects) {
             auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
             float radius = cellSize * 0.33f;
 
-            if (!object._signalRestriction.has_value()) {
-                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
-            } else {
-                auto startAngle = Math::getNormalizedAngle(object._signalRestriction->_startAngle, 0);
-                auto endAngle = Math::getNormalizedAngle(object._signalRestriction->_endAngle, 0);
-
-                // Draw filled ring sector (annular sector) between startAngle and endAngle
-                const int numSegments = 32;  // Increase for smoother arc
-                float startRad = Math::getNormalizedAngle(startAngle * Const::DegToRad, 0);
-                float endRad = Math::getNormalizedAngle(endAngle * Const::DegToRad, 0);
-                if (startRad > endRad) {
-                    endRad += 2 * Const::Pi;  // If the angle wraps around, we need to adjust the end angle
-                }
-                float angleStep = (endRad - startRad) / numSegments;
-
-                std::vector<ImVec2> ringPoints;
-                ringPoints.reserve((numSegments + 1) * 2);
-
-                // Outer arc (from start to end)
-                for (int i = 0; i <= numSegments; ++i) {
-                    float angle = startRad + i * angleStep;
-                    ringPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
-                }
-                ringPoints.push_back(ImVec2(cellPos.x, cellPos.y));
-
-                // Draw filled polygon (ring sector)
-                drawList->AddConcavePolyFilled(ringPoints.data(), ringPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
-            }
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
         }
     }
 
@@ -290,13 +263,20 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             auto constexpr cellRadiusFactor = 0.3f;
             float radius = cellSize * cellRadiusFactor;
 
-            if (object._signalState == SignalState_Active) {
-                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, 1.0f));
-                drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, 0.8f));
-            }
-            if (object._signalState == SignalState_Fading) {
-                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 1.0f, 0.5f));
-                drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 0.2f, 0.5f));
+            // Check if signal has non-zero values (indicates active signal)
+            bool hasActiveSignal = object._signal.has_value() && !object._signal->_channels.empty();
+            if (hasActiveSignal) {
+                bool hasNonZeroChannel = false;
+                for (auto const& ch : object._signal->_channels) {
+                    if (ch != 0.0f) {
+                        hasNonZeroChannel = true;
+                        break;
+                    }
+                }
+                if (hasNonZeroChannel) {
+                    drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, 1.0f));
+                    drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, 0.8f));
+                }
             }
         }
     }
@@ -385,27 +365,35 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
     }
     CHECK(selectedCell.has_value());
 
+    // Check if signal has non-zero values
+    bool hasSignalChannels = selectedCell->_signal.has_value() && !selectedCell->_signal->_channels.empty();
 
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(440.0f), ImGui::GetScrollY() + scale(13.0f)});
-    auto height = selectedCell->_signalState == SignalState_Active ? scale(168.0f) : scale(67.0f);
+    auto height = hasSignalChannels ? scale(168.0f) : scale(67.0f);
     if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), height), ImGuiChildFlags_FrameStyle)) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
-        int signalState = selectedCell->_signalState; 
-        phenotypeChanged |=
-            AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Fading signal", "Signal"}).textWidth(0), signalState);
-        selectedCell->_signalState = static_cast<uint8_t>(signalState);
+        int signalEnabled = hasSignalChannels ? 1 : 0; 
+        bool signalStateChanged = AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Signal"}).textWidth(0), signalEnabled);
+        phenotypeChanged |= signalStateChanged;
+        
+        if (signalStateChanged) {
+            if (signalEnabled == 1) {
+                // Enable signal with default channels
+                selectedCell->_signal = SignalPreviewDesc();
+            } else {
+                // Clear signal
+                selectedCell->_signal = std::nullopt;
+            }
+        }
 
-        if (selectedCell->_signalState == SignalState_Active) {
+        if (signalEnabled == 1 && selectedCell->_signal.has_value()) {
 
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));  // Transparent background
             ImGuiStyle& style = ImGui::GetStyle();
             auto originalGrabMinSize = style.GrabMinSize;
             style.GrabMinSize = scale(8.0f);
 
-            if (!selectedCell->_signal.has_value()) {
-                selectedCell->_signal = SignalPreviewDesc();
-            }
             auto& channels = selectedCell->_signal->_channels;
             int index = 0;
             for (int i = 0; i < MAX_CHANNELS / 4; ++i) {
@@ -523,10 +511,11 @@ void _CreaturePreviewWidget::updatePhenotype(Desc& phenotype, CellPreviewDesc co
 {
     for (auto& object : phenotype._objects) {
         if (object._id == editedCell._id) {
-            object.getCellRef()._signalState = editedCell._signalState;
-            if (editedCell._signalState == SignalState_Active) {
+            if (editedCell._signal.has_value()) {
                 auto signalDesc = SignalDesc().channels(editedCell._signal.value()._channels);
                 object.getCellRef()._signal = signalDesc;
+            } else {
+                object.getCellRef()._signal = SignalDesc();
             }
         }
     }

@@ -4,9 +4,9 @@
 
 #include "ConstantMemory.cuh"
 #include "Entities.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
+#include "ObjectConnectionProcessor.cuh"
 
 class CommunicatorProcessor
 {
@@ -37,7 +37,7 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 {
     __shared__ bool shouldProcess;
     if (threadIdx.x == 0) {
-        shouldProcess = SignalProcessor::isManuallyTriggered(data, object);
+        shouldProcess = NeuronProcessor::isManuallyTriggered(data, object);
     }
     __syncthreads();
 
@@ -55,16 +55,23 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     __shared__ float range;
+    __shared__ int maxTimesSent;
     __shared__ int currentNumTimesSent;
     __shared__ float2 senderPos;
 
     if (threadIdx.x == 0) {
         auto& sender = object->typeData.cell.cellTypeData.communicator.modeData.sender;
         range = sender.range;
+        maxTimesSent = sender.maxTimesSent;
         currentNumTimesSent = object->typeData.cell.signal.numTimesSent;
         senderPos = object->pos;
     }
     __syncthreads();
+
+    // Check if signal can still be forwarded
+    if (currentNumTimesSent >= maxTimesSent) {
+        return;
+    }
 
     auto const newNumTimesSent = currentNumTimesSent + 1;
     int rangeInt = static_cast<int>(ceilf(range));
@@ -151,8 +158,8 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
         // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
         // We need to maintain the absolute direction: senderRefDir rotated by senderAngle = receiverRefDir rotated by receiverAngle
         // Therefore: receiverAngle = senderAngle + (senderRefAngle - receiverRefAngle)
-        auto senderRefDir = SignalProcessor::calcReferenceDirection(data, senderObject);
-        auto receiverRefDir = SignalProcessor::calcReferenceDirection(data, receiverObject);
+        auto senderRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, senderObject);
+        auto receiverRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, receiverObject);
         auto senderRefAngle = Math::angleOfVector(senderRefDir);
         auto receiverRefAngle = Math::angleOfVector(receiverRefDir);
         auto angleDiff = senderRefAngle - receiverRefAngle;

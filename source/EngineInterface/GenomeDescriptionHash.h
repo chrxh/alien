@@ -13,9 +13,9 @@ struct std::hash<NeuralNetworkGenomeDesc>
     std::size_t operator()(NeuralNetworkGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        for (const auto& weight : desc._weights) {
-            hash_combine(seed, weight);
-        }
+        //for (const auto& weight : desc._weights) {
+        //    hash_combine(seed, weight);
+        //}
         for (const auto& bias : desc._biases) {
             hash_combine(seed, bias);
         }
@@ -492,19 +492,6 @@ struct std::hash<CellTypeGenomeDesc>
 };
 
 template <>
-struct std::hash<SignalRestrictionGenomeDesc>
-{
-    std::size_t operator()(SignalRestrictionGenomeDesc const& desc) const
-    {
-        std::size_t seed = 0;
-        hash_combine(seed, desc._mode);
-        hash_combine(seed, desc._baseAngle);
-        hash_combine(seed, desc._openingAngle);
-        return seed;
-    }
-};
-
-template <>
 struct std::hash<NodeDesc>
 {
     std::size_t operator()(NodeDesc const& desc) const
@@ -520,7 +507,6 @@ struct std::hash<NodeDesc>
         } else {
             hash_combine(seed, -1);
         }
-        hash_combine(seed, std::hash<SignalRestrictionGenomeDesc>{}(desc._signalRestriction));
         return seed;
     }
 };

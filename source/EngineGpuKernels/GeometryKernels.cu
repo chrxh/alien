@@ -1,6 +1,5 @@
 ﻿#include "GeometryKernels.cuh"
 #include "ParameterCalculator.cuh"
-#include "SignalProcessor.cuh"
 
 namespace
 {

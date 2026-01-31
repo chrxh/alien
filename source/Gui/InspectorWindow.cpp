@@ -202,26 +202,6 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                 ImGui::TreePop();
             }
 
-            if (ImGui::TreeNodeEx("Signal routing", TreeNodeFlags)) {
-                int modeAsInt = static_cast<int>(object.getCellRef()._signalRestriction._mode);
-                if (AlienGui::Switcher(
-                    AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(BaseTabTextWidth),
-                    modeAsInt)) {
-                    object.getCellRef()._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
-                }
-                bool restrictionActive = (object.getCellRef()._signalRestriction._mode == SignalRestrictionMode_Active || 
-                                          object.getCellRef()._signalRestriction._mode == SignalRestrictionMode_Conditional);
-                if (restrictionActive) {
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
-                        object.getCellRef()._signalRestriction._baseAngle);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
-                        object.getCellRef()._signalRestriction._openingAngle);
-                }
-                ImGui::TreePop();
-            }
-
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
                 std::stringstream ss;
                 ss << "0x" << std::hex << std::uppercase << extendedCell.creature->_id;
@@ -341,8 +321,17 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
                 ImGui::TreePop();
             }
         }
-        if (object.getCellRef()._signalState == SignalState_Active) {
-            if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
+        // Check if signal has non-zero values
+        bool hasSignalChannels = !object.getCellRef()._signal._channels.empty();
+        if (hasSignalChannels) {
+            bool hasNonZeroChannel = false;
+            for (auto const& ch : object.getCellRef()._signal._channels) {
+                if (ch != 0.0f) {
+                    hasNonZeroChannel = true;
+                    break;
+                }
+            }
+            if (hasNonZeroChannel && ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
                 int index = 0;
                 for (auto& channel : object.getCellRef()._signal._channels) {
                     AlienGui::InputFloat(

@@ -221,37 +221,6 @@ void _NodeEditorWidget::processNodeAttributes()
                 node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
             }
 
-            int modeAsInt = static_cast<int>(node._signalRestriction._mode);
-            if (AlienGui::Switcher(
-                AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(rightColumnWidth),
-                modeAsInt)) {
-                node._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
-            }
-
-            bool restrictionActive = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
-                                      node._signalRestriction._mode == SignalRestrictionMode_Conditional);
-            AlienGui::BeginIndent();
-
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters()
-                    .name("Signal base angle")
-                    .format("%.1f")
-                    .step(0.5f)
-                    .readOnly(!restrictionActive)
-                    .textWidth(rightColumnWidth),
-                node._signalRestriction._baseAngle);
-
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters()
-                    .name("Signal opening angle")
-                    .format("%.1f")
-                    .step(0.5f)
-                    .readOnly(!restrictionActive)
-                    .textWidth(rightColumnWidth),
-                node._signalRestriction._openingAngle);
-
-            AlienGui::EndIndent();
-
             AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(rightColumnWidth), node._color);
 
             table.next();

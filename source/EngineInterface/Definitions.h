@@ -55,3 +55,9 @@ struct ObjectVertexData;
 struct EnergyVertexData;
 
 struct ParametersFilter;
+
+#if defined(__CUDACC__)
+#define HOST_DEVICE __host__ __device__
+#else
+#define HOST_DEVICE
+#endif

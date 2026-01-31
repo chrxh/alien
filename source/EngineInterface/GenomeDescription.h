@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <Base/Definitions.h>
+#include <EngineInterface/NeuralNetWeight.h>
 
 #include "CellTypeConstants.h"
 #include "EngineConstants.h"
@@ -20,9 +21,9 @@ struct NeuralNetworkGenomeDesc
     NeuralNetworkGenomeDesc();
     auto operator<=>(NeuralNetworkGenomeDesc const&) const = default;
 
-    NeuralNetworkGenomeDesc& weight(int row, int col, float value);
+    NeuralNetworkGenomeDesc& weight(int row, int col, NeuralNetWeight value);
 
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, weights, {});
+    MEMBER(NeuralNetworkGenomeDesc, std::vector<NeuralNetWeight>, weights, {});
     MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, biases, {});
     MEMBER(NeuralNetworkGenomeDesc, std::vector<ActivationFunction>, activationFunctions, {});
     MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, connectionWeights, {});

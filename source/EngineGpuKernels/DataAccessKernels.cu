@@ -72,9 +72,6 @@ namespace
                     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
                         nodeTO.neuralNetwork.connectionWeights[i] = node.neuralNetwork.connectionWeights[i];
                     }
-                    nodeTO.signalRestriction.mode = node.signalRestriction.mode;
-                    nodeTO.signalRestriction.baseAngle = node.signalRestriction.baseAngle;
-                    nodeTO.signalRestriction.openingAngle = node.signalRestriction.openingAngle;
                     nodeTO.cellType = node.cellType;
                     switch (node.cellType) {
                     case CellType_Base:
@@ -310,10 +307,6 @@ namespace
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
-            cellTO.signalRestriction.mode = cell.signalRestriction.mode;
-            cellTO.signalRestriction.baseAngle = cell.signalRestriction.baseAngle;
-            cellTO.signalRestriction.openingAngle = cell.signalRestriction.openingAngle;
-            cellTO.signalState = cell.signalState;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cellTO.signal.channels[i] = cell.signal.channels[i];
             }
@@ -328,7 +321,7 @@ namespace
             cellTO.eventCounter = cell.eventCounter;
             cellTO.eventPos = cell.eventPos;
 
-            // Convert NeuralNetwork (half weights) to NeuralNetworkTO (float weights)
+            // Copy NeuralNetwork to NeuralNetworkTO
             if (cell.neuralNetwork != nullptr) {
                 uint64_t size = sizeof(NeuralNetworkTO);
                 cellTO.neuralNetworkDataIndex = alienAtomicAdd64(to.heapSize, size);
@@ -338,7 +331,7 @@ namespace
                 }
                 auto* nnTO = reinterpret_cast<NeuralNetworkTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
                 for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-                    nnTO->weights[i] = cell.neuralNetwork->weights[i];  // Both are half, direct copy
+                    nnTO->weights[i] = cell.neuralNetwork->weights[i];
                 }
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
                     nnTO->biases[i] = cell.neuralNetwork->biases[i];

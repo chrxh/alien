@@ -35,10 +35,6 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                     std::clamp(activationFunction, static_cast<ActivationFunction>(0), static_cast<ActivationFunction>(ActivationFunction_Count - 1));
             }
 
-            // Validate signal restriction
-            node._signalRestriction._baseAngle = Math::getNormalizedAngle(node._signalRestriction._baseAngle, -180.0f);
-            node._signalRestriction._openingAngle = Math::modulo(node._signalRestriction._openingAngle, 360.0f);
-
             // Validate cell-specific attributes based on type
             auto nodeType = node.getCellType();
 

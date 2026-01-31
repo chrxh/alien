@@ -33,7 +33,7 @@ protected:
                 .type(CellDesc()
                           .cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit))
                           .usableEnergy(usableEnergy)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         });
         data.addConnection(1, 2);
         return data;
@@ -47,7 +47,7 @@ protected:
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         });
         data.addConnection(1, 2);
         return data;

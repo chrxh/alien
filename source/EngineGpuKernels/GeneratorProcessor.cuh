@@ -5,7 +5,6 @@
 
 #include "Base.cuh"
 #include "ObjectConnectionProcessor.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 #include "TOs.cuh"
 
@@ -28,8 +27,8 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
         auto const& object = operation.object;
 
         auto& generator = object->typeData.cell.cellTypeData.generator;
-        if (SignalProcessor::isAutoTriggered(data, object, generator.autoTriggerInterval)) {
-            SignalProcessor::createEmptySignal(object);
+        if (NeuronProcessor::isAutoTriggered(data, object, generator.autoTriggerInterval)) {
+            NeuronProcessor::clearSignal(object);
             statistics.incNumGeneratorPulses(object->color);
             if (generator.pulseType == GeneratorPulseType_Positive) {
                 object->typeData.cell.signal.channels[Channels::CellTypeActivation] += 1.0f;

@@ -9,6 +9,8 @@
 #include <Base/Macros.h>
 #include <Base/MathTypes.h>
 
+#include <EngineInterface/NeuralNetWeight.h>
+
 #include "Definitions.h"
 #include "GenomeDescription.h"
 
@@ -26,12 +28,13 @@ struct NeuralNetworkDesc
     NeuralNetworkDesc();
     auto operator<=>(NeuralNetworkDesc const&) const = default;
 
-    MEMBER(NeuralNetworkDesc, std::vector<float>, weights, {});
+    MEMBER(NeuralNetworkDesc, std::vector<NeuralNetWeight>, weights, {});
     MEMBER(NeuralNetworkDesc, std::vector<float>, biases, {});
     MEMBER(NeuralNetworkDesc, std::vector<ActivationFunction>, activationFunctions, {});
     MEMBER(NeuralNetworkDesc, std::vector<float>, connectionWeights, {});
 
-    NeuralNetworkDesc& weight(int row, int col, float value);
+    NeuralNetworkDesc& weight(int row, int col, NeuralNetWeight value);
+    NeuralNetworkDesc& connectionWeight(int connectionIndex, float value);
 };
 
 struct BaseDesc
@@ -396,6 +399,7 @@ struct SenderDesc
     auto operator<=>(SenderDesc const&) const = default;
 
     MEMBER(SenderDesc, float, range, 15.0f);
+    MEMBER(SenderDesc, int, maxTimesSent, 4);
 };
 
 struct ReceiverDesc
@@ -437,7 +441,10 @@ struct SignalDesc
     SignalDesc();
     auto operator<=>(SignalDesc const&) const = default;
 
-    MEMBER(SignalDesc, std::vector<float>, channels, {});
+    SignalDesc& channels(std::vector<float> const& value);
+    std::vector<float> _channels;
+
+    MEMBER(SignalDesc, int, numTimesSent, 0);
 };
 
 struct StructureDesc
@@ -480,7 +487,8 @@ struct CellDesc
     MEMBER(CellDesc, NeuralNetworkDesc, neuralNetwork, NeuralNetworkDesc());
     MEMBER(CellDesc, CellTypeDesc, cellType, BaseDesc());
     MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
-    MEMBER(CellDesc, SignalDesc, signal, SignalDesc());  // For signalState == SignalState_Active
+    MEMBER(CellDesc, SignalDesc, signal, SignalDesc());
+    CellDesc& signal(std::vector<float> const& value);
     MEMBER(CellDesc, int, activationTime, 0);
 
     // Process data
@@ -493,8 +501,6 @@ struct CellDesc
     MEMBER(CellDesc, RealVector2D, eventPos, RealVector2D());
 
     CellType getCellType() const;
-    CellDesc& signalAndState(std::vector<float> const& value);
-    CellDesc& signalRestriction(float baseAngle, float openingAngle);
 };
 
 using ObjectTypeDesc = std::variant<StructureDesc, FreeCellDesc, CellDesc>;
