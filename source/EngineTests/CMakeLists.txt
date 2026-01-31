@@ -32,7 +32,6 @@ PUBLIC
     RadiationTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
-    SignalTests.cpp
     SimulationControlTests.cpp
     StatisticsTests.cpp
     Testsuite.cpp)

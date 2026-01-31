@@ -80,6 +80,26 @@ TEST_F(NeuronTests, forwardSignalByDefault)
     EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(2).getCellRef()._signal._channels));
 }
 
+TEST_F(NeuronTests, forwardSignalByDefault_preview)
+{
+    auto signal1 = getExampleSignal1();
+    auto signal2 = getExampleSignal2();
+
+    auto data = Desc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(signal2)),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(signal1)),
+                    })
+                    .addConnection(1, 2);
+
+    _simulationFacade->setPreviewData(data);
+    _simulationFacade->calcTimestepsForPreview(1, true);
+    auto actualData = _simulationFacade->getPreviewData();
+
+    EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._signal._channels));
+    EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(2).getCellRef()._signal._channels));
+}
+
 TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
 {
     auto signal = getExampleSignal1();

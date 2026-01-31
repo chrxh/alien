@@ -240,12 +240,13 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::EndIndent();
             } else if (nodeType == CellType_Sensor) {
 
+                ImGui::PushID("Sensor");
                 AlienGui::BeginIndent();
 
                 // Auto activation interval
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval###1").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
+                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
                 // Mode selection
                 auto mode = sensor.getMode();
@@ -295,6 +296,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
 
                 AlienGui::EndIndent();
+                ImGui::PopID();
 
             } else if (nodeType == CellType_Generator) {
 
@@ -619,6 +621,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
             }
             if (hasConstructor) {
+                ImGui::PushID("Constructor");
                 AlienGui::BeginIndent();
                 auto& constructor = node._constructor.value();
 
@@ -635,7 +638,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 // Auto activation interval
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval###2").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
+                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
 
                 // Construction activation time
                 AlienGui::InputInt(
@@ -651,6 +654,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 constructor._provideEnergy = provideEnergy ? ProvideEnergy_CellAndGene : ProvideEnergy_CellOnly;
 
                 AlienGui::EndIndent();
+                ImGui::PopID();
             }
 
             table.next();
