@@ -610,6 +610,7 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
+        cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
 
@@ -1470,6 +1471,7 @@ void DescriptionConverterService::convertObjectToTO(
         for (int i = 0; i < MAX_CHANNELS && i < numChannels; ++i) {
             objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
         }
+        objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
     } else {
         CHECK(false);
     }
