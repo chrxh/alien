@@ -268,9 +268,7 @@ TEST_P(NeuronTests_ApplyNeuralNetwork, applyNeuralNetwork)
     NeuralNetworkDesc nn;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         nn._activationFunctions[i] = (i == param.channelIndex) ? param.activationFunction : ActivationFunction_Identity;
-        // Set non-trivial diagonal weight for test channel, identity for others
         nn.weight(i, i, (i == param.channelIndex) ? weight : 1.0f);
-        // Set non-trivial bias for test channel, zero for others
         nn._biases[i] = (i == param.channelIndex) ? bias : 0.0f;
     }
 
@@ -307,13 +305,6 @@ TEST_P(NeuronTests_ApplyNeuralNetwork, applyNeuralNetwork)
 
     auto& actual = actualData.getObjectRef(1).getCellRef()._signal._channels;
 
-    // Use higher precision tolerance (0.1 = 10%) to account for CPU vs GPU floating-point differences
-    // in transcendental functions (exp). The Gaussian function exp(-2*x*x) shows significant
-    // precision differences for large |x| due to GPU's fast-math approximations (__expf).
-    // This tolerance is intentionally high because:
-    // 1. GPU uses __expf which trades precision for speed
-    // 2. Non-trivial weights/biases change the pre-activation values, exposing precision differences
-    // 3. The test validates the neural network logic works correctly, not exact floating-point precision
     constexpr float precision = 0.1f;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         EXPECT_TRUE(approxCompare(expected[i], actual[i], precision))
