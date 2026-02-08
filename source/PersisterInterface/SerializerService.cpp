@@ -982,9 +982,7 @@ namespace cereal
         SignalDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Signal_Channels, data._channels, defaultObject._channels);
-        // NumTimesSent was removed - read for backward compatibility but discard
-        int dummyNumTimesSent = 0;
-        loadSave(task, auxiliaries, Id_Signal_NumTimesSent, dummyNumTimesSent, 0);
+        loadSave(task, auxiliaries, Id_Signal_NumTimesSent, data._numTimesSent, defaultObject._numTimesSent);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDesc)
