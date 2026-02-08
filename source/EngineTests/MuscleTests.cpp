@@ -389,21 +389,13 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
         lastAngle = angle;
     }
 
-    if (channel0 == Channel0::Positive && side == Side::Left) {
+    if ((channel0 == Channel0::Positive && side == Side::Left) || (channel0 == Channel0::Negative && side == Side::Right)) {
         EXPECT_TRUE(numPositiveAngleChanges > 10);
         EXPECT_EQ(0, numNegativeAngleChanges);
     }
-    if (channel0 == Channel0::Positive && side == Side::Right) {
+    if ((channel0 == Channel0::Positive && side == Side::Right) || (channel0 == Channel0::Negative && side == Side::Left)) {
         EXPECT_EQ(0, numPositiveAngleChanges);
         EXPECT_TRUE(numNegativeAngleChanges > 10);
-    }
-    if (channel0 == Channel0::Negative && side == Side::Left) {
-        EXPECT_EQ(0, numPositiveAngleChanges);
-        EXPECT_TRUE(numNegativeAngleChanges < 10);
-    }
-    if (channel0 == Channel0::Negative && side == Side::Right) {
-        EXPECT_TRUE(numPositiveAngleChanges < 10);
-        EXPECT_EQ(0, numNegativeAngleChanges);
     }
     if (channel0 == Channel0::Zero) {
         EXPECT_TRUE(minAngle < 180.0f + AnglePrecision);
@@ -490,21 +482,13 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
         }
         lastAngle = angle;
     }
-    if (channel0 == Channel0::Positive && side == Side::Left) {
+    if ((channel0 == Channel0::Positive && side == Side::Left) || (channel0 == Channel0::Negative && side == Side::Right)) {
         EXPECT_TRUE(numPositiveAngleChanges > 10);
         EXPECT_EQ(0, numNegativeAngleChanges);
     }
-    if (channel0 == Channel0::Positive && side == Side::Right) {
+    if ((channel0 == Channel0::Positive && side == Side::Right) || (channel0 == Channel0::Negative && side == Side::Left)) {
         EXPECT_EQ(0, numPositiveAngleChanges);
         EXPECT_TRUE(numNegativeAngleChanges > 10);
-    }
-    if (channel0 == Channel0::Negative && side == Side::Left) {
-        EXPECT_EQ(0, numPositiveAngleChanges);
-        EXPECT_TRUE(numNegativeAngleChanges < 10);
-    }
-    if (channel0 == Channel0::Negative && side == Side::Right) {
-        EXPECT_TRUE(numPositiveAngleChanges < 10);
-        EXPECT_EQ(0, numNegativeAngleChanges);
     }
     if (channel0 == Channel0::Zero) {
         EXPECT_TRUE(minAngle < 90.0f + AnglePrecision);
