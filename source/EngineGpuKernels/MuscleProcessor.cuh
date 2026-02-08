@@ -375,6 +375,12 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     // Process angle bending
     auto bendingInfo = getBendingInfo(object);
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+
+    // Only process when there is actual activation
+    if (abs(activation) < NEAR_ZERO) {
+        return;
+    }
+
     auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
     auto targetAngleRelToConnection0 = Math::getNormalizedAngle(object->typeData.cell.frontAngle + targetAngle, -180.0f);
 
