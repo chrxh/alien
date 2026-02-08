@@ -26,7 +26,7 @@ private:
     __inline__ __device__ static void directMovement(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void restoreInitialAngleFromPreviousIntern(float& initialAngle, Object* muscleCell, Object* affectedCell, int connectionIndex);
 
-    __inline__ __device__ static void radiate(SimulationData& data, Object* object);
+    __inline__ __device__ static void radiate(SimulationData& data, Object* object, float activation);
 
     __inline__ __device__ static void getChain(Object** chain, int& chainLength, Object* startCell);
     __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Object* object);
@@ -251,7 +251,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     }
 
     statistics.incNumMuscleActivities(object->color);
-    radiate(data, object);
+    radiate(data, object, activation);
 }
 
 __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -351,7 +351,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     }
 
     statistics.incNumMuscleActivities(object->color);
-    radiate(data, object);
+    radiate(data, object, activation);
 }
 
 __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -407,7 +407,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     object->typeData.cell.frontAngle -= angleDelta;
 
     statistics.incNumMuscleActivities(object->color);
-    radiate(data, object);
+    radiate(data, object, activation);
 }
 
 __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object)
@@ -499,7 +499,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
 
         crawling.lastActualDistance = actualDistance;
         statistics.incNumMuscleActivities(object->color);
-        radiate(data, object);
+        radiate(data, object, activation);
         --crawling.activationCountdown;
     }
 }
@@ -582,7 +582,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
 
         crawling.lastActualDistance = actualDistance;
         statistics.incNumMuscleActivities(object->color);
-        radiate(data, object);
+        radiate(data, object, activation);
     }
 }
 
@@ -602,7 +602,7 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
         object->typeData.cell.cellTypeData.muscle.lastMovementX = direction.x;
         object->typeData.cell.cellTypeData.muscle.lastMovementY = direction.y;
         statistics.incNumMuscleActivities(object->color);
-        radiate(data, object);
+        radiate(data, object, activation);
     }
 }
 
@@ -623,9 +623,9 @@ MuscleProcessor::restoreInitialAngleFromPreviousIntern(float& initialAngle, Obje
     }
 }
 
-__inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object* object)
+__inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object* object, float activation)
 {
-    auto cellTypeMuscleEnergyCost = cudaSimulationParameters.muscleEnergyCost.value[object->color];
+    auto cellTypeMuscleEnergyCost = cudaSimulationParameters.muscleEnergyCost.value[object->color] * activation;
     if (cellTypeMuscleEnergyCost > 0) {
         EnergyProcessor::radiate(data, object, cellTypeMuscleEnergyCost);
     }
