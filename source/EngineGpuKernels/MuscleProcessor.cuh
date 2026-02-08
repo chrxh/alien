@@ -215,7 +215,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
 
     // Modify angle
     auto angleDelta = bending.forward ? -(0.05f + forwardBackwardRatio) : 1.05f - forwardBackwardRatio;
-    angleDelta *= 1.0f * activation;
+    angleDelta *= 0.5f * activation;
 
     if (angleFromPrevious + angleDelta > maxAngle) {
         angleDelta = maxAngle - angleFromPrevious;

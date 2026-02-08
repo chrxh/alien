@@ -144,19 +144,22 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     auto [side, channel0, channel1] = GetParam();
 
+    NeuralNetworkDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0) / 2;
+    nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 4;
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc()
-                .id(1)
-                .pos({side == Side::Left ? 10.0f : 13.0f, 10.0f})
-                .type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
+            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}),
             ObjectDesc()
                 .id(2)
                 .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(side == Side::Left ? 90.0f : -90.0f)
                           .cellType(MuscleDesc().mode(AutoBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4))),
+                          .neuralNetwork(nn)),
             ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc()),
             ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
         },
