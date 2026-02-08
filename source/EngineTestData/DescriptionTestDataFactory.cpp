@@ -74,7 +74,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .frontAngleId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
+                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).numTimesSent(42))
                       .constructor(ConstructorDesc()
                                        .autoTriggerInterval(55)
                                        .geneIndex(1)
