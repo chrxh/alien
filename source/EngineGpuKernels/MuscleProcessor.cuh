@@ -373,44 +373,41 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     }
 
     // Process angle bending
-    if (NeuronProcessor::isManuallyTriggered(data, object)) {
+    auto bendingInfo = getBendingInfo(object);
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
+    auto targetAngleRelToConnection0 = Math::getNormalizedAngle(object->typeData.cell.frontAngle + targetAngle, -180.0f);
 
-        auto bendingInfo = getBendingInfo(object);
-        auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
-        auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
-        auto targetAngleRelToConnection0 = Math::getNormalizedAngle(object->typeData.cell.frontAngle + targetAngle, -180.0f);
+    // Change bending direction
+    auto angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
+    auto angleFromPrevious2 = alienAtomicRead(&bendingInfo.connectionNext->angleFromPrevious);
+    auto sumAngle = angleFromPrevious + angleFromPrevious2;  // Sum will not change
+    auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
+    auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, MinAngle), sumAngle - MinAngle);
+    auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, MinAngle), sumAngle - MinAngle);
 
-        // Change bending direction
-        auto angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
-        auto angleFromPrevious2 = alienAtomicRead(&bendingInfo.connectionNext->angleFromPrevious);
-        auto sumAngle = angleFromPrevious + angleFromPrevious2;  // Sum will not change
-        auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
-        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, MinAngle), sumAngle - MinAngle);
-        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, MinAngle), sumAngle - MinAngle);
-
-        // Modify angle
-        auto angleDelta = activation > 0 ? (1.05f - bending.attractionRepulsionRatio) : (0.05f + bending.attractionRepulsionRatio);
-        angleDelta *= 5.0f * activation;
-        if (targetAngleRelToConnection0 < 0) {
-            angleDelta = -angleDelta;
-        }
-        if (object->numConnections == 1) {
-            angleDelta = -angleDelta;
-        }
-
-        if (angleFromPrevious + angleDelta > maxAngle) {
-            angleDelta = maxAngle - angleFromPrevious;
-        }
-        if (angleFromPrevious + angleDelta < minAngle) {
-            angleDelta = minAngle - angleFromPrevious;
-        }
-        atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
-        atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
-        object->typeData.cell.frontAngle -= angleDelta;
-
-        statistics.incNumMuscleActivities(object->color);
-        radiate(data, object);
+    // Modify angle
+    auto angleDelta = activation > 0 ? (1.05f - bending.attractionRepulsionRatio) : (0.05f + bending.attractionRepulsionRatio);
+    angleDelta *= 0.5f * activation;
+    if (targetAngleRelToConnection0 < 0) {
+        angleDelta = -angleDelta;
     }
+    if (object->numConnections == 1) {
+        angleDelta = -angleDelta;
+    }
+
+    if (angleFromPrevious + angleDelta > maxAngle) {
+        angleDelta = maxAngle - angleFromPrevious;
+    }
+    if (angleFromPrevious + angleDelta < minAngle) {
+        angleDelta = minAngle - angleFromPrevious;
+    }
+    atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
+    atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
+    object->typeData.cell.frontAngle -= angleDelta;
+
+    statistics.incNumMuscleActivities(object->color);
+    radiate(data, object);
 }
 
 __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object)
