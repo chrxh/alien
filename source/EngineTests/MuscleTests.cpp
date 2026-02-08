@@ -325,21 +325,23 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
+    NeuralNetworkDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc()
-                .id(1)
-                .pos({side == Side::Left ? 10.0f : 13.0f, 10.0f})
-                .type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
+            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}),
             ObjectDesc()
                 .id(2)
                 .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(side == Side::Left ? 90.0f : -90.0f)
                           .cellType(MuscleDesc().mode(ManualBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
-            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc()),
-            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
+                          .neuralNetwork(nn)),
+            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -353,8 +355,8 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     auto numPositiveAngleChanges = 0;
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
-    for (int i = 0; i < 200; ++i) {
-        calcTimesteps(10, detailedPreview);
+    for (int i = 0; i < 2000; ++i) {
+        calcTimesteps(1, detailedPreview);
 
         auto actualData = getSimulationData(detailedPreview);
         ASSERT_EQ(4, actualData._objects.size());
@@ -428,19 +430,23 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
+    NeuralNetworkDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc()),
-            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
-            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc()),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc().id(2).pos({10.0f, 11.0f}),
+            ObjectDesc().id(3).pos({10.0f, 12.0f}),
             ObjectDesc()
                 .id(4)
                 .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
                 .type(CellDesc()
                           .frontAngle(side == Side::Left ? -90.0f : 90.0f)
-                          .cellType(
-                              MuscleDesc().mode(ManualBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.8f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
+                          .cellType(MuscleDesc().mode(ManualBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.8f)))
+                          .neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -454,8 +460,8 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     auto numPositiveAngleChanges = 0;
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 2000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(4);

@@ -187,8 +187,6 @@ struct AutoBending
     // Process data
     float initialAngle;  // May be invalid
     bool forward;        // Current direction
-    //float activation;
-    //uint8_t activationCountdown;
     bool impulseAlreadyApplied;
 };
 

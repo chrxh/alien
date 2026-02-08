@@ -293,68 +293,65 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     }
 
     // Process manual bending
-    if (NeuronProcessor::isManuallyTriggered(data, object)) {
+    auto bendingInfo = getBendingInfo(object);
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
 
-        auto bendingInfo = getBendingInfo(object);
-        auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    // Change bending direction
+    auto angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
+    auto angleFromPrevious2 = alienAtomicRead(&bendingInfo.connectionNext->angleFromPrevious);
+    auto sumAngle = angleFromPrevious + angleFromPrevious2;  // Sum will not change
 
-        // Change bending direction
-        auto angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
-        auto angleFromPrevious2 = alienAtomicRead(&bendingInfo.connectionNext->angleFromPrevious);
-        auto sumAngle = angleFromPrevious + angleFromPrevious2;  // Sum will not change
+    auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
+    auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, MinAngle), sumAngle - MinAngle);
+    auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, MinAngle), sumAngle - MinAngle);
 
-        auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
-        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, MinAngle), sumAngle - MinAngle);
-        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, MinAngle), sumAngle - MinAngle);
-
-        // Modify angle
-        auto angleDelta = activation > 0 ? -1.05f + bending.forwardBackwardRatio : -0.05f - bending.forwardBackwardRatio;
-        angleDelta *= 5.0f * activation;
-        if (isLeftSide(object)) {
-            angleDelta = -angleDelta;
-        }
-
-        if (angleFromPrevious + angleDelta > maxAngle) {
-            angleDelta = maxAngle - angleFromPrevious;
-        }
-        if (angleFromPrevious + angleDelta < minAngle) {
-            angleDelta = minAngle - angleFromPrevious;
-        }
-        atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
-        atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
-
-        if ((angleDelta > 0 && bending.lastAngleDelta <= 0) || (angleDelta < 0 && bending.lastAngleDelta >= 0)) {
-            bending.impulseAlreadyApplied = false;
-        }
-        bending.lastAngleDelta = angleDelta;
-
-        // Apply impulse
-        if (!bending.impulseAlreadyApplied) {
-            angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
-            if ((angleDelta < 0 && angleFromPrevious < bending.initialAngle) || (angleDelta > 0 && angleFromPrevious > bending.initialAngle)) {
-                bending.impulseAlreadyApplied = true;
-
-                auto direction = calcAverageDirection(data, object);
-
-                if (angleDelta < 0) {
-                    Math::rotateQuarterClockwise(direction);
-                } else {
-                    Math::rotateQuarterCounterClockwise(direction);
-                }
-                angleDelta = min(5.0f, abs(angleDelta));
-                if (activation > 0) {
-                    angleDelta *= powf(1.0f - bending.forwardBackwardRatio, 4.0f);
-                } else {
-                    angleDelta *= powf(bending.forwardBackwardRatio, 4.0f);
-                }
-                auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 9.0f;
-                applyAcceleration(object, acceleration);
-            }
-        }
-
-        statistics.incNumMuscleActivities(object->color);
-        radiate(data, object);
+    // Modify angle
+    auto angleDelta = activation > 0 ? -1.05f + bending.forwardBackwardRatio : -0.05f - bending.forwardBackwardRatio;
+    angleDelta *= 0.5f * activation;
+    if (isLeftSide(object)) {
+        angleDelta = -angleDelta;
     }
+
+    if (angleFromPrevious + angleDelta > maxAngle) {
+        angleDelta = maxAngle - angleFromPrevious;
+    }
+    if (angleFromPrevious + angleDelta < minAngle) {
+        angleDelta = minAngle - angleFromPrevious;
+    }
+    atomicAdd(&bendingInfo.connection->angleFromPrevious, angleDelta);
+    atomicAdd(&bendingInfo.connectionNext->angleFromPrevious, -angleDelta);
+
+    if ((angleDelta > 0 && bending.lastAngleDelta <= 0) || (angleDelta < 0 && bending.lastAngleDelta >= 0)) {
+        bending.impulseAlreadyApplied = false;
+    }
+    bending.lastAngleDelta = angleDelta;
+
+    // Apply impulse
+    if (!bending.impulseAlreadyApplied) {
+        angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
+        if ((angleDelta < 0 && angleFromPrevious < bending.initialAngle) || (angleDelta > 0 && angleFromPrevious > bending.initialAngle)) {
+            bending.impulseAlreadyApplied = true;
+
+            auto direction = calcAverageDirection(data, object);
+
+            if (angleDelta < 0) {
+                Math::rotateQuarterClockwise(direction);
+            } else {
+                Math::rotateQuarterCounterClockwise(direction);
+            }
+            angleDelta = min(5.0f, abs(angleDelta));
+            if (activation > 0) {
+                angleDelta *= powf(1.0f - bending.forwardBackwardRatio, 4.0f);
+            } else {
+                angleDelta *= powf(bending.forwardBackwardRatio, 4.0f);
+            }
+            auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[object->color] / 9.0f;
+            applyAcceleration(object, acceleration);
+        }
+    }
+
+    statistics.incNumMuscleActivities(object->color);
+    radiate(data, object);
 }
 
 __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, SimulationStatistics& statistics, Object* object)
