@@ -140,7 +140,8 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
-    auto constexpr AnglePrecision = NEAR_ZERO;
+    // With asymmetric speeds and sampling every 10 timesteps, the worst-case sampling error is about 0.7 degrees
+    auto constexpr AnglePrecision = 0.7f;
 
     auto [side, channel0, channel1] = GetParam();
 
@@ -224,7 +225,8 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
-    auto constexpr AnglePrecision = NEAR_ZERO;
+    // With asymmetric speeds and sampling every 10 timesteps, the worst-case sampling error is about 0.7 degrees
+    auto constexpr AnglePrecision = 0.7f;
 
     auto [side, channel0, channel1] = GetParam();
 
