@@ -189,8 +189,6 @@ struct AutoBendingDesc
     // Process data
     MEMBER(AutoBendingDesc, std::optional<float>, initialAngle, std::nullopt);
     MEMBER(AutoBendingDesc, bool, forward, true);  // Current direction
-    MEMBER(AutoBendingDesc, float, activation, 0);
-    MEMBER(AutoBendingDesc, int, activationCountdown, 0);
     MEMBER(AutoBendingDesc, bool, impulseAlreadyApplied, false);
 };
 

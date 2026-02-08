@@ -450,10 +450,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                     cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle;
                 cell->cellTypeData.muscle.modeData.autoBending.forward =
                     cellTO.cellTypeData.muscle.modeData.autoBending.forward;
-                cell->cellTypeData.muscle.modeData.autoBending.activation =
-                    cellTO.cellTypeData.muscle.modeData.autoBending.activation;
-                cell->cellTypeData.muscle.modeData.autoBending.activationCountdown =
-                    cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown;
                 cell->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied =
                     cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
@@ -834,8 +830,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             muscle.modeData.autoBending.forwardBackwardRatio = nodeMuscle.modeData.autoBending.forwardBackwardRatio;
             muscle.modeData.autoBending.initialAngle = VALUE_NOT_SET_FLOAT;
             muscle.modeData.autoBending.forward = true;
-            muscle.modeData.autoBending.activation = 0;
-            muscle.modeData.autoBending.activationCountdown = 0;
             muscle.modeData.autoBending.impulseAlreadyApplied = false;
         } break;
         case MuscleMode_ManualBending: {

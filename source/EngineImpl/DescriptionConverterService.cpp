@@ -437,8 +437,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle)
                     : std::nullopt;
                 bending._forward = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forward;
-                bending._activation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activation;
-                bending._activationCountdown = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activationCountdown;
                 bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
                 muscle._mode = bending;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
@@ -1329,8 +1327,6 @@ void DescriptionConverterService::convertObjectToTO(
                 bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
                 bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
                 bendingTO.forward = bendingDesc._forward;
-                bendingTO.activation = bendingDesc._activation;
-                bendingTO.activationCountdown = bendingDesc._activationCountdown;
                 bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_ManualBending) {
                 auto const& bendingDesc = std::get<ManualBendingDesc>(muscleDesc._mode);

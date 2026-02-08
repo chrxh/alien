@@ -394,8 +394,6 @@ namespace
                     cellTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio = cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
                     cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle = cell.cellTypeData.muscle.modeData.autoBending.initialAngle;
                     cellTO.cellTypeData.muscle.modeData.autoBending.forward = cell.cellTypeData.muscle.modeData.autoBending.forward;
-                    cellTO.cellTypeData.muscle.modeData.autoBending.activation = cell.cellTypeData.muscle.modeData.autoBending.activation;
-                    cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown = cell.cellTypeData.muscle.modeData.autoBending.activationCountdown;
                     cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
                     cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;

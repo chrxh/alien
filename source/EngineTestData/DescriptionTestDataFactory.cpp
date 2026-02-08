@@ -658,8 +658,6 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
                                  .forwardBackwardRatio(0.4f)
                                  .initialAngle(135.0f)
                                  .forward(false)
-                                 .activation(0.7f)
-                                 .activationCountdown(8)
                                  .impulseAlreadyApplied(true);
         } break;
         case MuscleMode_ManualBending:
