@@ -232,9 +232,13 @@ namespace
     auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = 0;
     auto constexpr Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio = 1;
 
-    auto constexpr Id_GeneratorGenome_AutoTriggerInterval = 0;
-    auto constexpr Id_GeneratorGenome_PulseType = 1;
-    auto constexpr Id_GeneratorGenome_AlternationInterval = 2;
+    auto constexpr Id_GeneratorGenome_Additive = 0;
+
+    auto constexpr Id_GeneratorModeGenome_SquareSignal_Amplitude = 0;
+    auto constexpr Id_GeneratorModeGenome_SquareSignal_Period = 1;
+
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal_Amplitude = 0;
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal_Period = 1;
 
     auto constexpr Id_AttackerModeGenome_FreeCell_RestrictToColor = 0;
 
@@ -392,14 +396,36 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorGenomeDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SquareSignalGenomeDesc& data)
+    {
+        SquareSignalGenomeDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_GeneratorModeGenome_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        loadSave(task, auxiliaries, Id_GeneratorModeGenome_SquareSignal_Period, data._period, defaultObject._period);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SquareSignalGenomeDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SawtoothSignalGenomeDesc& data)
+    {
+        SawtoothSignalGenomeDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_GeneratorModeGenome_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        loadSave(task, auxiliaries, Id_GeneratorModeGenome_SawtoothSignal_Period, data._period, defaultObject._period);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SawtoothSignalGenomeDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GeneratorGenomeDesc& data)
     {
         GeneratorGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_GeneratorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_GeneratorGenome_PulseType, data._pulseType, defaultObject._pulseType);
-        loadSave(task, auxiliaries, Id_GeneratorGenome_AlternationInterval, data._alternationInterval, defaultObject._alternationInterval);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(GeneratorGenomeDesc)
 
@@ -890,10 +916,14 @@ namespace
 
     auto constexpr Id_Injector_GeneIndex = 0;
 
-    auto constexpr Id_Generator_AutoTriggerInterval = 0;
-    auto constexpr Id_Generator_PulseType = 1;
-    auto constexpr Id_Generator_AlternationMode = 2;
-    auto constexpr Id_Generator_NumPulses = 3;
+    auto constexpr Id_Generator_Additive = 0;
+    auto constexpr Id_Generator_NumPulses = 1;
+
+    auto constexpr Id_GeneratorMode_SquareSignal_Amplitude = 0;
+    auto constexpr Id_GeneratorMode_SquareSignal_Period = 1;
+
+    auto constexpr Id_GeneratorMode_SawtoothSignal_Amplitude = 0;
+    auto constexpr Id_GeneratorMode_SawtoothSignal_Period = 1;
 
     auto constexpr Id_AttackerMode_FreeCell_RestrictToColor = 0;
 
@@ -1145,15 +1175,37 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SquareSignalDesc& data)
+    {
+        SquareSignalDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_GeneratorMode_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        loadSave(task, auxiliaries, Id_GeneratorMode_SquareSignal_Period, data._period, defaultObject._period);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SquareSignalDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SawtoothSignalDesc& data)
+    {
+        SawtoothSignalDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_GeneratorMode_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        loadSave(task, auxiliaries, Id_GeneratorMode_SawtoothSignal_Period, data._period, defaultObject._period);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SawtoothSignalDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GeneratorDesc& data)
     {
         GeneratorDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Generator_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_Generator_PulseType, data._pulseType, defaultObject._pulseType);
-        loadSave(task, auxiliaries, Id_Generator_AlternationMode, data._alternationInterval, defaultObject._alternationInterval);
+        loadSave(task, auxiliaries, Id_Generator_Additive, data._additive, defaultObject._additive);
         loadSave(task, auxiliaries, Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(GeneratorDesc)
 

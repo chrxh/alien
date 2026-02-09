@@ -101,6 +101,16 @@ ReconnectorMode ReconnectorDesc::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
+GeneratorMode GeneratorDesc::getMode() const
+{
+    if (std::holds_alternative<SquareSignalDesc>(_mode)) {
+        return GeneratorMode_SquareSignal;
+    } else if (std::holds_alternative<SawtoothSignalDesc>(_mode)) {
+        return GeneratorMode_SawtoothSignal;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 SignalEntryDesc::SignalEntryDesc()
 {
     _channels.resize(MAX_CHANNELS, 0);

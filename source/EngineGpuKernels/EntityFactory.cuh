@@ -161,9 +161,15 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 }
                 break;
             case CellType_Generator:
-                node.cellTypeData.generator.autoTriggerInterval = nodeTO.cellTypeData.generator.autoTriggerInterval;
-                node.cellTypeData.generator.pulseType = nodeTO.cellTypeData.generator.pulseType;
-                node.cellTypeData.generator.alternationInterval = nodeTO.cellTypeData.generator.alternationInterval;
+                node.cellTypeData.generator.additive = nodeTO.cellTypeData.generator.additive;
+                node.cellTypeData.generator.mode = nodeTO.cellTypeData.generator.mode;
+                if (nodeTO.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
+                    node.cellTypeData.generator.modeData.squareSignal.amplitude = nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude;
+                    node.cellTypeData.generator.modeData.squareSignal.period = nodeTO.cellTypeData.generator.modeData.squareSignal.period;
+                } else if (nodeTO.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
+                    node.cellTypeData.generator.modeData.sawtoothSignal.amplitude = nodeTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                    node.cellTypeData.generator.modeData.sawtoothSignal.period = nodeTO.cellTypeData.generator.modeData.sawtoothSignal.period;
+                }
                 break;
             case CellType_Attacker:
                 node.cellTypeData.attacker.mode = nodeTO.cellTypeData.attacker.mode;
@@ -424,9 +430,19 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->cellTypeData.sensor.lastMatch.pos = cellTO.cellTypeData.sensor.lastMatch.pos;
         } break;
         case CellType_Generator: {
-            cell->cellTypeData.generator.autoTriggerInterval = cellTO.cellTypeData.generator.autoTriggerInterval;
-            cell->cellTypeData.generator.pulseType = cellTO.cellTypeData.generator.pulseType;
-            cell->cellTypeData.generator.alternationInterval = cellTO.cellTypeData.generator.alternationInterval;
+            cell->cellTypeData.generator.additive = cellTO.cellTypeData.generator.additive;
+            cell->cellTypeData.generator.mode = cellTO.cellTypeData.generator.mode;
+            if (cellTO.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
+                cell->cellTypeData.generator.modeData.squareSignal.amplitude =
+                    cellTO.cellTypeData.generator.modeData.squareSignal.amplitude;
+                cell->cellTypeData.generator.modeData.squareSignal.period =
+                    cellTO.cellTypeData.generator.modeData.squareSignal.period;
+            } else if (cellTO.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
+                cell->cellTypeData.generator.modeData.sawtoothSignal.amplitude =
+                    cellTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                cell->cellTypeData.generator.modeData.sawtoothSignal.period =
+                    cellTO.cellTypeData.generator.modeData.sawtoothSignal.period;
+            }
             cell->cellTypeData.generator.numPulses = cellTO.cellTypeData.generator.numPulses;
         } break;
         case CellType_Attacker: {
@@ -793,9 +809,15 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         cell.cellType = CellType_Generator;
         auto const& nodeGenerator = node->cellTypeData.generator;
         auto& generator = cell.cellTypeData.generator;
-        generator.autoTriggerInterval = nodeGenerator.autoTriggerInterval;
-        generator.pulseType = nodeGenerator.pulseType;
-        generator.alternationInterval = nodeGenerator.alternationInterval;
+        generator.additive = nodeGenerator.additive;
+        generator.mode = nodeGenerator.mode;
+        if (nodeGenerator.mode == GeneratorMode_SquareSignal) {
+            generator.modeData.squareSignal.amplitude = nodeGenerator.modeData.squareSignal.amplitude;
+            generator.modeData.squareSignal.period = nodeGenerator.modeData.squareSignal.period;
+        } else if (nodeGenerator.mode == GeneratorMode_SawtoothSignal) {
+            generator.modeData.sawtoothSignal.amplitude = nodeGenerator.modeData.sawtoothSignal.amplitude;
+            generator.modeData.sawtoothSignal.period = nodeGenerator.modeData.sawtoothSignal.period;
+        }
         generator.numPulses = 0;
     } break;
     case CellType_Attacker: {

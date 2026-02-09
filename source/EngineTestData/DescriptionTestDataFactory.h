@@ -15,11 +15,12 @@ class DescriptionTestDataFactory
 public:
     struct MuscleModeWrapper { MuscleMode value; };
     struct SensorModeWrapper { SensorMode value; };
+    struct GeneratorModeWrapper { GeneratorMode value; };
     struct ReconnectorModeWrapper { ReconnectorMode value; };
     struct MemoryModeWrapper { MemoryMode value; };
     struct CommunicatorModeWrapper { CommunicatorMode value; };
 
-    using CellTypeMode = std::variant<std::monostate, MuscleModeWrapper, SensorModeWrapper, ReconnectorModeWrapper, MemoryModeWrapper, CommunicatorModeWrapper>;
+    using CellTypeMode = std::variant<std::monostate, MuscleModeWrapper, SensorModeWrapper, GeneratorModeWrapper, ReconnectorModeWrapper, MemoryModeWrapper, CommunicatorModeWrapper>;
 
     struct ObjectParameter
     {
@@ -47,6 +48,5 @@ public:
 
 private:
     CellTypeDesc createNonDefaultCellTypeDesc(ObjectParameter objectParameter) const;
-
     CellTypeGenomeDesc createNonDefaultCellTypeGenomeDesc(NodeParameter objectParameter) const;
 };

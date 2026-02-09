@@ -90,6 +90,16 @@ AttackerMode AttackerGenomeDesc::getMode() const
     CHECK(false);
 }
 
+GeneratorMode GeneratorGenomeDesc::getMode() const
+{
+    if (std::holds_alternative<SquareSignalGenomeDesc>(_mode)) {
+        return GeneratorMode_SquareSignal;
+    } else if (std::holds_alternative<SawtoothSignalGenomeDesc>(_mode)) {
+        return GeneratorMode_SawtoothSignal;
+    }
+    CHECK(false);
+}
+
 SignalEntryGenomeDesc::SignalEntryGenomeDesc()
 {
     _channels.resize(MAX_CHANNELS, 0);

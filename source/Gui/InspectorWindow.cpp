@@ -511,19 +511,29 @@ void _InspectorWindow::processGeneratorContent(GeneratorDesc& _generator)
 {
     if (ImGui::TreeNodeEx("Properties###_generator", TreeNodeFlags)) {
 
-        AlienGui::InputInt(
-            AlienGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorPulseIntervalTooltip),
-            _generator._autoTriggerInterval);
-        bool alternation = _generator._alternationInterval > 0;
-        if (AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorAlternatingPulsesTooltip),
-                alternation)) {
-            _generator._alternationInterval = alternation ? 1 : 0;
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(CellTypeTextWidth), _generator._additive);
+
+        auto mode = _generator.getMode();
+        if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::GeneratorModeStrings).textWidth(CellTypeTextWidth), mode)) {
+            if (mode == GeneratorMode_SquareSignal) {
+                _generator._mode = SquareSignalDesc();
+            } else if (mode == GeneratorMode_SawtoothSignal) {
+                _generator._mode = SawtoothSignalDesc();
+            }
         }
-        if (alternation) {
-            AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorPulsesPerPhaseTooltip),
-                _generator._alternationInterval);
+
+        if (mode == GeneratorMode_SquareSignal) {
+            auto& squareSignal = std::get<SquareSignalDesc>(_generator._mode);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(CellTypeTextWidth),
+                squareSignal._amplitude);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(CellTypeTextWidth), squareSignal._period);
+        } else if (mode == GeneratorMode_SawtoothSignal) {
+            auto& sawtoothSignal = std::get<SawtoothSignalDesc>(_generator._mode);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(CellTypeTextWidth),
+                sawtoothSignal._amplitude);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(CellTypeTextWidth), sawtoothSignal._period);
         }
         ImGui::TreePop();
     }
@@ -636,7 +646,7 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
 {
     if (ImGui::TreeNodeEx("Properties###sensor", TreeNodeFlags)) {
         AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name("Auto trigger").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorActivationModeTooltip),
+            AlienGui::CheckboxParameters().name("Auto trigger").textWidth(CellTypeTextWidth),
             sensor._autoTrigger);
 
         // Mode selection
@@ -827,8 +837,14 @@ void _InspectorWindow::validateAndCorrect(ObjectDesc& object) const
         } break;
         case CellType_Generator: {
             auto& _generator = std::get<GeneratorDesc>(object.getCellRef()._cellType);
-            _generator._autoTriggerInterval = std::max(0, _generator._autoTriggerInterval);
-            _generator._alternationInterval = std::max(0, _generator._alternationInterval);
+            auto generatorMode = _generator.getMode();
+            if (generatorMode == GeneratorMode_SquareSignal) {
+                auto& squareSignal = std::get<SquareSignalDesc>(_generator._mode);
+                squareSignal._period = std::max(1, squareSignal._period);
+            } else if (generatorMode == GeneratorMode_SawtoothSignal) {
+                auto& sawtoothSignal = std::get<SawtoothSignalDesc>(_generator._mode);
+                sawtoothSignal._period = std::max(1, sawtoothSignal._period);
+            }
         } break;
         case CellType_Detonator: {
             auto& detonator = std::get<DetonatorDesc>(object.getCellRef()._cellType);

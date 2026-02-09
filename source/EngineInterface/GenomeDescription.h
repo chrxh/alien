@@ -107,17 +107,30 @@ struct SensorGenomeDesc
     SensorMode getMode() const;
 };
 
+struct SquareSignalGenomeDesc
+{
+    auto operator<=>(SquareSignalGenomeDesc const&) const = default;
+    MEMBER(SquareSignalGenomeDesc, float, amplitude, 1.0f);
+    MEMBER(SquareSignalGenomeDesc, int, period, 100);
+};
+
+struct SawtoothSignalGenomeDesc
+{
+    auto operator<=>(SawtoothSignalGenomeDesc const&) const = default;
+    MEMBER(SawtoothSignalGenomeDesc, float, amplitude, 1.0f);
+    MEMBER(SawtoothSignalGenomeDesc, int, period, 100);
+};
+
+using GeneratorModeGenomeDesc = std::variant<SquareSignalGenomeDesc, SawtoothSignalGenomeDesc>;
+
 struct GeneratorGenomeDesc
 {
     auto operator<=>(GeneratorGenomeDesc const&) const = default;
 
-    MEMBER(GeneratorGenomeDesc, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
-    MEMBER(GeneratorGenomeDesc, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
-    MEMBER(
-        GeneratorGenomeDesc,
-        int,
-        alternationInterval,
-        20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    MEMBER(GeneratorGenomeDesc, bool, additive, false);
+    MEMBER(GeneratorGenomeDesc, GeneratorModeGenomeDesc, mode, SquareSignalGenomeDesc());
+
+    GeneratorMode getMode() const;
 };
 
 struct AttackFreeCellGenomeDesc

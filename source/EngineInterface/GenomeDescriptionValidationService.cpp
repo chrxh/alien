@@ -80,9 +80,15 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
 
             } else if (nodeType == CellType_Generator) {
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
-                generator._autoTriggerInterval = std::max(generator._autoTriggerInterval, 0);
-                generator._pulseType = std::clamp(generator._pulseType, 0, GeneratorPulseType_Count - 1);
-                generator._alternationInterval = std::max(generator._alternationInterval, 1);
+                // Validate mode-specific data
+                auto generatorMode = generator.getMode();
+                if (generatorMode == GeneratorMode_SquareSignal) {
+                    auto& squareSignal = std::get<SquareSignalGenomeDesc>(generator._mode);
+                    squareSignal._period = std::max(squareSignal._period, 1);
+                } else if (generatorMode == GeneratorMode_SawtoothSignal) {
+                    auto& sawtoothSignal = std::get<SawtoothSignalGenomeDesc>(generator._mode);
+                    sawtoothSignal._period = std::max(sawtoothSignal._period, 1);
+                }
 
             } else if (nodeType == CellType_Attacker) {
                 auto& attacker = std::get<AttackerGenomeDesc>(node._cellType);

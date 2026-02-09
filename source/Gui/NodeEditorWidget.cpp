@@ -137,6 +137,18 @@ namespace
         }
     }
 
+    GeneratorModeGenomeDesc createGeneratorModeGenomeDesc(GeneratorMode mode)
+    {
+        switch (mode) {
+        case GeneratorMode_SquareSignal:
+            return SquareSignalGenomeDesc();
+        case GeneratorMode_SawtoothSignal:
+            return SawtoothSignalGenomeDesc();
+        default:
+            CHECK(false);
+        }
+    }
+
     ReconnectorModeGenomeDesc createReconnectorModeGenomeDesc(ReconnectorMode mode)
     {
         switch (mode) {
@@ -301,20 +313,33 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::BeginIndent();
 
-                // Activation interval
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), generator._autoTriggerInterval);
 
-                // Pulse type
-                AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Pulse type").values({"Positive", "Alternation"}).textWidth(rightColumnWidth), generator._pulseType);
+                // Additive
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive"), generator._additive);
 
-                if (generator._pulseType == GeneratorPulseType_Alternation) {
+                // Mode
+                auto mode = generator.getMode();
+                if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::GeneratorModeStrings).textWidth(rightColumnWidth), mode)) {
+                    generator._mode = createGeneratorModeGenomeDesc(mode);
+                }
 
+                if (mode == GeneratorMode_SquareSignal) {
                     AlienGui::BeginIndent();
 
-                    // Pulses per phase
-                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Pulses per phase").textWidth(rightColumnWidth), generator._alternationInterval);
+                    auto& squareSignal = std::get<SquareSignalGenomeDesc>(generator._mode);
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(rightColumnWidth), squareSignal._amplitude);
+                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(rightColumnWidth), squareSignal._period);
+
+                    AlienGui::EndIndent();
+                } else if (mode == GeneratorMode_SawtoothSignal) {
+                    AlienGui::BeginIndent();
+
+                    auto& sawtoothSignal = std::get<SawtoothSignalGenomeDesc>(generator._mode);
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(rightColumnWidth), sawtoothSignal._amplitude);
+                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(rightColumnWidth), sawtoothSignal._period);
 
                     AlienGui::EndIndent();
                 }
