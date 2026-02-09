@@ -183,6 +183,11 @@ enum MutationState_
 //************************
 //* Generator constants *
 //************************
+namespace Channels
+{
+    auto constexpr GeneratorOutput = 0;
+}
+
 using GeneratorMode = int;
 enum GeneratorMode_
 {
