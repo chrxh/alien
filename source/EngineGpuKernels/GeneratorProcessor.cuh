@@ -37,9 +37,9 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
             auto halfPeriod = squareSignal.period / 2;
             
             if (timestepInPeriod < halfPeriod) {
-                outputValue = squareSignal.amplitude / 2.0f;
+                outputValue = squareSignal.amplitude;
             } else {
-                outputValue = -squareSignal.amplitude / 2.0f;
+                outputValue = -squareSignal.amplitude;
             }
         } else if (generator.mode == GeneratorMode_SawtoothSignal) {
             auto& sawtoothSignal = generator.modeData.sawtoothSignal;

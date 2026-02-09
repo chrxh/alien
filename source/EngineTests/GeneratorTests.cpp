@@ -33,7 +33,7 @@ class GeneratorTests_SquareSignal
 {};
 
 // Test square signal at key points in the period
-// Period = 100, Amplitude = 4.0
+// Period = 100, Amplitude = 2.0
 // Expected: +2.0 for timesteps [0, 50), -2.0 for timesteps [50, 100)
 INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SquareSignal,
@@ -52,7 +52,7 @@ TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
     
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(4.0f).period(100)))),
+            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(2.0f).period(100)))),
         },
         CreatureDesc().id(0));
 
@@ -130,7 +130,7 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
                 .id(1)
                 .type(CellDesc()
                           .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that should be overridden
-                          .cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(2.0f).period(10)).additive(false))),
+                          .cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(false))),
         },
         CreatureDesc().id(0));
 
@@ -153,7 +153,7 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
                 .id(1)
                 .type(CellDesc()
                           .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that generator adds to
-                          .cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(2.0f).period(10)).additive(true))),
+                          .cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(true))),
         },
         CreatureDesc().id(0));
 
@@ -166,3 +166,28 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
     // Expected: 0.6 (base from bias) + 1.0 (generator output) = 1.6
     EXPECT_TRUE(approxCompare(1.6f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
 }
+
+//**************
+//* Truncation *
+//**************
+TEST_F(GeneratorTests, squareSignal_truncation)
+{
+    // With additive mode, generator should add to the base signal from the neural network
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).type(CellDesc()
+                                        .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that generator adds to
+                                        .cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(2.0f).period(10)).additive(true))),
+        },
+        CreatureDesc().id(0));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto generator = actualData.getObjectRef(1);
+
+    // Expected: 0.6 (base from bias) + 2.0 (generator output) = 2.6 truncated to 2.0
+    EXPECT_TRUE(approxCompare(2.0f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
+}
+
