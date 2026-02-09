@@ -33,18 +33,18 @@ class GeneratorTests_SquareSignal
 {};
 
 // Test square signal at key points in the period
-// Period = 100, Amplitude = 2.0
-// Expected: +2.0 for timesteps [0, 50), -2.0 for timesteps [50, 100)
+// Period = 100, Amplitude = 2.0, ValueOffset = 0.1
+// Expected: +2.1 (clamped to 2.0) for timesteps [0, 50), -1.9 for timesteps [50, 100)
 INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SquareSignal,
     GeneratorTests_SquareSignal,
     ::testing::Values(
-        SquareSignalTestParams{1, 2.0f, "at the beginning"},              // timestep 0
-        SquareSignalTestParams{30, 2.0f, "before halfway through"},        // timestep 29
-        SquareSignalTestParams{51, -2.0f, "at halfway through"},           // timestep 50
-        SquareSignalTestParams{80, -2.0f, "before the end"},               // timestep 79
-        SquareSignalTestParams{100, -2.0f, "at the end"},                  // timestep 99
-        SquareSignalTestParams{101, 2.0f, "after the end (wrapping)"}));  // timestep 0 (wrapped)
+        SquareSignalTestParams{1, 2.0f, "at the beginning"},              // timestep 0: 2.0 + 0.1 = 2.1 clamped to 2.0
+        SquareSignalTestParams{30, 2.0f, "before halfway through"},        // timestep 29: 2.0 + 0.1 = 2.1 clamped to 2.0
+        SquareSignalTestParams{51, -1.9f, "at halfway through"},           // timestep 50: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{80, -1.9f, "before the end"},               // timestep 79: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{100, -1.9f, "at the end"},                  // timestep 99: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{101, 2.0f, "after the end (wrapping)"}));  // timestep 0 (wrapped): 2.0 + 0.1 = 2.1 clamped to 2.0
 
 TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
 {
@@ -52,7 +52,7 @@ TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
     
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(2.0f).period(100)))),
+            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().valueOffset(0.1f).mode(SquareSignalDesc().amplitude(2.0f).period(100)))),
         },
         CreatureDesc().id(0));
 
@@ -83,18 +83,18 @@ class GeneratorTests_SawtoothSignal
 {};
 
 // Test sawtooth signal at key points in the period
-// Period = 100, Amplitude = 2.0
-// Expected: linearly increasing from 0.0 to 2.0 over 100 timesteps
+// Period = 100, Amplitude = 2.0, ValueOffset = 0.2
+// Expected: linearly increasing from 0.2 to 2.0 (clamped) over 100 timesteps
 INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SawtoothSignal,
     GeneratorTests_SawtoothSignal,
     ::testing::Values(
-        SawtoothSignalTestParams{1, 0.0f, "at the beginning"},            // timestep 0: 2.0 * 0 / 100 = 0.0
-        SawtoothSignalTestParams{30, 0.58f, "before halfway through"},     // timestep 29: 2.0 * 29 / 100 = 0.58
-        SawtoothSignalTestParams{51, 1.0f, "at halfway through"},         // timestep 50: 2.0 * 50 / 100 = 1.0
-        SawtoothSignalTestParams{80, 1.58f, "before the end"},             // timestep 79: 2.0 * 79 / 100 = 1.58
-        SawtoothSignalTestParams{100, 1.98f, "at the end"},                // timestep 99: 2.0 * 99 / 100 = 1.98
-        SawtoothSignalTestParams{101, 0.0f, "after the end (wrapping)"}));  // timestep 0 (wrapped): 2.0 * 0 / 100 = 0.0
+        SawtoothSignalTestParams{1, 0.2f, "at the beginning"},            // timestep 0: 2.0 * 0 / 100 + 0.2 = 0.2
+        SawtoothSignalTestParams{30, 0.78f, "before halfway through"},     // timestep 29: 2.0 * 29 / 100 + 0.2 = 0.78
+        SawtoothSignalTestParams{51, 1.2f, "at halfway through"},         // timestep 50: 2.0 * 50 / 100 + 0.2 = 1.2
+        SawtoothSignalTestParams{80, 1.78f, "before the end"},             // timestep 79: 2.0 * 79 / 100 + 0.2 = 1.78
+        SawtoothSignalTestParams{100, 2.0f, "at the end"},                // timestep 99: 2.0 * 99 / 100 + 0.2 = 2.18 clamped to 2.0
+        SawtoothSignalTestParams{101, 0.2f, "after the end (wrapping)"}));  // timestep 0 (wrapped): 2.0 * 0 / 100 + 0.2 = 0.2
 
 TEST_P(GeneratorTests_SawtoothSignal, sawtoothSignal_outputAtVariousTimesteps)
 {
@@ -102,7 +102,7 @@ TEST_P(GeneratorTests_SawtoothSignal, sawtoothSignal_outputAtVariousTimesteps)
     
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().mode(SawtoothSignalDesc().amplitude(2.0f).period(100)))),
+            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().valueOffset(0.2f).mode(SawtoothSignalDesc().amplitude(2.0f).period(100)))),
         },
         CreatureDesc().id(0));
 
@@ -130,7 +130,7 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
                 .id(1)
                 .type(CellDesc()
                           .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that should be overridden
-                          .cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(false))),
+                          .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(false))),
         },
         CreatureDesc().id(0));
 
@@ -140,8 +140,8 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
     
-    // Expected: +2.0 / 2 = +1.0 (set directly, not added to the 0.6 bias)
-    EXPECT_TRUE(approxCompare(1.0f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
+    // Expected: 1.0 + 0.15 = 1.15 (set directly, not added to the 0.6 bias)
+    EXPECT_TRUE(approxCompare(1.15f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
 }
 
 TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
@@ -153,7 +153,7 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
                 .id(1)
                 .type(CellDesc()
                           .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that generator adds to
-                          .cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(true))),
+                          .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(true))),
         },
         CreatureDesc().id(0));
 
@@ -163,8 +163,8 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
     
-    // Expected: 0.6 (base from bias) + 1.0 (generator output) = 1.6
-    EXPECT_TRUE(approxCompare(1.6f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
+    // Expected: 0.6 (base from bias) + 1.0 (generator output) + 0.15 (valueOffset) = 1.75
+    EXPECT_TRUE(approxCompare(1.75f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
 }
 
 //**************
@@ -177,7 +177,7 @@ TEST_F(GeneratorTests, squareSignal_truncation)
         {
             ObjectDesc().id(1).type(CellDesc()
                                         .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that generator adds to
-                                        .cellType(GeneratorDesc().mode(SquareSignalDesc().amplitude(2.0f).period(10)).additive(true))),
+                                        .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(2.0f).period(10)).additive(true))),
         },
         CreatureDesc().id(0));
 
@@ -187,7 +187,7 @@ TEST_F(GeneratorTests, squareSignal_truncation)
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
 
-    // Expected: 0.6 (base from bias) + 2.0 (generator output) = 2.6 truncated to 2.0
+    // Expected: 0.6 (base from bias) + 2.0 (generator output) + 0.15 (valueOffset) = 2.75 truncated to 2.0
     EXPECT_TRUE(approxCompare(2.0f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
 }
 

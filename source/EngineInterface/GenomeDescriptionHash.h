@@ -152,6 +152,7 @@ struct std::hash<GeneratorGenomeDesc>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._additive);
+        hash_combine(seed, desc._valueOffset);
         hash_combine(seed, std::hash<GeneratorModeGenomeDesc>{}(desc._mode));
         return seed;
     }

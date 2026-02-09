@@ -162,6 +162,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 break;
             case CellType_Generator:
                 node.cellTypeData.generator.additive = nodeTO.cellTypeData.generator.additive;
+                node.cellTypeData.generator.valueOffset = nodeTO.cellTypeData.generator.valueOffset;
                 node.cellTypeData.generator.mode = nodeTO.cellTypeData.generator.mode;
                 if (nodeTO.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
                     node.cellTypeData.generator.modeData.squareSignal.amplitude = nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude;
@@ -431,6 +432,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         } break;
         case CellType_Generator: {
             cell->cellTypeData.generator.additive = cellTO.cellTypeData.generator.additive;
+            cell->cellTypeData.generator.valueOffset = cellTO.cellTypeData.generator.valueOffset;
             cell->cellTypeData.generator.mode = cellTO.cellTypeData.generator.mode;
             if (cellTO.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
                 cell->cellTypeData.generator.modeData.squareSignal.amplitude =
@@ -810,6 +812,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         auto const& nodeGenerator = node->cellTypeData.generator;
         auto& generator = cell.cellTypeData.generator;
         generator.additive = nodeGenerator.additive;
+        generator.valueOffset = nodeGenerator.valueOffset;
         generator.mode = nodeGenerator.mode;
         if (nodeGenerator.mode == GeneratorMode_SquareSignal) {
             generator.modeData.squareSignal.amplitude = nodeGenerator.modeData.squareSignal.amplitude;

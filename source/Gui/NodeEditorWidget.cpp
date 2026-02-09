@@ -318,6 +318,10 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Additive
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive"), generator._additive);
 
+                // Value offset
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Value offset").format("%.2f").step(0.05f).textWidth(rightColumnWidth), generator._valueOffset);
+
                 // Mode
                 auto mode = generator.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::GeneratorModeStrings).textWidth(rightColumnWidth), mode)) {

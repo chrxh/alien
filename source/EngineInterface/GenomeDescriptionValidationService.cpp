@@ -80,6 +80,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
 
             } else if (nodeType == CellType_Generator) {
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
+                generator._valueOffset = std::clamp(generator._valueOffset, -2.0f, 2.0f);
                 // Validate mode-specific data
                 auto generatorMode = generator.getMode();
                 if (generatorMode == GeneratorMode_SquareSignal) {

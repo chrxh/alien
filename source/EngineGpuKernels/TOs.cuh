@@ -138,6 +138,7 @@ union GeneratorModeTO
 struct GeneratorTO
 {
     bool additive;
+    float valueOffset;
     GeneratorMode mode;
     GeneratorModeTO modeData;
 

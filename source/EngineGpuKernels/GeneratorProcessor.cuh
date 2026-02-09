@@ -49,6 +49,7 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
         }
         
         // Set the output signal
+        outputValue += generator.valueOffset;
         if (generator.additive) {
             object->typeData.cell.signal.channels[Channels::GeneratorOutput] += outputValue;
         } else {

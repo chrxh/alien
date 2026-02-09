@@ -164,6 +164,7 @@ union GeneratorModeData
 struct Generator
 {
     bool additive;
+    float valueOffset;
     GeneratorMode mode;
     GeneratorModeData modeData;
 

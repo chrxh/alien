@@ -128,6 +128,7 @@ struct GeneratorGenomeDesc
     auto operator<=>(GeneratorGenomeDesc const&) const = default;
 
     MEMBER(GeneratorGenomeDesc, bool, additive, false);
+    MEMBER(GeneratorGenomeDesc, float, valueOffset, 0);
     MEMBER(GeneratorGenomeDesc, GeneratorModeGenomeDesc, mode, SquareSignalGenomeDesc());
 
     GeneratorMode getMode() const;
