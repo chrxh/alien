@@ -33,10 +33,11 @@ protected:
         std::vector<SignalEntryDesc> const& signalEntries = {})
     {
         auto data = Desc().addCreature({
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().mode(mode).signalEntries(signalEntries))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(signal)),
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().biases(signal)).cellType(MemoryDesc().mode(mode).signalEntries(signalEntries))),
         });
-        data.addConnection(1, 2);
         return data;
     }
 };
@@ -203,7 +204,7 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
     auto data = createMemoryCellWithIncomingSignal(SignalDelayDesc().delay(1), signal1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(1);
 
     // Second signal
     std::vector<float> signal2 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -234,13 +235,13 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
 
     auto data = createMemoryCellWithIncomingSignal(SignalDelayDesc().delay(2), signal1);
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(1);
 
     // Second signal
     auto actualData = _simulationFacade->getSimulationData();
     actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(1);
 
     // Third signal
     actualData = _simulationFacade->getSimulationData();
@@ -256,7 +257,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 
     // Waiting
-    _simulationFacade->calcTimesteps(2);
+    _simulationFacade->calcTimesteps(1);
     actualData = _simulationFacade->getSimulationData();
 
     // Fourth signal - should output signal2
@@ -289,7 +290,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 
     // Waiting
-    _simulationFacade->calcTimesteps(2);
+    _simulationFacade->calcTimesteps(1);
     actualData = _simulationFacade->getSimulationData();
 
     // Second signal
@@ -342,7 +343,7 @@ TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false), signal1, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(1);
 
     // Second signal - should record and complete
     auto actualData = _simulationFacade->getSimulationData();
@@ -400,7 +401,7 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(1);
 
     // Second read - should read second entry and complete
     auto actualData = _simulationFacade->getSimulationData();
@@ -445,7 +446,7 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false), positiveSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(1);
 
     // Send negative signal - should continue recording, not switch to reading
     auto actualData = _simulationFacade->getSimulationData();
