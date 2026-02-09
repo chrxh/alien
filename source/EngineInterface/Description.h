@@ -154,6 +154,7 @@ struct GeneratorDesc
     // Fixed data
     MEMBER(GeneratorDesc, bool, additive, false);
     MEMBER(GeneratorDesc, float, valueOffset, 0);
+    MEMBER(GeneratorDesc, int, timeOffset, 0);
     MEMBER(GeneratorDesc, GeneratorModeDesc, mode, SquareSignalDesc());
 
     // Process data
@@ -268,13 +269,7 @@ struct DirectMovementDesc
     auto operator<=>(DirectMovementDesc const&) const = default;
 };
 
-using MuscleModeDesc = std::variant<
-    AutoBendingDesc,
-    ManualBendingDesc,
-    AngleBendingDesc,
-    AutoCrawlingDesc,
-    ManualCrawlingDesc,
-    DirectMovementDesc>;
+using MuscleModeDesc = std::variant<AutoBendingDesc, ManualBendingDesc, AngleBendingDesc, AutoCrawlingDesc, ManualCrawlingDesc, DirectMovementDesc>;
 
 struct MuscleDesc
 {
@@ -341,7 +336,7 @@ struct DigestorDesc
 {
     auto operator<=>(DigestorDesc const&) const = default;
 
-    MEMBER(DigestorDesc, float, rawEnergyConductivity, 0.5f);    // Between 0 and 1
+    MEMBER(DigestorDesc, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
 
     float getRawEnergyConversionRate() const { return 1 - _rawEnergyConductivity; }
     DigestorDesc& setRawEnergyConversionRate(float value)
@@ -437,7 +432,7 @@ using CellTypeDesc = std::variant<
     DepotDesc,
     SensorDesc,
     GeneratorDesc,
-    AttackerDesc,   
+    AttackerDesc,
     InjectorDesc,
     MuscleDesc,
     DefenderDesc,
@@ -600,10 +595,7 @@ struct Desc
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
 
-    Desc& addCreature(
-        std::vector<ObjectDesc> const& objects,
-        CreatureDesc const& creature = CreatureDesc(),
-        GenomeDesc const& genome = GenomeDesc());
+    Desc& addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc const& creature = CreatureDesc(), GenomeDesc const& genome = GenomeDesc());
     Desc& addObjects(std::vector<ObjectDesc> const& objects);
 
     size_t getNumObjects() const;

@@ -2,8 +2,8 @@
 
 #include <cuda_fp16.h>
 
-#include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/NeuralNetWeight.h>
 
@@ -165,6 +165,7 @@ struct Generator
 {
     bool additive;
     float valueOffset;
+    int timeOffset;
     GeneratorMode mode;
     GeneratorModeData modeData;
 

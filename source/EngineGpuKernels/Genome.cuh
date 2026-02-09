@@ -6,8 +6,8 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/SimulationParametersTypes.h>
 #include <EngineInterface/NeuralNetWeight.h>
+#include <EngineInterface/SimulationParametersTypes.h>
 
 struct NeuralNetworkGenome
 {
@@ -45,8 +45,8 @@ struct DetectFreeCellGenome
 
 struct DetectCreatureGenome
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -100,6 +100,7 @@ struct GeneratorGenome
 {
     bool additive;
     float valueOffset;
+    int timeOffset;
     GeneratorMode mode;
     GeneratorModeGenome modeData;
 };
@@ -193,8 +194,8 @@ struct ReconnectFreeCellGenome
 
 struct ReconnectCreatureGenome
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -316,7 +317,7 @@ struct Node
     NeuralNetworkGenome neuralNetwork;
     CellType cellType;
     CellTypeDataGenome cellTypeData;
-    bool constructorAvailable;  // If true, constructor holds valid data
+    bool constructorAvailable;      // If true, constructor holds valid data
     ConstructorGenome constructor;  // Optional constructor data
 };
 

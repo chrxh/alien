@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cuda_fp16.h>
+#include <cuda_runtime.h>
 
 #include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
 
 #include "GenomeTO.cuh"
-#include <cuda_runtime.h>
 #include <stdint.h>
 
 struct EnergyTO
@@ -83,8 +83,8 @@ struct DetectFreeCellTO
 
 struct DetectCreatureTO
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -139,6 +139,7 @@ struct GeneratorTO
 {
     bool additive;
     float valueOffset;
+    int timeOffset;
     GeneratorMode mode;
     GeneratorModeTO modeData;
 
@@ -270,8 +271,8 @@ struct ReconnectFreeCellTO
 
 struct ReconnectCreatureTO
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -428,7 +429,7 @@ struct CellTO
     CellTypeDataTO cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorTO constructor;  // Optional constructor data
-    SignalTO signal;  // For signalState == SignalState_Active
+    SignalTO signal;            // For signalState == SignalState_Active
     uint32_t activationTime;
 
     // Process data

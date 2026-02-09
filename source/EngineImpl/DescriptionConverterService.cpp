@@ -402,6 +402,7 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
             GeneratorDesc generator;
             generator._additive = objectTO.typeData.cell.cellTypeData.generator.additive;
             generator._valueOffset = objectTO.typeData.cell.cellTypeData.generator.valueOffset;
+            generator._timeOffset = objectTO.typeData.cell.cellTypeData.generator.timeOffset;
             if (objectTO.typeData.cell.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
                 SquareSignalDesc squareSignal;
                 squareSignal._amplitude = objectTO.typeData.cell.cellTypeData.generator.modeData.squareSignal.amplitude;
@@ -689,6 +690,7 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
         GeneratorGenomeDesc generatorDesc;
         generatorDesc._additive = nodeTO->cellTypeData.generator.additive;
         generatorDesc._valueOffset = nodeTO->cellTypeData.generator.valueOffset;
+        generatorDesc._timeOffset = nodeTO->cellTypeData.generator.timeOffset;
         if (nodeTO->cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
             SquareSignalGenomeDesc squareSignal;
             squareSignal._amplitude = nodeTO->cellTypeData.generator.modeData.squareSignal.amplitude;
@@ -1024,6 +1026,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto& generatorTO = nodeTO.cellTypeData.generator;
                 generatorTO.additive = generatorDesc._additive;
                 generatorTO.valueOffset = generatorDesc._valueOffset;
+                generatorTO.timeOffset = generatorDesc._timeOffset;
                 generatorTO.mode = generatorDesc.getMode();
                 if (generatorTO.mode == GeneratorMode_SquareSignal) {
                     auto const& squareSignalDesc = std::get<SquareSignalGenomeDesc>(generatorDesc._mode);
@@ -1323,6 +1326,7 @@ void DescriptionConverterService::convertObjectToTO(
             GeneratorTO& generatorTO = objectTO.typeData.cell.cellTypeData.generator;
             generatorTO.additive = generatorDesc._additive;
             generatorTO.valueOffset = generatorDesc._valueOffset;
+            generatorTO.timeOffset = generatorDesc._timeOffset;
             generatorTO.mode = generatorDesc.getMode();
             if (generatorTO.mode == GeneratorMode_SquareSignal) {
                 auto const& squareSignalDesc = std::get<SquareSignalDesc>(generatorDesc._mode);
