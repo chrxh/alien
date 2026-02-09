@@ -514,65 +514,62 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     }
 
     // Process manual crawling
-    if (NeuronProcessor::isManuallyTriggered(data, object)) {
+    auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
 
-        auto actualDistance = data.objectMap.getDistance(object->connections[0].object->pos, object->pos);
-        auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    // Calc min and max distance
+    auto maxDistanceDeviation = max(0.0f, min(1.0f, crawling.maxDistanceDeviation));
+    auto maxDistance = max(crawling.initialDistance * (1.0f + maxDistanceDeviation), MinDistance);
+    auto minDistance = min(max(crawling.initialDistance * (1.0f - maxDistanceDeviation), MinDistance), crawling.initialDistance);
 
-        // Calc min and max distance
-        auto maxDistanceDeviation = max(0.0f, min(1.0f, crawling.maxDistanceDeviation));
-        auto maxDistance = max(crawling.initialDistance * (1.0f + maxDistanceDeviation), MinDistance);
-        auto minDistance = min(max(crawling.initialDistance * (1.0f - maxDistanceDeviation), MinDistance), crawling.initialDistance);
-
-        // Calc and apply distance delta
-        auto distanceDelta = activation > 0 ? 1.05f - crawling.forwardBackwardRatio : 0.05f + crawling.forwardBackwardRatio;
-        distanceDelta *= 0.25f * activation;
-        if (object->connections[0].distance + distanceDelta > maxDistance) {
-            distanceDelta = maxDistance - object->connections[0].distance;
-        }
-        if (object->connections[0].distance + distanceDelta < minDistance) {
-            distanceDelta = minDistance - object->connections[0].distance;
-        }
-        object->connections[0].distance += distanceDelta;
-        auto& connectedObject = object->connections[0].object;
-        connectedObject->getRefDistance(object) += distanceDelta;
-
-        if ((distanceDelta > 0 && crawling.lastDistanceDelta <= 0) || (distanceDelta < 0 && crawling.lastDistanceDelta >= 0)) {
-            crawling.impulseAlreadyApplied = false;
-        }
-        crawling.lastDistanceDelta = distanceDelta;
-
-        // Apply impulse
-        if (!crawling.impulseAlreadyApplied) {
-            if ((distanceDelta < 0 && object->connections[0].distance < crawling.initialDistance)
-                || (distanceDelta > 0 && object->connections[0].distance > crawling.initialDistance)) {
-                crawling.impulseAlreadyApplied = true;
-
-                auto power = min(5.0f, abs(distanceDelta));
-                if (activation > 0) {
-                    power *= powf(1.0f - crawling.forwardBackwardRatio, 4.0f);
-                } else {
-                    power *= powf(crawling.forwardBackwardRatio, 4.0f);
-                }
-                auto direction = calcAverageDirection(data, object);
-
-                auto front = Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
-                if (Math::dot(front, direction) > 0) {
-                    direction *= -1.0f;
-                }
-                if (activation < 0) {
-                    direction *= -1.0f;
-                }
-
-                auto acceleration = direction * power * cudaSimulationParameters.muscleCrawlingAcceleration.value[object->color] * 20;
-                applyAcceleration(object, acceleration);
-            }
-        }
-
-        crawling.lastActualDistance = actualDistance;
-        statistics.incNumMuscleActivities(object->color);
-        radiate(data, object, activation);
+    // Calc and apply distance delta
+    auto distanceDelta = activation > 0 ? 1.05f - crawling.forwardBackwardRatio : 0.05f + crawling.forwardBackwardRatio;
+    distanceDelta *= 0.025f * activation;
+    if (object->connections[0].distance + distanceDelta > maxDistance) {
+        distanceDelta = maxDistance - object->connections[0].distance;
     }
+    if (object->connections[0].distance + distanceDelta < minDistance) {
+        distanceDelta = minDistance - object->connections[0].distance;
+    }
+    object->connections[0].distance += distanceDelta;
+    auto& connectedObject = object->connections[0].object;
+    connectedObject->getRefDistance(object) += distanceDelta;
+
+    if ((distanceDelta > 0 && crawling.lastDistanceDelta <= 0) || (distanceDelta < 0 && crawling.lastDistanceDelta >= 0)) {
+        crawling.impulseAlreadyApplied = false;
+    }
+    crawling.lastDistanceDelta = distanceDelta;
+
+    // Apply impulse
+    if (!crawling.impulseAlreadyApplied) {
+        if ((distanceDelta < 0 && object->connections[0].distance < crawling.initialDistance)
+            || (distanceDelta > 0 && object->connections[0].distance > crawling.initialDistance)) {
+            crawling.impulseAlreadyApplied = true;
+
+            auto power = min(5.0f, abs(distanceDelta));
+            if (activation > 0) {
+                power *= powf(1.0f - crawling.forwardBackwardRatio, 4.0f);
+            } else {
+                power *= powf(crawling.forwardBackwardRatio, 4.0f);
+            }
+            auto direction = calcAverageDirection(data, object);
+
+            auto front = Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
+            if (Math::dot(front, direction) > 0) {
+                direction *= -1.0f;
+            }
+            if (activation < 0) {
+                direction *= -1.0f;
+            }
+
+            auto acceleration = direction * power * cudaSimulationParameters.muscleCrawlingAcceleration.value[object->color] * 20;
+            applyAcceleration(object, acceleration);
+        }
+    }
+
+    crawling.lastActualDistance = actualDistance;
+    statistics.incNumMuscleActivities(object->color);
+    radiate(data, object, activation);
 }
 
 __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data, SimulationStatistics& statistics, Object* object)
