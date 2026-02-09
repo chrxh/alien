@@ -429,7 +429,7 @@ struct CellTO
     CellTypeDataTO cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorTO constructor;  // Optional constructor data
-    SignalTO signal;            // For signalState == SignalState_Active
+    SignalTO signal;
     uint32_t activationTime;
 
     // Process data

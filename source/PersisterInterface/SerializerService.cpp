@@ -840,7 +840,6 @@ namespace
     auto constexpr Id_Cell_NodeIndex = 6;
     auto constexpr Id_Cell_ParentNodeIndex = 7;
     auto constexpr Id_Cell_GeneIndex = 8;
-    auto constexpr Id_Cell_SignalState = 9;
     auto constexpr Id_Cell_AngleToFront = 10;
     auto constexpr Id_Cell_FrontAngleId = 11;
     auto constexpr Id_Cell_IsFrontAngleRefCell = 12;
@@ -1561,9 +1560,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        // SignalState was removed - read for backward compatibility but discard
-        int dummySignalState = 0;
-        loadSave(task, auxiliaries, Id_Cell_SignalState, dummySignalState, 0);
         loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
         loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
@@ -1572,9 +1568,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        // For backward compatibility, read the legacy signal restriction and discard
-        SignalRestrictionDescLegacy legacySignalRestriction;
-        ar(data._cellType, data._constructor, data._signal, legacySignalRestriction, data._neuralNetwork);
+        ar(data._cellType, data._constructor, data._signal, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
 
