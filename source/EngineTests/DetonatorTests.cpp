@@ -62,7 +62,7 @@ TEST_F(DetonatorTests, activateDetonator)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = actualData.getObjectRef(1);
 
-    EXPECT_EQ(2, actualData._objects.size());
+    EXPECT_EQ(1, actualData._objects.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(1.0f, actualDetonatorCell.getCellRef()._signal._channels[0]));
     EXPECT_EQ(9, std::get<DetonatorDesc>(actualDetonatorCell.getCellRef()._cellType)._countdown);
