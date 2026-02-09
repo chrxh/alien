@@ -35,8 +35,10 @@ protected:
                     .id(creatureId * 100)
                     .pos(pos)
                     .color(color)
-                    .type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(range).maxTimesSent(maxTimesSent)))),
-                ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().signal({1.0f, 0.5f, 2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+                    .type(CellDesc()
+                              .neuralNetwork(NeuralNetworkDesc().biases({1.0f, 0.5f, 2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
+                              .cellType(CommunicatorDesc().mode(SenderDesc().range(range).maxTimesSent(maxTimesSent)))),
+                ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
             },
             CreatureDesc().id(creatureId));
         data.addConnection(creatureId * 100, creatureId * 100 + 1);

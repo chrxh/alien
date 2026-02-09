@@ -70,16 +70,19 @@ TEST_F(MuscleTests, noFrontAngle)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
-            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(MuscleDesc().mode(AutoBendingDesc()))),
-            ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(MuscleDesc().mode(AutoBendingDesc()))),
+            ObjectDesc().id(3).pos({12.0f, 10.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(50);
+    _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = actualData.getObjectRef(2);

@@ -29,8 +29,12 @@ protected:
     Desc createInjectorWithGenerator(RealVector2D const& injectorPos, int geneIndex = 0, int injectorColor = 0)
     {
         auto data = Desc().addCreature({
-            ObjectDesc().id(1).pos(injectorPos).color(injectorColor).type(CellDesc().cellType(InjectorDesc().geneIndex(geneIndex))),
-            ObjectDesc().id(2).pos({injectorPos.x + 1.0f, injectorPos.y}).color(injectorColor).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
+                ObjectDesc()
+                    .id(1)
+                    .pos(injectorPos)
+                    .color(injectorColor)
+                    .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(geneIndex))),
+            ObjectDesc().id(2).pos({injectorPos.x + 1.0f, injectorPos.y}).color(injectorColor),
         }, CreatureDesc().id(1));
         data.addConnection(1, 2);
         return data;
@@ -103,8 +107,8 @@ TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
 {
     // Create a single creature with injector and constructor
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(InjectorDesc().geneIndex(3))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(3))),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}),
         ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),  // Same creature
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -157,8 +161,8 @@ TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
 {
     // Create injector with connections that block the injection ray
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(InjectorDesc().geneIndex(3))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(3))),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}),
         // Create a connection that crosses the ray path to target at (100, 97)
         ObjectDesc().id(3).pos({99.0f, 99.0f}),
         ObjectDesc().id(4).pos({101.0f, 99.0f}),

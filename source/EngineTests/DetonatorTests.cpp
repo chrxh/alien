@@ -49,10 +49,12 @@ TEST_F(DetonatorTests, doNothing)
 TEST_F(DetonatorTests, activateDetonator)
 {
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(DetonatorDesc().countdown(10))),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc()).signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .type(
+                CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(DetonatorDesc().countdown(10))),
     });
-    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

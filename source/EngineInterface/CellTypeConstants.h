@@ -183,12 +183,12 @@ enum MutationState_
 //************************
 //* Generator constants *
 //************************
-using GeneratorPulseType = int;
-enum GeneratorPulseType_
+using GeneratorMode = int;
+enum GeneratorMode_
 {
-    GeneratorPulseType_Positive,
-    GeneratorPulseType_Alternation,
-    GeneratorPulseType_Count,
+    GeneratorMode_SquareSignal,
+    GeneratorMode_SawtoothSignal,
+    GeneratorMode_Count,
 };
 
 //*******************

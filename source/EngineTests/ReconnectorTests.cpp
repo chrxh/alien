@@ -206,8 +206,8 @@ TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
 {
     // Create a creature with reconnector, generator, and potential target in same creature
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectCreatureDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(ReconnectorDesc().mode(ReconnectCreatureDesc()))),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}),
         ObjectDesc().id(3).pos({99.0f, 100.0f}),  // Potential target in same creature but not connected to reconnector
     });
     data.addConnection(1, 2);
