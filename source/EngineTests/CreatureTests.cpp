@@ -44,8 +44,8 @@ protected:
                 CHECK(false);
             }
         }();
-        // TODO: Update Generator API usage after migration
-        auto generator = GeneratorGenomeDesc();  // Simplified for now - old API removed
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
                 NodeDesc().cellType(generator),
@@ -72,8 +72,8 @@ protected:
                 CHECK(false);
             }
         }();
-        // TODO: Update Generator API usage after migration
-        auto generator = GeneratorGenomeDesc();  // Simplified for now - old API removed
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
                 NodeDesc().cellType(generator),
@@ -94,8 +94,8 @@ protected:
         auto muscleDesc = muscleMode == MuscleMode_AutoCrawling
             ? MuscleGenomeDesc().mode(AutoCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
             : MuscleGenomeDesc().mode(ManualCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
-        // TODO: Update Generator API usage after migration
-        auto generator = GeneratorGenomeDesc();  // Simplified for now - old API removed
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc()
             .frontAngle(frontAngle)
             .genes({
