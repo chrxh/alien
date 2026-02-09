@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <Base/Definitions.h>
+
 #include <EngineInterface/NeuralNetWeight.h>
 
 #include "CellTypeConstants.h"
@@ -88,12 +89,8 @@ struct DetectCreatureGenomeDesc
     MEMBER(DetectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeGenomeDesc = std::variant<
-    TelemetryGenomeDesc,
-    DetectEnergyGenomeDesc,
-    DetectStructureGenomeDesc,
-    DetectFreeCellGenomeDesc,
-    DetectCreatureGenomeDesc>;
+using SensorModeGenomeDesc =
+    std::variant<TelemetryGenomeDesc, DetectEnergyGenomeDesc, DetectStructureGenomeDesc, DetectFreeCellGenomeDesc, DetectCreatureGenomeDesc>;
 
 struct SensorGenomeDesc
 {
@@ -129,6 +126,7 @@ struct GeneratorGenomeDesc
 
     MEMBER(GeneratorGenomeDesc, bool, additive, false);
     MEMBER(GeneratorGenomeDesc, float, valueOffset, 0);
+    MEMBER(GeneratorGenomeDesc, int, timeOffset, 0);
     MEMBER(GeneratorGenomeDesc, GeneratorModeGenomeDesc, mode, SquareSignalGenomeDesc());
 
     GeneratorMode getMode() const;
@@ -210,13 +208,8 @@ struct DirectMovementGenomeDesc
     auto operator<=>(DirectMovementGenomeDesc const&) const = default;
 };
 
-using MuscleModeGenomeDesc = std::variant<
-    AutoBendingGenomeDesc,
-    ManualBendingGenomeDesc,
-    AngleBendingGenomeDesc,
-    AutoCrawlingGenomeDesc,
-    ManualCrawlingGenomeDesc,
-    DirectMovementGenomeDesc>;
+using MuscleModeGenomeDesc = std::
+    variant<AutoBendingGenomeDesc, ManualBendingGenomeDesc, AngleBendingGenomeDesc, AutoCrawlingGenomeDesc, ManualCrawlingGenomeDesc, DirectMovementGenomeDesc>;
 
 struct MuscleGenomeDesc
 {
@@ -280,10 +273,7 @@ struct DigestorGenomeDesc
 
     MEMBER(DigestorGenomeDesc, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
 
-    float getRawEnergyConversionRate() const
-    {
-        return 1 - _rawEnergyConductivity;
-    }
+    float getRawEnergyConversionRate() const { return 1 - _rawEnergyConductivity; }
     DigestorGenomeDesc& setRawEnergyConversionRate(float value)
     {
         _rawEnergyConductivity = 1 - value;

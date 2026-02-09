@@ -74,7 +74,7 @@ struct std::hash<SensorGenomeDesc>
         hash_combine(seed, desc._minRange);
         hash_combine(seed, desc._maxRange);
         hash_combine(seed, desc.getMode());
-        
+
         // Hash mode-specific data
         if (desc.getMode() == SensorMode_DetectEnergy) {
             auto const& mode = std::get<DetectEnergyGenomeDesc>(desc._mode);
@@ -139,10 +139,7 @@ struct std::hash<SawtoothSignalGenomeDesc>
 template <>
 struct std::hash<GeneratorModeGenomeDesc>
 {
-    std::size_t operator()(GeneratorModeGenomeDesc const& desc) const
-    {
-        return variant_hasher<SquareSignalGenomeDesc, SawtoothSignalGenomeDesc>{}(desc);
-    }
+    std::size_t operator()(GeneratorModeGenomeDesc const& desc) const { return variant_hasher<SquareSignalGenomeDesc, SawtoothSignalGenomeDesc>{}(desc); }
 };
 
 template <>
@@ -153,6 +150,7 @@ struct std::hash<GeneratorGenomeDesc>
         std::size_t seed = 0;
         hash_combine(seed, desc._additive);
         hash_combine(seed, desc._valueOffset);
+        hash_combine(seed, desc._timeOffset);
         hash_combine(seed, std::hash<GeneratorModeGenomeDesc>{}(desc._mode));
         return seed;
     }
@@ -186,19 +184,13 @@ struct std::hash<AttackCreatureGenomeDesc>
 template <>
 struct std::hash<AttackerModeGenomeDesc>
 {
-    std::size_t operator()(AttackerModeGenomeDesc const& desc) const
-    {
-        return variant_hasher<AttackFreeCellGenomeDesc, AttackCreatureGenomeDesc>{}(desc);
-    }
+    std::size_t operator()(AttackerModeGenomeDesc const& desc) const { return variant_hasher<AttackFreeCellGenomeDesc, AttackCreatureGenomeDesc>{}(desc); }
 };
 
 template <>
 struct std::hash<AttackerGenomeDesc>
 {
-    std::size_t operator()(AttackerGenomeDesc const& desc) const
-    {
-        return std::hash<AttackerModeGenomeDesc>{}(desc._mode);
-    }
+    std::size_t operator()(AttackerGenomeDesc const& desc) const { return std::hash<AttackerModeGenomeDesc>{}(desc._mode); }
 };
 
 template <>
@@ -486,10 +478,7 @@ struct std::hash<ReceiverGenomeDesc>
 template <>
 struct std::hash<CommunicatorModeGenomeDesc>
 {
-    std::size_t operator()(CommunicatorModeGenomeDesc const& desc) const
-    {
-        return variant_hasher<SenderGenomeDesc, ReceiverGenomeDesc>{}(desc);
-    }
+    std::size_t operator()(CommunicatorModeGenomeDesc const& desc) const { return variant_hasher<SenderGenomeDesc, ReceiverGenomeDesc>{}(desc); }
 };
 
 template <>

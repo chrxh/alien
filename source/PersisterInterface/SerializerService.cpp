@@ -234,6 +234,7 @@ namespace
 
     auto constexpr Id_GeneratorGenome_Additive = 0;
     auto constexpr Id_GeneratorGenome_ValueOffset = 1;
+    auto constexpr Id_GeneratorGenome_TimeOffset = 2;
 
     auto constexpr Id_GeneratorModeGenome_SquareSignal_Amplitude = 0;
     auto constexpr Id_GeneratorModeGenome_SquareSignal_Period = 1;
@@ -425,6 +426,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
         loadSave(task, auxiliaries, Id_GeneratorGenome_ValueOffset, data._valueOffset, defaultObject._valueOffset);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._mode);
@@ -734,7 +736,7 @@ namespace cereal
     {
         SignalRestrictionGenomeDescLegacy defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        
+
         // For backward compatibility, read any mode format but discard
         if (task == SerializationTask::Load) {
             auto findResult = auxiliaries.find(Id_SignalRestrictionGenome_Mode);
@@ -747,7 +749,7 @@ namespace cereal
                 }
             }
         }
-        
+
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -838,7 +840,6 @@ namespace
     auto constexpr Id_Cell_NodeIndex = 6;
     auto constexpr Id_Cell_ParentNodeIndex = 7;
     auto constexpr Id_Cell_GeneIndex = 8;
-    auto constexpr Id_Cell_SignalState = 9;
     auto constexpr Id_Cell_AngleToFront = 10;
     auto constexpr Id_Cell_FrontAngleId = 11;
     auto constexpr Id_Cell_IsFrontAngleRefCell = 12;
@@ -921,6 +922,7 @@ namespace
     auto constexpr Id_Generator_Additive = 0;
     auto constexpr Id_Generator_NumPulses = 1;
     auto constexpr Id_Generator_ValueOffset = 2;
+    auto constexpr Id_Generator_TimeOffset = 3;
 
     auto constexpr Id_GeneratorMode_SquareSignal_Amplitude = 0;
     auto constexpr Id_GeneratorMode_SquareSignal_Period = 1;
@@ -1031,7 +1033,7 @@ namespace cereal
     {
         SignalRestrictionDescLegacy defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        
+
         // For backward compatibility, read any mode format but discard
         if (task == SerializationTask::Load) {
             auto findResult = auxiliaries.find(Id_SignalRestriction_Mode);
@@ -1044,7 +1046,7 @@ namespace cereal
                 }
             }
         }
-        
+
         loadSave(task, auxiliaries, Id_SignalRestriction_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestriction_OpeningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -1207,6 +1209,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Generator_Additive, data._additive, defaultObject._additive);
         loadSave(task, auxiliaries, Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
         loadSave(task, auxiliaries, Id_Generator_ValueOffset, data._valueOffset, defaultObject._valueOffset);
+        loadSave(task, auxiliaries, Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._mode);
@@ -1557,9 +1560,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        // SignalState was removed - read for backward compatibility but discard
-        int dummySignalState = 0;
-        loadSave(task, auxiliaries, Id_Cell_SignalState, dummySignalState, 0);
         loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
         loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
@@ -1568,9 +1568,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        // For backward compatibility, read the legacy signal restriction and discard
-        SignalRestrictionDescLegacy legacySignalRestriction;
-        ar(data._cellType, data._constructor, data._signal, legacySignalRestriction, data._neuralNetwork);
+        ar(data._cellType, data._constructor, data._signal, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
 

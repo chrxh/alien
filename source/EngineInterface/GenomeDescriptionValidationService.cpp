@@ -47,7 +47,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 sensor._minRange = std::max(0, std::min(255, sensor._minRange));
                 sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
-                
+
                 // Validate mode-specific data
                 auto mode = sensor.getMode();
                 if (mode == SensorMode_DetectEnergy) {
@@ -74,13 +74,13 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                         auto& value = detectCreature._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
-                    detectCreature._restrictToLineage =
-                        std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
+                    detectCreature._restrictToLineage = std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellType_Generator) {
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
                 generator._valueOffset = std::clamp(generator._valueOffset, -2.0f, 2.0f);
+                generator._timeOffset = std::max(generator._timeOffset, 0);
                 // Validate mode-specific data
                 auto generatorMode = generator.getMode();
                 if (generatorMode == GeneratorMode_SquareSignal) {
@@ -181,7 +181,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                     signalDelay._delay = std::clamp(signalDelay._delay, 0, MAX_CELL_MEMORY_ENTRIES);
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
                     auto& signalRecorder = std::get<SignalRecorderGenomeDesc>(memory._mode);
-                    signalRecorder._numWrittenSignalEntries = std::clamp(signalRecorder._numWrittenSignalEntries, 0, static_cast<int>(memory._signalEntries.size()));
+                    signalRecorder._numWrittenSignalEntries =
+                        std::clamp(signalRecorder._numWrittenSignalEntries, 0, static_cast<int>(memory._signalEntries.size()));
                 } else if (memoryMode == MemoryMode_SignalStorage) {
                 } else if (memoryMode == MemoryMode_SignalIntegrator) {
                     auto& signalIntegrator = std::get<SignalIntegratorGenomeDesc>(memory._mode);

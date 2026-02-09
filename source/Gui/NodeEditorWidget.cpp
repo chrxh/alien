@@ -322,6 +322,9 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Value offset").format("%.2f").step(0.05f).textWidth(rightColumnWidth), generator._valueOffset);
 
+                // Time offset
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Time offset").textWidth(rightColumnWidth), generator._timeOffset);
+
                 // Mode
                 auto mode = generator.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::GeneratorModeStrings).textWidth(rightColumnWidth), mode)) {
@@ -368,7 +371,6 @@ void _NodeEditorWidget::processNodeAttributes()
                         AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackFreeCell._restrictToColor);
 
                     AlienGui::EndIndent();
-
                 }
 
                 AlienGui::EndIndent();
@@ -540,8 +542,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     &digestor._rawEnergyConductivity);
                 auto rawEnergyConversionRate = digestor.getRawEnergyConversionRate();
                 AlienGui::SliderFloat(
-                    AlienGui::SliderFloatParameters().name("Energy conversion").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                    &rawEnergyConversionRate);
+                    AlienGui::SliderFloatParameters().name("Energy conversion").max(1.0f).format("%.2f").textWidth(rightColumnWidth), &rawEnergyConversionRate);
                 digestor.setRawEnergyConversionRate(rawEnergyConversionRate);
                 AlienGui::EndIndent();
             } else if (nodeType == CellType_Memory) {

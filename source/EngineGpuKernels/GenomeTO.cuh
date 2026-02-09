@@ -6,8 +6,8 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/SimulationParametersTypes.h>
 #include <EngineInterface/NeuralNetWeight.h>
+#include <EngineInterface/SimulationParametersTypes.h>
 
 struct NeuralNetworkGenomeTO
 {
@@ -45,8 +45,8 @@ struct DetectFreeCellGenomeTO
 
 struct DetectCreatureGenomeTO
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -100,6 +100,7 @@ struct GeneratorGenomeTO
 {
     bool additive;
     float valueOffset;
+    int timeOffset;
     GeneratorMode mode;
     GeneratorModeGenomeTO modeData;
 };
@@ -111,8 +112,8 @@ struct AttackFreeCellGenomeTO
 
 struct AttackCreatureGenomeTO
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -198,8 +199,8 @@ struct ReconnectFreeCellGenomeTO
 
 struct ReconnectCreatureGenomeTO
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -321,7 +322,7 @@ struct NodeTO
     NeuralNetworkGenomeTO neuralNetwork;
     CellType cellType;
     CellTypeDataGenomeTO cellTypeData;
-    bool constructorAvailable;  // If true, constructor holds valid data
+    bool constructorAvailable;        // If true, constructor holds valid data
     ConstructorGenomeTO constructor;  // Optional constructor data
 };
 

@@ -310,6 +310,9 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         if (generator._valueOffset != nodeGenerator._valueOffset) {
             return false;
         }
+        if (generator._timeOffset != nodeGenerator._timeOffset) {
+            return false;
+        }
         // Compare modes
         if (generator.getMode() != nodeGenerator.getMode()) {
             return false;
@@ -683,7 +686,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
             generatorModeDesc = GeneratorModeDesc();
             break;
         }
-        return GeneratorDesc().additive(true).valueOffset(0.3f).mode(generatorModeDesc).numPulses(5);
+        return GeneratorDesc().additive(true).valueOffset(0.3f).timeOffset(7).mode(generatorModeDesc).numPulses(5);
     }
     case CellType_Attacker:
         return AttackerDesc().mode(AttackCreatureDesc());
@@ -693,12 +696,8 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         MuscleModeDesc muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending: {
-            muscleModeDesc = AutoBendingDesc()
-                                 .maxAngleDeviation(0.6f)
-                                 .forwardBackwardRatio(0.4f)
-                                 .initialAngle(135.0f)
-                                 .forward(false)
-                                 .impulseAlreadyApplied(true);
+            muscleModeDesc =
+                AutoBendingDesc().maxAngleDeviation(0.6f).forwardBackwardRatio(0.4f).initialAngle(135.0f).forward(false).impulseAlreadyApplied(true);
         } break;
         case MuscleMode_ManualBending:
             muscleModeDesc =
@@ -861,7 +860,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
             generatorModeDesc = GeneratorModeGenomeDesc();
             break;
         }
-        return GeneratorGenomeDesc().additive(true).valueOffset(0.3f).mode(generatorModeDesc);
+        return GeneratorGenomeDesc().additive(true).valueOffset(0.3f).timeOffset(7).mode(generatorModeDesc);
     }
     case CellType_Attacker:
         return AttackerGenomeDesc().mode(AttackCreatureGenomeDesc());
