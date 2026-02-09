@@ -143,7 +143,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     }
 }
 
-__inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent)
+__inline__ __device__ void CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent)
 {
     receiverObject->getLock();
 
