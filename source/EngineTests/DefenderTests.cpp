@@ -1,200 +1,230 @@
-//#include <gtest/gtest.h>
-//
-//#include <EngineInterface/DescriptionEditService.h>
-//#include <EngineInterface/Description.h>
-//#include <EngineInterface/GenomeDescConverterService.h>
-//#include <EngineInterface/SimulationFacade.h>
-//#include "IntegrationTestFramework.h"
-//
-//class DefenderTests : public IntegrationTestFramework
-//{
-//public:
-//    static SimulationParameters getParameters()
-//    {
-//        SimulationParameters result;
-//        result.innerFriction.value = 0;
-//        result.friction.baseValue = 1;
-//        for (int i = 0; i < MAX_COLORS; ++i) {
-//            result.defenderAntiAttackerStrength.value[i] = 1000.0f;
-//            result.radiationType1_strength.baseValue[i] = 0;
-//            result.radiationType2_strength.value[i] = 0;
-//            for (int j = 0; j < MAX_COLORS; ++j) {
-//                result.injectorInjectionTime.value[i][j] = 3;
-//            }
-//        }
-//        return result;
-//    }
-//    DefenderTests()
-//        : IntegrationTestFramework(getParameters())
-//    {}
-//
-//    ~DefenderTests() = default;
-//};
-//
-//TEST_F(DefenderTests, attackerVsAntiAttacker)
-//{
-//    Desc data;
-//    data.objects() = {
-//        ObjectDesc()
-//            .id(1)
-//            .pos({10.0f, 10.0f})
-//            .cellType(AttackerDesc()),
-//        ObjectDesc()
-//            .id(2)
-//            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDesc().autoTriggerInterval(1))
-//            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDesc()
-//            .id(3)
-//            .pos({9.0f, 10.0f})
-//            .cellType(GeneratorDesc()),
-//        ObjectDesc()
-//            .id(4)
-//            .pos({7.0f, 10.0f})
-//            .cellType(DefenderDesc().mode(DefenderMode_DefendAgainstAttacker)),
-//    });
-//    data.addConnection(1, 2);
-//    data.addConnection(3, 4);
-//
-//    _simulationFacade->setSimulationData(data);
-//    _simulationFacade->calcTimesteps(1);
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//    auto actualAttacker = getCell(actualData, 1);
-//
-//    auto origTarget = getCell(data, 3);
-//    auto actualTarget = getCell(actualData, 3);
-//
-//    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-//    EXPECT_TRUE(actualAttacker.getCellRef()._signal._channels[0] > NEAR_ZERO);
-//    EXPECT_LT(origTarget._energy, actualTarget._energy + 0.1f);
-//}
-//
-//TEST_F(DefenderTests, attackerVsAntiInjector)
-//{
-//    Desc data;
-//    data.objects() = {
-//        ObjectDesc()
-//            .id(1)
-//            .pos({10.0f, 10.0f})
-//            .cellType(AttackerDesc()),
-//        ObjectDesc()
-//            .id(2)
-//            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDesc().autoTriggerInterval(1))
-//            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc())),
-//        ObjectDesc()
-//            .id(4)
-//            .pos({7.0f, 10.0f})
-//            .cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector)),
-//    });
-//    data.addConnection(1, 2);
-//    data.addConnection(3, 4);
-//
-//    _simulationFacade->setSimulationData(data);
-//    _simulationFacade->calcTimesteps(1);
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//    auto actualAttacker = getCell(actualData, 1);
-//
-//    auto origTarget = getCell(data, 3);
-//    auto actualTarget = getCell(actualData, 3);
-//
-//    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-//    EXPECT_TRUE(actualAttacker.getCellRef()._signal._channels[0] > NEAR_ZERO);
-//    EXPECT_GT(origTarget._energy, actualTarget._energy + 0.1f);
-//}
-//
-//TEST_F(DefenderTests, injectorVsAntiAttacker)
-//{
-//    auto genome = GenomeDescConverterService::get().convertDescriptionToBytes(GenomeDesc().objects({CellGenomeDesc()}));
-//
-//    Desc data;
-//    data.objects() = {
-//        ObjectDesc()
-//            .id(1)
-//            .pos({10.0f, 10.0f})
-//            .cellType(InjectorDesc().mode(InjectorMode_InjectAll).genome(genome)),
-//        ObjectDesc()
-//            .id(2)
-//            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDesc().autoTriggerInterval(1))
-//            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().constructor(ConstructorDesc())),
-//        ObjectDesc()
-//            .id(4)
-//            .pos({7.0f, 10.0f})
-//            .cellType(DefenderDesc().mode(DefenderMode_DefendAgainstAttacker)),
-//    });
-//    data.addConnection(1, 2);
-//    data.addConnection(3, 4);
-//
-//    _simulationFacade->setSimulationData(data);
-//    for (int i = 0; i < 1 + 6 * 3; ++i) {
-//        _simulationFacade->calcTimesteps(1);
-//    }
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//
-//    auto actualInjector = getCell(actualData, 1);
-//    auto actualInjectorFunc = std::get<InjectorDesc>(actualInjector.getCellRef()._cellType);
-//
-//    auto actualTarget = getCell(actualData, 3);
-//    auto actualTargetFunc = std::get<ConstructorDesc>(actualTarget.getCellRef()._cellType);
-//
-//    auto origInjector = getCell(data, 1);
-//    auto origInjectorFunc = std::get<InjectorDesc>(origInjector.getCellRef()._cellType);
-//
-//    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._signal._channels[0]));
-//    EXPECT_EQ(0, actualInjectorFunc._counter);
-//    EXPECT_EQ(origInjectorFunc._genome, actualTargetFunc._genome);
-//}
-//
-//TEST_F(DefenderTests, injectorVsAntiInjector)
-//{
-//    auto genome = GenomeDescConverterService::get().convertDescriptionToBytes(GenomeDesc().objects({CellGenomeDesc()}));
-//
-//    Desc data;
-//    data.objects() = {
-//        ObjectDesc()
-//            .id(1)
-//            .pos({10.0f, 10.0f})
-//            .cellType(InjectorDesc().mode(InjectorMode_InjectAll).genome(genome)),
-//        ObjectDesc()
-//            .id(2)
-//            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDesc().autoTriggerInterval(1))
-//            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
-//        ObjectDesc().id(3).pos({9.0f, 10.0f}).type(CellDesc().constructor(ConstructorDesc())),
-//        ObjectDesc()
-//            .id(4)
-//            .pos({7.0f, 10.0f})
-//            .cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector)),
-//    });
-//    data.addConnection(1, 2);
-//    data.addConnection(3, 4);
-//
-//    _simulationFacade->setSimulationData(data);
-//    for (int i = 0; i < 1 + 6 * 3; ++i) {
-//        _simulationFacade->calcTimesteps(1);
-//    }
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//
-//    auto actualInjector = getCell(actualData, 1);
-//    auto actualInjectorFunc = std::get<InjectorDesc>(actualInjector.getCellRef()._cellType);
-//
-//    auto origTarget = getCell(data, 3);
-//    auto origTargetFunc = std::get<ConstructorDesc>(origTarget.getCellRef()._cellType);
-//
-//    auto actualTarget = getCell(actualData, 3);
-//    auto actualTargetFunc = std::get<ConstructorDesc>(actualTarget.getCellRef()._cellType);
-//
-//    auto origInjector = getCell(data, 1);
-//    auto origInjectorFunc = std::get<InjectorDesc>(origInjector.getCellRef()._cellType);
-//
-//    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._signal._channels[0]));
-//    EXPECT_EQ(4, actualInjectorFunc._counter);
-//    EXPECT_EQ(origTargetFunc._genome, actualTargetFunc._genome);
-//}
+#include <gtest/gtest.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
+
+#include "IntegrationTestFramework.h"
+
+class DefenderTests : public IntegrationTestFramework
+{
+public:
+    DefenderTests()
+        : IntegrationTestFramework()
+    {
+        _parameters.innerFriction.value = 0;
+        _parameters.friction.baseValue = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+            _parameters.attackerEnergyCost.baseValue[i] = 0;
+            _parameters.attackerStrength.value[i] = 0.5f;
+            _parameters.attackerRadius.value[i] = 3.5f;
+            _parameters.defenderAntiAttackerStrength.value[i] = 1000.0f;
+            _parameters.injectorEnergyCost.value[i] = 40.0f;
+            _parameters.injectorRadius.value[i] = 3.5f;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
+
+    ~DefenderTests() = default;
+};
+
+/**
+ * Test: attackerVsAntiAttacker
+ * An attacker attacks a target creature that has a defender cell in DefendAgainstAttacker mode.
+ * The attack should be heavily reduced (defenderAntiAttackerStrength=1000 → divisor=1001).
+ */
+TEST_F(DefenderTests, attackerVsAntiAttacker)
+{
+    NeuralNetworkDesc nn;
+    nn._biases[Channels::CellTypeActivation] = 1.0f;
+
+    SensorLastMatchDesc lastMatch;
+    lastMatch._creatureId = 2;
+    lastMatch._pos = {100.0f, 103.0f};
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+
+    // Target creature with anti-attacker defender connected
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().cellType(DefenderDesc().mode(DefenderMode_DefendAgainstAttacker))),
+        },
+        CreatureDesc().id(2));
+    data.addConnection(100, 101);
+
+    auto origTarget = data.getObjectRef(100);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    // Attack should be blocked by anti-attacker defender (strength=1000 → divisor=1001)
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
+}
+
+/**
+ * Test: attackerVsAntiInjector
+ * An attacker attacks a target creature that has a defender cell in DefendAgainstInjector mode.
+ * The wrong defender mode should not block the attack, so energy should be drained.
+ */
+TEST_F(DefenderTests, attackerVsAntiInjector)
+{
+    NeuralNetworkDesc nn;
+    nn._biases[Channels::CellTypeActivation] = 1.0f;
+
+    SensorLastMatchDesc lastMatch;
+    lastMatch._creatureId = 2;
+    lastMatch._pos = {100.0f, 103.0f};
+
+    auto data = Desc()
+                    .addCreature(
+                        {
+                            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+                            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
+                        },
+                        CreatureDesc().id(1))
+                    .addConnection(1, 2);
+
+    // Target creature with anti-injector defender connected (wrong mode for blocking attacker)
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector))),
+        },
+        CreatureDesc().id(2));
+    data.addConnection(100, 101);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    // Attack should succeed because defender is in anti-injector mode (not anti-attacker)
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - 1.0f);
+}
+
+/**
+ * Test: injectorVsAntiAttacker
+ * An injector injects a target creature that has a defender cell in DefendAgainstAttacker mode.
+ * The wrong defender mode should not block the injection, so it should succeed.
+ */
+TEST_F(DefenderTests, injectorVsAntiAttacker)
+{
+    auto injectorGenome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc().color(1)}),
+    });
+
+    auto data = Desc()
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(1)
+                                .pos({100.0f, 100.0f})
+                                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                        },
+                        CreatureDesc().id(1),
+                        injectorGenome)
+                    .addConnection(1, 2);
+
+    // Target creature with constructor and anti-attacker defender (wrong mode for blocking injector)
+    auto targetGenome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().color(2)}),
+    });
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).constructor(ConstructorDesc())),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().cellType(DefenderDesc().mode(DefenderMode_DefendAgainstAttacker))),
+        },
+        CreatureDesc().id(2),
+        targetGenome);
+    data.addConnection(100, 101);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualInjector = actualData.getObjectRef(1);
+    auto actualTargetConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
+
+    // Injection should succeed because defender is in anti-attacker mode (not anti-injector)
+    EXPECT_TRUE(approxCompare(1.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
+    EXPECT_EQ(2, actualTargetConstructor._geneIndex);
+
+    // Verify the injector's genome was injected into the target creature
+    auto actualTargetCreatureId = actualData.getObjectRef(100).getCellRef()._creatureId;
+    auto actualTargetCreature = actualData.getCreatureRef(actualTargetCreatureId);
+    auto actualTargetGenome = actualData.getGenomeRef(actualTargetCreature._genomeId);
+    EXPECT_EQ(injectorGenome._genes, actualTargetGenome._genes);
+}
+
+/**
+ * Test: injectorVsAntiInjector
+ * An injector injects a target creature that has a defender cell in DefendAgainstInjector mode.
+ * The defender increases injection cost by 1.5x, making injection fail when the injector can't afford it.
+ */
+TEST_F(DefenderTests, injectorVsAntiInjector)
+{
+    // usableEnergy=100, minCellEnergy=50, cost=40: without defender 100-40=60>50 OK; with defender 100-60=40<50 FAIL
+    auto injectorGenome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc().color(1)}),
+    });
+
+    auto data = Desc()
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(1)
+                                .pos({100.0f, 100.0f})
+                                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                        },
+                        CreatureDesc().id(1),
+                        injectorGenome)
+                    .addConnection(1, 2);
+
+    // Target creature with constructor and anti-injector defender (correct mode)
+    auto targetGenome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().color(2)}),
+    });
+    data.addCreature(
+            {
+                ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).constructor(ConstructorDesc().geneIndex(0))),
+                ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector))),
+            },
+            CreatureDesc().id(2),
+            targetGenome)
+        .addConnection(100, 101);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualInjector = actualData.getObjectRef(1);
+    auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
+
+    // Injection should fail because defender increases cost beyond what the injector can afford
+    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
+    EXPECT_EQ(0, actualConstructor._geneIndex);
+
+    // Verify the injector's genome was NOT injected — target still has original genome
+    auto actualTargetCreatureId = actualData.getObjectRef(100).getCellRef()._creatureId;
+    auto actualTargetCreature = actualData.getCreatureRef(actualTargetCreatureId);
+    auto actualTargetGenome = actualData.getGenomeRef(actualTargetCreature._genomeId);
+    EXPECT_EQ(targetGenome._genes, actualTargetGenome._genes);
+}
