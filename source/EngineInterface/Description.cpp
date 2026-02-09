@@ -30,6 +30,12 @@ NeuralNetworkDesc& NeuralNetworkDesc::weight(int row, int col, NeuralNetWeight v
     return *this;
 }
 
+NeuralNetworkDesc& NeuralNetworkDesc::bias(int row, float value)
+{
+    _biases[row] = value;
+    return *this;
+}
+
 NeuralNetworkDesc& NeuralNetworkDesc::connectionWeight(int connectionIndex, float value)
 {
     CHECK(connectionIndex < MAX_OBJECT_CONNECTIONS);

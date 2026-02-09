@@ -142,7 +142,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.depot.initialStoredUsableEnergy = nodeTO.cellTypeData.depot.initialStoredUsableEnergy;
                 break;
             case CellType_Sensor:
-                node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;
+                node.cellTypeData.sensor.autoTrigger = nodeTO.cellTypeData.sensor.autoTrigger;
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
                 node.cellTypeData.sensor.maxRange = nodeTO.cellTypeData.sensor.maxRange;
                 node.cellTypeData.sensor.mode = nodeTO.cellTypeData.sensor.mode;
@@ -395,7 +395,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->cellTypeData.depot.storedUsableEnergy = cellTO.cellTypeData.depot.storedUsableEnergy;
         } break;
         case CellType_Sensor: {
-            cell->cellTypeData.sensor.autoTriggerInterval = cellTO.cellTypeData.sensor.autoTriggerInterval;
+            cell->cellTypeData.sensor.autoTrigger = cellTO.cellTypeData.sensor.autoTrigger;
             cell->cellTypeData.sensor.minRange = cellTO.cellTypeData.sensor.minRange;
             cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;
             cell->cellTypeData.sensor.mode = cellTO.cellTypeData.sensor.mode;
@@ -770,7 +770,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         cell.cellType = CellType_Sensor;
         auto const& nodeSensor = node->cellTypeData.sensor;
         auto& sensor = cell.cellTypeData.sensor;
-        sensor.autoTriggerInterval = nodeSensor.autoTriggerInterval;
+        sensor.autoTrigger = nodeSensor.autoTrigger;
         sensor.minRange = nodeSensor.minRange;
         sensor.maxRange = nodeSensor.maxRange;
         sensor.mode = nodeSensor.mode;

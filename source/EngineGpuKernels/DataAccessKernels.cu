@@ -80,7 +80,7 @@ namespace
                         nodeTO.cellTypeData.depot.storageLimit = node.cellTypeData.depot.storageLimit;
                         break;
                     case CellType_Sensor:
-                        nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
+                        nodeTO.cellTypeData.sensor.autoTrigger = node.cellTypeData.sensor.autoTrigger;
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
                         nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
                         nodeTO.cellTypeData.sensor.mode = node.cellTypeData.sensor.mode;
@@ -351,7 +351,7 @@ namespace
                 cellTO.cellTypeData.depot.storedUsableEnergy = cell.cellTypeData.depot.storedUsableEnergy;
             } break;
             case CellType_Sensor: {
-                cellTO.cellTypeData.sensor.autoTriggerInterval = cell.cellTypeData.sensor.autoTriggerInterval;
+                cellTO.cellTypeData.sensor.autoTrigger = cell.cellTypeData.sensor.autoTrigger;
                 cellTO.cellTypeData.sensor.minRange = cell.cellTypeData.sensor.minRange;
                 cellTO.cellTypeData.sensor.maxRange = cell.cellTypeData.sensor.maxRange;
                 cellTO.cellTypeData.sensor.mode = cell.cellTypeData.sensor.mode;

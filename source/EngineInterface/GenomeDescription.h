@@ -99,7 +99,7 @@ struct SensorGenomeDesc
 {
     auto operator<=>(SensorGenomeDesc const&) const = default;
 
-    MEMBER(SensorGenomeDesc, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
+    MEMBER(SensorGenomeDesc, bool, autoTrigger, true);
     MEMBER(SensorGenomeDesc, SensorModeGenomeDesc, mode, DetectCreatureGenomeDesc());
     MEMBER(SensorGenomeDesc, int, minRange, 0);
     MEMBER(SensorGenomeDesc, int, maxRange, 255);

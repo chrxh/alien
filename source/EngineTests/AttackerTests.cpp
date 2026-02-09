@@ -55,7 +55,7 @@ protected:
                     .id(2)
                     .pos({attackerPos.x + 1.0f, attackerPos.y})
                     .color(attackerColor)
-                    .type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch))),
+                    .type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
             },
             CreatureDesc().id(1));
         data.addConnection(1, 2);
@@ -230,7 +230,7 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
             ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),  // Same creature, in attack range
             ObjectDesc().id(4).pos({100.5f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),  // Same creature, in attack range
         },
@@ -393,8 +393,8 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch2))),
-            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch1))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch2))),
+            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch1))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -439,7 +439,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
             // Connections that don't intersect the ray to target
             ObjectDesc().id(3).pos({102.0f, 99.0f}),
             ObjectDesc().id(4).pos({103.0f, 99.0f}),
@@ -550,8 +550,8 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch2))),
-            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTriggerInterval(std::nullopt).lastMatch(lastMatch1))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch2))),
+            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch1))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);

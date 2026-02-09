@@ -18,6 +18,7 @@ public:
     __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Object* object, uint32_t autoTriggerInterval, bool isPreview = false);
     __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Object* object);
     __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Object* cell, uint32_t autoTriggerInterval, bool isPreview = false);
+    __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Object* cell, bool autoTrigger);
 
 private:
     // Process a single cell's neural network using classic CUDA FP32 matrix-vector multiplication
@@ -106,9 +107,19 @@ __inline__ __device__ bool NeuronProcessor::isAutoOrManuallyTriggered(Simulation
     } else {
         if (!isAutoTriggered(data, cell, autoTriggerInterval, isPreview)) {
             return false;
+        } else {
+            return true;
         }
     }
-    return true;
+}
+
+__inline__ __device__ bool NeuronProcessor::isAutoOrManuallyTriggered(SimulationData& data, Object* cell, bool autoTrigger)
+{
+    if (!autoTrigger) {
+        return isManuallyTriggered(data, cell);
+    } else {
+        return true;
+    }
 }
 
 __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool initMatrices)

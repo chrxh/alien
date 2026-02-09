@@ -62,7 +62,7 @@ union SensorModeGenomeTO
 
 struct SensorGenomeTO
 {
-    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    bool autoTrigger;
     SensorMode mode;
     SensorModeGenomeTO modeData;
     uint16_t minRange;

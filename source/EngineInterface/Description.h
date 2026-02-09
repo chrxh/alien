@@ -34,6 +34,7 @@ struct NeuralNetworkDesc
     MEMBER(NeuralNetworkDesc, std::vector<float>, connectionWeights, {});
 
     NeuralNetworkDesc& weight(int row, int col, NeuralNetWeight value);
+    NeuralNetworkDesc& bias(int row, float value);
     NeuralNetworkDesc& connectionWeight(int connectionIndex, float value);
 };
 
@@ -119,7 +120,7 @@ struct SensorDesc
 {
     auto operator<=>(SensorDesc const&) const = default;
 
-    MEMBER(SensorDesc, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
+    MEMBER(SensorDesc, bool, autoTrigger, true);
     MEMBER(SensorDesc, SensorModeDesc, mode, DetectCreatureDesc());
     MEMBER(SensorDesc, int, minRange, 0);
     MEMBER(SensorDesc, int, maxRange, 255);

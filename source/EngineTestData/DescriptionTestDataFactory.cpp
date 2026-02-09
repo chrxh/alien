@@ -243,7 +243,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
         auto const& sensor = std::get<SensorDesc>(cell._cellType);
         auto const& nodeSensor = std::get<SensorGenomeDesc>(node._cellType);
-        if (sensor._autoTriggerInterval != nodeSensor._autoTriggerInterval) {
+        if (sensor._autoTrigger != nodeSensor._autoTrigger) {
             return false;
         }
         if (sensor._minRange != nodeSensor._minRange) {
@@ -636,7 +636,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
             break;
         }
         return SensorDesc()
-            .autoTriggerInterval(80)
+            .autoTrigger(false)
             .mode(sensorModeDesc)
             .minRange(10)
             .maxRange(50)
@@ -804,7 +804,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
             sensorModeDesc = SensorModeGenomeDesc();
             break;
         }
-        return SensorGenomeDesc().autoTriggerInterval(70).mode(sensorModeDesc).minRange(5).maxRange(30);
+        return SensorGenomeDesc().autoTrigger(false).mode(sensorModeDesc).minRange(5).maxRange(30);
     }
     case CellType_Generator:
         return GeneratorGenomeDesc().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);

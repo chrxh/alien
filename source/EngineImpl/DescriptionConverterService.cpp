@@ -353,9 +353,7 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
         } break;
         case CellType_Sensor: {
             SensorDesc sensor;
-            sensor._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval > 0
-                ? std::make_optional(objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval)
-                : std::nullopt;
+            sensor._autoTrigger = objectTO.typeData.cell.cellTypeData.sensor.autoTrigger;
             sensor._minRange = objectTO.typeData.cell.cellTypeData.sensor.minRange;
             sensor._maxRange = objectTO.typeData.cell.cellTypeData.sensor.maxRange;
 
@@ -639,8 +637,7 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
     } break;
     case CellType_Sensor: {
         SensorGenomeDesc sensorDesc;
-        sensorDesc._autoTriggerInterval =
-            nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
+        sensorDesc._autoTrigger = nodeTO->cellTypeData.sensor.autoTrigger;
         sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
         sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
 
@@ -975,7 +972,7 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellType_Sensor: {
                 auto const& sensorDesc = std::get<SensorGenomeDesc>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
-                sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
+                sensorTO.autoTrigger = sensorDesc._autoTrigger;
                 sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
                 sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
                 sensorTO.mode = sensorDesc.getMode();
@@ -1260,7 +1257,7 @@ void DescriptionConverterService::convertObjectToTO(
         case CellType_Sensor: {
             auto const& sensorDesc = std::get<SensorDesc>(cellDesc._cellType);
             SensorTO& sensorTO = objectTO.typeData.cell.cellTypeData.sensor;
-            sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
+            sensorTO.autoTrigger = sensorDesc._autoTrigger;
             sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
             sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
             sensorTO.mode = sensorDesc.getMode();

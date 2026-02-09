@@ -70,11 +70,7 @@ struct std::hash<SensorGenomeDesc>
     std::size_t operator()(SensorGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        if (desc._autoTriggerInterval) {
-            hash_combine(seed, *desc._autoTriggerInterval);
-        } else {
-            hash_combine(seed, -1);
-        }
+        hash_combine(seed, desc._autoTrigger);
         hash_combine(seed, desc._minRange);
         hash_combine(seed, desc._maxRange);
         hash_combine(seed, desc.getMode());

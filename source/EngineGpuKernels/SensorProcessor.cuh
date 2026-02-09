@@ -61,7 +61,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 {
     __shared__ bool isTriggered;
     if (threadIdx.x == 0) {
-        isTriggered = NeuronProcessor::isAutoOrManuallyTriggered(data, object, object->typeData.cell.cellTypeData.sensor.autoTriggerInterval);
+        isTriggered = NeuronProcessor::isAutoOrManuallyTriggered(data, object, object->typeData.cell.cellTypeData.sensor.autoTrigger);
         if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
             isTriggered = false;
         }

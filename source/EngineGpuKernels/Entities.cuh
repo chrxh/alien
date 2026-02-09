@@ -132,7 +132,7 @@ struct SensorLastMatch
 
 struct Sensor
 {
-    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    bool autoTrigger;
     SensorMode mode;
     SensorModeData modeData;
     uint16_t minRange;
