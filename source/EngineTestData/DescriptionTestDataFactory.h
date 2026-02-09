@@ -48,6 +48,5 @@ public:
 
 private:
     CellTypeDesc createNonDefaultCellTypeDesc(ObjectParameter objectParameter) const;
-
     CellTypeGenomeDesc createNonDefaultCellTypeGenomeDesc(NodeParameter objectParameter) const;
 };
