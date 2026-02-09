@@ -33,18 +33,18 @@ class GeneratorTests_SquareSignal
 {};
 
 // Test square signal at key points in the period
-// Period = 100, Amplitude = 2.0 (clamped from 4.0 by validation)
-// Expected: +1.0 for timesteps [0, 50), -1.0 for timesteps [50, 100)
+// Period = 100, Amplitude = 4.0
+// Expected: +2.0 for timesteps [0, 50), -2.0 for timesteps [50, 100)
 INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SquareSignal,
     GeneratorTests_SquareSignal,
     ::testing::Values(
-        SquareSignalTestParams{1, 1.0f, "at the beginning"},              // timestep 0
-        SquareSignalTestParams{30, 1.0f, "before halfway through"},        // timestep 29
-        SquareSignalTestParams{51, -1.0f, "at halfway through"},           // timestep 50
-        SquareSignalTestParams{80, -1.0f, "before the end"},               // timestep 79
-        SquareSignalTestParams{100, -1.0f, "at the end"},                  // timestep 99
-        SquareSignalTestParams{101, 1.0f, "after the end (wrapping)"}));  // timestep 0 (wrapped)
+        SquareSignalTestParams{1, 2.0f, "at the beginning"},              // timestep 0
+        SquareSignalTestParams{30, 2.0f, "before halfway through"},        // timestep 29
+        SquareSignalTestParams{51, -2.0f, "at halfway through"},           // timestep 50
+        SquareSignalTestParams{80, -2.0f, "before the end"},               // timestep 79
+        SquareSignalTestParams{100, -2.0f, "at the end"},                  // timestep 99
+        SquareSignalTestParams{101, 2.0f, "after the end (wrapping)"}));  // timestep 0 (wrapped)
 
 TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
 {
@@ -84,7 +84,7 @@ class GeneratorTests_SawtoothSignal
 
 // Test sawtooth signal at key points in the period
 // Period = 100, Amplitude = 2.0
-// Expected: linearly increasing from 0.0 to 2.0 over 100 timesteps, clamped to [-2.0, 2.0]
+// Expected: linearly increasing from 0.0 to 2.0 over 100 timesteps
 INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SawtoothSignal,
     GeneratorTests_SawtoothSignal,
@@ -92,8 +92,8 @@ INSTANTIATE_TEST_SUITE_P(
         SawtoothSignalTestParams{1, 0.0f, "at the beginning"},            // timestep 0: 2.0 * 0 / 100 = 0.0
         SawtoothSignalTestParams{30, 0.58f, "before halfway through"},     // timestep 29: 2.0 * 29 / 100 = 0.58
         SawtoothSignalTestParams{51, 1.0f, "at halfway through"},         // timestep 50: 2.0 * 50 / 100 = 1.0
-        SawtoothSignalTestParams{80, 1.0f, "before the end"},             // timestep 79: 2.0 * 79 / 100 = 1.58, clamped to 1.0
-        SawtoothSignalTestParams{100, 1.0f, "at the end"},                // timestep 99: 2.0 * 99 / 100 = 1.98, clamped to 1.0
+        SawtoothSignalTestParams{80, 1.58f, "before the end"},             // timestep 79: 2.0 * 79 / 100 = 1.58
+        SawtoothSignalTestParams{100, 1.98f, "at the end"},                // timestep 99: 2.0 * 99 / 100 = 1.98
         SawtoothSignalTestParams{101, 0.0f, "after the end (wrapping)"}));  // timestep 0 (wrapped): 2.0 * 0 / 100 = 0.0
 
 TEST_P(GeneratorTests_SawtoothSignal, sawtoothSignal_outputAtVariousTimesteps)
@@ -164,6 +164,5 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
     auto generator = actualData.getObjectRef(1);
     
     // Expected: 0.6 (base from bias) + 1.0 (generator output) = 1.6
-    // But this will be clamped to 1.0 due to signal range limits
-    EXPECT_TRUE(approxCompare(1.0f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
+    EXPECT_TRUE(approxCompare(1.6f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
 }
