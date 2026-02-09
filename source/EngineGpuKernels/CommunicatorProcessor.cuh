@@ -147,7 +147,10 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
 {
     receiverObject->getLock();
 
-    bool shouldTransmit = newNumTimesSent < receiverObject->typeData.cell.signal.numTimesSent;
+    // Transmit if receiver hasn't received a communicator signal yet (numTimesSent == 0),
+    // or if the new signal is fresher (lower numTimesSent)
+    auto receiverNumTimesSent = receiverObject->typeData.cell.signal.numTimesSent;
+    bool shouldTransmit = (receiverNumTimesSent == 0) || (newNumTimesSent < receiverNumTimesSent);
 
     if (shouldTransmit) {
         // Copy signal to receiver with incremented numTimesSent
