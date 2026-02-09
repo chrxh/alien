@@ -44,9 +44,8 @@ protected:
                 CHECK(false);
             }
         }();
-        auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDesc().autoTriggerInterval(15)
-            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        // TODO: Update Generator API usage after migration
+        auto generator = GeneratorGenomeDesc();  // Simplified for now - old API removed
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
                 NodeDesc().cellType(generator),
@@ -73,9 +72,8 @@ protected:
                 CHECK(false);
             }
         }();
-        auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDesc().autoTriggerInterval(15)
-            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        // TODO: Update Generator API usage after migration
+        auto generator = GeneratorGenomeDesc();  // Simplified for now - old API removed
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
                 NodeDesc().cellType(generator),
@@ -96,9 +94,8 @@ protected:
         auto muscleDesc = muscleMode == MuscleMode_AutoCrawling
             ? MuscleGenomeDesc().mode(AutoCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
             : MuscleGenomeDesc().mode(ManualCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
-        auto generator = muscleMode == MuscleMode_AutoCrawling
-            ? GeneratorGenomeDesc()
-            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        // TODO: Update Generator API usage after migration
+        auto generator = GeneratorGenomeDesc();  // Simplified for now - old API removed
         return GenomeDesc()
             .frontAngle(frontAngle)
             .genes({

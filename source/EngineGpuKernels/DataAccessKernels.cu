@@ -102,9 +102,19 @@ namespace
                         }
                         break;
                     case CellType_Generator:
-                        nodeTO.cellTypeData.generator.autoTriggerInterval = node.cellTypeData.generator.autoTriggerInterval;
-                        nodeTO.cellTypeData.generator.pulseType = node.cellTypeData.generator.pulseType;
-                        nodeTO.cellTypeData.generator.alternationInterval = node.cellTypeData.generator.alternationInterval;
+                        nodeTO.cellTypeData.generator.additive = node.cellTypeData.generator.additive;
+                        nodeTO.cellTypeData.generator.mode = node.cellTypeData.generator.mode;
+                        if (node.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
+                            nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude =
+                                node.cellTypeData.generator.modeData.squareSignal.amplitude;
+                            nodeTO.cellTypeData.generator.modeData.squareSignal.period =
+                                node.cellTypeData.generator.modeData.squareSignal.period;
+                        } else if (node.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
+                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude =
+                                node.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.period =
+                                node.cellTypeData.generator.modeData.sawtoothSignal.period;
+                        }
                         break;
                     case CellType_Attacker:
                         nodeTO.cellTypeData.attacker.mode = node.cellTypeData.attacker.mode;
@@ -373,9 +383,15 @@ namespace
                 cellTO.cellTypeData.sensor.lastMatch.pos = cell.cellTypeData.sensor.lastMatch.pos;
             } break;
             case CellType_Generator: {
-                cellTO.cellTypeData.generator.autoTriggerInterval = cell.cellTypeData.generator.autoTriggerInterval;
-                cellTO.cellTypeData.generator.pulseType = cell.cellTypeData.generator.pulseType;
-                cellTO.cellTypeData.generator.alternationInterval = cell.cellTypeData.generator.alternationInterval;
+                cellTO.cellTypeData.generator.additive = cell.cellTypeData.generator.additive;
+                cellTO.cellTypeData.generator.mode = cell.cellTypeData.generator.mode;
+                if (cell.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
+                    cellTO.cellTypeData.generator.modeData.squareSignal.amplitude = cell.cellTypeData.generator.modeData.squareSignal.amplitude;
+                    cellTO.cellTypeData.generator.modeData.squareSignal.period = cell.cellTypeData.generator.modeData.squareSignal.period;
+                } else if (cell.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
+                    cellTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude = cell.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                    cellTO.cellTypeData.generator.modeData.sawtoothSignal.period = cell.cellTypeData.generator.modeData.sawtoothSignal.period;
+                }
                 cellTO.cellTypeData.generator.numPulses = cell.cellTypeData.generator.numPulses;
             } break;
             case CellType_Attacker: {

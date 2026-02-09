@@ -78,11 +78,29 @@ struct ConstructorGenomeTO
     ProvideEnergy provideEnergy;
 };
 
+struct SquareSignalGenomeTO
+{
+    float amplitude;
+    int period;
+};
+
+struct SawtoothSignalGenomeTO
+{
+    float amplitude;
+    int period;
+};
+
+union GeneratorModeGenomeTO
+{
+    SquareSignalGenomeTO squareSignal;
+    SawtoothSignalGenomeTO sawtoothSignal;
+};
+
 struct GeneratorGenomeTO
 {
-    uint32_t autoTriggerInterval;
-    GeneratorPulseType pulseType;
-    uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    bool additive;
+    GeneratorMode mode;
+    GeneratorModeGenomeTO modeData;
 };
 
 struct AttackFreeCellGenomeTO

@@ -143,11 +143,29 @@ struct Sensor
     SensorLastMatch lastMatch;
 };
 
+struct SquareSignal
+{
+    float amplitude;
+    int period;
+};
+
+struct SawtoothSignal
+{
+    float amplitude;
+    int period;
+};
+
+union GeneratorModeData
+{
+    SquareSignal squareSignal;
+    SawtoothSignal sawtoothSignal;
+};
+
 struct Generator
 {
-    uint32_t autoTriggerInterval;
-    GeneratorPulseType pulseType;
-    uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    bool additive;
+    GeneratorMode mode;
+    GeneratorModeData modeData;
 
     // Process data
     uint32_t numPulses;

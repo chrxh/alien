@@ -191,6 +191,11 @@ enum GeneratorMode_
     GeneratorMode_Count,
 };
 
+namespace Const
+{
+    std::vector<std::string> const GeneratorModeStrings = {"Square signal", "Sawtooth signal"};
+}
+
 //*******************
 //* Depot constants *
 //*******************

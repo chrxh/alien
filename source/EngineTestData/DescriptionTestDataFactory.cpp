@@ -18,7 +18,8 @@ std::vector<DescriptionTestDataFactory::ObjectParameter> DescriptionTestDataFact
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
-        ObjectParameter{ObjectType_Cell, CellType_Generator},
+        ObjectParameter{ObjectType_Cell, CellType_Generator, GeneratorModeWrapper{GeneratorMode_SquareSignal}},
+        ObjectParameter{ObjectType_Cell, CellType_Generator, GeneratorModeWrapper{GeneratorMode_SawtoothSignal}},
         ObjectParameter{ObjectType_Cell, CellType_Attacker},
         ObjectParameter{ObjectType_Cell, CellType_Injector},
         ObjectParameter{ObjectType_Cell, CellType_Muscle, MuscleModeWrapper{MuscleMode_AutoBending}},
@@ -109,7 +110,8 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
-        NodeParameter{CellType_Generator},
+        NodeParameter{CellType_Generator, GeneratorModeWrapper{GeneratorMode_SquareSignal}},
+        NodeParameter{CellType_Generator, GeneratorModeWrapper{GeneratorMode_SawtoothSignal}},
         NodeParameter{CellType_Attacker},
         NodeParameter{CellType_Injector},
         NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_AutoBending}},
@@ -302,14 +304,35 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
         auto const& generator = std::get<GeneratorDesc>(cell._cellType);
         auto const& nodeGenerator = std::get<GeneratorGenomeDesc>(node._cellType);
-        if (generator._autoTriggerInterval != nodeGenerator._autoTriggerInterval) {
+        if (generator._additive != nodeGenerator._additive) {
             return false;
         }
-        if (generator._pulseType != nodeGenerator._pulseType) {
+        // Compare modes
+        if (generator.getMode() != nodeGenerator.getMode()) {
             return false;
         }
-        if (generator._alternationInterval != nodeGenerator._alternationInterval) {
-            return false;
+        // Compare mode-specific data
+        switch (generator.getMode()) {
+        case GeneratorMode_SquareSignal: {
+            auto const& squareSignal = std::get<SquareSignalDesc>(generator._mode);
+            auto const& nodeSquareSignal = std::get<SquareSignalGenomeDesc>(nodeGenerator._mode);
+            if (squareSignal._amplitude != nodeSquareSignal._amplitude) {
+                return false;
+            }
+            if (squareSignal._period != nodeSquareSignal._period) {
+                return false;
+            }
+        } break;
+        case GeneratorMode_SawtoothSignal: {
+            auto const& sawtoothSignal = std::get<SawtoothSignalDesc>(generator._mode);
+            auto const& nodeSawtoothSignal = std::get<SawtoothSignalGenomeDesc>(nodeGenerator._mode);
+            if (sawtoothSignal._amplitude != nodeSawtoothSignal._amplitude) {
+                return false;
+            }
+            if (sawtoothSignal._period != nodeSawtoothSignal._period) {
+                return false;
+            }
+        } break;
         }
     } break;
     case CellType_Attacker: {
@@ -603,6 +626,8 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         std::holds_alternative<MuscleModeWrapper>(objectParameter.mode) ? std::get<MuscleModeWrapper>(objectParameter.mode).value : MuscleMode_AutoBending;
     auto sensorMode =
         std::holds_alternative<SensorModeWrapper>(objectParameter.mode) ? std::get<SensorModeWrapper>(objectParameter.mode).value : SensorMode_DetectEnergy;
+    auto generatorMode = std::holds_alternative<GeneratorModeWrapper>(objectParameter.mode) ? std::get<GeneratorModeWrapper>(objectParameter.mode).value
+                                                                                            : GeneratorMode_SquareSignal;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value
                                                                                                 : ReconnectorMode_Structure;
     auto memoryMode =
@@ -643,7 +668,19 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
             .lastMatch(SensorLastMatchDesc().creatureId(42).pos({10.5f, 20.3f}));
     }
     case CellType_Generator: {
-        return GeneratorDesc().autoTriggerInterval(60).alternationInterval(3).numPulses(5);
+        GeneratorModeDesc generatorModeDesc;
+        switch (generatorMode) {
+        case GeneratorMode_SquareSignal:
+            generatorModeDesc = SquareSignalDesc().amplitude(0.8f).period(80);
+            break;
+        case GeneratorMode_SawtoothSignal:
+            generatorModeDesc = SawtoothSignalDesc().amplitude(0.6f).period(120);
+            break;
+        default:
+            generatorModeDesc = GeneratorModeDesc();
+            break;
+        }
+        return GeneratorDesc().additive(true).mode(generatorModeDesc).numPulses(5);
     }
     case CellType_Attacker:
         return AttackerDesc().mode(AttackCreatureDesc());
@@ -773,6 +810,8 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         std::holds_alternative<MuscleModeWrapper>(objectParameter.mode) ? std::get<MuscleModeWrapper>(objectParameter.mode).value : MuscleMode_AutoBending;
     auto sensorMode =
         std::holds_alternative<SensorModeWrapper>(objectParameter.mode) ? std::get<SensorModeWrapper>(objectParameter.mode).value : SensorMode_DetectEnergy;
+    auto generatorMode = std::holds_alternative<GeneratorModeWrapper>(objectParameter.mode) ? std::get<GeneratorModeWrapper>(objectParameter.mode).value
+                                                                                            : GeneratorMode_SquareSignal;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value
                                                                                                 : ReconnectorMode_Structure;
     auto memoryMode =
@@ -806,8 +845,21 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         }
         return SensorGenomeDesc().autoTrigger(false).mode(sensorModeDesc).minRange(5).maxRange(30);
     }
-    case CellType_Generator:
-        return GeneratorGenomeDesc().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
+    case CellType_Generator: {
+        GeneratorModeGenomeDesc generatorModeDesc;
+        switch (generatorMode) {
+        case GeneratorMode_SquareSignal:
+            generatorModeDesc = SquareSignalGenomeDesc().amplitude(0.8f).period(80);
+            break;
+        case GeneratorMode_SawtoothSignal:
+            generatorModeDesc = SawtoothSignalGenomeDesc().amplitude(0.6f).period(120);
+            break;
+        default:
+            generatorModeDesc = GeneratorModeGenomeDesc();
+            break;
+        }
+        return GeneratorGenomeDesc().additive(true).mode(generatorModeDesc);
+    }
     case CellType_Attacker:
         return AttackerGenomeDesc().mode(AttackCreatureGenomeDesc());
     case CellType_Injector:
