@@ -84,7 +84,7 @@ class GeneratorTests_SawtoothSignal
 
 // Test sawtooth signal at key points in the period
 // Period = 100, Amplitude = 2.0
-// Expected: linearly increasing from 0.0 to 2.0 over 100 timesteps, clamped to [-1.0, 1.0]
+// Expected: linearly increasing from 0.0 to 2.0 over 100 timesteps, clamped to [-2.0, 2.0]
 INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SawtoothSignal,
     GeneratorTests_SawtoothSignal,
