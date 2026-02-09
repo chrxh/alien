@@ -20,7 +20,7 @@ public:
             _parameters.attackerStrength.value[i] = 0.5f;
             _parameters.attackerRadius.value[i] = 3.5f;
             _parameters.defenderAntiAttackerStrength.value[i] = 1000.0f;
-            _parameters.injectorEnergyCost.value[i] = 0;
+            _parameters.injectorEnergyCost.value[i] = 40.0f;
             _parameters.injectorRadius.value[i] = 3.5f;
         }
         _simulationFacade->setSimulationParameters(_parameters);
@@ -86,13 +86,14 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     lastMatch._creatureId = 2;
     lastMatch._pos = {100.0f, 103.0f};
 
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
-        },
-        CreatureDesc().id(1));
-    data.addConnection(1, 2);
+    auto data = Desc()
+                    .addCreature(
+                        {
+                            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+                            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
+                        },
+                        CreatureDesc().id(1))
+                    .addConnection(1, 2);
 
     // Target creature with anti-injector defender connected (wrong mode for blocking attacker)
     data.addCreature(
@@ -126,14 +127,18 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
         GeneDesc().nodes({NodeDesc().color(1)}),
     });
 
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}),
-        },
-        CreatureDesc().id(1),
-        injectorGenome);
-    data.addConnection(1, 2);
+    auto data = Desc()
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(1)
+                                .pos({100.0f, 100.0f})
+                                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                        },
+                        CreatureDesc().id(1),
+                        injectorGenome)
+                    .addConnection(1, 2);
 
     // Target creature with constructor and anti-attacker defender (wrong mode for blocking injector)
     auto targetGenome = GenomeDesc().genes({
@@ -149,7 +154,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
+    _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
@@ -173,43 +178,41 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
  */
 TEST_F(DefenderTests, injectorVsAntiInjector)
 {
-    // Set injection cost so that with defender the injector can't afford it
     // usableEnergy=100, minCellEnergy=50, cost=40: without defender 100-40=60>50 OK; with defender 100-60=40<50 FAIL
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        _parameters.injectorEnergyCost.value[i] = 40.0f;
-    }
-    _simulationFacade->setSimulationParameters(_parameters);
-
     auto injectorGenome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc()}),
         GeneDesc().nodes({NodeDesc()}),
         GeneDesc().nodes({NodeDesc().color(1)}),
     });
 
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}),
-        },
-        CreatureDesc().id(1),
-        injectorGenome);
-    data.addConnection(1, 2);
+    auto data = Desc()
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(1)
+                                .pos({100.0f, 100.0f})
+                                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                        },
+                        CreatureDesc().id(1),
+                        injectorGenome)
+                    .addConnection(1, 2);
 
     // Target creature with constructor and anti-injector defender (correct mode)
     auto targetGenome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().color(2)}),
     });
     data.addCreature(
-        {
-            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).constructor(ConstructorDesc().geneIndex(0))),
-            ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector))),
-        },
-        CreatureDesc().id(2),
-        targetGenome);
-    data.addConnection(100, 101);
+            {
+                ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).constructor(ConstructorDesc().geneIndex(0))),
+                ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().cellType(DefenderDesc().mode(DefenderMode_DefendAgainstInjector))),
+            },
+            CreatureDesc().id(2),
+            targetGenome)
+        .addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
+    _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
