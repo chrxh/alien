@@ -30,6 +30,9 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
 
         // Calculate current position within the period, shifted by timeOffset
         int period = (generator.mode == GeneratorMode_SquareSignal) ? generator.modeData.squareSignal.period : generator.modeData.sawtoothSignal.period;
+        if (period <= 0) {
+            continue;
+        }
         auto timestepInPeriod = (generator.numPulses + generator.timeOffset) % period;
         float outputValue = 0.0f;
 
