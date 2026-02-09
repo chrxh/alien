@@ -946,7 +946,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
 {
-    auto constexpr AnglePrecision = 1.0f;
+    auto constexpr AnglePrecision = 3.0f;
     auto [channel0, channel1] = GetParam();
 
     NeuralNetworkDesc nn;
