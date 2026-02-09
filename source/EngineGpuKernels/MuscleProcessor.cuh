@@ -577,19 +577,17 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
     if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
     }
-    if (NeuronProcessor::isManuallyTriggered(data, object)) {
-        auto direction = ObjectConnectionProcessor::calcReferenceDirection(data, object);
-        auto angle = Math::getNormalizedAngle(object->typeData.cell.frontAngle + max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
-        direction = Math::rotateClockwise(direction, angle);
+    auto direction = ObjectConnectionProcessor::calcReferenceDirection(data, object);
+    auto angle = Math::getNormalizedAngle(object->typeData.cell.frontAngle + max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
+    direction = Math::rotateClockwise(direction, angle);
 
-        auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
-        direction = direction * cudaSimulationParameters.muscleMovementAcceleration.value[object->color] * activation * 0.005f;
-        object->vel += direction;
-        object->typeData.cell.cellTypeData.muscle.lastMovementX = direction.x;
-        object->typeData.cell.cellTypeData.muscle.lastMovementY = direction.y;
-        statistics.incNumMuscleActivities(object->color);
-        radiate(data, object, activation);
-    }
+    auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
+    direction = direction * cudaSimulationParameters.muscleMovementAcceleration.value[object->color] * activation * 0.0005f;
+    object->vel += direction;
+    object->typeData.cell.cellTypeData.muscle.lastMovementX = direction.x;
+    object->typeData.cell.cellTypeData.muscle.lastMovementY = direction.y;
+    statistics.incNumMuscleActivities(object->color);
+    radiate(data, object, activation);
 }
 
 __inline__ __device__ void

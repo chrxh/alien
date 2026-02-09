@@ -946,17 +946,17 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     auto constexpr AnglePrecision = 1.0f;
     auto [channel0, channel1] = GetParam();
 
+    NeuralNetworkDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+    nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 2;
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
-            ObjectDesc()
-                .id(2)
-                .pos({11.0f, 10.0f})
-                .type(CellDesc()
-                          .frontAngle(0.0f)
-                          .cellType(MuscleDesc().mode(DirectMovementDesc()))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 2))),
-            ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(MuscleDesc().mode(DirectMovementDesc())).neuralNetwork(nn)),
+            ObjectDesc().id(3).pos({12.0f, 10.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -964,7 +964,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData._objects.size());
