@@ -55,6 +55,9 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
             object->typeData.cell.signal.channels[Channels::GeneratorOutput] = outputValue;
         }
         
+        // Clamp final signal to valid range [-1.0, 1.0]
+        object->typeData.cell.signal.channels[Channels::GeneratorOutput] = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::GeneratorOutput]));
+        
         // Increment timestep counter and wrap around at period
         ++generator.numPulses;
         int period = (generator.mode == GeneratorMode_SquareSignal) 

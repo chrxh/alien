@@ -85,9 +85,11 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 if (generatorMode == GeneratorMode_SquareSignal) {
                     auto& squareSignal = std::get<SquareSignalGenomeDesc>(generator._mode);
                     squareSignal._period = std::max(squareSignal._period, 1);
+                    squareSignal._amplitude = std::clamp(squareSignal._amplitude, 0.0f, 2.0f);
                 } else if (generatorMode == GeneratorMode_SawtoothSignal) {
                     auto& sawtoothSignal = std::get<SawtoothSignalGenomeDesc>(generator._mode);
                     sawtoothSignal._period = std::max(sawtoothSignal._period, 1);
+                    sawtoothSignal._amplitude = std::clamp(sawtoothSignal._amplitude, 0.0f, 2.0f);
                 }
 
             } else if (nodeType == CellType_Attacker) {
