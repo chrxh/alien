@@ -665,16 +665,19 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
+    NeuralNetworkDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(GeneratorDesc().autoTriggerInterval(10))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f)),
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .type(CellDesc()
-                          .frontAngle(180.0f)
-                          .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
+                .type(
+                    CellDesc().frontAngle(180.0f).cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(nn)),
             ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f)),
         },
         CreatureDesc().id(0));
@@ -685,8 +688,8 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -734,16 +737,21 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
+    NeuralNetworkDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(GeneratorDesc().autoTriggerInterval(10))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f)),
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(180.0f)
                           .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
+                          .neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -752,8 +760,8 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);

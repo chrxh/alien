@@ -466,8 +466,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     : std::nullopt;
                 crawling._lastActualDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
                 crawling._forward = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forward;
-                crawling._activation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activation;
-                crawling._activationCountdown = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
                 crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
                 muscle._mode = crawling;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
@@ -1350,8 +1348,6 @@ void DescriptionConverterService::convertObjectToTO(
                 crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
                 crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
                 crawlingTO.forward = crawlingDesc._forward;
-                crawlingTO.activation = crawlingDesc._activation;
-                crawlingTO.activationCountdown = crawlingDesc._activationCountdown;
                 crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_ManualCrawling) {
                 auto const& crawlingDesc = std::get<ManualCrawlingDesc>(muscleDesc._mode);

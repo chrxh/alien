@@ -414,8 +414,6 @@ namespace
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance = cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance;
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance = cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.forward = cell.cellTypeData.muscle.modeData.autoCrawling.forward;
-                    cellTO.cellTypeData.muscle.modeData.autoCrawling.activation = cell.cellTypeData.muscle.modeData.autoCrawling.activation;
-                    cellTO.cellTypeData.muscle.modeData.autoCrawling.activationCountdown = cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied =
                         cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {

@@ -668,15 +668,12 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
             muscleModeDesc = AngleBendingDesc().maxAngleDeviation(0.7f).attractionRepulsionRatio(0.6f).initialAngle(315.0f);
             break;
         case MuscleMode_AutoCrawling: {
-            AutoCrawlingDesc defaultCrawling;
             muscleModeDesc = AutoCrawlingDesc()
                                  .maxDistanceDeviation(0.9f)
                                  .forwardBackwardRatio(0.35f)
                                  .initialDistance(0.6f)
                                  .lastActualDistance(0.8f)
                                  .forward(false)
-                                 .activation(0.4f)
-                                 .activationCountdown(12)
                                  .impulseAlreadyApplied(true);
         } break;
         case MuscleMode_ManualCrawling:

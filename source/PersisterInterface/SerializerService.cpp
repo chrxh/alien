@@ -878,8 +878,6 @@ namespace
     auto constexpr Id_MuscleMode_AutoCrawling_ForwardBackwardRatio = 1;
     auto constexpr Id_MuscleMode_AutoCrawling_InitialDistance = 2;
     auto constexpr Id_MuscleMode_AutoCrawling_Forward = 3;
-    auto constexpr Id_MuscleMode_AutoCrawling_Activation = 4;
-    auto constexpr Id_MuscleMode_AutoCrawling_ActivationCountdown = 5;
     auto constexpr Id_MuscleMode_AutoCrawling_LastActualDistance = 6;
     auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
 
@@ -1250,8 +1248,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Activation, data._activation, defaultObject._activation);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
     }

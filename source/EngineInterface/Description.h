@@ -230,8 +230,6 @@ struct AutoCrawlingDesc
     MEMBER(AutoCrawlingDesc, std::optional<float>, initialDistance, std::nullopt);
     MEMBER(AutoCrawlingDesc, float, lastActualDistance, 0.0f);
     MEMBER(AutoCrawlingDesc, bool, forward, true);  // Current direction
-    MEMBER(AutoCrawlingDesc, float, activation, 0.0f);
-    MEMBER(AutoCrawlingDesc, int, activationCountdown, 0);
     MEMBER(AutoCrawlingDesc, bool, impulseAlreadyApplied, false);
 };
 

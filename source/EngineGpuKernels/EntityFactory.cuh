@@ -481,10 +481,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
                 cell->cellTypeData.muscle.modeData.autoCrawling.forward =
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.forward;
-                cell->cellTypeData.muscle.modeData.autoCrawling.activation =
-                    cellTO.cellTypeData.muscle.modeData.autoCrawling.activation;
-                cell->cellTypeData.muscle.modeData.autoCrawling.activationCountdown =
-                    cellTO.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
                 cell->cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied =
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
@@ -850,8 +846,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             muscle.modeData.autoCrawling.initialDistance = VALUE_NOT_SET_FLOAT;
             muscle.modeData.autoCrawling.lastActualDistance = 0;
             muscle.modeData.autoCrawling.forward = true;
-            muscle.modeData.autoCrawling.activation = 0;
-            muscle.modeData.autoCrawling.activationCountdown = 0;
             muscle.modeData.autoCrawling.impulseAlreadyApplied = false;
         } break;
         case MuscleMode_ManualCrawling: {

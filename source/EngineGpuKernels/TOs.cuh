@@ -196,8 +196,6 @@ struct AutoCrawlingTO
     float initialDistance;  // May be invalid
     float lastActualDistance;
     bool forward;  // Current direction
-    float activation;
-    uint8_t activationCountdown;
     bool impulseAlreadyApplied;
 };
 
