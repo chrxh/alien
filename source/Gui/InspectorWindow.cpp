@@ -635,7 +635,7 @@ void _InspectorWindow::processMuscleContent(MuscleDesc& muscle)
 void _InspectorWindow::processSensorContent(SensorDesc& sensor)
 {
     if (ImGui::TreeNodeEx("Properties###sensor", TreeNodeFlags)) {
-        int constructorMode = sensor._autoTriggerInterval == 0 ? 0 : 1;
+        int constructorMode = sensor._autoTrigger ? 1 : 0;
         if (AlienGui::Combo(
                 AlienGui::ComboParameters()
                     .name("Activation mode")
@@ -643,12 +643,7 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                     .values({"Manual", "Automatic"})
                     .tooltip(Const::GenomeConstructorActivationModeTooltip),
                 constructorMode)) {
-            sensor._autoTriggerInterval = constructorMode;
-        }
-        if (constructorMode == 1) {
-            AlienGui::InputOptionalInt(
-                AlienGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
-                sensor._autoTriggerInterval);
+            sensor._autoTrigger = (constructorMode == 1);
         }
 
         // Mode selection
