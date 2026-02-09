@@ -178,7 +178,7 @@ TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
-                .type(CellDesc().signal(SignalDesc().numTimesSent(2).channels({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}))),
+                .type(CellDesc().signal(SignalDesc().numTimesSent(2).channels({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1));
     data.addConnection(100, 101);
@@ -198,7 +198,7 @@ TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
 TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
 {
     // Create sender with color 2
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 2);
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 2);
 
     // Create receiver that only accepts color 2
     data.add(createReceiverCreature(2, {110.0f, 100.0f}, 2), false);
@@ -216,7 +216,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
 TEST_F(CommunicatorTests, sender_receiverColorRestriction_nonMatchingColor)
 {
     // Create sender with color 3
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 3);
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 3);
 
     // Create receiver that only accepts color 2
     data.add(createReceiverCreature(2, {110.0f, 100.0f}, 2), false);
@@ -304,7 +304,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
-                .type(CellDesc().signal(SignalDesc().numTimesSent(3).channels({1.0f, 0, 0, 0, 0, 0, 0, 0}))),
+                .type(CellDesc().signal(SignalDesc().numTimesSent(3).channels({1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1));
     data.addConnection(100, 101);
@@ -316,7 +316,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
             ObjectDesc()
                 .id(201)
                 .pos({101.0f, 120.0f})
-                .type(CellDesc().signal(SignalDesc().numTimesSent(1).channels({-1.0f, 0, 0, 0, 0, 0, 0, 0}))),
+                .type(CellDesc().signal(SignalDesc().numTimesSent(1).channels({-1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(2));
     data.addConnection(200, 201);

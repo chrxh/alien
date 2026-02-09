@@ -33,11 +33,10 @@ protected:
         std::vector<SignalEntryDesc> const& signalEntries = {})
     {
         auto data = Desc().addCreature({
-            ObjectDesc()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().biases(signal)).cellType(MemoryDesc().mode(mode).signalEntries(signalEntries))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().mode(mode).signalEntries(signalEntries))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(signal)),
         });
+        data.addConnection(1, 2);
         return data;
     }
 };
@@ -256,10 +255,6 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     EXPECT_EQ(2, signalDelay._numSignalEntriesInitialized);
     EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
 
-    // Waiting
-    _simulationFacade->calcTimesteps(1);
-    actualData = _simulationFacade->getSimulationData();
-
     // Fourth signal - should output signal2
     actualData.getObjectRef(2).getCellRef().signal(signal4);
     _simulationFacade->setSimulationData(actualData);
@@ -288,10 +283,6 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     EXPECT_EQ(1, signalDelay._numSignalEntriesInitialized);
     // Signal should still be the incoming signal1 (not modified by delay output)
     EXPECT_TRUE(approxCompare(signal1, memoryCell.getCellRef()._signal._channels));
-
-    // Waiting
-    _simulationFacade->calcTimesteps(1);
-    actualData = _simulationFacade->getSimulationData();
 
     // Second signal
     actualData.getObjectRef(2).getCellRef().signal(signal2);

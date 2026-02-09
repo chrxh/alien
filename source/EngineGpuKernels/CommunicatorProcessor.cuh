@@ -17,7 +17,7 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent);
+    __inline__ __device__ static void tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent);
 };
 
 /************************************************************************/
@@ -147,31 +147,26 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
 {
     receiverObject->getLock();
 
-    bool shouldTransmit = newNumTimesSent < receiverObject->typeData.cell.signal.numTimesSent;
+    // Copy signal to receiver with incremented numTimesSent
+    copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
+    receiverObject->typeData.cell.signal.numTimesSent = newNumTimesSent;
 
-    if (shouldTransmit) {
-        // Copy signal to receiver with incremented numTimesSent
-        copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
-        receiverObject->typeData.cell.signal.numTimesSent = newNumTimesSent;
+    // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
+    // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
+    // We need to maintain the absolute direction: senderRefDir rotated by senderAngle = receiverRefDir rotated by receiverAngle
+    // Therefore: receiverAngle = senderAngle + (senderRefAngle - receiverRefAngle)
+    auto senderRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, senderObject);
+    auto receiverRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, receiverObject);
+    auto senderRefAngle = Math::angleOfVector(senderRefDir);
+    auto receiverRefAngle = Math::angleOfVector(receiverRefDir);
+    auto angleDiff = senderRefAngle - receiverRefAngle;
 
-        // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
-        // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
-        // We need to maintain the absolute direction: senderRefDir rotated by senderAngle = receiverRefDir rotated by receiverAngle
-        // Therefore: receiverAngle = senderAngle + (senderRefAngle - receiverRefAngle)
-        auto senderRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, senderObject);
-        auto receiverRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, receiverObject);
-        auto senderRefAngle = Math::angleOfVector(senderRefDir);
-        auto receiverRefAngle = Math::angleOfVector(receiverRefDir);
-        auto angleDiff = senderRefAngle - receiverRefAngle;
-
-        // The signal angle is encoded as angle/180, so the diff must also be scaled
-        auto senderAngle = senderObject->typeData.cell.signal.channels[Channels::CommunicatorAngle];
-        auto translatedAngle = senderAngle + angleDiff / 180.0f;
-        // Normalize to [-1, 1] range (representing [-180, 180] degrees)
-        translatedAngle = Math::getNormalizedAngle(translatedAngle * 180.0f, -180.0f) / 180.0f;
-        receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = translatedAngle;
-    }
+    // The signal angle is encoded as angle/180, so the diff must also be scaled
+    auto senderAngle = senderObject->typeData.cell.signal.channels[Channels::CommunicatorAngle];
+    auto translatedAngle = senderAngle + angleDiff / 180.0f;
+    // Normalize to [-1, 1] range (representing [-180, 180] degrees)
+    translatedAngle = Math::getNormalizedAngle(translatedAngle * 180.0f, -180.0f) / 180.0f;
+    receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = translatedAngle;
 
     receiverObject->releaseLock();
-    return shouldTransmit;
 }
