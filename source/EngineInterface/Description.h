@@ -153,6 +153,7 @@ struct GeneratorDesc
 
     // Fixed data
     MEMBER(GeneratorDesc, bool, additive, false);
+    MEMBER(GeneratorDesc, float, valueOffset, 0);
     MEMBER(GeneratorDesc, GeneratorModeDesc, mode, SquareSignalDesc());
 
     // Process data

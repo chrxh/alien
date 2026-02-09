@@ -307,6 +307,9 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         if (generator._additive != nodeGenerator._additive) {
             return false;
         }
+        if (generator._valueOffset != nodeGenerator._valueOffset) {
+            return false;
+        }
         // Compare modes
         if (generator.getMode() != nodeGenerator.getMode()) {
             return false;
@@ -680,7 +683,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
             generatorModeDesc = GeneratorModeDesc();
             break;
         }
-        return GeneratorDesc().additive(true).mode(generatorModeDesc).numPulses(5);
+        return GeneratorDesc().additive(true).valueOffset(0.3f).mode(generatorModeDesc).numPulses(5);
     }
     case CellType_Attacker:
         return AttackerDesc().mode(AttackCreatureDesc());
@@ -858,7 +861,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
             generatorModeDesc = GeneratorModeGenomeDesc();
             break;
         }
-        return GeneratorGenomeDesc().additive(true).mode(generatorModeDesc);
+        return GeneratorGenomeDesc().additive(true).valueOffset(0.3f).mode(generatorModeDesc);
     }
     case CellType_Attacker:
         return AttackerGenomeDesc().mode(AttackCreatureGenomeDesc());

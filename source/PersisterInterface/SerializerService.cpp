@@ -233,6 +233,7 @@ namespace
     auto constexpr Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio = 1;
 
     auto constexpr Id_GeneratorGenome_Additive = 0;
+    auto constexpr Id_GeneratorGenome_ValueOffset = 1;
 
     auto constexpr Id_GeneratorModeGenome_SquareSignal_Amplitude = 0;
     auto constexpr Id_GeneratorModeGenome_SquareSignal_Period = 1;
@@ -423,6 +424,7 @@ namespace cereal
         GeneratorGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_ValueOffset, data._valueOffset, defaultObject._valueOffset);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._mode);
@@ -918,6 +920,7 @@ namespace
 
     auto constexpr Id_Generator_Additive = 0;
     auto constexpr Id_Generator_NumPulses = 1;
+    auto constexpr Id_Generator_ValueOffset = 2;
 
     auto constexpr Id_GeneratorMode_SquareSignal_Amplitude = 0;
     auto constexpr Id_GeneratorMode_SquareSignal_Period = 1;
@@ -1203,6 +1206,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Generator_Additive, data._additive, defaultObject._additive);
         loadSave(task, auxiliaries, Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
+        loadSave(task, auxiliaries, Id_Generator_ValueOffset, data._valueOffset, defaultObject._valueOffset);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._mode);

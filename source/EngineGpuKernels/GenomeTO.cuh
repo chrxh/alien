@@ -99,6 +99,7 @@ union GeneratorModeGenomeTO
 struct GeneratorGenomeTO
 {
     bool additive;
+    float valueOffset;
     GeneratorMode mode;
     GeneratorModeGenomeTO modeData;
 };
