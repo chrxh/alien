@@ -469,6 +469,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         }
     }
 
+    //------------------
     // Move connection between lastConstructionCell and hostObject to a connection between lastConstructionCell and newObject
     auto separation = constructionData.isSeparation && constructionData.isLastNodeOfLastConcatenation;
     bool adaptReferenceAngles = false;
@@ -504,6 +505,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             auto index = hostObject->getConnectionIndex(lastObject);
             auto& connection = hostObject->connections[index];
             connection.object = newObject;
+            connection.distance = hostDistance;
         }
     } else {
         newObject->numConnections = 1;
@@ -586,7 +588,8 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
             if (otherObject->tryLock()) {
                 if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
-                    if (ObjectConnectionProcessor::tryAddConnections(data, newObject, otherObject, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
+                    if (ObjectConnectionProcessor::tryAddConnections(
+                            data, newObject, otherObject, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
                         ++numConnectedObjects;
                     }
                 }

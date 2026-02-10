@@ -2477,18 +2477,18 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(4))),
             ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).nodeIndex(1).constructor(ConstructorDesc().geneIndex(2).currentNodeIndex(2).lastConstructedCellId(6))),
 
-            ObjectDesc().id(3).pos({10.0f, 10.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(1).parentNodeIndex(0)),
+            ObjectDesc().id(3).pos({10.1f, 10.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(1).parentNodeIndex(0)),
             ObjectDesc().id(4).pos({10.0f, 10.0f - getOffspringDistance()}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(1).geneIndex(1).parentNodeIndex(0)),
-            ObjectDesc().id(5).pos({11.0f, 10.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(2).parentNodeIndex(1)),
+            ObjectDesc().id(5).pos({11.1f, 10.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(2).parentNodeIndex(1)),
             ObjectDesc().id(6).pos({11.0f, 10.0f - getOffspringDistance()}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(1).geneIndex(2).parentNodeIndex(1)),
         }, CreatureDesc().id(0), genome);
     data.addConnection(1, 2);
 
-    data.addConnection(3, 4);
     data.addConnection(4, 1);
+    data.addConnection(3, 4);
 
-    data.addConnection(5, 6);
     data.addConnection(6, 2);
+    data.addConnection(5, 6);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
