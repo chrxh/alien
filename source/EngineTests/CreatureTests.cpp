@@ -46,18 +46,16 @@ protected:
         }();
         auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
                                                               : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
-        auto nn = NeuralNetworkGenomeDesc();
-        nn._connectionWeights[0] = 1.0f;
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
-                NodeDesc().neuralNetwork(nn).cellType(generator),
-                NodeDesc().neuralNetwork(nn),
-                NodeDesc().neuralNetwork(nn),
-                NodeDesc().neuralNetwork(nn),
-                NodeDesc().neuralNetwork(nn).constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc().neuralNetwork(nn),
+                NodeDesc().cellType(generator),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+                NodeDesc(),
             }),
-            GeneDesc().numConcatenations(4).numBranches(2).nodes({NodeDesc().neuralNetwork(nn).cellType(muscleDesc)}),
+            GeneDesc().numConcatenations(4).numBranches(2).nodes({NodeDesc().cellType(muscleDesc)}),
         });
     }
 
@@ -76,21 +74,18 @@ protected:
         }();
         auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
                                                               : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
-        auto nn = NeuralNetworkGenomeDesc();
-        nn._connectionWeights[0] = 1.0f;
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
-                NodeDesc().neuralNetwork(nn).cellType(generator),
-                NodeDesc().neuralNetwork(nn),
-                NodeDesc().neuralNetwork(nn),
-                NodeDesc().neuralNetwork(nn),
-                NodeDesc().neuralNetwork(nn).constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc().neuralNetwork(nn),
+                NodeDesc().cellType(generator),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+                NodeDesc(),
             }),
             GeneDesc().numConcatenations(2).numBranches(1).nodes(
-                {NodeDesc().neuralNetwork(nn).color(1).cellType(muscleDesc),
-                 NodeDesc().neuralNetwork(nn).color(1).constructor(ConstructorGenomeDesc().geneIndex(2))}),
-            GeneDesc().numConcatenations(1).numBranches(2).nodes({NodeDesc().neuralNetwork(nn).color(2)}),
+                {NodeDesc().color(1).cellType(muscleDesc), NodeDesc().color(1).constructor(ConstructorGenomeDesc().geneIndex(2))}),
+            GeneDesc().numConcatenations(1).numBranches(2).nodes({NodeDesc().color(2)}),
         });
     }
 
@@ -99,25 +94,22 @@ protected:
         auto muscleDesc = muscleMode == MuscleMode_AutoCrawling
             ? MuscleGenomeDesc().mode(AutoCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
             : MuscleGenomeDesc().mode(ManualCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
-        auto generator = muscleMode == MuscleMode_AutoCrawling
-            ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
-            : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
-        auto nn = NeuralNetworkGenomeDesc();
-        nn._connectionWeights[0] = 1.0f;
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc()
             .frontAngle(frontAngle)
             .genes({
                 GeneDesc().separation(false).nodes({
-                    NodeDesc().neuralNetwork(nn).cellType(generator),
-                    NodeDesc().neuralNetwork(nn),
-                    NodeDesc().neuralNetwork(nn),
-                    NodeDesc().neuralNetwork(nn),
-                    NodeDesc().neuralNetwork(nn).cellType(muscleDesc),
-                    NodeDesc().neuralNetwork(nn).cellType(muscleDesc),
-                    NodeDesc().neuralNetwork(nn),
-                    NodeDesc().neuralNetwork(nn),
-                    NodeDesc().neuralNetwork(nn),
-                    NodeDesc().neuralNetwork(nn),
+                    NodeDesc().cellType(generator),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc().cellType(muscleDesc),
+                    NodeDesc().cellType(muscleDesc),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
                 }),
             });
     }
