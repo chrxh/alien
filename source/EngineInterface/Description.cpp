@@ -18,6 +18,7 @@ NeuralNetworkDesc::NeuralNetworkDesc()
     }
 
     _biases.resize(MAX_CHANNELS, 0);
+
     _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
     
     _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
