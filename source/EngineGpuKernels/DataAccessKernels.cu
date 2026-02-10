@@ -384,6 +384,8 @@ namespace
             } break;
             case CellType_Generator: {
                 cellTO.cellTypeData.generator.additive = cell.cellTypeData.generator.additive;
+                cellTO.cellTypeData.generator.valueOffset = cell.cellTypeData.generator.valueOffset;
+                cellTO.cellTypeData.generator.timeOffset = cell.cellTypeData.generator.timeOffset;
                 cellTO.cellTypeData.generator.mode = cell.cellTypeData.generator.mode;
                 if (cell.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
                     cellTO.cellTypeData.generator.modeData.squareSignal.amplitude = cell.cellTypeData.generator.modeData.squareSignal.amplitude;
