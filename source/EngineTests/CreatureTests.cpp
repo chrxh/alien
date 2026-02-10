@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <ranges>
 
 #include <gtest/gtest.h>
@@ -166,6 +167,21 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
         leg2.emplace_back(cells.at(i));
     }
 
+    // Debug: print actual front angles
+    std::cerr << "=== DEBUG constructCreatureWithTwoLegs ===" << std::endl;
+    for (int i = 0; i < 6; ++i) {
+        auto fa = body.at(i).getCellRef()._frontAngle;
+        std::cerr << "body[" << i << "] frontAngle: " << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+    }
+    for (int i = 0; i < 4; ++i) {
+        auto fa = leg1.at(i).getCellRef()._frontAngle;
+        std::cerr << "leg1[" << i << "] frontAngle: " << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+    }
+    for (int i = 0; i < 4; ++i) {
+        auto fa = leg2.at(i).getCellRef()._frontAngle;
+        std::cerr << "leg2[" << i << "] frontAngle: " << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+    }
+
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
         EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0).getCellRef()._frontAngle.value()));
@@ -196,6 +212,13 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
             CHECK(false);
         }
     };
+    std::cerr << "=== DEBUG INITIAL ANGLES ===" << std::endl;
+    for (int i = 0; i < 4; ++i) {
+        std::cerr << "leg1[" << i << "] initialAngle: " << getInitialAngle(leg1.at(i)) << std::endl;
+    }
+    for (int i = 0; i < 4; ++i) {
+        std::cerr << "leg2[" << i << "] initialAngle: " << getInitialAngle(leg2.at(i)) << std::endl;
+    }
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(approxCompareAngles(180.0f, getInitialAngle(leg1.at(i))));
     }
