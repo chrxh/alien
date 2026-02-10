@@ -167,19 +167,19 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
         leg2.emplace_back(cells.at(i));
     }
 
-    // Debug: print actual front angles
-    std::cerr << "=== DEBUG constructCreatureWithTwoLegs ===" << std::endl;
+    // Debug output
+    std::cerr << "=== constructCreatureWithTwoLegs mode=" << muscleMode << " ===" << std::endl;
     for (int i = 0; i < 6; ++i) {
         auto fa = body.at(i).getCellRef()._frontAngle;
-        std::cerr << "body[" << i << "] frontAngle: " << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+        std::cerr << "body[" << i << "] frontAngle=" << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
     }
     for (int i = 0; i < 4; ++i) {
         auto fa = leg1.at(i).getCellRef()._frontAngle;
-        std::cerr << "leg1[" << i << "] frontAngle: " << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+        std::cerr << "leg1[" << i << "] frontAngle=" << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
     }
     for (int i = 0; i < 4; ++i) {
         auto fa = leg2.at(i).getCellRef()._frontAngle;
-        std::cerr << "leg2[" << i << "] frontAngle: " << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+        std::cerr << "leg2[" << i << "] frontAngle=" << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
     }
 
     // Check front angles
@@ -212,12 +212,12 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
             CHECK(false);
         }
     };
-    std::cerr << "=== DEBUG INITIAL ANGLES ===" << std::endl;
+    std::cerr << "=== initial angles ===" << std::endl;
     for (int i = 0; i < 4; ++i) {
-        std::cerr << "leg1[" << i << "] initialAngle: " << getInitialAngle(leg1.at(i)) << std::endl;
+        std::cerr << "leg1[" << i << "] initialAngle=" << getInitialAngle(leg1.at(i)) << std::endl;
     }
     for (int i = 0; i < 4; ++i) {
-        std::cerr << "leg2[" << i << "] initialAngle: " << getInitialAngle(leg2.at(i)) << std::endl;
+        std::cerr << "leg2[" << i << "] initialAngle=" << getInitialAngle(leg2.at(i)) << std::endl;
     }
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(approxCompareAngles(180.0f, getInitialAngle(leg1.at(i))));
@@ -275,6 +275,26 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     spikes2.emplace_back(actualData.getObjectRef(leg.at(1)._connections.at(1)._objectId));
     spikes2.emplace_back(actualData.getObjectRef(leg.at(3)._connections.at(1)._objectId));
 
+    // Debug output
+    std::cerr << "=== constructCreatureWithOneLegAndSpikes mode=" << muscleMode << " ===" << std::endl;
+    std::cerr << "body.size()=" << body.size() << " leg.size()=" << leg.size() << std::endl;
+    for (int i = 0; i < (int)body.size(); ++i) {
+        auto fa = body.at(i).getCellRef()._frontAngle;
+        std::cerr << "body[" << i << "] frontAngle=" << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+    }
+    for (int i = 0; i < (int)leg.size(); ++i) {
+        auto fa = leg.at(i).getCellRef()._frontAngle;
+        std::cerr << "leg[" << i << "] frontAngle=" << (fa.has_value() ? std::to_string(fa.value()) : "none")
+            << " numConn=" << leg.at(i)._connections.size() << std::endl;
+    }
+    for (int i = 0; i < (int)spikes1.size(); ++i) {
+        auto fa = spikes1.at(i).getCellRef()._frontAngle;
+        std::cerr << "spikes1[" << i << "] frontAngle=" << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+    }
+    for (int i = 0; i < (int)spikes2.size(); ++i) {
+        auto fa = spikes2.at(i).getCellRef()._frontAngle;
+        std::cerr << "spikes2[" << i << "] frontAngle=" << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+    }
 
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
@@ -305,6 +325,17 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
             CHECK(false);
         }
     };
+
+    // Debug output for initial angles and connections
+    std::cerr << "=== initial angles and connections ===" << std::endl;
+    for (int i = 0; i < (int)leg.size(); ++i) {
+        if (std::holds_alternative<MuscleDesc>(leg.at(i).getCellRef()._cellType)) {
+            std::cerr << "leg[" << i << "] initialAngle=" << getInitialAngle(leg.at(i)) << std::endl;
+        }
+        for (int j = 0; j < (int)leg.at(i)._connections.size(); ++j) {
+            std::cerr << "leg[" << i << "].conn[" << j << "] angleFromPrev=" << leg.at(i)._connections.at(j)._angleFromPrevious << std::endl;
+        }
+    }
 
     // Check angles for first cell leg
     ASSERT_EQ(1, leg.at(0)._connections.size());
@@ -388,7 +419,14 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
         auto movedRefPoint = refPoint + movementDirection * 30.0f;
-        EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, movementDirection));
+        auto dotResult = Math::dot(cells.front()._pos - movedRefPoint, movementDirection);
+        std::cerr << "=== moveCreatureWithTwoLegs mode=" << muscleMode << " dir=" << (int)direction << " ===" << std::endl;
+        std::cerr << "cells[0].pos=(" << cells.front()._pos.x << "," << cells.front()._pos.y << ")" << std::endl;
+        std::cerr << "cells[5].pos=(" << cells.at(5)._pos.x << "," << cells.at(5)._pos.y << ")" << std::endl;
+        std::cerr << "movedRefPoint=(" << movedRefPoint.x << "," << movedRefPoint.y << ")" << std::endl;
+        std::cerr << "movementDirection=(" << movementDirection.x << "," << movementDirection.y << ")" << std::endl;
+        std::cerr << "dotResult=" << dotResult << std::endl;
+        EXPECT_LT(0.0, dotResult);
     }
 }
 
@@ -421,6 +459,13 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
 
     auto cells = actualData.getObjectsForCreature(creature._id);
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
+
+    // Debug output
+    std::cerr << "=== constructCrawlingCreature mode=" << muscleMode << " ===" << std::endl;
+    for (int i = 0; i < (int)cells.size(); ++i) {
+        auto fa = cells.at(i).getCellRef()._frontAngle;
+        std::cerr << "cells[" << i << "] frontAngle=" << (fa.has_value() ? std::to_string(fa.value()) : "none") << std::endl;
+    }
 
     // Check front angles
     auto first = true;
