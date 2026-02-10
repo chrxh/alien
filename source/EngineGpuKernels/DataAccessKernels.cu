@@ -105,15 +105,11 @@ namespace
                         nodeTO.cellTypeData.generator.additive = node.cellTypeData.generator.additive;
                         nodeTO.cellTypeData.generator.mode = node.cellTypeData.generator.mode;
                         if (node.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
-                            nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude =
-                                node.cellTypeData.generator.modeData.squareSignal.amplitude;
-                            nodeTO.cellTypeData.generator.modeData.squareSignal.period =
-                                node.cellTypeData.generator.modeData.squareSignal.period;
+                            nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude = node.cellTypeData.generator.modeData.squareSignal.amplitude;
+                            nodeTO.cellTypeData.generator.modeData.squareSignal.period = node.cellTypeData.generator.modeData.squareSignal.period;
                         } else if (node.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
-                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude =
-                                node.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
-                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.period =
-                                node.cellTypeData.generator.modeData.sawtoothSignal.period;
+                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude = node.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.period = node.cellTypeData.generator.modeData.sawtoothSignal.period;
                         }
                         break;
                     case CellType_Attacker:
@@ -384,6 +380,8 @@ namespace
             } break;
             case CellType_Generator: {
                 cellTO.cellTypeData.generator.additive = cell.cellTypeData.generator.additive;
+                cellTO.cellTypeData.generator.valueOffset = cell.cellTypeData.generator.valueOffset;
+                cellTO.cellTypeData.generator.timeOffset = cell.cellTypeData.generator.timeOffset;
                 cellTO.cellTypeData.generator.mode = cell.cellTypeData.generator.mode;
                 if (cell.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
                     cellTO.cellTypeData.generator.modeData.squareSignal.amplitude = cell.cellTypeData.generator.modeData.squareSignal.amplitude;
