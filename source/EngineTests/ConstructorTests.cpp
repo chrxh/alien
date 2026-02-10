@@ -2923,15 +2923,20 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
         }),
     });
 
-    auto data = Desc().addCreature({
-            ObjectDesc().id(0).pos(RealVector2D{10.0f, 8.5f} + Math::unitVectorOfAngle(180.0f - 45.0f) * getOffspringDistance()).type(CellDesc().constructor(ConstructorDesc().currentNodeIndex(4).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(4).provideEnergy(
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos(RealVector2D{10.0f, 8.5f} + Math::unitVectorOfAngle(180.0f - 45.0f) * getOffspringDistance())
+                .type(CellDesc().constructor(ConstructorDesc().currentNodeIndex(4).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(4).provideEnergy(
                     ProvideEnergy_FreeGeneration))),
-
             ObjectDesc().id(1).pos({10.0f, 11.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc().id(2).pos({10.0f, 9.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc().id(3).pos({9.0f, 9.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc().id(4).pos({10.0f, 8.5f}).type(CellDesc().cellState(CellState_Constructing)),
-        }, CreatureDesc().id(0), genome);
+        },
+        CreatureDesc().id(0),
+        genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 4);

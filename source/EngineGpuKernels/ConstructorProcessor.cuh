@@ -481,7 +481,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             auto& connection = lastObject->connections[0];
             connection.object = newObject;
             connection.distance = desiredDistance;
-            connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;
+            //connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;
         }
         {
             auto& connection = newObject->connections[1];
@@ -520,7 +520,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             auto& connection = newObject->connections[0];
             connection.object = lastObject;
             connection.distance = desiredDistance;
-            connection.angleFromPrevious = 180.0f;
+            connection.angleFromPrevious = 360.0f;
             ObjectConnectionProcessor::deleteConnectionOneWay(hostObject, lastObject);
         }
     }
@@ -568,6 +568,17 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     //        adaptReferenceAngles = true;
     //    }
     //}
+    //-----------------
+    printf("hostObject: %d\n", hostObject->numConnections);
+    for (int i = 0; i < hostObject->numConnections; ++i) {
+        printf("-- angle: %f\n", hostObject->connections[i].angleFromPrevious);
+    }
+    printf("lastObject: %d\n", lastObject->numConnections);
+    for (int i = 0; i < lastObject->numConnections; ++i) {
+        printf("-- angle: %f\n", lastObject->connections[i].angleFromPrevious);
+    }
+    printf(
+        "newObject angles: %d, %f, %f\n", newObject->numConnections, newObject->connections[0].angleFromPrevious, newObject->connections[1].angleFromPrevious);
 
     // Get surrounding cells
     if (numObjectsToConnect > 0 && constructionData.numAdditionalConnections != 0) {
