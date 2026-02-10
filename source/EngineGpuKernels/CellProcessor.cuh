@@ -121,6 +121,9 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
         bool isOtherCreatureNeighborDetaching = false;
         bool isSameCreatureNeighborReviving = false;
         bool isNeighborActivating = false;
+        if (object->numConnections > 0) {
+            isNeighborActivating = object->connections[0].object->typeData.cell.cellState == CellState_Activating;
+        }
         //int activatingObjectConnection = -1;
         for (int i = 0; i < object->numConnections; ++i) {
             auto const& connectedObject = object->connections[i].object;
@@ -133,12 +136,13 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                     isSameCreatureNeighborDetaching = true;
                 } else if (connectedObjectState == CellState_Reviving) {
                     isSameCreatureNeighborReviving = true;
-                } else if (connectedObjectState == CellState_Activating) {
-                    if (connectedObject->connections[0].object == object) {
-                        isNeighborActivating = true;
-                        //activatingObjectConnection = i;
-                    }
                 }
+                // else if (connectedObjectState == CellState_Activating) {
+                //    if (connectedObject->connections[0].object == object) {
+                //        //isNeighborActivating = true;
+                //        //activatingObjectConnection = i;
+                //    }
+                //}
             } else {
                 if (connectedObject->typeData.cell.cellState == CellState_Detaching) {
                     isOtherCreatureNeighborDetaching = true;
