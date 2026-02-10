@@ -2937,10 +2937,10 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
         },
         CreatureDesc().id(0),
         genome);
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    data.addConnection(3, 4);
     data.addConnection(4, 0);
+    data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.getConnectionRef(3, 4)._angleFromPrevious = 270.0f;
     data.getConnectionRef(3, 2)._angleFromPrevious = 90.0f;
     data.getConnectionRef(4, 0)._angleFromPrevious = 270.0f;
@@ -2995,10 +2995,10 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
             ObjectDesc().id(3).pos({11.0f, 9.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc().id(4).pos({10.0f, 8.5f}).type(CellDesc().cellState(CellState_Constructing)),
         }, CreatureDesc().id(0), genome);
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    data.addConnection(3, 4);
     data.addConnection(4, 0);
+    data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.getConnectionRef(3, 4)._angleFromPrevious = 90.0f;
     data.getConnectionRef(3, 2)._angleFromPrevious = 270.0f;
     data.getConnectionRef(4, 0)._angleFromPrevious = 90.0f;
