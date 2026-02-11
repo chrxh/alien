@@ -99,7 +99,7 @@ protected:
         return GenomeDesc()
             .frontAngle(frontAngle)
             .genes({
-                GeneDesc().separation(false).nodes({
+                GeneDesc().separation(true).nodes({
                     NodeDesc().cellType(generator),
                     NodeDesc(),
                     NodeDesc(),
@@ -397,15 +397,10 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
     // Check front angles
-    auto first = true;
-    for (auto const& object : cells) {
-        if (first) {
-            EXPECT_TRUE(approxCompareAngles(0.0f, object.getCellRef()._frontAngle.value()));
-        } else {
-            EXPECT_TRUE(approxCompareAngles(180.0f, object.getCellRef()._frontAngle.value()));
-        }
-        first = false;
+    for (int i = 0; i < 9; ++i) {
+        EXPECT_TRUE(approxCompareAngles(0.0f, cells[i].getCellRef()._frontAngle.value()));
     }
+    EXPECT_TRUE(approxCompareAngles(-180.0f, cells[9].getCellRef()._frontAngle.value()));
 }
 
 class CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles
