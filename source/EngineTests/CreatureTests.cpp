@@ -168,19 +168,17 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
 
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
-        EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 6; ++i) {
-            EXPECT_TRUE(approxCompareAngles(180.0f, body.at(i).getCellRef()._frontAngle.value()));
+        for (int i = 0; i < 5; ++i) {
+            EXPECT_TRUE(approxCompareAngles(0.0f, body.at(i).getCellRef()._frontAngle.value()));
+        }
+        EXPECT_TRUE(approxCompareAngles(-180.0f, body.at(5).getCellRef()._frontAngle.value()));
+
+        for (int i = 0; i < 4; ++i) {
+            EXPECT_TRUE(approxCompareAngles(-90.0f, leg1.at(i).getCellRef()._frontAngle.value()));
         }
 
-        EXPECT_TRUE(approxCompareAngles(-90.0f, leg1.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(90.0f, leg1.at(i).getCellRef()._frontAngle.value()));
-        }
-
-        EXPECT_TRUE(approxCompareAngles(90.0f, leg2.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(-90.0f, leg2.at(i).getCellRef()._frontAngle.value()));
+        for (int i = 0; i < 4; ++i) {
+            EXPECT_TRUE(approxCompareAngles(90.0f, leg2.at(i).getCellRef()._frontAngle.value()));
         }
     }
 
@@ -255,14 +253,13 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
 
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
-        EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 6; ++i) {
-            EXPECT_TRUE(approxCompareAngles(180.0f, body.at(i).getCellRef()._frontAngle.value()));
+        for (int i = 0; i < 5; ++i) {
+            EXPECT_TRUE(approxCompareAngles(0.0f, body.at(i).getCellRef()._frontAngle.value()));
         }
+        EXPECT_TRUE(approxCompareAngles(-180.0f, body.at(5).getCellRef()._frontAngle.value()));
 
-        EXPECT_TRUE(approxCompareAngles(-90.0f, leg.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(90.0f, leg.at(i).getCellRef()._frontAngle.value()));
+        for (int i = 0; i < 4; ++i) {
+            EXPECT_TRUE(approxCompareAngles(-90.0f, leg.at(i).getCellRef()._frontAngle.value()));
         }
         EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(0).getCellRef()._frontAngle.value()));
         EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(1).getCellRef()._frontAngle.value()));

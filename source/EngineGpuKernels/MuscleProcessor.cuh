@@ -680,7 +680,7 @@ __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingIn
 {
     BendingInfo result;
     if (object->numConnections == 2) {
-        auto privotCell = object->connections[1].object;
+        auto privotCell = object->connections[0].object;
         result.pivotCell = privotCell;
         for (int i = 0; i < privotCell->numConnections; ++i) {
             if (privotCell->connections[i].object == object) {
