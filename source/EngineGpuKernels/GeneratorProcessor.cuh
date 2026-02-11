@@ -38,7 +38,7 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
 
         if (generator.mode == GeneratorMode_SquareSignal) {
             auto& squareSignal = generator.modeData.squareSignal;
-            auto halfPeriod = squareSignal.period / 2;
+            auto halfPeriod = period / 2;
 
             if (timestepInPeriod < halfPeriod) {
                 outputValue = squareSignal.amplitude;
@@ -49,11 +49,12 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
             auto& sawtoothSignal = generator.modeData.sawtoothSignal;
 
             // Linear increase from 0 to amplitude over the period
-            outputValue = sawtoothSignal.amplitude * static_cast<float>(timestepInPeriod) / static_cast<float>(sawtoothSignal.period);
+            outputValue = sawtoothSignal.amplitude * toFloat(timestepInPeriod) / toFloat(period);
         }
+        outputValue += generator.valueOffset;
 
         // Set the output signal
-        outputValue += generator.valueOffset;
+
         if (generator.additive) {
             object->typeData.cell.signal.channels[Channels::GeneratorOutput] += outputValue;
         } else {

@@ -48,12 +48,12 @@ protected:
                                                               : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
-                NodeDesc().cellType(generator),
+                NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc(),
+                NodeDesc().cellType(generator),
             }),
             GeneDesc().numConcatenations(4).numBranches(2).nodes({NodeDesc().cellType(muscleDesc)}),
         });
@@ -76,12 +76,12 @@ protected:
                                                               : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
-                NodeDesc().cellType(generator),
+                NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc(),
+                NodeDesc().cellType(generator),
             }),
             GeneDesc().numConcatenations(2).numBranches(1).nodes(
                 {NodeDesc().color(1).cellType(muscleDesc), NodeDesc().color(1).constructor(ConstructorGenomeDesc().geneIndex(2))}),
@@ -100,16 +100,16 @@ protected:
             .frontAngle(frontAngle)
             .genes({
                 GeneDesc().separation(true).nodes({
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc().cellType(muscleDesc),
+                    NodeDesc().cellType(muscleDesc),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
                     NodeDesc().cellType(generator),
-                    NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc().cellType(muscleDesc),
-                    NodeDesc().cellType(muscleDesc),
-                    NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc(),
                 }),
             });
     }

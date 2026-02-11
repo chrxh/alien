@@ -725,6 +725,9 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.geneIndex = geneIndex;
     cell.frontAngleId = 0;
     cell.headCell = false;
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        cell.signal.channels[i] = 0.0f;
+    }
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNetwork>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
