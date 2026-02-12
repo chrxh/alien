@@ -167,8 +167,8 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
             ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.addConnection(3, 4);
 
     _simulationFacade->setSimulationData(data);
@@ -347,8 +347,8 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
             ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.addConnection(3, 4);
 
     setSimulationData(data, detailedPreview);
@@ -562,8 +562,8 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
             ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.addConnection(3, 4);
 
     _simulationFacade->setSimulationData(data);
