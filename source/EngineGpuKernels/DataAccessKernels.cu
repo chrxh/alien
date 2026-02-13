@@ -412,15 +412,12 @@ namespace
                     cellTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio = cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
                     cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle = cell.cellTypeData.muscle.modeData.autoBending.initialAngle;
                     cellTO.cellTypeData.muscle.modeData.autoBending.forward = cell.cellTypeData.muscle.modeData.autoBending.forward;
-                    cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
                     cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
                     cellTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio =
                         cell.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
                     cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle = cell.cellTypeData.muscle.modeData.manualBending.initialAngle;
                     cellTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta = cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
-                    cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied =
-                        cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
                     cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = cell.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
                     cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
@@ -432,8 +429,6 @@ namespace
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance = cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance;
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance = cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.forward = cell.cellTypeData.muscle.modeData.autoCrawling.forward;
-                    cellTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied =
-                        cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
                         cell.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
@@ -442,8 +437,6 @@ namespace
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance = cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance;
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
-                    cellTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied =
-                        cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
                 }
                 cellTO.cellTypeData.muscle.lastMovementX = cell.cellTypeData.muscle.lastMovementX;

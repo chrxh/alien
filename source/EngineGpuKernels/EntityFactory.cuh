@@ -460,14 +460,11 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                 cell->cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio = cellTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
                 cell->cellTypeData.muscle.modeData.autoBending.initialAngle = cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle;
                 cell->cellTypeData.muscle.modeData.autoBending.forward = cellTO.cellTypeData.muscle.modeData.autoBending.forward;
-                cell->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
                 cell->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
                 cell->cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio = cellTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
                 cell->cellTypeData.muscle.modeData.manualBending.initialAngle = cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle;
                 cell->cellTypeData.muscle.modeData.manualBending.lastAngleDelta = cellTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
-                cell->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied =
-                    cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
                 cell->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
                 cell->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
@@ -479,7 +476,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                 cell->cellTypeData.muscle.modeData.autoCrawling.initialDistance = cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance;
                 cell->cellTypeData.muscle.modeData.autoCrawling.lastActualDistance = cellTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
                 cell->cellTypeData.muscle.modeData.autoCrawling.forward = cellTO.cellTypeData.muscle.modeData.autoCrawling.forward;
-                cell->cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
                 cell->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
@@ -488,8 +484,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                 cell->cellTypeData.muscle.modeData.manualCrawling.initialDistance = cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance;
                 cell->cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = cellTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
                 cell->cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
-                cell->cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied =
-                    cellTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
             }
             cell->cellTypeData.muscle.lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
@@ -822,14 +816,12 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             muscle.modeData.autoBending.forwardBackwardRatio = nodeMuscle.modeData.autoBending.forwardBackwardRatio;
             muscle.modeData.autoBending.initialAngle = VALUE_NOT_SET_FLOAT;
             muscle.modeData.autoBending.forward = true;
-            muscle.modeData.autoBending.impulseAlreadyApplied = false;
         } break;
         case MuscleMode_ManualBending: {
             muscle.modeData.manualBending.maxAngleDeviation = nodeMuscle.modeData.manualBending.maxAngleDeviation;
             muscle.modeData.manualBending.forwardBackwardRatio = nodeMuscle.modeData.manualBending.forwardBackwardRatio;
             muscle.modeData.manualBending.initialAngle = VALUE_NOT_SET_FLOAT;
             muscle.modeData.manualBending.lastAngleDelta = 0;
-            muscle.modeData.manualBending.impulseAlreadyApplied = false;
         } break;
         case MuscleMode_AngleBending: {
             muscle.modeData.angleBending.maxAngleDeviation = nodeMuscle.modeData.angleBending.maxAngleDeviation;
@@ -842,7 +834,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             muscle.modeData.autoCrawling.initialDistance = VALUE_NOT_SET_FLOAT;
             muscle.modeData.autoCrawling.lastActualDistance = 0;
             muscle.modeData.autoCrawling.forward = true;
-            muscle.modeData.autoCrawling.impulseAlreadyApplied = false;
         } break;
         case MuscleMode_ManualCrawling: {
             muscle.modeData.manualCrawling.maxDistanceDeviation = nodeMuscle.modeData.manualCrawling.maxDistanceDeviation;
@@ -850,7 +841,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             muscle.modeData.manualCrawling.initialDistance = VALUE_NOT_SET_FLOAT;
             muscle.modeData.manualCrawling.lastActualDistance = 0;
             muscle.modeData.manualCrawling.lastDistanceDelta = 0;
-            muscle.modeData.manualCrawling.impulseAlreadyApplied = false;
         } break;
         case MuscleMode_DirectMovement: {
         } break;

@@ -207,7 +207,6 @@ struct AutoBending
     // Process data
     float initialAngle;  // May be invalid
     bool forward;        // Current direction
-    bool impulseAlreadyApplied;
 };
 
 struct ManualBending
@@ -219,7 +218,6 @@ struct ManualBending
     // Process data
     float initialAngle;  // May be invalid
     float lastAngleDelta;
-    bool impulseAlreadyApplied;
 };
 
 struct AngleBending
@@ -242,7 +240,6 @@ struct AutoCrawling
     float initialDistance;  // May be invalid
     float lastActualDistance;
     bool forward;  // Current direction
-    bool impulseAlreadyApplied;
 };
 
 struct ManualCrawling
@@ -255,7 +252,6 @@ struct ManualCrawling
     float initialDistance;  // May be invalid
     float lastActualDistance;
     float lastDistanceDelta;
-    bool impulseAlreadyApplied;
 };
 
 struct DirectMovement

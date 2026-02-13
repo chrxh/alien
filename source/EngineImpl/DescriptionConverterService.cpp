@@ -446,7 +446,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle)
                     : std::nullopt;
                 bending._forward = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forward;
-                bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
                 muscle._mode = bending;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
                 ManualBendingDesc bending;
@@ -456,7 +455,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle)
                     : std::nullopt;
                 bending._lastAngleDelta = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
-                bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
                 muscle._mode = bending;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
                 AngleBendingDesc bending;
@@ -475,7 +473,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     : std::nullopt;
                 crawling._lastActualDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
                 crawling._forward = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forward;
-                crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
                 muscle._mode = crawling;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
                 ManualCrawlingDesc crawling;
@@ -486,7 +483,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     : std::nullopt;
                 crawling._lastActualDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
                 crawling._lastDistanceDelta = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
-                crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
                 muscle._mode = crawling;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
                 DirectMovementDesc movement;
@@ -1364,7 +1360,6 @@ void DescriptionConverterService::convertObjectToTO(
                 bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
                 bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
                 bendingTO.forward = bendingDesc._forward;
-                bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_ManualBending) {
                 auto const& bendingDesc = std::get<ManualBendingDesc>(muscleDesc._mode);
                 ManualBendingTO& bendingTO = muscleTO.modeData.manualBending;
@@ -1372,7 +1367,6 @@ void DescriptionConverterService::convertObjectToTO(
                 bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
                 bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
                 bendingTO.lastAngleDelta = bendingDesc._lastAngleDelta;
-                bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_AngleBending) {
                 auto const& bendingDesc = std::get<AngleBendingDesc>(muscleDesc._mode);
                 AngleBendingTO& bendingTO = muscleTO.modeData.angleBending;
@@ -1387,7 +1381,6 @@ void DescriptionConverterService::convertObjectToTO(
                 crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
                 crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
                 crawlingTO.forward = crawlingDesc._forward;
-                crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_ManualCrawling) {
                 auto const& crawlingDesc = std::get<ManualCrawlingDesc>(muscleDesc._mode);
                 ManualCrawlingTO& crawlingTO = muscleTO.modeData.manualCrawling;
@@ -1396,7 +1389,6 @@ void DescriptionConverterService::convertObjectToTO(
                 crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
                 crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
                 crawlingTO.lastDistanceDelta = crawlingDesc._lastDistanceDelta;
-                crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_DirectMovement) {
             }
             muscleTO.lastMovementX = muscleDesc._lastMovementX;

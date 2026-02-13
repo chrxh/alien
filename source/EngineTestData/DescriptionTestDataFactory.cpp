@@ -697,11 +697,11 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         switch (muscleMode) {
         case MuscleMode_AutoBending: {
             muscleModeDesc =
-                AutoBendingDesc().maxAngleDeviation(0.6f).forwardBackwardRatio(0.4f).initialAngle(135.0f).forward(false).impulseAlreadyApplied(true);
+                AutoBendingDesc().maxAngleDeviation(0.6f).forwardBackwardRatio(0.4f).initialAngle(135.0f).forward(false);
         } break;
         case MuscleMode_ManualBending:
             muscleModeDesc =
-                ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f).impulseAlreadyApplied(true);
+                ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f);
             break;
         case MuscleMode_AngleBending:
             muscleModeDesc = AngleBendingDesc().maxAngleDeviation(0.7f).attractionRepulsionRatio(0.6f).initialAngle(315.0f);
@@ -712,8 +712,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
                                  .forwardBackwardRatio(0.35f)
                                  .initialDistance(0.6f)
                                  .lastActualDistance(0.8f)
-                                 .forward(false)
-                                 .impulseAlreadyApplied(true);
+                                 .forward(false);
         } break;
         case MuscleMode_ManualCrawling:
             muscleModeDesc = ManualCrawlingDesc()
@@ -721,8 +720,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
                                  .forwardBackwardRatio(0.45f)
                                  .initialDistance(0.4f)
                                  .lastActualDistance(0.9f)
-                                 .lastDistanceDelta(0.65f)
-                                 .impulseAlreadyApplied(true);
+                                 .lastDistanceDelta(0.65f);
             break;
         case MuscleMode_DirectMovement:
             muscleModeDesc = DirectMovementDesc();

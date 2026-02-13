@@ -205,7 +205,6 @@ struct AutoBendingDesc
     // Process data
     MEMBER(AutoBendingDesc, std::optional<float>, initialAngle, std::nullopt);
     MEMBER(AutoBendingDesc, bool, forward, true);  // Current direction
-    MEMBER(AutoBendingDesc, bool, impulseAlreadyApplied, false);
 };
 
 struct ManualBendingDesc
@@ -219,7 +218,6 @@ struct ManualBendingDesc
     // Process data
     MEMBER(ManualBendingDesc, std::optional<float>, initialAngle, std::nullopt);
     MEMBER(ManualBendingDesc, float, lastAngleDelta, 0.0f);
-    MEMBER(ManualBendingDesc, bool, impulseAlreadyApplied, false);
 };
 
 struct AngleBendingDesc
@@ -246,7 +244,6 @@ struct AutoCrawlingDesc
     MEMBER(AutoCrawlingDesc, std::optional<float>, initialDistance, std::nullopt);
     MEMBER(AutoCrawlingDesc, float, lastActualDistance, 0.0f);
     MEMBER(AutoCrawlingDesc, bool, forward, true);  // Current direction
-    MEMBER(AutoCrawlingDesc, bool, impulseAlreadyApplied, false);
 };
 
 struct ManualCrawlingDesc
@@ -261,7 +258,6 @@ struct ManualCrawlingDesc
     MEMBER(ManualCrawlingDesc, std::optional<float>, initialDistance, std::nullopt);
     MEMBER(ManualCrawlingDesc, float, lastActualDistance, 0.0f);
     MEMBER(ManualCrawlingDesc, float, lastDistanceDelta, 0.0f);
-    MEMBER(ManualCrawlingDesc, bool, impulseAlreadyApplied, false);
 };
 
 struct DirectMovementDesc
