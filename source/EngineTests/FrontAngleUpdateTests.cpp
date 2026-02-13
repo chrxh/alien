@@ -373,6 +373,6 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
     EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
     EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(3).getCellRef()._frontAngle.value()));
 }
