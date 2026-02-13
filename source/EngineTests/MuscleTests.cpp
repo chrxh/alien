@@ -589,9 +589,9 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto angle = actualCell3._connections.at(0)._angleFromPrevious;
     if (side == Side::Left) {
-        EXPECT_TRUE(abs(angle - 90.0f - targetAngle) < AnglePrecision);
+        EXPECT_TRUE(approxCompareAngles(-90.0f + targetAngle, angle, AnglePrecision));
     } else {
-        EXPECT_TRUE(abs(270.0f - angle + targetAngle) < AnglePrecision);
+        EXPECT_TRUE(approxCompareAngles(targetAngle - 90.0f, angle, AnglePrecision));
     }
 }
 
@@ -618,13 +618,13 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
                 .id(4)
                 .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
                 .type(CellDesc()
-                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
+                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
                           .cellType(MuscleDesc().mode(AngleBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).attractionRepulsionRatio(0.8f)))
                           .neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.addConnection(4, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -647,11 +647,9 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     auto angle = actualCell2._connections.at(side == Side::Left ? 2 : 1)._angleFromPrevious;
     if (side == Side::Left) {
-        targetAngle = std::min(-AngleMinDistance, std::max(-180.0f + AngleMinDistance, targetAngle));
-        EXPECT_TRUE(abs(angle - targetAngle - 180.0f) < AnglePrecision);
+        EXPECT_TRUE(approxCompareAngles(-90.0f + targetAngle, angle, AnglePrecision));
     } else {
-        targetAngle = std::min(180.0f - AngleMinDistance, std::max(AngleMinDistance, targetAngle));
-        EXPECT_TRUE(abs(angle - targetAngle) < AnglePrecision);
+        EXPECT_TRUE(approxCompareAngles(targetAngle - 90.0f, angle, AnglePrecision));
     }
 }
 

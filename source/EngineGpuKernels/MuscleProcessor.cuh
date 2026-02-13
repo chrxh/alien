@@ -182,9 +182,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         if (isLeftSide(object)) {
             targetAngleRelToConnection0 = -targetAngleRelToConnection0;
         }
-        //if (object->numConnections == 1) {
-            targetAngleRelToConnection0 = Math::getNormalizedAngle(targetAngleRelToConnection0 + 180.0f, -180.0f);
-        //}
+        targetAngleRelToConnection0 = Math::getNormalizedAngle(targetAngleRelToConnection0 + 180.0f, -180.0f);
         if (targetAngleRelToConnection0 >= 0 && targetAngleRelToConnection0 < 90.0f) {
             return 0.0f;
         }
@@ -376,7 +374,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     auto bendingInfo = getBendingInfo(object);
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
     auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
-    auto targetAngleRelToConnection0 = Math::getNormalizedAngle(object->typeData.cell.frontAngle + targetAngle, -180.0f);
+    auto targetAngleRelToConnection0 = Math::getNormalizedAngle(object->typeData.cell.frontAngle + 180.0f + targetAngle, -180.0f);
 
     // Change bending direction
     auto angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
@@ -392,9 +390,6 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     if (targetAngleRelToConnection0 < 0) {
         angleDelta = -angleDelta;
     }
-    //if (object->numConnections == 1) {
-        angleDelta = -angleDelta;
-    //}
 
     if (angleFromPrevious + angleDelta > maxAngle) {
         angleDelta = maxAngle - angleFromPrevious;
@@ -679,41 +674,20 @@ __inline__ __device__ void MuscleProcessor::applyAcceleration(Object* object, fl
 __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingInfo(Object* object)
 {
     BendingInfo result;
-    //if (object->numConnections == 2) {
-        auto privotCell = object->connections[0].object;
-        result.pivotCell = privotCell;
-        for (int i = 0; i < privotCell->numConnections; ++i) {
-            if (privotCell->connections[i].object == object) {
-                result.connection = &privotCell->connections[i];
-                result.connectionPrev = &privotCell->connections[(i + privotCell->numConnections - 1) % privotCell->numConnections];
-                result.connectionNext = &privotCell->connections[(i + 1) % privotCell->numConnections];
-                break;
-            }
+    auto privotCell = object->connections[0].object;
+    result.pivotCell = privotCell;
+    for (int i = 0; i < privotCell->numConnections; ++i) {
+        if (privotCell->connections[i].object == object) {
+            result.connection = &privotCell->connections[i];
+            result.connectionPrev = &privotCell->connections[(i + privotCell->numConnections - 1) % privotCell->numConnections];
+            result.connectionNext = &privotCell->connections[(i + 1) % privotCell->numConnections];
+            break;
         }
-    //}
-
-    //// numConnections == 1
-    //else {
-    //    auto privotCell = object->connections[0].object;
-    //    result.pivotCell = privotCell;
-    //    for (int i = 0; i < privotCell->numConnections; ++i) {
-    //        if (privotCell->connections[i].object == object) {
-    //            result.connection = &privotCell->connections[i];
-    //            result.connectionPrev = &privotCell->connections[(i + privotCell->numConnections - 1) % privotCell->numConnections];
-    //            result.connectionNext = &privotCell->connections[(i + 1) % privotCell->numConnections];
-    //            break;
-    //        }
-    //    }
-    //}
+    }
     return result;
 }
 
 __inline__ __device__ bool MuscleProcessor::isLeftSide(Object* object)
 {
     return object->typeData.cell.frontAngle < -NEAR_ZERO;
-    //if (object->numConnections == 2) {
-    //    return object->typeData.cell.frontAngle > NEAR_ZERO;
-    //} else {
-    //    return object->typeData.cell.frontAngle < -NEAR_ZERO;
-    //}
 }
