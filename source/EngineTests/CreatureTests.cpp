@@ -174,11 +174,11 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
         EXPECT_TRUE(approxCompareAngles(-180.0f, body.at(5).getCellRef()._frontAngle.value()));
 
         for (int i = 0; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(-90.0f, leg1.at(i).getCellRef()._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(90.0f, leg1.at(i).getCellRef()._frontAngle.value()));
         }
 
         for (int i = 0; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(90.0f, leg2.at(i).getCellRef()._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(-90.0f, leg2.at(i).getCellRef()._frontAngle.value()));
         }
     }
 

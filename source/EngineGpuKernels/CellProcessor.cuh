@@ -231,12 +231,28 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         continue;
                     }
                     if (otherObject->typeData.cell.frontAngleId == object->typeData.cell.creature->frontAngleId) {
+                        //auto frontAngle_otherObject_object = Math::getNormalizedAngle(
+                        //    otherObject->typeData.cell.frontAngle - getInitialAngelSpan(otherObject, object, otherObject->connections[0].object), -180.0f);
+                        //auto frontAngle_object_otherObject = Math::getNormalizedAngle(frontAngle_otherObject_object - 180.0f, -180.0f);
+                        //auto frontAngle_object_connection0 =
+                        //    Math::getNormalizedAngle(frontAngle_object_otherObject + getInitialAngelSpan(object, 0, i), -180.0f);
+
                         auto frontAngle_otherObject_object = Math::getNormalizedAngle(
-                            otherObject->typeData.cell.frontAngle - getInitialAngelSpan(otherObject, object, otherObject->connections[0].object), -180.0f);
-                        auto frontAngle_object_otherObject = Math::getNormalizedAngle(frontAngle_otherObject_object - 180.0f, -180.0f);
+                            -getInitialAngelSpan(otherObject, object, otherObject->connections[0].object) - otherObject->typeData.cell.frontAngle, -180.0f);
+
+                        auto frontAngle_object_otherObject = Math::getNormalizedAngle(180.0f - frontAngle_otherObject_object, -180.0f);
                         auto frontAngle_object_connection0 =
                             Math::getNormalizedAngle(frontAngle_object_otherObject + getInitialAngelSpan(object, 0, i), -180.0f);
+
                         object->tempValue.as_uint32_float.floatPart = frontAngle_object_connection0;
+
+                        //if (object->id == 4) {
+                        //    printf("a: %f\n", otherObject->typeData.cell.frontAngle);
+                        //    printf("span: %f\n", getInitialAngelSpan(otherObject, object, otherObject->connections[0].object));
+                        //    printf("a: %f\n", frontAngle_otherObject_object);
+                        //    printf("a: %f\n", frontAngle_object_otherObject);
+                        //    printf("a: %f\n", frontAngle_object_connection0);
+                        //}
 
                         update = true;
                         break;

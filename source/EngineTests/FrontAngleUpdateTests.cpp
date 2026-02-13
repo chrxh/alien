@@ -35,8 +35,8 @@ TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
         GenomeDesc().frontAngle(FrontAngle));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(5);
@@ -105,6 +105,9 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
         GenomeDesc().frontAngle(FrontAngle));
+
+    // The order of connection are theoretical and cannot be created in a construction process.
+    // The goal is to check that the front angle are updated correctly nevertheless.
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 9);
@@ -253,9 +256,9 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
         },
         CreatureDesc().id(1).frontAngleId(InitialFrontAngleId + 1),
         GenomeDesc().frontAngle(FrontAngle));
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
     data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(5);
@@ -306,8 +309,8 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
         },
         CreatureDesc().id(1).frontAngleId(InitialFrontAngleId + 1),
         GenomeDesc().frontAngle(FrontAngle));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(5);
@@ -355,8 +358,8 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
             .id(1)
             .frontAngleId(InitialFrontAngleId + 1),
         GenomeDesc().frontAngle(FrontAngle));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(5);
