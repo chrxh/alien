@@ -831,8 +831,8 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
             ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f)),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
 
@@ -843,12 +843,12 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
-        auto actualCell1 = actualData.getObjectRef(1);
+        auto actualCell3 = actualData.getObjectRef(3);
 
         ASSERT_EQ(3, actualData._objects.size());
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
-        EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
+        EXPECT_TRUE(approxCompare(distance, actualCell3._connections.at(0)._distance));
 
         minDistance = std::min(minDistance, distance);
         maxDistance = std::max(maxDistance, distance);
@@ -960,8 +960,8 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
             ObjectDesc().id(3).pos({12.0f, 10.0f}),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
 
