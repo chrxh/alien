@@ -662,7 +662,7 @@ INSTANTIATE_TEST_SUITE_P(MuscleTests_AutoCrawling, MuscleTests_AutoCrawling, ::t
 
 TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 {
-    auto constexpr MaxDistanceDeviation = 0.8f;
+    auto constexpr MaxDistanceDeviation = 0.5f;
 
     auto channel0 = GetParam();
 
@@ -734,7 +734,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
 TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 {
-    auto constexpr MaxDistanceDeviation = 0.8f;
+    auto constexpr MaxDistanceDeviation = 0.5f;
 
     auto channel0 = GetParam();
 
@@ -809,7 +809,7 @@ INSTANTIATE_TEST_SUITE_P(MuscleTests_ManualCrawling, MuscleTests_ManualCrawling,
 
 TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 {
-    auto constexpr MaxDistanceDeviation = 0.8f;
+    auto constexpr MaxDistanceDeviation = 0.5f;
 
     auto channel0 = GetParam();
 
@@ -868,7 +868,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
 TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 {
-    auto constexpr MaxDistanceDeviation = 0.8f;
+    auto constexpr MaxDistanceDeviation = 0.5f;
 
     auto channel0 = GetParam();
 
