@@ -259,7 +259,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
         EXPECT_TRUE(approxCompareAngles(-180.0f, body.at(5).getCellRef()._frontAngle.value()));
 
         for (int i = 0; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(-90.0f, leg.at(i).getCellRef()._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(90.0f, leg.at(i).getCellRef()._frontAngle.value()));
         }
         EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(0).getCellRef()._frontAngle.value()));
         EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(1).getCellRef()._frontAngle.value()));
@@ -286,8 +286,8 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     // Check angles for second cell leg
     ASSERT_EQ(4, leg.at(1)._connections.size());
     EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(0))));    // initial angle connection is stored in connected muscle
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(2)._angleFromPrevious));
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(3)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(0)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(1)._angleFromPrevious));
 
     // Check angles for third cell leg
     ASSERT_EQ(2, leg.at(2)._connections.size());
@@ -296,8 +296,8 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     // Check angles for forth cell leg
     ASSERT_EQ(4, leg.at(3)._connections.size());
     EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(2))));  // initial angle connection is stored in connected muscle
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(2)._angleFromPrevious));
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(3)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(0)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(1)._angleFromPrevious));
 }
 
 class CreatureTests_BendingMuscles_TwoDirections
