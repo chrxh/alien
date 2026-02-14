@@ -53,9 +53,10 @@ void _NeuralNetEditorWidget::process(std::vector<NeuralNetWeight>& weights, std:
         }
         ImGui::EndChild();
 
-        // Visualize input channels 
+        // Visualize input channels
         ImGui::Button("##Channels", {width - 2 * ImGui::GetStyle().FramePadding.x, 0.0f});
         auto channelButtonWidth = width / MAX_CHANNELS - 2 * ImGui::GetStyle().FramePadding.x;
+        ImVec2 inputButtonBottomCenter[MAX_CHANNELS];
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             if (i > 0) {
                 ImGui::SameLine();
@@ -63,6 +64,7 @@ void _NeuralNetEditorWidget::process(std::vector<NeuralNetWeight>& weights, std:
             ImGui::SetWindowFontScale(0.6f);
             ImGui::Button((std::to_string(i) + "##input").c_str(), {channelButtonWidth, 0});
             ImGui::SetWindowFontScale(1.0f);
+            inputButtonBottomCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMax().y};
         }
 
         // Visualize weights
@@ -71,6 +73,7 @@ void _NeuralNetEditorWidget::process(std::vector<NeuralNetWeight>& weights, std:
         ImGui::EndChild();
 
         // Visualize output channels
+        ImVec2 outputButtonTopCenter[MAX_CHANNELS];
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             if (i > 0) {
                 ImGui::SameLine();
@@ -78,6 +81,34 @@ void _NeuralNetEditorWidget::process(std::vector<NeuralNetWeight>& weights, std:
             ImGui::SetWindowFontScale(0.6f);
             ImGui::Button((std::to_string(i) + "##output").c_str(), {channelButtonWidth, 0});
             ImGui::SetWindowFontScale(1.0f);
+            outputButtonTopCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMin().y};
+        }
+
+        // Draw weight lines
+        {
+            auto calcColor = [](float value) {
+                auto factor = std::min(1.0f, std::abs(value));
+                if (value > NEAR_ZERO) {
+                    return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
+                } else if (value < -NEAR_ZERO) {
+                    return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
+                } else {
+                    return ImColor::HSV(0.0f, 0.0f, 0.1f);
+                }
+            };
+            auto drawList = ImGui::GetWindowDrawList();
+            drawList->AddCallback(enableAdditiveBlending, nullptr);
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int j = 0; j < MAX_CHANNELS; ++j) {
+                    auto weightFloat = weights[j * MAX_CHANNELS + i].getValue();
+                    if (std::abs(weightFloat) <= NEAR_ZERO) {
+                        continue;
+                    }
+                    auto thickness = std::min(4.0f, std::abs(weightFloat));
+                    drawList->AddLine(inputButtonBottomCenter[i], outputButtonTopCenter[j], calcColor(weightFloat), thickness);
+                }
+            }
+            drawList->AddCallback(disableAdditiveBlending, nullptr);
         }
 
         //auto& selectionData = getValueRef(_dataById);
@@ -278,9 +309,7 @@ void _NeuralNetEditorWidget::processEditWidgets(
 
         // Convert NeuralNetWeight to float for slider, then back
         float weightFloat = weights[selectionData.outputNeuronIndex * MAX_CHANNELS + selectionData.inputNeuronIndex].getValue();
-        AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().name("Weight").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth),
-            &weightFloat);
+        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Weight").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth), &weightFloat);
         weights[selectionData.outputNeuronIndex * MAX_CHANNELS + selectionData.inputNeuronIndex] = weightFloat;
 
         AlienGui::SliderFloat(
