@@ -9,7 +9,11 @@ class _NeuralNetEditorWidget
 public:
     static NeuralNetEditorWidget create();
 
-    void process(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
+    void process(
+        std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions,
+        std::vector<float>& connectionWeights);
 
 private:
     _NeuralNetEditorWidget();
