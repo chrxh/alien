@@ -45,15 +45,16 @@ void _NeuralNetEditorWidget::process(
         // Visualize connections
         auto width = ImGui::GetContentRegionAvail().x;
         auto connectionButtonWidth = width / MAX_OBJECT_CONNECTIONS - 2 * ImGui::GetStyle().FramePadding.x;
-        ImVec2 connectionButtonBottomCenter[MAX_OBJECT_CONNECTIONS];
+        ImVec2 connectionButtonBottomLeft[MAX_OBJECT_CONNECTIONS];
+        ImVec2 connectionButtonBottomRight[MAX_OBJECT_CONNECTIONS];
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
             if (i > 0) {
                 ImGui::SameLine();
             }
             ImGui::Button(("C" + std::to_string(i)).c_str(), {connectionButtonWidth, 0});
-            connectionButtonBottomCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMax().y};
+            connectionButtonBottomLeft[i] = {ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y};
+            connectionButtonBottomRight[i] = {ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y};
         }
-        auto connectionButtonHeight = ImGui::GetItemRectMax().y - ImGui::GetItemRectMin().y;
 
         // Visualize connection weights
         if (ImGui::BeginChild("ChannelWeights", ImVec2(0, scale(50.0f)))) {
@@ -113,8 +114,16 @@ void _NeuralNetEditorWidget::process(
                 if (std::abs(value) <= NEAR_ZERO) {
                     continue;
                 }
-                auto thickness = std::min(connectionButtonHeight, std::abs(value) * (connectionButtonHeight / 4.0f));
-                drawList->AddLine(connectionButtonBottomCenter[i], channelsButtonTopCenter, calcColor(value), thickness);
+                auto factor = std::min(1.0f, std::abs(value) / 4.0f);
+                auto halfWidth = connectionButtonWidth / 2.0f * factor;
+                auto centerX = (connectionButtonBottomLeft[i].x + connectionButtonBottomRight[i].x) / 2.0f;
+                auto topY = connectionButtonBottomLeft[i].y;
+                drawList->AddQuadFilled(
+                    {centerX - halfWidth, topY},
+                    {centerX + halfWidth, topY},
+                    {channelsButtonTopCenter.x + 1.0f, channelsButtonTopCenter.y},
+                    {channelsButtonTopCenter.x - 1.0f, channelsButtonTopCenter.y},
+                    calcColor(value));
             }
 
             for (int i = 0; i < MAX_CHANNELS; ++i) {
