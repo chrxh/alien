@@ -37,14 +37,57 @@ NeuralNetEditorWidget _NeuralNetEditorWidget::create()
 void _NeuralNetEditorWidget::process(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions)
 {
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
-        auto& selectionData = getValueRef(_dataById);
 
-        processNetwork(selectionData, weights, biases, activationFunctions);
+        // Visualize connections
+        auto width = ImGui::GetContentRegionAvail().x;
+        auto connectionButtonWidth = width / MAX_OBJECT_CONNECTIONS - 2 * ImGui::GetStyle().FramePadding.x;
+        for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+            if (i > 0) {
+                ImGui::SameLine();
+            }
+            ImGui::Button(("C" + std::to_string(i)).c_str(), {connectionButtonWidth, 0});
+        }
 
-        ImGui::SameLine();
-        processEditWidgets(selectionData, weights, biases, activationFunctions);
+        // Visualize connection weights
+        if (ImGui::BeginChild("ChannelWeights", ImVec2(0, scale(50.0f)))) {
+        }
+        ImGui::EndChild();
 
-        processActionButtons(weights, biases, activationFunctions);
+        // Visualize input channels 
+        ImGui::Button("##Channels", {width - 2 * ImGui::GetStyle().FramePadding.x, 0.0f});
+        auto channelButtonWidth = width / MAX_CHANNELS - 2 * ImGui::GetStyle().FramePadding.x;
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            if (i > 0) {
+                ImGui::SameLine();
+            }
+            ImGui::SetWindowFontScale(0.6f);
+            ImGui::Button((std::to_string(i) + "##input").c_str(), {channelButtonWidth, 0});
+            ImGui::SetWindowFontScale(1.0f);
+        }
+
+        // Visualize weights
+        if (ImGui::BeginChild("Weights", ImVec2(0, scale(50.0f)))) {
+        }
+        ImGui::EndChild();
+
+        // Visualize output channels
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            if (i > 0) {
+                ImGui::SameLine();
+            }
+            ImGui::SetWindowFontScale(0.6f);
+            ImGui::Button((std::to_string(i) + "##output").c_str(), {channelButtonWidth, 0});
+            ImGui::SetWindowFontScale(1.0f);
+        }
+
+        //auto& selectionData = getValueRef(_dataById);
+
+        //processNetwork(selectionData, weights, biases, activationFunctions);
+
+        //ImGui::SameLine();
+        //processEditWidgets(selectionData, weights, biases, activationFunctions);
+
+        //processActionButtons(weights, biases, activationFunctions);
     }
     ImGui::EndChild();
 }
