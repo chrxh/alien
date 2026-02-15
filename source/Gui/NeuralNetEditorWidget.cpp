@@ -36,19 +36,42 @@ void _NeuralNetEditorWidget::process(
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive]);
     };
     auto popColors = [] { ImGui::PopStyleColor(3); };
+    auto calcWeightColor = [](float value) {
+        auto factor = std::min(1.0f, std::abs(value));
+        if (value > NEAR_ZERO) {
+            return ImColor::HSV(0.61f, 0.5f, std::max(1.0f * factor, 0.1f), 0.5f);
+        } else if (value < -NEAR_ZERO) {
+            return ImColor::HSV(0.0f, 0.5f, std::max(1.0f * factor, 0.1f), 0.5f);
+        } else {
+            return ImColor::HSV(0.0f, 0.0f, 0.1f, 0.5f);
+        }
+    };
+    auto calcBiasColor = [](float value) {
+        auto factor = std::min(1.0f, std::abs(value));
+        if (value > NEAR_ZERO) {
+            return ImColor::HSV(0.61f, 0.5f, std::max(1.0f * factor, 0.2f), 1.0f);
+        } else if (value < -NEAR_ZERO) {
+            return ImColor::HSV(0.0f, 0.5f, std::max(1.0f * factor, 0.2f), 1.0f);
+        } else {
+            return ImColor::HSV(0.0f, 0.0f, 0.2f, 0.5f);
+        }
+    };
     auto& selectionData = getValueRef(_dataById);
+    auto drawList = ImGui::GetWindowDrawList();
+    auto constexpr BiasHeight = 8.0f;
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
 
-        // Connection buttons
-        ImGui::PushID("CellConnectionWeights");
+        // Connection weights info button
         auto width = ImGui::GetContentRegionAvail().x;
         auto connectionButtonWidth = width / MAX_OBJECT_CONNECTIONS - 2 * ImGui::GetStyle().FramePadding.x;
 
         pushDefaultColors();
-        ImGui::Button("Cell connection weights", {width - 2 * ImGui::GetStyle().FramePadding.x, 0});
+        ImGui::Button("Connection weights", {width - 2 * ImGui::GetStyle().FramePadding.x, 0});
         popColors();
 
+        // Connection weight sliders
+        ImGui::PushID("ConnectionWeightSliders");
         ImVec2 connectionButtonBottomLeft[MAX_OBJECT_CONNECTIONS];
         ImVec2 connectionButtonBottomRight[MAX_OBJECT_CONNECTIONS];
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -72,16 +95,16 @@ void _NeuralNetEditorWidget::process(
         // Placeholder for connection weights
         ImGui::Dummy(ImVec2(0, scale(20.0f)));
 
-        // Input channel buttons
-        ImGui::PushID("CellChannelWeights");
-
+        // Channel weights info button
         pushDefaultColors();
-        ImGui::Button("Cell channel weights", {width - 2 * ImGui::GetStyle().FramePadding.x, 0});
+        ImGui::Button("Channel weights", {width - 2 * ImGui::GetStyle().FramePadding.x, 0});
         popColors();
 
+        // Channel weight sliders
+        ImGui::PushID("ChannelWeightSliders");
         auto channelsButtonTopCenter = ImVec2{(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMin().y};
         auto channelButtonWidth = width / MAX_CHANNELS - 2 * ImGui::GetStyle().FramePadding.x;
-        ImVec2 inputButtonBottomCenter[MAX_CHANNELS];
+        ImVec2 inputChannelBottomCenter[MAX_CHANNELS];
         ImVec2 inputButtonTopLeft[MAX_CHANNELS];
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             if (i > 0) {
@@ -99,7 +122,7 @@ void _NeuralNetEditorWidget::process(
             ImGui::SetWindowFontScale(1.0f);
             ImGui::PopID();
 
-            inputButtonBottomCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMax().y};
+            inputChannelBottomCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMax().y};
             inputButtonTopLeft[i] = {ImGui::GetItemRectMin().x, ImGui::GetItemRectMin().y};
         }
         ImGui::PopID();
@@ -107,8 +130,20 @@ void _NeuralNetEditorWidget::process(
         // Placeholder for channel weights
         ImGui::Dummy(ImVec2(0, scale(70.0f)));
 
-        // Output channel buttons
-        ImVec2 outputButtonTopCenter[MAX_CHANNELS];
+        // Bias visualization
+        {
+            auto yPos = ImGui::GetCursorScreenPos().y;
+            for (int i = 0; i < MAX_CHANNELS; ++i)
+            {
+                drawList->AddRectFilled(
+                    {inputChannelBottomCenter[i].x - channelButtonWidth / 4, yPos - scale(BiasHeight)},
+                    {inputChannelBottomCenter[i].x + channelButtonWidth / 4, yPos},
+                    calcBiasColor(biases[i]));
+            }
+        }
+
+        // Neuron selection buttons
+        ImVec2 neuronTopCenter[MAX_CHANNELS];
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             if (i > 0) {
                 ImGui::SameLine();
@@ -125,29 +160,37 @@ void _NeuralNetEditorWidget::process(
             }
             popColors();
             ImGui::SetWindowFontScale(1.0f);
-            outputButtonTopCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMin().y};
+            neuronTopCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMin().y - scale(BiasHeight)};
         }
 
-        // Draw connection weight lines
-        auto calcColor = [](float value) {
-            auto factor = std::min(1.0f, std::abs(value));
-            if (value > NEAR_ZERO) {
-                return ImColor::HSV(0.61f, 0.5f, 1.0f * factor, 0.5f);
-            } else if (value < -NEAR_ZERO) {
-                return ImColor::HSV(0.0f, 0.5f, 1.0f * factor, 0.5f);
-            } else {
-                return ImColor::HSV(0.0f, 0.0f, 0.2f, 0.5f);
+        // Bias sliders
+        ImGui::PushID("BiasSliders");
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            if (i > 0) {
+                ImGui::SameLine();
             }
-        };
-        auto drawList = ImGui::GetWindowDrawList();
+            ImGui::PushID(i);
+            ImGui::SetWindowFontScale(0.8f);
+            ImGuiStyle& style = ImGui::GetStyle();
+            auto originalGrabMinSize = style.GrabMinSize;
+            style.GrabMinSize = scale(4.0f);
+            auto bias = biases.at(i);
+            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(channelButtonWidth).textWidth(0).min(-2.0f).max(2.0f), &bias);
+            biases.at(i) = bias;
+            style.GrabMinSize = originalGrabMinSize;
+            ImGui::SetWindowFontScale(1.0f);
+            ImGui::PopID();
+        }
+        ImGui::PopID();
+
+        // Draw connection weight lines
         {
             for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
                 auto value = connectionWeights[i];
                 if (std::abs(value) <= NEAR_ZERO) {
                     continue;
                 }
-                auto factor = std::min(1.0f, std::abs(value) / 4.0f);
-                auto halfWidth = /*scale(2.0f) * factor;*/  connectionButtonWidth / 2.0f * factor;
+                auto halfWidth = /*scale(2.0f) * factor;*/ connectionButtonWidth * std::min(1.0f, std::abs(value) / 2.0f) * 0.35f;
                 auto centerX = (connectionButtonBottomLeft[i].x + connectionButtonBottomRight[i].x) / 2.0f;
                 auto topY = connectionButtonBottomLeft[i].y;
                 drawList->AddQuadFilled(
@@ -155,7 +198,7 @@ void _NeuralNetEditorWidget::process(
                     {centerX + halfWidth, topY},
                     {centerX + halfWidth, channelsButtonTopCenter.y},
                     {centerX - halfWidth, channelsButtonTopCenter.y},
-                    calcColor(value));
+                    calcWeightColor(value));
             }
         }
         // Draw weight lines
@@ -167,7 +210,7 @@ void _NeuralNetEditorWidget::process(
                     //    continue;
                     //}
                     auto thickness = std::min(4.0f, std::abs(weightFloat));
-                    drawList->AddLine(inputButtonBottomCenter[i], outputButtonTopCenter[j], calcColor(weightFloat), scale(thickness));
+                    drawList->AddLine(inputChannelBottomCenter[i], neuronTopCenter[j], calcWeightColor(weightFloat), scale(thickness));
                 }
             }
         }
