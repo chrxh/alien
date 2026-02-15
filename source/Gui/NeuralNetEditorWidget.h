@@ -9,27 +9,20 @@ class _NeuralNetEditorWidget
 public:
     static NeuralNetEditorWidget create();
 
-    void process(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
+    void process(
+        std::vector<NeuralNetWeight>& weights,
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions,
+        std::vector<float>& connectionWeights);
 
 private:
     _NeuralNetEditorWidget();
 
     struct SelectionData
     {
-        int inputNeuronIndex = 0;
-        int outputNeuronIndex = 0;
+        int neuronIndex = 0;
     };
 
-    void processNetwork(
-        SelectionData& selectionData,
-        std::vector<NeuralNetWeight>& weights,
-        std::vector<float>& biases,
-        std::vector<ActivationFunction>& activationFunctions);
-    void processEditWidgets(
-        SelectionData& selectionData,
-        std::vector<NeuralNetWeight>& weights,
-        std::vector<float>& biases,
-        std::vector<ActivationFunction>& activationFunctions);
     void processActionButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     template <typename T>
