@@ -1,5 +1,6 @@
 #include "NeuralNetEditorWidget.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include <glad/glad.h>
@@ -267,12 +268,23 @@ void _NeuralNetEditorWidget::process(
         }
         // Draw channel weight lines
         {
+            struct WeightLine
+            {
+                int i;
+                int j;
+                float weightFloat;
+            };
+            std::vector<WeightLine> weightLines;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
                     auto weightFloat = weights[j * MAX_CHANNELS + i].getValue();
-                    auto thickness = std::min(4.0f, std::abs(weightFloat));
-                    drawList->AddLine(inputChannelBottomCenter[i], neuronTopCenter[j], calcWeightColor(weightFloat), scale(thickness));
+                    weightLines.push_back({i, j, weightFloat});
                 }
+            }
+            std::sort(weightLines.begin(), weightLines.end(), [](auto const& a, auto const& b) { return std::abs(a.weightFloat) < std::abs(b.weightFloat); });
+            for (auto const& wl : weightLines) {
+                auto thickness = std::min(4.0f, std::abs(wl.weightFloat));
+                drawList->AddLine(inputChannelBottomCenter[wl.i], neuronTopCenter[wl.j], calcWeightColor(wl.weightFloat), scale(thickness));
             }
         }
 
