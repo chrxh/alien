@@ -14,21 +14,6 @@
 #include "HelpStrings.h"
 #include "StyleRepository.h"
 
-namespace
-{
-    auto constexpr WidgetTextColumnWidth = 60.0f;
-
-    void enableAdditiveBlending(const ImDrawList*, const ImDrawCmd*)
-    {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
-
-    void disableAdditiveBlending(const ImDrawList*, const ImDrawCmd*)
-    {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-}
-
 NeuralNetEditorWidget _NeuralNetEditorWidget::create()
 {
     return NeuralNetEditorWidget(new _NeuralNetEditorWidget());
@@ -119,8 +104,8 @@ void _NeuralNetEditorWidget::process(
         }
         ImGui::PopID();
 
-        // Placeholder for weights
-        ImGui::Dummy(ImVec2(0, scale(50.0f)));
+        // Placeholder for channel weights
+        ImGui::Dummy(ImVec2(0, scale(70.0f)));
 
         // Output channel buttons
         ImVec2 outputButtonTopCenter[MAX_CHANNELS];
@@ -147,17 +132,15 @@ void _NeuralNetEditorWidget::process(
         auto calcColor = [](float value) {
             auto factor = std::min(1.0f, std::abs(value));
             if (value > NEAR_ZERO) {
-                return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
+                return ImColor::HSV(0.61f, 0.5f, 1.0f * factor, 0.5f);
             } else if (value < -NEAR_ZERO) {
-                return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
+                return ImColor::HSV(0.0f, 0.5f, 1.0f * factor, 0.5f);
             } else {
-                return ImColor::HSV(0.0f, 0.0f, 0.1f);
+                return ImColor::HSV(0.0f, 0.0f, 0.2f, 0.5f);
             }
         };
         auto drawList = ImGui::GetWindowDrawList();
         {
-            drawList->AddCallback(enableAdditiveBlending, nullptr);
-
             for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
                 auto value = connectionWeights[i];
                 if (std::abs(value) <= NEAR_ZERO) {
@@ -180,14 +163,13 @@ void _NeuralNetEditorWidget::process(
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
                     auto weightFloat = weights[j * MAX_CHANNELS + i].getValue();
-                    if (std::abs(weightFloat) <= NEAR_ZERO) {
-                        continue;
-                    }
+                    //if (std::abs(weightFloat) <= NEAR_ZERO) {
+                    //    continue;
+                    //}
                     auto thickness = std::min(4.0f, std::abs(weightFloat));
                     drawList->AddLine(inputButtonBottomCenter[i], outputButtonTopCenter[j], calcColor(weightFloat), scale(thickness));
                 }
             }
-            drawList->AddCallback(disableAdditiveBlending, nullptr);
         }
 
         AlienGui::Separator();
