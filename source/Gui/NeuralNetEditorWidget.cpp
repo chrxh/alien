@@ -270,9 +270,6 @@ void _NeuralNetEditorWidget::process(
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
                     auto weightFloat = weights[j * MAX_CHANNELS + i].getValue();
-                    //if (std::abs(weightFloat) <= NEAR_ZERO) {
-                    //    continue;
-                    //}
                     auto thickness = std::min(4.0f, std::abs(weightFloat));
                     drawList->AddLine(inputChannelBottomCenter[i], neuronTopCenter[j], calcWeightColor(weightFloat), scale(thickness));
                 }
