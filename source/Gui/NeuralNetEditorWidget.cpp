@@ -57,10 +57,10 @@ void _NeuralNetEditorWidget::process(
         }
     };
     auto& selectionData = getValueRef(_dataById);
-    auto drawList = ImGui::GetWindowDrawList();
     auto constexpr BiasHeight = 8.0f;
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+        auto drawList = ImGui::GetWindowDrawList();
 
         // Connection weights info button
         auto width = ImGui::GetContentRegionAvail().x;
