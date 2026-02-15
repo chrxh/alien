@@ -57,10 +57,10 @@ void _NeuralNetEditorWidget::process(
         }
     };
     auto& selectionData = getValueRef(_dataById);
-    auto drawList = ImGui::GetWindowDrawList();
     auto constexpr BiasHeight = 8.0f;
 
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+        auto drawList = ImGui::GetWindowDrawList();
 
         // Connection weights info button
         auto width = ImGui::GetContentRegionAvail().x;
@@ -83,8 +83,7 @@ void _NeuralNetEditorWidget::process(
             auto originalGrabMinSize = style.GrabMinSize;
             style.GrabMinSize = scale(8.0f);
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().format("%.2f").width(connectionButtonWidth).textWidth(0).min(-2.0f).max(2.0f),
-                &connectionWeights.at(i));
+                AlienGui::SliderFloatParameters().format("%.2f").width(connectionButtonWidth).textWidth(0).min(-2.0f).max(2.0f), &connectionWeights.at(i));
             style.GrabMinSize = originalGrabMinSize;
             ImGui::PopID();
             connectionButtonBottomLeft[i] = {ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y};
@@ -133,8 +132,7 @@ void _NeuralNetEditorWidget::process(
         // Bias visualization
         {
             auto yPos = ImGui::GetCursorScreenPos().y;
-            for (int i = 0; i < MAX_CHANNELS; ++i)
-            {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
                 drawList->AddRectFilled(
                     {inputChannelBottomCenter[i].x - channelButtonWidth / 4, yPos - scale(BiasHeight)},
                     {inputChannelBottomCenter[i].x + channelButtonWidth / 4, yPos},
@@ -182,6 +180,72 @@ void _NeuralNetEditorWidget::process(
             ImGui::PopID();
         }
         ImGui::PopID();
+
+        // Draw activation function plots below bias sliders
+        {
+            RealVector2D const plotSize{channelButtonWidth * 0.8f, scale(20.0f)};
+            auto calcPlotPosition = [&](RealVector2D const& refPos, float x, ActivationFunction activationFunction) {
+                float value = 0;
+                switch (activationFunction) {
+                case ActivationFunction_Sigmoid:
+                    value = Math::sigmoid(x);
+                    break;
+                case ActivationFunction_BinaryStep:
+                    value = Math::binaryStep(x);
+                    break;
+                case ActivationFunction_Identity:
+                    value = x / 4;
+                    break;
+                case ActivationFunction_Abs:
+                    value = std::abs(x) / 4;
+                    break;
+                case ActivationFunction_Gaussian:
+                    value = Math::gaussian(x);
+                    break;
+                }
+                return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8, refPos.y - value * plotSize.y / 2};
+            };
+
+            auto yPos = ImGui::GetCursorScreenPos().y;
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                RealVector2D refPos{inputChannelBottomCenter[i].x - plotSize.x / 2, yPos + plotSize.y / 2};
+
+                // Draw grid lines
+                for (float dx = 0; dx <= plotSize.x + NEAR_ZERO; dx += plotSize.x / 8) {
+                    auto color = std::abs(dx - plotSize.x / 2) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
+                    drawList->AddLine({refPos.x + dx, refPos.y - plotSize.y / 2}, {refPos.x + dx, refPos.y + plotSize.y / 2}, color, 1.0f);
+                }
+                for (float dy = -plotSize.y / 2; dy <= plotSize.y / 2 + NEAR_ZERO; dy += plotSize.y / 6) {
+                    auto color = std::abs(dy) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
+                    drawList->AddLine({refPos.x, refPos.y + dy}, {refPos.x + plotSize.x, refPos.y + dy}, color, 1.0f);
+                }
+
+                // Draw activation function curve
+                std::optional<RealVector2D> lastPos;
+                for (float dx = -4.0f; dx < 4.0f; dx += 0.2f) {
+                    RealVector2D pos = calcPlotPosition(refPos, dx, activationFunctions[i]);
+                    if (lastPos) {
+                        drawList->AddLine({lastPos->x, lastPos->y}, {pos.x, pos.y}, Const::NeuronEditorPlotColor, 1.0f);
+                    }
+                    lastPos = pos;
+                }
+            }
+
+            // Invisible buttons for clicking to cycle activation function
+            ImGui::PushID("ActivationFunctions");
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                if (i > 0) {
+                    ImGui::SameLine();
+                }
+                ImGui::PushID(i);
+                ImGui::SetCursorScreenPos({inputButtonTopLeft[i].x, yPos});
+                if (ImGui::InvisibleButton("##actfn", {channelButtonWidth, plotSize.y})) {
+                    activationFunctions[i] = (activationFunctions[i] + 1) % ActivationFunction_Count;
+                }
+                ImGui::PopID();
+            }
+            ImGui::PopID();
+        }
 
         // Draw connection weight lines
         {
