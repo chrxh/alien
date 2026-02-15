@@ -40,92 +40,143 @@ void _NeuralNetEditorWidget::process(
     std::vector<ActivationFunction>& activationFunctions,
     std::vector<float>& connectionWeights)
 {
+    auto pushDefaultColors = [] {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_FrameBg]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_FrameBgHovered]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_FrameBg]);
+    };
+    auto pushHighlightingColors = [] {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive]);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive]);
+    };
+    auto popColors = [] { ImGui::PopStyleColor(3); };
+    auto& selectionData = getValueRef(_dataById);
+
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
 
-        // Visualize connections
+        // Connection buttons
+        ImGui::PushID("CellConnectionWeights");
         auto width = ImGui::GetContentRegionAvail().x;
         auto connectionButtonWidth = width / MAX_OBJECT_CONNECTIONS - 2 * ImGui::GetStyle().FramePadding.x;
+
+        pushDefaultColors();
+        ImGui::Button("Cell connection weights", {width - 2 * ImGui::GetStyle().FramePadding.x, 0});
+        popColors();
+
         ImVec2 connectionButtonBottomLeft[MAX_OBJECT_CONNECTIONS];
         ImVec2 connectionButtonBottomRight[MAX_OBJECT_CONNECTIONS];
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
             if (i > 0) {
                 ImGui::SameLine();
             }
-            ImGui::Button(("C" + std::to_string(i)).c_str(), {connectionButtonWidth, 0});
+            ImGui::PushID(i);
+            ImGuiStyle& style = ImGui::GetStyle();
+            auto originalGrabMinSize = style.GrabMinSize;
+            style.GrabMinSize = scale(8.0f);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().format("%.2f").width(connectionButtonWidth).textWidth(0).min(-2.0f).max(2.0f),
+                &connectionWeights.at(i));
+            style.GrabMinSize = originalGrabMinSize;
+            ImGui::PopID();
             connectionButtonBottomLeft[i] = {ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y};
             connectionButtonBottomRight[i] = {ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y};
         }
+        ImGui::PopID();
 
-        // Visualize connection weights
-        if (ImGui::BeginChild("ChannelWeights", ImVec2(0, scale(50.0f)))) {
-        }
-        ImGui::EndChild();
+        // Placeholder for connection weights
+        ImGui::Dummy(ImVec2(0, scale(20.0f)));
 
-        // Visualize input channels
-        ImGui::Button("##Channels", {width - 2 * ImGui::GetStyle().FramePadding.x, 0.0f});
+        // Input channel buttons
+        ImGui::PushID("CellChannelWeights");
+
+        pushDefaultColors();
+        ImGui::Button("Cell channel weights", {width - 2 * ImGui::GetStyle().FramePadding.x, 0});
+        popColors();
+
         auto channelsButtonTopCenter = ImVec2{(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMin().y};
         auto channelButtonWidth = width / MAX_CHANNELS - 2 * ImGui::GetStyle().FramePadding.x;
         ImVec2 inputButtonBottomCenter[MAX_CHANNELS];
+        ImVec2 inputButtonTopLeft[MAX_CHANNELS];
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             if (i > 0) {
                 ImGui::SameLine();
             }
-            ImGui::SetWindowFontScale(0.6f);
-            ImGui::Button((std::to_string(i) + "##input").c_str(), {channelButtonWidth, 0});
+            ImGui::PushID(i);
+            ImGui::SetWindowFontScale(0.8f);
+            ImGuiStyle& style = ImGui::GetStyle();
+            auto originalGrabMinSize = style.GrabMinSize;
+            style.GrabMinSize = scale(4.0f);
+            auto weight = weights.at(i + selectionData.outputNeuronIndex * MAX_CHANNELS).getValue();
+            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(channelButtonWidth).textWidth(0).min(-2.0f).max(2.0f), &weight);
+            weights.at(i + selectionData.outputNeuronIndex * MAX_CHANNELS) = weight;
+            style.GrabMinSize = originalGrabMinSize;
             ImGui::SetWindowFontScale(1.0f);
+            ImGui::PopID();
+
             inputButtonBottomCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMax().y};
+            inputButtonTopLeft[i] = {ImGui::GetItemRectMin().x, ImGui::GetItemRectMin().y};
         }
+        ImGui::PopID();
 
-        // Visualize weights
-        if (ImGui::BeginChild("Weights", ImVec2(0, scale(50.0f)))) {
-        }
-        ImGui::EndChild();
+        // Placeholder for weights
+        ImGui::Dummy(ImVec2(0, scale(50.0f)));
 
-        // Visualize output channels
+        // Output channel buttons
         ImVec2 outputButtonTopCenter[MAX_CHANNELS];
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             if (i > 0) {
                 ImGui::SameLine();
             }
-            ImGui::SetWindowFontScale(0.6f);
-            ImGui::Button((std::to_string(i) + "##output").c_str(), {channelButtonWidth, 0});
+            ImGui::SetWindowFontScale(0.7f);
+            if (i == selectionData.outputNeuronIndex) {
+                pushHighlightingColors();
+            } else {
+                pushDefaultColors();
+            }
+            ImGui::SetCursorScreenPos({inputButtonTopLeft[i].x, ImGui::GetCursorScreenPos().y});
+            if (ImGui::Button((std::to_string(i) + "##output").c_str(), {channelButtonWidth, 0})) {
+                selectionData.outputNeuronIndex = i;
+            }
+            popColors();
             ImGui::SetWindowFontScale(1.0f);
             outputButtonTopCenter[i] = {(ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) / 2, ImGui::GetItemRectMin().y};
         }
 
-        // Draw weight lines
+        // Draw connection weight lines
+        auto calcColor = [](float value) {
+            auto factor = std::min(1.0f, std::abs(value));
+            if (value > NEAR_ZERO) {
+                return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
+            } else if (value < -NEAR_ZERO) {
+                return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
+            } else {
+                return ImColor::HSV(0.0f, 0.0f, 0.1f);
+            }
+        };
+        auto drawList = ImGui::GetWindowDrawList();
         {
-            auto calcColor = [](float value) {
-                auto factor = std::min(1.0f, std::abs(value));
-                if (value > NEAR_ZERO) {
-                    return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
-                } else if (value < -NEAR_ZERO) {
-                    return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
-                } else {
-                    return ImColor::HSV(0.0f, 0.0f, 0.1f);
-                }
-            };
-            auto drawList = ImGui::GetWindowDrawList();
             drawList->AddCallback(enableAdditiveBlending, nullptr);
 
-            // Draw connection weight lines
             for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
                 auto value = connectionWeights[i];
                 if (std::abs(value) <= NEAR_ZERO) {
                     continue;
                 }
                 auto factor = std::min(1.0f, std::abs(value) / 4.0f);
-                auto halfWidth = connectionButtonWidth / 2.0f * factor;
+                auto halfWidth = /*scale(2.0f) * factor;*/  connectionButtonWidth / 2.0f * factor;
                 auto centerX = (connectionButtonBottomLeft[i].x + connectionButtonBottomRight[i].x) / 2.0f;
                 auto topY = connectionButtonBottomLeft[i].y;
                 drawList->AddQuadFilled(
                     {centerX - halfWidth, topY},
                     {centerX + halfWidth, topY},
-                    {channelsButtonTopCenter.x + 1.0f, channelsButtonTopCenter.y},
-                    {channelsButtonTopCenter.x - 1.0f, channelsButtonTopCenter.y},
+                    {centerX + halfWidth, channelsButtonTopCenter.y},
+                    {centerX - halfWidth, channelsButtonTopCenter.y},
                     calcColor(value));
             }
-
+        }
+        // Draw weight lines
+        {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
                     auto weightFloat = weights[j * MAX_CHANNELS + i].getValue();
@@ -133,20 +184,15 @@ void _NeuralNetEditorWidget::process(
                         continue;
                     }
                     auto thickness = std::min(4.0f, std::abs(weightFloat));
-                    drawList->AddLine(inputButtonBottomCenter[i], outputButtonTopCenter[j], calcColor(weightFloat), thickness);
+                    drawList->AddLine(inputButtonBottomCenter[i], outputButtonTopCenter[j], calcColor(weightFloat), scale(thickness));
                 }
             }
             drawList->AddCallback(disableAdditiveBlending, nullptr);
         }
 
-        //auto& selectionData = getValueRef(_dataById);
+        AlienGui::Separator();
 
-        //processNetwork(selectionData, weights, biases, activationFunctions);
-
-        //ImGui::SameLine();
-        //processEditWidgets(selectionData, weights, biases, activationFunctions);
-
-        //processActionButtons(weights, biases, activationFunctions);
+        processActionButtons(weights, biases, activationFunctions);
     }
     ImGui::EndChild();
 }
@@ -160,8 +206,6 @@ void _NeuralNetEditorWidget::processNetwork(
     std::vector<ActivationFunction>& activationFunctions)
 {
     if (ImGui::BeginChild("Network", ImVec2(ImGui::GetContentRegionAvail().x / 2, scale(400.0f)))) {
-        // #TODO GCC incompatibily:
-        // auto weights_span = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         auto pushDefaultColors = [] {
             ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonColor);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonHoveredColor);
@@ -377,9 +421,9 @@ void _NeuralNetEditorWidget::processActionButtons(
         if (AlienGui::Button("Randomize")) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
-                    weights[i * MAX_CHANNELS + j] = NeuralNetWeight(NumberGenerator::get().getRandomFloat(-4.0f, 4.0f));
+                    weights[i * MAX_CHANNELS + j] = NeuralNetWeight(NumberGenerator::get().getRandomFloat(-2.0f, 2.0f));
                 }
-                biases[i] = NumberGenerator::get().getRandomFloat(-4.0f, 4.0f);
+                biases[i] = NumberGenerator::get().getRandomFloat(-2.0f, 2.0f);
                 activationFunctions[i] = NumberGenerator::get().getRandomInt(ActivationFunction_Count);
             }
         }
