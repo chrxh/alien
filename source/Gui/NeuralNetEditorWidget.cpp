@@ -206,15 +206,9 @@ void _NeuralNetEditorWidget::process(
                 return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8, refPos.y - value * plotSize.y / 2};
             };
 
-            ImGui::PushID("ActivationFunctions");
+            auto yPos = ImGui::GetCursorScreenPos().y;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                if (i > 0) {
-                    ImGui::SameLine();
-                }
-                ImGui::PushID(i);
-
-                auto cursorPos = ImGui::GetCursorScreenPos();
-                RealVector2D refPos{cursorPos.x + (channelButtonWidth - plotSize.x) / 2, cursorPos.y + plotSize.y / 2};
+                RealVector2D refPos{inputChannelBottomCenter[i].x - plotSize.x / 2, yPos + plotSize.y / 2};
 
                 // Draw grid lines
                 for (float dx = 0; dx <= plotSize.x + NEAR_ZERO; dx += plotSize.x / 8) {
@@ -235,13 +229,19 @@ void _NeuralNetEditorWidget::process(
                     }
                     lastPos = pos;
                 }
+            }
 
-                // Invisible button for clicking to cycle activation function
-                ImGui::SetCursorScreenPos(cursorPos);
+            // Invisible buttons for clicking to cycle activation function
+            ImGui::PushID("ActivationFunctions");
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                if (i > 0) {
+                    ImGui::SameLine();
+                }
+                ImGui::PushID(i);
+                ImGui::SetCursorScreenPos({inputButtonTopLeft[i].x, yPos});
                 if (ImGui::InvisibleButton("##actfn", {channelButtonWidth, plotSize.y})) {
                     activationFunctions[i] = (activationFunctions[i] + 1) % ActivationFunction_Count;
                 }
-
                 ImGui::PopID();
             }
             ImGui::PopID();
