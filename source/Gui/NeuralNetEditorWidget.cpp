@@ -265,7 +265,7 @@ void _NeuralNetEditorWidget::process(
                     calcWeightColor(value));
             }
         }
-        // Draw weight lines
+        // Draw channel weight lines
         {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
