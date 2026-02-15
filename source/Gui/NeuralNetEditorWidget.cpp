@@ -107,9 +107,9 @@ void _NeuralNetEditorWidget::process(
             ImGuiStyle& style = ImGui::GetStyle();
             auto originalGrabMinSize = style.GrabMinSize;
             style.GrabMinSize = scale(4.0f);
-            auto weight = weights.at(i + selectionData.outputNeuronIndex * MAX_CHANNELS).getValue();
+            auto weight = weights.at(i + selectionData.neuronIndex * MAX_CHANNELS).getValue();
             AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(channelButtonWidth).textWidth(0).min(-2.0f).max(2.0f), &weight);
-            weights.at(i + selectionData.outputNeuronIndex * MAX_CHANNELS) = weight;
+            weights.at(i + selectionData.neuronIndex * MAX_CHANNELS) = weight;
             style.GrabMinSize = originalGrabMinSize;
             ImGui::SetWindowFontScale(1.0f);
             ImGui::PopID();
@@ -129,14 +129,14 @@ void _NeuralNetEditorWidget::process(
                 ImGui::SameLine();
             }
             ImGui::SetWindowFontScale(0.7f);
-            if (i == selectionData.outputNeuronIndex) {
+            if (i == selectionData.neuronIndex) {
                 pushHighlightingColors();
             } else {
                 pushDefaultColors();
             }
             ImGui::SetCursorScreenPos({inputButtonTopLeft[i].x, ImGui::GetCursorScreenPos().y});
-            if (ImGui::Button((std::to_string(i) + "##output").c_str(), {channelButtonWidth, 0})) {
-                selectionData.outputNeuronIndex = i;
+            if (ImGui::Button((std::to_string(i + 1) + "##output").c_str(), {channelButtonWidth, 0})) {
+                selectionData.neuronIndex = i;
             }
             popColors();
             ImGui::SetWindowFontScale(1.0f);
@@ -199,198 +199,198 @@ void _NeuralNetEditorWidget::process(
 
 _NeuralNetEditorWidget::_NeuralNetEditorWidget() {}
 
-void _NeuralNetEditorWidget::processNetwork(
-    SelectionData& selectionData,
-    std::vector<NeuralNetWeight>& weights,
-    std::vector<float>& biases,
-    std::vector<ActivationFunction>& activationFunctions)
-{
-    if (ImGui::BeginChild("Network", ImVec2(ImGui::GetContentRegionAvail().x / 2, scale(400.0f)))) {
-        auto pushDefaultColors = [] {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonHoveredColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonHoveredColor);
-        };
-        auto pushHighlightingColors = [] {
-            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
-        };
-        RealVector2D const ioButtonSize{scale(30.0f), scale(20.0f)};
-        RealVector2D const plotSize{scale(50.0f), scale(20.0f)};
-        auto const biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
-        auto width = ImGui::GetContentRegionAvail().x;
+//void _NeuralNetEditorWidget::processNetwork(
+//    SelectionData& selectionData,
+//    std::vector<NeuralNetWeight>& weights,
+//    std::vector<float>& biases,
+//    std::vector<ActivationFunction>& activationFunctions)
+//{
+//    if (ImGui::BeginChild("Network", ImVec2(ImGui::GetContentRegionAvail().x / 2, scale(400.0f)))) {
+//        auto pushDefaultColors = [] {
+//            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonColor);
+//            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonHoveredColor);
+//            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonHoveredColor);
+//        };
+//        auto pushHighlightingColors = [] {
+//            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ToggleButtonActiveColor);
+//            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ToggleButtonActiveColor);
+//            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ToggleButtonActiveColor);
+//        };
+//        RealVector2D const ioButtonSize{scale(30.0f), scale(20.0f)};
+//        RealVector2D const plotSize{scale(50.0f), scale(20.0f)};
+//        auto const biasFieldWidth = ImGui::GetStyle().FramePadding.x * 2;
+//        auto width = ImGui::GetContentRegionAvail().x;
+//
+//        auto drawList = ImGui::GetWindowDrawList();
+//
+//        // Position functions
+//        auto startPos = ImGui::GetCursorScreenPos();
+//        auto style = ImGui::GetStyle();
+//        auto calcInputPos = [&](int i) { return ImVec2{startPos.x, startPos.y + (ioButtonSize.y + style.FramePadding.y + scale(1.0f)) * i}; };
+//        auto calcOutputPos = [&](int i) {
+//            return ImVec2{
+//                startPos.x + width - ioButtonSize.x - plotSize.x - biasFieldWidth - style.FramePadding.x * 2,
+//                startPos.y + (ioButtonSize.y + style.FramePadding.y + scale(1.0f)) * i};
+//        };
+//
+//        // Draw selection
+//        {
+//            auto inputPos = calcInputPos(selectionData.inputNeuronIndex);
+//            auto outputPos = calcOutputPos(selectionData.outputNeuronIndex);
+//            drawList->AddLine(
+//                {inputPos.x + ioButtonSize.x, inputPos.y + ioButtonSize.y / 2},
+//                {outputPos.x, outputPos.y + ioButtonSize.y / 2},
+//                ImColor::HSV(0.0f, 0.0f, 0.35f, 1.0f),
+//                8.0f);
+//        }
+//
+//        // Draw weights and biases
+//        auto calcColor = [](float value) {
+//            auto factor = std::min(1.0f, std::abs(value));
+//            if (value > NEAR_ZERO) {
+//                return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
+//            } else if (value < -NEAR_ZERO) {
+//                return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
+//            } else {
+//                return ImColor::HSV(0.0f, 0.0f, 0.1f);
+//            }
+//        };
+//        drawList->AddCallback(enableAdditiveBlending, nullptr);
+//        for (int i = 0; i < MAX_CHANNELS; ++i) {
+//            auto inputPos = calcInputPos(i);
+//            for (int j = 0; j < MAX_CHANNELS; ++j) {
+//                auto weightFloat = weights[j * MAX_CHANNELS + i].getValue();
+//                if (std::abs(weightFloat) <= NEAR_ZERO) {
+//                    continue;
+//                }
+//                auto thickness = std::min(4.0f, std::abs(weightFloat));
+//                auto outputPos = calcOutputPos(j);
+//                drawList->AddLine(
+//                    {inputPos.x + ioButtonSize.x, inputPos.y + ioButtonSize.y / 2},
+//                    {outputPos.x, outputPos.y + ioButtonSize.y / 2},
+//                    calcColor(weightFloat),
+//                    thickness);
+//            }
+//        }
+//        drawList->AddCallback(disableAdditiveBlending, nullptr);
+//        for (int i = 0; i < MAX_CHANNELS; ++i) {
+//            auto outputPos = calcOutputPos(i);
+//            if (i == selectionData.outputNeuronIndex) {
+//                drawList->AddRectFilled(
+//                    {outputPos.x, outputPos.y}, {outputPos.x + biasFieldWidth, outputPos.y + ioButtonSize.y}, ImColor::HSV(0.0f, 0.0f, 0.35f, 1.0f));
+//            }
+//            drawList->AddRectFilled(
+//                {outputPos.x, outputPos.y + ioButtonSize.y / 4}, {outputPos.x + biasFieldWidth, outputPos.y + ioButtonSize.y * 3 / 4}, calcColor(biases[i]));
+//        }
+//
+//        // Process buttons
+//        for (int i = 0; i < MAX_CHANNELS; ++i) {
+//            ImGui::PushID(i);
+//
+//            // Input button
+//            ImGui::SetCursorScreenPos(calcInputPos(i));
+//            if (i == selectionData.inputNeuronIndex) {
+//                pushHighlightingColors();
+//            } else {
+//                pushDefaultColors();
+//            }
+//            if (ImGui::Button(("i" + std::to_string(i + 1) + "###Input").c_str(), {ioButtonSize.x, ioButtonSize.y})) {
+//                selectionData.inputNeuronIndex = i;
+//            }
+//            ImGui::PopStyleColor(3);
+//
+//
+//            // Output button
+//            auto outputButtonPos = calcOutputPos(i);
+//            ImGui::SetCursorScreenPos({outputButtonPos.x + biasFieldWidth, outputButtonPos.y});
+//            if (i == selectionData.outputNeuronIndex) {
+//                pushHighlightingColors();
+//            } else {
+//                pushDefaultColors();
+//            }
+//            if (ImGui::Button(("o" + std::to_string(i + 1) + "###Output").c_str(), {ioButtonSize.x, ioButtonSize.y})) {
+//                selectionData.outputNeuronIndex = i;
+//            }
+//            ImGui::PopStyleColor(3);
+//
+//            ImGui::PopID();
+//        }
+//
+//        // Draw activation functions
+//        auto calcPlotPosition = [&](RealVector2D const& refPos, float x, ActivationFunction activationFunction) {
+//            float value = 0;
+//            switch (activationFunction) {
+//            case ActivationFunction_Sigmoid:
+//                value = Math::sigmoid(x);
+//                break;
+//            case ActivationFunction_BinaryStep:
+//                value = Math::binaryStep(x);
+//                break;
+//            case ActivationFunction_Identity:
+//                value = x / 4;
+//                break;
+//            case ActivationFunction_Abs:
+//                value = std::abs(x) / 4;
+//                break;
+//            case ActivationFunction_Gaussian:
+//                value = Math::gaussian(x);
+//                break;
+//            }
+//            return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8, refPos.y - value * plotSize.y / 2};
+//        };
+//        for (int i = 0; i < MAX_CHANNELS; ++i) {
+//            auto outputButtonPos = calcOutputPos(i);
+//            std::optional<RealVector2D> lastPos;
+//            RealVector2D refPos{outputButtonPos.x + ioButtonSize.x + biasFieldWidth + ImGui::GetStyle().FramePadding.x * 2, outputButtonPos.y + plotSize.y / 2};
+//            for (float dx = 0; dx <= plotSize.x + NEAR_ZERO; dx += plotSize.x / 8) {
+//                auto color = std::abs(dx - plotSize.x / 2) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
+//                drawList->AddLine({refPos.x + dx, refPos.y - plotSize.y / 2}, {refPos.x + dx, refPos.y + plotSize.y / 2}, color, 1.0f);
+//            }
+//            for (float dy = -plotSize.y / 2; dy <= plotSize.y / 2 + NEAR_ZERO; dy += plotSize.y / 6) {
+//                auto color = std::abs(dy) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
+//                drawList->AddLine({refPos.x, refPos.y + dy}, {refPos.x + plotSize.x, refPos.y + dy}, color, 1.0f);
+//            }
+//            for (float dx = -4.0f; dx < 4.0f; dx += 0.2f) {
+//                RealVector2D pos = calcPlotPosition(refPos, dx, activationFunctions[i]);
+//                if (lastPos) {
+//                    drawList->AddLine({lastPos->x, lastPos->y}, {pos.x, pos.y}, Const::NeuronEditorPlotColor, 1.0f);
+//                }
+//                lastPos = pos;
+//            }
+//        }
+//    }
+//    ImGui::EndChild();
+//}
 
-        auto drawList = ImGui::GetWindowDrawList();
-
-        // Position functions
-        auto startPos = ImGui::GetCursorScreenPos();
-        auto style = ImGui::GetStyle();
-        auto calcInputPos = [&](int i) { return ImVec2{startPos.x, startPos.y + (ioButtonSize.y + style.FramePadding.y + scale(1.0f)) * i}; };
-        auto calcOutputPos = [&](int i) {
-            return ImVec2{
-                startPos.x + width - ioButtonSize.x - plotSize.x - biasFieldWidth - style.FramePadding.x * 2,
-                startPos.y + (ioButtonSize.y + style.FramePadding.y + scale(1.0f)) * i};
-        };
-
-        // Draw selection
-        {
-            auto inputPos = calcInputPos(selectionData.inputNeuronIndex);
-            auto outputPos = calcOutputPos(selectionData.outputNeuronIndex);
-            drawList->AddLine(
-                {inputPos.x + ioButtonSize.x, inputPos.y + ioButtonSize.y / 2},
-                {outputPos.x, outputPos.y + ioButtonSize.y / 2},
-                ImColor::HSV(0.0f, 0.0f, 0.35f, 1.0f),
-                8.0f);
-        }
-
-        // Draw weights and biases
-        auto calcColor = [](float value) {
-            auto factor = std::min(1.0f, std::abs(value));
-            if (value > NEAR_ZERO) {
-                return ImColor::HSV(0.61f, 0.5f, 0.8f * factor);
-            } else if (value < -NEAR_ZERO) {
-                return ImColor::HSV(0.0f, 0.5f, 0.8f * factor);
-            } else {
-                return ImColor::HSV(0.0f, 0.0f, 0.1f);
-            }
-        };
-        drawList->AddCallback(enableAdditiveBlending, nullptr);
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            auto inputPos = calcInputPos(i);
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                auto weightFloat = weights[j * MAX_CHANNELS + i].getValue();
-                if (std::abs(weightFloat) <= NEAR_ZERO) {
-                    continue;
-                }
-                auto thickness = std::min(4.0f, std::abs(weightFloat));
-                auto outputPos = calcOutputPos(j);
-                drawList->AddLine(
-                    {inputPos.x + ioButtonSize.x, inputPos.y + ioButtonSize.y / 2},
-                    {outputPos.x, outputPos.y + ioButtonSize.y / 2},
-                    calcColor(weightFloat),
-                    thickness);
-            }
-        }
-        drawList->AddCallback(disableAdditiveBlending, nullptr);
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            auto outputPos = calcOutputPos(i);
-            if (i == selectionData.outputNeuronIndex) {
-                drawList->AddRectFilled(
-                    {outputPos.x, outputPos.y}, {outputPos.x + biasFieldWidth, outputPos.y + ioButtonSize.y}, ImColor::HSV(0.0f, 0.0f, 0.35f, 1.0f));
-            }
-            drawList->AddRectFilled(
-                {outputPos.x, outputPos.y + ioButtonSize.y / 4}, {outputPos.x + biasFieldWidth, outputPos.y + ioButtonSize.y * 3 / 4}, calcColor(biases[i]));
-        }
-
-        // Process buttons
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            ImGui::PushID(i);
-
-            // Input button
-            ImGui::SetCursorScreenPos(calcInputPos(i));
-            if (i == selectionData.inputNeuronIndex) {
-                pushHighlightingColors();
-            } else {
-                pushDefaultColors();
-            }
-            if (ImGui::Button(("i" + std::to_string(i + 1) + "###Input").c_str(), {ioButtonSize.x, ioButtonSize.y})) {
-                selectionData.inputNeuronIndex = i;
-            }
-            ImGui::PopStyleColor(3);
-
-
-            // Output button
-            auto outputButtonPos = calcOutputPos(i);
-            ImGui::SetCursorScreenPos({outputButtonPos.x + biasFieldWidth, outputButtonPos.y});
-            if (i == selectionData.outputNeuronIndex) {
-                pushHighlightingColors();
-            } else {
-                pushDefaultColors();
-            }
-            if (ImGui::Button(("o" + std::to_string(i + 1) + "###Output").c_str(), {ioButtonSize.x, ioButtonSize.y})) {
-                selectionData.outputNeuronIndex = i;
-            }
-            ImGui::PopStyleColor(3);
-
-            ImGui::PopID();
-        }
-
-        // Draw activation functions
-        auto calcPlotPosition = [&](RealVector2D const& refPos, float x, ActivationFunction activationFunction) {
-            float value = 0;
-            switch (activationFunction) {
-            case ActivationFunction_Sigmoid:
-                value = Math::sigmoid(x);
-                break;
-            case ActivationFunction_BinaryStep:
-                value = Math::binaryStep(x);
-                break;
-            case ActivationFunction_Identity:
-                value = x / 4;
-                break;
-            case ActivationFunction_Abs:
-                value = std::abs(x) / 4;
-                break;
-            case ActivationFunction_Gaussian:
-                value = Math::gaussian(x);
-                break;
-            }
-            return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8, refPos.y - value * plotSize.y / 2};
-        };
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            auto outputButtonPos = calcOutputPos(i);
-            std::optional<RealVector2D> lastPos;
-            RealVector2D refPos{outputButtonPos.x + ioButtonSize.x + biasFieldWidth + ImGui::GetStyle().FramePadding.x * 2, outputButtonPos.y + plotSize.y / 2};
-            for (float dx = 0; dx <= plotSize.x + NEAR_ZERO; dx += plotSize.x / 8) {
-                auto color = std::abs(dx - plotSize.x / 2) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
-                drawList->AddLine({refPos.x + dx, refPos.y - plotSize.y / 2}, {refPos.x + dx, refPos.y + plotSize.y / 2}, color, 1.0f);
-            }
-            for (float dy = -plotSize.y / 2; dy <= plotSize.y / 2 + NEAR_ZERO; dy += plotSize.y / 6) {
-                auto color = std::abs(dy) < NEAR_ZERO ? Const::NeuronEditorZeroLinePlotColor : Const::NeuronEditorGridColor;
-                drawList->AddLine({refPos.x, refPos.y + dy}, {refPos.x + plotSize.x, refPos.y + dy}, color, 1.0f);
-            }
-            for (float dx = -4.0f; dx < 4.0f; dx += 0.2f) {
-                RealVector2D pos = calcPlotPosition(refPos, dx, activationFunctions[i]);
-                if (lastPos) {
-                    drawList->AddLine({lastPos->x, lastPos->y}, {pos.x, pos.y}, Const::NeuronEditorPlotColor, 1.0f);
-                }
-                lastPos = pos;
-            }
-        }
-    }
-    ImGui::EndChild();
-}
-
-void _NeuralNetEditorWidget::processEditWidgets(
-    SelectionData& selectionData,
-    std::vector<NeuralNetWeight>& weights,
-    std::vector<float>& biases,
-    std::vector<ActivationFunction>& activationFunctions)
-{
-    if (ImGui::BeginChild("EditWidgets", ImVec2(0, 0))) {
-
-        int activationFunction = activationFunctions.at(selectionData.outputNeuronIndex);
-        AlienGui::Combo(
-            AlienGui::ComboParameters().name("ActFn").values(Const::ActivationFunctionStrings).textWidth(WidgetTextColumnWidth), activationFunction);
-        activationFunctions.at(selectionData.outputNeuronIndex) = static_cast<ActivationFunction>(activationFunction);
-
-        ImGuiStyle& style = ImGui::GetStyle();
-        auto originalGrabMinSize = style.GrabMinSize;
-        style.GrabMinSize = scale(8.0f);
-
-        // Convert NeuralNetWeight to float for slider, then back
-        float weightFloat = weights[selectionData.outputNeuronIndex * MAX_CHANNELS + selectionData.inputNeuronIndex].getValue();
-        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Weight").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth), &weightFloat);
-        weights[selectionData.outputNeuronIndex * MAX_CHANNELS + selectionData.inputNeuronIndex] = weightFloat;
-
-        AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().name("Bias").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth), &biases.at(selectionData.outputNeuronIndex));
-
-        style.GrabMinSize = originalGrabMinSize;
-    }
-    ImGui::EndChild();
-}
+//void _NeuralNetEditorWidget::processEditWidgets(
+//    SelectionData& selectionData,
+//    std::vector<NeuralNetWeight>& weights,
+//    std::vector<float>& biases,
+//    std::vector<ActivationFunction>& activationFunctions)
+//{
+//    if (ImGui::BeginChild("EditWidgets", ImVec2(0, 0))) {
+//
+//        int activationFunction = activationFunctions.at(selectionData.outputNeuronIndex);
+//        AlienGui::Combo(
+//            AlienGui::ComboParameters().name("ActFn").values(Const::ActivationFunctionStrings).textWidth(WidgetTextColumnWidth), activationFunction);
+//        activationFunctions.at(selectionData.outputNeuronIndex) = static_cast<ActivationFunction>(activationFunction);
+//
+//        ImGuiStyle& style = ImGui::GetStyle();
+//        auto originalGrabMinSize = style.GrabMinSize;
+//        style.GrabMinSize = scale(8.0f);
+//
+//        // Convert NeuralNetWeight to float for slider, then back
+//        float weightFloat = weights[selectionData.outputNeuronIndex * MAX_CHANNELS + selectionData.inputNeuronIndex].getValue();
+//        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Weight").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth), &weightFloat);
+//        weights[selectionData.outputNeuronIndex * MAX_CHANNELS + selectionData.inputNeuronIndex] = weightFloat;
+//
+//        AlienGui::SliderFloat(
+//            AlienGui::SliderFloatParameters().name("Bias").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth), &biases.at(selectionData.outputNeuronIndex));
+//
+//        style.GrabMinSize = originalGrabMinSize;
+//    }
+//    ImGui::EndChild();
+//}
 
 void _NeuralNetEditorWidget::processActionButtons(
     std::vector<NeuralNetWeight>& weights,

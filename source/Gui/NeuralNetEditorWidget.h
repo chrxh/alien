@@ -20,20 +20,9 @@ private:
 
     struct SelectionData
     {
-        int inputNeuronIndex = 0;
-        int outputNeuronIndex = 0;
+        int neuronIndex = 0;
     };
 
-    void processNetwork(
-        SelectionData& selectionData,
-        std::vector<NeuralNetWeight>& weights,
-        std::vector<float>& biases,
-        std::vector<ActivationFunction>& activationFunctions);
-    void processEditWidgets(
-        SelectionData& selectionData,
-        std::vector<NeuralNetWeight>& weights,
-        std::vector<float>& biases,
-        std::vector<ActivationFunction>& activationFunctions);
     void processActionButtons(std::vector<NeuralNetWeight>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     template <typename T>
