@@ -134,8 +134,8 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
             auto previewConnection = ConnectionPreviewDesc()
                                          .object1(object1._pos)
                                          .object2(object2._pos)
-                                         .connectionWeightToObject1(getConnectionWeight(object2, objectId1))
-                                         .connectionWeightToObject2(getConnectionWeight(object1, objectId2));
+                                         .connectionWeightToObject1(getConnectionWeight(object1, objectId2))
+                                         .connectionWeightToObject2(getConnectionWeight(object2, objectId1));
             result.description._connections.push_back(previewConnection);
         }
     }
