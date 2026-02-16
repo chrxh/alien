@@ -445,15 +445,8 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
             continue;
         }
 
-        // Calculate signal angle restrictions for this cell
-        auto summedAngle = 0.0f;
-
         // Process each connection from this cell
         for (int i = 0; i < object->numConnections; ++i) {
-            if (i > 0) {
-                summedAngle += object->connections[i].angleFromPrevious;
-            }
-
             auto connectedObject = object->connections[i].object;
 
             // Only add each connection once (from lower id to higher id to avoid duplicates)
@@ -466,18 +459,27 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 continue;
             }
 
-            bool arrowToCell1 = false;
-            bool arrowToCell2 = false;
+            float connectionWeightToObject1 = 0.0f;
+            float connectionWeightToObject2 = 0.0f;
             if (object->type == ObjectType_Cell) {
-                // TODO 
+                // connectionWeightToObject1: weight on object for this connection (signal flows from connectedObject to object)
+                auto* nn = object->typeData.cell.neuralNetwork;
+                if (nn) {
+                    connectionWeightToObject1 = nn->connectionWeights[i];
+                }
+            }
+            if (connectedObject->type == ObjectType_Cell) {
+                // connectionWeightToObject2: weight on connectedObject for reverse connection (signal flows from object to connectedObject)
+                auto* nn = connectedObject->typeData.cell.neuralNetwork;
+                if (nn) {
+                    auto backIndex = connectedObject->getConnectionIndex(object);
+                    connectionWeightToObject2 = nn->connectionWeights[backIndex];
+                }
             }
 
             // Get cell colors
             auto cellColor = getCellColor(object->color);
             auto connectedObjectColor = getCellColor(connectedObject->color);
-
-            // Encode arrow direction in flags: bit 0 = arrow to object1, bit 1 = arrow to object2
-            int arrowFlags = (arrowToCell1 ? 1 : 0) | (arrowToCell2 ? 2 : 0);
 
             // Add connection arrow data (2 vertices for the line)
             uint64_t vertexIndex = alienAtomicAdd64(numConnectionArrowVertices, uint64_t(2));
@@ -489,7 +491,8 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 connectionArrowData[vertexIndex].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex].color[2] = toFloat((cellColor >> 0) & 0xff) / 255.0f;
-                connectionArrowData[vertexIndex].arrowFlags = arrowFlags;
+                connectionArrowData[vertexIndex].connectionWeightToObject1 = connectionWeightToObject1;
+                connectionArrowData[vertexIndex].connectionWeightToObject2 = connectionWeightToObject2;
 
                 // Second vertex (object2)
                 connectionArrowData[vertexIndex + 1].pos[0] = connectedObject->pos.x;
@@ -497,7 +500,8 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 connectionArrowData[vertexIndex + 1].color[0] = toFloat((connectedObjectColor >> 16) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex + 1].color[1] = toFloat((connectedObjectColor >> 8) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex + 1].color[2] = toFloat((connectedObjectColor >> 0) & 0xff) / 255.0f;
-                connectionArrowData[vertexIndex + 1].arrowFlags = arrowFlags;
+                connectionArrowData[vertexIndex + 1].connectionWeightToObject1 = connectionWeightToObject1;
+                connectionArrowData[vertexIndex + 1].connectionWeightToObject2 = connectionWeightToObject2;
             }
         }
     }
