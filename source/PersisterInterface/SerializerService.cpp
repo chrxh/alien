@@ -187,10 +187,10 @@ namespace
     auto constexpr Id_SignalRestrictionGenome_BaseAngle = 1;
     auto constexpr Id_SignalRestrictionGenome_OpeneningAngle = 2;
 
-    auto constexpr Id_NeuralNetworkGenome_Weights = 0;
-    auto constexpr Id_NeuralNetworkGenome_Biases = 1;
-    auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 2;
-    auto constexpr Id_NeuralNetworkGenome_ConnectionWeights = 3;
+    auto constexpr Id_NeuralNetGenome_Weights = 0;
+    auto constexpr Id_NeuralNetGenome_Biases = 1;
+    auto constexpr Id_NeuralNetGenome_ActivationFunctions = 2;
+    auto constexpr Id_NeuralNetGenome_ConnectionWeights = 3;
 
     auto constexpr Id_DepotGenome_storageLimit = 0;
     auto constexpr Id_DepotGenome_InitialStoredUsableEnergy = 1;
@@ -285,17 +285,17 @@ namespace
 namespace cereal
 {
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NeuralNetworkGenomeDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuralNetGenomeDesc& data)
     {
-        NeuralNetworkGenomeDesc defaultObject;
+        NeuralNetGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Weights, data._weights, defaultObject._weights);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Biases, data._biases, defaultObject._biases);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        loadSave(task, auxiliaries, Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
+        loadSave(task, auxiliaries, Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
+        loadSave(task, auxiliaries, Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        loadSave(task, auxiliaries, Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NeuralNetworkGenomeDesc)
+    SPLIT_SERIALIZATION(NeuralNetGenomeDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, BaseGenomeDesc& data)
@@ -867,10 +867,10 @@ namespace
     auto constexpr Id_Connection_Distance = 1;
     auto constexpr Id_Connection_AngleFromPrevious = 2;
 
-    auto constexpr Id_NeuralNetwork_Weights = 0;
-    auto constexpr Id_NeuralNetwork_Biases = 1;
-    auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
-    auto constexpr Id_NeuralNetwork_ConnectionWeights = 3;
+    auto constexpr Id_NeuralNet_Weights = 0;
+    auto constexpr Id_NeuralNet_Biases = 1;
+    auto constexpr Id_NeuralNet_ActivationFunctions = 2;
+    auto constexpr Id_NeuralNet_ConnectionWeights = 3;
 
     auto constexpr Id_Constructor_AutoTriggerInterval = 0;
     auto constexpr Id_Constructor_ConstructionActivationTime = 1;
@@ -1045,17 +1045,17 @@ namespace cereal
     SPLIT_SERIALIZATION(SignalRestrictionDescLegacy)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NeuralNetworkDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuralNetDesc& data)
     {
-        NeuralNetworkDesc defaultObject;
+        NeuralNetDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_Weights, data._weights, defaultObject._weights);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_Biases, data._biases, defaultObject._biases);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        loadSave(task, auxiliaries, Id_NeuralNet_Weights, data._weights, defaultObject._weights);
+        loadSave(task, auxiliaries, Id_NeuralNet_Biases, data._biases, defaultObject._biases);
+        loadSave(task, auxiliaries, Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        loadSave(task, auxiliaries, Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NeuralNetworkDesc)
+    SPLIT_SERIALIZATION(NeuralNetDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, BaseDesc& data)

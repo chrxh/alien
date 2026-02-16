@@ -133,7 +133,7 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).type(CellDesc()
-                                        .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that should be overridden
+                                        .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that should be overridden
                                         .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(false))),
         },
         CreatureDesc().id(0));
@@ -154,7 +154,7 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).type(CellDesc()
-                                        .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that generator adds to
+                                        .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that generator adds to
                                         .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(true))),
         },
         CreatureDesc().id(0));
@@ -178,7 +178,7 @@ TEST_F(GeneratorTests, squareSignal_truncation)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).type(CellDesc()
-                                        .neuralNetwork(NeuralNetworkDesc().bias(0, 0.6f))  // Base signal that generator adds to
+                                        .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that generator adds to
                                         .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(2.0f).period(10)).additive(true))),
         },
         CreatureDesc().id(0));

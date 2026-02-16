@@ -8,9 +8,9 @@
 #include "GenomeDescription.h"
 
 template <>
-struct std::hash<NeuralNetworkGenomeDesc>
+struct std::hash<NeuralNetGenomeDesc>
 {
-    std::size_t operator()(NeuralNetworkGenomeDesc const& desc) const
+    std::size_t operator()(NeuralNetGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
         //for (const auto& weight : desc._weights) {
@@ -518,7 +518,7 @@ struct std::hash<NodeDesc>
         hash_combine(seed, desc._referenceAngle);
         hash_combine(seed, desc._color);
         hash_combine(seed, desc._numAdditionalConnections);
-        hash_combine(seed, std::hash<NeuralNetworkGenomeDesc>{}(desc._neuralNetwork));
+        hash_combine(seed, std::hash<NeuralNetGenomeDesc>{}(desc._neuralNetwork));
         hash_combine(seed, std::hash<CellTypeGenomeDesc>{}(desc._cellType));
         if (desc._constructor.has_value()) {
             hash_combine(seed, std::hash<ConstructorGenomeDesc>{}(desc._constructor.value()));

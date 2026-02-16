@@ -325,7 +325,7 @@ namespace
             for (auto& node : gene._nodes) {
                 node._color = PreviewColor;
                 if (!detailSimulation) {
-                    node._neuralNetwork = NeuralNetworkGenomeDesc();
+                    node._neuralNetwork = NeuralNetGenomeDesc();
                     node._cellType = BaseGenomeDesc();
                 }
                 if (node._constructor.has_value()) {

@@ -17,17 +17,17 @@
 struct MakeGenomeCopy;
 struct BaseGenomeDesc;
 
-struct NeuralNetworkGenomeDesc
+struct NeuralNetGenomeDesc
 {
-    NeuralNetworkGenomeDesc();
-    auto operator<=>(NeuralNetworkGenomeDesc const&) const = default;
+    NeuralNetGenomeDesc();
+    auto operator<=>(NeuralNetGenomeDesc const&) const = default;
 
-    NeuralNetworkGenomeDesc& weight(int row, int col, NeuralNetWeight value);
+    NeuralNetGenomeDesc& weight(int row, int col, NeuralNetWeight value);
 
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<NeuralNetWeight>, weights, {});
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, biases, {});
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<ActivationFunction>, activationFunctions, {});
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, connectionWeights, {});
+    MEMBER(NeuralNetGenomeDesc, std::vector<NeuralNetWeight>, weights, {});
+    MEMBER(NeuralNetGenomeDesc, std::vector<float>, biases, {});
+    MEMBER(NeuralNetGenomeDesc, std::vector<ActivationFunction>, activationFunctions, {});
+    MEMBER(NeuralNetGenomeDesc, std::vector<float>, connectionWeights, {});
 };
 
 struct BaseGenomeDesc
@@ -381,7 +381,7 @@ struct NodeDesc
     MEMBER(NodeDesc, int, color, 0);
     MEMBER(NodeDesc, int, numAdditionalConnections, 0);
 
-    MEMBER(NodeDesc, NeuralNetworkGenomeDesc, neuralNetwork, NeuralNetworkGenomeDesc());
+    MEMBER(NodeDesc, NeuralNetGenomeDesc, neuralNetwork, NeuralNetGenomeDesc());
     MEMBER(NodeDesc, CellTypeGenomeDesc, cellType, BaseGenomeDesc());
     MEMBER(NodeDesc, std::optional<ConstructorGenomeDesc>, constructor, std::nullopt);
 

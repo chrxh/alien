@@ -65,9 +65,9 @@ namespace
         return std::string(source, strnlen(source, 64));
     }
 
-    NeuralNetworkGenomeDesc convert(NeuralNetworkGenomeTO const& neuralNetworkGenomeTO)
+    NeuralNetGenomeDesc convert(NeuralNetGenomeTO const& neuralNetworkGenomeTO)
     {
-        NeuralNetworkGenomeDesc result;
+        NeuralNetGenomeDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result._weights[i] = neuralNetworkGenomeTO.weights[i];
         }
@@ -83,9 +83,9 @@ namespace
         return result;
     }
 
-    NeuralNetworkDesc convert(NeuralNetworkTO const& neuralNetworkTO)
+    NeuralNetDesc convert(NeuralNetTO const& neuralNetworkTO)
     {
-        NeuralNetworkDesc result;
+        NeuralNetDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result._weights[i] = neuralNetworkTO.weights[i];
         }
@@ -101,9 +101,9 @@ namespace
         return result;
     }
 
-    NeuralNetworkGenomeTO convert(NeuralNetworkGenomeDesc const& neuralNetworkDesc)
+    NeuralNetGenomeTO convert(NeuralNetGenomeDesc const& neuralNetworkDesc)
     {
-        NeuralNetworkGenomeTO result;
+        NeuralNetGenomeTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
@@ -119,14 +119,14 @@ namespace
         return result;
     }
 
-    NeuralNetworkTO convert(NeuralNetworkDesc const& neuralNetworkDesc)
+    NeuralNetTO convert(NeuralNetDesc const& neuralNetworkDesc)
     {
         CHECK(neuralNetworkDesc._weights.size() == MAX_CHANNELS * MAX_CHANNELS);
         CHECK(neuralNetworkDesc._biases.size() == MAX_CHANNELS);
         CHECK(neuralNetworkDesc._activationFunctions.size() == MAX_CHANNELS);
         CHECK(neuralNetworkDesc._connectionWeights.size() == MAX_OBJECT_CONNECTIONS);
 
-        NeuralNetworkTO result;
+        NeuralNetTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
@@ -605,7 +605,7 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
             cellDesc._constructor = constructor;
         }
 
-        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
+        auto const& neuralNetworkTO = getFromHeap<NeuralNetTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
         for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -1266,8 +1266,8 @@ void DescriptionConverterService::convertObjectToTO(
         objectTO.typeData.cell.eventPos = {cellDesc._eventPos.x, cellDesc._eventPos.y};
 
         objectTO.typeData.cell.neuralNetworkDataIndex = heap.size();
-        heap.resize(heap.size() + sizeof(NeuralNetworkTO));
-        auto neuralNetworkTO = reinterpret_cast<NeuralNetworkTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkTO));
+        heap.resize(heap.size() + sizeof(NeuralNetTO));
+        auto neuralNetworkTO = reinterpret_cast<NeuralNetTO*>(heap.data() + heap.size() - sizeof(NeuralNetTO));
         *neuralNetworkTO = convert(cellDesc._neuralNetwork);
         auto cellType = cellDesc.getCellType();
 

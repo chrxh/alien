@@ -5,7 +5,7 @@
 
 #include "NumberGenerator.h"
 
-NeuralNetworkGenomeDesc::NeuralNetworkGenomeDesc()
+NeuralNetGenomeDesc::NeuralNetGenomeDesc()
 {
     _weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -20,7 +20,7 @@ NeuralNetworkGenomeDesc::NeuralNetworkGenomeDesc()
     _connectionWeights.at(0) = 1.0f;
 }
 
-NeuralNetworkGenomeDesc& NeuralNetworkGenomeDesc::weight(int row, int col, NeuralNetWeight value)
+NeuralNetGenomeDesc& NeuralNetGenomeDesc::weight(int row, int col, NeuralNetWeight value)
 {
     _weights[row * MAX_CHANNELS + col] = value;
     return *this;

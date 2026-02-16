@@ -331,15 +331,15 @@ namespace
             cellTO.eventCounter = cell.eventCounter;
             cellTO.eventPos = cell.eventPos;
 
-            // Copy NeuralNetwork to NeuralNetworkTO
+            // Copy NeuralNet to NeuralNetTO
             if (cell.neuralNetwork != nullptr) {
-                uint64_t size = sizeof(NeuralNetworkTO);
+                uint64_t size = sizeof(NeuralNetTO);
                 cellTO.neuralNetworkDataIndex = alienAtomicAdd64(to.heapSize, size);
                 if (cellTO.neuralNetworkDataIndex + size > to.capacities.heap) {
-                    printf("Insufficient heap memory for NeuralNetworkTO.\n");
+                    printf("Insufficient heap memory for NeuralNetTO.\n");
                     ABORT();
                 }
-                auto* nnTO = reinterpret_cast<NeuralNetworkTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
+                auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
                 for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
                     nnTO->weights[i] = cell.neuralNetwork->weights[i];
                 }
@@ -1096,7 +1096,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if (object->type == ObjectType_Cell) {
-            heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
+            heapBytes += sizeof(NeuralNet) + GpuMemoryAlignmentBytes;
             if (object->typeData.cell.cellType == CellType_Memory) {
                 heapBytes += sizeof(SignalEntry) * object->typeData.cell.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
             }
@@ -1148,7 +1148,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TOs to, ArraySizesForGpuEntitie
             auto& objectTO = to.objects[index];
             heapBytes += sizeof(Object) + GpuMemoryAlignmentBytes;
             if (objectTO.type == ObjectType_Cell) {
-                heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
+                heapBytes += sizeof(NeuralNet) + GpuMemoryAlignmentBytes;
                 if (objectTO.typeData.cell.cellType == CellType_Memory) {
                     heapBytes += sizeof(SignalEntry) * objectTO.typeData.cell.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
                 }

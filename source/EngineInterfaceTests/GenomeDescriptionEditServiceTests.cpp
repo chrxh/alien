@@ -311,7 +311,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
         GeneDesc().separation(false).nodes({
             NodeDesc()
                 .constructor(ConstructorGenomeDesc())
-                .neuralNetwork(NeuralNetworkGenomeDesc().weight(2, 3, 0.4f)),
+                .neuralNetwork(NeuralNetGenomeDesc().weight(2, 3, 0.4f)),
             NodeDesc().cellType(DepotGenomeDesc()),
             NodeDesc().cellType(BaseGenomeDesc()),
             NodeDesc().cellType(SensorGenomeDesc()),
@@ -337,7 +337,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
         }
         // Cell types remain their original types in preview mode
     }
-    EXPECT_EQ(NeuralNetworkGenomeDesc(), gene0._nodes.front()._neuralNetwork);
+    EXPECT_EQ(NeuralNetGenomeDesc(), gene0._nodes.front()._neuralNetwork);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_complexCycles)

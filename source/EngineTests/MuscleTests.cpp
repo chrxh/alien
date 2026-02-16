@@ -74,7 +74,7 @@ TEST_F(MuscleTests, noFrontAngle)
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(MuscleDesc().mode(AutoBendingDesc()))),
+                .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(MuscleDesc().mode(AutoBendingDesc()))),
             ObjectDesc().id(3).pos({12.0f, 10.0f}),
         },
         CreatureDesc().id(0));
@@ -147,7 +147,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     auto [side, channel0, channel1] = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
@@ -231,7 +231,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     auto [side, channel0, channel1] = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
@@ -328,7 +328,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
@@ -425,7 +425,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
@@ -542,7 +542,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto [side, targetAngle] = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = 1.0f;
@@ -603,7 +603,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     auto [side, targetAngle] = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = 1.0f;
@@ -666,7 +666,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
@@ -738,7 +738,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
@@ -813,7 +813,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
@@ -872,7 +872,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
@@ -947,7 +947,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     auto constexpr AnglePrecision = 3.0f;
     auto [channel0, channel1] = GetParam();
 
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._weights.clear();
     nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
