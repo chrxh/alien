@@ -70,16 +70,19 @@ TEST_F(MuscleTests, noFrontAngle)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
-            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellType(MuscleDesc().mode(AutoBendingDesc()))),
-            ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(MuscleDesc().mode(AutoBendingDesc()))),
+            ObjectDesc().id(3).pos({12.0f, 10.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(50);
+    _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = actualData.getObjectRef(2);
@@ -127,9 +130,9 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(Side::Left, Channel0::Zero, Channel1::Positive),
         std::make_tuple(Side::Right, Channel0::Zero, Channel1::Positive),
         std::make_tuple(Side::Left, Channel0::Positive, Channel1::Positive),
-        std::make_tuple(Side::Right, Channel0::Positive, Channel1::Positive),
+        std::make_tuple(Side::Right, Channel0::Positive, Channel1::Positive),   
         std::make_tuple(Side::Left, Channel0::Negative, Channel1::Positive),
-        std::make_tuple(Side::Right, Channel0::Negative, Channel1::Positive),
+        std::make_tuple(Side::Right, Channel0::Negative, Channel1::Positive),   
         std::make_tuple(Side::Left, Channel0::Zero, Channel1::Negative),
         std::make_tuple(Side::Right, Channel0::Zero, Channel1::Negative),
         std::make_tuple(Side::Left, Channel0::Positive, Channel1::Negative),
@@ -144,33 +147,36 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     auto [side, channel0, channel1] = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+    nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 4;
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc()
-                .id(1)
-                .pos({side == Side::Left ? 10.0f : 13.0f, 10.0f})
-                .type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
+            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}),
             ObjectDesc()
                 .id(2)
                 .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
                 .type(CellDesc()
-                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
+                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
                           .cellType(MuscleDesc().mode(AutoBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4))),
-            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc()),
-            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
+                          .neuralNetwork(nn)),
+            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
     data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
 
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         ASSERT_EQ(4, actualData._objects.size());
@@ -190,7 +196,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
         EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualCell4._connections.at(0)._distance));
 
-        auto angle = actualCell3._connections.at(0)._angleFromPrevious;
+        auto angle = actualCell3._connections.at(1)._angleFromPrevious;
         minAngle = std::min(minAngle, angle);
         maxAngle = std::max(maxAngle, angle);
         if (i == 0) {
@@ -225,30 +231,36 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     auto [side, channel0, channel1] = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+    nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 4;
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc()),
-            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
-            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc()),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc().id(2).pos({10.0f, 11.0f}),
+            ObjectDesc().id(3).pos({10.0f, 12.0f}),
             ObjectDesc()
                 .id(4)
                 .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
                 .type(CellDesc()
-                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
+                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
                           .cellType(MuscleDesc().mode(AutoBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4))),
+                          .neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.addConnection(4, 2);
 
     _simulationFacade->setSimulationData(data);
 
     auto minAngle = 90.0f;
     auto maxAngle = 90.0f;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(4);
@@ -264,7 +276,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
         EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
 
-        auto angle = actualCell2._connections.at(side == Side::Left ? 2 : 1)._angleFromPrevious;
+        auto angle = actualCell2._connections.at(side == Side::Left ? 1 : 2)._angleFromPrevious;
         minAngle = std::min(minAngle, angle);
         maxAngle = std::max(maxAngle, angle);
         if (i == 0) {
@@ -272,9 +284,9 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
                 EXPECT_TRUE(angle < 90.0f + NEAR_ZERO);
                 EXPECT_TRUE(angle > 90.0f - NEAR_ZERO);
             } else if ((side == Side::Left && channel0 == Channel0::Positive) || (side == Side::Right && channel0 == Channel0::Negative)) {
-                EXPECT_TRUE(angle > 90.0f + NEAR_ZERO);
-            } else {
                 EXPECT_TRUE(angle < 90.0f - NEAR_ZERO);
+            } else {
+                EXPECT_TRUE(angle > 90.0f + NEAR_ZERO);
             }
         }
     }
@@ -316,26 +328,28 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc()
-                .id(1)
-                .pos({side == Side::Left ? 10.0f : 13.0f, 10.0f})
-                .type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
+            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}),
             ObjectDesc()
                 .id(2)
                 .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
                 .type(CellDesc()
-                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
+                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
                           .cellType(MuscleDesc().mode(ManualBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
-            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc()),
-            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
+                          .neuralNetwork(nn)),
+            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
     data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     setSimulationData(data, detailedPreview);
 
@@ -344,8 +358,8 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     auto numPositiveAngleChanges = 0;
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
-    for (int i = 0; i < 200; ++i) {
-        calcTimesteps(10, detailedPreview);
+    for (int i = 0; i < 2000; ++i) {
+        calcTimesteps(1, detailedPreview);
 
         auto actualData = getSimulationData(detailedPreview);
         ASSERT_EQ(4, actualData._objects.size());
@@ -378,20 +392,12 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
         lastAngle = angle;
     }
 
-    if (channel0 == Channel0::Positive && side == Side::Left) {
-        EXPECT_TRUE(numPositiveAngleChanges > 10);
-        EXPECT_EQ(0, numNegativeAngleChanges);
-    }
-    if (channel0 == Channel0::Positive && side == Side::Right) {
+    if ((channel0 == Channel0::Positive && side == Side::Left) || (channel0 == Channel0::Negative && side == Side::Right)) {
         EXPECT_EQ(0, numPositiveAngleChanges);
         EXPECT_TRUE(numNegativeAngleChanges > 10);
     }
-    if (channel0 == Channel0::Negative && side == Side::Left) {
-        EXPECT_EQ(0, numPositiveAngleChanges);
-        EXPECT_TRUE(numNegativeAngleChanges < 10);
-    }
-    if (channel0 == Channel0::Negative && side == Side::Right) {
-        EXPECT_TRUE(numPositiveAngleChanges < 10);
+    if ((channel0 == Channel0::Positive && side == Side::Right) || (channel0 == Channel0::Negative && side == Side::Left)) {
+        EXPECT_TRUE(numPositiveAngleChanges > 10);
         EXPECT_EQ(0, numNegativeAngleChanges);
     }
     if (channel0 == Channel0::Zero) {
@@ -400,15 +406,15 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
         EXPECT_TRUE(maxAngle < 180.0f + AnglePrecision);
         EXPECT_TRUE(maxAngle > 180.0f - AnglePrecision);
     } else if ((channel0 == Channel0::Positive && side == Side::Left) || (channel0 == Channel0::Negative && side == Side::Right)) {
-        EXPECT_TRUE(minAngle < 180.0f + AnglePrecision);
-        EXPECT_TRUE(minAngle > 180.0f - AnglePrecision);
-        EXPECT_TRUE(maxAngle > 180.0f + MaxAngleDeviation - AnglePrecision);
-        EXPECT_TRUE(maxAngle < 180.0f + MaxAngleDeviation + AnglePrecision);
-    } else {
         EXPECT_TRUE(maxAngle < 180.0f + AnglePrecision);
         EXPECT_TRUE(maxAngle > 180.0f - AnglePrecision);
         EXPECT_TRUE(minAngle > 180.0f - MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(minAngle < 180.0f - MaxAngleDeviation + AnglePrecision);
+    } else {
+        EXPECT_TRUE(minAngle < 180.0f + AnglePrecision);
+        EXPECT_TRUE(minAngle > 180.0f - AnglePrecision);
+        EXPECT_TRUE(maxAngle > 180.0f + MaxAngleDeviation - AnglePrecision);
+        EXPECT_TRUE(maxAngle < 180.0f + MaxAngleDeviation + AnglePrecision);
     }
 }
 
@@ -419,23 +425,27 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 
     auto [side, channel0, detailedPreview] = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc()),
-            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(20))),
-            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc()),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc().id(2).pos({10.0f, 11.0f}),
+            ObjectDesc().id(3).pos({10.0f, 12.0f}),
             ObjectDesc()
                 .id(4)
                 .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
                 .type(CellDesc()
-                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
-                          .cellType(
-                              MuscleDesc().mode(ManualBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.8f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
+                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
+                          .cellType(MuscleDesc().mode(ManualBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.8f)))
+                          .neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.addConnection(4, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -445,8 +455,8 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     auto numPositiveAngleChanges = 0;
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 2000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(4);
@@ -462,7 +472,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
         EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
 
-        auto angle = actualCell2._connections.at(side == Side::Left ? 2 : 1)._angleFromPrevious;
+        auto angle = actualCell2._connections.at(side == Side::Left ? 1 : 2)._angleFromPrevious;
         minAngle = std::min(minAngle, angle);
         maxAngle = std::max(maxAngle, angle);
         if (lastAngle.has_value()) {
@@ -475,20 +485,12 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
         }
         lastAngle = angle;
     }
-    if (channel0 == Channel0::Positive && side == Side::Left) {
-        EXPECT_TRUE(numPositiveAngleChanges > 10);
-        EXPECT_EQ(0, numNegativeAngleChanges);
-    }
-    if (channel0 == Channel0::Positive && side == Side::Right) {
+    if ((channel0 == Channel0::Positive && side == Side::Left) || (channel0 == Channel0::Negative && side == Side::Right)) {
         EXPECT_EQ(0, numPositiveAngleChanges);
         EXPECT_TRUE(numNegativeAngleChanges > 10);
     }
-    if (channel0 == Channel0::Negative && side == Side::Left) {
-        EXPECT_EQ(0, numPositiveAngleChanges);
-        EXPECT_TRUE(numNegativeAngleChanges < 10);
-    }
-    if (channel0 == Channel0::Negative && side == Side::Right) {
-        EXPECT_TRUE(numPositiveAngleChanges < 10);
+    if ((channel0 == Channel0::Positive && side == Side::Right) || (channel0 == Channel0::Negative && side == Side::Left)) {
+        EXPECT_TRUE(numPositiveAngleChanges > 10);
         EXPECT_EQ(0, numNegativeAngleChanges);
     }
     if (channel0 == Channel0::Zero) {
@@ -497,15 +499,15 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
         EXPECT_TRUE(maxAngle < 90.0f + AnglePrecision);
         EXPECT_TRUE(maxAngle > 90.0f - AnglePrecision);
     } else if ((channel0 == Channel0::Positive && side == Side::Left) || (channel0 == Channel0::Negative && side == Side::Right)) {
-        EXPECT_TRUE(minAngle < 90.0f + AnglePrecision);
-        EXPECT_TRUE(minAngle > 90.0f - AnglePrecision);
-        EXPECT_TRUE(maxAngle > 90.0f + MaxAngleDeviation - AnglePrecision);
-        EXPECT_TRUE(maxAngle < 90.0f + MaxAngleDeviation + AnglePrecision);
-    } else {
         EXPECT_TRUE(maxAngle < 90.0f + AnglePrecision);
         EXPECT_TRUE(maxAngle > 90.0f - AnglePrecision);
         EXPECT_TRUE(minAngle > 90.0f - MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(minAngle < 90.0f - MaxAngleDeviation + AnglePrecision);
+    } else {
+        EXPECT_TRUE(minAngle < 90.0f + AnglePrecision);
+        EXPECT_TRUE(minAngle > 90.0f - AnglePrecision);
+        EXPECT_TRUE(maxAngle > 90.0f + MaxAngleDeviation - AnglePrecision);
+        EXPECT_TRUE(maxAngle < 90.0f + MaxAngleDeviation + AnglePrecision);
     }
 }
 
@@ -540,26 +542,29 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto [side, targetAngle] = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = 1.0f;
+    nn._biases.at(Channels::MuscleAngle) = targetAngle / 180.0f;
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc()
-                .id(1)
-                .pos({side == Side::Left ? 10.0f : 13.0f, 10.0f})
-                .type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(10))),
+            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}),
             ObjectDesc()
                 .id(2)
                 .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
                 .type(CellDesc()
-                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
+                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
                           .cellType(MuscleDesc().mode(AngleBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f))),
-            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc()),
-            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
+                          .neuralNetwork(nn)),
+            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}),
+            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
     data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
 
@@ -584,9 +589,9 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto angle = actualCell3._connections.at(0)._angleFromPrevious;
     if (side == Side::Left) {
-        EXPECT_TRUE(abs(270.0f - angle + targetAngle) < AnglePrecision);
+        EXPECT_TRUE(approxCompareAngles(-90.0f + targetAngle, angle, AnglePrecision));
     } else {
-        EXPECT_TRUE(abs(angle - 90.0f - targetAngle) < AnglePrecision);
+        EXPECT_TRUE(approxCompareAngles(targetAngle - 90.0f, angle, AnglePrecision));
     }
 }
 
@@ -598,23 +603,28 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     auto [side, targetAngle] = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = 1.0f;
+    nn._biases.at(Channels::MuscleAngle) = targetAngle / 180.0f;
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc()),
-            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(10))),
-            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc()),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc().id(2).pos({10.0f, 11.0f}),
+            ObjectDesc().id(3).pos({10.0f, 12.0f}),
             ObjectDesc()
                 .id(4)
                 .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
                 .type(CellDesc()
-                          .frontAngle(side == Side::Left ? -90.0f : 90.0f)
-                          .cellType(MuscleDesc().mode(
-                              AngleBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).attractionRepulsionRatio(0.8f)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f))),
+                          .frontAngle(side == Side::Left ? 90.0f : -90.0f)
+                          .cellType(MuscleDesc().mode(AngleBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).attractionRepulsionRatio(0.8f)))
+                          .neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.addConnection(4, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -637,11 +647,9 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     auto angle = actualCell2._connections.at(side == Side::Left ? 2 : 1)._angleFromPrevious;
     if (side == Side::Left) {
-        targetAngle = std::min(-AngleMinDistance, std::max(-180.0f + AngleMinDistance, targetAngle));
-        EXPECT_TRUE(abs(angle - targetAngle - 180.0f) < AnglePrecision);
+        EXPECT_TRUE(approxCompareAngles(-90.0f + targetAngle, angle, AnglePrecision));
     } else {
-        targetAngle = std::min(180.0f - AngleMinDistance, std::max(AngleMinDistance, targetAngle));
-        EXPECT_TRUE(abs(angle - targetAngle) < AnglePrecision);
+        EXPECT_TRUE(approxCompareAngles(targetAngle - 90.0f, angle, AnglePrecision));
     }
 }
 
@@ -654,20 +662,23 @@ INSTANTIATE_TEST_SUITE_P(MuscleTests_AutoCrawling, MuscleTests_AutoCrawling, ::t
 
 TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 {
-    auto constexpr MaxDistanceDeviation = 0.8f;
+    auto constexpr MaxDistanceDeviation = 0.5f;
 
     auto channel0 = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(GeneratorDesc().autoTriggerInterval(10))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f)),
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .type(CellDesc()
-                          .frontAngle(180.0f)
-                          .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
+                .type(
+                    CellDesc().frontAngle(180.0f).cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(nn)),
             ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f)),
         },
         CreatureDesc().id(0));
@@ -678,8 +689,8 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -723,20 +734,25 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
 TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 {
-    auto constexpr MaxDistanceDeviation = 0.8f;
+    auto constexpr MaxDistanceDeviation = 0.5f;
 
     auto channel0 = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(GeneratorDesc().autoTriggerInterval(10))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f)),
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(180.0f)
                           .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
+                          .neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -745,8 +761,8 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -793,41 +809,46 @@ INSTANTIATE_TEST_SUITE_P(MuscleTests_ManualCrawling, MuscleTests_ManualCrawling,
 
 TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 {
-    auto constexpr MaxDistanceDeviation = 0.8f;
+    auto constexpr MaxDistanceDeviation = 0.5f;
 
     auto channel0 = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(GeneratorDesc().autoTriggerInterval(10))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f)),
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(180.0f)
                           .cellType(MuscleDesc().mode(ManualCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
+                          .neuralNetwork(nn)),
             ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f)),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
-        auto actualCell1 = actualData.getObjectRef(1);
+        auto actualCell3 = actualData.getObjectRef(3);
 
         ASSERT_EQ(3, actualData._objects.size());
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
-        EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
+        EXPECT_TRUE(approxCompare(distance, actualCell3._connections.at(0)._distance));
 
         minDistance = std::min(minDistance, distance);
         maxDistance = std::max(maxDistance, distance);
@@ -847,20 +868,25 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
 TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 {
-    auto constexpr MaxDistanceDeviation = 0.8f;
+    auto constexpr MaxDistanceDeviation = 0.5f;
 
     auto channel0 = GetParam();
 
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(GeneratorDesc().autoTriggerInterval(10))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngle(0.0f)),
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(180.0f)
                           .cellType(MuscleDesc().mode(ManualCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)))),
+                          .neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -869,8 +895,8 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -918,28 +944,28 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
 {
-    auto constexpr AnglePrecision = 1.0f;
+    auto constexpr AnglePrecision = 3.0f;
     auto [channel0, channel1] = GetParam();
+
+    NeuralNetDesc nn;
+    nn._weights.clear();
+    nn._weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
+    nn._biases.at(Channels::CellTypeActivation) = getValue(channel0);
+    nn._biases.at(Channels::MuscleAngle) = getValue(channel1) / 2;
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
-            ObjectDesc()
-                .id(2)
-                .pos({11.0f, 10.0f})
-                .type(CellDesc()
-                          .frontAngle(0.0f)
-                          .cellType(MuscleDesc().mode(DirectMovementDesc()))
-                          .neuralNetwork(NeuralNetworkDesc().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 2))),
-            ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(MuscleDesc().mode(DirectMovementDesc())).neuralNetwork(nn)),
+            ObjectDesc().id(3).pos({12.0f, 10.0f}),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData._objects.size());

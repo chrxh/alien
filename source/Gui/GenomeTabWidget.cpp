@@ -6,7 +6,7 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescriptionValidationService.h>
+#include <EngineInterface/GenomeDescValidationService.h>
 
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"

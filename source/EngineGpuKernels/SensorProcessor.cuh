@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Entities.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 
 class SensorProcessor
@@ -62,7 +61,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 {
     __shared__ bool isTriggered;
     if (threadIdx.x == 0) {
-        isTriggered = SignalProcessor::isAutoOrManuallyTriggered(data, object, object->typeData.cell.cellTypeData.sensor.autoTriggerInterval);
+        isTriggered = NeuronProcessor::isAutoOrManuallyTriggered(data, object, object->typeData.cell.cellTypeData.sensor.autoTrigger);
         if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
             isTriggered = false;
         }
@@ -98,11 +97,6 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
 {
     if (threadIdx.x == 0) {
 
-        // Create signal if not already existing
-        if (object->typeData.cell.signalState != SignalState_Active) {
-            SignalProcessor::createEmptySignal(object);
-        }
-
         // Measure cell energy level
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
         auto energyAboveMin = max(object->typeData.cell.usableEnergy - cellMinEnergy, 0.0f);
@@ -115,7 +109,7 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
         object->typeData.cell.signal.channels[Channels::SensorTelemetryCellEnergy] = 1.0f - 1.0f / powf(object->typeData.cell.usableEnergy + 1.0f, 0.1f);
 
         // Measure cell velocity with respect to front angle
-        auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, object));
+        auto refAngle = Math::angleOfVector(ObjectConnectionProcessor::calcReferenceDirection(data, object));
         auto absFrontAngle = refAngle + object->typeData.cell.frontAngle;
         auto velAngle = Math::angleOfVector(object->vel);
         object->typeData.cell.signal.channels[Channels::SensorTelemetryCellVelAngle] =
@@ -225,16 +219,12 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-            // Create signal if not already existing
-            if (object->typeData.cell.signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(object);
-            }
 
             float distance, absAngle, density;
             uint16_t creatureIdPart;
             unpack(distance, absAngle, density, creatureIdPart, lookupResult);
 
-            auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, object));
+            auto refAngle = Math::angleOfVector(ObjectConnectionProcessor::calcReferenceDirection(data, object));
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - object->typeData.cell.frontAngle, -180.0f);
             writeSignal(object->typeData.cell.signal, relAngle, density, distance);
             statistics.incNumSensorMatches(object->color);
@@ -266,7 +256,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
     if (threadIdx.x == 0) {
         lookupResult = 0xffffffffffffffff;
-        refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, object));
+        refAngle = Math::angleOfVector(ObjectConnectionProcessor::calcReferenceDirection(data, object));
     }
     __syncthreads();
 
@@ -328,11 +318,6 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-
-            // Create signal if not already existing
-            if (object->typeData.cell.signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(object);
-            }
 
             auto targetPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - object->typeData.cell.frontAngle, -180.0f);

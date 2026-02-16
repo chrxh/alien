@@ -46,6 +46,8 @@ public:
 
     __inline__ __device__ static bool existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject);
 
+    __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Object* object);
+
 private:
     static int constexpr MaxOperationsPerCell = 30;
 
@@ -646,4 +648,12 @@ __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingObjec
         }
     });
     return result;
+}
+
+__inline__ __device__ float2 ObjectConnectionProcessor::calcReferenceDirection(SimulationData& data, Object* object)
+{
+    if (object->numConnections == 0) {
+        return float2{0.0f, -1.0f};
+    }
+    return Math::getNormalized(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos));
 }

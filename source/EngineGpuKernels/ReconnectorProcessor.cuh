@@ -7,7 +7,6 @@
 #include "ConstantMemory.cuh"
 #include "Entities.cuh"
 #include "EnergyProcessor.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -38,7 +37,7 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (SignalProcessor::isManuallyTriggered(data, object)) {
+    if (NeuronProcessor::isManuallyTriggered(data, object)) {
         if (object->typeData.cell.signal.channels[Channels::CellTypeActivation] > 0) {
             tryCreateConnection(data, statistics, object);
         } else {

@@ -1,4 +1,4 @@
-#include "GenomeDescriptionValidationService.h"
+#include "GenomeDescValidationService.h"
 
 #include <algorithm>
 #include <cmath>
@@ -34,10 +34,12 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 activationFunction =
                     std::clamp(activationFunction, static_cast<ActivationFunction>(0), static_cast<ActivationFunction>(ActivationFunction_Count - 1));
             }
-
-            // Validate signal restriction
-            node._signalRestriction._baseAngle = Math::getNormalizedAngle(node._signalRestriction._baseAngle, -180.0f);
-            node._signalRestriction._openingAngle = Math::modulo(node._signalRestriction._openingAngle, 360.0f);
+            for (auto& bias : node._neuralNetwork._biases) {
+                bias = std::clamp(bias, -2.0f, 2.0f);
+            }
+            for (auto& weight : node._neuralNetwork._connectionWeights) {
+                weight = std::clamp(weight, -1.0f, 1.0f);
+            }
 
             // Validate cell-specific attributes based on type
             auto nodeType = node.getCellType();
@@ -49,13 +51,9 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
 
             } else if (nodeType == CellType_Sensor) {
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
-                if (sensor._autoTriggerInterval.has_value()) {
-                    auto& value = sensor._autoTriggerInterval.value();
-                    value = std::max(value, 1);
-                }
                 sensor._minRange = std::max(0, std::min(255, sensor._minRange));
                 sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
-                
+
                 // Validate mode-specific data
                 auto mode = sensor.getMode();
                 if (mode == SensorMode_DetectEnergy) {
@@ -82,15 +80,24 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                         auto& value = detectCreature._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
-                    detectCreature._restrictToLineage =
-                        std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
+                    detectCreature._restrictToLineage = std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellType_Generator) {
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
-                generator._autoTriggerInterval = std::max(generator._autoTriggerInterval, 0);
-                generator._pulseType = std::clamp(generator._pulseType, 0, GeneratorPulseType_Count - 1);
-                generator._alternationInterval = std::max(generator._alternationInterval, 1);
+                generator._valueOffset = std::clamp(generator._valueOffset, -2.0f, 2.0f);
+                generator._timeOffset = std::max(generator._timeOffset, 0);
+                // Validate mode-specific data
+                auto generatorMode = generator.getMode();
+                if (generatorMode == GeneratorMode_SquareSignal) {
+                    auto& squareSignal = std::get<SquareSignalGenomeDesc>(generator._mode);
+                    squareSignal._period = std::max(squareSignal._period, 1);
+                    squareSignal._amplitude = std::clamp(squareSignal._amplitude, 0.0f, 2.0f);
+                } else if (generatorMode == GeneratorMode_SawtoothSignal) {
+                    auto& sawtoothSignal = std::get<SawtoothSignalGenomeDesc>(generator._mode);
+                    sawtoothSignal._period = std::max(sawtoothSignal._period, 1);
+                    sawtoothSignal._amplitude = std::clamp(sawtoothSignal._amplitude, 0.0f, 4.0f);
+                }
 
             } else if (nodeType == CellType_Attacker) {
                 auto& attacker = std::get<AttackerGenomeDesc>(node._cellType);
@@ -180,7 +187,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                     signalDelay._delay = std::clamp(signalDelay._delay, 0, MAX_CELL_MEMORY_ENTRIES);
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
                     auto& signalRecorder = std::get<SignalRecorderGenomeDesc>(memory._mode);
-                    signalRecorder._numWrittenSignalEntries = std::clamp(signalRecorder._numWrittenSignalEntries, 0, static_cast<int>(memory._signalEntries.size()));
+                    signalRecorder._numWrittenSignalEntries =
+                        std::clamp(signalRecorder._numWrittenSignalEntries, 0, static_cast<int>(memory._signalEntries.size()));
                 } else if (memoryMode == MemoryMode_SignalStorage) {
                 } else if (memoryMode == MemoryMode_SignalIntegrator) {
                     auto& signalIntegrator = std::get<SignalIntegratorGenomeDesc>(memory._mode);

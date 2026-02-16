@@ -85,33 +85,16 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     }
 
     // Create preview cells
-    auto getNode = [&](ObjectDesc const& object) -> NodeDesc const& { return genome._genes.at(object.getCellRef()._geneIndex)._nodes.at(object.getCellRef()._nodeIndex); };
+    auto getNode = [&](ObjectDesc const& object) -> NodeDesc const& {
+        return genome._genes.at(object.getCellRef()._geneIndex)._nodes.at(object.getCellRef()._nodeIndex);
+    };
     for (auto const& object : phenotype._objects) {
         auto const& node = getNode(object);
         auto const& color = object.getCellRef()._cellState == CellState_Ready ? node._color : -1;
-        auto previewCell = CellPreviewDesc()
-                               .id(object._id)
-                               .pos(object._pos)
-                               .color(color)
-                               .geneIndex(object.getCellRef()._geneIndex)
-                               .nodeIndex(object.getCellRef()._nodeIndex)
-                               .signalState(object.getCellRef()._signalState);
+        auto previewCell =
+            CellPreviewDesc().id(object._id).pos(object._pos).color(color).geneIndex(object.getCellRef()._geneIndex).nodeIndex(object.getCellRef()._nodeIndex);
 
-        // Render as active if mode is Active or Conditional
-        bool hasRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
-                               node._signalRestriction._mode == SignalRestrictionMode_Conditional) && 
-                              !object._connections.empty();
-        if (hasRestriction) {
-            auto otherObjectId = object._connections.front()._objectId;
-            auto const& otherObject = phenotype.getObjectRef(otherObjectId, cache);
-            auto baseAngle = Math::angleOfVector(otherObject._pos - object._pos) + 180.0f + node._signalRestriction._baseAngle;
-            auto signalAngleRestrictionStart = Math::getNormalizedAngle(baseAngle - node._signalRestriction._openingAngle / 2, 0);
-            auto signalAngleRestrictionEnd = Math::getNormalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
-            previewCell._signalRestriction = SignalRestrictionPreviewDesc().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
-        }
-        if (object.getCellRef()._signalState == SignalState_Active) {
-            previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
-        }
+        previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
         if (node._constructor.has_value()) {
             if (!genome._genes.empty()) {
                 auto nodeConstructor = node._constructor.value();
@@ -121,34 +104,16 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
         result.description._objects.emplace_back(previewCell);
     }
 
-    // Determine arrow directions for each cell
-    std::set<std::pair<uint64_t, uint64_t>> arrowFromCell1ToCell2;
-    for (auto const& object : phenotype._objects) {
-        auto const& node = getNode(object);
-        auto signalAngleRestrictionStart = 180.0f + node._signalRestriction._baseAngle - node._signalRestriction._openingAngle / 2;
-        auto signalAngleRestrictionEnd = 180.0f + node._signalRestriction._baseAngle + node._signalRestriction._openingAngle / 2;
-        signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
-        signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
-
-        // For rendering, Active and Conditional modes are treated as having restriction
-        bool hasNodeRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
-                                   node._signalRestriction._mode == SignalRestrictionMode_Conditional);
-
-        auto summedAngle = 0.0f;
-        for (int i = 0; i < object._connections.size(); ++i) {
-            if (i > 0) {
-                summedAngle += object._connections[i]._angleFromPrevious;
-            }
-            auto connectedObjectId = object._connections[i]._objectId;
-
-            bool shouldAddArrow =
-                !hasNodeRestriction || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
-
-            if (shouldAddArrow) {
-                arrowFromCell1ToCell2.insert({object._id, connectedObjectId});
+    // Helper to find the connection weight from genome for a given connection
+    auto getConnectionWeight = [&getNode](ObjectDesc const& sourceObject, uint64_t targetId) -> float {
+        for (int i = 0, size = sourceObject._connections.size(); i < size; ++i) {
+            if (sourceObject._connections.at(i)._objectId == targetId) {
+                auto const& cw = getNode(sourceObject)._neuralNetwork._connectionWeights;
+                return cw.at(i);
             }
         }
-    }
+        return 0.0f;
+    };
 
     // Create preview connections
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
@@ -163,13 +128,14 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
             }
             processedConnections.insert(connectionPair);
 
-            bool arrowToObject1 = arrowFromCell1ToCell2.contains({objectId2, objectId1});
-            bool arrowToObject2 = arrowFromCell1ToCell2.contains({objectId1, objectId2});
+            auto const& object1 = phenotype.getObjectRef(objectId1, cache);
+            auto const& object2 = phenotype.getObjectRef(objectId2, cache);
+
             auto previewConnection = ConnectionPreviewDesc()
-                                         .object1(phenotype.getObjectRef(objectId1, cache)._pos)
-                                         .object2(phenotype.getObjectRef(objectId2, cache)._pos)
-                                         .arrowToObject1(arrowToObject1)
-                                         .arrowToObject2(arrowToObject2);
+                                         .object1(object1._pos)
+                                         .object2(object2._pos)
+                                         .connectionWeightToObject1(getConnectionWeight(object1, objectId2))
+                                         .connectionWeightToObject2(getConnectionWeight(object2, objectId1));
             result.description._connections.push_back(previewConnection);
         }
     }

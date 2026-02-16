@@ -2,5 +2,5 @@
 
 enum class MutationType
 {
-    NeuralNetwork,
+    NeuralNet,
 };

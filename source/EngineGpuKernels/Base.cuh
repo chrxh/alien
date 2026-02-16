@@ -2,7 +2,10 @@
 
 #include <vector>
 
+#include <cuda_fp16.h>
+
 #include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/EngineConstants.h>
 
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
@@ -318,4 +321,17 @@ __device__ __inline__ void bubbleSort(Container& container, int size, LessFunc l
             break;
         }
     }
+}
+
+// Efficient channel copy using float4 vectorized operations
+// Copies MAX_CHANNELS (16) floats from src to dst using 4x float4 operations
+__device__ __forceinline__ void copyChannels(float* __restrict__ dst, float const* __restrict__ src)
+{
+    static_assert(MAX_CHANNELS == 16, "copyChannels requires MAX_CHANNELS == 16 for float4 optimization");
+    float4 const* src4 = reinterpret_cast<float4 const*>(src);
+    float4* dst4 = reinterpret_cast<float4*>(dst);
+    dst4[0] = src4[0];
+    dst4[1] = src4[1];
+    dst4[2] = src4[2];
+    dst4[3] = src4[3];
 }

@@ -8,14 +8,14 @@
 #include "GenomeDescription.h"
 
 template <>
-struct std::hash<NeuralNetworkGenomeDesc>
+struct std::hash<NeuralNetGenomeDesc>
 {
-    std::size_t operator()(NeuralNetworkGenomeDesc const& desc) const
+    std::size_t operator()(NeuralNetGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        for (const auto& weight : desc._weights) {
-            hash_combine(seed, weight);
-        }
+        //for (const auto& weight : desc._weights) {
+        //    hash_combine(seed, weight);
+        //}
         for (const auto& bias : desc._biases) {
             hash_combine(seed, bias);
         }
@@ -70,15 +70,11 @@ struct std::hash<SensorGenomeDesc>
     std::size_t operator()(SensorGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        if (desc._autoTriggerInterval) {
-            hash_combine(seed, *desc._autoTriggerInterval);
-        } else {
-            hash_combine(seed, -1);
-        }
+        hash_combine(seed, desc._autoTrigger);
         hash_combine(seed, desc._minRange);
         hash_combine(seed, desc._maxRange);
         hash_combine(seed, desc.getMode());
-        
+
         // Hash mode-specific data
         if (desc.getMode() == SensorMode_DetectEnergy) {
             auto const& mode = std::get<DetectEnergyGenomeDesc>(desc._mode);
@@ -117,14 +113,45 @@ struct std::hash<SensorGenomeDesc>
 };
 
 template <>
+struct std::hash<SquareSignalGenomeDesc>
+{
+    std::size_t operator()(SquareSignalGenomeDesc const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._amplitude);
+        hash_combine(seed, desc._period);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<SawtoothSignalGenomeDesc>
+{
+    std::size_t operator()(SawtoothSignalGenomeDesc const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._amplitude);
+        hash_combine(seed, desc._period);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<GeneratorModeGenomeDesc>
+{
+    std::size_t operator()(GeneratorModeGenomeDesc const& desc) const { return variant_hasher<SquareSignalGenomeDesc, SawtoothSignalGenomeDesc>{}(desc); }
+};
+
+template <>
 struct std::hash<GeneratorGenomeDesc>
 {
     std::size_t operator()(GeneratorGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        hash_combine(seed, desc._autoTriggerInterval);
-        hash_combine(seed, static_cast<int>(desc._pulseType));
-        hash_combine(seed, desc._alternationInterval);
+        hash_combine(seed, desc._additive);
+        hash_combine(seed, desc._valueOffset);
+        hash_combine(seed, desc._timeOffset);
+        hash_combine(seed, std::hash<GeneratorModeGenomeDesc>{}(desc._mode));
         return seed;
     }
 };
@@ -157,19 +184,13 @@ struct std::hash<AttackCreatureGenomeDesc>
 template <>
 struct std::hash<AttackerModeGenomeDesc>
 {
-    std::size_t operator()(AttackerModeGenomeDesc const& desc) const
-    {
-        return variant_hasher<AttackFreeCellGenomeDesc, AttackCreatureGenomeDesc>{}(desc);
-    }
+    std::size_t operator()(AttackerModeGenomeDesc const& desc) const { return variant_hasher<AttackFreeCellGenomeDesc, AttackCreatureGenomeDesc>{}(desc); }
 };
 
 template <>
 struct std::hash<AttackerGenomeDesc>
 {
-    std::size_t operator()(AttackerGenomeDesc const& desc) const
-    {
-        return std::hash<AttackerModeGenomeDesc>{}(desc._mode);
-    }
+    std::size_t operator()(AttackerGenomeDesc const& desc) const { return std::hash<AttackerModeGenomeDesc>{}(desc._mode); }
 };
 
 template <>
@@ -457,10 +478,7 @@ struct std::hash<ReceiverGenomeDesc>
 template <>
 struct std::hash<CommunicatorModeGenomeDesc>
 {
-    std::size_t operator()(CommunicatorModeGenomeDesc const& desc) const
-    {
-        return variant_hasher<SenderGenomeDesc, ReceiverGenomeDesc>{}(desc);
-    }
+    std::size_t operator()(CommunicatorModeGenomeDesc const& desc) const { return variant_hasher<SenderGenomeDesc, ReceiverGenomeDesc>{}(desc); }
 };
 
 template <>
@@ -492,19 +510,6 @@ struct std::hash<CellTypeGenomeDesc>
 };
 
 template <>
-struct std::hash<SignalRestrictionGenomeDesc>
-{
-    std::size_t operator()(SignalRestrictionGenomeDesc const& desc) const
-    {
-        std::size_t seed = 0;
-        hash_combine(seed, desc._mode);
-        hash_combine(seed, desc._baseAngle);
-        hash_combine(seed, desc._openingAngle);
-        return seed;
-    }
-};
-
-template <>
 struct std::hash<NodeDesc>
 {
     std::size_t operator()(NodeDesc const& desc) const
@@ -513,14 +518,13 @@ struct std::hash<NodeDesc>
         hash_combine(seed, desc._referenceAngle);
         hash_combine(seed, desc._color);
         hash_combine(seed, desc._numAdditionalConnections);
-        hash_combine(seed, std::hash<NeuralNetworkGenomeDesc>{}(desc._neuralNetwork));
+        hash_combine(seed, std::hash<NeuralNetGenomeDesc>{}(desc._neuralNetwork));
         hash_combine(seed, std::hash<CellTypeGenomeDesc>{}(desc._cellType));
         if (desc._constructor.has_value()) {
             hash_combine(seed, std::hash<ConstructorGenomeDesc>{}(desc._constructor.value()));
         } else {
             hash_combine(seed, -1);
         }
-        hash_combine(seed, std::hash<SignalRestrictionGenomeDesc>{}(desc._signalRestriction));
         return seed;
     }
 };

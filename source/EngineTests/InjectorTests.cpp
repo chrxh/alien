@@ -29,8 +29,12 @@ protected:
     Desc createInjectorWithGenerator(RealVector2D const& injectorPos, int geneIndex = 0, int injectorColor = 0)
     {
         auto data = Desc().addCreature({
-            ObjectDesc().id(1).pos(injectorPos).color(injectorColor).type(CellDesc().cellType(InjectorDesc().geneIndex(geneIndex))),
-            ObjectDesc().id(2).pos({injectorPos.x + 1.0f, injectorPos.y}).color(injectorColor).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
+                ObjectDesc()
+                    .id(1)
+                    .pos(injectorPos)
+                    .color(injectorColor)
+                    .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(geneIndex))),
+            ObjectDesc().id(2).pos({injectorPos.x + 1.0f, injectorPos.y}).color(injectorColor),
         }, CreatureDesc().id(1));
         data.addConnection(1, 2);
         return data;
@@ -66,9 +70,7 @@ TEST_F(InjectorTests, noTargetFound)
     auto actualInjector = actualData.getObjectRef(1);
 
     // Injector should have a signal with success value = 0
-    if (actualInjector.getCellRef()._signalState == SignalState_Active) {
-        EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
-    }
+    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
 }
 
 /**
@@ -91,7 +93,6 @@ TEST_F(InjectorTests, successfulInjection)
     auto actualTargetConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
 
     // Injector should have a signal with success value > 0
-    ASSERT_TRUE(actualInjector.getCellRef()._signalState == SignalState_Active);
     EXPECT_TRUE(actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess] > NEAR_ZERO);
 
     // Target constructor should have the injector's geneIndex
@@ -106,8 +107,8 @@ TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
 {
     // Create a single creature with injector and constructor
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(InjectorDesc().geneIndex(3))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(3))),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}),
         ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),  // Same creature
     }, CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -160,8 +161,8 @@ TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
 {
     // Create injector with connections that block the injection ray
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(InjectorDesc().geneIndex(3))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(3))),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}),
         // Create a connection that crosses the ray path to target at (100, 97)
         ObjectDesc().id(3).pos({99.0f, 99.0f}),
         ObjectDesc().id(4).pos({101.0f, 99.0f}),

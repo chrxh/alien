@@ -1,11 +1,13 @@
 #pragma once
 
+#include <cuda_fp16.h>
+#include <cuda_runtime.h>
+
 #include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
 
 #include "GenomeTO.cuh"
-#include <cuda_runtime.h>
 #include <stdint.h>
 
 struct EnergyTO
@@ -27,9 +29,9 @@ struct ConnectionTO
     float angleFromPrevious;
 };
 
-struct NeuralNetworkTO
+struct NeuralNetTO
 {
-    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
@@ -81,8 +83,8 @@ struct DetectFreeCellTO
 
 struct DetectCreatureTO
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -104,7 +106,7 @@ struct SensorLastMatchTO
 
 struct SensorTO
 {
-    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    bool autoTrigger;
     SensorMode mode;
     SensorModeTO modeData;
     uint16_t minRange;
@@ -115,11 +117,31 @@ struct SensorTO
     SensorLastMatchTO lastMatch;
 };
 
+struct SquareSignalTO
+{
+    float amplitude;
+    int period;
+};
+
+struct SawtoothSignalTO
+{
+    float amplitude;
+    int period;
+};
+
+union GeneratorModeTO
+{
+    SquareSignalTO squareSignal;
+    SawtoothSignalTO sawtoothSignal;
+};
+
 struct GeneratorTO
 {
-    uint32_t autoTriggerInterval;
-    GeneratorPulseType pulseType;
-    uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    bool additive;
+    float valueOffset;
+    int timeOffset;
+    GeneratorMode mode;
+    GeneratorModeTO modeData;
 
     // Process data
     uint32_t numPulses;
@@ -159,9 +181,6 @@ struct AutoBendingTO
     // Process data
     float initialAngle;  // May be invalid
     bool forward;        // Current direction
-    float activation;
-    uint8_t activationCountdown;
-    bool impulseAlreadyApplied;
 };
 
 struct ManualBendingTO
@@ -173,7 +192,6 @@ struct ManualBendingTO
     // Process data
     float initialAngle;  // May be invalid
     float lastAngleDelta;
-    bool impulseAlreadyApplied;
 };
 
 struct AngleBendingTO
@@ -196,9 +214,6 @@ struct AutoCrawlingTO
     float initialDistance;  // May be invalid
     float lastActualDistance;
     bool forward;  // Current direction
-    float activation;
-    uint8_t activationCountdown;
-    bool impulseAlreadyApplied;
 };
 
 
@@ -212,7 +227,6 @@ struct ManualCrawlingTO
     float initialDistance;  // May be invalid
     float lastActualDistance;
     float lastDistanceDelta;
-    bool impulseAlreadyApplied;
 };
 
 struct DirectMovementTO
@@ -253,8 +267,8 @@ struct ReconnectFreeCellTO
 
 struct ReconnectCreatureTO
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -327,7 +341,7 @@ struct MemoryTO
     MemoryModeDataTO modeData;
 
     uint8_t numSignalEntries;
-    uint8_t channelBitMask;
+    uint16_t channelBitMask;
     uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryTO[MAX_CELL_MEMORY_ENTRIES]
 };
 
@@ -372,13 +386,6 @@ union CellTypeDataTO
     CommunicatorTO communicator;
 };
 
-struct SignalRestrictionTO
-{
-    SignalRestrictionMode mode;
-    float baseAngle;
-    float openingAngle;
-};
-
 struct SignalTO
 {
     float channels[MAX_CHANNELS];
@@ -418,9 +425,7 @@ struct CellTO
     CellTypeDataTO cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     ConstructorTO constructor;  // Optional constructor data
-    SignalState signalState;
-    SignalTO signal;  // For signalState == SignalState_Active
-    SignalRestrictionTO signalRestriction;
+    SignalTO signal;
     uint32_t activationTime;
 
     // Process data

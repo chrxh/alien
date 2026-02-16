@@ -5,7 +5,6 @@
 #include "ConstantMemory.cuh"
 #include "ConstructorHelper.cuh"
 #include "Entities.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -34,7 +33,7 @@ __device__ __inline__ void DepotProcessor::process(SimulationData& data, Simulat
 
 __device__ __inline__ void DepotProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (SignalProcessor::isManuallyTriggered(data, object)) {
+    if (NeuronProcessor::isManuallyTriggered(data, object)) {
         auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
         if (object->typeData.cell.signal.channels[Channels::CellTypeActivation] > 0 && object->typeData.cell.usableEnergy > normalCellEnergy) {
             auto energyToTransfer = max(min(object->typeData.cell.usableEnergy - normalCellEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);

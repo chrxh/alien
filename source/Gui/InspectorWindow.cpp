@@ -202,26 +202,6 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                 ImGui::TreePop();
             }
 
-            if (ImGui::TreeNodeEx("Signal routing", TreeNodeFlags)) {
-                int modeAsInt = static_cast<int>(object.getCellRef()._signalRestriction._mode);
-                if (AlienGui::Switcher(
-                    AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(BaseTabTextWidth),
-                    modeAsInt)) {
-                    object.getCellRef()._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
-                }
-                bool restrictionActive = (object.getCellRef()._signalRestriction._mode == SignalRestrictionMode_Active || 
-                                          object.getCellRef()._signalRestriction._mode == SignalRestrictionMode_Conditional);
-                if (restrictionActive) {
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
-                        object.getCellRef()._signalRestriction._baseAngle);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
-                        object.getCellRef()._signalRestriction._openingAngle);
-                }
-                ImGui::TreePop();
-            }
-
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
                 std::stringstream ss;
                 ss << "0x" << std::hex << std::uppercase << extendedCell.creature->_id;
@@ -341,8 +321,17 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
                 ImGui::TreePop();
             }
         }
-        if (object.getCellRef()._signalState == SignalState_Active) {
-            if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
+        // Check if signal has non-zero values
+        bool hasSignalChannels = !object.getCellRef()._signal._channels.empty();
+        if (hasSignalChannels) {
+            bool hasNonZeroChannel = false;
+            for (auto const& ch : object.getCellRef()._signal._channels) {
+                if (ch != 0.0f) {
+                    hasNonZeroChannel = true;
+                    break;
+                }
+            }
+            if (hasNonZeroChannel && ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
                 int index = 0;
                 for (auto& channel : object.getCellRef()._signal._channels) {
                     AlienGui::InputFloat(
@@ -522,19 +511,29 @@ void _InspectorWindow::processGeneratorContent(GeneratorDesc& _generator)
 {
     if (ImGui::TreeNodeEx("Properties###_generator", TreeNodeFlags)) {
 
-        AlienGui::InputInt(
-            AlienGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorPulseIntervalTooltip),
-            _generator._autoTriggerInterval);
-        bool alternation = _generator._alternationInterval > 0;
-        if (AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorAlternatingPulsesTooltip),
-                alternation)) {
-            _generator._alternationInterval = alternation ? 1 : 0;
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(CellTypeTextWidth), _generator._additive);
+
+        auto mode = _generator.getMode();
+        if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::GeneratorModeStrings).textWidth(CellTypeTextWidth), mode)) {
+            if (mode == GeneratorMode_SquareSignal) {
+                _generator._mode = SquareSignalDesc();
+            } else if (mode == GeneratorMode_SawtoothSignal) {
+                _generator._mode = SawtoothSignalDesc();
+            }
         }
-        if (alternation) {
-            AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorPulsesPerPhaseTooltip),
-                _generator._alternationInterval);
+
+        if (mode == GeneratorMode_SquareSignal) {
+            auto& squareSignal = std::get<SquareSignalDesc>(_generator._mode);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(CellTypeTextWidth),
+                squareSignal._amplitude);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(CellTypeTextWidth), squareSignal._period);
+        } else if (mode == GeneratorMode_SawtoothSignal) {
+            auto& sawtoothSignal = std::get<SawtoothSignalDesc>(_generator._mode);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(CellTypeTextWidth),
+                sawtoothSignal._amplitude);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(CellTypeTextWidth), sawtoothSignal._period);
         }
         ImGui::TreePop();
     }
@@ -646,21 +645,9 @@ void _InspectorWindow::processMuscleContent(MuscleDesc& muscle)
 void _InspectorWindow::processSensorContent(SensorDesc& sensor)
 {
     if (ImGui::TreeNodeEx("Properties###sensor", TreeNodeFlags)) {
-        int constructorMode = sensor._autoTriggerInterval == 0 ? 0 : 1;
-        if (AlienGui::Combo(
-                AlienGui::ComboParameters()
-                    .name("Activation mode")
-                    .textWidth(CellTypeTextWidth)
-                    .values({"Manual", "Automatic"})
-                    .tooltip(Const::GenomeConstructorActivationModeTooltip),
-                constructorMode)) {
-            sensor._autoTriggerInterval = constructorMode;
-        }
-        if (constructorMode == 1) {
-            AlienGui::InputOptionalInt(
-                AlienGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
-                sensor._autoTriggerInterval);
-        }
+        AlienGui::Checkbox(
+            AlienGui::CheckboxParameters().name("Auto trigger").textWidth(CellTypeTextWidth),
+            sensor._autoTrigger);
 
         // Mode selection
         auto mode = sensor.getMode();
@@ -850,8 +837,14 @@ void _InspectorWindow::validateAndCorrect(ObjectDesc& object) const
         } break;
         case CellType_Generator: {
             auto& _generator = std::get<GeneratorDesc>(object.getCellRef()._cellType);
-            _generator._autoTriggerInterval = std::max(0, _generator._autoTriggerInterval);
-            _generator._alternationInterval = std::max(0, _generator._alternationInterval);
+            auto generatorMode = _generator.getMode();
+            if (generatorMode == GeneratorMode_SquareSignal) {
+                auto& squareSignal = std::get<SquareSignalDesc>(_generator._mode);
+                squareSignal._period = std::max(1, squareSignal._period);
+            } else if (generatorMode == GeneratorMode_SawtoothSignal) {
+                auto& sawtoothSignal = std::get<SawtoothSignalDesc>(_generator._mode);
+                sawtoothSignal._period = std::max(1, sawtoothSignal._period);
+            }
         } break;
         case CellType_Detonator: {
             auto& detonator = std::get<DetonatorDesc>(object.getCellRef()._cellType);

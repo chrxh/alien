@@ -137,6 +137,18 @@ namespace
         }
     }
 
+    GeneratorModeGenomeDesc createGeneratorModeGenomeDesc(GeneratorMode mode)
+    {
+        switch (mode) {
+        case GeneratorMode_SquareSignal:
+            return SquareSignalGenomeDesc();
+        case GeneratorMode_SawtoothSignal:
+            return SawtoothSignalGenomeDesc();
+        default:
+            CHECK(false);
+        }
+    }
+
     ReconnectorModeGenomeDesc createReconnectorModeGenomeDesc(ReconnectorMode mode)
     {
         switch (mode) {
@@ -221,37 +233,6 @@ void _NodeEditorWidget::processNodeAttributes()
                 node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
             }
 
-            int modeAsInt = static_cast<int>(node._signalRestriction._mode);
-            if (AlienGui::Switcher(
-                AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(rightColumnWidth),
-                modeAsInt)) {
-                node._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
-            }
-
-            bool restrictionActive = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
-                                      node._signalRestriction._mode == SignalRestrictionMode_Conditional);
-            AlienGui::BeginIndent();
-
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters()
-                    .name("Signal base angle")
-                    .format("%.1f")
-                    .step(0.5f)
-                    .readOnly(!restrictionActive)
-                    .textWidth(rightColumnWidth),
-                node._signalRestriction._baseAngle);
-
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters()
-                    .name("Signal opening angle")
-                    .format("%.1f")
-                    .step(0.5f)
-                    .readOnly(!restrictionActive)
-                    .textWidth(rightColumnWidth),
-                node._signalRestriction._openingAngle);
-
-            AlienGui::EndIndent();
-
             AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(rightColumnWidth), node._color);
 
             table.next();
@@ -271,12 +252,12 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::EndIndent();
             } else if (nodeType == CellType_Sensor) {
 
+                ImGui::PushID("Sensor");
                 AlienGui::BeginIndent();
 
                 // Auto activation interval
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
-                AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval###1").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Auto trigger").textWidth(rightColumnWidth), sensor._autoTrigger);
 
                 // Mode selection
                 auto mode = sensor.getMode();
@@ -326,25 +307,46 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
 
                 AlienGui::EndIndent();
+                ImGui::PopID();
 
             } else if (nodeType == CellType_Generator) {
 
                 AlienGui::BeginIndent();
 
-                // Activation interval
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), generator._autoTriggerInterval);
 
-                // Pulse type
-                AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Pulse type").values({"Positive", "Alternation"}).textWidth(rightColumnWidth), generator._pulseType);
+                // Additive
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive"), generator._additive);
 
-                if (generator._pulseType == GeneratorPulseType_Alternation) {
+                // Value offset
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Value offset").format("%.2f").step(0.05f).textWidth(rightColumnWidth), generator._valueOffset);
 
+                // Time offset
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Time offset").textWidth(rightColumnWidth), generator._timeOffset);
+
+                // Mode
+                auto mode = generator.getMode();
+                if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::GeneratorModeStrings).textWidth(rightColumnWidth), mode)) {
+                    generator._mode = createGeneratorModeGenomeDesc(mode);
+                }
+
+                if (mode == GeneratorMode_SquareSignal) {
                     AlienGui::BeginIndent();
 
-                    // Pulses per phase
-                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Pulses per phase").textWidth(rightColumnWidth), generator._alternationInterval);
+                    auto& squareSignal = std::get<SquareSignalGenomeDesc>(generator._mode);
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(rightColumnWidth), squareSignal._amplitude);
+                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(rightColumnWidth), squareSignal._period);
+
+                    AlienGui::EndIndent();
+                } else if (mode == GeneratorMode_SawtoothSignal) {
+                    AlienGui::BeginIndent();
+
+                    auto& sawtoothSignal = std::get<SawtoothSignalGenomeDesc>(generator._mode);
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(rightColumnWidth), sawtoothSignal._amplitude);
+                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(rightColumnWidth), sawtoothSignal._period);
 
                     AlienGui::EndIndent();
                 }
@@ -369,7 +371,6 @@ void _NodeEditorWidget::processNodeAttributes()
                         AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackFreeCell._restrictToColor);
 
                     AlienGui::EndIndent();
-
                 }
 
                 AlienGui::EndIndent();
@@ -541,8 +542,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     &digestor._rawEnergyConductivity);
                 auto rawEnergyConversionRate = digestor.getRawEnergyConversionRate();
                 AlienGui::SliderFloat(
-                    AlienGui::SliderFloatParameters().name("Energy conversion").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                    &rawEnergyConversionRate);
+                    AlienGui::SliderFloatParameters().name("Energy conversion").max(1.0f).format("%.2f").textWidth(rightColumnWidth), &rawEnergyConversionRate);
                 digestor.setRawEnergyConversionRate(rawEnergyConversionRate);
                 AlienGui::EndIndent();
             } else if (nodeType == CellType_Memory) {
@@ -594,6 +594,10 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::MultiCheckboxesParameters().name("Channel mask bit 0-3").textWidth(rightColumnWidth), bit[0], bit[1], bit[2], bit[3]);
                 AlienGui::MultiCheckboxes(
                     AlienGui::MultiCheckboxesParameters().name("Channel mask bit 4-7").textWidth(rightColumnWidth), bit[4], bit[5], bit[6], bit[7]);
+                AlienGui::MultiCheckboxes(
+                    AlienGui::MultiCheckboxesParameters().name("Channel mask bit 8-11").textWidth(rightColumnWidth), bit[8], bit[9], bit[10], bit[11]);
+                AlienGui::MultiCheckboxes(
+                    AlienGui::MultiCheckboxesParameters().name("Channel mask bit 12-15").textWidth(rightColumnWidth), bit[12], bit[13], bit[14], bit[15]);
                 memory._channelBitMask = 0;
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
                     if (bit[i]) {
@@ -646,6 +650,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
             }
             if (hasConstructor) {
+                ImGui::PushID("Constructor");
                 AlienGui::BeginIndent();
                 auto& constructor = node._constructor.value();
 
@@ -662,7 +667,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 // Auto activation interval
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval###2").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
+                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
 
                 // Construction activation time
                 AlienGui::InputInt(
@@ -678,6 +683,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 constructor._provideEnergy = provideEnergy ? ProvideEnergy_CellAndGene : ProvideEnergy_CellOnly;
 
                 AlienGui::EndIndent();
+                ImGui::PopID();
             }
 
             table.next();
@@ -709,5 +715,6 @@ void _NodeEditorWidget::processNeuralNetEditor()
     AlienGui::Group(AlienGui::GroupParameters().text("Neural network"));
 
     auto& node = _editData->getSelectedNodeRef();
-    _neuralNetWidget->process(node._neuralNetwork._weights, node._neuralNetwork._biases, node._neuralNetwork._activationFunctions);
+    _neuralNetWidget->process(
+        node._neuralNetwork._weights, node._neuralNetwork._biases, node._neuralNetwork._activationFunctions, node._neuralNetwork._connectionWeights);
 }

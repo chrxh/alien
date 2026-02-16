@@ -6,7 +6,7 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescriptionEditService.h>
+#include <EngineInterface/GenomeDescEditService.h>
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
@@ -155,13 +155,12 @@ void _GeneEditorWidget::processNodeList()
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-        if (ImGui::BeginTable("Node list", 6, flags, ImVec2(-1, -1), 0.0f)) {
+        if (ImGui::BeginTable("Node list", 5, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("No.", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(30.0f));
             ImGui::TableSetupColumn("Node type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
             ImGui::TableSetupColumn("Construction", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
             ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
             ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
-            ImGui::TableSetupColumn("Signal restriction", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -224,23 +223,6 @@ void _GeneEditorWidget::processNodeList()
                         AlienGui::ColorField(Const::IndividualObjectColors[node._color], 40.0f, ImGui::GetTextLineHeight());
                     }
                     ImGui::EndChild();
-
-                    // Column 5: Signal restriction
-                    ImGui::TableNextColumn();
-                    bool hasRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
-                                           node._signalRestriction._mode == SignalRestrictionMode_Conditional);
-                    if (hasRestriction) {
-                        if (ImGui::BeginChild("signal", {0, scale(17.0f)}, 0, ImGuiWindowFlags_NoInputs)) {
-                            std::string restrictionText =
-                                StringHelper::format(node._signalRestriction._baseAngle, 1) + " deg, "
-                                + StringHelper::format(node._signalRestriction._openingAngle, 1) + " deg";
-                            if (node._signalRestriction._mode == SignalRestrictionMode_Conditional) {
-                                restrictionText += " (cond.)";
-                            }
-                            AlienGui::Text(restrictionText);
-                        }
-                        ImGui::EndChild();
-                    }
 
                     ImGui::PopID();
                 }

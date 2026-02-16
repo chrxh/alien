@@ -41,7 +41,6 @@ add_library(EngineGpuKernels
     GarbageCollectorKernels.cuh
     GeneratorProcessor.cuh
     Genome.cuh
-    GenomeProcessor.cuh
     GenomeTO.cuh
     GeometryKernels.cu
     GeometryKernels.cuh
@@ -70,7 +69,6 @@ add_library(EngineGpuKernels
     SelectionKernels.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
-    SignalProcessor.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu

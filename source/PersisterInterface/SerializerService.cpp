@@ -1,5 +1,6 @@
 #include "SerializerService.h"
 
+#include <cmath>
 #include <filesystem>
 #include <optional>
 #include <sstream>
@@ -109,6 +110,36 @@ namespace cereal
             loadSaveMap.emplace(key, value);
         }
     }
+
+    // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
+    void loadSave(
+        SerializationTask task,
+        std::unordered_map<int, VariantData>& loadSaveMap,
+        int key,
+        std::vector<NeuralNetWeight>& value,
+        std::vector<NeuralNetWeight> const& defaultValue)
+    {
+        if (task == SerializationTask::Load) {
+            auto findResult = loadSaveMap.find(key);
+            if (findResult != loadSaveMap.end()) {
+                auto variantData = findResult->second;
+                auto& int8Vec = std::get<std::vector<int8_t>>(variantData);
+                value.resize(int8Vec.size());
+                for (size_t i = 0; i < int8Vec.size(); ++i) {
+                    value[i] = NeuralNetWeight::fromRawValue(static_cast<uint8_t>(int8Vec[i]));
+                }
+            } else {
+                value = defaultValue;
+            }
+        } else {
+            std::vector<int8_t> int8Vec(value.size());
+            for (size_t i = 0; i < value.size(); ++i) {
+                int8Vec[i] = value[i].rawValue;
+            }
+            loadSaveMap.emplace(key, int8Vec);
+        }
+    }
+
     template <class Archive>
     void processLoadSaveMap(SerializationTask task, Archive& ar, std::unordered_map<int, VariantData>& loadSaveMap)
     {
@@ -156,10 +187,10 @@ namespace
     auto constexpr Id_SignalRestrictionGenome_BaseAngle = 1;
     auto constexpr Id_SignalRestrictionGenome_OpeneningAngle = 2;
 
-    auto constexpr Id_NeuralNetworkGenome_Weights = 0;
-    auto constexpr Id_NeuralNetworkGenome_Biases = 1;
-    auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 2;
-    auto constexpr Id_NeuralNetworkGenome_ConnectionWeights = 3;
+    auto constexpr Id_NeuralNetGenome_Weights = 0;
+    auto constexpr Id_NeuralNetGenome_Biases = 1;
+    auto constexpr Id_NeuralNetGenome_ActivationFunctions = 2;
+    auto constexpr Id_NeuralNetGenome_ConnectionWeights = 3;
 
     auto constexpr Id_DepotGenome_storageLimit = 0;
     auto constexpr Id_DepotGenome_InitialStoredUsableEnergy = 1;
@@ -172,7 +203,7 @@ namespace
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
 
-    auto constexpr Id_SensorGenome_AutoTriggerInterval = 0;
+    auto constexpr Id_SensorGenome_AutoTrigger = 0;
     auto constexpr Id_SensorGenome_MinRange = 1;
     auto constexpr Id_SensorGenome_MaxRange = 2;
 
@@ -201,9 +232,15 @@ namespace
     auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = 0;
     auto constexpr Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio = 1;
 
-    auto constexpr Id_GeneratorGenome_AutoTriggerInterval = 0;
-    auto constexpr Id_GeneratorGenome_PulseType = 1;
-    auto constexpr Id_GeneratorGenome_AlternationInterval = 2;
+    auto constexpr Id_GeneratorGenome_Additive = 0;
+    auto constexpr Id_GeneratorGenome_ValueOffset = 1;
+    auto constexpr Id_GeneratorGenome_TimeOffset = 2;
+
+    auto constexpr Id_GeneratorModeGenome_SquareSignal_Amplitude = 0;
+    auto constexpr Id_GeneratorModeGenome_SquareSignal_Period = 1;
+
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal_Amplitude = 0;
+    auto constexpr Id_GeneratorModeGenome_SawtoothSignal_Period = 1;
 
     auto constexpr Id_AttackerModeGenome_FreeCell_RestrictToColor = 0;
 
@@ -241,7 +278,6 @@ namespace
     auto constexpr Id_SenderGenome_Range = 0;
     auto constexpr Id_SenderGenome_MaxTimesSent = 1;
 
-    auto constexpr Id_ReceiverGenome_ChannelBitMask = 0;
     auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
     auto constexpr Id_ReceiverGenome_RestrictToLineage = 2;
 }
@@ -249,17 +285,17 @@ namespace
 namespace cereal
 {
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NeuralNetworkGenomeDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuralNetGenomeDesc& data)
     {
-        NeuralNetworkGenomeDesc defaultObject;
+        NeuralNetGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Weights, data._weights, defaultObject._weights);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Biases, data._biases, defaultObject._biases);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        loadSave(task, auxiliaries, Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
+        loadSave(task, auxiliaries, Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
+        loadSave(task, auxiliaries, Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        loadSave(task, auxiliaries, Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NeuralNetworkGenomeDesc)
+    SPLIT_SERIALIZATION(NeuralNetGenomeDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, BaseGenomeDesc& data)
@@ -352,7 +388,7 @@ namespace cereal
     {
         SensorGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_SensorGenome_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
         loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -362,14 +398,38 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorGenomeDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SquareSignalGenomeDesc& data)
+    {
+        SquareSignalGenomeDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_GeneratorModeGenome_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        loadSave(task, auxiliaries, Id_GeneratorModeGenome_SquareSignal_Period, data._period, defaultObject._period);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SquareSignalGenomeDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SawtoothSignalGenomeDesc& data)
+    {
+        SawtoothSignalGenomeDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_GeneratorModeGenome_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        loadSave(task, auxiliaries, Id_GeneratorModeGenome_SawtoothSignal_Period, data._period, defaultObject._period);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SawtoothSignalGenomeDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GeneratorGenomeDesc& data)
     {
         GeneratorGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_GeneratorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_GeneratorGenome_PulseType, data._pulseType, defaultObject._pulseType);
-        loadSave(task, auxiliaries, Id_GeneratorGenome_AlternationInterval, data._alternationInterval, defaultObject._alternationInterval);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_ValueOffset, data._valueOffset, defaultObject._valueOffset);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(GeneratorGenomeDesc)
 
@@ -663,41 +723,38 @@ namespace cereal
     }
     SPLIT_SERIALIZATION(CommunicatorGenomeDesc)
 
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDesc& data)
+    // Dummy struct for backward compatibility with old files that have SignalRestrictionGenomeDesc
+    struct SignalRestrictionGenomeDescLegacy
     {
-        SignalRestrictionGenomeDesc defaultObject;
+        uint8_t _mode = 0;
+        float _baseAngle = 0.0f;
+        float _openingAngle = 0.0f;
+    };
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDescLegacy& data)
+    {
+        SignalRestrictionGenomeDescLegacy defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        
-        // Backward compatibility: old files stored a bool at key 0 (true = active, false = inactive)
-        // New files store a SignalRestrictionMode (uint8_t) at the same key
+
+        // For backward compatibility, read any mode format but discard
         if (task == SerializationTask::Load) {
             auto findResult = auxiliaries.find(Id_SignalRestrictionGenome_Mode);
             if (findResult != auxiliaries.end()) {
                 auto& variantData = findResult->second;
                 if (std::holds_alternative<bool>(variantData)) {
-                    // Old file format: bool (true = active, false = inactive)
-                    data._mode = std::get<bool>(variantData) ? SignalRestrictionMode_Active : SignalRestrictionMode_Inactive;
+                    data._mode = std::get<bool>(variantData) ? 1 : 0;
                 } else if (std::holds_alternative<uint8_t>(variantData)) {
-                    // New file format: SignalRestrictionMode (uint8_t)
-                    auto modeValue = std::get<uint8_t>(variantData);
-                    data._mode = (modeValue < SignalRestrictionMode_Count) ? modeValue : defaultObject._mode;
-                } else {
-                    data._mode = defaultObject._mode;
+                    data._mode = std::get<uint8_t>(variantData);
                 }
-            } else {
-                data._mode = defaultObject._mode;
             }
-        } else {
-            // Save using the new uint8_t format
-            auxiliaries.emplace(Id_SignalRestrictionGenome_Mode, data._mode);
         }
-        
+
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SignalRestrictionGenomeDesc)
+    SPLIT_SERIALIZATION(SignalRestrictionGenomeDescLegacy)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NodeDesc& data)
@@ -709,7 +766,9 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._neuralNetwork, data._cellType, data._constructor, data._signalRestriction);
+        // For backward compatibility, read the legacy signal restriction and discard
+        SignalRestrictionGenomeDescLegacy legacySignalRestriction;
+        ar(data._neuralNetwork, data._cellType, data._constructor, legacySignalRestriction);
     }
     SPLIT_SERIALIZATION(NodeDesc)
 
@@ -781,7 +840,6 @@ namespace
     auto constexpr Id_Cell_NodeIndex = 6;
     auto constexpr Id_Cell_ParentNodeIndex = 7;
     auto constexpr Id_Cell_GeneIndex = 8;
-    auto constexpr Id_Cell_SignalState = 9;
     auto constexpr Id_Cell_AngleToFront = 10;
     auto constexpr Id_Cell_FrontAngleId = 11;
     auto constexpr Id_Cell_IsFrontAngleRefCell = 12;
@@ -809,10 +867,10 @@ namespace
     auto constexpr Id_Connection_Distance = 1;
     auto constexpr Id_Connection_AngleFromPrevious = 2;
 
-    auto constexpr Id_NeuralNetwork_Weights = 0;
-    auto constexpr Id_NeuralNetwork_Biases = 1;
-    auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
-    auto constexpr Id_NeuralNetwork_ConnectionWeights = 3;
+    auto constexpr Id_NeuralNet_Weights = 0;
+    auto constexpr Id_NeuralNet_Biases = 1;
+    auto constexpr Id_NeuralNet_ActivationFunctions = 2;
+    auto constexpr Id_NeuralNet_ConnectionWeights = 3;
 
     auto constexpr Id_Constructor_AutoTriggerInterval = 0;
     auto constexpr Id_Constructor_ConstructionActivationTime = 1;
@@ -833,14 +891,10 @@ namespace
     auto constexpr Id_MuscleMode_AutoBending_ForwardBackwardRatio = 6;
     auto constexpr Id_MuscleMode_AutoBending_InitialAngle = 7;
     auto constexpr Id_MuscleMode_AutoBending_Forward = 8;
-    auto constexpr Id_MuscleMode_AutoBending_Activation = 9;
-    auto constexpr Id_MuscleMode_AutoBending_ActivationCountdown = 10;
-    auto constexpr Id_MuscleMode_AutoBending_ImpulseAlreadyApplied = 12;
 
     auto constexpr Id_MuscleMode_ManualBending_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleMode_ManualBending_ForwardBackwardRatio = 1;
     auto constexpr Id_MuscleMode_ManualBending_InitialAngle = 2;
-    auto constexpr Id_MuscleMode_ManualBending_ImpulseAlreadyApplied = 4;
     auto constexpr Id_MuscleMode_ManualBending_LastAngleDelta = 5;
 
     auto constexpr Id_MuscleMode_AngleBending_MaxAngleDeviation = 0;
@@ -851,35 +905,32 @@ namespace
     auto constexpr Id_MuscleMode_AutoCrawling_ForwardBackwardRatio = 1;
     auto constexpr Id_MuscleMode_AutoCrawling_InitialDistance = 2;
     auto constexpr Id_MuscleMode_AutoCrawling_Forward = 3;
-    auto constexpr Id_MuscleMode_AutoCrawling_Activation = 4;
-    auto constexpr Id_MuscleMode_AutoCrawling_ActivationCountdown = 5;
     auto constexpr Id_MuscleMode_AutoCrawling_LastActualDistance = 6;
-    auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
 
     auto constexpr Id_MuscleMode_ManualCrawling_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleMode_ManualCrawling_ForwardBackwardRatio = 1;
     auto constexpr Id_MuscleMode_ManualCrawling_InitialDistance = 2;
     auto constexpr Id_MuscleMode_ManualCrawling_LastActualDistance = 3;
     auto constexpr Id_MuscleMode_ManualCrawling_LastDistanceDelta = 4;
-    auto constexpr Id_MuscleMode_ManualCrawling_ImpulseAlreadyApplied = 5;
 
     auto constexpr Id_Injector_GeneIndex = 0;
 
-    auto constexpr Id_Generator_AutoTriggerInterval = 0;
-    auto constexpr Id_Generator_PulseType = 1;
-    auto constexpr Id_Generator_AlternationMode = 2;
-    auto constexpr Id_Generator_NumPulses = 3;
+    auto constexpr Id_Generator_Additive = 0;
+    auto constexpr Id_Generator_NumPulses = 1;
+    auto constexpr Id_Generator_ValueOffset = 2;
+    auto constexpr Id_Generator_TimeOffset = 3;
+
+    auto constexpr Id_GeneratorMode_SquareSignal_Amplitude = 0;
+    auto constexpr Id_GeneratorMode_SquareSignal_Period = 1;
+
+    auto constexpr Id_GeneratorMode_SawtoothSignal_Amplitude = 0;
+    auto constexpr Id_GeneratorMode_SawtoothSignal_Period = 1;
 
     auto constexpr Id_AttackerMode_FreeCell_RestrictToColor = 0;
 
-    auto constexpr Id_AttackerMode_Creature_MinNumCells = 0;
-    auto constexpr Id_AttackerMode_Creature_MaxNumCells = 1;
-    auto constexpr Id_AttackerMode_Creature_RestrictToColor = 2;
-    auto constexpr Id_AttackerMode_Creature_RestrictToLineage = 3;
-
     auto constexpr Id_Sensor_MinRange = 0;
     auto constexpr Id_Sensor_MaxRange = 1;
-    auto constexpr Id_Sensor_AutoTriggerInterval = 2;
+    auto constexpr Id_Sensor_AutoTrigger = 2;
 
     auto constexpr Id_SensorMode_DetectEnergy_MinDensity = 0;
 
@@ -960,54 +1011,51 @@ namespace cereal
     }
     SPLIT_SERIALIZATION(SignalDesc)
 
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionDesc& data)
+    // Dummy struct for backward compatibility with old files that have SignalRestrictionDesc
+    struct SignalRestrictionDescLegacy
     {
-        SignalRestrictionDesc defaultObject;
+        uint8_t _mode = 0;
+        float _baseAngle = 0.0f;
+        float _openingAngle = 0.0f;
+    };
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionDescLegacy& data)
+    {
+        SignalRestrictionDescLegacy defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        
-        // Backward compatibility: old files stored a bool at key 0 (true = active, false = inactive)
-        // New files store a SignalRestrictionMode (uint8_t) at the same key
+
+        // For backward compatibility, read any mode format but discard
         if (task == SerializationTask::Load) {
             auto findResult = auxiliaries.find(Id_SignalRestriction_Mode);
             if (findResult != auxiliaries.end()) {
                 auto& variantData = findResult->second;
                 if (std::holds_alternative<bool>(variantData)) {
-                    // Old file format: bool (true = active, false = inactive)
-                    data._mode = std::get<bool>(variantData) ? SignalRestrictionMode_Active : SignalRestrictionMode_Inactive;
+                    data._mode = std::get<bool>(variantData) ? 1 : 0;
                 } else if (std::holds_alternative<uint8_t>(variantData)) {
-                    // New file format: SignalRestrictionMode (uint8_t)
-                    auto modeValue = std::get<uint8_t>(variantData);
-                    data._mode = (modeValue < SignalRestrictionMode_Count) ? modeValue : defaultObject._mode;
-                } else {
-                    data._mode = defaultObject._mode;
+                    data._mode = std::get<uint8_t>(variantData);
                 }
-            } else {
-                data._mode = defaultObject._mode;
             }
-        } else {
-            // Save using the new uint8_t format
-            auxiliaries.emplace(Id_SignalRestriction_Mode, data._mode);
         }
-        
+
         loadSave(task, auxiliaries, Id_SignalRestriction_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestriction_OpeningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SignalRestrictionDesc)
+    SPLIT_SERIALIZATION(SignalRestrictionDescLegacy)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NeuralNetworkDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuralNetDesc& data)
     {
-        NeuralNetworkDesc defaultObject;
+        NeuralNetDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_Weights, data._weights, defaultObject._weights);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_Biases, data._biases, defaultObject._biases);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        loadSave(task, auxiliaries, Id_NeuralNet_Weights, data._weights, defaultObject._weights);
+        loadSave(task, auxiliaries, Id_NeuralNet_Biases, data._biases, defaultObject._biases);
+        loadSave(task, auxiliaries, Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        loadSave(task, auxiliaries, Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NeuralNetworkDesc)
+    SPLIT_SERIALIZATION(NeuralNetDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, BaseDesc& data)
@@ -1113,7 +1161,7 @@ namespace cereal
     {
         SensorDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Sensor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_Sensor_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
         loadSave(task, auxiliaries, Id_Sensor_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -1123,15 +1171,39 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SquareSignalDesc& data)
+    {
+        SquareSignalDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_GeneratorMode_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        loadSave(task, auxiliaries, Id_GeneratorMode_SquareSignal_Period, data._period, defaultObject._period);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SquareSignalDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SawtoothSignalDesc& data)
+    {
+        SawtoothSignalDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_GeneratorMode_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        loadSave(task, auxiliaries, Id_GeneratorMode_SawtoothSignal_Period, data._period, defaultObject._period);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SawtoothSignalDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GeneratorDesc& data)
     {
         GeneratorDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Generator_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_Generator_PulseType, data._pulseType, defaultObject._pulseType);
-        loadSave(task, auxiliaries, Id_Generator_AlternationMode, data._alternationInterval, defaultObject._alternationInterval);
+        loadSave(task, auxiliaries, Id_Generator_Additive, data._additive, defaultObject._additive);
         loadSave(task, auxiliaries, Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
+        loadSave(task, auxiliaries, Id_Generator_ValueOffset, data._valueOffset, defaultObject._valueOffset);
+        loadSave(task, auxiliaries, Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(GeneratorDesc)
 
@@ -1184,9 +1256,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Forward, data._forward, defaultObject._forward);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Activation, data._activation, defaultObject._activation);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoBendingDesc)
@@ -1200,7 +1269,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_LastAngleDelta, data._lastAngleDelta, defaultObject._lastAngleDelta);
-        loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ManualBendingDesc)
@@ -1228,9 +1296,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Activation, data._activation, defaultObject._activation);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoCrawlingDesc)
@@ -1245,7 +1310,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_LastDistanceDelta, data._lastDistanceDelta, defaultObject._lastDistanceDelta);
-        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ManualCrawlingDesc)
@@ -1483,7 +1547,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        loadSave(task, auxiliaries, Id_Cell_SignalState, data._signalState, defaultObject._signalState);
         loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
         loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
@@ -1492,7 +1555,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._cellType, data._constructor, data._signal, data._signalRestriction, data._neuralNetwork);
+        ar(data._cellType, data._constructor, data._signal, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
 

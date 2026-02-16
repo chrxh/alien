@@ -16,182 +16,179 @@ public:
     ~GeneratorTests() = default;
 };
 
-TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
+//********************
+//* Square Signal    *
+//********************
+
+struct SquareSignalTestParams
 {
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(97))),
-        },
-        CreatureDesc().id(0));
+    int timesteps;         // Number of timesteps to execute
+    int timeOffset;        // Time offset for the generator
+    float expectedOutput;  // Expected signal output
+    std::string description;
+};
 
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97);
+class GeneratorTests_SquareSignal
+    : public GeneratorTests
+    , public testing::WithParamInterface<SquareSignalTestParams>
+{};
 
-    auto actualData = _simulationFacade->getSimulationData();
+// Test square signal at key points in the period
+// Period = 100, Amplitude = 2.0, ValueOffset = 0.1
+// Expected: +2.1 (clamped to 2.0) for timesteps [0, 50), -1.9 for timesteps [50, 100)
+INSTANTIATE_TEST_SUITE_P(
+    GeneratorTests_SquareSignal,
+    GeneratorTests_SquareSignal,
+    ::testing::Values(
+        SquareSignalTestParams{1, 0, 2.0f, "at the beginning"},                    // timestep 0: 2.0 + 0.1 = 2.1 clamped to 2.0
+        SquareSignalTestParams{30, 0, 2.0f, "before halfway through"},             // timestep 29: 2.0 + 0.1 = 2.1 clamped to 2.0
+        SquareSignalTestParams{51, 0, -1.9f, "at halfway through"},                // timestep 50: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{80, 0, -1.9f, "before the end"},                    // timestep 79: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{100, 0, -1.9f, "at the end"},                       // timestep 99: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{101, 0, 2.0f, "after the end (wrapping)"},          // timestep 0 (wrapped): 2.0 + 0.1 = 2.1 clamped to 2.0
+        SquareSignalTestParams{1, 50, -1.9f, "with timeOffset at second half"}));  // timeOffset 50: effective pos = 50 => -2.0 + 0.1 = -1.9
 
-    auto generator = actualData.getObjectRef(1);
-    EXPECT_FALSE(generator.getCellRef()._signalState == SignalState_Active);
-}
-
-TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
+TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
 {
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(97))),
-        },
-        CreatureDesc().id(0));
+    auto params = GetParam();
 
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(98);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    auto generator = actualData.getObjectRef(1);
-    ASSERT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
-}
-
-TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailedPreview)
-{
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(97))),
-        },
-        CreatureDesc().id(0));
-
-    _simulationFacade->setPreviewData(data);
-    _simulationFacade->calcTimestepsForPreview(98, true);
-    auto actualData = _simulationFacade->getPreviewData();
-
-    auto generator = actualData.getObjectRef(1);
-    ASSERT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
-}
-
-TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
-{
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(97 * 2))),
-        },
-        CreatureDesc().id(0));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97 * 2 + 1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
-}
-
-TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
-{
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(97))),
-        },
-        CreatureDesc().id(0));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(99);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    auto generator = actualData.getObjectRef(1);
-    EXPECT_FALSE(generator.getCellRef()._signalState == SignalState_Active);
-}
-
-TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
-{
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).type(
-                CellDesc().cellType(GeneratorDesc().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
+                CellDesc().cellType(GeneratorDesc().valueOffset(0.1f).timeOffset(params.timeOffset).mode(SquareSignalDesc().amplitude(2.0f).period(100)))),
         },
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97 * 2 + 1);
+    _simulationFacade->calcTimesteps(params.timesteps);
 
     auto actualData = _simulationFacade->getSimulationData();
-
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
+
+    EXPECT_TRUE(approxCompare(params.expectedOutput, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)))
+        << "Failed " << params.description << " (after " << params.timesteps << " timesteps)";
 }
 
-TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
+//********************
+//* Sawtooth Signal  *
+//********************
+
+struct SawtoothSignalTestParams
 {
+    int timesteps;         // Number of timesteps to execute
+    int timeOffset;        // Time offset for the generator
+    float expectedOutput;  // Expected signal output
+    std::string description;
+};
+
+class GeneratorTests_SawtoothSignal
+    : public GeneratorTests
+    , public testing::WithParamInterface<SawtoothSignalTestParams>
+{};
+
+// Test sawtooth signal at key points in the period
+// Period = 100, Amplitude = 2.0, ValueOffset = 0.2
+// Expected: linearly increasing from 0.2 to 2.0 (clamped) over 100 timesteps
+INSTANTIATE_TEST_SUITE_P(
+    GeneratorTests_SawtoothSignal,
+    GeneratorTests_SawtoothSignal,
+    ::testing::Values(
+        SawtoothSignalTestParams{1, 0, 0.2f, "at the beginning"},                // timestep 0: 2.0 * 0 / 100 + 0.2 = 0.2
+        SawtoothSignalTestParams{30, 0, 0.78f, "before halfway through"},        // timestep 29: 2.0 * 29 / 100 + 0.2 = 0.78
+        SawtoothSignalTestParams{51, 0, 1.2f, "at halfway through"},             // timestep 50: 2.0 * 50 / 100 + 0.2 = 1.2
+        SawtoothSignalTestParams{80, 0, 1.78f, "before the end"},                // timestep 79: 2.0 * 79 / 100 + 0.2 = 1.78
+        SawtoothSignalTestParams{100, 0, 2.0f, "at the end"},                    // timestep 99: 2.0 * 99 / 100 + 0.2 = 2.18 clamped to 2.0
+        SawtoothSignalTestParams{101, 0, 0.2f, "after the end (wrapping)"},      // timestep 0 (wrapped): 2.0 * 0 / 100 + 0.2 = 0.2
+        SawtoothSignalTestParams{1, 50, 1.2f, "with timeOffset at midpoint"}));  // timeOffset 50: effective pos = 50 => 2.0 * 50 / 100 + 0.2 = 1.2
+
+TEST_P(GeneratorTests_SawtoothSignal, sawtoothSignal_outputAtVariousTimesteps)
+{
+    auto params = GetParam();
+
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).type(
-                CellDesc().cellType(GeneratorDesc().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
+                CellDesc().cellType(GeneratorDesc().valueOffset(0.2f).timeOffset(params.timeOffset).mode(SawtoothSignalDesc().amplitude(2.0f).period(100)))),
         },
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97 * 3 + 1);
+    _simulationFacade->calcTimesteps(params.timesteps);
 
     auto actualData = _simulationFacade->getSimulationData();
-
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
-    EXPECT_EQ(-1.0f, generator.getCellRef()._signal._channels.at(0));
+
+    EXPECT_TRUE(approxCompare(params.expectedOutput, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)))
+        << "Failed " << params.description << " (after " << params.timesteps << " timesteps)";
 }
 
-TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
+//********************
+//* Additive Mode    *
+//********************
+
+TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
 {
+    // With non-additive mode (default), generator should set the signal value directly,
+    // overriding any base signal from the neural network
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).type(
-                CellDesc().cellType(GeneratorDesc().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
+            ObjectDesc().id(1).type(CellDesc()
+                                        .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that should be overridden
+                                        .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(false))),
         },
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97 * 6 + 1);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator.getCellRef()._signal._channels.at(0));
+
+    // Expected: 1.0 + 0.15 = 1.15 (set directly, not added to the 0.6 bias)
+    EXPECT_TRUE(approxCompare(1.15f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
 }
 
-TEST_F(GeneratorTests, generatePulse_triangularNetwork)
+TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
 {
+    // With additive mode, generator should add to the base signal from the neural network
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({0, 0}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(10))),
-            ObjectDesc().id(2).pos({1, 0}),
-            ObjectDesc().id(3).pos({0.5, 0.5}),
+            ObjectDesc().id(1).type(CellDesc()
+                                        .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that generator adds to
+                                        .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(1.0f).period(10)).additive(true))),
         },
         CreatureDesc().id(0));
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    data.addConnection(3, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(20 + 1);
+    _simulationFacade->calcTimesteps(1);
 
-    {
-        auto actualData = _simulationFacade->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
+    auto generator = actualData.getObjectRef(1);
 
-        auto generator = actualData.getObjectRef(1);
-        EXPECT_TRUE(generator.getCellRef()._signalState == SignalState_Active);
-        EXPECT_TRUE(approxCompare(1.0f, generator.getCellRef()._signal._channels.at(0)));
-        EXPECT_EQ(2, generator.getCellRef()._signalState);
+    // Expected: 0.6 (base from bias) + 1.0 (generator output) + 0.15 (valueOffset) = 1.75
+    EXPECT_TRUE(approxCompare(1.75f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
+}
 
-        auto base1 = actualData.getObjectRef(2);
-        EXPECT_FALSE(base1.getCellRef()._signalState == SignalState_Active);
-        EXPECT_EQ(0, base1.getCellRef()._signalState);
+//**************
+//* Truncation *
+//**************
+TEST_F(GeneratorTests, squareSignal_truncation)
+{
+    // With additive mode, generator should add to the base signal from the neural network
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).type(CellDesc()
+                                        .neuralNetwork(NeuralNetDesc().bias(0, 0.6f))  // Base signal that generator adds to
+                                        .cellType(GeneratorDesc().valueOffset(0.15f).mode(SquareSignalDesc().amplitude(2.0f).period(10)).additive(true))),
+        },
+        CreatureDesc().id(0));
 
-        auto base2 = actualData.getObjectRef(3);
-        EXPECT_FALSE(base2.getCellRef()._signalState == SignalState_Active);
-        EXPECT_EQ(0, base2.getCellRef()._signalState);
-    }
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto generator = actualData.getObjectRef(1);
+
+    // Expected: 0.6 (base from bias) + 2.0 (generator output) + 0.15 (valueOffset) = 2.75 truncated to 2.0
+    EXPECT_TRUE(approxCompare(2.0f, generator.getCellRef()._signal._channels.at(Channels::GeneratorOutput)));
 }

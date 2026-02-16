@@ -56,9 +56,10 @@ struct SelectedObjectVertexData
 
 struct ConnectionArrowVertexData
 {
-    float pos[2];    // x, y position
-    float color[3];  // r, g, b color
-    int arrowFlags;  // bit 0: arrow to first vertex, bit 1: arrow to second vertex
+    float pos[2];                     // x, y position
+    float color[3];                   // r, g, b color
+    float connectionWeightToObject1;  // connection weight for arrow toward first vertex
+    float connectionWeightToObject2;  // connection weight for arrow toward second vertex
 };
 
 struct AttackEventVertexData

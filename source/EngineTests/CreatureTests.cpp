@@ -44,17 +44,16 @@ protected:
                 CHECK(false);
             }
         }();
-        auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDesc().autoTriggerInterval(15)
-            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
-                NodeDesc().cellType(generator),
+                NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc(),
+                NodeDesc().cellType(generator),
             }),
             GeneDesc().numConcatenations(4).numBranches(2).nodes({NodeDesc().cellType(muscleDesc)}),
         });
@@ -73,17 +72,16 @@ protected:
                 CHECK(false);
             }
         }();
-        auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDesc().autoTriggerInterval(15)
-            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc().genes({
             GeneDesc().separation(true).nodes({
-                NodeDesc().cellType(generator),
+                NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc(),
+                NodeDesc().cellType(generator),
             }),
             GeneDesc().numConcatenations(2).numBranches(1).nodes(
                 {NodeDesc().color(1).cellType(muscleDesc), NodeDesc().color(1).constructor(ConstructorGenomeDesc().geneIndex(2))}),
@@ -96,23 +94,22 @@ protected:
         auto muscleDesc = muscleMode == MuscleMode_AutoCrawling
             ? MuscleGenomeDesc().mode(AutoCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
             : MuscleGenomeDesc().mode(ManualCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
-        auto generator = muscleMode == MuscleMode_AutoCrawling
-            ? GeneratorGenomeDesc()
-            : GeneratorGenomeDesc().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
         return GenomeDesc()
             .frontAngle(frontAngle)
             .genes({
-                GeneDesc().separation(false).nodes({
+                GeneDesc().separation(true).nodes({
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc().cellType(muscleDesc),
+                    NodeDesc().cellType(muscleDesc),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
                     NodeDesc().cellType(generator),
-                    NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc().cellType(muscleDesc),
-                    NodeDesc().cellType(muscleDesc),
-                    NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc(),
                 }),
             });
     }
@@ -171,18 +168,16 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
 
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
-        EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 6; ++i) {
-            EXPECT_TRUE(approxCompareAngles(180.0f, body.at(i).getCellRef()._frontAngle.value()));
+        for (int i = 0; i < 5; ++i) {
+            EXPECT_TRUE(approxCompareAngles(0.0f, body.at(i).getCellRef()._frontAngle.value()));
         }
+        EXPECT_TRUE(approxCompareAngles(-180.0f, body.at(5).getCellRef()._frontAngle.value()));
 
-        EXPECT_TRUE(approxCompareAngles(-90.0f, leg1.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i) {
             EXPECT_TRUE(approxCompareAngles(90.0f, leg1.at(i).getCellRef()._frontAngle.value()));
         }
 
-        EXPECT_TRUE(approxCompareAngles(90.0f, leg2.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i) {
             EXPECT_TRUE(approxCompareAngles(-90.0f, leg2.at(i).getCellRef()._frontAngle.value()));
         }
     }
@@ -258,13 +253,12 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
 
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
-        EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 6; ++i) {
-            EXPECT_TRUE(approxCompareAngles(180.0f, body.at(i).getCellRef()._frontAngle.value()));
+        for (int i = 0; i < 5; ++i) {
+            EXPECT_TRUE(approxCompareAngles(0.0f, body.at(i).getCellRef()._frontAngle.value()));
         }
+        EXPECT_TRUE(approxCompareAngles(-180.0f, body.at(5).getCellRef()._frontAngle.value()));
 
-        EXPECT_TRUE(approxCompareAngles(-90.0f, leg.at(0).getCellRef()._frontAngle.value()));
-        for (int i = 1; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i) {
             EXPECT_TRUE(approxCompareAngles(90.0f, leg.at(i).getCellRef()._frontAngle.value()));
         }
         EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(0).getCellRef()._frontAngle.value()));
@@ -292,8 +286,8 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     // Check angles for second cell leg
     ASSERT_EQ(4, leg.at(1)._connections.size());
     EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(0))));    // initial angle connection is stored in connected muscle
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(2)._angleFromPrevious));
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(3)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(0)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(1)._angleFromPrevious));
 
     // Check angles for third cell leg
     ASSERT_EQ(2, leg.at(2)._connections.size());
@@ -302,8 +296,8 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     // Check angles for forth cell leg
     ASSERT_EQ(4, leg.at(3)._connections.size());
     EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(2))));  // initial angle connection is stored in connected muscle
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(2)._angleFromPrevious));
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(3)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(0)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(1)._angleFromPrevious));
 }
 
 class CreatureTests_BendingMuscles_TwoDirections
@@ -403,15 +397,10 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
     // Check front angles
-    auto first = true;
-    for (auto const& object : cells) {
-        if (first) {
-            EXPECT_TRUE(approxCompareAngles(0.0f, object.getCellRef()._frontAngle.value()));
-        } else {
-            EXPECT_TRUE(approxCompareAngles(180.0f, object.getCellRef()._frontAngle.value()));
-        }
-        first = false;
+    for (int i = 0; i < 9; ++i) {
+        EXPECT_TRUE(approxCompareAngles(0.0f, cells[i].getCellRef()._frontAngle.value()));
     }
+    EXPECT_TRUE(approxCompareAngles(-180.0f, cells[9].getCellRef()._frontAngle.value()));
 }
 
 class CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles

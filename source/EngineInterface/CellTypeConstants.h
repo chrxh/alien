@@ -105,42 +105,12 @@ enum CellEvent_
     CellEvent_Detonation,
 };
 
-using CellTriggered = uint8_t;
-enum CellTriggered_
-{
-    CellTriggered_No,
-    CellTriggered_Yes,
-};
-
-using SignalState = uint8_t;
-enum SignalState_
-{
-    SignalState_Inactive,
-    SignalState_Fading,
-    SignalState_Active,
-    SignalState_Count,
-};
-
 using SignalOrigin = uint8_t;
 enum SignalOrigin_
 {
     SignalOrigin_Unknown,
     SignalOrigin_Sensor,
 };
-
-using SignalRestrictionMode = uint8_t;
-enum SignalRestrictionMode_
-{
-    SignalRestrictionMode_Inactive,
-    SignalRestrictionMode_Active,
-    SignalRestrictionMode_Conditional,
-    SignalRestrictionMode_Count,
-};
-
-namespace Const
-{
-    std::vector<std::string> const SignalRestrictionModeStrings = {"Inactive", "Active", "Conditional"};
-}
 
 //*************************
 //* Constructor constants *
@@ -213,13 +183,23 @@ enum MutationState_
 //************************
 //* Generator constants *
 //************************
-using GeneratorPulseType = int;
-enum GeneratorPulseType_
+namespace Channels
 {
-    GeneratorPulseType_Positive,
-    GeneratorPulseType_Alternation,
-    GeneratorPulseType_Count,
+    auto constexpr GeneratorOutput = 0;
+}
+
+using GeneratorMode = int;
+enum GeneratorMode_
+{
+    GeneratorMode_SquareSignal,
+    GeneratorMode_SawtoothSignal,
+    GeneratorMode_Count,
 };
+
+namespace Const
+{
+    std::vector<std::string> const GeneratorModeStrings = {"Square signal", "Sawtooth signal"};
+}
 
 //*******************
 //* Depot constants *

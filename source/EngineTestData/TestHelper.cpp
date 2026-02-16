@@ -47,6 +47,7 @@ bool TestHelper::compare(Desc left, Desc right)
     std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._genomes.begin(), left._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._genomes.begin(), right._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    
     return left == right;
 }
 
@@ -54,10 +55,18 @@ bool TestHelper::compare(ObjectDesc left, ObjectDesc right)
 {
     left._id = 0;
     right._id = 0;
+    
     return left == right;
 }
 
 bool TestHelper::compare(EnergyDesc left, EnergyDesc right)
+{
+    left._id = 0;
+    right._id = 0;
+    return left == right;
+}
+
+bool TestHelper::compare(GenomeDesc left, GenomeDesc right)
 {
     left._id = 0;
     right._id = 0;

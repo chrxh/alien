@@ -7,9 +7,7 @@
 #include "ConstructorHelper.cuh"
 #include "CudaShapeGenerator.cuh"
 #include "Genome.cuh"
-#include "GenomeProcessor.cuh"
 #include "MuscleProcessor.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 
 class ConstructorProcessor
@@ -93,6 +91,8 @@ private:
     //  No angle correction
     //
     __inline__ __device__ static void correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* object3);
+
+    __inline__ __device__ static float getRequiredEnergyForNodes(Gene* gene);
 };
 
 /************************************************************************/
@@ -119,7 +119,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
     auto& constructor = object->typeData.cell.constructor;
-    if (SignalProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
+    if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
         constructor.offspring = findOrCreateNewCreature(data, object);
 
         if (ConstructorHelper::isFinished(constructor, *constructor.offspring->genome)) {
@@ -231,7 +231,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
             auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
             if (!referencedGene.separation) {
-                auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
+                auto requiredEnergyForNodes = getRequiredEnergyForNodes(&referencedGene);
                 if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
                     result.neededReservedEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
                 } else {
@@ -454,13 +454,13 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         newObject->typeData.cell.cellState = CellState_Dying;
     }
 
-    float origAngleFromPreviousOnHostCell;
-    for (int i = 0; i < hostObject->numConnections; ++i) {
-        if (hostObject->connections[i].object == constructionData.lastConstructionObject) {
-            origAngleFromPreviousOnHostCell = hostObject->connections[i].angleFromPrevious;
-            break;
-        }
-    }
+    //float origAngleFromPreviousOnHostCell;
+    //for (int i = 0; i < hostObject->numConnections; ++i) {
+    //    if (hostObject->connections[i].object == constructionData.lastConstructionObject) {
+    //        origAngleFromPreviousOnHostCell = hostObject->connections[i].angleFromPrevious;
+    //        break;
+    //    }
+    //}
 
     float origAngleFromPreviousOnLastConstructedCell;
     for (int i = 0; i < constructionData.lastConstructionObject->numConnections; ++i) {
@@ -469,47 +469,107 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         }
     }
 
+    //------------------
     // Move connection between lastConstructionCell and hostObject to a connection between lastConstructionCell and newObject
-    for (int i = 0; i < lastObject->numConnections; ++i) {
-        auto& connection = lastObject->connections[i];
-        if (connection.object == hostObject) {
+    auto separation = constructionData.isSeparation && constructionData.isLastNodeOfLastConcatenation;
+    bool adaptReferenceAngles = false;
+    if (!separation) {
+        adaptReferenceAngles = true;
+        newObject->numConnections = 2;
+
+        // Connection between lastObject and newObject
+        {
+            auto& connection = lastObject->connections[0];
+            connection.object = newObject;
+            connection.distance = desiredDistance;
+        }
+        {
+            auto& connection = newObject->connections[1];
+            connection.object = lastObject;
+            connection.distance = desiredDistance;
+            connection.angleFromPrevious = 180.0f;
+        }
+
+        // Connection between newObject and hostObject
+        auto hostDistance = desiredDistance;
+        if (!constructionData.isLastNodeOfLastConcatenation) {
+            hostDistance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
+        }
+        {
+            auto& connection = newObject->connections[0];
+            connection.object = hostObject;
+            connection.distance = hostDistance;
+            connection.angleFromPrevious = 180.0f;
+        }
+        {
+            auto index = hostObject->getConnectionIndex(lastObject);
+            auto& connection = hostObject->connections[index];
+            connection.object = newObject;
+            connection.distance = hostDistance;
+        }
+    } else {
+        newObject->numConnections = 1;
+
+        // Connection between lastObject and newObject
+        {
+            auto& connection = lastObject->connections[0];
             connection.object = newObject;
             connection.distance = desiredDistance;
             connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;
-            newObject->numConnections = 1;
-            newObject->connections[0].object = lastObject;
-            newObject->connections[0].distance = desiredDistance;
-            newObject->connections[0].angleFromPrevious = 360.0f;
+        }
+        {
+            auto& connection = newObject->connections[0];
+            connection.object = lastObject;
+            connection.distance = desiredDistance;
+            connection.angleFromPrevious = 360.0f;
             ObjectConnectionProcessor::deleteConnectionOneWay(hostObject, lastObject);
-            break;
         }
     }
 
-    // Possibly connect newObject to hostObject
-    bool adaptReferenceAngles = false;
-    if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparation) {
 
-        auto distance = constructionData.gene->connectionDistance;
-        if (!constructionData.isLastNodeOfLastConcatenation) {
-            distance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
-        }
+    //-----------------
+    //auto separation = constructionData.isSeparation && constructionData.isLastNodeOfLastConcatenation;
+    //for (int i = 0; i < lastObject->numConnections; ++i) {
+    //    auto& connection = lastObject->connections[i];
+    //    if (connection.object == hostObject) {
+    //        connection.object = newObject;
+    //        connection.distance = desiredDistance;
+    //        connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;
+    //        newObject->numConnections = 1;
+    //        newObject->connections[0].object = lastObject;
+    //        newObject->connections[0].distance = desiredDistance;
+    //        newObject->connections[0].angleFromPrevious = 360.0f;
+    //        ObjectConnectionProcessor::deleteConnectionOneWay(hostObject, lastObject);
+    //        break;
+    //    }
+    //}
 
-        if (!ObjectConnectionProcessor::tryAddConnections(data, newObject, hostObject, 0, origAngleFromPreviousOnHostCell, distance)) {
-            ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
-            hostObject->typeData.cell.cellState = CellState_Dying;
-            for (int i = 0; i < hostObject->numConnections; ++i) {
-                auto const& connectedObject = hostObject->connections[i].object;
-                if (connectedObject->type != ObjectType_Cell) {
-                    continue;
-                }
-                if (connectedObject->typeData.cell.creature == hostObject->typeData.cell.creature) {
-                    connectedObject->typeData.cell.cellState = CellState_Detaching;
-                }
-            }
-        } else {
-            adaptReferenceAngles = true;
-        }
-    }
+    //// Possibly connect newObject to hostObject
+    //bool adaptReferenceAngles = false;
+    //if (!separation) {
+
+    //    auto distance = constructionData.gene->connectionDistance;
+    //    if (!constructionData.isLastNodeOfLastConcatenation) {
+    //        distance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
+    //    }
+
+    //    if (!ObjectConnectionProcessor::tryAddConnections(data, newObject, hostObject, 0, origAngleFromPreviousOnHostCell, distance)) {
+    //        ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
+    //        hostObject->typeData.cell.cellState = CellState_Dying;
+    //        for (int i = 0; i < hostObject->numConnections; ++i) {
+    //            auto const& connectedObject = hostObject->connections[i].object;
+    //            if (connectedObject->type != ObjectType_Cell) {
+    //                continue;
+    //            }
+    //            if (connectedObject->typeData.cell.creature == hostObject->typeData.cell.creature) {
+    //                connectedObject->typeData.cell.cellState = CellState_Detaching;
+    //            }
+    //        }
+    //    } else {
+    //        adaptReferenceAngles = true;
+    //    }
+    //}
+    //-----------------
 
     // Get surrounding cells
     if (numObjectsToConnect > 0 && constructionData.numAdditionalConnections != 0) {
@@ -528,7 +588,8 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
             if (otherObject->tryLock()) {
                 if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
-                    if (ObjectConnectionProcessor::tryAddConnections(data, newObject, otherObject, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
+                    if (ObjectConnectionProcessor::tryAddConnections(
+                            data, newObject, otherObject, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
                         ++numConnectedObjects;
                     }
                 }
@@ -998,4 +1059,17 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ob
     } else {
         object3->increaseAngle(object2Index, -angleCorrection);
     }
+}
+
+__inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Gene* gene)
+{
+    auto result = 0.0f;
+    for (int i = 0, j = gene->numNodes; i < j; ++i) {
+        auto const& node = &gene->nodes[i];
+        result += cudaSimulationParameters.normalCellEnergy.value[node->color];
+        if (node->cellType == CellType_Depot) {
+            result += node->cellTypeData.depot.initialStoredUsableEnergy;
+        }
+    }
+    return result;
 }

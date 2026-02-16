@@ -60,7 +60,8 @@ TEST_F(ConstructorTests, alreadyFinished)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, emptyGenome)
@@ -87,7 +88,8 @@ TEST_F(ConstructorTests, emptyGenome)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, emptyGene)
@@ -114,7 +116,8 @@ TEST_F(ConstructorTests, emptyGene)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, nodeIndexOutOfRange)
@@ -141,7 +144,8 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, geneIndexOutOfRange)
@@ -168,7 +172,8 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, insufficientEnergy)
@@ -195,14 +200,15 @@ TEST_F(ConstructorTests, insufficientEnergy)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 {
     auto data = Desc().addCreature({
             ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))),  // Not enough energy
-            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         }, CreatureDesc().id(0), GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
     data.addConnection(0, 1);
 
@@ -224,7 +230,6 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    ASSERT_TRUE(hostObject.getCellRef()._signalState == SignalState_Active);
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[Channels::ConstructorSuccess]));
 }
 
@@ -232,7 +237,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 {
     auto data = Desc().addCreature({
             ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))),
-            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
+            ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         }, CreatureDesc().id(0), GenomeDesc().genes({GeneDesc().separation(false).nodes({NodeDesc()})}));
     data.addConnection(0, 1);
 
@@ -254,7 +259,6 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    ASSERT_TRUE(hostObject.getCellRef()._signalState == SignalState_Active);
     EXPECT_TRUE(approxCompare(1.0f, hostObject.getCellRef()._signal._channels[Channels::ConstructorSuccess]));
 }
 
@@ -284,7 +288,8 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, lastConstructedCellNotFound)
@@ -311,7 +316,8 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, insufficientSpace)
@@ -350,7 +356,8 @@ TEST_F(ConstructorTests, insufficientSpace)
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_F(ConstructorTests, crossingLinks)
@@ -434,7 +441,8 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostObject.getCellRef()._signalState == SignalState_Active);
+    // Verify no active signal
+    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview)
@@ -2469,18 +2477,18 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
             ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(4))),
             ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).nodeIndex(1).constructor(ConstructorDesc().geneIndex(2).currentNodeIndex(2).lastConstructedCellId(6))),
 
-            ObjectDesc().id(3).pos({10.0f, 10.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(1).parentNodeIndex(0)),
+            ObjectDesc().id(3).pos({10.1f, 10.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(1).parentNodeIndex(0)),
             ObjectDesc().id(4).pos({10.0f, 10.0f - getOffspringDistance()}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(1).geneIndex(1).parentNodeIndex(0)),
-            ObjectDesc().id(5).pos({11.0f, 10.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(2).parentNodeIndex(1)),
+            ObjectDesc().id(5).pos({11.1f, 10.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(2).parentNodeIndex(1)),
             ObjectDesc().id(6).pos({11.0f, 10.0f - getOffspringDistance()}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(1).geneIndex(2).parentNodeIndex(1)),
         }, CreatureDesc().id(0), genome);
     data.addConnection(1, 2);
 
-    data.addConnection(3, 4);
     data.addConnection(4, 1);
+    data.addConnection(3, 4);
 
-    data.addConnection(5, 6);
     data.addConnection(6, 2);
+    data.addConnection(5, 6);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -2915,19 +2923,24 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
         }),
     });
 
-    auto data = Desc().addCreature({
-            ObjectDesc().id(0).pos(RealVector2D{10.0f, 8.5f} + Math::unitVectorOfAngle(180.0f - 45.0f) * getOffspringDistance()).type(CellDesc().constructor(ConstructorDesc().currentNodeIndex(4).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(4).provideEnergy(
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos(RealVector2D{10.0f, 8.5f} + Math::unitVectorOfAngle(180.0f - 45.0f) * getOffspringDistance())
+                .type(CellDesc().constructor(ConstructorDesc().currentNodeIndex(4).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(4).provideEnergy(
                     ProvideEnergy_FreeGeneration))),
-
             ObjectDesc().id(1).pos({10.0f, 11.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc().id(2).pos({10.0f, 9.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc().id(3).pos({9.0f, 9.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc().id(4).pos({10.0f, 8.5f}).type(CellDesc().cellState(CellState_Constructing)),
-        }, CreatureDesc().id(0), genome);
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    data.addConnection(3, 4);
+        },
+        CreatureDesc().id(0),
+        genome);
     data.addConnection(4, 0);
+    data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.getConnectionRef(3, 4)._angleFromPrevious = 270.0f;
     data.getConnectionRef(3, 2)._angleFromPrevious = 90.0f;
     data.getConnectionRef(4, 0)._angleFromPrevious = 270.0f;
@@ -2982,10 +2995,10 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
             ObjectDesc().id(3).pos({11.0f, 9.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc().id(4).pos({10.0f, 8.5f}).type(CellDesc().cellState(CellState_Constructing)),
         }, CreatureDesc().id(0), genome);
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    data.addConnection(3, 4);
     data.addConnection(4, 0);
+    data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
     data.getConnectionRef(3, 4)._angleFromPrevious = 90.0f;
     data.getConnectionRef(3, 2)._angleFromPrevious = 270.0f;
     data.getConnectionRef(4, 0)._angleFromPrevious = 90.0f;

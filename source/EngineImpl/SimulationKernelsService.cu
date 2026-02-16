@@ -87,9 +87,8 @@ void SimulationKernelsService::launchTimestepKernels(
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
 
     // Signal processing
-    STREAM_KERNEL_CALL(cudaNextTimestep_signal_calcFutureSignals, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(cudaNextTimestep_signal_updateSignals, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, _stream, numBlocks, MAX_CHANNELS * MAX_CHANNELS, data, statistics);
+    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, numBlocks, 32, data, statistics);
+    STREAM_KERNEL_CALL(cudaNextTimestep_signal_setSignal, _stream, numBlocks, data);
 
     // Energy flow
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
@@ -254,9 +253,8 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
 
         // Signal processing
-        STREAM_KERNEL_CALL(cudaNextTimestep_signal_calcFutureSignals, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_signal_updateSignals, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, _stream, numBlocks, MAX_CHANNELS * MAX_CHANNELS, data, statistics);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, numBlocks, 32, data, statistics);
+        STREAM_KERNEL_CALL(cudaNextTimestep_signal_setSignal, _stream, numBlocks, data);
 
         // Energy flow
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);

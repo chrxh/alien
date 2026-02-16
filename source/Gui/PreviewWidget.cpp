@@ -10,8 +10,8 @@
 
 #include <EngineInterface/Description.h>
 #include <EngineInterface/DescriptionEditService.h>
-#include <EngineInterface/GenomeDescriptionEditService.h>
-#include <EngineInterface/GenomeDescriptionInfoService.h>
+#include <EngineInterface/GenomeDescEditService.h>
+#include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"

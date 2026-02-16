@@ -15,7 +15,7 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId, MutationT
 
         if (object->id == objectId) {
             switch (mutationType) {
-            case MutationType::NeuralNetwork: {
+            case MutationType::NeuralNet: {
                 MutationProcessor::applyMutations_neuralNetwork(data, object->typeData.cell.creature->genome);
             } break;
             }

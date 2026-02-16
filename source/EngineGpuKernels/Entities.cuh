@@ -1,8 +1,11 @@
 #pragma once
 
-#include <EngineInterface/CudaSettings.h>
+#include <cuda_fp16.h>
+
 #include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/NeuralNetWeight.h>
 
 #include "Array.cuh"
 #include "Base.cuh"
@@ -48,9 +51,9 @@ struct ObjectConnection
     float angleFromPrevious;
 };
 
-struct NeuralNetwork
+struct __align__(16) NeuralNet
 {
-    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
@@ -129,7 +132,7 @@ struct SensorLastMatch
 
 struct Sensor
 {
-    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    bool autoTrigger;
     SensorMode mode;
     SensorModeData modeData;
     uint16_t minRange;
@@ -140,11 +143,31 @@ struct Sensor
     SensorLastMatch lastMatch;
 };
 
+struct SquareSignal
+{
+    float amplitude;
+    int period;
+};
+
+struct SawtoothSignal
+{
+    float amplitude;
+    int period;
+};
+
+union GeneratorModeData
+{
+    SquareSignal squareSignal;
+    SawtoothSignal sawtoothSignal;
+};
+
 struct Generator
 {
-    uint32_t autoTriggerInterval;
-    GeneratorPulseType pulseType;
-    uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    bool additive;
+    float valueOffset;
+    int timeOffset;
+    GeneratorMode mode;
+    GeneratorModeData modeData;
 
     // Process data
     uint32_t numPulses;
@@ -184,9 +207,6 @@ struct AutoBending
     // Process data
     float initialAngle;  // May be invalid
     bool forward;        // Current direction
-    float activation;
-    uint8_t activationCountdown;
-    bool impulseAlreadyApplied;
 };
 
 struct ManualBending
@@ -198,7 +218,6 @@ struct ManualBending
     // Process data
     float initialAngle;  // May be invalid
     float lastAngleDelta;
-    bool impulseAlreadyApplied;
 };
 
 struct AngleBending
@@ -221,9 +240,6 @@ struct AutoCrawling
     float initialDistance;  // May be invalid
     float lastActualDistance;
     bool forward;  // Current direction
-    float activation;
-    uint8_t activationCountdown;
-    bool impulseAlreadyApplied;
 };
 
 struct ManualCrawling
@@ -236,7 +252,6 @@ struct ManualCrawling
     float initialDistance;  // May be invalid
     float lastActualDistance;
     float lastDistanceDelta;
-    bool impulseAlreadyApplied;
 };
 
 struct DirectMovement
@@ -346,7 +361,7 @@ union MemoryModeData
     SignalIntegrator signalIntegrator;
 };
 
-struct SignalEntry
+struct __align__(16) SignalEntry
 {
     float channels[MAX_CHANNELS];
 };
@@ -357,7 +372,7 @@ struct Memory
     MemoryModeData modeData;
 
     uint8_t numSignalEntries;
-    uint8_t channelBitMask;
+    uint16_t channelBitMask;
     SignalEntry* signalEntries;  // Pointer to SignalEntry[MAX_CELL_MEMORY_ENTRIES] in heap
 };
 
@@ -402,14 +417,7 @@ union CellTypeData
     Communicator communicator;
 };
 
-struct SignalRestriction
-{
-    SignalRestrictionMode mode;
-    float baseAngle;
-    float openingAngle;
-};
-
-struct Signal
+struct __align__(16) Signal
 {
     float channels[MAX_CHANNELS];
     int numTimesSent;
@@ -486,18 +494,15 @@ struct Cell
     uint16_t geneIndex;
 
     // Cell type data
-    NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
+    NeuralNet* neuralNetwork;  // Not used for structure and base cells
     CellType cellType;
     CellTypeData cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
     Constructor constructor;    // Optional constructor data
-    SignalState signalState;  // For signalState == SignalState_Active
     Signal signal;
-    SignalRestriction signalRestriction;
     uint32_t activationTime;
 
     // Process data
-    SignalState futureSignalState;
     Signal futureSignal;
     uint32_t frontAngleId;
     bool headCell;

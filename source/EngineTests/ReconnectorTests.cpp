@@ -32,7 +32,7 @@ protected:
     {
         auto data = Desc().addCreature({
             ObjectDesc().id(1).pos(pos).color(color).type(CellDesc().cellType(ReconnectorDesc().mode(mode))),
-            ObjectDesc().id(2).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
+            ObjectDesc().id(2).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
         }, CreatureDesc(), GenomeDesc().lineageId(lineageId));
         data.addConnection(1, 2);
         return data;
@@ -46,7 +46,7 @@ protected:
     {
         auto data = Desc().addCreature({
             ObjectDesc().id(1).pos(pos).color(color).type(CellDesc().cellType(ReconnectorDesc().mode(mode))),
-            ObjectDesc().id(2).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
+            ObjectDesc().id(2).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
         }, CreatureDesc(), GenomeDesc().lineageId(lineageId));
         data.addConnection(1, 2);
         return data;
@@ -206,8 +206,8 @@ TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
 {
     // Create a creature with reconnector, generator, and potential target in same creature
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectCreatureDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(GeneratorDesc().autoTriggerInterval(3))),
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(ReconnectorDesc().mode(ReconnectCreatureDesc()))),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}),
         ObjectDesc().id(3).pos({99.0f, 100.0f}),  // Potential target in same creature but not connected to reconnector
     });
     data.addConnection(1, 2);
@@ -514,7 +514,7 @@ TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
     // Create creature with reconnector and additional object, signal on connected cell
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectCreatureDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         ObjectDesc().id(3).pos({99.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -622,7 +622,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     // Create attacker with connections that block the attack ray
     auto data = Desc().addCreature({
         ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectStructureDesc()))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         // Create a connection that crosses the ray path to target at (100, 99)
         ObjectDesc().id(3).pos({99.0f, 99.0f}),
         ObjectDesc().id(4).pos({101.0f, 99.0f}),

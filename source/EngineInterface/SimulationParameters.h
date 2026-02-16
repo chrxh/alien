@@ -89,7 +89,7 @@ struct SimulationParameters
     PinBaseParameter relativeStrengthBasePin = {false};
     LayerParameter<bool> disableRadiationSources = {{false}};
     BaseLayerParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
-    BaseLayerParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
+    BaseLayerParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f}};
     BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};
     BaseParameter<ColorVector<float>> radiationType2_strength = {{0, 0, 0, 0, 0, 0, 0}};
     BaseParameter<ColorVector<float>> radiationType2_energyThreshold = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
@@ -126,10 +126,10 @@ struct SimulationParameters
     static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Mutations
-    BaseParameter<float> mutationNeuralNetwork = {0};
+    BaseParameter<float> mutationNeuralNet = {0};
 
     // Expert settings: Customize neuron mutations setting
-    ExpertToggle customizeNeuralNetworkMutationsToggle = {false};
+    ExpertToggle customizeNeuralNetMutationsToggle = {false};
     BaseParameter<float> neuralNetworkMutationWeight = {0.2f};
     BaseParameter<float> neuralNetworkMutationBias = {0.2f};
     BaseParameter<float> neuralNetworkMutationActivationFunction = {0.05f};

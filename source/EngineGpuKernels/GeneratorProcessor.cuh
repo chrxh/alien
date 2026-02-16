@@ -5,7 +5,6 @@
 
 #include "Base.cuh"
 #include "ObjectConnectionProcessor.cuh"
-#include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 #include "TOs.cuh"
 
@@ -28,20 +27,50 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
         auto const& object = operation.object;
 
         auto& generator = object->typeData.cell.cellTypeData.generator;
-        if (SignalProcessor::isAutoTriggered(data, object, max(1, generator.autoTriggerInterval))) {
-            if (object->typeData.cell.signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(object);
-            }
-            statistics.incNumGeneratorPulses(object->color);
-            if (generator.pulseType == GeneratorPulseType_Positive) {
-                object->typeData.cell.signal.channels[Channels::CellTypeActivation] += 1.0f;
-            } else {
-                object->typeData.cell.signal.channels[Channels::CellTypeActivation] += generator.numPulses < generator.alternationInterval ? 1.0f : -1.0f;
-            }
-            ++generator.numPulses;
-            if (generator.alternationInterval > 0 && generator.numPulses == generator.alternationInterval * 2) {
-                generator.numPulses = 0;
-            }
+
+        // Calculate current position within the period, shifted by timeOffset
+        int period = (generator.mode == GeneratorMode_SquareSignal) ? generator.modeData.squareSignal.period : generator.modeData.sawtoothSignal.period;
+        if (period <= 0) {
+            continue;
         }
+        auto timestepInPeriod = (generator.numPulses + generator.timeOffset) % period;
+        float outputValue = 0.0f;
+
+        if (generator.mode == GeneratorMode_SquareSignal) {
+            auto& squareSignal = generator.modeData.squareSignal;
+            auto halfPeriod = period / 2;
+
+            if (timestepInPeriod < halfPeriod) {
+                outputValue = squareSignal.amplitude;
+            } else {
+                outputValue = -squareSignal.amplitude;
+            }
+        } else if (generator.mode == GeneratorMode_SawtoothSignal) {
+            auto& sawtoothSignal = generator.modeData.sawtoothSignal;
+
+            // Linear increase from 0 to amplitude over the period
+            outputValue = sawtoothSignal.amplitude * toFloat(timestepInPeriod) / toFloat(period);
+        }
+        outputValue += generator.valueOffset;
+
+        // Set the output signal
+
+        if (generator.additive) {
+            object->typeData.cell.signal.channels[Channels::GeneratorOutput] += outputValue;
+        } else {
+            object->typeData.cell.signal.channels[Channels::GeneratorOutput] = outputValue;
+        }
+
+        // Clamp final signal to valid range [-2.0, 2.0]
+        object->typeData.cell.signal.channels[Channels::GeneratorOutput] =
+            max(-2.0f, min(2.0f, object->typeData.cell.signal.channels[Channels::GeneratorOutput]));
+
+        // Increment timestep counter and wrap around at period
+        ++generator.numPulses;
+        if (generator.numPulses >= period) {
+            generator.numPulses = 0;
+        }
+
+        statistics.incNumGeneratorPulses(object->color);
     }
 }

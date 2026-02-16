@@ -18,7 +18,8 @@ std::vector<DescriptionTestDataFactory::ObjectParameter> DescriptionTestDataFact
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
-        ObjectParameter{ObjectType_Cell, CellType_Generator},
+        ObjectParameter{ObjectType_Cell, CellType_Generator, GeneratorModeWrapper{GeneratorMode_SquareSignal}},
+        ObjectParameter{ObjectType_Cell, CellType_Generator, GeneratorModeWrapper{GeneratorMode_SawtoothSignal}},
         ObjectParameter{ObjectType_Cell, CellType_Attacker},
         ObjectParameter{ObjectType_Cell, CellType_Injector},
         ObjectParameter{ObjectType_Cell, CellType_Muscle, MuscleModeWrapper{MuscleMode_AutoBending}},
@@ -51,7 +52,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
         return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FreeCellDesc().energy(42.0f).age(7));
     case ObjectType_Cell: {
         auto cellTypeDesc = createNonDefaultCellTypeDesc(objectParameter);
-        NeuralNetworkDesc nn;
+        NeuralNetDesc nn;
         nn.weight(2, 1, 0.7f);
         nn._biases.at(1) = -0.4f;
         nn._activationFunctions.at(5) = 2 % ActivationFunction_Count;
@@ -74,9 +75,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
                       .frontAngleId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}).numTimesSent(5))
-                      .signalState(SignalState_Active)
-                      .signalRestriction(SignalRestrictionDesc().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
+                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).numTimesSent(42))
                       .constructor(ConstructorDesc()
                                        .autoTriggerInterval(55)
                                        .geneIndex(1)
@@ -111,7 +110,8 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
-        NodeParameter{CellType_Generator},
+        NodeParameter{CellType_Generator, GeneratorModeWrapper{GeneratorMode_SquareSignal}},
+        NodeParameter{CellType_Generator, GeneratorModeWrapper{GeneratorMode_SawtoothSignal}},
         NodeParameter{CellType_Attacker},
         NodeParameter{CellType_Injector},
         NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_AutoBending}},
@@ -137,7 +137,7 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
 
 NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParameter) const
 {
-    NeuralNetworkGenomeDesc nn;
+    NeuralNetGenomeDesc nn;
     nn.weight(4, 3, 0.8f);
     nn._biases.at(3) = -0.5f;
     nn._activationFunctions.at(2) = 1;
@@ -151,8 +151,7 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
             ProvideEnergy_FreeGeneration))
         .color(4)
         .numAdditionalConnections(3)
-        .referenceAngle(90.0f)
-        .signalRestriction(SignalRestrictionGenomeDesc().mode(SignalRestrictionMode_Active).baseAngle(60.0f).openingAngle(180.0f));
+        .referenceAngle(90.0f);
 }
 
 std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
@@ -222,15 +221,6 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
             return false;
         }
     }
-    if (cell._signalRestriction._mode != node._signalRestriction._mode) {
-        return false;
-    }
-    if (cell._signalRestriction._baseAngle != node._signalRestriction._baseAngle) {
-        return false;
-    }
-    if (cell._signalRestriction._openingAngle != node._signalRestriction._openingAngle) {
-        return false;
-    }
 
     auto nodeType = node.getCellType();
     switch (cell.getCellType()) {
@@ -255,7 +245,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
         auto const& sensor = std::get<SensorDesc>(cell._cellType);
         auto const& nodeSensor = std::get<SensorGenomeDesc>(node._cellType);
-        if (sensor._autoTriggerInterval != nodeSensor._autoTriggerInterval) {
+        if (sensor._autoTrigger != nodeSensor._autoTrigger) {
             return false;
         }
         if (sensor._minRange != nodeSensor._minRange) {
@@ -314,14 +304,41 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
         }
         auto const& generator = std::get<GeneratorDesc>(cell._cellType);
         auto const& nodeGenerator = std::get<GeneratorGenomeDesc>(node._cellType);
-        if (generator._autoTriggerInterval != nodeGenerator._autoTriggerInterval) {
+        if (generator._additive != nodeGenerator._additive) {
             return false;
         }
-        if (generator._pulseType != nodeGenerator._pulseType) {
+        if (generator._valueOffset != nodeGenerator._valueOffset) {
             return false;
         }
-        if (generator._alternationInterval != nodeGenerator._alternationInterval) {
+        if (generator._timeOffset != nodeGenerator._timeOffset) {
             return false;
+        }
+        // Compare modes
+        if (generator.getMode() != nodeGenerator.getMode()) {
+            return false;
+        }
+        // Compare mode-specific data
+        switch (generator.getMode()) {
+        case GeneratorMode_SquareSignal: {
+            auto const& squareSignal = std::get<SquareSignalDesc>(generator._mode);
+            auto const& nodeSquareSignal = std::get<SquareSignalGenomeDesc>(nodeGenerator._mode);
+            if (squareSignal._amplitude != nodeSquareSignal._amplitude) {
+                return false;
+            }
+            if (squareSignal._period != nodeSquareSignal._period) {
+                return false;
+            }
+        } break;
+        case GeneratorMode_SawtoothSignal: {
+            auto const& sawtoothSignal = std::get<SawtoothSignalDesc>(generator._mode);
+            auto const& nodeSawtoothSignal = std::get<SawtoothSignalGenomeDesc>(nodeGenerator._mode);
+            if (sawtoothSignal._amplitude != nodeSawtoothSignal._amplitude) {
+                return false;
+            }
+            if (sawtoothSignal._period != nodeSawtoothSignal._period) {
+                return false;
+            }
+        } break;
         }
     } break;
     case CellType_Attacker: {
@@ -615,6 +632,8 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         std::holds_alternative<MuscleModeWrapper>(objectParameter.mode) ? std::get<MuscleModeWrapper>(objectParameter.mode).value : MuscleMode_AutoBending;
     auto sensorMode =
         std::holds_alternative<SensorModeWrapper>(objectParameter.mode) ? std::get<SensorModeWrapper>(objectParameter.mode).value : SensorMode_DetectEnergy;
+    auto generatorMode = std::holds_alternative<GeneratorModeWrapper>(objectParameter.mode) ? std::get<GeneratorModeWrapper>(objectParameter.mode).value
+                                                                                            : GeneratorMode_SquareSignal;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value
                                                                                                 : ReconnectorMode_Structure;
     auto memoryMode =
@@ -648,14 +667,26 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
             break;
         }
         return SensorDesc()
-            .autoTriggerInterval(80)
+            .autoTrigger(false)
             .mode(sensorModeDesc)
             .minRange(10)
             .maxRange(50)
             .lastMatch(SensorLastMatchDesc().creatureId(42).pos({10.5f, 20.3f}));
     }
     case CellType_Generator: {
-        return GeneratorDesc().autoTriggerInterval(60).alternationInterval(3).numPulses(5);
+        GeneratorModeDesc generatorModeDesc;
+        switch (generatorMode) {
+        case GeneratorMode_SquareSignal:
+            generatorModeDesc = SquareSignalDesc().amplitude(0.8f).period(80);
+            break;
+        case GeneratorMode_SawtoothSignal:
+            generatorModeDesc = SawtoothSignalDesc().amplitude(0.6f).period(120);
+            break;
+        default:
+            generatorModeDesc = GeneratorModeDesc();
+            break;
+        }
+        return GeneratorDesc().additive(true).valueOffset(0.3f).timeOffset(7).mode(generatorModeDesc).numPulses(5);
     }
     case CellType_Attacker:
         return AttackerDesc().mode(AttackCreatureDesc());
@@ -665,33 +696,23 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         MuscleModeDesc muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending: {
-            muscleModeDesc = AutoBendingDesc()
-                                 .maxAngleDeviation(0.6f)
-                                 .forwardBackwardRatio(0.4f)
-                                 .initialAngle(135.0f)
-                                 .forward(false)
-                                 .activation(0.7f)
-                                 .activationCountdown(8)
-                                 .impulseAlreadyApplied(true);
+            muscleModeDesc =
+                AutoBendingDesc().maxAngleDeviation(0.6f).forwardBackwardRatio(0.4f).initialAngle(135.0f).forward(false);
         } break;
         case MuscleMode_ManualBending:
             muscleModeDesc =
-                ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f).impulseAlreadyApplied(true);
+                ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f);
             break;
         case MuscleMode_AngleBending:
             muscleModeDesc = AngleBendingDesc().maxAngleDeviation(0.7f).attractionRepulsionRatio(0.6f).initialAngle(315.0f);
             break;
         case MuscleMode_AutoCrawling: {
-            AutoCrawlingDesc defaultCrawling;
             muscleModeDesc = AutoCrawlingDesc()
                                  .maxDistanceDeviation(0.9f)
                                  .forwardBackwardRatio(0.35f)
                                  .initialDistance(0.6f)
                                  .lastActualDistance(0.8f)
-                                 .forward(false)
-                                 .activation(0.4f)
-                                 .activationCountdown(12)
-                                 .impulseAlreadyApplied(true);
+                                 .forward(false);
         } break;
         case MuscleMode_ManualCrawling:
             muscleModeDesc = ManualCrawlingDesc()
@@ -699,8 +720,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
                                  .forwardBackwardRatio(0.45f)
                                  .initialDistance(0.4f)
                                  .lastActualDistance(0.9f)
-                                 .lastDistanceDelta(0.65f)
-                                 .impulseAlreadyApplied(true);
+                                 .lastDistanceDelta(0.65f);
             break;
         case MuscleMode_DirectMovement:
             muscleModeDesc = DirectMovementDesc();
@@ -751,7 +771,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         default:
             memoryModeDesc = MemoryModeDesc();
         }
-        auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b01010101);
+        auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 10; ++i) {
             SignalEntryDesc entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
@@ -790,6 +810,8 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         std::holds_alternative<MuscleModeWrapper>(objectParameter.mode) ? std::get<MuscleModeWrapper>(objectParameter.mode).value : MuscleMode_AutoBending;
     auto sensorMode =
         std::holds_alternative<SensorModeWrapper>(objectParameter.mode) ? std::get<SensorModeWrapper>(objectParameter.mode).value : SensorMode_DetectEnergy;
+    auto generatorMode = std::holds_alternative<GeneratorModeWrapper>(objectParameter.mode) ? std::get<GeneratorModeWrapper>(objectParameter.mode).value
+                                                                                            : GeneratorMode_SquareSignal;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value
                                                                                                 : ReconnectorMode_Structure;
     auto memoryMode =
@@ -821,10 +843,23 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
             sensorModeDesc = SensorModeGenomeDesc();
             break;
         }
-        return SensorGenomeDesc().autoTriggerInterval(70).mode(sensorModeDesc).minRange(5).maxRange(30);
+        return SensorGenomeDesc().autoTrigger(false).mode(sensorModeDesc).minRange(5).maxRange(30);
     }
-    case CellType_Generator:
-        return GeneratorGenomeDesc().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
+    case CellType_Generator: {
+        GeneratorModeGenomeDesc generatorModeDesc;
+        switch (generatorMode) {
+        case GeneratorMode_SquareSignal:
+            generatorModeDesc = SquareSignalGenomeDesc().amplitude(0.8f).period(80);
+            break;
+        case GeneratorMode_SawtoothSignal:
+            generatorModeDesc = SawtoothSignalGenomeDesc().amplitude(0.6f).period(120);
+            break;
+        default:
+            generatorModeDesc = GeneratorModeGenomeDesc();
+            break;
+        }
+        return GeneratorGenomeDesc().additive(true).valueOffset(0.3f).timeOffset(7).mode(generatorModeDesc);
+    }
     case CellType_Attacker:
         return AttackerGenomeDesc().mode(AttackCreatureGenomeDesc());
     case CellType_Injector:
@@ -899,7 +934,7 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         default:
             memoryModeDesc = MemoryModeGenomeDesc();
         }
-        auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b10101010);
+        auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 5; ++i) {
             SignalEntryGenomeDesc entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {

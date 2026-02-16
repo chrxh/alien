@@ -7,8 +7,8 @@
 
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/GenomeDescription.h>
-#include <EngineInterface/GenomeDescriptionEditService.h>
-#include <EngineInterface/GenomeDescriptionInfoService.h>
+#include <EngineInterface/GenomeDescEditService.h>
+#include <EngineInterface/GenomeDescInfoService.h>
 
 class GenomeDescEditServiceTests : public ::testing::Test
 {
@@ -311,8 +311,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
         GeneDesc().separation(false).nodes({
             NodeDesc()
                 .constructor(ConstructorGenomeDesc())
-                .neuralNetwork(NeuralNetworkGenomeDesc().weight(2, 3, 0.4f))
-                .signalRestriction(SignalRestrictionGenomeDesc().mode(SignalRestrictionMode_Active).openingAngle(3.0f)),
+                .neuralNetwork(NeuralNetGenomeDesc().weight(2, 3, 0.4f)),
             NodeDesc().cellType(DepotGenomeDesc()),
             NodeDesc().cellType(BaseGenomeDesc()),
             NodeDesc().cellType(SensorGenomeDesc()),
@@ -338,8 +337,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
         }
         // Cell types remain their original types in preview mode
     }
-    EXPECT_EQ(NeuralNetworkGenomeDesc(), gene0._nodes.front()._neuralNetwork);
-    EXPECT_EQ(SignalRestrictionGenomeDesc(), gene0._nodes.front()._signalRestriction);
+    EXPECT_EQ(NeuralNetGenomeDesc(), gene0._nodes.front()._neuralNetwork);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_complexCycles)

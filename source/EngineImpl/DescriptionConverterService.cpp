@@ -7,6 +7,8 @@
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
+#include <cuda_fp16.h>
+
 #include <Base/Exceptions.h>
 
 #include <EngineInterface/Description.h>
@@ -40,7 +42,8 @@ namespace
     void copyMemoryEntriesToTO(TOEntry* target, std::vector<DescEntry> const& source)
     {
         for (int i = 0, j = toInt(source.size()); i < j; ++i) {
-            for (int k = 0; k < MAX_CHANNELS; ++k) {
+            auto numChannels = source[i]._channels.size();
+            for (int k = 0; k < MAX_CHANNELS && k < numChannels; ++k) {
                 target[i].channels[k] = source[i]._channels[k];
             }
         }
@@ -62,9 +65,9 @@ namespace
         return std::string(source, strnlen(source, 64));
     }
 
-    NeuralNetworkGenomeDesc convert(NeuralNetworkGenomeTO const& neuralNetworkGenomeTO)
+    NeuralNetGenomeDesc convert(NeuralNetGenomeTO const& neuralNetworkGenomeTO)
     {
-        NeuralNetworkGenomeDesc result;
+        NeuralNetGenomeDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result._weights[i] = neuralNetworkGenomeTO.weights[i];
         }
@@ -80,9 +83,9 @@ namespace
         return result;
     }
 
-    NeuralNetworkDesc convert(NeuralNetworkTO const& neuralNetworkTO)
+    NeuralNetDesc convert(NeuralNetTO const& neuralNetworkTO)
     {
-        NeuralNetworkDesc result;
+        NeuralNetDesc result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result._weights[i] = neuralNetworkTO.weights[i];
         }
@@ -98,9 +101,9 @@ namespace
         return result;
     }
 
-    NeuralNetworkGenomeTO convert(NeuralNetworkGenomeDesc const& neuralNetworkDesc)
+    NeuralNetGenomeTO convert(NeuralNetGenomeDesc const& neuralNetworkDesc)
     {
-        NeuralNetworkGenomeTO result;
+        NeuralNetGenomeTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
@@ -116,9 +119,14 @@ namespace
         return result;
     }
 
-    NeuralNetworkTO convert(NeuralNetworkDesc const& neuralNetworkDesc)
+    NeuralNetTO convert(NeuralNetDesc const& neuralNetworkDesc)
     {
-        NeuralNetworkTO result;
+        CHECK(neuralNetworkDesc._weights.size() == MAX_CHANNELS * MAX_CHANNELS);
+        CHECK(neuralNetworkDesc._biases.size() == MAX_CHANNELS);
+        CHECK(neuralNetworkDesc._activationFunctions.size() == MAX_CHANNELS);
+        CHECK(neuralNetworkDesc._connectionWeights.size() == MAX_OBJECT_CONNECTIONS);
+
+        NeuralNetTO result;
         for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
@@ -345,9 +353,7 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
         } break;
         case CellType_Sensor: {
             SensorDesc sensor;
-            sensor._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval > 0
-                ? std::make_optional(objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval)
-                : std::nullopt;
+            sensor._autoTrigger = objectTO.typeData.cell.cellTypeData.sensor.autoTrigger;
             sensor._minRange = objectTO.typeData.cell.cellTypeData.sensor.minRange;
             sensor._maxRange = objectTO.typeData.cell.cellTypeData.sensor.maxRange;
 
@@ -394,9 +400,20 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
         } break;
         case CellType_Generator: {
             GeneratorDesc generator;
-            generator._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.generator.autoTriggerInterval;
-            generator._pulseType = objectTO.typeData.cell.cellTypeData.generator.pulseType;
-            generator._alternationInterval = objectTO.typeData.cell.cellTypeData.generator.alternationInterval;
+            generator._additive = objectTO.typeData.cell.cellTypeData.generator.additive;
+            generator._valueOffset = objectTO.typeData.cell.cellTypeData.generator.valueOffset;
+            generator._timeOffset = objectTO.typeData.cell.cellTypeData.generator.timeOffset;
+            if (objectTO.typeData.cell.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
+                SquareSignalDesc squareSignal;
+                squareSignal._amplitude = objectTO.typeData.cell.cellTypeData.generator.modeData.squareSignal.amplitude;
+                squareSignal._period = objectTO.typeData.cell.cellTypeData.generator.modeData.squareSignal.period;
+                generator._mode = squareSignal;
+            } else if (objectTO.typeData.cell.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
+                SawtoothSignalDesc sawtoothSignal;
+                sawtoothSignal._amplitude = objectTO.typeData.cell.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                sawtoothSignal._period = objectTO.typeData.cell.cellTypeData.generator.modeData.sawtoothSignal.period;
+                generator._mode = sawtoothSignal;
+            }
             generator._numPulses = objectTO.typeData.cell.cellTypeData.generator.numPulses;
             cellDesc._cellType = generator;
         } break;
@@ -429,9 +446,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle)
                     : std::nullopt;
                 bending._forward = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forward;
-                bending._activation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activation;
-                bending._activationCountdown = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activationCountdown;
-                bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
                 muscle._mode = bending;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
                 ManualBendingDesc bending;
@@ -441,7 +455,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle)
                     : std::nullopt;
                 bending._lastAngleDelta = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
-                bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
                 muscle._mode = bending;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
                 AngleBendingDesc bending;
@@ -460,9 +473,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     : std::nullopt;
                 crawling._lastActualDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
                 crawling._forward = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forward;
-                crawling._activation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activation;
-                crawling._activationCountdown = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
-                crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
                 muscle._mode = crawling;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
                 ManualCrawlingDesc crawling;
@@ -473,7 +483,6 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
                     : std::nullopt;
                 crawling._lastActualDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
                 crawling._lastDistanceDelta = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
-                crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
                 muscle._mode = crawling;
             } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
                 DirectMovementDesc movement;
@@ -596,21 +605,13 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
             cellDesc._constructor = constructor;
         }
 
-        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
+        auto const& neuralNetworkTO = getFromHeap<NeuralNetTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
-        SignalRestrictionDesc routingRestriction;
-        routingRestriction._mode = objectTO.typeData.cell.signalRestriction.mode;
-        routingRestriction._baseAngle = objectTO.typeData.cell.signalRestriction.baseAngle;
-        routingRestriction._openingAngle = objectTO.typeData.cell.signalRestriction.openingAngle;
-        cellDesc._signalRestriction = routingRestriction;
-        cellDesc._signalState = objectTO.typeData.cell.signalState;
-        if (objectTO.typeData.cell.signalState == SignalState_Active) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
-            }
-            cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
+        cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
 
@@ -629,9 +630,6 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
     nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
 
     nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
-    nodeDesc._signalRestriction._mode = nodeTO->signalRestriction.mode;
-    nodeDesc._signalRestriction._baseAngle = nodeTO->signalRestriction.baseAngle;
-    nodeDesc._signalRestriction._openingAngle = nodeTO->signalRestriction.openingAngle;
 
     switch (nodeTO->cellType) {
     case CellType_Base: {
@@ -646,8 +644,7 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
     } break;
     case CellType_Sensor: {
         SensorGenomeDesc sensorDesc;
-        sensorDesc._autoTriggerInterval =
-            nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
+        sensorDesc._autoTrigger = nodeTO->cellTypeData.sensor.autoTrigger;
         sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
         sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
 
@@ -687,9 +684,20 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
     } break;
     case CellType_Generator: {
         GeneratorGenomeDesc generatorDesc;
-        generatorDesc._autoTriggerInterval = nodeTO->cellTypeData.generator.autoTriggerInterval;
-        generatorDesc._pulseType = nodeTO->cellTypeData.generator.pulseType;
-        generatorDesc._alternationInterval = nodeTO->cellTypeData.generator.alternationInterval;
+        generatorDesc._additive = nodeTO->cellTypeData.generator.additive;
+        generatorDesc._valueOffset = nodeTO->cellTypeData.generator.valueOffset;
+        generatorDesc._timeOffset = nodeTO->cellTypeData.generator.timeOffset;
+        if (nodeTO->cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
+            SquareSignalGenomeDesc squareSignal;
+            squareSignal._amplitude = nodeTO->cellTypeData.generator.modeData.squareSignal.amplitude;
+            squareSignal._period = nodeTO->cellTypeData.generator.modeData.squareSignal.period;
+            generatorDesc._mode = squareSignal;
+        } else if (nodeTO->cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
+            SawtoothSignalGenomeDesc sawtoothSignal;
+            sawtoothSignal._amplitude = nodeTO->cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+            sawtoothSignal._period = nodeTO->cellTypeData.generator.modeData.sawtoothSignal.period;
+            generatorDesc._mode = sawtoothSignal;
+        }
         nodeDesc._cellType = generatorDesc;
     } break;
     case CellType_Attacker: {
@@ -967,9 +975,6 @@ void DescriptionConverterService::convertGenomeToTO(
             nodeTO.referenceAngle = nodeDesc._referenceAngle;
             nodeTO.color = nodeDesc._color;
             nodeTO.numAdditionalConnections = nodeDesc._numAdditionalConnections;
-            nodeTO.signalRestriction.mode = nodeDesc._signalRestriction._mode;
-            nodeTO.signalRestriction.baseAngle = nodeDesc._signalRestriction._baseAngle;
-            nodeTO.signalRestriction.openingAngle = nodeDesc._signalRestriction._openingAngle;
             nodeTO.neuralNetwork = convert(nodeDesc._neuralNetwork);
 
             nodeTO.cellType = nodeDesc.getCellType();
@@ -985,7 +990,7 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellType_Sensor: {
                 auto const& sensorDesc = std::get<SensorGenomeDesc>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
-                sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
+                sensorTO.autoTrigger = sensorDesc._autoTrigger;
                 sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
                 sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
                 sensorTO.mode = sensorDesc.getMode();
@@ -1015,9 +1020,19 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellType_Generator: {
                 auto const& generatorDesc = std::get<GeneratorGenomeDesc>(nodeDesc._cellType);
                 auto& generatorTO = nodeTO.cellTypeData.generator;
-                generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
-                generatorTO.pulseType = generatorDesc._pulseType;
-                generatorTO.alternationInterval = generatorDesc._alternationInterval;
+                generatorTO.additive = generatorDesc._additive;
+                generatorTO.valueOffset = generatorDesc._valueOffset;
+                generatorTO.timeOffset = generatorDesc._timeOffset;
+                generatorTO.mode = generatorDesc.getMode();
+                if (generatorTO.mode == GeneratorMode_SquareSignal) {
+                    auto const& squareSignalDesc = std::get<SquareSignalGenomeDesc>(generatorDesc._mode);
+                    generatorTO.modeData.squareSignal.amplitude = squareSignalDesc._amplitude;
+                    generatorTO.modeData.squareSignal.period = squareSignalDesc._period;
+                } else if (generatorTO.mode == GeneratorMode_SawtoothSignal) {
+                    auto const& sawtoothSignalDesc = std::get<SawtoothSignalGenomeDesc>(generatorDesc._mode);
+                    generatorTO.modeData.sawtoothSignal.amplitude = sawtoothSignalDesc._amplitude;
+                    generatorTO.modeData.sawtoothSignal.period = sawtoothSignalDesc._period;
+                }
             } break;
             case CellType_Attacker: {
                 auto const& attackerDesc = std::get<AttackerGenomeDesc>(nodeDesc._cellType);
@@ -1251,8 +1266,8 @@ void DescriptionConverterService::convertObjectToTO(
         objectTO.typeData.cell.eventPos = {cellDesc._eventPos.x, cellDesc._eventPos.y};
 
         objectTO.typeData.cell.neuralNetworkDataIndex = heap.size();
-        heap.resize(heap.size() + sizeof(NeuralNetworkTO));
-        auto neuralNetworkTO = reinterpret_cast<NeuralNetworkTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkTO));
+        heap.resize(heap.size() + sizeof(NeuralNetTO));
+        auto neuralNetworkTO = reinterpret_cast<NeuralNetTO*>(heap.data() + heap.size() - sizeof(NeuralNetTO));
         *neuralNetworkTO = convert(cellDesc._neuralNetwork);
         auto cellType = cellDesc.getCellType();
 
@@ -1270,7 +1285,7 @@ void DescriptionConverterService::convertObjectToTO(
         case CellType_Sensor: {
             auto const& sensorDesc = std::get<SensorDesc>(cellDesc._cellType);
             SensorTO& sensorTO = objectTO.typeData.cell.cellTypeData.sensor;
-            sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
+            sensorTO.autoTrigger = sensorDesc._autoTrigger;
             sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
             sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
             sensorTO.mode = sensorDesc.getMode();
@@ -1305,9 +1320,19 @@ void DescriptionConverterService::convertObjectToTO(
         case CellType_Generator: {
             auto const& generatorDesc = std::get<GeneratorDesc>(cellDesc._cellType);
             GeneratorTO& generatorTO = objectTO.typeData.cell.cellTypeData.generator;
-            generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
-            generatorTO.pulseType = generatorDesc._pulseType;
-            generatorTO.alternationInterval = generatorDesc._alternationInterval;
+            generatorTO.additive = generatorDesc._additive;
+            generatorTO.valueOffset = generatorDesc._valueOffset;
+            generatorTO.timeOffset = generatorDesc._timeOffset;
+            generatorTO.mode = generatorDesc.getMode();
+            if (generatorTO.mode == GeneratorMode_SquareSignal) {
+                auto const& squareSignalDesc = std::get<SquareSignalDesc>(generatorDesc._mode);
+                generatorTO.modeData.squareSignal.amplitude = squareSignalDesc._amplitude;
+                generatorTO.modeData.squareSignal.period = squareSignalDesc._period;
+            } else if (generatorTO.mode == GeneratorMode_SawtoothSignal) {
+                auto const& sawtoothSignalDesc = std::get<SawtoothSignalDesc>(generatorDesc._mode);
+                generatorTO.modeData.sawtoothSignal.amplitude = sawtoothSignalDesc._amplitude;
+                generatorTO.modeData.sawtoothSignal.period = sawtoothSignalDesc._period;
+            }
             generatorTO.numPulses = generatorDesc._numPulses;
         } break;
         case CellType_Attacker: {
@@ -1335,9 +1360,6 @@ void DescriptionConverterService::convertObjectToTO(
                 bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
                 bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
                 bendingTO.forward = bendingDesc._forward;
-                bendingTO.activation = bendingDesc._activation;
-                bendingTO.activationCountdown = bendingDesc._activationCountdown;
-                bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_ManualBending) {
                 auto const& bendingDesc = std::get<ManualBendingDesc>(muscleDesc._mode);
                 ManualBendingTO& bendingTO = muscleTO.modeData.manualBending;
@@ -1345,7 +1367,6 @@ void DescriptionConverterService::convertObjectToTO(
                 bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
                 bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
                 bendingTO.lastAngleDelta = bendingDesc._lastAngleDelta;
-                bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_AngleBending) {
                 auto const& bendingDesc = std::get<AngleBendingDesc>(muscleDesc._mode);
                 AngleBendingTO& bendingTO = muscleTO.modeData.angleBending;
@@ -1360,9 +1381,6 @@ void DescriptionConverterService::convertObjectToTO(
                 crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
                 crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
                 crawlingTO.forward = crawlingDesc._forward;
-                crawlingTO.activation = crawlingDesc._activation;
-                crawlingTO.activationCountdown = crawlingDesc._activationCountdown;
-                crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_ManualCrawling) {
                 auto const& crawlingDesc = std::get<ManualCrawlingDesc>(muscleDesc._mode);
                 ManualCrawlingTO& crawlingTO = muscleTO.modeData.manualCrawling;
@@ -1371,7 +1389,6 @@ void DescriptionConverterService::convertObjectToTO(
                 crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
                 crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
                 crawlingTO.lastDistanceDelta = crawlingDesc._lastDistanceDelta;
-                crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
             } else if (muscleTO.mode == MuscleMode_DirectMovement) {
             }
             muscleTO.lastMovementX = muscleDesc._lastMovementX;
@@ -1473,16 +1490,11 @@ void DescriptionConverterService::convertObjectToTO(
             constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
         }
 
-        objectTO.typeData.cell.signalRestriction.mode = cellDesc._signalRestriction._mode;
-        objectTO.typeData.cell.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
-        objectTO.typeData.cell.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
-        objectTO.typeData.cell.signalState = cellDesc._signalState;
-        if (cellDesc._signalState == SignalState_Active) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
-            }
-            objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
+        auto numChannels = cellDesc._signal._channels.size();
+        for (int i = 0; i < MAX_CHANNELS && i < numChannels; ++i) {
+            objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
         }
+        objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
     } else {
         CHECK(false);
     }

@@ -1,4 +1,4 @@
-#include "GenomeDescriptionEditService.h"
+#include "GenomeDescEditService.h"
 
 #include <algorithm>
 #include <iterator>
@@ -8,7 +8,7 @@
 #include <EngineInterface/NumberGenerator.h>
 
 #include "DescriptionEditService.h"
-#include "GenomeDescriptionInfoService.h"
+#include "GenomeDescInfoService.h"
 
 namespace
 {
@@ -325,8 +325,7 @@ namespace
             for (auto& node : gene._nodes) {
                 node._color = PreviewColor;
                 if (!detailSimulation) {
-                    node._neuralNetwork = NeuralNetworkGenomeDesc();
-                    node._signalRestriction = SignalRestrictionGenomeDesc();
+                    node._neuralNetwork = NeuralNetGenomeDesc();
                     node._cellType = BaseGenomeDesc();
                 }
                 if (node._constructor.has_value()) {

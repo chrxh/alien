@@ -7,14 +7,6 @@
 
 #include "CellTypeConstants.h"
 
-struct SignalRestrictionPreviewDesc
-{
-    auto operator<=>(SignalRestrictionPreviewDesc const&) const = default;
-
-    MEMBER(SignalRestrictionPreviewDesc, float, startAngle, 0);
-    MEMBER(SignalRestrictionPreviewDesc, float, endAngle, 0);
-};
-
 struct SignalPreviewDesc
 {
     SignalPreviewDesc();
@@ -33,8 +25,6 @@ struct CellPreviewDesc
     MEMBER(CellPreviewDesc, int, geneIndex, 0);
     MEMBER(CellPreviewDesc, int, nodeIndex, 0);
     MEMBER(CellPreviewDesc, std::optional<SignalPreviewDesc>, signal, std::nullopt);
-    MEMBER(CellPreviewDesc, std::optional<SignalRestrictionPreviewDesc>, signalRestriction, std::nullopt);
-    MEMBER(CellPreviewDesc, SignalState, signalState, 0);
     MEMBER(CellPreviewDesc, std::optional<int>, constructorGeneIndex, std::nullopt);
 };
 
@@ -44,8 +34,8 @@ struct ConnectionPreviewDesc
 
     MEMBER(ConnectionPreviewDesc, RealVector2D, object1, {});
     MEMBER(ConnectionPreviewDesc, RealVector2D, object2, {});
-    MEMBER(ConnectionPreviewDesc, bool, arrowToObject1, false);
-    MEMBER(ConnectionPreviewDesc, bool, arrowToObject2, false);
+    MEMBER(ConnectionPreviewDesc, float, connectionWeightToObject1, 0.0f);
+    MEMBER(ConnectionPreviewDesc, float, connectionWeightToObject2, 0.0f);
 };
 
 struct PreviewDesc

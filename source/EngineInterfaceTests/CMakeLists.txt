@@ -1,9 +1,9 @@
 target_sources(EngineInterfaceTests
 PUBLIC
-    GenomeDescriptionEditServiceTests.cpp
-    GenomeDescriptionInfoServiceTests.cpp
+    GenomeDescEditServiceTests.cpp
+    GenomeDescInfoServiceTests.cpp
     ParametersEditServiceTests.cpp
-    PreviewDescriptionConverterServiceTests.cpp
+    PreviewDescConverterServiceTests.cpp
     SpecificationFilterServiceTests.cpp
     Testsuite.cpp)
 

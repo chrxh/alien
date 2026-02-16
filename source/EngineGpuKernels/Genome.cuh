@@ -2,12 +2,16 @@
 
 #include <cstdint>
 
+#include <cuda_fp16.h>
+
 #include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/NeuralNetWeight.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
-struct NeuralNetworkGenome
+struct NeuralNetGenome
 {
-    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];
     ActivationFunction activationFunctions[MAX_CHANNELS];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
@@ -41,8 +45,8 @@ struct DetectFreeCellGenome
 
 struct DetectCreatureGenome
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -58,7 +62,7 @@ union SensorModeGenome
 
 struct SensorGenome
 {
-    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    bool autoTrigger;
     SensorMode mode;
     SensorModeGenome modeData;
     uint16_t minRange;
@@ -74,11 +78,31 @@ struct ConstructorGenome
     ProvideEnergy provideEnergy;
 };
 
+struct SquareSignalGenome
+{
+    float amplitude;
+    int period;
+};
+
+struct SawtoothSignalGenome
+{
+    float amplitude;
+    int period;
+};
+
+union GeneratorModeGenome
+{
+    SquareSignalGenome squareSignal;
+    SawtoothSignalGenome sawtoothSignal;
+};
+
 struct GeneratorGenome
 {
-    uint32_t autoTriggerInterval;
-    GeneratorPulseType pulseType;
-    uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    bool additive;
+    float valueOffset;
+    int timeOffset;
+    GeneratorMode mode;
+    GeneratorModeGenome modeData;
 };
 
 struct AttackFreeCellGenome
@@ -170,8 +194,8 @@ struct ReconnectFreeCellGenome
 
 struct ReconnectCreatureGenome
 {
-    uint32_t minNumCells;  // 0 = no restriction
-    uint32_t maxNumCells;  // 0 = no restriction
+    uint32_t minNumCells;     // 0 = no restriction
+    uint32_t maxNumCells;     // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -239,7 +263,7 @@ struct MemoryGenome
     MemoryModeDataGenome modeData;
 
     uint8_t numSignalEntries;
-    uint8_t channelBitMask;
+    uint16_t channelBitMask;
     SignalEntryGenome* signalEntries;  // Pointer to heap memory
 };
 
@@ -284,25 +308,17 @@ union CellTypeDataGenome
     CommunicatorGenome communicator;
 };
 
-struct SignalRestrictionGenome
-{
-    SignalRestrictionMode mode;
-    float baseAngle;
-    float openingAngle;
-};
-
 struct Node
 {
     float referenceAngle;
     int color;
     int numAdditionalConnections;
 
-    NeuralNetworkGenome neuralNetwork;
+    NeuralNetGenome neuralNetwork;
     CellType cellType;
     CellTypeDataGenome cellTypeData;
-    bool constructorAvailable;  // If true, constructor holds valid data
+    bool constructorAvailable;      // If true, constructor holds valid data
     ConstructorGenome constructor;  // Optional constructor data
-    SignalRestrictionGenome signalRestriction;
 };
 
 struct Gene

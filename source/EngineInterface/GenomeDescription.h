@@ -9,23 +9,25 @@
 
 #include <Base/Definitions.h>
 
+#include <EngineInterface/NeuralNetWeight.h>
+
 #include "CellTypeConstants.h"
 #include "EngineConstants.h"
 
 struct MakeGenomeCopy;
 struct BaseGenomeDesc;
 
-struct NeuralNetworkGenomeDesc
+struct NeuralNetGenomeDesc
 {
-    NeuralNetworkGenomeDesc();
-    auto operator<=>(NeuralNetworkGenomeDesc const&) const = default;
+    NeuralNetGenomeDesc();
+    auto operator<=>(NeuralNetGenomeDesc const&) const = default;
 
-    NeuralNetworkGenomeDesc& weight(int row, int col, float value);
+    NeuralNetGenomeDesc& weight(int row, int col, NeuralNetWeight value);
 
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, weights, {});
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, biases, {});
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<ActivationFunction>, activationFunctions, {});
-    MEMBER(NeuralNetworkGenomeDesc, std::vector<float>, connectionWeights, {});
+    MEMBER(NeuralNetGenomeDesc, std::vector<NeuralNetWeight>, weights, {});
+    MEMBER(NeuralNetGenomeDesc, std::vector<float>, biases, {});
+    MEMBER(NeuralNetGenomeDesc, std::vector<ActivationFunction>, activationFunctions, {});
+    MEMBER(NeuralNetGenomeDesc, std::vector<float>, connectionWeights, {});
 };
 
 struct BaseGenomeDesc
@@ -87,18 +89,14 @@ struct DetectCreatureGenomeDesc
     MEMBER(DetectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeGenomeDesc = std::variant<
-    TelemetryGenomeDesc,
-    DetectEnergyGenomeDesc,
-    DetectStructureGenomeDesc,
-    DetectFreeCellGenomeDesc,
-    DetectCreatureGenomeDesc>;
+using SensorModeGenomeDesc =
+    std::variant<TelemetryGenomeDesc, DetectEnergyGenomeDesc, DetectStructureGenomeDesc, DetectFreeCellGenomeDesc, DetectCreatureGenomeDesc>;
 
 struct SensorGenomeDesc
 {
     auto operator<=>(SensorGenomeDesc const&) const = default;
 
-    MEMBER(SensorGenomeDesc, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
+    MEMBER(SensorGenomeDesc, bool, autoTrigger, true);
     MEMBER(SensorGenomeDesc, SensorModeGenomeDesc, mode, DetectCreatureGenomeDesc());
     MEMBER(SensorGenomeDesc, int, minRange, 0);
     MEMBER(SensorGenomeDesc, int, maxRange, 255);
@@ -106,17 +104,32 @@ struct SensorGenomeDesc
     SensorMode getMode() const;
 };
 
+struct SquareSignalGenomeDesc
+{
+    auto operator<=>(SquareSignalGenomeDesc const&) const = default;
+    MEMBER(SquareSignalGenomeDesc, float, amplitude, 1.0f);
+    MEMBER(SquareSignalGenomeDesc, int, period, 100);
+};
+
+struct SawtoothSignalGenomeDesc
+{
+    auto operator<=>(SawtoothSignalGenomeDesc const&) const = default;
+    MEMBER(SawtoothSignalGenomeDesc, float, amplitude, 1.0f);
+    MEMBER(SawtoothSignalGenomeDesc, int, period, 100);
+};
+
+using GeneratorModeGenomeDesc = std::variant<SquareSignalGenomeDesc, SawtoothSignalGenomeDesc>;
+
 struct GeneratorGenomeDesc
 {
     auto operator<=>(GeneratorGenomeDesc const&) const = default;
 
-    MEMBER(GeneratorGenomeDesc, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
-    MEMBER(GeneratorGenomeDesc, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
-    MEMBER(
-        GeneratorGenomeDesc,
-        int,
-        alternationInterval,
-        20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    MEMBER(GeneratorGenomeDesc, bool, additive, false);
+    MEMBER(GeneratorGenomeDesc, float, valueOffset, 0);
+    MEMBER(GeneratorGenomeDesc, int, timeOffset, 0);
+    MEMBER(GeneratorGenomeDesc, GeneratorModeGenomeDesc, mode, SquareSignalGenomeDesc());
+
+    GeneratorMode getMode() const;
 };
 
 struct AttackFreeCellGenomeDesc
@@ -195,13 +208,8 @@ struct DirectMovementGenomeDesc
     auto operator<=>(DirectMovementGenomeDesc const&) const = default;
 };
 
-using MuscleModeGenomeDesc = std::variant<
-    AutoBendingGenomeDesc,
-    ManualBendingGenomeDesc,
-    AngleBendingGenomeDesc,
-    AutoCrawlingGenomeDesc,
-    ManualCrawlingGenomeDesc,
-    DirectMovementGenomeDesc>;
+using MuscleModeGenomeDesc = std::
+    variant<AutoBendingGenomeDesc, ManualBendingGenomeDesc, AngleBendingGenomeDesc, AutoCrawlingGenomeDesc, ManualCrawlingGenomeDesc, DirectMovementGenomeDesc>;
 
 struct MuscleGenomeDesc
 {
@@ -265,10 +273,7 @@ struct DigestorGenomeDesc
 
     MEMBER(DigestorGenomeDesc, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
 
-    float getRawEnergyConversionRate() const
-    {
-        return 1 - _rawEnergyConductivity;
-    }
+    float getRawEnergyConversionRate() const { return 1 - _rawEnergyConductivity; }
     DigestorGenomeDesc& setRawEnergyConversionRate(float value)
     {
         _rawEnergyConductivity = 1 - value;
@@ -321,7 +326,7 @@ struct MemoryGenomeDesc
 
     MEMBER(MemoryGenomeDesc, MemoryModeGenomeDesc, mode, SignalDelayGenomeDesc());
     MEMBER(MemoryGenomeDesc, std::vector<SignalEntryGenomeDesc>, signalEntries, {});
-    MEMBER(MemoryGenomeDesc, uint8_t, channelBitMask, 0b11111111);
+    MEMBER(MemoryGenomeDesc, uint16_t, channelBitMask, 0b1111111111111111);
 
     MemoryMode getMode() const;
 };
@@ -368,15 +373,6 @@ using CellTypeGenomeDesc = std::variant<
     MemoryGenomeDesc,
     CommunicatorGenomeDesc>;
 
-struct SignalRestrictionGenomeDesc
-{
-    auto operator<=>(SignalRestrictionGenomeDesc const&) const = default;
-
-    MEMBER(SignalRestrictionGenomeDesc, SignalRestrictionMode, mode, SignalRestrictionMode_Inactive);
-    MEMBER(SignalRestrictionGenomeDesc, float, baseAngle, 0.0f);
-    MEMBER(SignalRestrictionGenomeDesc, float, openingAngle, 90.0f);
-};
-
 struct NodeDesc
 {
     auto operator<=>(NodeDesc const&) const = default;
@@ -385,10 +381,9 @@ struct NodeDesc
     MEMBER(NodeDesc, int, color, 0);
     MEMBER(NodeDesc, int, numAdditionalConnections, 0);
 
-    MEMBER(NodeDesc, NeuralNetworkGenomeDesc, neuralNetwork, NeuralNetworkGenomeDesc());
+    MEMBER(NodeDesc, NeuralNetGenomeDesc, neuralNetwork, NeuralNetGenomeDesc());
     MEMBER(NodeDesc, CellTypeGenomeDesc, cellType, BaseGenomeDesc());
     MEMBER(NodeDesc, std::optional<ConstructorGenomeDesc>, constructor, std::nullopt);
-    MEMBER(NodeDesc, SignalRestrictionGenomeDesc, signalRestriction, SignalRestrictionGenomeDesc());
 
     CellType getCellType() const;
 };

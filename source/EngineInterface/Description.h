@@ -9,6 +9,8 @@
 #include <Base/Macros.h>
 #include <Base/MathTypes.h>
 
+#include <EngineInterface/NeuralNetWeight.h>
+
 #include "Definitions.h"
 #include "GenomeDescription.h"
 
@@ -21,17 +23,19 @@ struct ConnectionDesc
     MEMBER(ConnectionDesc, float, angleFromPrevious, 0.0f);
 };
 
-struct NeuralNetworkDesc
+struct NeuralNetDesc
 {
-    NeuralNetworkDesc();
-    auto operator<=>(NeuralNetworkDesc const&) const = default;
+    NeuralNetDesc();
+    auto operator<=>(NeuralNetDesc const&) const = default;
 
-    MEMBER(NeuralNetworkDesc, std::vector<float>, weights, {});
-    MEMBER(NeuralNetworkDesc, std::vector<float>, biases, {});
-    MEMBER(NeuralNetworkDesc, std::vector<ActivationFunction>, activationFunctions, {});
-    MEMBER(NeuralNetworkDesc, std::vector<float>, connectionWeights, {});
+    MEMBER(NeuralNetDesc, std::vector<NeuralNetWeight>, weights, {});
+    MEMBER(NeuralNetDesc, std::vector<float>, biases, {});
+    MEMBER(NeuralNetDesc, std::vector<ActivationFunction>, activationFunctions, {});
+    MEMBER(NeuralNetDesc, std::vector<float>, connectionWeights, {});
 
-    NeuralNetworkDesc& weight(int row, int col, float value);
+    NeuralNetDesc& weight(int row, int col, NeuralNetWeight value);
+    NeuralNetDesc& bias(int row, float value);
+    NeuralNetDesc& connectionWeight(int connectionIndex, float value);
 };
 
 struct BaseDesc
@@ -116,7 +120,7 @@ struct SensorDesc
 {
     auto operator<=>(SensorDesc const&) const = default;
 
-    MEMBER(SensorDesc, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
+    MEMBER(SensorDesc, bool, autoTrigger, true);
     MEMBER(SensorDesc, SensorModeDesc, mode, DetectCreatureDesc());
     MEMBER(SensorDesc, int, minRange, 0);
     MEMBER(SensorDesc, int, maxRange, 255);
@@ -127,21 +131,36 @@ struct SensorDesc
     SensorMode getMode() const;
 };
 
+struct SquareSignalDesc
+{
+    auto operator<=>(SquareSignalDesc const&) const = default;
+    MEMBER(SquareSignalDesc, float, amplitude, 1.0f);
+    MEMBER(SquareSignalDesc, int, period, 100);
+};
+
+struct SawtoothSignalDesc
+{
+    auto operator<=>(SawtoothSignalDesc const&) const = default;
+    MEMBER(SawtoothSignalDesc, float, amplitude, 1.0f);
+    MEMBER(SawtoothSignalDesc, int, period, 100);
+};
+
+using GeneratorModeDesc = std::variant<SquareSignalDesc, SawtoothSignalDesc>;
+
 struct GeneratorDesc
 {
     auto operator<=>(GeneratorDesc const&) const = default;
 
     // Fixed data
-    MEMBER(GeneratorDesc, int, autoTriggerInterval, 100);  // Must be >= 3
-    MEMBER(GeneratorDesc, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
-    MEMBER(
-        GeneratorDesc,
-        int,
-        alternationInterval,
-        20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    MEMBER(GeneratorDesc, bool, additive, false);
+    MEMBER(GeneratorDesc, float, valueOffset, 0);
+    MEMBER(GeneratorDesc, int, timeOffset, 0);
+    MEMBER(GeneratorDesc, GeneratorModeDesc, mode, SquareSignalDesc());
 
     // Process data
     MEMBER(GeneratorDesc, int, numPulses, 0);
+
+    GeneratorMode getMode() const;
 };
 
 struct AttackFreeCellDesc
@@ -186,9 +205,6 @@ struct AutoBendingDesc
     // Process data
     MEMBER(AutoBendingDesc, std::optional<float>, initialAngle, std::nullopt);
     MEMBER(AutoBendingDesc, bool, forward, true);  // Current direction
-    MEMBER(AutoBendingDesc, float, activation, 0);
-    MEMBER(AutoBendingDesc, int, activationCountdown, 0);
-    MEMBER(AutoBendingDesc, bool, impulseAlreadyApplied, false);
 };
 
 struct ManualBendingDesc
@@ -202,7 +218,6 @@ struct ManualBendingDesc
     // Process data
     MEMBER(ManualBendingDesc, std::optional<float>, initialAngle, std::nullopt);
     MEMBER(ManualBendingDesc, float, lastAngleDelta, 0.0f);
-    MEMBER(ManualBendingDesc, bool, impulseAlreadyApplied, false);
 };
 
 struct AngleBendingDesc
@@ -229,9 +244,6 @@ struct AutoCrawlingDesc
     MEMBER(AutoCrawlingDesc, std::optional<float>, initialDistance, std::nullopt);
     MEMBER(AutoCrawlingDesc, float, lastActualDistance, 0.0f);
     MEMBER(AutoCrawlingDesc, bool, forward, true);  // Current direction
-    MEMBER(AutoCrawlingDesc, float, activation, 0.0f);
-    MEMBER(AutoCrawlingDesc, int, activationCountdown, 0);
-    MEMBER(AutoCrawlingDesc, bool, impulseAlreadyApplied, false);
 };
 
 struct ManualCrawlingDesc
@@ -246,7 +258,6 @@ struct ManualCrawlingDesc
     MEMBER(ManualCrawlingDesc, std::optional<float>, initialDistance, std::nullopt);
     MEMBER(ManualCrawlingDesc, float, lastActualDistance, 0.0f);
     MEMBER(ManualCrawlingDesc, float, lastDistanceDelta, 0.0f);
-    MEMBER(ManualCrawlingDesc, bool, impulseAlreadyApplied, false);
 };
 
 struct DirectMovementDesc
@@ -254,13 +265,7 @@ struct DirectMovementDesc
     auto operator<=>(DirectMovementDesc const&) const = default;
 };
 
-using MuscleModeDesc = std::variant<
-    AutoBendingDesc,
-    ManualBendingDesc,
-    AngleBendingDesc,
-    AutoCrawlingDesc,
-    ManualCrawlingDesc,
-    DirectMovementDesc>;
+using MuscleModeDesc = std::variant<AutoBendingDesc, ManualBendingDesc, AngleBendingDesc, AutoCrawlingDesc, ManualCrawlingDesc, DirectMovementDesc>;
 
 struct MuscleDesc
 {
@@ -327,7 +332,7 @@ struct DigestorDesc
 {
     auto operator<=>(DigestorDesc const&) const = default;
 
-    MEMBER(DigestorDesc, float, rawEnergyConductivity, 0.5f);    // Between 0 and 1
+    MEMBER(DigestorDesc, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
 
     float getRawEnergyConversionRate() const { return 1 - _rawEnergyConductivity; }
     DigestorDesc& setRawEnergyConversionRate(float value)
@@ -386,7 +391,7 @@ struct MemoryDesc
 
     MEMBER(MemoryDesc, MemoryModeDesc, mode, SignalDelayDesc());
     MEMBER(MemoryDesc, std::vector<SignalEntryDesc>, signalEntries, {});
-    MEMBER(MemoryDesc, uint8_t, channelBitMask, 0b11111111);
+    MEMBER(MemoryDesc, uint16_t, channelBitMask, 0b1111111111111111);
 
     MemoryMode getMode() const;
 };
@@ -423,7 +428,7 @@ using CellTypeDesc = std::variant<
     DepotDesc,
     SensorDesc,
     GeneratorDesc,
-    AttackerDesc,   
+    AttackerDesc,
     InjectorDesc,
     MuscleDesc,
     DefenderDesc,
@@ -433,21 +438,14 @@ using CellTypeDesc = std::variant<
     MemoryDesc,
     CommunicatorDesc>;
 
-struct SignalRestrictionDesc
-{
-    auto operator<=>(SignalRestrictionDesc const&) const = default;
-
-    MEMBER(SignalRestrictionDesc, SignalRestrictionMode, mode, SignalRestrictionMode_Inactive);
-    MEMBER(SignalRestrictionDesc, float, baseAngle, 0);
-    MEMBER(SignalRestrictionDesc, float, openingAngle, 90.0f);
-};
-
 struct SignalDesc
 {
     SignalDesc();
     auto operator<=>(SignalDesc const&) const = default;
 
-    MEMBER(SignalDesc, std::vector<float>, channels, {});
+    SignalDesc& channels(std::vector<float> const& value);
+    std::vector<float> _channels;
+
     MEMBER(SignalDesc, int, numTimesSent, 0);
 };
 
@@ -488,12 +486,11 @@ struct CellDesc
     MEMBER(CellDesc, int, geneIndex, 0);
 
     // Cell type-specific data
-    MEMBER(CellDesc, NeuralNetworkDesc, neuralNetwork, NeuralNetworkDesc());
+    MEMBER(CellDesc, NeuralNetDesc, neuralNetwork, NeuralNetDesc());
     MEMBER(CellDesc, CellTypeDesc, cellType, BaseDesc());
     MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
-    MEMBER(CellDesc, SignalState, signalState, SignalState_Inactive);
-    MEMBER(CellDesc, SignalDesc, signal, SignalDesc());  // For signalState == SignalState_Active
-    MEMBER(CellDesc, SignalRestrictionDesc, signalRestriction, SignalRestrictionDesc());
+    MEMBER(CellDesc, SignalDesc, signal, SignalDesc());
+    CellDesc& signal(std::vector<float> const& value);
     MEMBER(CellDesc, int, activationTime, 0);
 
     // Process data
@@ -506,8 +503,6 @@ struct CellDesc
     MEMBER(CellDesc, RealVector2D, eventPos, RealVector2D());
 
     CellType getCellType() const;
-    CellDesc& signalAndState(std::vector<float> const& value);
-    CellDesc& signalRestriction(float baseAngle, float openingAngle);
 };
 
 using ObjectTypeDesc = std::variant<StructureDesc, FreeCellDesc, CellDesc>;
@@ -596,10 +591,7 @@ struct Desc
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
 
-    Desc& addCreature(
-        std::vector<ObjectDesc> const& objects,
-        CreatureDesc const& creature = CreatureDesc(),
-        GenomeDesc const& genome = GenomeDesc());
+    Desc& addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc const& creature = CreatureDesc(), GenomeDesc const& genome = GenomeDesc());
     Desc& addObjects(std::vector<ObjectDesc> const& objects);
 
     size_t getNumObjects() const;

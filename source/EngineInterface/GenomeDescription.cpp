@@ -1,19 +1,26 @@
 #include "GenomeDescription.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include "NumberGenerator.h"
 
-NeuralNetworkGenomeDesc::NeuralNetworkGenomeDesc()
+NeuralNetGenomeDesc::NeuralNetGenomeDesc()
 {
-    _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
-    _biases.resize(MAX_CHANNELS, 0);
-    _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-    _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
+    _weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         _weights[i * MAX_CHANNELS + i] = 1.0f;
     }
+
+    _biases.resize(MAX_CHANNELS, 0);
+
+    _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
+
+    _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
+    _connectionWeights.at(0) = 1.0f;
 }
 
-NeuralNetworkGenomeDesc& NeuralNetworkGenomeDesc::weight(int row, int col, float value)
+NeuralNetGenomeDesc& NeuralNetGenomeDesc::weight(int row, int col, NeuralNetWeight value)
 {
     _weights[row * MAX_CHANNELS + col] = value;
     return *this;
@@ -83,6 +90,16 @@ AttackerMode AttackerGenomeDesc::getMode() const
         return AttackerMode_FreeCell;
     } else if (std::holds_alternative<AttackCreatureGenomeDesc>(_mode)) {
         return AttackerMode_Creature;
+    }
+    CHECK(false);
+}
+
+GeneratorMode GeneratorGenomeDesc::getMode() const
+{
+    if (std::holds_alternative<SquareSignalGenomeDesc>(_mode)) {
+        return GeneratorMode_SquareSignal;
+    } else if (std::holds_alternative<SawtoothSignalGenomeDesc>(_mode)) {
+        return GeneratorMode_SawtoothSignal;
     }
     CHECK(false);
 }

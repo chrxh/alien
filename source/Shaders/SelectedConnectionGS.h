@@ -10,7 +10,8 @@ layout (lines) in;
 layout (triangle_strip, max_vertices = 20) out;
 
 in vec3 vertexColor[];
-flat in int vertexActive[];
+flat in float weightToObject1[];
+flat in float weightToObject2[];
 out vec3 fragColor;
 
 uniform vec2 viewportSize;
@@ -119,17 +120,12 @@ void main()
     vec4 p0 = gl_in[0].gl_Position;
     vec4 p1 = gl_in[1].gl_Position;
 
-  
-    // Extract arrow direction flags from the state field
-    // Bit 0: arrow to object1 (vertex 0)
-    // Bit 1: arrow to object2 (vertex 1)
-    bool arrowToObject1 = (vertexActive[0] & 1) != 0;
-    bool arrowToObject2 = (vertexActive[0] & 2) != 0;
+    // Get connection weights
+    float cwToObject1 = weightToObject1[0];
+    float cwToObject2 = weightToObject2[0];
     
     // Line width in NDC coordinates - thinner lines (1-2 pixels)
     float lineWidth = 2.0;
-    // Arrow size - make arrows more visible
-    float arrowSize = zoom / 8.0;
     
     // Calculate line direction
     vec2 dir = normalize(p1.xy - p0.xy);
@@ -139,12 +135,16 @@ void main()
     // Draw the main line
     emitLine(p0, p1, vertexColor[0], vertexColor[1], lineWidth);
     
-    // Draw arrow heads if signal can flow
-    if (arrowToObject1) {
+    // Draw arrow heads scaled by connection weight (analogous to CreaturePreviewWidget)
+    if (cwToObject1 != 0.0) {
+        float arrowScale = min(abs(cwToObject1), 1.0);
+        float arrowSize = zoom / 8.0 * arrowScale;
         emitArrowHead(p0, -dir, vertexColor[0], lineWidth, arrowSize);
     }
     
-    if (arrowToObject2) {
+    if (cwToObject2 != 0.0) {
+        float arrowScale = min(abs(cwToObject2), 1.0);
+        float arrowSize = zoom / 8.0 * arrowScale;
         emitArrowHead(p1, dir, vertexColor[1], lineWidth, arrowSize);
     }
 }

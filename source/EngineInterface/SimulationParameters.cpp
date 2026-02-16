@@ -479,13 +479,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Neural network")
-                        .reference(FloatSpec().member(&SimulationParameters::mutationNeuralNetwork).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                        .reference(FloatSpec().member(&SimulationParameters::mutationNeuralNet).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                         .description(
                             "This type of mutation can change the weights, biases and activation functions of neural networks of node."),
                 }),
             ParameterGroupSpec()
                 .name("Customize neuron mutations")
-                .expertToggle(&SimulationParameters::customizeNeuralNetworkMutationsToggle)
+                .expertToggle(&SimulationParameters::customizeNeuralNetMutationsToggle)
                 .parameters({
                     ParameterSpec()
                         .name("Affected weights")

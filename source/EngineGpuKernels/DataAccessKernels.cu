@@ -72,9 +72,6 @@ namespace
                     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
                         nodeTO.neuralNetwork.connectionWeights[i] = node.neuralNetwork.connectionWeights[i];
                     }
-                    nodeTO.signalRestriction.mode = node.signalRestriction.mode;
-                    nodeTO.signalRestriction.baseAngle = node.signalRestriction.baseAngle;
-                    nodeTO.signalRestriction.openingAngle = node.signalRestriction.openingAngle;
                     nodeTO.cellType = node.cellType;
                     switch (node.cellType) {
                     case CellType_Base:
@@ -83,7 +80,7 @@ namespace
                         nodeTO.cellTypeData.depot.storageLimit = node.cellTypeData.depot.storageLimit;
                         break;
                     case CellType_Sensor:
-                        nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
+                        nodeTO.cellTypeData.sensor.autoTrigger = node.cellTypeData.sensor.autoTrigger;
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
                         nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
                         nodeTO.cellTypeData.sensor.mode = node.cellTypeData.sensor.mode;
@@ -105,9 +102,19 @@ namespace
                         }
                         break;
                     case CellType_Generator:
-                        nodeTO.cellTypeData.generator.autoTriggerInterval = node.cellTypeData.generator.autoTriggerInterval;
-                        nodeTO.cellTypeData.generator.pulseType = node.cellTypeData.generator.pulseType;
-                        nodeTO.cellTypeData.generator.alternationInterval = node.cellTypeData.generator.alternationInterval;
+                        nodeTO.cellTypeData.generator.additive = node.cellTypeData.generator.additive;
+                        nodeTO.cellTypeData.generator.mode = node.cellTypeData.generator.mode;
+                        if (node.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
+                            nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude =
+                                node.cellTypeData.generator.modeData.squareSignal.amplitude;
+                            nodeTO.cellTypeData.generator.modeData.squareSignal.period =
+                                node.cellTypeData.generator.modeData.squareSignal.period;
+                        } else if (node.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
+                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude =
+                                node.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.period =
+                                node.cellTypeData.generator.modeData.sawtoothSignal.period;
+                        }
                         break;
                     case CellType_Attacker:
                         nodeTO.cellTypeData.attacker.mode = node.cellTypeData.attacker.mode;
@@ -310,10 +317,6 @@ namespace
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
-            cellTO.signalRestriction.mode = cell.signalRestriction.mode;
-            cellTO.signalRestriction.baseAngle = cell.signalRestriction.baseAngle;
-            cellTO.signalRestriction.openingAngle = cell.signalRestriction.openingAngle;
-            cellTO.signalState = cell.signalState;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cellTO.signal.channels[i] = cell.signal.channels[i];
             }
@@ -328,9 +331,25 @@ namespace
             cellTO.eventCounter = cell.eventCounter;
             cellTO.eventPos = cell.eventPos;
 
+            // Copy NeuralNet to NeuralNetTO
             if (cell.neuralNetwork != nullptr) {
-                int targetSize;  //not used
-                copyDataToHeap<int>(sizeof(NeuralNetwork), reinterpret_cast<uint8_t*>(cell.neuralNetwork), targetSize, cellTO.neuralNetworkDataIndex, to);
+                uint64_t size = sizeof(NeuralNetTO);
+                cellTO.neuralNetworkDataIndex = alienAtomicAdd64(to.heapSize, size);
+                if (cellTO.neuralNetworkDataIndex + size > to.capacities.heap) {
+                    printf("Insufficient heap memory for NeuralNetTO.\n");
+                    ABORT();
+                }
+                auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
+                for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                    nnTO->weights[i] = cell.neuralNetwork->weights[i];
+                }
+                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                    nnTO->biases[i] = cell.neuralNetwork->biases[i];
+                    nnTO->activationFunctions[i] = cell.neuralNetwork->activationFunctions[i];
+                }
+                for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+                    nnTO->connectionWeights[i] = cell.neuralNetwork->connectionWeights[i];
+                }
             }
 
             cellTO.cellType = cell.cellType;
@@ -342,7 +361,7 @@ namespace
                 cellTO.cellTypeData.depot.storedUsableEnergy = cell.cellTypeData.depot.storedUsableEnergy;
             } break;
             case CellType_Sensor: {
-                cellTO.cellTypeData.sensor.autoTriggerInterval = cell.cellTypeData.sensor.autoTriggerInterval;
+                cellTO.cellTypeData.sensor.autoTrigger = cell.cellTypeData.sensor.autoTrigger;
                 cellTO.cellTypeData.sensor.minRange = cell.cellTypeData.sensor.minRange;
                 cellTO.cellTypeData.sensor.maxRange = cell.cellTypeData.sensor.maxRange;
                 cellTO.cellTypeData.sensor.mode = cell.cellTypeData.sensor.mode;
@@ -364,9 +383,17 @@ namespace
                 cellTO.cellTypeData.sensor.lastMatch.pos = cell.cellTypeData.sensor.lastMatch.pos;
             } break;
             case CellType_Generator: {
-                cellTO.cellTypeData.generator.autoTriggerInterval = cell.cellTypeData.generator.autoTriggerInterval;
-                cellTO.cellTypeData.generator.pulseType = cell.cellTypeData.generator.pulseType;
-                cellTO.cellTypeData.generator.alternationInterval = cell.cellTypeData.generator.alternationInterval;
+                cellTO.cellTypeData.generator.additive = cell.cellTypeData.generator.additive;
+                cellTO.cellTypeData.generator.valueOffset = cell.cellTypeData.generator.valueOffset;
+                cellTO.cellTypeData.generator.timeOffset = cell.cellTypeData.generator.timeOffset;
+                cellTO.cellTypeData.generator.mode = cell.cellTypeData.generator.mode;
+                if (cell.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
+                    cellTO.cellTypeData.generator.modeData.squareSignal.amplitude = cell.cellTypeData.generator.modeData.squareSignal.amplitude;
+                    cellTO.cellTypeData.generator.modeData.squareSignal.period = cell.cellTypeData.generator.modeData.squareSignal.period;
+                } else if (cell.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
+                    cellTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude = cell.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                    cellTO.cellTypeData.generator.modeData.sawtoothSignal.period = cell.cellTypeData.generator.modeData.sawtoothSignal.period;
+                }
                 cellTO.cellTypeData.generator.numPulses = cell.cellTypeData.generator.numPulses;
             } break;
             case CellType_Attacker: {
@@ -385,17 +412,12 @@ namespace
                     cellTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio = cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
                     cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle = cell.cellTypeData.muscle.modeData.autoBending.initialAngle;
                     cellTO.cellTypeData.muscle.modeData.autoBending.forward = cell.cellTypeData.muscle.modeData.autoBending.forward;
-                    cellTO.cellTypeData.muscle.modeData.autoBending.activation = cell.cellTypeData.muscle.modeData.autoBending.activation;
-                    cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown = cell.cellTypeData.muscle.modeData.autoBending.activationCountdown;
-                    cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
                     cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
                     cellTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio =
                         cell.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
                     cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle = cell.cellTypeData.muscle.modeData.manualBending.initialAngle;
                     cellTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta = cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
-                    cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied =
-                        cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
                     cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = cell.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
                     cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
@@ -407,10 +429,6 @@ namespace
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance = cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance;
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance = cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
                     cellTO.cellTypeData.muscle.modeData.autoCrawling.forward = cell.cellTypeData.muscle.modeData.autoCrawling.forward;
-                    cellTO.cellTypeData.muscle.modeData.autoCrawling.activation = cell.cellTypeData.muscle.modeData.autoCrawling.activation;
-                    cellTO.cellTypeData.muscle.modeData.autoCrawling.activationCountdown = cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
-                    cellTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied =
-                        cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
                         cell.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
@@ -419,8 +437,6 @@ namespace
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance = cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance;
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
                     cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
-                    cellTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied =
-                        cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
                 } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
                 }
                 cellTO.cellTypeData.muscle.lastMovementX = cell.cellTypeData.muscle.lastMovementX;
@@ -1080,7 +1096,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if (object->type == ObjectType_Cell) {
-            heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
+            heapBytes += sizeof(NeuralNet) + GpuMemoryAlignmentBytes;
             if (object->typeData.cell.cellType == CellType_Memory) {
                 heapBytes += sizeof(SignalEntry) * object->typeData.cell.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
             }
@@ -1132,7 +1148,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TOs to, ArraySizesForGpuEntitie
             auto& objectTO = to.objects[index];
             heapBytes += sizeof(Object) + GpuMemoryAlignmentBytes;
             if (objectTO.type == ObjectType_Cell) {
-                heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
+                heapBytes += sizeof(NeuralNet) + GpuMemoryAlignmentBytes;
                 if (objectTO.typeData.cell.cellType == CellType_Memory) {
                     heapBytes += sizeof(SignalEntry) * objectTO.typeData.cell.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
                 }
