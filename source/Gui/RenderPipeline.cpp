@@ -5,11 +5,11 @@
 #include <boost/range/adaptor/indexed.hpp>
 
 #include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "RenderStep.h"
 #include "Shader.h"
 #include "Viewport.h"
-#include <EngineInterface/SimulationFacade.h>
 
 _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
     : _geometryBuffers(_GeometryBuffers::create())
@@ -155,9 +155,13 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
-        // Arrow flags (1 int)
-        glVertexAttribIPointer(2, 1, GL_INT, sizeof(ConnectionArrowVertexData), (void*)(5 * sizeof(float)));
+        // Connection weight to object1 (1 float)
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)(5 * sizeof(float)));
         glEnableVertexAttribArray(2);
+
+        // Connection weight to object2 (1 float)
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(3);
     }
     {
         auto vao = _geometryBuffers->getVaoForAttackEvents();

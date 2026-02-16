@@ -8,10 +8,12 @@ namespace Shaders
 #version 330 core
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec3 aColor;
-layout (location = 2) in int isActive;
+layout (location = 2) in float aConnectionWeightToObject1;
+layout (location = 3) in float aConnectionWeightToObject2;
 
 out vec3 vertexColor;
-flat out int vertexActive;
+flat out float weightToObject1;
+flat out float weightToObject2;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -29,9 +31,10 @@ void main()
     
     gl_Position = vec4(ndc, 0.0, 1.0);
     
-    // Pass color and active state to geometry shader
+    // Pass color and connection weights to geometry shader
     vertexColor = aColor;
-    vertexActive = isActive;
+    weightToObject1 = aConnectionWeightToObject1;
+    weightToObject2 = aConnectionWeightToObject2;
 }
 )";
 }
