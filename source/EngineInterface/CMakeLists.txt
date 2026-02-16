@@ -16,13 +16,13 @@ add_library(EngineInterface
     EngineConstants.h
     GenomeDescription.cpp
     GenomeDescription.h
-    GenomeDescriptionEditService.cpp
-    GenomeDescriptionEditService.h
+    GenomeDescEditService.cpp
+    GenomeDescEditService.h
     GenomeDescriptionHash.h
-    GenomeDescriptionInfoService.cpp
-    GenomeDescriptionInfoService.h
-    GenomeDescriptionValidationService.cpp
-    GenomeDescriptionValidationService.h
+    GenomeDescInfoService.cpp
+    GenomeDescInfoService.h
+    GenomeDescValidationService.cpp
+    GenomeDescValidationService.h
     GeometryBuffers.cpp
     GeometryBuffers.h
     Ids.h

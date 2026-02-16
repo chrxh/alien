@@ -1,7 +1,7 @@
 #pragma once
 
 #include <EngineInterface/GenomeDescription.h>
-#include <EngineInterface/GenomeDescriptionEditService.h>
+#include <EngineInterface/GenomeDescEditService.h>
 
 #include "Definitions.h"
 

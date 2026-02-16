@@ -6,7 +6,7 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescriptionEditService.h>
+#include <EngineInterface/GenomeDescEditService.h>
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"

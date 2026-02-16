@@ -1,4 +1,4 @@
-#include "GenomeDescriptionEditService.h"
+#include "GenomeDescEditService.h"
 
 #include <algorithm>
 #include <iterator>
@@ -8,7 +8,7 @@
 #include <EngineInterface/NumberGenerator.h>
 
 #include "DescriptionEditService.h"
-#include "GenomeDescriptionInfoService.h"
+#include "GenomeDescInfoService.h"
 
 namespace
 {

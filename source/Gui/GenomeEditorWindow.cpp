@@ -8,7 +8,7 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescriptionInfoService.h>
+#include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 

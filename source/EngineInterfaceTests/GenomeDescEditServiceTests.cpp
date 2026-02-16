@@ -7,8 +7,8 @@
 
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/GenomeDescription.h>
-#include <EngineInterface/GenomeDescriptionEditService.h>
-#include <EngineInterface/GenomeDescriptionInfoService.h>
+#include <EngineInterface/GenomeDescEditService.h>
+#include <EngineInterface/GenomeDescInfoService.h>
 
 class GenomeDescEditServiceTests : public ::testing::Test
 {

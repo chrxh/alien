@@ -1,4 +1,4 @@
-#include "GenomeDescriptionValidationService.h"
+#include "GenomeDescValidationService.h"
 
 #include <algorithm>
 #include <cmath>

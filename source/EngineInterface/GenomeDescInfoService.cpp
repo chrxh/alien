@@ -1,4 +1,4 @@
-#include "GenomeDescriptionInfoService.h"
+#include "GenomeDescInfoService.h"
 
 #include <algorithm>
 #include <iterator>
