@@ -104,11 +104,11 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
         result.description._objects.emplace_back(previewCell);
     }
 
-    // Helper to find the connection index of targetId in sourceObject's connections
-    auto getConnectionWeight = [](ObjectDesc const& sourceObject, uint64_t targetId) -> float {
+    // Helper to find the connection weight from genome for a given connection
+    auto getConnectionWeight = [&getNode](ObjectDesc const& sourceObject, uint64_t targetId) -> float {
         for (int i = 0; i < static_cast<int>(sourceObject._connections.size()); ++i) {
             if (sourceObject._connections[i]._objectId == targetId) {
-                auto const& cw = sourceObject.getCellRef()._neuralNetwork._connectionWeights;
+                auto const& cw = getNode(sourceObject)._neuralNetwork._connectionWeights;
                 return i < static_cast<int>(cw.size()) ? cw[i] : 0.0f;
             }
         }

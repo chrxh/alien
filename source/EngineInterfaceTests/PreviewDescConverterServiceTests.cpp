@@ -513,3 +513,33 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
     EXPECT_TRUE(object1._signal.has_value());
     EXPECT_EQ(signal, object1._signal->_channels);
 }
+
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_connectionWeightsFromGenome)
+{
+    auto nn1 = NeuralNetGenomeDesc();
+    nn1._connectionWeights.at(0) = 0.5f;
+    auto nn2 = NeuralNetGenomeDesc();
+    nn2._connectionWeights.at(0) = 0.3f;
+    auto genome = GenomeDesc().genes({
+        GeneDesc().separation(true).nodes({NodeDesc().color(2).neuralNetwork(nn1), NodeDesc().color(3).neuralNetwork(nn2)}),
+    });
+
+    Desc input;
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+        },
+        CreatureDesc(),
+        genome);
+    input.addConnection(1, 2);
+
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+
+    ASSERT_EQ(2, result.description._objects.size());
+    ASSERT_EQ(1, result.description._connections.size());
+
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    auto object2 = getPreviewCell(result.description, 0, 1);
+    checkConnections(result.description, {{object1._pos, object2._pos, 0.5f, 0.3f}});
+}
