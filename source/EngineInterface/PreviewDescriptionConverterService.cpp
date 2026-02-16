@@ -105,13 +105,14 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     }
 
     // Helper to find the connection index of targetId in sourceObject's connections
-    auto getConnectionIndex = [](ObjectDesc const& sourceObject, uint64_t targetId) -> std::optional<int> {
+    auto getConnectionWeight = [](ObjectDesc const& sourceObject, uint64_t targetId) -> float {
         for (int i = 0; i < static_cast<int>(sourceObject._connections.size()); ++i) {
             if (sourceObject._connections[i]._objectId == targetId) {
-                return i;
+                auto const& cw = sourceObject.getCellRef()._neuralNetwork._connectionWeights;
+                return i < static_cast<int>(cw.size()) ? cw[i] : 0.0f;
             }
         }
-        return std::nullopt;
+        return 0.0f;
     };
 
     // Create preview connections
@@ -130,27 +131,11 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
             auto const& object1 = phenotype.getObjectRef(objectId1, cache);
             auto const& object2 = phenotype.getObjectRef(objectId2, cache);
 
-            float connectionWeightToObject2 = 0.0f;
-            if (auto connIdx = getConnectionIndex(object1, objectId2)) {
-                auto const& cw = object1.getCellRef()._neuralNetwork._connectionWeights;
-                if (*connIdx < static_cast<int>(cw.size())) {
-                    connectionWeightToObject2 = cw[*connIdx];
-                }
-            }
-
-            float connectionWeightToObject1 = 0.0f;
-            if (auto connIdx = getConnectionIndex(object2, objectId1)) {
-                auto const& cw = object2.getCellRef()._neuralNetwork._connectionWeights;
-                if (*connIdx < static_cast<int>(cw.size())) {
-                    connectionWeightToObject1 = cw[*connIdx];
-                }
-            }
-
             auto previewConnection = ConnectionPreviewDesc()
                                          .object1(object1._pos)
                                          .object2(object2._pos)
-                                         .connectionWeightToObject1(connectionWeightToObject1)
-                                         .connectionWeightToObject2(connectionWeightToObject2);
+                                         .connectionWeightToObject1(getConnectionWeight(object2, objectId1))
+                                         .connectionWeightToObject2(getConnectionWeight(object1, objectId2));
             result.description._connections.push_back(previewConnection);
         }
     }
