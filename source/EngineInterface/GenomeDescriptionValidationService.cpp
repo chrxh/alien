@@ -34,6 +34,12 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 activationFunction =
                     std::clamp(activationFunction, static_cast<ActivationFunction>(0), static_cast<ActivationFunction>(ActivationFunction_Count - 1));
             }
+            for (auto& bias : node._neuralNetwork._biases) {
+                bias = std::clamp(bias, -2.0f, 2.0f);
+            }
+            for (auto& weight : node._neuralNetwork._connectionWeights) {
+                weight = std::clamp(weight, -1.0f, 1.0f);
+            }
 
             // Validate cell-specific attributes based on type
             auto nodeType = node.getCellType();

@@ -73,7 +73,7 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
         auto originalGrabMinSize = style.GrabMinSize;
         style.GrabMinSize = scale(8.0f);
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().format("%.2f").width(layout.connectionButtonWidth).textWidth(0).min(-2.0f).max(2.0f), &connectionWeights.at(i));
+            AlienGui::SliderFloatParameters().format("%.2f").width(layout.connectionButtonWidth).textWidth(0).min(-1.0f).max(1.0f), &connectionWeights.at(i));
         style.GrabMinSize = originalGrabMinSize;
         ImGui::PopID();
         layout.connectionButtonBottomLeft[i] = {ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y};
@@ -241,7 +241,7 @@ void _NeuralNetEditorWidget::drawConnectionWeightLines(std::vector<float>& conne
         if (std::abs(value) <= NEAR_ZERO) {
             continue;
         }
-        auto halfWidth = layout.connectionButtonWidth * std::min(1.0f, std::abs(value) / 2.0f) * 0.35f;
+        auto halfWidth = layout.connectionButtonWidth * std::min(1.0f, std::abs(value)) * 0.35f;
         auto centerX = (layout.connectionButtonBottomLeft[i].x + layout.connectionButtonBottomRight[i].x) / 2.0f;
         auto topY = layout.connectionButtonBottomLeft[i].y;
         drawList->AddQuadFilled(
