@@ -106,10 +106,10 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
 
     // Helper to find the connection weight from genome for a given connection
     auto getConnectionWeight = [&getNode](ObjectDesc const& sourceObject, uint64_t targetId) -> float {
-        for (int i = 0; i < static_cast<int>(sourceObject._connections.size()); ++i) {
-            if (sourceObject._connections[i]._objectId == targetId) {
+        for (int i = 0, size = sourceObject._connections.size(); i < size; ++i) {
+            if (sourceObject._connections.at(i)._objectId == targetId) {
                 auto const& cw = getNode(sourceObject)._neuralNetwork._connectionWeights;
-                return i < static_cast<int>(cw.size()) ? cw[i] : 0.0f;
+                return cw.at(i);
             }
         }
         return 0.0f;

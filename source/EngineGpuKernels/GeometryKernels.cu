@@ -464,17 +464,13 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
             if (object->type == ObjectType_Cell) {
                 // connectionWeightToObject1: weight on object for this connection (signal flows from connectedObject to object)
                 auto* nn = object->typeData.cell.neuralNetwork;
-                if (nn) {
                     connectionWeightToObject1 = nn->connectionWeights[i];
-                }
             }
             if (connectedObject->type == ObjectType_Cell) {
                 // connectionWeightToObject2: weight on connectedObject for reverse connection (signal flows from object to connectedObject)
                 auto* nn = connectedObject->typeData.cell.neuralNetwork;
-                if (nn) {
-                    auto backIndex = connectedObject->getConnectionIndex(object);
-                    connectionWeightToObject2 = nn->connectionWeights[backIndex];
-                }
+                auto backIndex = connectedObject->getConnectionIndex(object);
+                connectionWeightToObject2 = nn->connectionWeights[backIndex];
             }
 
             // Get cell colors
