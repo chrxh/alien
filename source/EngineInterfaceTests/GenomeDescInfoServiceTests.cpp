@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/GenomeDescription.h>
-#include <EngineInterface/GenomeDescriptionInfoService.h>
+#include <EngineInterface/GenomeDescInfoService.h>
 
 class GenomeDescInfoServiceTests : public ::testing::Test
 {

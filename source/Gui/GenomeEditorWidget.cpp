@@ -9,8 +9,8 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <EngineInterface/GenomeDescriptionEditService.h>
-#include <EngineInterface/GenomeDescriptionInfoService.h>
+#include <EngineInterface/GenomeDescEditService.h>
+#include <EngineInterface/GenomeDescInfoService.h>
 
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"
