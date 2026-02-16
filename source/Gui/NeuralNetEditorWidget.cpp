@@ -352,7 +352,7 @@ ImColor _NeuralNetEditorWidget::calcWeightColor(float value)
 {
     auto factor = std::min(1.0f, std::abs(value));
     if (value > NEAR_ZERO) {
-        return ImColor::HSV(0.61f, 0.7f, std::max(1.0f * factor, 0.1f), 0.5f);
+        return ImColor::HSV(0.33f, 0.7f, std::max(1.0f * factor, 0.1f), 0.5f);
     } else if (value < -NEAR_ZERO) {
         return ImColor::HSV(0.0f, 0.7f, std::max(1.0f * factor, 0.1f), 0.5f);
     } else {
@@ -364,7 +364,7 @@ ImColor _NeuralNetEditorWidget::calcBiasColor(float value)
 {
     auto factor = std::min(1.0f, std::abs(value));
     if (value > NEAR_ZERO) {
-        return ImColor::HSV(0.61f, 0.7f, std::max(1.0f * factor, 0.2f), 1.0f);
+        return ImColor::HSV(0.33f, 0.7f, std::max(1.0f * factor, 0.2f), 1.0f);
     } else if (value < -NEAR_ZERO) {
         return ImColor::HSV(0.0f, 0.7f, std::max(1.0f * factor, 0.2f), 1.0f);
     } else {
