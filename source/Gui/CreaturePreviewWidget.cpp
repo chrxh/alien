@@ -297,12 +297,12 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             if (connection._connectionWeightToObject1 != 0.0f) {
                 auto arrowScale = std::min(std::abs(connection._connectionWeightToObject1), 1.0f);
                 auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
-                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8 * arrowScale;
+                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 6 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
                 auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
-                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8 * arrowScale;
+                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 6 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
             }
@@ -310,12 +310,12 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             if (connection._connectionWeightToObject2 != 0.0f) {
                 auto arrowScale = std::min(std::abs(connection._connectionWeightToObject2), 1.0f);
                 auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
-                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8 * arrowScale;
+                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 6 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
                 auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
-                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8 * arrowScale;
+                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 6 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
             }
