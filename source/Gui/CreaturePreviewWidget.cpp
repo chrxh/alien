@@ -43,8 +43,8 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, fl
 
     auto geneStartIndex = _subGenome.startIndex;
 
-    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(
-        _editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
+    auto conversionResult =
+        PreviewDescConverterService::get().convertToPreviewDesc(_editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
     _visualFrontAngle = conversionResult.visualFrontAngle;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
@@ -240,7 +240,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
         if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == object._id) {
             if (_zoom > ZoomLevelForLabels) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f/*cellSize * 0.05f*/);
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f /*cellSize * 0.05f*/);
             }
         }
 
@@ -251,7 +251,6 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 selectedNode = object._nodeIndex;
                 _selectedNodeFromPreview = selectedNode;
                 _selectedCellIdFromPreview = object._id;
-
             }
         }
     }
@@ -295,26 +294,28 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             drawList->AddLine(
                 {connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
-            if (connection._arrowToObject1) {
+            if (connection._connectionWeightToObject1 != 0.0f) {
+                auto arrowScale = std::min(std::abs(connection._connectionWeightToObject1), 1.0f);
                 auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
-                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
+                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
                 auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
-                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8;
+                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
             }
 
-            if (connection._arrowToObject2) {
+            if (connection._connectionWeightToObject2 != 0.0f) {
+                auto arrowScale = std::min(std::abs(connection._connectionWeightToObject2), 1.0f);
                 auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
-                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
+                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
                 auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
-                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8;
+                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
             }
@@ -373,10 +374,10 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
     if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), height), ImGuiChildFlags_FrameStyle)) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
-        int signalEnabled = hasSignalChannels ? 1 : 0; 
+        int signalEnabled = hasSignalChannels ? 1 : 0;
         bool signalStateChanged = AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Signal"}).textWidth(0), signalEnabled);
         phenotypeChanged |= signalStateChanged;
-        
+
         if (signalStateChanged) {
             if (signalEnabled == 1) {
                 // Enable signal with default channels
@@ -402,15 +403,10 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
                     for (int j = 0; j < 4; ++j) {
                         auto& channel = channels.at(i * 4 + j);
                         phenotypeChanged |= AlienGui::SliderFloat(
-                            AlienGui::SliderFloatParameters()
-                                .name("#" + std::to_string(index))
-                                .format("%.3f")
-                                .textWidth(SignalTextWidth)
-                                .min(-2.0f)
-                                .max(2.0f),
+                            AlienGui::SliderFloatParameters().name("#" + std::to_string(index)).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f),
                             &channel);
                         ++index;
-                }
+                    }
                 }
                 ImGui::EndChild();
                 ImGui::PopID();
@@ -419,7 +415,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
                 }
             }
 
-            style.GrabMinSize = originalGrabMinSize; 
+            style.GrabMinSize = originalGrabMinSize;
             ImGui::PopStyleColor();
         }
 

@@ -85,16 +85,14 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     }
 
     // Create preview cells
-    auto getNode = [&](ObjectDesc const& object) -> NodeDesc const& { return genome._genes.at(object.getCellRef()._geneIndex)._nodes.at(object.getCellRef()._nodeIndex); };
+    auto getNode = [&](ObjectDesc const& object) -> NodeDesc const& {
+        return genome._genes.at(object.getCellRef()._geneIndex)._nodes.at(object.getCellRef()._nodeIndex);
+    };
     for (auto const& object : phenotype._objects) {
         auto const& node = getNode(object);
         auto const& color = object.getCellRef()._cellState == CellState_Ready ? node._color : -1;
-        auto previewCell = CellPreviewDesc()
-                               .id(object._id)
-                               .pos(object._pos)
-                               .color(color)
-                               .geneIndex(object.getCellRef()._geneIndex)
-                               .nodeIndex(object.getCellRef()._nodeIndex);
+        auto previewCell =
+            CellPreviewDesc().id(object._id).pos(object._pos).color(color).geneIndex(object.getCellRef()._geneIndex).nodeIndex(object.getCellRef()._nodeIndex);
 
         previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
         if (node._constructor.has_value()) {
@@ -106,8 +104,15 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
         result.description._objects.emplace_back(previewCell);
     }
 
-    // Determine arrow directions for each cell
-    std::set<std::pair<uint64_t, uint64_t>> arrowFromCell1ToCell2;
+    // Helper to find the connection index of targetId in sourceObject's connections
+    auto getConnectionIndex = [](ObjectDesc const& sourceObject, uint64_t targetId) -> std::optional<int> {
+        for (int i = 0; i < static_cast<int>(sourceObject._connections.size()); ++i) {
+            if (sourceObject._connections[i]._objectId == targetId) {
+                return i;
+            }
+        }
+        return std::nullopt;
+    };
 
     // Create preview connections
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
@@ -122,13 +127,30 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
             }
             processedConnections.insert(connectionPair);
 
-            bool arrowToObject1 = arrowFromCell1ToCell2.contains({objectId2, objectId1});
-            bool arrowToObject2 = arrowFromCell1ToCell2.contains({objectId1, objectId2});
+            auto const& object1 = phenotype.getObjectRef(objectId1, cache);
+            auto const& object2 = phenotype.getObjectRef(objectId2, cache);
+
+            float connectionWeightToObject2 = 0.0f;
+            if (auto connIdx = getConnectionIndex(object1, objectId2)) {
+                auto const& cw = object1.getCellRef()._neuralNetwork._connectionWeights;
+                if (*connIdx < static_cast<int>(cw.size())) {
+                    connectionWeightToObject2 = cw[*connIdx];
+                }
+            }
+
+            float connectionWeightToObject1 = 0.0f;
+            if (auto connIdx = getConnectionIndex(object2, objectId1)) {
+                auto const& cw = object2.getCellRef()._neuralNetwork._connectionWeights;
+                if (*connIdx < static_cast<int>(cw.size())) {
+                    connectionWeightToObject1 = cw[*connIdx];
+                }
+            }
+
             auto previewConnection = ConnectionPreviewDesc()
-                                         .object1(phenotype.getObjectRef(objectId1, cache)._pos)
-                                         .object2(phenotype.getObjectRef(objectId2, cache)._pos)
-                                         .arrowToObject1(arrowToObject1)
-                                         .arrowToObject2(arrowToObject2);
+                                         .object1(object1._pos)
+                                         .object2(object2._pos)
+                                         .connectionWeightToObject1(connectionWeightToObject1)
+                                         .connectionWeightToObject2(connectionWeightToObject2);
             result.description._connections.push_back(previewConnection);
         }
     }

@@ -32,8 +32,8 @@ public:
     {
         RealVector2D object1;
         RealVector2D object2;
-        bool arrowToObject1 = false;  // No signal restrictions anymore, arrows are always false
-        bool arrowToObject2 = false;
+        std::optional<float> connectionWeightToObject1 = std::nullopt;
+        std::optional<float> connectionWeightToObject2 = std::nullopt;
     };
     void checkConnections(PreviewDesc const& preview, std::vector<ConnectionCheckDescription> const& expectedConnections)
     {
@@ -42,13 +42,19 @@ public:
             for (auto const& connection : preview._connections) {
                 if (TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._object1)
                     && TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._object2)
-                    && expectedConnection.arrowToObject1 == connection._arrowToObject1 && expectedConnection.arrowToObject2 == connection._arrowToObject2) {
+                    && (!expectedConnection.connectionWeightToObject1.has_value()
+                        || expectedConnection.connectionWeightToObject1.value() == connection._connectionWeightToObject1)
+                    && (!expectedConnection.connectionWeightToObject2.has_value()
+                        || expectedConnection.connectionWeightToObject2.value() == connection._connectionWeightToObject2)) {
                     found = true;
                     break;
                 }
                 if (TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._object1)
                     && TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._object2)
-                    && expectedConnection.arrowToObject2 == connection._arrowToObject1 && expectedConnection.arrowToObject1 == connection._arrowToObject2) {
+                    && (!expectedConnection.connectionWeightToObject2.has_value()
+                        || expectedConnection.connectionWeightToObject2.value() == connection._connectionWeightToObject1)
+                    && (!expectedConnection.connectionWeightToObject1.has_value()
+                        || expectedConnection.connectionWeightToObject1.value() == connection._connectionWeightToObject2)) {
                     found = true;
                     break;
                 }
@@ -77,9 +83,10 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation)
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),
         genome);
@@ -99,7 +106,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation)
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
-    checkConnections(result.description, {{object1._pos, object2._pos}});
+    checkConnections(result.description, {{object1._pos, object2._pos, 1.0f, 1.0f}});
 }
 
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_nonRootGene)
@@ -110,9 +117,10 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_n
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(1)),
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(1)),
         },
         CreatureDesc(),
         genome);
@@ -132,7 +140,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_n
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
-    checkConnections(result.description, {{object1._pos, object2._pos}});
+    checkConnections(result.description, {{object1._pos, object2._pos, 1.0f, 1.0f}});
 }
 
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withoutSeparation)
@@ -142,9 +150,10 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withoutSeparatio
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),
         genome);
@@ -164,7 +173,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withoutSeparatio
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
-    checkConnections(result.description, {{object1._pos, object2._pos}});
+    checkConnections(result.description, {{object1._pos, object2._pos, 1.0f, 1.0f}});
 }
 
 TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
@@ -174,10 +183,11 @@ TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        ObjectDesc().id(3).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(2)),
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(3).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(2)),
         },
         CreatureDesc(),
         genome);
@@ -214,15 +224,16 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_multipleNodes_m
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),
         genome);
@@ -262,15 +273,16 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_oneNode_multipl
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
         },
         CreatureDesc(),
         genome);
@@ -311,15 +323,16 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(2).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(3).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(4).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(5).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(6).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(7).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(8).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-        ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1))),
+    input.addCreature(
+        {
+            ObjectDesc().id(2).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(3).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(4).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(5).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(6).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(7).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(8).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1))),
         },
         CreatureDesc(),
         genome);
@@ -355,15 +368,16 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGenes_twoNode_multip
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),
         genome);
@@ -408,15 +422,17 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
     });
 
     Desc inputCreature1;
-    inputCreature1.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2))),
+    inputCreature1.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2))),
         },
         CreatureDesc(),
         genome);
 
     Desc inputCreature2;
-    inputCreature2.addCreature({
-        ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2))),
+    inputCreature2.addCreature(
+        {
+            ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2))),
         },
         CreatureDesc(),
         genome);
@@ -448,9 +464,10 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withoutSeparat
     });
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(0).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1))),
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(0))),
+    input.addCreature(
+        {
+            ObjectDesc().id(0).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(0))),
         },
         CreatureDesc(),
         genome);
@@ -477,9 +494,10 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
     std::vector<float> signal{0.2f, 0.2f, 0.2f, 0.8f, 0.2f, -1.2f, 0.2f, -0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
     Desc input;
-    input.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).signal(signal)),
-        ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).signal(signal)),
+            ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),
         genome);

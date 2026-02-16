@@ -34,8 +34,8 @@ struct ConnectionPreviewDesc
 
     MEMBER(ConnectionPreviewDesc, RealVector2D, object1, {});
     MEMBER(ConnectionPreviewDesc, RealVector2D, object2, {});
-    MEMBER(ConnectionPreviewDesc, bool, arrowToObject1, false);
-    MEMBER(ConnectionPreviewDesc, bool, arrowToObject2, false);
+    MEMBER(ConnectionPreviewDesc, float, connectionWeightToObject1, 0.0f);
+    MEMBER(ConnectionPreviewDesc, float, connectionWeightToObject2, 0.0f);
 };
 
 struct PreviewDesc
