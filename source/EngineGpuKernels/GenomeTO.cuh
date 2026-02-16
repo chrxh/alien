@@ -9,7 +9,7 @@
 #include <EngineInterface/NeuralNetWeight.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
-struct NeuralNetworkGenomeTO
+struct NeuralNetGenomeTO
 {
     NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];
@@ -319,7 +319,7 @@ struct NodeTO
     int color;
     int numAdditionalConnections;
 
-    NeuralNetworkGenomeTO neuralNetwork;
+    NeuralNetGenomeTO neuralNetwork;
     CellType cellType;
     CellTypeDataGenomeTO cellTypeData;
     bool constructorAvailable;        // If true, constructor holds valid data

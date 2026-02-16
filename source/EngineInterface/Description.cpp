@@ -10,7 +10,7 @@
 
 #include "NumberGenerator.h"
 
-NeuralNetworkDesc::NeuralNetworkDesc()
+NeuralNetDesc::NeuralNetDesc()
 {
     _weights.resize(MAX_CHANNELS * MAX_CHANNELS, NeuralNetWeight(0));
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -25,19 +25,19 @@ NeuralNetworkDesc::NeuralNetworkDesc()
     _connectionWeights.at(0) = 1.0f;
 }
 
-NeuralNetworkDesc& NeuralNetworkDesc::weight(int row, int col, NeuralNetWeight value)
+NeuralNetDesc& NeuralNetDesc::weight(int row, int col, NeuralNetWeight value)
 {
     _weights[row * MAX_CHANNELS + col] = value;
     return *this;
 }
 
-NeuralNetworkDesc& NeuralNetworkDesc::bias(int row, float value)
+NeuralNetDesc& NeuralNetDesc::bias(int row, float value)
 {
     _biases[row] = value;
     return *this;
 }
 
-NeuralNetworkDesc& NeuralNetworkDesc::connectionWeight(int connectionIndex, float value)
+NeuralNetDesc& NeuralNetDesc::connectionWeight(int connectionIndex, float value)
 {
     CHECK(connectionIndex < MAX_OBJECT_CONNECTIONS);
     _connectionWeights[connectionIndex] = value;

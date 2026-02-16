@@ -126,10 +126,10 @@ struct SimulationParameters
     static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Mutations
-    BaseParameter<float> mutationNeuralNetwork = {0};
+    BaseParameter<float> mutationNeuralNet = {0};
 
     // Expert settings: Customize neuron mutations setting
-    ExpertToggle customizeNeuralNetworkMutationsToggle = {false};
+    ExpertToggle customizeNeuralNetMutationsToggle = {false};
     BaseParameter<float> neuralNetworkMutationWeight = {0.2f};
     BaseParameter<float> neuralNetworkMutationBias = {0.2f};
     BaseParameter<float> neuralNetworkMutationActivationFunction = {0.05f};

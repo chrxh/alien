@@ -36,7 +36,7 @@ public:
  */
 TEST_F(DefenderTests, attackerVsAntiAttacker)
 {
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     SensorLastMatchDesc lastMatch;
@@ -79,7 +79,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
  */
 TEST_F(DefenderTests, attackerVsAntiInjector)
 {
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     SensorLastMatchDesc lastMatch;
@@ -133,7 +133,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
                             ObjectDesc()
                                 .id(1)
                                 .pos({100.0f, 100.0f})
-                                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                                .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
                         CreatureDesc().id(1),
@@ -191,7 +191,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
                             ObjectDesc()
                                 .id(1)
                                 .pos({100.0f, 100.0f})
-                                .type(CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                                .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
                         CreatureDesc().id(1),

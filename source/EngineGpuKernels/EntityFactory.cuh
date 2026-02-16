@@ -385,10 +385,10 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
 
         cell->cellType = cellTO.cellType;
 
-        // Copy NeuralNetworkTO to NeuralNetwork
+        // Copy NeuralNetTO to NeuralNet
         {
-            auto* nnTO = reinterpret_cast<NeuralNetworkTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
-            cell->neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNetwork>(1);
+            auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
+            cell->neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
             for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
                 cell->neuralNetwork->weights[i] = nnTO->weights[i];
             }
@@ -723,7 +723,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         cell.signal.channels[i] = 0.0f;
     }
 
-    cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNetwork>(1);
+    cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
         cell.neuralNetwork->weights[i] = node->neuralNetwork.weights[i];
     }

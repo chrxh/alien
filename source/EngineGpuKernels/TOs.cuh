@@ -29,7 +29,7 @@ struct ConnectionTO
     float angleFromPrevious;
 };
 
-struct NeuralNetworkTO
+struct NeuralNetTO
 {
     NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];

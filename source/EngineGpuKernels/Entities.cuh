@@ -51,7 +51,7 @@ struct ObjectConnection
     float angleFromPrevious;
 };
 
-struct __align__(16) NeuralNetwork
+struct __align__(16) NeuralNet
 {
     NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
     float biases[MAX_CHANNELS];
@@ -494,7 +494,7 @@ struct Cell
     uint16_t geneIndex;
 
     // Cell type data
-    NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
+    NeuralNet* neuralNetwork;  // Not used for structure and base cells
     CellType cellType;
     CellTypeData cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data

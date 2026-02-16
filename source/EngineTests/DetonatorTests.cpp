@@ -53,7 +53,7 @@ TEST_F(DetonatorTests, activateDetonator)
             .id(1)
             .pos({10.0f, 10.0f})
             .type(
-                CellDesc().neuralNetwork(NeuralNetworkDesc().bias(0, 1.0f)).cellType(DetonatorDesc().countdown(10))),
+                CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(DetonatorDesc().countdown(10))),
     });
 
     _simulationFacade->setSimulationData(data);

@@ -36,7 +36,7 @@ protected:
         int attackerColor = 0)
     {
         // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-        NeuralNetworkDesc nn;
+        NeuralNetDesc nn;
         nn._biases[Channels::CellTypeActivation] = 1.0f;
 
         // Create a sensor with lastMatch pointing to the target creature
@@ -218,7 +218,7 @@ TEST_F(AttackerTests, outputSignal_noTarget)
 TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create a sensor with lastMatch pointing to creature 1 (same creature)
@@ -337,7 +337,7 @@ TEST_F(AttackerTests, noAttackOnFixedCells)
 TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create a sensor with lastMatch pointing to creature 2
@@ -378,7 +378,7 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
 TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature with sensor targeting creatures 2 and 3
@@ -427,7 +427,7 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
 TEST_F(AttackerTests, rayNotBlocked_noIntersection)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create a sensor with lastMatch pointing to creature 2
@@ -507,7 +507,7 @@ TEST_F(AttackerTests, sensorTargeting_nonMatchingCreatureId)
 TEST_F(AttackerTests, sensorTargeting_noSensorWithLastMatch)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker without sensor (single cell is sufficient for this test)
@@ -535,7 +535,7 @@ TEST_F(AttackerTests, sensorTargeting_noSensorWithLastMatch)
 TEST_F(AttackerTests, sensorTargeting_multipleTargets)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create a sensor with lastMatch pointing to creature 2 and another to creature 3
@@ -584,7 +584,7 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
 TEST_F(AttackerTests, freeCellMode_attackFreeCell)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in FreeCell mode (single cell is sufficient)
@@ -612,7 +612,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
 TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in FreeCell mode with color restriction to color 1 (single cell is sufficient)
@@ -644,7 +644,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
 TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in FreeCell mode with color restriction to color 1 (single cell is sufficient)
@@ -678,7 +678,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
 TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in FreeCell mode (single cell is sufficient)
@@ -706,7 +706,7 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
 TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     // Create attacker creature in Creature mode (single cell is sufficient)

@@ -571,7 +571,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
                                 .pos({100.0f, 100.0f})
                                 .type(CellDesc()
                                           .frontAngle(0.0f)
-                                          .neuralNetwork(NeuralNetworkDesc().bias(0, -1.0f))
+                                          .neuralNetwork(NeuralNetDesc().bias(0, -1.0f))
                                           .cellType(SensorDesc().autoTrigger(false).mode(createModeWithDensity(GetParam())))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
@@ -623,7 +623,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
                                 .pos({100.0f, 100.0f})
                                 .type(CellDesc()
                                           .frontAngle(0.0f)
-                                          .neuralNetwork(NeuralNetworkDesc().bias(0, -1.0f))
+                                          .neuralNetwork(NeuralNetDesc().bias(0, -1.0f))
                                           .cellType(SensorDesc().autoTrigger(false).mode(createModeWithDensity(GetParam())))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
@@ -686,7 +686,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
                                 .pos({100.0f, 100.0f})
                                 .type(CellDesc()
                                           .frontAngle(0.0f)
-                                          .neuralNetwork(NeuralNetworkDesc().bias(0, -1.0f))
+                                          .neuralNetwork(NeuralNetDesc().bias(0, -1.0f))
                                           .cellType(SensorDesc().autoTrigger(false).mode(createModeWithDensity(GetParam())).maxRange(60))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
@@ -747,7 +747,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
                                 .pos({100.0f, 100.0f})
                                 .type(CellDesc()
                                           .frontAngle(0.0f)
-                                          .neuralNetwork(NeuralNetworkDesc().bias(0, -1.0f))
+                                          .neuralNetwork(NeuralNetDesc().bias(0, -1.0f))
                                           .cellType(SensorDesc().autoTrigger(false).mode(createModeWithDensity(GetParam())).minRange(40))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
@@ -865,7 +865,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
                           .frontAngle(0.0f)
-                          .neuralNetwork(NeuralNetworkDesc().bias(0, -1.0f))
+                          .neuralNetwork(NeuralNetDesc().bias(0, -1.0f))
                           .cellType(SensorDesc().autoTrigger(false).mode(createModeWithDensity(GetParam())))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
@@ -919,7 +919,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
                                 .pos({100.0f, 100.0f})
                                 .type(CellDesc()
                                           .frontAngle(0.0f)
-                                          .neuralNetwork(NeuralNetworkDesc().bias(0, -1.0f))
+                                          .neuralNetwork(NeuralNetDesc().bias(0, -1.0f))
                                           .cellType(SensorDesc().autoTrigger(false).mode(createModeWithDensity(GetParam())))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
@@ -1647,7 +1647,7 @@ TEST_F(SensorTests, detectCreature_relocation_densityOutputReflectsCellCount)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
                           .frontAngle(0.0f)
-                          .neuralNetwork(NeuralNetworkDesc().bias(0, -1.0f))
+                          .neuralNetwork(NeuralNetDesc().bias(0, -1.0f))
                           .cellType(SensorDesc().autoTrigger(false).mode(DetectCreatureDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },

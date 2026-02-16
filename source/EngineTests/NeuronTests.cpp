@@ -118,7 +118,7 @@ TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
 
     auto data = Desc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(NeuralNetworkDesc().connectionWeight(0, 0.0f))),
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().neuralNetwork(NeuralNetDesc().connectionWeight(0, 0.0f))),
                         ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(signal)),
                     })
                     .addConnection(1, 2);
@@ -144,7 +144,7 @@ TEST_F(NeuronTests, forkSignal)
                         ObjectDesc().id(2).pos({2, 2}).type(CellDesc().signal(SignalDesc().channels(signal).numTimesSent(4))),
                         ObjectDesc().id(3).pos({3, 2}).type(CellDesc()),
                         ObjectDesc().id(4).pos({2, 3}).type(CellDesc()),
-                        ObjectDesc().id(5).pos({2, 1}).type(CellDesc().neuralNetwork(NeuralNetworkDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),
+                        ObjectDesc().id(5).pos({2, 1}).type(CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),
                         ObjectDesc().id(6).pos({2, 0}).type(CellDesc()),
                     })
                     .addConnection(2, 1)
@@ -186,12 +186,12 @@ TEST_F(NeuronTests, mergeSignal)
             .addCreature({
                 ObjectDesc().id(1).pos({1, 2}).type(CellDesc().signal(SignalDesc().channels(signal1).numTimesSent(3))),  // Gets input from cell 2
                 ObjectDesc().id(2).pos({2, 2}).type(
-                    CellDesc().neuralNetwork(NeuralNetworkDesc().connectionWeights({1, 0, 1, 1, 0, 0}))),  // Gets input from cell 1, 3, 4 and not cell 5
+                    CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({1, 0, 1, 1, 0, 0}))),  // Gets input from cell 1, 3, 4 and not cell 5
                 ObjectDesc().id(3).pos({3, 2}).type(CellDesc().signal(SignalDesc().channels(signal2).numTimesSent(5))),  // Gets input from cell 2
                 ObjectDesc().id(4).pos({2, 3}).type(CellDesc().signal(SignalDesc().channels(signal2).numTimesSent(2))),  // Gets input from cell 2
                 ObjectDesc().id(5).pos({2, 1}).type(CellDesc()
                                                         .signal(SignalDesc().channels(signal2).numTimesSent(4))
-                                                        .neuralNetwork(NeuralNetworkDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),  // Gets input from cell 6
+                                                        .neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),  // Gets input from cell 6
                 ObjectDesc().id(6).pos({2, 0}).type(CellDesc()),                                                                     // Gets input from cell 5
             })
             .addConnection(2, 1)
@@ -224,16 +224,16 @@ TEST_F(NeuronTests, mergeSignal)
     EXPECT_EQ(actualData.getObjectRef(6).getCellRef()._signal._numTimesSent, 4);
 }
 
-struct ApplyNeuralNetworkParameter
+struct ApplyNeuralNetParameter
 {
     ActivationFunction activationFunction;
     int channelIndex;
     float inputValue;
 };
 
-inline std::vector<ApplyNeuralNetworkParameter> generateApplyNeuralNetworkParameters()
+inline std::vector<ApplyNeuralNetParameter> generateApplyNeuralNetParameters()
 {
-    std::vector<ApplyNeuralNetworkParameter> params;
+    std::vector<ApplyNeuralNetParameter> params;
 
     for (int af = 0; af < ActivationFunction_Count; ++af) {
         for (int c = 0; c < MAX_CHANNELS; ++c) {
@@ -247,14 +247,14 @@ inline std::vector<ApplyNeuralNetworkParameter> generateApplyNeuralNetworkParame
     return params;
 }
 
-class NeuronTests_ApplyNeuralNetwork
+class NeuronTests_ApplyNeuralNet
     : public NeuronTests
-    , public testing::WithParamInterface<ApplyNeuralNetworkParameter>
+    , public testing::WithParamInterface<ApplyNeuralNetParameter>
 {};
 
-INSTANTIATE_TEST_SUITE_P(NeuronTests_ApplyNeuralNetwork, NeuronTests_ApplyNeuralNetwork, ::testing::ValuesIn(generateApplyNeuralNetworkParameters()));
+INSTANTIATE_TEST_SUITE_P(NeuronTests_ApplyNeuralNet, NeuronTests_ApplyNeuralNet, ::testing::ValuesIn(generateApplyNeuralNetParameters()));
 
-TEST_P(NeuronTests_ApplyNeuralNetwork, applyNeuralNetwork)
+TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
 {
     auto param = GetParam();
 
@@ -265,7 +265,7 @@ TEST_P(NeuronTests_ApplyNeuralNetwork, applyNeuralNetwork)
     // Setup neural network with non-trivial weight matrix and bias vector:
     // - Channel 'c' uses the specified activation function with custom weight and bias
     // - All other channels use Identity activation with identity weight (1.0) and zero bias
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         nn._activationFunctions[i] = (i == param.channelIndex) ? param.activationFunction : ActivationFunction_Identity;
         nn.weight(i, i, (i == param.channelIndex) ? weight : 1.0f);
@@ -315,7 +315,7 @@ TEST_P(NeuronTests_ApplyNeuralNetwork, applyNeuralNetwork)
 // Test that signals are truncated to [-2, 2] after neural network application
 TEST_F(NeuronTests, truncateSignal)
 {
-    NeuralNetworkDesc nn;
+    NeuralNetDesc nn;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         nn.weight(i, i, 2.0f);
     }
@@ -368,7 +368,7 @@ TEST_F(NeuronPerformanceTests, largeGridPerformance)
             auto cell = ObjectDesc()
                             .id(cellId)
                             .pos({toFloat(x), toFloat(y)})
-                            .type(CellDesc().neuralNetwork(NeuralNetworkDesc().connectionWeight(0, 1.0f).connectionWeight(1, 1.0f)));
+                            .type(CellDesc().neuralNetwork(NeuralNetDesc().connectionWeight(0, 1.0f).connectionWeight(1, 1.0f)));
             objects.push_back(cell);
         }
     }

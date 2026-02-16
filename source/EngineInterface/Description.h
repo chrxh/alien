@@ -23,19 +23,19 @@ struct ConnectionDesc
     MEMBER(ConnectionDesc, float, angleFromPrevious, 0.0f);
 };
 
-struct NeuralNetworkDesc
+struct NeuralNetDesc
 {
-    NeuralNetworkDesc();
-    auto operator<=>(NeuralNetworkDesc const&) const = default;
+    NeuralNetDesc();
+    auto operator<=>(NeuralNetDesc const&) const = default;
 
-    MEMBER(NeuralNetworkDesc, std::vector<NeuralNetWeight>, weights, {});
-    MEMBER(NeuralNetworkDesc, std::vector<float>, biases, {});
-    MEMBER(NeuralNetworkDesc, std::vector<ActivationFunction>, activationFunctions, {});
-    MEMBER(NeuralNetworkDesc, std::vector<float>, connectionWeights, {});
+    MEMBER(NeuralNetDesc, std::vector<NeuralNetWeight>, weights, {});
+    MEMBER(NeuralNetDesc, std::vector<float>, biases, {});
+    MEMBER(NeuralNetDesc, std::vector<ActivationFunction>, activationFunctions, {});
+    MEMBER(NeuralNetDesc, std::vector<float>, connectionWeights, {});
 
-    NeuralNetworkDesc& weight(int row, int col, NeuralNetWeight value);
-    NeuralNetworkDesc& bias(int row, float value);
-    NeuralNetworkDesc& connectionWeight(int connectionIndex, float value);
+    NeuralNetDesc& weight(int row, int col, NeuralNetWeight value);
+    NeuralNetDesc& bias(int row, float value);
+    NeuralNetDesc& connectionWeight(int connectionIndex, float value);
 };
 
 struct BaseDesc
@@ -486,7 +486,7 @@ struct CellDesc
     MEMBER(CellDesc, int, geneIndex, 0);
 
     // Cell type-specific data
-    MEMBER(CellDesc, NeuralNetworkDesc, neuralNetwork, NeuralNetworkDesc());
+    MEMBER(CellDesc, NeuralNetDesc, neuralNetwork, NeuralNetDesc());
     MEMBER(CellDesc, CellTypeDesc, cellType, BaseDesc());
     MEMBER(CellDesc, std::optional<ConstructorDesc>, constructor, std::nullopt);
     MEMBER(CellDesc, SignalDesc, signal, SignalDesc());

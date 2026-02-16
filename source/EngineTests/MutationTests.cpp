@@ -21,7 +21,7 @@ public:
     MutationTests()
         : IntegrationTestFramework()
     {
-        _parameters.mutationNeuralNetwork.value = 1.0f;
+        _parameters.mutationNeuralNet.value = 1.0f;
         _simulationFacade->setSimulationParameters(_parameters);
     }
 
@@ -48,9 +48,9 @@ protected:
         return GenomeDesc().genes(genes);
     }
 
-    bool compareAllExceptNeuralNetwork(GenomeDesc expected, GenomeDesc actual)
+    bool compareAllExceptNeuralNet(GenomeDesc expected, GenomeDesc actual)
     {
-        auto resetNeuralNetwork = [](GenomeDesc& genome) {
+        auto resetNeuralNet = [](GenomeDesc& genome) {
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._weights.begin(), node._neuralNetwork._weights.end(), 0.0f);
@@ -60,8 +60,8 @@ protected:
             }
         };
 
-        resetNeuralNetwork(expected);
-        resetNeuralNetwork(actual);
+        resetNeuralNet(expected);
+        resetNeuralNet(actual);
 
         return expected == actual;
     }
@@ -75,7 +75,7 @@ TEST_F(MutationTests, neuralNetworkMutation)
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
-        _simulationFacade->testOnly_mutate(1, MutationType::NeuralNetwork);
+        _simulationFacade->testOnly_mutate(1, MutationType::NeuralNet);
     }
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -84,5 +84,5 @@ TEST_F(MutationTests, neuralNetworkMutation)
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
     // Mutated genome must be equal to original genome except the neural network properties
-    EXPECT_TRUE(compareAllExceptNeuralNetwork(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptNeuralNet(genome, actualGenome));
 }

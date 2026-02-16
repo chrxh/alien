@@ -52,7 +52,7 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
         return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FreeCellDesc().energy(42.0f).age(7));
     case ObjectType_Cell: {
         auto cellTypeDesc = createNonDefaultCellTypeDesc(objectParameter);
-        NeuralNetworkDesc nn;
+        NeuralNetDesc nn;
         nn.weight(2, 1, 0.7f);
         nn._biases.at(1) = -0.4f;
         nn._activationFunctions.at(5) = 2 % ActivationFunction_Count;
@@ -137,7 +137,7 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
 
 NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParameter) const
 {
-    NeuralNetworkGenomeDesc nn;
+    NeuralNetGenomeDesc nn;
     nn.weight(4, 3, 0.8f);
     nn._biases.at(3) = -0.5f;
     nn._activationFunctions.at(2) = 1;
