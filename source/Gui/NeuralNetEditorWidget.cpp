@@ -308,7 +308,7 @@ void _NeuralNetEditorWidget::processActionButtons(
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
                     weights[i * MAX_CHANNELS + j] = NeuralNetWeight(NumberGenerator::get().getRandomFloat(-2.0f, 2.0f));
                 }
-                biases[i] = NumberGenerator::get().getRandomFloat(-2.0f, 2.0f);
+                biases[i] = NumberGenerator::get().getRandomFloat(-0.2f, 0.2f);
                 activationFunctions[i] = NumberGenerator::get().getRandomInt(ActivationFunction_Count);
             }
         }

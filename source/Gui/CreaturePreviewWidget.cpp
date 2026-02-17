@@ -265,17 +265,13 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             // Check if signal has non-zero values (indicates active signal)
             bool hasActiveSignal = object._signal.has_value() && !object._signal->_channels.empty();
             if (hasActiveSignal) {
-                bool hasNonZeroChannel = false;
+                auto signalStrength = 0.0f;
                 for (auto const& ch : object._signal->_channels) {
-                    if (ch != 0.0f) {
-                        hasNonZeroChannel = true;
-                        break;
-                    }
+                    signalStrength += std::abs(ch);
                 }
-                if (hasNonZeroChannel) {
-                    drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, 1.0f));
-                    drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, 0.8f));
-                }
+                signalStrength = std::min(1.0f, sqrt(sqrt(signalStrength)) / 2);
+                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, signalStrength));
+                drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, signalStrength));
             }
         }
     }
