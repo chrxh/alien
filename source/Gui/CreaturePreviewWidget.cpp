@@ -267,7 +267,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             for (auto const& ch : object._signal._channels) {
                 signalStrength += std::abs(ch);
             }
-            signalStrength = std::min(1.0f, sqrt(sqrt(signalStrength)) / 2);
+            signalStrength = std::min(1.0f, static_cast<float>(sqrt(sqrt(signalStrength)) / 2));
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, signalStrength));
             drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, signalStrength));
         }

@@ -510,8 +510,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
 
     auto object1 = getPreviewCell(result.description, 0, 0);
 
-    EXPECT_TRUE(object1._signal.has_value());
-    EXPECT_EQ(signal, object1._signal->_channels);
+    EXPECT_EQ(signal, object1._signal._channels);
 }
 
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_connectionWeightsFromGenome)
