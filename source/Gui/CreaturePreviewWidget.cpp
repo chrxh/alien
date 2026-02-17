@@ -197,7 +197,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 
     // Draw selected gene
-    auto selectedGeneColor = ImColor::HSV(0.66f, 0.5f, 0.15f);
+    auto selectedGeneColor = ImColor::HSV(0.66f, 0.5f, 0.1f);
     for (auto const& object : desc._objects) {
         auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
         if (selectedGene.has_value() && object._geneIndex == selectedGene.value()) {
@@ -211,9 +211,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         if (selectedGene.has_value() && selectedNode.has_value() && object._geneIndex == selectedGene.value() && object._nodeIndex == selectedNode.value()) {
             float h, s, v;
             AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[object._color], h, s, v);
-            s = 0.5f;
-            v = 0.3f;
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, ImColor::HSV(h, s, v));
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.4f, ImColor::HSV(h, 0.5f, 0.4f));
         }
     }
 
@@ -224,12 +222,12 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         uint32_t color = object._color != -1 ? Const::IndividualObjectColors[object._color] : 0x707070;
         AlienGui::ConvertRGBtoHSV(color, h, s, v);
 
-        auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
+        auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.15f : 0.5f;
         drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
         if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == object._id) {
             if (_zoom > ZoomLevelForLabels) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f /*cellSize * 0.05f*/);
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.15f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f /*cellSize * 0.05f*/);
             }
         }
 
@@ -248,7 +246,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     if (_zoom > ZoomLevelForConnections && _editData->detailSimulation) {
         for (auto const& object : desc._objects) {
             auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
-            auto constexpr cellRadiusFactor = 0.3f;
+            auto constexpr cellRadiusFactor = 0.11f;
             float radius = cellSize * cellRadiusFactor;
 
             auto signalStrength = 0.0f;
@@ -256,8 +254,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 signalStrength += std::abs(ch);
             }
             signalStrength = std::min(1.0f, static_cast<float>(sqrt(sqrt(signalStrength)) / 2));
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, signalStrength));
-            drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, signalStrength));
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, signalStrength));
+            drawList->AddCircle({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 0.2f, signalStrength));
         }
     }
 
@@ -270,20 +268,20 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             auto direction = cellPos1 - cellPos2;
 
             Math::normalize(direction);
-            auto connectionStartPos = cellPos1 - direction * cellSize * 0.25f;
-            auto connectionEndPos = cellPos2 + direction * cellSize * 0.25f;
+            auto connectionStartPos = cellPos1 - direction * cellSize * 0.15f;
+            auto connectionEndPos = cellPos2 + direction * cellSize * 0.15f;
             drawList->AddLine(
                 {connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
             if (connection._connectionWeightToObject1 != 0.0f) {
                 auto arrowScale = std::min(std::abs(connection._connectionWeightToObject1), 1.0f);
                 auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
-                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 6 * arrowScale;
+                auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
                 auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
-                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 6 * arrowScale;
+                auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
             }
@@ -291,12 +289,12 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             if (connection._connectionWeightToObject2 != 0.0f) {
                 auto arrowScale = std::min(std::abs(connection._connectionWeightToObject2), 1.0f);
                 auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
-                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 6 * arrowScale;
+                auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart1.x, arrowPartStart1.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
                 auto arrowPartDirection2 = RealVector2D{direction.x + direction.y, -direction.x + direction.y};
-                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 6 * arrowScale;
+                auto arrowPartStart2 = connectionEndPos + arrowPartDirection2 * cellSize / 8 * arrowScale;
                 drawList->AddLine(
                     {arrowPartStart2.x, arrowPartStart2.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
             }
