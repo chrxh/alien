@@ -316,7 +316,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
 
                 // Additive
-                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive"), generator._additive);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(rightColumnWidth), generator._additive);
 
                 // Value offset
                 AlienGui::InputFloat(

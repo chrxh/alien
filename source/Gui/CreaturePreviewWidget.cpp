@@ -347,16 +347,14 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
 void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult)
 {
-    if (!_editData->detailSimulation) {
-        return;
-    }
     // Check if signal has non-zero values
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(440.0f), ImGui::GetScrollY() + scale(13.0f)});
-    if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), scale(149.0f)), ImGuiChildFlags_FrameStyle)) {
+    auto height = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(149.0f) : scale(67.0f);
+    if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), height), ImGuiChildFlags_FrameStyle)) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
 
-        if (_selectedCellIdFromPreview.has_value()) {
+        if (_editData->detailSimulation && _selectedCellIdFromPreview.has_value()) {
             std::optional<CellPreviewDesc> selectedCell;
             for (auto const& object : conversionResult.description._objects) {
                 if (object._id == _selectedCellIdFromPreview.value()) {
@@ -398,7 +396,11 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
                 updatePhenotype(phenotype, selectedCell.value());
             }
         } else {
-            AlienGui::Text("No cell selected");
+            if (!_editData->detailSimulation) {
+                AlienGui::Text("Detailed simulation needed to edit signals");
+            } else if (!_selectedCellIdFromPreview.has_value()) {
+                AlienGui::Text("No cell selected");
+            }
         }
     }
     ImGui::EndChild();
