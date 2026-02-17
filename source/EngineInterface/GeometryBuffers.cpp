@@ -16,8 +16,6 @@ GeometryBuffers _GeometryBuffers::create()
     glGenBuffers(1, &result->_vboForEnergies);
     glGenVertexArrays(1, &result->_vaoForLocations);
     glGenBuffers(1, &result->_vboForLocations);
-    glGenVertexArrays(1, &result->_vaoForSelectedObjects);
-    glGenBuffers(1, &result->_vboForSelectedObjects);
     glGenVertexArrays(1, &result->_vaoForSelectedConnections);
     glGenBuffers(1, &result->_vboForSelectedConnections);
     glGenVertexArrays(1, &result->_vaoForAttackEvents);
@@ -44,11 +42,6 @@ void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects
         _locationBufferCapacity = std::max(numRenderObjects.locations * 2, static_cast<uint64_t>(1000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForLocations());
         glBufferData(GL_ARRAY_BUFFER, toInt(_locationBufferCapacity * sizeof(LocationVertexData)), nullptr, GL_DYNAMIC_DRAW);
-    }
-    if (numRenderObjects.selectedObjects >= _selectedObjectBufferCapacity) {
-        _selectedObjectBufferCapacity = std::max(numRenderObjects.selectedObjects * 2, static_cast<uint64_t>(10000));
-        glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedObjects());
-        glBufferData(GL_ARRAY_BUFFER, toInt(_selectedObjectBufferCapacity * sizeof(SelectedObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.lineIndices >= _lineIndexBufferCapacity) {
         _lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
@@ -103,13 +96,6 @@ void _GeometryBuffers::setLocationData(LocationVertexData const* data, uint64_t 
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForLocations());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(LocationVertexData)), data);
-}
-
-void _GeometryBuffers::setSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count)
-{
-    if (count == 0) return;
-    glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedObjects());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(SelectedObjectVertexData)), data);
 }
 
 void _GeometryBuffers::setLineIndices(unsigned int const* data, uint64_t count)
@@ -173,15 +159,6 @@ std::vector<LocationVertexData> _GeometryBuffers::getLocationData() const
     if (_numObjects.locations == 0) return result;
     glBindBuffer(GL_ARRAY_BUFFER, _vboForLocations);
     glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.locations * sizeof(LocationVertexData)), result.data());
-    return result;
-}
-
-std::vector<SelectedObjectVertexData> _GeometryBuffers::getSelectedObjectData() const
-{
-    std::vector<SelectedObjectVertexData> result(_numObjects.selectedObjects);
-    if (_numObjects.selectedObjects == 0) return result;
-    glBindBuffer(GL_ARRAY_BUFFER, _vboForSelectedObjects);
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.selectedObjects * sizeof(SelectedObjectVertexData)), result.data());
     return result;
 }
 

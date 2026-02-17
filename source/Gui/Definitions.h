@@ -177,9 +177,6 @@ using EnergyParticleRenderStep = std::shared_ptr<_EnergyParticleRenderStep>;
 class _LocationRenderStep;
 using LocationRenderStep = std::shared_ptr<_LocationRenderStep>;
 
-class _SelectedObjectRenderStep;
-using SelectedObjectRenderStep = std::shared_ptr<_SelectedObjectRenderStep>;
-
 class _CellTypeOverlayRenderStep;
 using CellTypeOverlayRenderStep = std::shared_ptr<_CellTypeOverlayRenderStep>;
 

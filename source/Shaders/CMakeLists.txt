@@ -44,9 +44,6 @@ add_library(Shaders INTERFACE
     SelectedConnectionFS.h
     SelectedConnectionGS.h
     SelectedConnectionVS.h
-    SelectedObjectFS.h
-    SelectedObjectGS.h
-    SelectedObjectVS.h
     ShaderSources.h
     SubsurfaceScatterFS.h
     SubsurfaceScatterVS.h

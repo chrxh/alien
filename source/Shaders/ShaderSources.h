@@ -32,7 +32,6 @@ namespace ShaderSources
     inline ShaderSource const Metaballs{Shaders::MetaballsVS, Shaders::MetaballsFS};
     inline ShaderSource const ModuloCopy{Shaders::ModuloCopyVS, Shaders::ModuloCopyFS};
     inline ShaderSource const SelectedConnection{Shaders::SelectedConnectionVS, Shaders::SelectedConnectionFS, Shaders::SelectedConnectionGS};
-    inline ShaderSource const SelectedObject{Shaders::SelectedObjectVS, Shaders::SelectedObjectFS, Shaders::SelectedObjectGS};
     inline ShaderSource const SubsurfaceScatter{Shaders::SubsurfaceScatterVS, Shaders::SubsurfaceScatterFS};
     inline ShaderSource const Threshold{Shaders::ThresholdVS, Shaders::ThresholdFS};
     inline ShaderSource const ToneMapping{Shaders::ToneMappingVS, Shaders::ToneMappingFS};

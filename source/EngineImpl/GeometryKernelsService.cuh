@@ -33,7 +33,6 @@ private:
     uint64_t* _numLineIndices = nullptr;
     uint64_t* _numTriangleIndices = nullptr;
     uint64_t* _numSelectedConnectionVertices = nullptr;
-    uint64_t* _numSelectedObjects = nullptr;
     uint64_t* _numAttackEventVertices = nullptr;
     uint64_t* _numDetonationEventVertices = nullptr;
     uint64_t* _numLocations = nullptr;

@@ -13,7 +13,6 @@ void GeometryKernelsService::init()
     memoryManager.acquireMemory(1, _numLineIndices);
     memoryManager.acquireMemory(1, _numTriangleIndices);
     memoryManager.acquireMemory(1, _numSelectedConnectionVertices);
-    memoryManager.acquireMemory(1, _numSelectedObjects);
     memoryManager.acquireMemory(1, _numAttackEventVertices);
     memoryManager.acquireMemory(1, _numDetonationEventVertices);
     memoryManager.acquireMemory(1, _numLocations);
@@ -25,7 +24,6 @@ void GeometryKernelsService::shutdown()
     memoryManager.freeMemory(_numLineIndices);
     memoryManager.freeMemory(_numTriangleIndices);
     memoryManager.freeMemory(_numSelectedConnectionVertices);
-    memoryManager.freeMemory(_numSelectedObjects);
     memoryManager.freeMemory(_numAttackEventVertices);
     memoryManager.freeMemory(_numDetonationEventVertices);
     memoryManager.freeMemory(_numLocations);
@@ -54,11 +52,6 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
     NumRenderObjects result;
     result.objects = data.entities.objects.getNumEntries_host();
     result.energies = data.entities.energies.getNumEntries_host();
-
-    setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects);
-    cudaDeviceSynchronize();
-    result.selectedObjects = copyToHost(_numSelectedObjects);
 
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices);
@@ -129,15 +122,6 @@ void GeometryKernelsService::extractObjectData(
         KERNEL_CALL_1_1(cudaExtractLocationData, data, mappedLocationBuffer, _numLocations, visibleTopLeft);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedObjectBuffer));
-        SelectedObjectVertexData* mappedSelectedObjectBuffer;
-        size_t selectedObjectBufferSize;
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
-            reinterpret_cast<void**>(&mappedSelectedObjectBuffer), &selectedObjectBufferSize, renderingData.selectedObjectBuffer));
-        setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractSelectedObjectData, data, mappedSelectedObjectBuffer, _numSelectedObjects);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedObjectBuffer));
-
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
         unsigned int* mappedLineIndexBuffer;
         size_t lineIndexBufferSize;
@@ -190,9 +174,6 @@ void GeometryKernelsService::extractObjectData(
 
         setValueToDevice(_numLocations, static_cast<uint64_t>(0));
         KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);
-
-        setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractSelectedObjectData, data, renderingData.deviceSelectedObjectBuffer, _numSelectedObjects);
 
         setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractLineIndices, data, renderingData.deviceLineIndexBuffer, _numLineIndices);

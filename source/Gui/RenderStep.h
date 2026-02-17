@@ -187,18 +187,6 @@ private:
     _LocationRenderStep(StepParameters const& parameters);
 };
 
-class _SelectedObjectRenderStep : public _RenderStep
-{
-public:
-    static SelectedObjectRenderStep create(StepParameters const& parameters);
-
-protected:
-    void execute(ExecutionParameters parameters) override;
-
-private:
-    _SelectedObjectRenderStep(StepParameters const& parameters);
-};
-
 class _CellTypeOverlayRenderStep : public _RenderStep
 {
 public:

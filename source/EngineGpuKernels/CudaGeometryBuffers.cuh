@@ -11,7 +11,6 @@ struct CudaGeometryBuffers
     cudaGraphicsResource* vertexBuffer = nullptr;
     cudaGraphicsResource* energyParticleBuffer = nullptr;
     cudaGraphicsResource* locationBuffer = nullptr;
-    cudaGraphicsResource* selectedObjectBuffer = nullptr;
     cudaGraphicsResource* lineIndexBuffer = nullptr;
     cudaGraphicsResource* triangleIndexBuffer = nullptr;
     cudaGraphicsResource* selectedConnectionBuffer = nullptr;
@@ -22,7 +21,6 @@ struct CudaGeometryBuffers
     ObjectVertexData* deviceObjectBuffer = nullptr;
     EnergyVertexData* deviceEnergyBuffer = nullptr;
     LocationVertexData* deviceLocationBuffer = nullptr;
-    SelectedObjectVertexData* deviceSelectedObjectBuffer = nullptr;
     unsigned int* deviceLineIndexBuffer = nullptr;
     unsigned int* deviceTriangleIndexBuffer = nullptr;
     ConnectionArrowVertexData* deviceSelectedConnectionBuffer = nullptr;
@@ -33,7 +31,6 @@ struct CudaGeometryBuffers
     uint64_t deviceObjectBufferCapacity = 0;
     uint64_t deviceEnergyBufferCapacity = 0;
     uint64_t deviceLocationBufferCapacity = 0;
-    uint64_t deviceSelectedObjectBufferCapacity = 0;
     uint64_t deviceLineIndexBufferCapacity = 0;
     uint64_t deviceTriangleIndexBufferCapacity = 0;
     uint64_t deviceSelectedConnectionBufferCapacity = 0;

@@ -394,47 +394,6 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
-{
-    // Process selected cells
-    auto const& objects = data.entities.objects;
-    auto numObjects = objects.getNumEntries();
-
-    for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numObjects; index += blockDim.x * gridDim.x) {
-        auto const& object = objects.at(index);
-        if (object->selected == 1) {
-            auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
-            if (selectedObjectData != nullptr) {
-                selectedObjectData[outputIndex].pos[0] = object->pos.x;
-                selectedObjectData[outputIndex].pos[1] = object->pos.y;
-
-                // TODO
-                selectedObjectData[outputIndex].hasSignalRestriction = 0;
-                selectedObjectData[outputIndex].startAngle = 0.0f;
-                selectedObjectData[outputIndex].endAngle = 0.0f;
-            }
-        }
-    }
-
-    // Process selected energy particles
-    auto const& energies = data.entities.energies;
-    auto numEnergies = energies.getNumEntries();
-
-    for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numEnergies; index += blockDim.x * gridDim.x) {
-        auto const& energy = energies.at(index);
-        if (energy->selected == 1) {
-            auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
-            if (selectedObjectData != nullptr) {
-                selectedObjectData[outputIndex].pos[0] = energy->pos.x;
-                selectedObjectData[outputIndex].pos[1] = energy->pos.y;
-                selectedObjectData[outputIndex].hasSignalRestriction = 0;
-                selectedObjectData[outputIndex].startAngle = 0.0f;
-                selectedObjectData[outputIndex].endAngle = 0.0f;
-            }
-        }
-    }
-}
-
 __global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());

@@ -43,11 +43,6 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
     }
     locationBuffer = registerBufferResource(buffers->getVboForLocations());
 
-    if (selectedObjectBuffer != nullptr) {
-        unregisterBufferResource(selectedObjectBuffer);
-    }
-    selectedObjectBuffer = registerBufferResource(buffers->getVboForSelectedObjects());
-
     if (lineIndexBuffer != nullptr) {
         unregisterBufferResource(lineIndexBuffer);
     }
@@ -108,16 +103,6 @@ void CudaGeometryBuffers::allocateBuffersForNoInterop(NumRenderObjects const& nu
         deviceLocationBufferCapacity = requiredLocationCapacity;
     }
 
-    // Allocate or reallocate selected object buffer
-    auto requiredSelectedObjectCapacity = std::max(numObjects.selectedObjects * 2, static_cast<uint64_t>(10000));
-    if (numObjects.selectedObjects >= deviceSelectedObjectBufferCapacity) {
-        if (deviceSelectedObjectBuffer != nullptr) {
-            memoryManager.freeMemory(deviceSelectedObjectBuffer);
-        }
-        memoryManager.acquireMemory(requiredSelectedObjectCapacity, deviceSelectedObjectBuffer);
-        deviceSelectedObjectBufferCapacity = requiredSelectedObjectCapacity;
-    }
-
     // Allocate or reallocate line index buffer
     auto requiredLineIndexCapacity = std::max(numObjects.lineIndices * 2, static_cast<uint64_t>(100000));
     if (numObjects.lineIndices >= deviceLineIndexBufferCapacity) {
@@ -176,7 +161,6 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
     memoryManager.freeMemory(deviceObjectBuffer);
     memoryManager.freeMemory(deviceEnergyBuffer);
     memoryManager.freeMemory(deviceLocationBuffer);
-    memoryManager.freeMemory(deviceSelectedObjectBuffer);
     memoryManager.freeMemory(deviceLineIndexBuffer);
     memoryManager.freeMemory(deviceTriangleIndexBuffer);
     memoryManager.freeMemory(deviceSelectedConnectionBuffer);
@@ -202,12 +186,6 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
         std::vector<LocationVertexData> hostLocationBuffer(numObjects.locations);
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostLocationBuffer.data(), deviceLocationBuffer, numObjects.locations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setLocationData(hostLocationBuffer.data(), numObjects.locations);
-    }
-
-    if (numObjects.selectedObjects > 0) {
-        std::vector<SelectedObjectVertexData> hostSelectedObjectBuffer(numObjects.selectedObjects);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedObjectBuffer.data(), deviceSelectedObjectBuffer, numObjects.selectedObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
-        geometryBuffers->setSelectedObjectData(hostSelectedObjectBuffer.data(), numObjects.selectedObjects);
     }
 
     if (numObjects.lineIndices > 0) {

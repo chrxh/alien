@@ -13,7 +13,6 @@ struct NumRenderObjects
     uint64_t lineIndices;
 
     uint64_t triangleIndices;
-    uint64_t selectedObjects;
     uint64_t connectionArrowVertices;
     uint64_t attackEventVertices;
     uint64_t detonationEventVertices;
@@ -46,14 +45,6 @@ struct LocationVertexData
     float opacity;        // opacity/transparency of the location
 };
 
-struct SelectedObjectVertexData
-{
-    float pos[2];              // x, y position
-    int hasSignalRestriction;  // 1 if signal restriction is active, 0 otherwise
-    float startAngle;          // start angle in degrees (0-360)
-    float endAngle;            // end angle in degrees (0-360)
-};
-
 struct ConnectionArrowVertexData
 {
     float pos[2];                     // x, y position
@@ -83,14 +74,12 @@ public:
     unsigned int getVaoForTriangles() const { return _vaoForTriangles; }
     unsigned int getVaoForEnergyParticles() const { return _vaoForEnergyParticles; }
     unsigned int getVaoForLocations() const { return _vaoForLocations; }
-    unsigned int getVaoForSelectedObjects() const { return _vaoForSelectedObjects; }
     unsigned int getVaoForSelectedConnections() const { return _vaoForSelectedConnections; }
     unsigned int getVaoForAttackEvents() const { return _vaoForAttackEvents; }
     unsigned int getVaoForDetonationEvents() const { return _vaoForDetonationEvents; }
     unsigned int getVboForObjects() const { return _vboForObjects; }
     unsigned int getVboForEnergies() const { return _vboForEnergies; }
     unsigned int getVboForLocations() const { return _vboForLocations; }
-    unsigned int getVboForSelectedObjects() const { return _vboForSelectedObjects; }
     unsigned int getVboForSelectedConnections() const { return _vboForSelectedConnections; }
     unsigned int getVboForAttackEvents() const { return _vboForAttackEvents; }
     unsigned int getVboForDetonationEvents() const { return _vboForDetonationEvents; }
@@ -105,7 +94,6 @@ public:
     void setCellData(ObjectVertexData const* data, uint64_t count);
     void setEnergyParticleData(EnergyVertexData const* data, uint64_t count);
     void setLocationData(LocationVertexData const* data, uint64_t count);
-    void setSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count);
     void setLineIndices(unsigned int const* data, uint64_t count);
     void setTriangleIndices(unsigned int const* data, uint64_t count);
     void setSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count);
@@ -116,7 +104,6 @@ public:
     std::vector<ObjectVertexData> getCellData() const;
     std::vector<EnergyVertexData> getEnergyParticleData() const;
     std::vector<LocationVertexData> getLocationData() const;
-    std::vector<SelectedObjectVertexData> getSelectedObjectData() const;
     std::vector<unsigned int> getLineIndices() const;
     std::vector<unsigned int> getTriangleIndices() const;
     std::vector<ConnectionArrowVertexData> getSelectedConnectionData() const;
@@ -128,14 +115,12 @@ private:
     unsigned int _vaoForTriangles = 0;
     unsigned int _vaoForEnergyParticles = 0;
     unsigned int _vaoForLocations = 0;
-    unsigned int _vaoForSelectedObjects = 0;
     unsigned int _vaoForSelectedConnections = 0;
     unsigned int _vaoForAttackEvents = 0;
     unsigned int _vaoForDetonationEvents = 0;
     unsigned int _vboForObjects = 0;
     unsigned int _vboForEnergies = 0;
     unsigned int _vboForLocations = 0;
-    unsigned int _vboForSelectedObjects = 0;
     unsigned int _vboForSelectedConnections = 0;
     unsigned int _vboForAttackEvents = 0;
     unsigned int _vboForDetonationEvents = 0;
@@ -145,7 +130,6 @@ private:
     uint64_t _vertexBufferCapacity = 0;
     uint64_t _energyParticleBufferCapacity = 0;
     uint64_t _locationBufferCapacity = 0;
-    uint64_t _selectedObjectBufferCapacity = 0;
     uint64_t _connectionArrowVertexBufferCapacity = 0;
     uint64_t _attackEventVertexBufferCapacity = 0;
     uint64_t _detonationEventVertexBufferCapacity = 0;

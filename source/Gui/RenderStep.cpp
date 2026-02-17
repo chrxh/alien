@@ -353,34 +353,6 @@ _LocationRenderStep::_LocationRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
 
-SelectedObjectRenderStep _SelectedObjectRenderStep::create(StepParameters const& parameters)
-{
-    return SelectedObjectRenderStep(new _SelectedObjectRenderStep(parameters));
-}
-
-void _SelectedObjectRenderStep::execute(ExecutionParameters parameters)
-{
-    if (!_previousTargetSelection.has_value()) {
-        parameters._clearBackground = true;
-    }
-    prepareExecution(parameters);
-
-    // Enable blending for semi-transparent circles
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Draw selected objects (cells and energy particles) as points (geometry shader will convert to quads)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForSelectedObjects());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().selectedObjects));
-
-    // Disable blending
-    glDisable(GL_BLEND);
-}
-
-_SelectedObjectRenderStep::_SelectedObjectRenderStep(StepParameters const& parameters)
-    : _RenderStep(parameters)
-{}
-
 CellTypeOverlayRenderStep _CellTypeOverlayRenderStep::create(StepParameters const& parameters)
 {
     return CellTypeOverlayRenderStep(new _CellTypeOverlayRenderStep(parameters));
