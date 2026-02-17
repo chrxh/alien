@@ -263,16 +263,13 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             float radius = cellSize * cellRadiusFactor;
 
             // Check if signal has non-zero values (indicates active signal)
-            bool hasActiveSignal = object._signal.has_value() && !object._signal->_channels.empty();
-            if (hasActiveSignal) {
-                auto signalStrength = 0.0f;
-                for (auto const& ch : object._signal->_channels) {
-                    signalStrength += std::abs(ch);
-                }
-                signalStrength = std::min(1.0f, sqrt(sqrt(signalStrength)) / 2);
-                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, signalStrength));
-                drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, signalStrength));
+            auto signalStrength = 0.0f;
+            for (auto const& ch : object._signal._channels) {
+                signalStrength += std::abs(ch);
             }
+            signalStrength = std::min(1.0f, sqrt(sqrt(signalStrength)) / 2);
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, signalStrength));
+            drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, signalStrength));
         }
     }
 
@@ -350,48 +347,31 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
 void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult)
 {
-    if (_editData->run || !_editData->detailSimulation || !_selectedCellIdFromPreview.has_value()) {
+    if (!_editData->detailSimulation) {
         return;
     }
-    std::optional<CellPreviewDesc> selectedCell;
-    for (auto const& object : conversionResult.description._objects) {
-        if (object._id == _selectedCellIdFromPreview.value()) {
-            selectedCell = object;
-            break;
-        }
-    }
-    CHECK(selectedCell.has_value());
-
     // Check if signal has non-zero values
-    bool hasSignalChannels = selectedCell->_signal.has_value() && !selectedCell->_signal->_channels.empty();
-
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(440.0f), ImGui::GetScrollY() + scale(13.0f)});
-    auto height = hasSignalChannels ? scale(168.0f) : scale(67.0f);
-    if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), height), ImGuiChildFlags_FrameStyle)) {
+    if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), scale(149.0f)), ImGuiChildFlags_FrameStyle)) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
-        int signalEnabled = hasSignalChannels ? 1 : 0;
-        bool signalStateChanged = AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Signal"}).textWidth(0), signalEnabled);
-        phenotypeChanged |= signalStateChanged;
 
-        if (signalStateChanged) {
-            if (signalEnabled == 1) {
-                // Enable signal with default channels
-                selectedCell->_signal = SignalPreviewDesc();
-            } else {
-                // Clear signal
-                selectedCell->_signal = std::nullopt;
+        if (_selectedCellIdFromPreview.has_value()) {
+            std::optional<CellPreviewDesc> selectedCell;
+            for (auto const& object : conversionResult.description._objects) {
+                if (object._id == _selectedCellIdFromPreview.value()) {
+                    selectedCell = object;
+                    break;
+                }
             }
-        }
-
-        if (signalEnabled == 1 && selectedCell->_signal.has_value()) {
+            CHECK(selectedCell.has_value());
 
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));  // Transparent background
             ImGuiStyle& style = ImGui::GetStyle();
             auto originalGrabMinSize = style.GrabMinSize;
             style.GrabMinSize = scale(8.0f);
 
-            auto& channels = selectedCell->_signal->_channels;
+            auto& channels = selectedCell->_signal._channels;
             int index = 0;
             for (int i = 0; i < MAX_CHANNELS / 4; ++i) {
                 ImGui::PushID(i);
@@ -413,10 +393,12 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
 
             style.GrabMinSize = originalGrabMinSize;
             ImGui::PopStyleColor();
-        }
 
-        if (phenotypeChanged) {
-            updatePhenotype(phenotype, selectedCell.value());
+            if (phenotypeChanged) {
+                updatePhenotype(phenotype, selectedCell.value());
+            }
+        } else {
+            AlienGui::Text("No cell selected");
         }
     }
     ImGui::EndChild();
@@ -503,12 +485,7 @@ void _CreaturePreviewWidget::updatePhenotype(Desc& phenotype, CellPreviewDesc co
 {
     for (auto& object : phenotype._objects) {
         if (object._id == editedCell._id) {
-            if (editedCell._signal.has_value()) {
-                auto signalDesc = SignalDesc().channels(editedCell._signal.value()._channels);
-                object.getCellRef()._signal = signalDesc;
-            } else {
-                object.getCellRef()._signal = SignalDesc();
-            }
+            object.getCellRef()._signal = SignalDesc().channels(editedCell._signal._channels);
         }
     }
 }
