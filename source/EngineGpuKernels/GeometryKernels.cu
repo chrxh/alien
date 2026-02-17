@@ -407,11 +407,6 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = object->pos.x;
                 selectedObjectData[outputIndex].pos[1] = object->pos.y;
-
-                // TODO
-                selectedObjectData[outputIndex].hasSignalRestriction = 0;
-                selectedObjectData[outputIndex].startAngle = 0.0f;
-                selectedObjectData[outputIndex].endAngle = 0.0f;
             }
         }
     }
@@ -427,9 +422,6 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = energy->pos.x;
                 selectedObjectData[outputIndex].pos[1] = energy->pos.y;
-                selectedObjectData[outputIndex].hasSignalRestriction = 0;
-                selectedObjectData[outputIndex].startAngle = 0.0f;
-                selectedObjectData[outputIndex].endAngle = 0.0f;
             }
         }
     }
@@ -464,7 +456,7 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
             if (object->type == ObjectType_Cell) {
                 // connectionWeightToObject1: weight on object for this connection (signal flows from connectedObject to object)
                 auto* nn = object->typeData.cell.neuralNetwork;
-                    connectionWeightToObject1 = nn->connectionWeights[i];
+                connectionWeightToObject1 = nn->connectionWeights[i];
             }
             if (connectedObject->type == ObjectType_Cell) {
                 // connectionWeightToObject2: weight on connectedObject for reverse connection (signal flows from object to connectedObject)
