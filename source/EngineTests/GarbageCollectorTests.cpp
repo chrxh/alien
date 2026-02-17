@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
+#include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -41,7 +41,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
 
     auto& numberGen = NumberGenerator::get();
 
-    auto data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().layers(10).center({100.0f, 100.0}));
+    auto data = DescEditService::get().createHex(DescEditService::CreateHexParameters().layers(10).center({100.0f, 100.0}));
     for (int i = 0; i < 100; ++i) {
         data._energies.emplace_back(EnergyDesc()
                                          .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})

@@ -2,7 +2,7 @@
 
 #include <Base/Singleton.h>
 
-#include "GenomeDescription.h"
+#include "GenomeDesc.h"
 
 class GenomeDescValidationService
 {

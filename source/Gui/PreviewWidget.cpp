@@ -8,8 +8,8 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GenomeDescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/SimulationFacade.h>

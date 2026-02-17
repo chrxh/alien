@@ -5,9 +5,9 @@
 #include <Base/Definitions.h>
 #include <Base/Math.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
-#include <EngineInterface/PreviewDescriptionConverterService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
+#include <EngineInterface/PreviewDescConverterService.h>
 #include <EngineInterface/SpaceCalculator.h>
 
 #include <EngineTestData/TestHelper.h>

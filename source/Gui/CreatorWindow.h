@@ -2,8 +2,8 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -63,7 +63,7 @@ private:
 
     //drawing
     Desc _drawingDescription;
-    DescriptionEditService::Occupancy _drawingOccupancy;
+    DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 
     CreationMode _mode = CreationMode_Drawing;

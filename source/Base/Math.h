@@ -30,7 +30,7 @@ public:
     static bool isCrossing(RealVector2D const& segmentStart, RealVector2D const& segmentEnd, RealVector2D const& otherSegmentStart, RealVector2D const& otherSegmentEnd);
     static float modulo(float value, float boundary);
 
-    static float sigmoid(float x);
+    static float tanh(float x);
     static float binaryStep(float x);
     static float gaussian(float x);
 };

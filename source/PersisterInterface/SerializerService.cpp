@@ -23,8 +23,8 @@
 #include <Base/Resources.h>
 #include <Base/VersionParserService.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include "SettingsParserService.h"

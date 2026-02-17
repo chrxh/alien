@@ -175,9 +175,9 @@ float Math::modulo(float value, float boundary)
     return fmodf(fmodf(value, boundary) + boundary, boundary);
 }
 
-float Math::sigmoid(float x)
+float Math::tanh(float x)
 {
-    return 2.0f / (1.0f + expf(-x)) - 1.0f;
+    return tanhf(x);
 }
 
 float Math::binaryStep(float x)

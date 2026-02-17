@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/GenomeDescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
 

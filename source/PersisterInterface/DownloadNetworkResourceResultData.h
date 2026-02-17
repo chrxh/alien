@@ -4,7 +4,7 @@
 
 #include <Network/Definitions.h>
 
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDesc.h>
 
 #include <PersisterInterface/DeserializedSimulation.h>
 

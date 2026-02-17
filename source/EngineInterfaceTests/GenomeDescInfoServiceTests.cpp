@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/GenomeDescInfoService.h>
 
 class GenomeDescInfoServiceTests : public ::testing::Test

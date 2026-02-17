@@ -3,7 +3,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include "AlienDialog.h"

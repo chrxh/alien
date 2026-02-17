@@ -3,7 +3,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "AlienWindow.h"
@@ -37,8 +37,8 @@ private:
 
     MultiplierMode _mode = MultiplierMode_Grid;
 
-    DescriptionEditService::GridMultiplyParameters _gridParameters;
-    DescriptionEditService::RandomMultiplyParameters _randomParameters;
+    DescEditService::GridMultiplyParameters _gridParameters;
+    DescEditService::RandomMultiplyParameters _randomParameters;
 
     Desc _origSelection;
     std::optional<SelectionShallowData> _selectionDataAfterMultiplication;

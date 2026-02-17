@@ -5,7 +5,7 @@
 
 #include <Base/Singleton.h>
 
-#include "GenomeDescription.h"
+#include "GenomeDesc.h"
 #include "SimulationParameters.h"
 
 class GenomeDescInfoService

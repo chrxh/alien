@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/GenomeDescEditService.h>
 
 #include "Definitions.h"

@@ -2,8 +2,8 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/PreviewDescription.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/PreviewDesc.h>
 
 struct ConversionResult
 {

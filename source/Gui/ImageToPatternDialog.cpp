@@ -10,8 +10,8 @@
 #include <Base/GlobalSettings.h>
 
 #include <EngineInterface/Colors.h>
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -107,8 +107,8 @@ void ImageToPatternDialog::show()
             }
         }
 
-        DescriptionEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
-        DescriptionEditService::get().setCenter(dataDesc, Viewport::get().getCenterInWorldPos());
+        DescEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
+        DescEditService::get().setCenter(dataDesc, Viewport::get().getCenterInWorldPos());
 
         _SimulationFacade::get()->addAndSelectSimulationData(std::move(dataDesc));
         //TODO: update pattern editor

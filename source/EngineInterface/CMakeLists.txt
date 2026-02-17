@@ -9,16 +9,16 @@ add_library(EngineInterface
     DataPointCollection.cpp
     DataPointCollection.h
     Definitions.h
-    DescriptionEditService.cpp
-    DescriptionEditService.h
-    Description.cpp
-    Description.h
+    DescEditService.cpp
+    DescEditService.h
+    Desc.cpp
+    Desc.h
     EngineConstants.h
-    GenomeDescription.cpp
-    GenomeDescription.h
+    GenomeDesc.cpp
+    GenomeDesc.h
     GenomeDescEditService.cpp
     GenomeDescEditService.h
-    GenomeDescriptionHash.h
+    GenomeDescHash.h
     GenomeDescInfoService.cpp
     GenomeDescInfoService.h
     GenomeDescValidationService.cpp
@@ -38,10 +38,10 @@ add_library(EngineInterface
     ParametersFilter.h
     ParametersValidationService.cpp
     ParametersValidationService.h
-    PreviewDescription.cpp
-    PreviewDescription.h
-    PreviewDescriptionConverterService.cpp
-    PreviewDescriptionConverterService.h
+    PreviewDesc.cpp
+    PreviewDesc.h
+    PreviewDescConverterService.cpp
+    PreviewDescConverterService.h
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h

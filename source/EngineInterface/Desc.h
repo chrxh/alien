@@ -12,7 +12,7 @@
 #include <EngineInterface/NeuralNetWeight.h>
 
 #include "Definitions.h"
-#include "GenomeDescription.h"
+#include "GenomeDesc.h"
 
 struct ConnectionDesc
 {

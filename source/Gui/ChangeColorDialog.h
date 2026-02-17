@@ -2,7 +2,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDesc.h>
 
 #include "AlienDialog.h"
 

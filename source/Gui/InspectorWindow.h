@@ -1,7 +1,7 @@
 #pragma once
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 
 #include "Definitions.h"
 

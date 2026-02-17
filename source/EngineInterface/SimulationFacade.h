@@ -5,7 +5,7 @@
 #include "Definitions.h"
 #include "GeometryBuffers.h"
 #include "MutationType.h"
-#include "PreviewDescription.h"
+#include "PreviewDesc.h"
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
 #include "ShallowUpdateSelectionData.h"

@@ -2,9 +2,9 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
+#include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <PersisterInterface/SerializerService.h>

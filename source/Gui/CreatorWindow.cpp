@@ -9,8 +9,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -180,7 +180,7 @@ void CreatorWindow::onDrawing()
             pos.x = toFloat(toInt(pos.x));
             pos.y = toFloat(toInt(pos.y));
         }
-        return DescriptionEditService::get().createUnconnectedCircle(DescriptionEditService::CreateUnconnectedCircleParameters()
+        return DescEditService::get().createUnconnectedCircle(DescEditService::CreateUnconnectedCircleParameters()
                                                                          .center(pos)
                                                                          .radius(EditorModel::get().getPencilWidth())
                                                                          .usableEnergy(_energy)
@@ -192,7 +192,7 @@ void CreatorWindow::onDrawing()
     };
 
     if (_drawingDescription.isEmpty()) {
-        DescriptionEditService::get().addIfSpaceAvailable(
+        DescEditService::get().addIfSpaceAvailable(
             _drawingDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _SimulationFacade::get()->getWorldSize());
         _lastDrawPos = pos;
     } else {
@@ -202,13 +202,13 @@ void CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescriptionEditService::get().addIfSpaceAvailable(
+                DescEditService::get().addIfSpaceAvailable(
                     _drawingDescription, _drawingOccupancy, toAdd, 0.5f, _SimulationFacade::get()->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
     }
-    DescriptionEditService::get().reconnectCells(_drawingDescription, 1.5f);
+    DescEditService::get().reconnectCells(_drawingDescription, 1.5f);
     _SimulationFacade::get()->addAndSelectSimulationData(Desc(_drawingDescription));
 
     _SimulationFacade::get()->reconnectSelectedObjects();
@@ -247,7 +247,7 @@ void CreatorWindow::createRectangle()
         return;
     }
 
-    auto description = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
+    auto description = DescEditService::get().createRect(DescEditService::CreateRectParameters()
                                                                     .objectType(StructureDesc())
                                                                     .width(_rectHorizontalCells)
                                                                     .height(_rectVerticalCells)
@@ -267,7 +267,7 @@ void CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    Desc description = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
+    Desc description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
                                                                           .objectType(StructureDesc())
                                                                           .layers(_layers)
                                                                           .cellDistance(_cellDistance)
@@ -304,8 +304,8 @@ void CreatorWindow::createDisc()
         }
     }
 
-    DescriptionEditService::get().reconnectCells(description, _cellDistance * 1.7f);
-    DescriptionEditService::get().setCenter(description, getRandomPos());
+    DescEditService::get().reconnectCells(description, _cellDistance * 1.7f);
+    DescEditService::get().setCenter(description, getRandomPos());
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 

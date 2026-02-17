@@ -177,8 +177,8 @@ void _NeuralNetEditorWidget::processActivationFunctions(std::vector<ActivationFu
     auto calcPlotPosition = [&](RealVector2D const& refPos, float x, ActivationFunction activationFunction) {
         float value = 0;
         switch (activationFunction) {
-        case ActivationFunction_Sigmoid:
-            value = Math::sigmoid(x);
+        case ActivationFunction_Tanh:
+            value = Math::tanh(x);
             break;
         case ActivationFunction_BinaryStep:
             value = Math::binaryStep(x);

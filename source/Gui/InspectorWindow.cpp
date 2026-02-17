@@ -7,7 +7,7 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -63,7 +63,7 @@ void _InspectorWindow::process()
             processParticle(std::get<EnergyDesc>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescEditService::get().getPos(entity), borderlessRendering);
         auto factor = StyleRepository::get().scale(1);
 
         drawList->AddLine({windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor}, {entityPos.x, entityPos.y}, Const::InspectorLineColor, 1.5f);

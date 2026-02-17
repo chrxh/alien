@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/ShapeGenerator.h>
 
 #include "Definitions.h"

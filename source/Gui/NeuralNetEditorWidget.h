@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDesc.h>
 
 #include "Definitions.h"
 

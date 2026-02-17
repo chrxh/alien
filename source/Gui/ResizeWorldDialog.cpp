@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -91,7 +91,7 @@ void ResizeWorldDialog::onResizing()
     _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
 
     if (_scaleContent) {
-        DescriptionEditService::get().duplicate(content, origWorldSize, {_width, _height});
+        DescEditService::get().duplicate(content, origWorldSize, {_width, _height});
     }
     _SimulationFacade::get()->setSimulationData(content);
     _SimulationFacade::get()->setStatisticsHistory(statistics);

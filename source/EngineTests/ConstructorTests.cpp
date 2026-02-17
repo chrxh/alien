@@ -2,8 +2,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/ShapeGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -2900,7 +2900,7 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
     auto largeData = Desc();
     for (int i = 0; i < 10; ++i) {
         auto clone = largeCreatureData;
-        DescriptionEditService::get().setCenter(clone, {100.0f, toFloat(i) * 20});
+        DescEditService::get().setCenter(clone, {100.0f, toFloat(i) * 20});
         largeData.add(std::move(clone));
     }
 

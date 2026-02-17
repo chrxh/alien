@@ -3,7 +3,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"

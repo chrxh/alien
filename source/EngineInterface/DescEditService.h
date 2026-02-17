@@ -3,11 +3,11 @@
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
-#include "Description.h"
+#include "Desc.h"
 
-class DescriptionEditService
+class DescEditService
 {
-    MAKE_SINGLETON(DescriptionEditService);
+    MAKE_SINGLETON(DescEditService);
 
 public:
     struct CreateRectParameters

@@ -7,8 +7,8 @@
 #include <Base/Cache.h>
 #include <Base/Singleton.h>
 
-#include "Description.h"
-#include "GenomeDescription.h"
+#include "Desc.h"
+#include "GenomeDesc.h"
 #include "SimulationParameters.h"
 
 using GeneIndicesForSubGenome = std::vector<int>;

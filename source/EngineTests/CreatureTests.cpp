@@ -6,8 +6,8 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -144,7 +144,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     auto constructor = actualData.getObjectRef(0).getCellRef()._constructor.value();
     EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
 
-    DescriptionEditService::get().removeCell(actualData, 0);
+    DescEditService::get().removeCell(actualData, 0);
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
@@ -225,7 +225,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     if (genome._genes[constructor._geneIndex]._separation) {
         EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
     }
-    DescriptionEditService::get().removeCell(actualData, 0);
+    DescEditService::get().removeCell(actualData, 0);
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
@@ -334,7 +334,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         for (auto& object : actualData._objects) { object._vel = {0, 0}; }
         _simulationFacade->setSimulationData(actualData);
 
-        DescriptionEditService::get().removeCell(actualData, 0);
+        DescEditService::get().removeCell(actualData, 0);
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
@@ -352,7 +352,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
     _simulationFacade->calcTimesteps(4000);
     {
         auto actualData = _simulationFacade->getSimulationData();
-        DescriptionEditService::get().removeCell(actualData, 0);
+        DescEditService::get().removeCell(actualData, 0);
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
@@ -387,7 +387,7 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     _simulationFacade->calcTimesteps(1300);
 
     auto actualData = _simulationFacade->getSimulationData();
-    DescriptionEditService::get().removeCell(actualData, 0);
+    DescEditService::get().removeCell(actualData, 0);
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
@@ -442,7 +442,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         for (auto& object : actualData._objects) { object._vel = {0, 0}; }
         _simulationFacade->setSimulationData(actualData);
 
-        DescriptionEditService::get().removeCell(actualData, 0);
+        DescEditService::get().removeCell(actualData, 0);
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
@@ -466,7 +466,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     _simulationFacade->calcTimesteps(1000);
     {
         auto actualData = _simulationFacade->getSimulationData();
-        DescriptionEditService::get().removeCell(actualData, 0);
+        DescEditService::get().removeCell(actualData, 0);
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();

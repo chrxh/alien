@@ -7,7 +7,7 @@
 
 #include <EngineInterface/NumberGenerator.h>
 
-#include "DescriptionEditService.h"
+#include "DescEditService.h"
 #include "GenomeDescInfoService.h"
 
 namespace
@@ -186,7 +186,7 @@ auto GenomeDescEditService::createSeedCollectionForPreview(
     std::vector<SubGenomeDesc> const& subGenomes,
     std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>> cache) const -> SeedCollectionResult
 {
-    auto const& editService = DescriptionEditService::get();
+    auto const& editService = DescEditService::get();
 
     RealVector2D currentPos{toFloat(PREVIEW_HEIGHT) / 2, toFloat(PREVIEW_HEIGHT) / 2};
 
@@ -273,7 +273,7 @@ void GenomeDescEditService::removeSeedFromPhenotype(Desc& phenotype) const
             seedCellIds.insert(object._id);
         }
     }
-    DescriptionEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& object) { return seedCellIds.contains(object._id); });
+    DescEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& object) { return seedCellIds.contains(object._id); });
 }
 
 Desc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome, RealVector2D const& pos) const

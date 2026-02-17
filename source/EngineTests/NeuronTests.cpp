@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -19,14 +19,14 @@ public:
     ~NeuronTests() = default;
 
 protected:
-    float scaledSigmoid(float value) const { return 2.0f / (1.0f + std::exp(-value)) - 1.0f; }
+    float activationTanh(float value) const { return std::tanh(value); }
     float binaryStep(float value) const { return value >= NEAR_ZERO ? 1.0f : 0.0f; }
 
     float applyActivationFunction(ActivationFunction af, float value)
     {
         switch (af) {
-        case ActivationFunction_Sigmoid:
-            return scaledSigmoid(value);
+        case ActivationFunction_Tanh:
+            return activationTanh(value);
             break;
         case ActivationFunction_BinaryStep:
             return binaryStep(value);

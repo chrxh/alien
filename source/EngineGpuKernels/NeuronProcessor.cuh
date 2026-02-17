@@ -198,8 +198,8 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
 __inline__ __device__ float NeuronProcessor::applyActivationFunction(ActivationFunction activationFunction, float x)
 {
     switch (activationFunction) {
-    case ActivationFunction_Sigmoid:
-        return 2.0f / (1.0f + __expf(-x)) - 1.0f;
+    case ActivationFunction_Tanh:
+        return tanhf(x);
     case ActivationFunction_BinaryStep:
         return x >= NEAR_ZERO ? 1.0f : 0.0f;
     case ActivationFunction_Identity:

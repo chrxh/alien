@@ -5,7 +5,7 @@
 
 #include <Base/GlobalSettings.h>
 
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 

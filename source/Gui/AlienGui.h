@@ -9,8 +9,8 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/GenomeDescription.h>
-#include <EngineInterface/PreviewDescription.h>
+#include <EngineInterface/GenomeDesc.h>
+#include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
 #include "Definitions.h"

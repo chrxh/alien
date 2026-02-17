@@ -83,7 +83,7 @@ enum CellState_
 using ActivationFunction = uint8_t;
 enum ActivationFunction_
 {
-    ActivationFunction_Sigmoid,
+    ActivationFunction_Tanh,
     ActivationFunction_BinaryStep,
     ActivationFunction_Identity,
     ActivationFunction_Abs,
@@ -93,7 +93,7 @@ enum ActivationFunction_
 
 namespace Const
 {
-    std::vector<std::string> const ActivationFunctionStrings = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
+    std::vector<std::string> const ActivationFunctionStrings = {"Tanh", "Binary step", "Identity", "Absolute value", "Gaussian"};
 }
 
 using CellEvent = uint8_t;

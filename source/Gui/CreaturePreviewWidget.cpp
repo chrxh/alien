@@ -14,7 +14,7 @@
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/Colors.h>
-#include <EngineInterface/PreviewDescriptionConverterService.h>
+#include <EngineInterface/PreviewDescConverterService.h>
 #include <EngineInterface/SpaceCalculator.h>
 
 #include "AlienGui.h"
@@ -217,17 +217,6 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
-    // Draw cells background
-    if (_zoom > ZoomLevelForConnections) {
-        for (auto const& object : desc._objects) {
-            auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
-            float radius = cellSize * 0.33f;
-
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
-        }
-    }
-
-
     // Draw cells and selected cells
     for (auto const& object : desc._objects) {
         auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
@@ -256,13 +245,12 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 
     // Draw signals
-    if (_zoom > ZoomLevelForConnections) {
+    if (_zoom > ZoomLevelForConnections && _editData->detailSimulation) {
         for (auto const& object : desc._objects) {
             auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
             auto constexpr cellRadiusFactor = 0.3f;
             float radius = cellSize * cellRadiusFactor;
 
-            // Check if signal has non-zero values (indicates active signal)
             auto signalStrength = 0.0f;
             for (auto const& ch : object._signal._channels) {
                 signalStrength += std::abs(ch);
@@ -397,7 +385,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
             }
         } else {
             if (!_editData->detailSimulation) {
-                AlienGui::Text("Detailed simulation needed to edit signals");
+                AlienGui::Text("Detailed simulation mode needed to edit signals");
             } else if (!_selectedCellIdFromPreview.has_value()) {
                 AlienGui::Text("No cell selected");
             }

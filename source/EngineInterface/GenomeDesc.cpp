@@ -1,4 +1,4 @@
-#include "GenomeDescription.h"
+#include "GenomeDesc.h"
 
 #include <algorithm>
 #include <cmath>

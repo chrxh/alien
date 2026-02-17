@@ -5,8 +5,8 @@
 #include <Base/Definitions.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/LocationHelper.h>
 #include <EngineInterface/ParametersEditService.h>
 

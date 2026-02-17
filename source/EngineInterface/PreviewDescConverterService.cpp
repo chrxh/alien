@@ -1,10 +1,10 @@
-#include "PreviewDescriptionConverterService.h"
+#include "PreviewDescConverterService.h"
 
 #include <set>
 
 #include <Base/Math.h>
 
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/DescEditService.h>
 
 #include "SpaceCalculator.h"
 
@@ -35,7 +35,7 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     result.frontAngle = genome._frontAngle;
     result.visualFrontAngle = lastVisualFrontAngle;
 
-    auto const& editService = DescriptionEditService::get();
+    auto const& editService = DescEditService::get();
 
     if (phenotype.isEmpty()) {
         return result;

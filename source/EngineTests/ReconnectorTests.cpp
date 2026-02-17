@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"

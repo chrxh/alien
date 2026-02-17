@@ -428,4 +428,4 @@ struct SubGenomeDesc
 };
 
 // Include hash specializations
-#include "GenomeDescriptionHash.h"
+#include "GenomeDescHash.h"

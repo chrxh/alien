@@ -1,4 +1,4 @@
-#include "DescriptionConverterService.h"
+#include "DescConverterService.h"
 
 #include <algorithm>
 #include <cmath>
@@ -11,7 +11,7 @@
 
 #include <Base/Exceptions.h>
 
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 #include <EngineInterface/NumberGenerator.h>
 
 #include <EngineGpuKernels/TOProvider.cuh>
@@ -145,7 +145,7 @@ namespace
 
 }
 
-Desc DescriptionConverterService::convertTOtoDescription(TOs const& to) const
+Desc DescConverterService::convertTOtoDescription(TOs const& to) const
 {
     Desc result;
 
@@ -187,7 +187,7 @@ Desc DescriptionConverterService::convertTOtoDescription(TOs const& to) const
     return result;
 }
 
-TOs DescriptionConverterService::convertDescriptionToTO(Desc const& description) const
+TOs DescConverterService::convertDescriptionToTO(Desc const& description) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<CreatureTO> creatureTOs;
@@ -221,7 +221,7 @@ TOs DescriptionConverterService::convertDescriptionToTO(Desc const& description)
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, objectTOs, particleTOs, heap);
 }
 
-TOs DescriptionConverterService::convertDescriptionToTO(ExtendedObjectDesc const& extendedObject) const
+TOs DescConverterService::convertDescriptionToTO(ExtendedObjectDesc const& extendedObject) const
 {
     std::vector<ObjectTO> objectTOs;
     std::vector<GenomeTO> genomeTOs;
@@ -247,7 +247,7 @@ TOs DescriptionConverterService::convertDescriptionToTO(ExtendedObjectDesc const
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, objectTOs, {}, heap);
 }
 
-TOs DescriptionConverterService::convertDescriptionToTO(EnergyDesc const& particle) const
+TOs DescConverterService::convertDescriptionToTO(EnergyDesc const& particle) const
 {
     std::vector<EnergyTO> particleTOs;
     std::vector<uint8_t> heap;
@@ -256,7 +256,7 @@ TOs DescriptionConverterService::convertDescriptionToTO(EnergyDesc const& partic
     return provideDataTO({}, {}, {}, {}, {}, particleTOs, heap);
 }
 
-TOs DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const
+TOs DescConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<CreatureTO> creatureTOs;
@@ -275,12 +275,12 @@ TOs DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, Gen
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, {}, {}, heap);
 }
 
-DescriptionConverterService::DescriptionConverterService()
+DescConverterService::DescConverterService()
 {
     _collectionTOProvider = std::make_shared<_TOProvider>();
 }
 
-ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int objectIndex) const
+ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex) const
 {
     ObjectDesc result(false);
 
@@ -622,7 +622,7 @@ ObjectDesc DescriptionConverterService::createObjectDesc(TOs const& to, int obje
 }
 
 
-NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeTO) const
+NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeTO) const
 {
     NodeDesc nodeDesc;
     nodeDesc._referenceAngle = nodeTO->referenceAngle;
@@ -862,7 +862,7 @@ NodeDesc DescriptionConverterService::createNodeDesc(TOs const& to, NodeTO const
     return nodeDesc;
 }
 
-GenomeDesc DescriptionConverterService::createGenomeDesc(TOs const& to, int genomeIndex) const
+GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex) const
 {
     auto const& genomeTO = to.genomes[genomeIndex];
 
@@ -900,7 +900,7 @@ GenomeDesc DescriptionConverterService::createGenomeDesc(TOs const& to, int geno
     return result;
 }
 
-CreatureDesc DescriptionConverterService::createCreatureDesc(TOs const& to, int creatureIndex) const
+CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatureIndex) const
 {
     CreatureDesc result;
 
@@ -916,7 +916,7 @@ CreatureDesc DescriptionConverterService::createCreatureDesc(TOs const& to, int 
     return result;
 }
 
-EnergyDesc DescriptionConverterService::createEnergyDesc(TOs const& to, int particleIndex) const
+EnergyDesc DescConverterService::createEnergyDesc(TOs const& to, int particleIndex) const
 {
     auto const& energyParticle = to.energyParticles[particleIndex];
     NumberGenerator::get().adaptMaxIds({.entityId = energyParticle.id});
@@ -928,7 +928,7 @@ EnergyDesc DescriptionConverterService::createEnergyDesc(TOs const& to, int part
         .color(energyParticle.color);
 }
 
-void DescriptionConverterService::convertGenomeToTO(
+void DescConverterService::convertGenomeToTO(
     std::vector<GenomeTO>& genomeTOs,
     std::vector<GeneTO>& geneTOs,
     std::vector<NodeTO>& nodeTOs,
@@ -1177,7 +1177,7 @@ void DescriptionConverterService::convertGenomeToTO(
     }
 }
 
-void DescriptionConverterService::convertCreatureToTO(
+void DescConverterService::convertCreatureToTO(
     std::vector<CreatureTO>& creatureTOs,
     CreatureDesc const& creatureDesc,
     std::unordered_map<uint64_t, uint64_t> const& genomeTOIndexById,
@@ -1208,7 +1208,7 @@ namespace
     }
 }
 
-void DescriptionConverterService::convertObjectToTO(
+void DescConverterService::convertObjectToTO(
     std::vector<ObjectTO>& objectTOs,
     std::vector<uint8_t>& heap,
     std::unordered_map<uint64_t, uint64_t>& objectTOIndexById,
@@ -1500,7 +1500,7 @@ void DescriptionConverterService::convertObjectToTO(
     }
 }
 
-void DescriptionConverterService::addParticle(std::vector<EnergyTO>& particleTOs, EnergyDesc const& particleDesc) const
+void DescConverterService::addParticle(std::vector<EnergyTO>& particleTOs, EnergyDesc const& particleDesc) const
 {
     auto& particleTO = particleTOs.emplace_back();
 
@@ -1512,7 +1512,7 @@ void DescriptionConverterService::addParticle(std::vector<EnergyTO>& particleTOs
     particleTO.color = particleDesc._color;
 }
 
-void DescriptionConverterService::setConnections(
+void DescConverterService::setConnections(
     std::vector<ObjectTO>& objectTOs,
     ObjectDesc const& cellToAdd,
     std::unordered_map<uint64_t, uint64_t> const& objectIndexByIds) const
@@ -1533,7 +1533,7 @@ void DescriptionConverterService::setConnections(
     objectTO.numConnections = index;
 }
 
-TOs DescriptionConverterService::provideDataTO(
+TOs DescConverterService::provideDataTO(
     std::vector<CreatureTO> const& creatureTOs,
     std::vector<GenomeTO> const& genomeTOs,
     std::vector<GeneTO> const& geneTOs,

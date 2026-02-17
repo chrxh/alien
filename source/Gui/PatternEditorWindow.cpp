@@ -7,7 +7,7 @@
 #include <Base/GlobalSettings.h>
 
 #include <EngineInterface/Colors.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -295,7 +295,7 @@ void PatternEditorWindow::onOpenPattern()
         Desc content;
         if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
             auto center = Viewport::get().getCenterInWorldPos();
-            DescriptionEditService::get().setCenter(content, center);
+            DescEditService::get().setCenter(content, center);
             _SimulationFacade::get()->addAndSelectSimulationData(Desc(content));
             EditorModel::get().update();
         } else {
@@ -347,7 +347,7 @@ void PatternEditorWindow::onPaste()
 {
     auto description = *_copiedSelection;
     auto center = Viewport::get().getCenterInWorldPos();
-    DescriptionEditService::get().setCenter(description, center);
+    DescEditService::get().setCenter(description, center);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
     EditorModel::get().update();
 }

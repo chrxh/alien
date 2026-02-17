@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 #include <EngineInterface/StatisticsHistory.h>
 
 #include "SettingsForSerialization.h"

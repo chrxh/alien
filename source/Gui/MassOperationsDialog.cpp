@@ -5,8 +5,8 @@
 #include <Base/Definitions.h>
 
 #include <EngineInterface/Colors.h>
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -165,22 +165,22 @@ void MassOperationsDialog::onExecute()
         return result;
     };
     if (_randomizeCellColors) {
-        DescriptionEditService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
+        DescEditService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
     }
     if (_randomizeGenomeColors) {
-        DescriptionEditService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
+        DescEditService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
     }
     if (_randomizeEnergies) {
-        DescriptionEditService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
+        DescEditService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
     }
     if (_randomizeAges) {
-        DescriptionEditService::get().randomizeAges(content, _minAge, _maxAge);
+        DescEditService::get().randomizeAges(content, _minAge, _maxAge);
     }
     if (_randomizeCountdowns) {
-        DescriptionEditService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
+        DescEditService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
     if (_randomizeLineageId) {
-        DescriptionEditService::get().randomizeLineageIds(content);
+        DescEditService::get().randomizeLineageIds(content);
     }
 
     if (_restrictToSelectedCreatures) {

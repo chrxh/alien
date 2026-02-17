@@ -6,8 +6,8 @@
 
 #include <Base/Definitions.h>
 
-#include <EngineInterface/Description.h>
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/Desc.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -41,12 +41,12 @@ protected:
 
 TEST_F(DescriptionEditTests, correctConnections)
 {
-    auto origData = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
+    auto origData = DescEditService::get().createRect(DescEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
     _simulationFacade->setSimulationData(origData);
 
     auto data = _simulationFacade->getSimulationData();
 
-    DescriptionEditService::get().duplicate(data, {100, 100}, {100, 100});
+    DescEditService::get().duplicate(data, {100, 100}, {100, 100});
 
     EXPECT_TRUE(areAngelsCorrect(data));
 }
@@ -603,7 +603,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
         data.addConnection(i - 1, i);
     }
 
-    DescriptionEditService::get().flattenTopology(data, IntVector2D{WorldWidth, WorldHeight});
+    DescEditService::get().flattenTopology(data, IntVector2D{WorldWidth, WorldHeight});
 
     ASSERT_EQ(1, data._creatures.size());
 
@@ -633,7 +633,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
         data.addConnection(i - 1, i);
     }
 
-    DescriptionEditService::get().flattenTopology(data, IntVector2D{WorldWidth, WorldHeight});
+    DescEditService::get().flattenTopology(data, IntVector2D{WorldWidth, WorldHeight});
 
     ASSERT_EQ(1, data._creatures.size());
 

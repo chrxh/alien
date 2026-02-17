@@ -6,7 +6,7 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -74,7 +74,7 @@ void EditorController::onCloseAllInspectorWindows()
 void EditorController::onInspectSelectedObjects()
 {
     Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
-    if (!onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false)) {
+    if (!onInspectObjects(DescEditService::get().getObjects(selectedData), false)) {
         showMessage(
             "Inspection not possible",
             "Too many objects are selected for inspection. A maximum of " + std::to_string(Const::MaxInspectedObjects) + " objects are allowed.");
@@ -84,7 +84,7 @@ void EditorController::onInspectSelectedObjects()
 void EditorController::onInspectSelectedGenomes()
 {
     Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(true);
-    auto constructors = DescriptionEditService::get().getCreatureRepresentatives(selectedData);
+    auto constructors = DescEditService::get().getCreatureRepresentatives(selectedData);
     if (constructors.size() > 1) {
         constructors = {constructors.front()};
     }
@@ -124,12 +124,12 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> 
     }
     auto origInspectedIds = inspectedIds;
     for (auto const& entity : filteredEntities) {
-        inspectedIds.insert(DescriptionEditService::get().getId(entity));
+        inspectedIds.insert(DescEditService::get().getId(entity));
     }
 
     std::vector<ExtendedObjectOrEnergyDesc> newEntities;
     for (auto const& entity : filteredEntities) {
-        if (origInspectedIds.find(DescriptionEditService::get().getId(entity)) == origInspectedIds.end()) {
+        if (origInspectedIds.find(DescEditService::get().getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
         }
     }
@@ -142,7 +142,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> 
     RealVector2D center;
     int num = 0;
     for (auto const& entity : filteredEntities) {
-        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescEditService::get().getPos(entity), borderlessRendering);
         center += entityPos;
         ++num;
     }
@@ -150,7 +150,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> 
 
     float maxDistanceFromCenter = 0;
     for (auto const& entity : filteredEntities) {
-        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescEditService::get().getPos(entity), borderlessRendering);
         auto distanceFromCenter = toFloat(Math::length(entityPos - center));
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
     }
@@ -159,9 +159,9 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> 
     auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 3.4f;
 
     for (auto const& entity : newEntities) {
-        auto id = DescriptionEditService::get().getId(entity);
+        auto id = DescEditService::get().getId(entity);
         EditorModel::get().addInspectedEntity(entity);
-        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescEditService::get().getPos(entity), borderlessRendering);
         auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
@@ -233,10 +233,10 @@ void EditorController::processInspectorWindows()
     if (++counter == 10) {
         std::vector<uint64_t> entityIds;
         for (auto const& entity : inspectedEntities) {
-            entityIds.emplace_back(DescriptionEditService::get().getId(entity));
+            entityIds.emplace_back(DescEditService::get().getId(entity));
         }
         auto inspectedData = _SimulationFacade::get()->getInspectedSimulationData(entityIds);
-        auto newInspectedEntities = DescriptionEditService::get().getObjects(inspectedData);
+        auto newInspectedEntities = DescEditService::get().getObjects(inspectedData);
         EditorModel::get().setInspectedEntities(newInspectedEntities);
         counter = 0;
     }

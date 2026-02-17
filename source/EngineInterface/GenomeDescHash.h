@@ -5,7 +5,7 @@
 
 #include <Base/Hashes.h>
 
-#include "GenomeDescription.h"
+#include "GenomeDesc.h"
 
 template <>
 struct std::hash<NeuralNetGenomeDesc>

@@ -1,6 +1,6 @@
 #include "EditorModel.h"
 
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <EngineInterface/SimulationFacade.h>
@@ -47,14 +47,14 @@ ExtendedObjectOrEnergyDesc EditorModel::getInspectedEntity(uint64_t id) const
 
 void EditorModel::addInspectedEntity(ExtendedObjectOrEnergyDesc const& entity)
 {
-    _inspectedEntityById.emplace(DescriptionEditService::get().getId(entity), entity);
+    _inspectedEntityById.emplace(DescEditService::get().getId(entity), entity);
 }
 
 void EditorModel::setInspectedEntities(std::vector<ExtendedObjectOrEnergyDesc> const& inspectedEntities)
 {
     _inspectedEntityById.clear();
     for (auto const& entity : inspectedEntities) {
-        _inspectedEntityById.emplace(DescriptionEditService::get().getId(entity), entity);
+        _inspectedEntityById.emplace(DescEditService::get().getId(entity), entity);
     }
 }
 

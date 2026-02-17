@@ -5,7 +5,7 @@
 
 #include <Base/ExitScopeGuard.h>
 
-#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/NumberGenerator.h>
@@ -13,7 +13,7 @@
 #include <EngineGpuKernels/TOs.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
 
-#include "DescriptionConverterService.h"
+#include "DescConverterService.h"
 
 #include "SimulationCudaFacade.cuh"
 
@@ -78,7 +78,7 @@ Desc EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector
     auto dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
     ExitScopeGuard guard([&dataTO]() { _TOProvider::destroyUnmanagedDataTO(dataTO); });
 
-    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
+    return DescConverterService::get().convertTOtoDescription(dataTO);
 }
 
 Desc EngineWorker::getSelectedSimulationData(bool includeClusters)
@@ -87,7 +87,7 @@ Desc EngineWorker::getSelectedSimulationData(bool includeClusters)
 
     auto dataTO = _simulationCudaFacade->getSelectedSimulationData(includeClusters);
 
-    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
+    return DescConverterService::get().convertTOtoDescription(dataTO);
 }
 
 Desc EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
@@ -96,7 +96,7 @@ Desc EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
 
     auto dataTO = _simulationCudaFacade->getInspectedSimulationData(objectsIds);
 
-    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
+    return DescConverterService::get().convertTOtoDescription(dataTO);
 }
 
 StatisticsRawData EngineWorker::getStatisticsRawData() const
@@ -123,7 +123,7 @@ void EngineWorker::addAndSelectSimulationData(Desc&& dataToUpdate)
 
     dataToUpdate.assignNewIds();
 
-    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
+    auto dataTO = DescConverterService::get().convertDescriptionToTO(dataToUpdate);
 
     _simulationCudaFacade->addAndSelectSimulationData(dataTO);
 }
@@ -136,7 +136,7 @@ void EngineWorker::setSimulationData(Desc const& dataToUpdate)
 
     EngineWorkerGuard access(this);
 
-    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
+    auto dataTO = DescConverterService::get().convertDescriptionToTO(dataToUpdate);
 
     _simulationCudaFacade->setSimulationData(dataTO);
 }
@@ -187,7 +187,7 @@ void EngineWorker::changeCell(ExtendedObjectDesc const& changedCell)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(changedCell);
+    auto dataTO = DescConverterService::get().convertDescriptionToTO(changedCell);
 
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
@@ -196,7 +196,7 @@ void EngineWorker::changeParticle(EnergyDesc const& changedParticle)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(changedParticle);
+    auto dataTO = DescConverterService::get().convertDescriptionToTO(changedParticle);
 
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
@@ -205,7 +205,7 @@ bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDesc const& genome)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(creatureId, genome);
+    auto dataTO = DescConverterService::get().convertDescriptionToTO(creatureId, genome);
 
     return _simulationCudaFacade->changeCreature(dataTO);
 }
@@ -222,7 +222,7 @@ std::optional<GenomeDesc> EngineWorker::getGenomeOfCreature(uint64_t creatureId)
         return std::nullopt;
     }
 
-    auto description = DescriptionConverterService::get().convertTOtoDescription(dataTO);
+    auto description = DescConverterService::get().convertTOtoDescription(dataTO);
 
     // The genome should be the only one in the result
     if (description._genomes.empty()) {
@@ -421,7 +421,7 @@ Desc EngineWorker::getPreviewData()
     auto preview = _simulationCudaFacade->getPreviewData();
     ExitScopeGuard guard([&preview]() { _TOProvider::destroyUnmanagedDataTO(preview); });
 
-    return DescriptionConverterService::get().convertTOtoDescription(preview);
+    return DescConverterService::get().convertTOtoDescription(preview);
 }
 
 void EngineWorker::setPreviewData(Desc const& description)
@@ -432,7 +432,7 @@ void EngineWorker::setPreviewData(Desc const& description)
 
     EngineWorkerGuard access(this);
 
-    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(description);
+    auto dataTO = DescConverterService::get().convertDescriptionToTO(description);
 
     _simulationCudaFacade->newPreview(dataTO);
 }

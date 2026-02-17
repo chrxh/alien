@@ -1,4 +1,4 @@
-#include "DescriptionEditService.h"
+#include "DescEditService.h"
 
 #include <cmath>
 #include <unordered_map>
@@ -11,10 +11,10 @@
 
 #include <EngineInterface/NumberGenerator.h>
 
-#include "GenomeDescription.h"
+#include "GenomeDesc.h"
 #include "SpaceCalculator.h"
 
-Desc DescriptionEditService::createRect(CreateRectParameters const& parameters) const
+Desc DescEditService::createRect(CreateRectParameters const& parameters) const
 {
     Desc result;
     for (int i = 0; i < parameters._width; ++i) {
@@ -33,7 +33,7 @@ Desc DescriptionEditService::createRect(CreateRectParameters const& parameters) 
     return result;
 }
 
-Desc DescriptionEditService::createHex(CreateHexParameters const& parameters) const
+Desc DescEditService::createHex(CreateHexParameters const& parameters) const
 {
     Desc result;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
@@ -67,7 +67,7 @@ Desc DescriptionEditService::createHex(CreateHexParameters const& parameters) co
     return result;
 }
 
-Desc DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const
+Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const
 {
     Desc result;
 
@@ -156,7 +156,7 @@ namespace
 
 }
 
-void DescriptionEditService::duplicate(Desc& description, IntVector2D const& origSize, IntVector2D const& size) const
+void DescEditService::duplicate(Desc& description, IntVector2D const& origSize, IntVector2D const& size) const
 {
     correctConnectionsForNonCreatures(description, origSize);
 
@@ -221,7 +221,7 @@ namespace
     }
 }
 
-Desc DescriptionEditService::gridMultiply(Desc const& input, GridMultiplyParameters const& parameters) const
+Desc DescEditService::gridMultiply(Desc const& input, GridMultiplyParameters const& parameters) const
 {
     Desc result;
     auto clone = input;
@@ -248,7 +248,7 @@ Desc DescriptionEditService::gridMultiply(Desc const& input, GridMultiplyParamet
     return result;
 }
 
-Desc DescriptionEditService::randomMultiply(
+Desc DescEditService::randomMultiply(
     Desc const& input,
     RandomMultiplyParameters const& parameters,
     IntVector2D const& worldSize,
@@ -315,7 +315,7 @@ Desc DescriptionEditService::randomMultiply(
     return result;
 }
 
-void DescriptionEditService::addIfSpaceAvailable(
+void DescEditService::addIfSpaceAvailable(
     Desc& result,
     Occupancy& cellOccupancy,
     Desc const& toAdd,
@@ -332,7 +332,7 @@ void DescriptionEditService::addIfSpaceAvailable(
     }
 }
 
-void DescriptionEditService::flattenTopology(Desc& description, IntVector2D const& worldSize) const
+void DescEditService::flattenTopology(Desc& description, IntVector2D const& worldSize) const
 {
     SpaceCalculator space(worldSize);
     auto cache = description.createCache();
@@ -373,7 +373,7 @@ void DescriptionEditService::flattenTopology(Desc& description, IntVector2D cons
     }
 }
 
-void DescriptionEditService::reconnectCells(Desc& description, float maxDistance) const
+void DescEditService::reconnectCells(Desc& description, float maxDistance) const
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 
@@ -398,7 +398,7 @@ void DescriptionEditService::reconnectCells(Desc& description, float maxDistance
     }
 }
 
-void DescriptionEditService::randomizeCellColors(Desc& description, std::vector<int> const& colorCodes) const
+void DescEditService::randomizeCellColors(Desc& description, std::vector<int> const& colorCodes) const
 {
     // Step 1: Create random color value for each creature
     std::unordered_map<uint64_t, float> cellColorsByCreatureId;
@@ -420,7 +420,7 @@ void DescriptionEditService::randomizeCellColors(Desc& description, std::vector<
     }
 }
 
-void DescriptionEditService::randomizeGenomeColors(Desc& description, std::vector<int> const& colorCodes) const
+void DescEditService::randomizeGenomeColors(Desc& description, std::vector<int> const& colorCodes) const
 {
     for (auto& genome : description._genomes) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
@@ -432,7 +432,7 @@ void DescriptionEditService::randomizeGenomeColors(Desc& description, std::vecto
     }
 }
 
-void DescriptionEditService::randomizeEnergies(Desc& description, float minEnergy, float maxEnergy) const
+void DescEditService::randomizeEnergies(Desc& description, float minEnergy, float maxEnergy) const
 {
     // Step 1: Create random energy value for each creature
     std::unordered_map<uint64_t, float> creatureEnergies;
@@ -457,7 +457,7 @@ void DescriptionEditService::randomizeEnergies(Desc& description, float minEnerg
     }
 }
 
-void DescriptionEditService::randomizeAges(Desc& description, int minAge, int maxAge) const
+void DescEditService::randomizeAges(Desc& description, int minAge, int maxAge) const
 {
     // Step 1: Create random age value for each creature
     std::unordered_map<uint64_t, int> creatureAges;
@@ -480,7 +480,7 @@ void DescriptionEditService::randomizeAges(Desc& description, int minAge, int ma
     }
 }
 
-void DescriptionEditService::randomizeCountdowns(Desc& description, int minValue, int maxValue) const
+void DescEditService::randomizeCountdowns(Desc& description, int minValue, int maxValue) const
 {
     // Step 1: Create random countdown value for each creature
     std::unordered_map<uint64_t, int> creatureCountdowns;
@@ -503,21 +503,21 @@ void DescriptionEditService::randomizeCountdowns(Desc& description, int minValue
     }
 }
 
-void DescriptionEditService::randomizeLineageIds(Desc& description) const
+void DescEditService::randomizeLineageIds(Desc& description) const
 {
     for (auto& genome : description._genomes) {
         genome._lineageId = NumberGenerator::get().getRandomInt();
     }
 }
 
-void DescriptionEditService::setCenter(Desc& description, RealVector2D const& center) const
+void DescEditService::setCenter(Desc& description, RealVector2D const& center) const
 {
     auto origCenter = calcCenter(description);
     auto delta = center - origCenter;
     shift(description, delta);
 }
 
-RealVector2D DescriptionEditService::calcCenter(Desc const& description) const
+RealVector2D DescEditService::calcCenter(Desc const& description) const
 {
     RealVector2D result;
     auto numEntities = description._objects.size() + description._energies.size();
@@ -532,7 +532,7 @@ RealVector2D DescriptionEditService::calcCenter(Desc const& description) const
     return result;
 }
 
-void DescriptionEditService::shift(Desc& description, RealVector2D const& delta) const
+void DescEditService::shift(Desc& description, RealVector2D const& delta) const
 {
     for (auto& object : description._objects) {
         object._pos += delta;
@@ -543,7 +543,7 @@ void DescriptionEditService::shift(Desc& description, RealVector2D const& delta)
     }
 }
 
-void DescriptionEditService::rotate(Desc& description, float angle) const
+void DescEditService::rotate(Desc& description, float angle) const
 {
     auto rotationMatrix = Math::calcRotationMatrix(angle);
     auto center = calcCenter(description);
@@ -561,7 +561,7 @@ void DescriptionEditService::rotate(Desc& description, float angle) const
     }
 }
 
-void DescriptionEditService::accelerate(Desc& description, RealVector2D const& velDelta, float angularVelDelta) const
+void DescEditService::accelerate(Desc& description, RealVector2D const& velDelta, float angularVelDelta) const
 {
     auto center = calcCenter(description);
 
@@ -577,7 +577,7 @@ void DescriptionEditService::accelerate(Desc& description, RealVector2D const& v
     }
 }
 
-void DescriptionEditService::removeCell(Desc& description, uint64_t objectId) const
+void DescEditService::removeCell(Desc& description, uint64_t objectId) const
 {
     std::erase_if(description._objects, [&](auto const& object) { return object._id == objectId; });
 
@@ -620,7 +620,7 @@ void DescriptionEditService::removeCell(Desc& description, uint64_t objectId) co
     }
 }
 
-void DescriptionEditService::removeCellIf(Desc& description, std::function<bool(ObjectDesc const&)> const& predicate) const
+void DescEditService::removeCellIf(Desc& description, std::function<bool(ObjectDesc const&)> const& predicate) const
 {
     std::unordered_set<uint64_t> removedCellIds;
     auto extPredicate = [&](ObjectDesc const& object) {
@@ -664,7 +664,7 @@ void DescriptionEditService::removeCellIf(Desc& description, std::function<bool(
     }
 }
 
-bool DescriptionEditService::isCellPresent(
+bool DescEditService::isCellPresent(
     Occupancy const& cellPosBySlot,
     SpaceCalculator const& spaceCalculator,
     RealVector2D const& posToCheck,
@@ -701,7 +701,7 @@ bool DescriptionEditService::isCellPresent(
     return false;
 }
 
-uint64_t DescriptionEditService::getId(ExtendedObjectOrEnergyDesc const& entity) const
+uint64_t DescEditService::getId(ExtendedObjectOrEnergyDesc const& entity) const
 {
     if (std::holds_alternative<ExtendedObjectDesc>(entity)) {
         return std::get<ExtendedObjectDesc>(entity).object._id;
@@ -709,7 +709,7 @@ uint64_t DescriptionEditService::getId(ExtendedObjectOrEnergyDesc const& entity)
     return std::get<EnergyDesc>(entity)._id;
 }
 
-RealVector2D DescriptionEditService::getPos(ExtendedObjectOrEnergyDesc const& entity) const
+RealVector2D DescEditService::getPos(ExtendedObjectOrEnergyDesc const& entity) const
 {
     if (std::holds_alternative<ExtendedObjectDesc>(entity)) {
         return std::get<ExtendedObjectDesc>(entity).object._pos;
@@ -717,7 +717,7 @@ RealVector2D DescriptionEditService::getPos(ExtendedObjectOrEnergyDesc const& en
     return std::get<EnergyDesc>(entity)._pos;
 }
 
-std::vector<ExtendedObjectOrEnergyDesc> DescriptionEditService::getObjects(Desc const& description) const
+std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(Desc const& description) const
 {
     std::vector<ExtendedObjectOrEnergyDesc> result;
     for (auto const& energyParticle : description._energies) {
@@ -751,7 +751,7 @@ std::vector<ExtendedObjectOrEnergyDesc> DescriptionEditService::getObjects(Desc 
     return result;
 }
 
-std::vector<ExtendedObjectOrEnergyDesc> DescriptionEditService::getCreatureRepresentatives(Desc const& description) const
+std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getCreatureRepresentatives(Desc const& description) const
 {
     return {};
 }

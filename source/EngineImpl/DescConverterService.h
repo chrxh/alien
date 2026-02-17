@@ -5,7 +5,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include <EngineGpuKernels/Definitions.h>
@@ -13,9 +13,9 @@
 
 #include "Definitions.h"
 
-class DescriptionConverterService
+class DescConverterService
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescriptionConverterService);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescConverterService);
 
 public:
     Desc convertTOtoDescription(TOs const& to) const;
@@ -25,7 +25,7 @@ public:
     TOs convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const;
 
 private:
-    DescriptionConverterService();
+    DescConverterService();
 
     ObjectDesc createObjectDesc(TOs const& to, int objectIndex) const;
     NodeDesc createNodeDesc(TOs const& to, NodeTO const* nodeTO) const;

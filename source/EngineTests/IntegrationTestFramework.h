@@ -8,7 +8,7 @@
 #include <Base/Definitions.h>
 
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include <EngineTestData/TestHelper.h>

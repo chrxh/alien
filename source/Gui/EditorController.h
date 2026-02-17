@@ -3,7 +3,7 @@
 #include <Base/Definitions.h>
 #include <Base/Singleton.h>
 
-#include <EngineInterface/Description.h>
+#include <EngineInterface/Desc.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"

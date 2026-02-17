@@ -2,9 +2,9 @@
 add_library(EngineImpl
     DataAccessKernelsService.cu
     DataAccessKernelsService.cuh
-    DescriptionConverterService.cpp
-    DescriptionConverterService.h
     Definitions.h
+    DescConverterService.cpp
+    DescConverterService.h
     EditKernelsService.cu
     EditKernelsService.cuh
     EngineWorker.cpp
