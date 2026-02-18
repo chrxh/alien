@@ -205,6 +205,8 @@ void _NodeEditorWidget::processNodeAttributes()
             auto rightColumnWidth = std::max(MinTextWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(MaxWidgetWidth)));
 
             // Angle
+            AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
+
             auto nodeIndex = _editData->getSelectedNodeIndex();
             auto isInnerNode = nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1;
             if (AlienGui::InputFloat(
@@ -237,11 +239,14 @@ void _NodeEditorWidget::processNodeAttributes()
 
             table.next();
 
+            AlienGui::Group(AlienGui::GroupParameters().text("Type-specific properties"));
+
             // Type
             auto nodeType = node.getCellType();
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeStrings).textWidth(rightColumnWidth), nodeType)) {
                 node._cellType = createCellTypeGenomeDesc(nodeType);
             }
+
             if (nodeType == CellType_Base) {
             } else if (nodeType == CellType_Depot) {
                 AlienGui::BeginIndent();
@@ -641,6 +646,9 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Optional constructor field (available for all node types)
             table.next();
+
+            AlienGui::Group(AlienGui::GroupParameters().text("Construction properties"));
+
             bool hasConstructor = node._constructor.has_value();
             if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(rightColumnWidth), hasConstructor)) {
                 if (hasConstructor) {

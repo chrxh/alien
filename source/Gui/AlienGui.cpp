@@ -1329,7 +1329,11 @@ void AlienGui::Separator()
 
 void AlienGui::MovableHorizontalSeparator(MovableHorizontalSeparatorParameters const& parameters, float& height)
 {
+    ImGui::PushStyleColor(ImGuiCol_Button, Const::MovableSeparatorColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::MovableSeparatorHoveredColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::MovableSeparatorActiveColor.Value);
     ImGui::Button("###MovableHorizontalSeparator", ImVec2(-1, scale(5.0f)));
+    ImGui::PopStyleColor(3);
     if (ImGui::IsItemActive()) {
         if (parameters._additive) {
             height += ImGui::GetIO().MouseDelta.y;
@@ -1344,8 +1348,11 @@ void AlienGui::MovableHorizontalSeparator(MovableHorizontalSeparatorParameters c
 
 void AlienGui::MovableVerticalSeparator(MovableVerticalSeparatorParameters const& parameters, float& width)
 {
-    auto sizeAvailable = ImGui::GetContentRegionAvail();
-    ImGui::Button("###MovableVerticalSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(parameters._bottomSpace)));
+    ImGui::PushStyleColor(ImGuiCol_Button, Const::MovableSeparatorColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::MovableSeparatorHoveredColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::MovableSeparatorActiveColor.Value);
+    ImGui::Button("###MovableVerticalSeparator", ImVec2(scale(5.0f), ImGui::GetContentRegionAvail().y - scale(parameters._bottomSpace)));
+    ImGui::PopStyleColor(3);
     if (ImGui::IsItemActive()) {
         if (parameters._additive) {
             width += ImGui::GetIO().MouseDelta.x;

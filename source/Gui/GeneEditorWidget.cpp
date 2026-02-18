@@ -79,6 +79,8 @@ void _GeneEditorWidget::processHeaderData()
 
             auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
 
+            AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
+
             // Gene name
             AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
 
@@ -104,6 +106,17 @@ void _GeneEditorWidget::processHeaderData()
         }*/
             AlienGui::EndIndent();
 
+            // Connection distance
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
+
+            // Stiffness
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
+
+            table.next();
+
+            AlienGui::Group(AlienGui::GroupParameters().text("Multiplier"));
+
             // Separation
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), gene._separation);
 
@@ -120,17 +133,8 @@ void _GeneEditorWidget::processHeaderData()
             }*/
             AlienGui::EndIndent();
 
-            table.next();
-
             // Concatenations
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);
-
-            // Connection distance
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
-
-            // Stiffness
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
 
             table.next();
             table.end();
