@@ -23,7 +23,7 @@ void main()
     float dist = length(gQuadCoord);
     
     // Circle radius in normalized quad space (0.5 = edge)
-    float outerRadius = 0.5;
+    float outerRadius = 0.4;
     float innerRadius = outerRadius - 3.0 / zoom; // Thin circle (2 pixels)
 
     if (dist > outerRadius || dist < innerRadius) {
