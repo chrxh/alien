@@ -22,6 +22,7 @@ namespace
 {
     auto constexpr HeaderMinRightColumnWidth = 160.0f;
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
+    auto constexpr HeaderMinColumnWidth = 300.0f;
 }
 
 
@@ -68,50 +69,66 @@ void _GenomeEditorWidget::processHeaderData()
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("GenomeHeader", ImVec2(0, -_layoutData->geneListHeight), 0)) {
 
-        AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
-        AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage").textWidth(rightColumnWidth), _editData->genome._lineageId);
+        AlienGui::DynamicTableLayout table(HeaderMinColumnWidth);
+        if (table.begin()) {
 
-        auto numNodesString = std::to_string(GenomeDescInfoService::get().getNumberOfNodes(_editData->genome));
-        AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
+            AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage").textWidth(rightColumnWidth), _editData->genome._lineageId);
 
-        auto numCells = GenomeDescInfoService::get().getNumberOfResultingCells(_editData->genome);
-        auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
-        AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
+            auto numNodesString = std::to_string(GenomeDescInfoService::get().getNumberOfNodes(_editData->genome));
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
 
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
+            auto numCells = GenomeDescInfoService::get().getNumberOfResultingCells(_editData->genome);
+            auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
-        AlienGui::Group(AlienGui::GroupParameters().text("Neuron mutation rate 1"));
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Probability###NMR1").format("%.3f").textWidth(rightColumnWidth),
-            _editData->genome._neuronMutationRate1._probability);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Sigma###NMR1").format("%.3f").textWidth(rightColumnWidth), _editData->genome._neuronMutationRate1._sigma);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
+            table.next();
 
-        AlienGui::Group(AlienGui::GroupParameters().text("Neuron mutation rate 2"));
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Probability###NMR2").format("%.3f").textWidth(rightColumnWidth),
-            _editData->genome._neuronMutationRate2._probability);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Sigma###NMR2").format("%.3f").textWidth(rightColumnWidth), _editData->genome._neuronMutationRate2._sigma);
+            AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 1"));
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Probability").id("NMR1").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._neuronMutationRate1._probability);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Sigma").id("NMR1").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._neuronMutationRate1._sigma);
 
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Activation function mutation rate").format("%.3f").textWidth(rightColumnWidth),
-            _editData->genome._activationFunctionMutationRate);
+            AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 2"));
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Probability").id("NMR2").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._neuronMutationRate2._probability);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Sigma").id("NMR2").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._neuronMutationRate2._sigma);
+            table.next();
 
-        AlienGui::Group(AlienGui::GroupParameters().text("Connection mutation rate 1"));
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Probability###CMR1").format("%.3f").textWidth(rightColumnWidth),
-            _editData->genome._connectionMutationRate1._probability);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Sigma###CMR1").format("%.3f").textWidth(rightColumnWidth), _editData->genome._connectionMutationRate1._sigma);
+            AlienGui::Group(AlienGui::GroupParameters().text("Activation function mutation rate"));
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Probability").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._activationFunctionMutationRate);
+            table.next();
 
-        AlienGui::Group(AlienGui::GroupParameters().text("Connection mutation rate 2"));
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Probability###CMR2").format("%.3f").textWidth(rightColumnWidth),
-            _editData->genome._connectionMutationRate2._probability);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Sigma###CMR2").format("%.3f").textWidth(rightColumnWidth), _editData->genome._connectionMutationRate2._sigma);
+            AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 1"));
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Probability").id("CMR1").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._connectionMutationRate1._probability);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Sigma").id("CMR1").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._connectionMutationRate1._sigma);
+            table.next();
+
+            AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 1"));
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Probability").id("CMR2").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._connectionMutationRate2._probability);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Sigma").id("CMR2").format("%.3f").textWidth(rightColumnWidth),
+                _editData->genome._connectionMutationRate2._sigma);
+            table.next();
+            table.end();
+        }
     }
     ImGui::EndChild();
 }

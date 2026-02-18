@@ -115,7 +115,7 @@ void _GeneEditorWidget::processHeaderData()
 
             table.next();
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Multiplier"));
+            AlienGui::Group(AlienGui::GroupParameters().text("Multipliers"));
 
             // Separation
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), gene._separation);

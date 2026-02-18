@@ -276,6 +276,7 @@ bool AlienGui::InputOptionalInt(InputIntParameters const& parameters, std::optio
 
 bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
+    ImGui::PushID(parameters._id.c_str());
     auto textWidth = StyleRepository::get().scale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
@@ -298,6 +299,7 @@ bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
     }
+    ImGui::PopID(); 
     return result;
 }
 
