@@ -139,7 +139,7 @@ void _CreaturePreviewWidget::processMouseNavigation()
 
 void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const& conversionResult)
 {
-    auto const LineThickness = scale(2.0f);
+    auto const LineThickness = scale(1.0f);
     auto const cellSize = scale(_zoom);
     auto const& desc = conversionResult.description;
     auto& selectedGene = _editData->selectedGeneIndex;
@@ -259,7 +259,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
-    // Draw cell connections
+    // Draw cell connections and connection weights
     if (_zoom > ZoomLevelForConnections) {
         for (auto const& connection : desc._connections) {
             auto cellPos1 = mapWorldToViewPosition(connection._object1, windowSize, windowPos);
