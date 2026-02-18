@@ -405,6 +405,22 @@ struct GeneDesc
     static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
 
+struct NeuronMutationRateDesc
+{
+    auto operator<=>(NeuronMutationRateDesc const&) const = default;
+
+    MEMBER(NeuronMutationRateDesc, float, probability, 0.0f);
+    MEMBER(NeuronMutationRateDesc, float, sigma, 0.0f);
+};
+
+struct ConnectionMutationRateDesc
+{
+    auto operator<=>(ConnectionMutationRateDesc const&) const = default;
+
+    MEMBER(ConnectionMutationRateDesc, float, probability, 0.0f);
+    MEMBER(ConnectionMutationRateDesc, float, sigma, 0.0f);
+};
+
 struct GenomeDesc
 {
     GenomeDesc();
@@ -416,6 +432,14 @@ struct GenomeDesc
     MEMBER(GenomeDesc, std::vector<GeneDesc>, genes, {})
     MEMBER(GenomeDesc, int, lineageId, 0);
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
+
+    MEMBER(GenomeDesc, NeuronMutationRateDesc, neuronMutationRate1, NeuronMutationRateDesc());
+    MEMBER(GenomeDesc, NeuronMutationRateDesc, neuronMutationRate2, NeuronMutationRateDesc());
+
+    MEMBER(GenomeDesc, float, activationFunctionMutationRate, 0);
+
+    MEMBER(GenomeDesc, ConnectionMutationRateDesc, connectionMutationRate1, ConnectionMutationRateDesc());
+    MEMBER(GenomeDesc, ConnectionMutationRateDesc, connectionMutationRate2, ConnectionMutationRateDesc());
 };
 
 struct SubGenomeDesc

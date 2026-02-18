@@ -1775,20 +1775,6 @@ bool AlienGui::ToggleButton(ToggleButtonParameters const& parameters, bool& valu
     return value != origValue;
 }
 
-namespace
-{
-    template <typename T>
-    int& getIdBasedValue(std::unordered_map<unsigned int, T>& idToValueMap, T const& defaultValue)
-    {
-        auto id = ImGui::GetID("");
-        if (!idToValueMap.contains(id)) {
-            idToValueMap[id] = defaultValue;
-        }
-        return idToValueMap.at(id);
-    }
-
-}
-
 void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDesc>& entries)
 {
     int numEntries = toInt(entries.size());
