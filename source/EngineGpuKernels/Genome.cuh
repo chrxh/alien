@@ -336,6 +336,18 @@ struct Gene
     Node* nodes;
 };
 
+struct NeuronMutationRate
+{
+    float probability;
+    float sigma;
+};
+
+struct ConnectionMutationRate
+{
+    float probability;
+    float sigma;
+};
+
 struct Genome
 {
     uint64_t id;
@@ -345,6 +357,12 @@ struct Genome
 
     uint32_t lineageId;
     float frontAngle;
+
+    NeuronMutationRate neuronMutationRate1;
+    NeuronMutationRate neuronMutationRate2;
+    float activationFunctionMutationRate;
+    ConnectionMutationRate connectionMutationRate1;
+    ConnectionMutationRate connectionMutationRate2;
 
     // Temporary data
     uint64_t genomeIndex;  // May be invalid

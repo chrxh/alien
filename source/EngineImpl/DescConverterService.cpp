@@ -873,6 +873,15 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._lineageId = genomeTO.lineageId;
     NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.lineageId});
     result._frontAngle = genomeTO.frontAngle;
+    result._neuronMutationRate1._probability = genomeTO.neuronMutationRate1.probability;
+    result._neuronMutationRate1._sigma = genomeTO.neuronMutationRate1.sigma;
+    result._neuronMutationRate2._probability = genomeTO.neuronMutationRate2.probability;
+    result._neuronMutationRate2._sigma = genomeTO.neuronMutationRate2.sigma;
+    result._activationFunctionMutationRate = genomeTO.activationFunctionMutationRate;
+    result._connectionMutationRate1._probability = genomeTO.connectionMutationRate1.probability;
+    result._connectionMutationRate1._sigma = genomeTO.connectionMutationRate1.sigma;
+    result._connectionMutationRate2._probability = genomeTO.connectionMutationRate2.probability;
+    result._connectionMutationRate2._sigma = genomeTO.connectionMutationRate2.sigma;
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -949,6 +958,11 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.id = genome._id;
     genomeTO.lineageId = genome._lineageId;
     genomeTO.frontAngle = genome._frontAngle;
+    genomeTO.neuronMutationRate1 = {genome._neuronMutationRate1._probability, genome._neuronMutationRate1._sigma};
+    genomeTO.neuronMutationRate2 = {genome._neuronMutationRate2._probability, genome._neuronMutationRate2._sigma};
+    genomeTO.activationFunctionMutationRate = genome._activationFunctionMutationRate;
+    genomeTO.connectionMutationRate1 = {genome._connectionMutationRate1._probability, genome._connectionMutationRate1._sigma};
+    genomeTO.connectionMutationRate2 = {genome._connectionMutationRate2._probability, genome._connectionMutationRate2._sigma};
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;

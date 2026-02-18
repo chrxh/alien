@@ -169,6 +169,17 @@ namespace
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
+    auto constexpr Id_Genome_NeuronMutationRate1 = 4;
+    auto constexpr Id_Genome_NeuronMutationRate2 = 5;
+    auto constexpr Id_Genome_ActivationFunctionMutationRate = 6;
+    auto constexpr Id_Genome_ConnectionMutationRate1 = 7;
+    auto constexpr Id_Genome_ConnectionMutationRate2 = 8;
+
+    auto constexpr Id_NeuronMutationRate_Probability = 0;
+    auto constexpr Id_NeuronMutationRate_Sigma = 1;
+
+    auto constexpr Id_ConnectionMutationRate_Probability = 0;
+    auto constexpr Id_ConnectionMutationRate_Sigma = 1;
 
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
@@ -792,6 +803,28 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, NeuronMutationRateDesc& data)
+    {
+        NeuronMutationRateDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_NeuronMutationRate_Probability, data._probability, defaultObject._probability);
+        loadSave(task, auxiliaries, Id_NeuronMutationRate_Sigma, data._sigma, defaultObject._sigma);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(NeuronMutationRateDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ConnectionMutationRateDesc& data)
+    {
+        ConnectionMutationRateDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_ConnectionMutationRate_Probability, data._probability, defaultObject._probability);
+        loadSave(task, auxiliaries, Id_ConnectionMutationRate_Sigma, data._sigma, defaultObject._sigma);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ConnectionMutationRateDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GenomeDesc& data)
     {
         GenomeDesc defaultObject;
@@ -800,9 +833,15 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+        loadSave(
+            task, auxiliaries, Id_Genome_ActivationFunctionMutationRate, data._activationFunctionMutationRate, defaultObject._activationFunctionMutationRate);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);
+        ar(data._neuronMutationRate1);
+        ar(data._neuronMutationRate2);
+        ar(data._connectionMutationRate1);
+        ar(data._connectionMutationRate2);
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }

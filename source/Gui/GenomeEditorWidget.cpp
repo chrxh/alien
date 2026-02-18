@@ -79,6 +79,38 @@ void _GenomeEditorWidget::processHeaderData()
         AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
+
+        AlienGui::Group(AlienGui::GroupParameters().text("Neuron mutation rate 1"));
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Probability##NMR1").format("%.3f").textWidth(rightColumnWidth),
+            _editData->genome._neuronMutationRate1._probability);
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Sigma##NMR1").format("%.3f").textWidth(rightColumnWidth), _editData->genome._neuronMutationRate1._sigma);
+
+        AlienGui::Group(AlienGui::GroupParameters().text("Neuron mutation rate 2"));
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Probability##NMR2").format("%.3f").textWidth(rightColumnWidth),
+            _editData->genome._neuronMutationRate2._probability);
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Sigma##NMR2").format("%.3f").textWidth(rightColumnWidth), _editData->genome._neuronMutationRate2._sigma);
+
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Activation function mutation rate").format("%.3f").textWidth(rightColumnWidth),
+            _editData->genome._activationFunctionMutationRate);
+
+        AlienGui::Group(AlienGui::GroupParameters().text("Connection mutation rate 1"));
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Probability##CMR1").format("%.3f").textWidth(rightColumnWidth),
+            _editData->genome._connectionMutationRate1._probability);
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Sigma##CMR1").format("%.3f").textWidth(rightColumnWidth), _editData->genome._connectionMutationRate1._sigma);
+
+        AlienGui::Group(AlienGui::GroupParameters().text("Connection mutation rate 2"));
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Probability##CMR2").format("%.3f").textWidth(rightColumnWidth),
+            _editData->genome._connectionMutationRate2._probability);
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Sigma##CMR2").format("%.3f").textWidth(rightColumnWidth), _editData->genome._connectionMutationRate2._sigma);
     }
     ImGui::EndChild();
 }
@@ -285,8 +317,7 @@ void _GenomeEditorWidget::onAddGene()
             insertIndex = toInt(genome._genes.size()) - 1;
         }
 
-        GenomeDescEditService::get().addGene(
-            genome, insertIndex, GeneDesc().name(name).separation(false).numBranches(1).nodes({NodeDesc()}));
+        GenomeDescEditService::get().addGene(genome, insertIndex, GeneDesc().name(name).separation(false).numBranches(1).nodes({NodeDesc()}));
 
         // Adapt gene selection
         _editData->selectedGeneIndex = insertIndex + 1;
