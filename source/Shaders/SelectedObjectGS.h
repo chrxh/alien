@@ -10,15 +10,9 @@ layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
 in vec2 vWorldPos[];
-flat in int vHasSignalRestriction[];
-flat in float vStartAngle[];
-flat in float vEndAngle[];
 
 out vec2 gWorldPos;
 out vec2 gQuadCoord;
-flat out int gHasSignalRestriction;
-flat out float gStartAngle;
-flat out float gEndAngle;
 
 uniform vec2 viewportSize;
 uniform float zoom;
@@ -27,9 +21,6 @@ uniform float radius;
 void main()
 {
     gWorldPos = vWorldPos[0];
-    gHasSignalRestriction = vHasSignalRestriction[0];
-    gStartAngle = vStartAngle[0];
-    gEndAngle = vEndAngle[0];
     
     // Circle radius in world coordinates (thin white circle)
     float circleRadius = radius * 0.35;

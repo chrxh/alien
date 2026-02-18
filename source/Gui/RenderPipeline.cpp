@@ -126,18 +126,6 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
         // Position (2 floats: x, y)
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(SelectedObjectVertexData), (void*)0);
         glEnableVertexAttribArray(0);
-
-        // HasSignalRestriction (1 int)
-        glVertexAttribIPointer(1, 1, GL_INT, sizeof(SelectedObjectVertexData), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        // StartAngle (1 float)
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(SelectedObjectVertexData), (void*)(2 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(2);
-
-        // EndAngle (1 float)
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(SelectedObjectVertexData), (void*)(3 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(3);
     }
     {
         auto vao = _geometryBuffers->getVaoForSelectedConnections();
