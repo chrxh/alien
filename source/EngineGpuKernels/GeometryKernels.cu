@@ -126,7 +126,6 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         float luminance;
         float zOffset = 0.0f;
         int cellType = 0;
-        int signalState = 0;
 
         if (object->type == ObjectType_Cell) {
             luminance = object->typeData.cell.getEnergy() / 300.0f;
@@ -165,8 +164,18 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
-        // Pack cellType (bits 0-7), objectType (bits 8-15), signalState (bits 16-23), and isInTriangleOrQuad (bit 24) into state field
-        objectData[index].state = cellType | (object->type << 8) | (signalState << 16) | (isInTriangleOrQuad << 24);
+        // Compute signal strength from cell signal channels
+        float signalStrength = 0.0f;
+        if (object->type == ObjectType_Cell) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                signalStrength += abs(object->typeData.cell.signal.channels[i]);
+            }
+            signalStrength = min(1.0f, sqrtf(sqrtf(signalStrength)) / 2.0f);
+        }
+
+        // Pack cellType (bits 0-7), objectType (bits 8-15), and isInTriangleOrQuad (bit 16) into state field
+        objectData[index].state = cellType | (object->type << 8) | (isInTriangleOrQuad << 16);
+        objectData[index].signalStrength = signalStrength;
 
         // Store cell index for line extraction (just use the index directly)
         object->tempValue.as_uint64 = index;

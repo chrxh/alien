@@ -36,6 +36,10 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
+        // Signal strength (1 float)
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
+        glEnableVertexAttribArray(3);
+
         // Bind EBO (will be filled by CUDA later)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     }
@@ -59,6 +63,10 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
         // States (1 int)
         glVertexAttribIPointer(2, 1, GL_INT, sizeof(ObjectVertexData), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
+
+        // Signal strength (1 float)
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
+        glEnableVertexAttribArray(3);
 
         // Bind EBO (will be filled by CUDA later)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
