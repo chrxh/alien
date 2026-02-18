@@ -169,11 +169,7 @@ namespace
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
-    auto constexpr Id_Genome_NeuronMutationRate1 = 4;
-    auto constexpr Id_Genome_NeuronMutationRate2 = 5;
-    auto constexpr Id_Genome_ActivationFunctionMutationRate = 6;
-    auto constexpr Id_Genome_ConnectionMutationRate1 = 7;
-    auto constexpr Id_Genome_ConnectionMutationRate2 = 8;
+    auto constexpr Id_Genome_ActivationFunctionMutationRate = 4;
 
     auto constexpr Id_NeuronMutationRate_Probability = 0;
     auto constexpr Id_NeuronMutationRate_Sigma = 1;
