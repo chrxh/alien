@@ -322,25 +322,15 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
             }
         }
         // Check if signal has non-zero values
-        bool hasSignalChannels = !object.getCellRef()._signal._channels.empty();
-        if (hasSignalChannels) {
-            bool hasNonZeroChannel = false;
-            for (auto const& ch : object.getCellRef()._signal._channels) {
-                if (ch != 0.0f) {
-                    hasNonZeroChannel = true;
-                    break;
-                }
+        if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
+            int index = 0;
+            for (auto& channel : object.getCellRef()._signal._channels) {
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
+                    channel);
+                ++index;
             }
-            if (hasNonZeroChannel && ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
-                int index = 0;
-                for (auto& channel : object.getCellRef()._signal._channels) {
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
-                        channel);
-                    ++index;
-                }
-                ImGui::TreePop();
-            }
+            ImGui::TreePop();
         }
 
         ImGui::EndChild();
