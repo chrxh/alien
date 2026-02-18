@@ -117,6 +117,7 @@ public:
     struct InputFloatParameters
     {
         MEMBER(InputFloatParameters, std::string, name, "");
+        MEMBER(InputFloatParameters, std::string, id, "");
         MEMBER(InputFloatParameters, float, step, 1.0f);
         MEMBER(InputFloatParameters, std::string, format, "%.3f");
         MEMBER(InputFloatParameters, float, textWidth, 100.0f);

@@ -160,6 +160,11 @@ std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefault
                       .name("Test Genome")
                       .lineageId(502)
                       .frontAngle(270.0f)
+                      .neuronMutationRate1(NeuronMutationRateDesc().probability(0.1f).sigma(0.2f))
+                      .neuronMutationRate2(NeuronMutationRateDesc().probability(0.3f).sigma(0.4f))
+                      .activationFunctionMutationRate(0.5f)
+                      .connectionMutationRate1(ConnectionMutationRateDesc().probability(0.6f).sigma(0.7f))
+                      .connectionMutationRate2(ConnectionMutationRateDesc().probability(0.8f).sigma(0.9f))
                       .genes({
                           GeneDesc()
                               .name("Test Gene")
@@ -696,31 +701,22 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         MuscleModeDesc muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending: {
-            muscleModeDesc =
-                AutoBendingDesc().maxAngleDeviation(0.6f).forwardBackwardRatio(0.4f).initialAngle(135.0f).forward(false);
+            muscleModeDesc = AutoBendingDesc().maxAngleDeviation(0.6f).forwardBackwardRatio(0.4f).initialAngle(135.0f).forward(false);
         } break;
         case MuscleMode_ManualBending:
-            muscleModeDesc =
-                ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f);
+            muscleModeDesc = ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f);
             break;
         case MuscleMode_AngleBending:
             muscleModeDesc = AngleBendingDesc().maxAngleDeviation(0.7f).attractionRepulsionRatio(0.6f).initialAngle(315.0f);
             break;
         case MuscleMode_AutoCrawling: {
-            muscleModeDesc = AutoCrawlingDesc()
-                                 .maxDistanceDeviation(0.9f)
-                                 .forwardBackwardRatio(0.35f)
-                                 .initialDistance(0.6f)
-                                 .lastActualDistance(0.8f)
-                                 .forward(false);
+            muscleModeDesc =
+                AutoCrawlingDesc().maxDistanceDeviation(0.9f).forwardBackwardRatio(0.35f).initialDistance(0.6f).lastActualDistance(0.8f).forward(false);
         } break;
         case MuscleMode_ManualCrawling:
-            muscleModeDesc = ManualCrawlingDesc()
-                                 .maxDistanceDeviation(0.75f)
-                                 .forwardBackwardRatio(0.45f)
-                                 .initialDistance(0.4f)
-                                 .lastActualDistance(0.9f)
-                                 .lastDistanceDelta(0.65f);
+            muscleModeDesc =
+                ManualCrawlingDesc().maxDistanceDeviation(0.75f).forwardBackwardRatio(0.45f).initialDistance(0.4f).lastActualDistance(0.9f).lastDistanceDelta(
+                    0.65f);
             break;
         case MuscleMode_DirectMovement:
             muscleModeDesc = DirectMovementDesc();

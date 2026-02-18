@@ -89,6 +89,11 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->id = genomeTO.id;
     genome->lineageId = genomeTO.lineageId;
     genome->frontAngle = genomeTO.frontAngle;
+    genome->neuronMutationRate1 = {genomeTO.neuronMutationRate1.probability, genomeTO.neuronMutationRate1.sigma};
+    genome->neuronMutationRate2 = {genomeTO.neuronMutationRate2.probability, genomeTO.neuronMutationRate2.sigma};
+    genome->activationFunctionMutationRate = genomeTO.activationFunctionMutationRate;
+    genome->connectionMutationRate1 = {genomeTO.connectionMutationRate1.probability, genomeTO.connectionMutationRate1.sigma};
+    genome->connectionMutationRate2 = {genomeTO.connectionMutationRate2.probability, genomeTO.connectionMutationRate2.sigma};
     genome->numGenes = genomeTO.numGenes;
     for (int i = 0; i < sizeof(genomeTO.name); ++i) {
         genome->name[i] = genomeTO.name[i];
