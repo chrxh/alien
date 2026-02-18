@@ -1793,6 +1793,7 @@ void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters
 {
     int numEntries = toInt(entries.size());
     if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of signals").textWidth(parameters._textWidth), numEntries)) {
+        numEntries = std::clamp(numEntries, 1, MAX_CELL_MEMORY_ENTRIES);
         entries.resize(numEntries, SignalEntryGenomeDesc());
     }
     if (numEntries > 0) {
@@ -1815,7 +1816,7 @@ void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters
         AlienGui::BeginIndent();
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("#" + std::to_string(i)).format("%.3f").textWidth(parameters._textWidth).min(-2.0f).max(2.0f),
+                AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).format("%.2f").textWidth(parameters._textWidth).min(-2.0f).max(2.0f),
                 &entries.at(selectedEntry)._channels.at(i));
         }
         AlienGui::EndIndent();
