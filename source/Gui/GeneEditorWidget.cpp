@@ -287,15 +287,18 @@ void _GeneEditorWidget::onAddNode()
         GenomeDescEditService::get().addNode(gene, 0, NodeDesc());
         _editData->setSelectedNodeIndex(0);
     } else {
-        int insertIndex;
-        if (selectedNode.has_value()) {
-            insertIndex = selectedNode.value();
-        } else {
-            insertIndex = toInt(gene._nodes.size()) - 1;
-        }
-        int color = gene._nodes.at(insertIndex)._color;
+        int insertIndex = selectedNode.has_value() ? selectedNode.value() : toInt(gene._nodes.size()) - 1;
+        auto insertAtBack = insertIndex == toInt(gene._nodes.size()) - 1;
 
-        GenomeDescEditService::get().addNode(gene, insertIndex, NodeDesc().color(color));
+        auto& nodeAtInsertIndex = gene._nodes.at(insertIndex);
+        int color = nodeAtInsertIndex._color;
+
+        auto newNode = NodeDesc().color(color);
+        if (insertAtBack) {
+            nodeAtInsertIndex._neuralNetwork._connectionWeights.at(0) = 1;
+            newNode._neuralNetwork._connectionWeights.at(0) = 0;
+        }
+        GenomeDescEditService::get().addNode(gene, insertIndex, newNode);
 
         _editData->setSelectedNodeIndex(insertIndex + 1);
     }
