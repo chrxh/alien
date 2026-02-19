@@ -5,7 +5,7 @@
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParameters.h>
 
-#include <EngineTestData/DescriptionTestDataFactory.h>
+#include <EngineTestData/DescTestDataFactory.h>
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
@@ -86,15 +86,15 @@ double IntegrationTestFramework::getEnergy(Desc const& data) const
 
 bool IntegrationTestFramework::compare(Desc left, Desc right) const
 {
-    return DescriptionTestDataFactory::get().compare(left, right);
+    return DescTestDataFactory::get().compare(left, right);
 }
 
 bool IntegrationTestFramework::compare(ObjectDesc left, ObjectDesc right) const
 {
-    return DescriptionTestDataFactory::get().compare(left, right);
+    return DescTestDataFactory::get().compare(left, right);
 }
 
 bool IntegrationTestFramework::compare(EnergyDesc left, EnergyDesc right) const
 {
-    return DescriptionTestDataFactory::get().compare(left, right);
+    return DescTestDataFactory::get().compare(left, right);
 }

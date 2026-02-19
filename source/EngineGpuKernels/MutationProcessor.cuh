@@ -49,6 +49,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
 
         __shared__ Genome* sharedGenome;
 
+<<<<<<< copilot/improve-mutation-processor-performance
         if (laneId == 0) {
             sharedGenome = nullptr;
             if (object->type == ObjectType_Cell) {
@@ -60,6 +61,10 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
             }
         }
         block.sync();
+=======
+            // Apply mutations to cloned genome
+            applyMutations(data, mutatedGenome);
+>>>>>>> develop
 
         if (sharedGenome != nullptr) {
             applyMutations_neurons(data, sharedGenome);

@@ -8,7 +8,7 @@
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include <EngineTestData/DescriptionTestDataFactory.h>
+#include <EngineTestData/DescTestDataFactory.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -19,14 +19,14 @@ public:
     DataTransferTests()
         : IntegrationTestFramework()
     {
-        _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
+        _descTestDataFactory = &DescTestDataFactory::get();
     }
 
 protected:
-    DescriptionTestDataFactory* _descriptionTestDataFactory;
+    DescTestDataFactory* _descTestDataFactory;
 };
 
-using ObjectParameter = DescriptionTestDataFactory::ObjectParameter;
+using ObjectParameter = DescTestDataFactory::ObjectParameter;
 class DataTransferTests_AllObjectTypes
     : public DataTransferTests
     , public testing::WithParamInterface<ObjectParameter>
@@ -35,7 +35,7 @@ class DataTransferTests_AllObjectTypes
 INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllObjectTypes,
     DataTransferTests_AllObjectTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
+    ::testing::ValuesIn(DescTestDataFactory::get().getAllObjectParameters()));
 
 TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes)
 {
@@ -43,12 +43,12 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes)
 
     Desc data;
     if (objectParameter.objectType == ObjectType_Cell) {
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+        data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+        data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
         data.objects(
-            {_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter),
-             _descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
+            {_descTestDataFactory->createNonDefaultObjectDesc(objectParameter),
+             _descTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
     }
 
     _simulationFacade->setSimulationData(data);
@@ -63,12 +63,12 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes_preview)
 
     Desc data;
     if (objectParameter.objectType == ObjectType_Cell) {
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+        data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+        data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
         data.objects(
-            {_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter),
-             _descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
+            {_descTestDataFactory->createNonDefaultObjectDesc(objectParameter),
+             _descTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
     }
 
     _simulationFacade->setPreviewData(data);
@@ -77,7 +77,7 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes_preview)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-using NodeParameter = DescriptionTestDataFactory::NodeParameter;
+using NodeParameter = DescTestDataFactory::NodeParameter;
 class DataTransferTests_AllNodeTypes
     : public DataTransferTests
     , public testing::WithParamInterface<NodeParameter>
@@ -86,14 +86,14 @@ class DataTransferTests_AllNodeTypes
 INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllNodeTypes,
     DataTransferTests_AllNodeTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
+    ::testing::ValuesIn(DescTestDataFactory::get().getAllNodeParameters()));
 
 TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode)
 {
     auto nodeParameter = GetParam();
 
-    auto [creature1, genome1] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
-    auto [creature2, genome2] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
+    auto [creature1, genome1] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
+    auto [creature2, genome2] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
     Desc data;
     data.addCreature({ObjectDesc()}, creature1, genome1);
@@ -109,7 +109,7 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
 {
     auto nodeParameter = GetParam();
 
-    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
+    auto [creature, genome] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
     Desc data;
     data.addCreature({ObjectDesc()}, creature, genome);

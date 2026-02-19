@@ -11,7 +11,7 @@
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include <EngineTestData/DescriptionTestDataFactory.h>
+#include <EngineTestData/DescTestDataFactory.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -27,7 +27,7 @@ public:
 protected:
     GenomeDesc createTestGenome() const
     {
-        auto const& factory = DescriptionTestDataFactory::get();
+        auto const& factory = DescTestDataFactory::get();
         auto nodeParameters = factory.getAllNodeParameters();
 
         std::vector<GeneDesc> genes;

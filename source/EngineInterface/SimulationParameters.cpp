@@ -479,6 +479,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Neuron mutations").reference(FloatSpec().member(&SimulationParameters::metaMutationNeurons).min(0.0f).max(0.1f)),
+                    ParameterSpec().name("Connection mutations").reference(FloatSpec().member(&SimulationParameters::metaMutationConnections).min(0.0f).max(0.1f)),
+                    ParameterSpec().name("Lineage mutations").reference(FloatSpec().member(&SimulationParameters::metaMutationLineages).min(0.0f).max(0.1f)),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")

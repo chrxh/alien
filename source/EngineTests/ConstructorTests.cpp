@@ -8,7 +8,7 @@
 #include <EngineInterface/ShapeGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include <EngineTestData/DescriptionTestDataFactory.h>
+#include <EngineTestData/DescTestDataFactory.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -18,7 +18,7 @@ public:
     ConstructorTests()
         : IntegrationTestFramework()
     {
-        _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
+        _descTestDataFactory = &DescTestDataFactory::get();
     }
 
     ~ConstructorTests() = default;
@@ -30,7 +30,7 @@ protected:
     }
     float getOffspringDistance() const { return 1.0f + _parameters.constructorAdditionalOffspringDistance; }
 
-    DescriptionTestDataFactory* _descriptionTestDataFactory;
+    DescTestDataFactory* _descTestDataFactory;
 };
 
 TEST_F(ConstructorTests, alreadyFinished)
@@ -389,7 +389,7 @@ TEST_F(ConstructorTests, crossingLinks)
     ASSERT_EQ(4, actualData.getObjectsForCreature(creature._id).size());
 }
 
-using NodeParameter = DescriptionTestDataFactory::NodeParameter;
+using NodeParameter = DescTestDataFactory::NodeParameter;
 class ConstructorTests_AllNodeTypes
     : public ConstructorTests
     , public testing::WithParamInterface<NodeParameter>
@@ -398,14 +398,14 @@ class ConstructorTests_AllNodeTypes
 INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_AllNodeTypes,
     ConstructorTests_AllNodeTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
+    ::testing::ValuesIn(DescTestDataFactory::get().getAllNodeParameters()));
 
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0)
 {
     auto nodeParameter = GetParam();
     auto constexpr FrontAngleId = 5;
 
-    auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDesc(nodeParameter);
+    auto randomNode = _descTestDataFactory->createNonDefaultNodeDesc(nodeParameter);
 
     auto data = Desc().addCreature({ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()).frontAngleId(FrontAngleId))}, CreatureDesc().id(0), GenomeDesc().genes({
             GeneDesc().separation(true).nodes({randomNode}),
@@ -434,7 +434,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_TRUE(newObject.getCellRef()._headCell);
     EXPECT_EQ(FrontAngleId, newObject.getCellRef()._frontAngleId);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
-    EXPECT_TRUE(_descriptionTestDataFactory->compare(newObject, randomNode));
+    EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
 
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -448,7 +448,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview)
 {
     auto nodeParameter = GetParam();
-    auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDesc(nodeParameter);
+    auto randomNode = _descTestDataFactory->createNonDefaultNodeDesc(nodeParameter);
 
     auto data = Desc().addCreature({ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()))}, CreatureDesc().id(0), GenomeDesc().genes({
             GeneDesc().separation(true).nodes({randomNode}),
@@ -476,7 +476,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
     EXPECT_TRUE(Math::length(hostObject._pos - newObject._pos) > 50.0f);  // Preview specific: Move seed far away from construction
-    EXPECT_TRUE(_descriptionTestDataFactory->compare(newObject, randomNode));
+    EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
 
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -487,7 +487,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview_detail)
 {
-    auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDesc(NodeParameter{CellType_Base});
+    auto randomNode = _descTestDataFactory->createNonDefaultNodeDesc(NodeParameter{CellType_Base});
 
     auto data = Desc().addCreature({ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()))}, CreatureDesc().id(0), GenomeDesc().genes({
             GeneDesc().separation(true).nodes({randomNode}),
@@ -515,7 +515,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
     EXPECT_TRUE(Math::length(hostObject._pos - newObject._pos) > 50.0f);  // Preview specific: Move seed far away from construction
-    EXPECT_TRUE(_descriptionTestDataFactory->compare(newObject, randomNode));
+    EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
 
     auto hostConstructor = hostObject.getCellRef()._constructor.value();

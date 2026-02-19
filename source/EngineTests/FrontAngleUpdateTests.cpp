@@ -6,7 +6,7 @@
 #include <EngineInterface/ShapeGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include <EngineTestData/DescriptionTestDataFactory.h>
+#include <EngineTestData/DescTestDataFactory.h>
 
 #include "IntegrationTestFramework.h"
 

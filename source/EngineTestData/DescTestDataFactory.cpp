@@ -1,4 +1,4 @@
-#include "DescriptionTestDataFactory.h"
+#include "DescTestDataFactory.h"
 
 #include <algorithm>
 
@@ -6,7 +6,7 @@
 
 #include "TestHelper.h"
 
-std::vector<DescriptionTestDataFactory::ObjectParameter> DescriptionTestDataFactory::getAllObjectParameters() const
+std::vector<DescTestDataFactory::ObjectParameter> DescTestDataFactory::getAllObjectParameters() const
 {
     return {
         ObjectParameter{ObjectType_Structure},
@@ -43,7 +43,7 @@ std::vector<DescriptionTestDataFactory::ObjectParameter> DescriptionTestDataFact
     };
 }
 
-ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objectParameter) const
+ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objectParameter) const
 {
     switch (objectParameter.objectType) {
     case ObjectType_Structure:
@@ -95,12 +95,12 @@ ObjectDesc DescriptionTestDataFactory::createNonDefaultObjectDesc(ObjectParamete
     }
 }
 
-EnergyDesc DescriptionTestDataFactory::createNonDefaultEnergyDesc() const
+EnergyDesc DescTestDataFactory::createNonDefaultEnergyDesc() const
 {
     return EnergyDesc().id(1).pos({0.3f, 0.9f}).vel({-0.6f, 0.2f}).energy(75.0f).color(5);
 }
 
-std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactory::getAllNodeParameters() const
+std::vector<DescTestDataFactory::NodeParameter> DescTestDataFactory::getAllNodeParameters() const
 {
     return {
         NodeParameter{CellType_Base},
@@ -135,7 +135,7 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
     };
 }
 
-NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParameter) const
+NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParameter) const
 {
     NeuralNetGenomeDesc nn;
     nn.weight(4, 3, 0.8f);
@@ -154,7 +154,7 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
         .referenceAngle(90.0f);
 }
 
-std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
+std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
 {
     auto genome =
         GenomeDesc()
@@ -186,22 +186,22 @@ std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefault
     return {creature, genome};
 }
 
-bool DescriptionTestDataFactory::compare(Desc left, Desc right) const
+bool DescTestDataFactory::compare(Desc left, Desc right) const
 {
     return TestHelper::compare(left, right);
 }
 
-bool DescriptionTestDataFactory::compare(ObjectDesc left, ObjectDesc right) const
+bool DescTestDataFactory::compare(ObjectDesc left, ObjectDesc right) const
 {
     return TestHelper::compare(left, right);
 }
 
-bool DescriptionTestDataFactory::compare(EnergyDesc left, EnergyDesc right) const
+bool DescTestDataFactory::compare(EnergyDesc left, EnergyDesc right) const
 {
     return TestHelper::compare(left, right);
 }
 
-bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node) const
+bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node) const
 {
     if (object._color != node._color) {
         return false;
@@ -630,7 +630,7 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     return true;
 }
 
-CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter objectParameter) const
+CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter objectParameter) const
 {
     auto const& type = objectParameter.cellType;
     auto muscleMode =
@@ -799,7 +799,7 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
     }
 }
 
-CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeParameter objectParameter) const
+CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeParameter objectParameter) const
 {
     auto const& type = objectParameter.cellTypeGenome;
     auto muscleMode =
