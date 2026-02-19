@@ -45,12 +45,13 @@ protected:
         return GenomeDesc().genes(genes);
     }
 
-    bool compareAllExceptNeuronWeights(GenomeDesc expected, GenomeDesc actual)
+    bool compareAllExceptNeuronWeightsAndBiases(GenomeDesc expected, GenomeDesc actual)
     {
         auto resetNeuralNet = [](GenomeDesc& genome) {
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._weights.begin(), node._neuralNetwork._weights.end(), 0.0f);
+                    std::fill(node._neuralNetwork._biases.begin(), node._neuralNetwork._biases.end(), 0.0f);
                 }
             }
         };
@@ -65,8 +66,8 @@ protected:
 TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(1.0f))
-        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).weightSigma(1.0f));
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(1.0f).biasSigma(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).weightSigma(1.0f).biasSigma(1.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
@@ -81,7 +82,7 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
     // Mutated genome must be equal to original genome except the neural network properties
-    EXPECT_TRUE(compareAllExceptNeuronWeights(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptNeuronWeightsAndBiases(genome, actualGenome));
 }
 
 TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
@@ -149,8 +150,8 @@ TEST_F(MutationTests, neuronWeightMutation_weightsStayClamped)
 TEST_F(MutationTests, neuronWeightMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(0.0f).weightSigma(1.0f))
-        .neuronMutationRate2(NeuronMutationRateDesc().probability(0.0f).weightSigma(1.0f));
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(0.0f).weightSigma(1.0f).biasSigma(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(0.0f).weightSigma(1.0f).biasSigma(1.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
@@ -164,12 +165,105 @@ TEST_F(MutationTests, neuronWeightMutation_zeroProbabilityNoChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    // No weights should have changed
+    // No weights or biases should have changed
     for (size_t g = 0; g < genome._genes.size(); ++g) {
         for (size_t n = 0; n < genome._genes.at(g)._nodes.size(); ++n) {
             auto const& origWeights = genome._genes.at(g)._nodes.at(n)._neuralNetwork._weights;
             auto const& actualWeights = actualGenome._genes.at(g)._nodes.at(n)._neuralNetwork._weights;
             EXPECT_EQ(origWeights, actualWeights);
+            auto const& origBiases = genome._genes.at(g)._nodes.at(n)._neuralNetwork._biases;
+            auto const& actualBiases = actualGenome._genes.at(g)._nodes.at(n)._neuralNetwork._biases;
+            EXPECT_EQ(origBiases, actualBiases);
+        }
+    }
+}
+
+TEST_F(MutationTests, neuronBiasMutation_biasesActuallyChange)
+{
+    auto genome = createTestGenome();
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(0.0f).biasSigma(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(0.0f).weightSigma(0.0f).biasSigma(0.0f));
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    // At least some biases should have changed
+    bool anyBiasChanged = false;
+    for (size_t g = 0; g < genome._genes.size() && !anyBiasChanged; ++g) {
+        for (size_t n = 0; n < genome._genes.at(g)._nodes.size() && !anyBiasChanged; ++n) {
+            auto const& origBiases = genome._genes.at(g)._nodes.at(n)._neuralNetwork._biases;
+            auto const& actualBiases = actualGenome._genes.at(g)._nodes.at(n)._neuralNetwork._biases;
+            for (size_t b = 0; b < origBiases.size(); ++b) {
+                if (origBiases.at(b) != actualBiases.at(b)) {
+                    anyBiasChanged = true;
+                    break;
+                }
+            }
+        }
+    }
+    EXPECT_TRUE(anyBiasChanged);
+}
+
+TEST_F(MutationTests, neuronBiasMutation_biasesStayClamped)
+{
+    auto genome = createTestGenome();
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(0.0f).biasSigma(10.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).weightSigma(0.0f).biasSigma(10.0f));
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    // All biases must be within [-2, 2]
+    for (auto const& gene : actualGenome._genes) {
+        for (auto const& node : gene._nodes) {
+            for (auto const& b : node._neuralNetwork._biases) {
+                EXPECT_GE(b, -2.0f - 0.1f);
+                EXPECT_LE(b, 2.0f + 0.1f);
+            }
+        }
+    }
+}
+
+TEST_F(MutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
+{
+    auto genome = createTestGenome();
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(0.0f).biasSigma(0.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).weightSigma(0.0f).biasSigma(0.0f));
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    // No biases should have changed
+    for (size_t g = 0; g < genome._genes.size(); ++g) {
+        for (size_t n = 0; n < genome._genes.at(g)._nodes.size(); ++n) {
+            auto const& origBiases = genome._genes.at(g)._nodes.at(n)._neuralNetwork._biases;
+            auto const& actualBiases = actualGenome._genes.at(g)._nodes.at(n)._neuralNetwork._biases;
+            EXPECT_EQ(origBiases, actualBiases);
         }
     }
 }
