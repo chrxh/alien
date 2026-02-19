@@ -87,7 +87,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.probability <= 0 || (rate.weightSigma <= 0 && rate.biasSigma <= 0)) {
+        if (rate.probability <= 0 || (rate.weightSigma <= 0 && rate.biasSigma <= 0 && rate.activationFunctionProbability <= 0)) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -110,6 +110,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                             float newBias = bias + generateGaussian(data) * rate.biasSigma;
                             newBias = max(-2.0f, min(2.0f, newBias));
                             bias = newBias;
+                        }
+                        if (rate.activationFunctionProbability > 0 && isRandomEvent(data, rate.activationFunctionProbability)) {
+                            node.neuralNetwork.activationFunctions[neuronIndex] =
+                                static_cast<ActivationFunction>(data.primaryNumberGen.random() * ActivationFunction_Count);
                         }
                     }
                 }

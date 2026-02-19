@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 
+#include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -45,13 +46,14 @@ protected:
         return GenomeDesc().genes(genes);
     }
 
-    bool compareAllExceptNeuronWeightsAndBiases(GenomeDesc expected, GenomeDesc actual)
+    bool compareAllExceptNeuronWeightsAndBiasesAndActivationFunctions(GenomeDesc expected, GenomeDesc actual)
     {
         auto resetNeuralNet = [](GenomeDesc& genome) {
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._weights.begin(), node._neuralNetwork._weights.end(), 0.0f);
                     std::fill(node._neuralNetwork._biases.begin(), node._neuralNetwork._biases.end(), 0.0f);
+                    std::fill(node._neuralNetwork._activationFunctions.begin(), node._neuralNetwork._activationFunctions.end(), ActivationFunction_Identity);
                 }
             }
         };
@@ -82,7 +84,7 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
     // Mutated genome must be equal to original genome except the neural network properties
-    EXPECT_TRUE(compareAllExceptNeuronWeightsAndBiases(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptNeuronWeightsAndBiasesAndActivationFunctions(genome, actualGenome));
 }
 
 TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
@@ -264,6 +266,98 @@ TEST_F(MutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
             auto const& origBiases = genome._genes.at(g)._nodes.at(n)._neuralNetwork._biases;
             auto const& actualBiases = actualGenome._genes.at(g)._nodes.at(n)._neuralNetwork._biases;
             EXPECT_EQ(origBiases, actualBiases);
+        }
+    }
+}
+
+TEST_F(MutationTests, neuronActivationFunctionMutation_activationFunctionsActuallyChange)
+{
+    auto genome = createTestGenome();
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(0.0f).activationFunctionProbability(0.0f));
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 10; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    // At least some activation functions should have changed
+    bool anyActivationFunctionChanged = false;
+    for (size_t g = 0; g < genome._genes.size() && !anyActivationFunctionChanged; ++g) {
+        for (size_t n = 0; n < genome._genes.at(g)._nodes.size() && !anyActivationFunctionChanged; ++n) {
+            auto const& origFunctions = genome._genes.at(g)._nodes.at(n)._neuralNetwork._activationFunctions;
+            auto const& actualFunctions = actualGenome._genes.at(g)._nodes.at(n)._neuralNetwork._activationFunctions;
+            for (size_t f = 0; f < origFunctions.size(); ++f) {
+                if (origFunctions.at(f) != actualFunctions.at(f)) {
+                    anyActivationFunctionChanged = true;
+                    break;
+                }
+            }
+        }
+    }
+    EXPECT_TRUE(anyActivationFunctionChanged);
+}
+
+TEST_F(MutationTests, neuronActivationFunctionMutation_zeroProbabilityNoChange)
+{
+    auto genome = createTestGenome();
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(0.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(0.0f));
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    // No activation functions should have changed
+    for (size_t g = 0; g < genome._genes.size(); ++g) {
+        for (size_t n = 0; n < genome._genes.at(g)._nodes.size(); ++n) {
+            auto const& origFunctions = genome._genes.at(g)._nodes.at(n)._neuralNetwork._activationFunctions;
+            auto const& actualFunctions = actualGenome._genes.at(g)._nodes.at(n)._neuralNetwork._activationFunctions;
+            EXPECT_EQ(origFunctions, actualFunctions);
+        }
+    }
+}
+
+TEST_F(MutationTests, neuronActivationFunctionMutation_validRange)
+{
+    auto genome = createTestGenome();
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(1.0f));
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    // All activation functions must be valid
+    for (auto const& gene : actualGenome._genes) {
+        for (auto const& node : gene._nodes) {
+            for (auto const& f : node._neuralNetwork._activationFunctions) {
+                EXPECT_GE(f, 0);
+                EXPECT_LT(f, ActivationFunction_Count);
+            }
         }
     }
 }

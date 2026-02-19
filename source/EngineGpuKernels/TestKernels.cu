@@ -7,7 +7,7 @@
 
 __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
 {
-    CUDA_CHECK(blockDim.x == MutationProcessor::BlockDim);
+    CUDA_CHECK(blockDim.x == NEURONS_PER_CELL);
 
     auto block = cooperative_groups::this_thread_block();
     auto laneId = block.thread_rank();
