@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cooperative_groups.h>
+
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/NeuralNetWeight.h>
@@ -11,11 +13,15 @@
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
+namespace cg_mutation = cooperative_groups;
+
 class MutationProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
     __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
+
+    static constexpr int BlockDim = NEURONS_PER_CELL;
 
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
@@ -28,30 +34,42 @@ private:
 /************************************************************************/
 __inline__ __device__ void MutationProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
+    CUDA_CHECK(blockDim.x == BlockDim);
+
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+
     auto& objects = data.entities.objects;
-    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+    auto partition = calcBlockPartition(objects.getNumEntries());
 
     EntityFactory factory;
     factory.init(&data);
 
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
-            continue;
+
+        __shared__ Genome* sharedGenome;
+
+        if (laneId == 0) {
+            sharedGenome = nullptr;
+            if (object->type == ObjectType_Cell) {
+                auto& creature = object->typeData.cell.creature;
+                int origMutationState = atomicCAS(&creature->mutationState, MutationState_MutationInProgress, MutationState_Mutated);
+                if (origMutationState == MutationState_MutationInProgress) {
+                    sharedGenome = factory.cloneGenome(creature->genome);
+                }
+            }
         }
-        auto& creature = object->typeData.cell.creature;
-        int origMutationState = atomicCAS(&creature->mutationState, MutationState_MutationInProgress, MutationState_Mutated);
-        if (origMutationState == MutationState_MutationInProgress) {
+        block.sync();
 
-            // Clone genome
-            auto mutatedGenome = factory.cloneGenome(creature->genome);
+        if (sharedGenome != nullptr) {
+            applyMutations_neurons(data, sharedGenome);
 
-            // Apply mutations to cloned genome
-            applyMutations_neurons(data, mutatedGenome);
-
-            // Update genome
-            creature->genome = mutatedGenome;
+            if (laneId == 0) {
+                object->typeData.cell.creature->genome = sharedGenome;
+            }
         }
+        block.sync();
     }
 }
 
@@ -62,6 +80,8 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
 
 __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome)
 {
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+
     NeuronMutationRate rates[2] = {genome->neuronMutationRate1, genome->neuronMutationRate2};
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
@@ -73,7 +93,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
             auto& gene = genome->genes[geneIndex];
             for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
                 auto& node = gene.nodes[nodeIndex];
-                for (int neuronIndex = 0; neuronIndex < NEURONS_PER_CELL; ++neuronIndex) {
+                if (laneId < NEURONS_PER_CELL) {
+                    int neuronIndex = laneId;
                     if (isRandomEvent(data, rate.probability)) {
                         if (rate.weightSigma > 0) {
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {

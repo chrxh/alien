@@ -1,7 +1,9 @@
-#include "TestKernelsService.cuh"
+#include <EngineInterface/EngineConstants.h>
 
 #include <EngineGpuKernels/Macros.cuh>
 #include <EngineGpuKernels/TestKernels.cuh>
+
+#include "TestKernelsService.cuh"
 
 void TestKernelsService::init()
 {
@@ -15,7 +17,7 @@ void TestKernelsService::shutdown()
 
 void TestKernelsService::testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL(cudaTestMutate, data, objectId);
+    KERNEL_CALL_MOD(cudaTestMutate, NEURONS_PER_CELL, data, objectId);
 }
 
 void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2)

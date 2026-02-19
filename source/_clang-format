@@ -56,11 +56,11 @@ ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
-IncludeBlocks: Regroup
+IncludeBlocks: Preserve
 IncludeIsMainRegex:  '(Test|Tests)?$'
 IncludeCategories:
   # The corresponding header for the source file (e.g. "MyClass.h" in "MyClass.cpp")
-  - Regex: '^[^<"].*\.h"$'
+  - Regex: '^[^<"].*\.c?(uh|h)"$'
     Priority: 0
 
   # C/C++ standard library headers
@@ -76,7 +76,7 @@ IncludeCategories:
     Priority: 101
 
   # CUDA headers
-  - Regex: '^<cuda.*>$'
+  - Regex: '^<(cuda.*|cooperative_groups.*|sm_\d+.*|device_launch_parameters\.h)>$'
     Priority: 102
 
   # OpenGL headers
@@ -152,7 +152,7 @@ IncludeCategories:
     Priority: 212
 
   # All other local project includes without path (from current directory)
-  - Regex: '^"[a-zA-Z0-9_]+\.h"$'
+  - Regex: '^"[a-zA-Z0-9_]+\.c?(uh|h)"$'
     Priority: 300
 IndentCaseLabels: false
 IndentPPDirectives: None

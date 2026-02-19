@@ -1,21 +1,34 @@
+#include <cooperative_groups.h>
+
+#include "MutationProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "SimulationData.cuh"
 #include "TestKernels.cuh"
 
-#include "MutationProcessor.cuh"
-
 __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
 {
+    CUDA_CHECK(blockDim.x == MutationProcessor::BlockDim);
+
+    auto block = cooperative_groups::this_thread_block();
+    auto laneId = block.thread_rank();
+
     auto& objects = data.entities.objects;
-    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+    auto partition = calcBlockPartition(objects.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& object = objects.at(index);
-        CUDA_CHECK(object->type == ObjectType_Cell);
 
-        if (object->id == objectId) {
+        __shared__ bool shouldMutate;
+        if (laneId == 0) {
+            CUDA_CHECK(object->type == ObjectType_Cell);
+            shouldMutate = (object->id == objectId);
+        }
+        block.sync();
+
+        if (shouldMutate) {
             MutationProcessor::applyMutations(data, object->typeData.cell.creature->genome);
         }
+        block.sync();
     }
 }
 
@@ -61,7 +74,7 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1
 
 namespace
 {
-    template<typename Pointer>
+    template <typename Pointer>
     __device__ bool isPointerValid(SimulationData const& data, Pointer pointer)
     {
         return reinterpret_cast<uint64_t>(pointer) >= reinterpret_cast<uint64_t>(data.entities.heap.getArray())
@@ -72,7 +85,7 @@ namespace
     {
         if (genome != nullptr) {
             if (!isPointerValid(data, genome)) {
-               return false;
+                return false;
             } else {
 
                 // Validate genes pointer
