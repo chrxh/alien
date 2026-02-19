@@ -2,8 +2,10 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 
+#include "ConstantMemory.cuh"
 #include "Entities.cuh"
 #include "NeuronProcessor.cuh"
+#include "ObjectConnectionProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 

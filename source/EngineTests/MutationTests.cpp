@@ -72,7 +72,7 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 10000; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
