@@ -127,6 +127,8 @@ struct SimulationParameters
 
     // Meta mutations
     BaseParameter<float> metaMutationNeurons = {0};
+    BaseParameter<float> metaMutationConnections = {0};
+    BaseParameter<float> metaMutationLineages = {0};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
