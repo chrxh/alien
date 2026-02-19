@@ -1,9 +1,9 @@
+#include "TestKernelsService.cuh"
+
 #include <EngineInterface/EngineConstants.h>
 
 #include <EngineGpuKernels/Macros.cuh>
 #include <EngineGpuKernels/TestKernels.cuh>
-
-#include "TestKernelsService.cuh"
 
 void TestKernelsService::init()
 {
