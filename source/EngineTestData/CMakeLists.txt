@@ -1,7 +1,7 @@
 
 add_library(EngineTestData
-    DescriptionTestDataFactory.cpp
-    DescriptionTestDataFactory.h
+    DescTestDataFactory.cpp
+    DescTestDataFactory.h
     TestHelper.cpp
     TestHelper.h)
 

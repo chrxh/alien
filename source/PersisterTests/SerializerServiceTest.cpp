@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <EngineTestData/DescriptionTestDataFactory.h>
+#include <EngineTestData/DescTestDataFactory.h>
 
 #include <PersisterInterface/SerializerService.h>
 
@@ -10,7 +10,7 @@ class SerializerServiceTests : public ::testing::Test
 public:
     SerializerServiceTests()
     {
-        _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
+        _descTestDataFactory = &DescTestDataFactory::get();
         _serializerService = &SerializerService::get();
     }
 
@@ -23,23 +23,23 @@ public:
         DeserializedSimulation deserializedSimulationAfter;
         _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
 
-        EXPECT_TRUE(_descriptionTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
+        EXPECT_TRUE(_descTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
     }
 
 protected:
-    DescriptionTestDataFactory* _descriptionTestDataFactory;
+    DescTestDataFactory* _descTestDataFactory;
     SerializerService* _serializerService;
 };
 
 TEST_F(SerializerServiceTests, singleEnergyParticle)
 {
     Desc data;
-    data._energies.emplace_back(_descriptionTestDataFactory->createNonDefaultEnergyDesc());
+    data._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
 
     testSerializationAndDeserialization(data);
 }
 
-using ObjectParameter = DescriptionTestDataFactory::ObjectParameter;
+using ObjectParameter = DescTestDataFactory::ObjectParameter;
 class SerializerServiceTests_AllCellTypes
     : public SerializerServiceTests
     , public testing::WithParamInterface<ObjectParameter>
@@ -48,7 +48,7 @@ class SerializerServiceTests_AllCellTypes
 INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllCellTypes,
     SerializerServiceTests_AllCellTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllObjectParameters()));
+    ::testing::ValuesIn(DescTestDataFactory::get().getAllObjectParameters()));
 
 TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
 {
@@ -56,16 +56,16 @@ TEST_P(SerializerServiceTests_AllCellTypes, objectWithEmptyGenome)
 
     Desc data;
     if (objectParameter.objectType == ObjectType_Cell) {
-        data.addCreature({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
+        data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
-        data.objects({_descriptionTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
+        data.objects({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
     }
 
 
     testSerializationAndDeserialization(data);
 }
 
-using NodeParameter = DescriptionTestDataFactory::NodeParameter;
+using NodeParameter = DescTestDataFactory::NodeParameter;
 class SerializerServiceTests_AllNodeTypes
     : public SerializerServiceTests
     , public testing::WithParamInterface<NodeParameter>
@@ -74,13 +74,13 @@ class SerializerServiceTests_AllNodeTypes
 INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllNodeTypes,
     SerializerServiceTests_AllNodeTypes,
-    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
+    ::testing::ValuesIn(DescTestDataFactory::get().getAllNodeParameters()));
 
 TEST_P(SerializerServiceTests_AllNodeTypes, objectWithNonEmptyGenome)
 {
     auto nodeParameter = GetParam();
 
-    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
+    auto [creature, genome] = _descTestDataFactory->createNonDefaultCreatureDesc(nodeParameter);
 
     auto data = Desc().addCreature({ObjectDesc()}, creature, genome);
 

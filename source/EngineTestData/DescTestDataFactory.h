@@ -8,9 +8,9 @@
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/GenomeDesc.h>
 
-class DescriptionTestDataFactory
+class DescTestDataFactory
 {
-    MAKE_SINGLETON(DescriptionTestDataFactory);
+    MAKE_SINGLETON(DescTestDataFactory);
 
 public:
     struct MuscleModeWrapper { MuscleMode value; };
