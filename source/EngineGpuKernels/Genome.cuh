@@ -340,7 +340,7 @@ struct NeuronMutationRate
 {
     float probability;
     float weightSigma;
-    float connectionWeightSigma;
+    float biasSigma;
     float activationFunctionProbability;
 };
 

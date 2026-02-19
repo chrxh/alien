@@ -92,12 +92,12 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->neuronMutationRate1 = {
         genomeTO.neuronMutationRate1.probability,
         genomeTO.neuronMutationRate1.weightSigma,
-        genomeTO.neuronMutationRate1.connectionWeightSigma,
+        genomeTO.neuronMutationRate1.biasSigma,
         genomeTO.neuronMutationRate1.activationFunctionProbability};
     genome->neuronMutationRate2 = {
         genomeTO.neuronMutationRate2.probability,
         genomeTO.neuronMutationRate2.weightSigma,
-        genomeTO.neuronMutationRate2.connectionWeightSigma,
+        genomeTO.neuronMutationRate2.biasSigma,
         genomeTO.neuronMutationRate2.activationFunctionProbability};
     genome->connectionMutationRate1 = {genomeTO.connectionMutationRate1.probability, genomeTO.connectionMutationRate1.sigma};
     genome->connectionMutationRate2 = {genomeTO.connectionMutationRate2.probability, genomeTO.connectionMutationRate2.sigma};

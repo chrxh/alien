@@ -875,11 +875,11 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._frontAngle = genomeTO.frontAngle;
     result._neuronMutationRate1._probability = genomeTO.neuronMutationRate1.probability;
     result._neuronMutationRate1._weightSigma = genomeTO.neuronMutationRate1.weightSigma;
-    result._neuronMutationRate1._connectionWeightSigma = genomeTO.neuronMutationRate1.connectionWeightSigma;
+    result._neuronMutationRate1._biasSigma = genomeTO.neuronMutationRate1.biasSigma;
     result._neuronMutationRate1._activationFunctionProbability = genomeTO.neuronMutationRate1.activationFunctionProbability;
     result._neuronMutationRate2._probability = genomeTO.neuronMutationRate2.probability;
     result._neuronMutationRate2._weightSigma = genomeTO.neuronMutationRate2.weightSigma;
-    result._neuronMutationRate2._connectionWeightSigma = genomeTO.neuronMutationRate2.connectionWeightSigma;
+    result._neuronMutationRate2._biasSigma = genomeTO.neuronMutationRate2.biasSigma;
     result._neuronMutationRate2._activationFunctionProbability = genomeTO.neuronMutationRate2.activationFunctionProbability;
     result._connectionMutationRate1._probability = genomeTO.connectionMutationRate1.probability;
     result._connectionMutationRate1._sigma = genomeTO.connectionMutationRate1.sigma;
@@ -964,12 +964,12 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.neuronMutationRate1 = {
         genome._neuronMutationRate1._probability,
         genome._neuronMutationRate1._weightSigma,
-        genome._neuronMutationRate1._connectionWeightSigma,
+        genome._neuronMutationRate1._biasSigma,
         genome._neuronMutationRate1._activationFunctionProbability};
     genomeTO.neuronMutationRate2 = {
         genome._neuronMutationRate2._probability,
         genome._neuronMutationRate2._weightSigma,
-        genome._neuronMutationRate2._connectionWeightSigma,
+        genome._neuronMutationRate2._biasSigma,
         genome._neuronMutationRate2._activationFunctionProbability};
     genomeTO.connectionMutationRate1 = {genome._connectionMutationRate1._probability, genome._connectionMutationRate1._sigma};
     genomeTO.connectionMutationRate2 = {genome._connectionMutationRate2._probability, genome._connectionMutationRate2._sigma};

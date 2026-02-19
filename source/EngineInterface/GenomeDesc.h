@@ -411,7 +411,7 @@ struct NeuronMutationRateDesc
 
     MEMBER(NeuronMutationRateDesc, float, probability, 0.0f);
     MEMBER(NeuronMutationRateDesc, float, weightSigma, 0.0f);
-    MEMBER(NeuronMutationRateDesc, float, connectionWeightSigma, 0.0f);
+    MEMBER(NeuronMutationRateDesc, float, biasSigma, 0.0f);
     MEMBER(NeuronMutationRateDesc, float, activationFunctionProbability, 0.0f);
 };
 

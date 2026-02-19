@@ -172,7 +172,7 @@ namespace
 
     auto constexpr Id_NeuronMutationRate_Probability = 0;
     auto constexpr Id_NeuronMutationRate_WeightSigma = 1;
-    auto constexpr Id_NeuronMutationRate_ConnectionWeightSigma = 2;
+    auto constexpr Id_NeuronMutationRate_BiasSigma = 2;
     auto constexpr Id_NeuronMutationRate_ActivationFunctionProbability = 3;
 
     auto constexpr Id_ConnectionMutationRate_Probability = 0;
@@ -806,7 +806,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_NeuronMutationRate_Probability, data._probability, defaultObject._probability);
         loadSave(task, auxiliaries, Id_NeuronMutationRate_WeightSigma, data._weightSigma, defaultObject._weightSigma);
-        loadSave(task, auxiliaries, Id_NeuronMutationRate_ConnectionWeightSigma, data._connectionWeightSigma, defaultObject._connectionWeightSigma);
+        loadSave(task, auxiliaries, Id_NeuronMutationRate_BiasSigma, data._biasSigma, defaultObject._biasSigma);
         loadSave(
             task,
             auxiliaries,
