@@ -213,12 +213,12 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     }
     auto const& cell = object.getCellRef();
 
-    for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
         if (cell._neuralNetwork._weights[i] != node._neuralNetwork._weights[i]) {
             return false;
         }
     }
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         if (cell._neuralNetwork._biases[i] != node._neuralNetwork._biases[i]) {
             return false;
         }
@@ -770,8 +770,8 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 10; ++i) {
             SignalEntryDesc entry;
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
+            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
+                entry._channels[j] = static_cast<float>(i * NEURONS_PER_CELL + j) * 0.15f;
             }
             memory._signalEntries.emplace_back(entry);
         }
@@ -933,8 +933,8 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 5; ++i) {
             SignalEntryGenomeDesc entry;
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
+            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
+                entry._channels[j] = static_cast<float>(i * NEURONS_PER_CELL + j) * 0.15f;
             }
             memory._signalEntries.emplace_back(entry);
         }

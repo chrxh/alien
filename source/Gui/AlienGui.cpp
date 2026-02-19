@@ -1809,7 +1809,7 @@ void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters
         style.GrabMinSize = scale(8.0f);
 
         AlienGui::BeginIndent();
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).format("%.2f").textWidth(parameters._textWidth).min(-2.0f).max(2.0f),
                 &entries.at(selectedEntry)._channels.at(i));

@@ -67,10 +67,10 @@ namespace
                     nodeTO.referenceAngle = node.referenceAngle;
                     nodeTO.color = node.color;
                     nodeTO.numAdditionalConnections = node.numAdditionalConnections;
-                    for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
                         nodeTO.neuralNetwork.weights[i] = node.neuralNetwork.weights[i];
                     }
-                    for (int i = 0; i < MAX_CHANNELS; ++i) {
+                    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                         nodeTO.neuralNetwork.biases[i] = node.neuralNetwork.biases[i];
                         nodeTO.neuralNetwork.activationFunctions[i] = node.neuralNetwork.activationFunctions[i];
                     }
@@ -318,7 +318,7 @@ namespace
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
+            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                 cellTO.signal.channels[i] = cell.signal.channels[i];
             }
             cellTO.signal.numTimesSent = cell.signal.numTimesSent;
@@ -341,10 +341,10 @@ namespace
                     ABORT();
                 }
                 auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
-                for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
                     nnTO->weights[i] = cell.neuralNetwork->weights[i];
                 }
-                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                     nnTO->biases[i] = cell.neuralNetwork->biases[i];
                     nnTO->activationFunctions[i] = cell.neuralNetwork->activationFunctions[i];
                 }

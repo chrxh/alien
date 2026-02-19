@@ -31,9 +31,9 @@ struct ConnectionTO
 
 struct NeuralNetTO
 {
-    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
-    float biases[MAX_CHANNELS];
-    ActivationFunction activationFunctions[MAX_CHANNELS];
+    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
+    float biases[NEURONS_PER_CELL];
+    ActivationFunction activationFunctions[NEURONS_PER_CELL];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -332,7 +332,7 @@ union MemoryModeDataTO
 
 struct SignalEntryTO
 {
-    float channels[MAX_CHANNELS];
+    float channels[NEURONS_PER_CELL];
 };
 
 struct MemoryTO
@@ -388,7 +388,7 @@ union CellTypeDataTO
 
 struct SignalTO
 {
-    float channels[MAX_CHANNELS];
+    float channels[NEURONS_PER_CELL];
     int numTimesSent;
 };
 

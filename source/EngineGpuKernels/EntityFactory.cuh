@@ -126,10 +126,10 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             node.referenceAngle = nodeTO.referenceAngle;
             node.color = nodeTO.color;
             node.numAdditionalConnections = nodeTO.numAdditionalConnections;
-            for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+            for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
                 node.neuralNetwork.weights[i] = nodeTO.neuralNetwork.weights[i];
             }
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
+            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                 node.neuralNetwork.biases[i] = nodeTO.neuralNetwork.biases[i];
                 node.neuralNetwork.activationFunctions[i] = nodeTO.neuralNetwork.activationFunctions[i];
             }
@@ -264,7 +264,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.memory.signalEntries = signalEntries;
                 auto const& entriesTO = reinterpret_cast<SignalEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.signalEntriesDataIndex);
                 for (int k = 0; k < numSignalEntries; ++k) {
-                    for (int l = 0; l < MAX_CHANNELS; ++l) {
+                    for (int l = 0; l < NEURONS_PER_CELL; ++l) {
                         signalEntries[k].channels[l] = entriesTO[k].channels[l];
                     }
                 }
@@ -383,7 +383,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->eventCounter = cellTO.eventCounter;
         cell->eventPos = cellTO.eventPos;
 
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             cell->signal.channels[i] = cellTO.signal.channels[i];
         }
         cell->signal.numTimesSent = cellTO.signal.numTimesSent;
@@ -394,10 +394,10 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         {
             auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
             cell->neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
-            for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+            for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
                 cell->neuralNetwork->weights[i] = nnTO->weights[i];
             }
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
+            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                 cell->neuralNetwork->biases[i] = nnTO->biases[i];
                 cell->neuralNetwork->activationFunctions[i] = nnTO->activationFunctions[i];
             }
@@ -724,19 +724,19 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.geneIndex = geneIndex;
     cell.frontAngleId = 0;
     cell.headCell = false;
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         cell.signal.channels[i] = 0.0f;
     }
     cell.signal.numTimesSent = 0;
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
-    for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
         cell.neuralNetwork->weights[i] = node->neuralNetwork.weights[i];
     }
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         cell.neuralNetwork->biases[i] = node->neuralNetwork.biases[i];
     }
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         cell.neuralNetwork->activationFunctions[i] = node->neuralNetwork.activationFunctions[i];
     }
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -909,7 +909,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         }
         memory.signalEntries = _data->entities.heap.getTypedSubArray<SignalEntry>(nodeMemory.numSignalEntries);
         for (int i = 0, j = nodeMemory.numSignalEntries; i < j; ++i) {
-            for (int k = 0; k < MAX_CHANNELS; ++k) {
+            for (int k = 0; k < NEURONS_PER_CELL; ++k) {
                 memory.signalEntries[i].channels[k] = nodeMemory.signalEntries[i].channels[k];
             }
         }

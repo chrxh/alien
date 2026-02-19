@@ -33,9 +33,9 @@ private:
         ImVec2 connectionButtonBottomLeft[MAX_OBJECT_CONNECTIONS];
         ImVec2 connectionButtonBottomRight[MAX_OBJECT_CONNECTIONS];
         ImVec2 channelsButtonTopCenter;
-        ImVec2 inputChannelBottomCenter[MAX_CHANNELS];
-        ImVec2 inputButtonTopLeft[MAX_CHANNELS];
-        ImVec2 neuronTopCenter[MAX_CHANNELS];
+        ImVec2 inputChannelBottomCenter[NEURONS_PER_CELL];
+        ImVec2 inputButtonTopLeft[NEURONS_PER_CELL];
+        ImVec2 neuronTopCenter[NEURONS_PER_CELL];
     };
 
     void processConnectionWeightSliders(std::vector<float>& connectionWeights, LayoutData& layout);

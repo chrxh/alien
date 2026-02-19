@@ -50,9 +50,9 @@ protected:
     std::vector<float> addSignals(std::vector<float> const& signal1, std::vector<float> const& signal2)
     {
         CHECK(signal1.size() == signal2.size());
-        CHECK(signal1.size() == MAX_CHANNELS);
+        CHECK(signal1.size() == NEURONS_PER_CELL);
         std::vector<float> result;
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result.emplace_back(signal1.at(i) + signal2.at(i));
         }
         return result;
@@ -128,7 +128,7 @@ TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    std::vector<float> emptySignal(MAX_CHANNELS, 0);
+    std::vector<float> emptySignal(NEURONS_PER_CELL, 0);
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
 }
@@ -158,7 +158,7 @@ TEST_F(NeuronTests, forkSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    std::vector<float> emptySignal(MAX_CHANNELS, 0);
+    std::vector<float> emptySignal(NEURONS_PER_CELL, 0);
     EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(1).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(2).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(3).getCellRef()._signal._channels));
@@ -205,7 +205,7 @@ TEST_F(NeuronTests, mergeSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    std::vector<float> emptySignal(MAX_CHANNELS, 0);
+    std::vector<float> emptySignal(NEURONS_PER_CELL, 0);
     auto sumSignal = addSignals(signal1, signal2);
     sumSignal = addSignals(sumSignal, signal2);
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(1).getCellRef()._signal._channels));
@@ -236,7 +236,7 @@ inline std::vector<ApplyNeuralNetParameter> generateApplyNeuralNetParameters()
     std::vector<ApplyNeuralNetParameter> params;
 
     for (int af = 0; af < ActivationFunction_Count; ++af) {
-        for (int c = 0; c < MAX_CHANNELS; ++c) {
+        for (int c = 0; c < NEURONS_PER_CELL; ++c) {
             for (int i = 0; i <= 20; ++i) {
                 float inputValue = -2.0f + i * 0.2f;
                 params.push_back({static_cast<ActivationFunction>(af), c, inputValue});
@@ -266,7 +266,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     // - Channel 'c' uses the specified activation function with custom weight and bias
     // - All other channels use Identity activation with identity weight (1.0) and zero bias
     NeuralNetDesc nn;
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         nn._activationFunctions[i] = (i == param.channelIndex) ? param.activationFunction : ActivationFunction_Identity;
         nn.weight(i, i, (i == param.channelIndex) ? weight : 1.0f);
         nn._biases[i] = (i == param.channelIndex) ? bias : 0.0f;
@@ -277,7 +277,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     // Setup input signal:
     // - Channel 'c' has the specified input value
     // - All other channels have 0 input
-    std::vector<float> inputSignal(MAX_CHANNELS, 0.0f);
+    std::vector<float> inputSignal(NEURONS_PER_CELL, 0.0f);
     inputSignal[param.channelIndex] = param.inputValue;
 
     auto data = Desc()
@@ -297,7 +297,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     //   preActivation = weight * inputValue + bias
     //   output = activation(preActivation), clamped to [-2, 2]
     // All other channels: Identity(0) = 0
-    std::vector<float> expected(MAX_CHANNELS, 0.0f);
+    std::vector<float> expected(NEURONS_PER_CELL, 0.0f);
 
     float preActivation = weight * param.inputValue + bias;
     float rawOutput = applyActivationFunction(param.activationFunction, preActivation);
@@ -306,7 +306,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     auto& actual = actualData.getObjectRef(1).getCellRef()._signal._channels;
 
     constexpr float precision = 0.1f;
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         EXPECT_TRUE(approxCompare(expected[i], actual[i], precision))
             << "Mismatch at channel " << i << ": expected=" << expected[i] << ", actual=" << actual[i];
     }
@@ -316,7 +316,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
 TEST_F(NeuronTests, truncateSignal)
 {
     NeuralNetDesc nn;
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         nn.weight(i, i, 2.0f);
     }
     nn._connectionWeights[0] = 1.0f;  // Enable signal forwarding from first connection

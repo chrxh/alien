@@ -11,9 +11,9 @@
 
 struct NeuralNetGenome
 {
-    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
-    float biases[MAX_CHANNELS];
-    ActivationFunction activationFunctions[MAX_CHANNELS];
+    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
+    float biases[NEURONS_PER_CELL];
+    ActivationFunction activationFunctions[NEURONS_PER_CELL];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -254,7 +254,7 @@ union MemoryModeDataGenome
 
 struct SignalEntryGenome
 {
-    float channels[MAX_CHANNELS];
+    float channels[NEURONS_PER_CELL];
 };
 
 struct MemoryGenome

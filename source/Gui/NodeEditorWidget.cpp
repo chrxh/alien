@@ -639,8 +639,8 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::EndIndent();
                 }
 
-                bool bit[MAX_CHANNELS];
-                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                bool bit[NEURONS_PER_CELL];
+                for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                     bit[i] = (memory._channelBitMask & (1 << i)) != 0;
                 }
                 AlienGui::MultiCheckboxes(
@@ -652,7 +652,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::MultiCheckboxes(
                     AlienGui::MultiCheckboxesParameters().name("Channel mask bit 12-15").textWidth(rightColumnWidth), bit[12], bit[13], bit[14], bit[15]);
                 memory._channelBitMask = 0;
-                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                     if (bit[i]) {
                         memory._channelBitMask |= 1 << i;
                     }
