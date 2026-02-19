@@ -65,6 +65,10 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
         if (object->type != ObjectType_Cell) {
             continue;
         }
+        if (object->typeData.cell.cellState == CellState_Constructing) {
+            continue;
+        }
+
         auto& cell = object->typeData.cell;
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);

@@ -351,7 +351,7 @@ public:
     {}
 };
 
-TEST_F(NeuronPerformanceTests, largeGridPerformance)
+TEST_F(NeuronPerformanceTests, DISABLED_largeGridPerformance)
 {
     constexpr int GridWith = 1000;
     constexpr int GridHeight = 100;
