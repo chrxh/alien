@@ -169,10 +169,11 @@ namespace
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
-    auto constexpr Id_Genome_ActivationFunctionMutationRate = 4;
 
     auto constexpr Id_NeuronMutationRate_Probability = 0;
-    auto constexpr Id_NeuronMutationRate_Sigma = 1;
+    auto constexpr Id_NeuronMutationRate_WeightSigma = 1;
+    auto constexpr Id_NeuronMutationRate_ConnectionWeightSigma = 2;
+    auto constexpr Id_NeuronMutationRate_ActivationFunctionProbability = 3;
 
     auto constexpr Id_ConnectionMutationRate_Probability = 0;
     auto constexpr Id_ConnectionMutationRate_Sigma = 1;
@@ -804,7 +805,14 @@ namespace cereal
         NeuronMutationRateDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_NeuronMutationRate_Probability, data._probability, defaultObject._probability);
-        loadSave(task, auxiliaries, Id_NeuronMutationRate_Sigma, data._sigma, defaultObject._sigma);
+        loadSave(task, auxiliaries, Id_NeuronMutationRate_WeightSigma, data._weightSigma, defaultObject._weightSigma);
+        loadSave(task, auxiliaries, Id_NeuronMutationRate_ConnectionWeightSigma, data._connectionWeightSigma, defaultObject._connectionWeightSigma);
+        loadSave(
+            task,
+            auxiliaries,
+            Id_NeuronMutationRate_ActivationFunctionProbability,
+            data._activationFunctionProbability,
+            defaultObject._activationFunctionProbability);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NeuronMutationRateDesc)
@@ -829,8 +837,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
-        loadSave(
-            task, auxiliaries, Id_Genome_ActivationFunctionMutationRate, data._neuronAfMutationRate, defaultObject._neuronAfMutationRate);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);

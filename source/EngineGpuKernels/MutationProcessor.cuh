@@ -65,7 +65,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neuronWeights(Simul
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.probability <= 0 || rate.sigma <= 0) {
+        if (rate.probability <= 0 || rate.weightSigma <= 0) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -82,7 +82,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neuronWeights(Simul
                             float u2 = data.primaryNumberGen.random();
                             float gaussian = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * Const::PI * u2);
 
-                            float newValue = weight.getValue() + gaussian * rate.sigma;
+                            float newValue = weight.getValue() + gaussian * rate.weightSigma;
                             newValue = max(-2.0f, min(2.0f, newValue));
                             weight = NeuralNetWeight(newValue);
                         }

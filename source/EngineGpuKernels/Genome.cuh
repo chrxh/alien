@@ -339,7 +339,9 @@ struct Gene
 struct NeuronMutationRate
 {
     float probability;
-    float sigma;
+    float weightSigma;
+    float connectionWeightSigma;
+    float activationFunctionProbability;
 };
 
 struct ConnectionMutationRate
@@ -360,7 +362,6 @@ struct Genome
 
     NeuronMutationRate neuronMutationRate1;
     NeuronMutationRate neuronMutationRate2;
-    float neuronAfMutationRate;
     ConnectionMutationRate connectionMutationRate1;
     ConnectionMutationRate connectionMutationRate2;
 

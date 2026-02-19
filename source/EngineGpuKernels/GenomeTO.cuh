@@ -344,7 +344,9 @@ struct GeneTO
 struct NeuronMutationRateTO
 {
     float probability;
-    float sigma;
+    float weightSigma;
+    float connectionWeightSigma;
+    float activationFunctionProbability;
 };
 
 struct ConnectionMutationRateTO
@@ -365,7 +367,6 @@ struct GenomeTO
 
     NeuronMutationRateTO neuronMutationRate1;
     NeuronMutationRateTO neuronMutationRate2;
-    float neuronAfMutationRate;
     ConnectionMutationRateTO connectionMutationRate1;
     ConnectionMutationRateTO connectionMutationRate2;
 

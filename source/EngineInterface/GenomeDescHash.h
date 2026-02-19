@@ -560,10 +560,13 @@ struct std::hash<GenomeDesc>
         }
         hash_combine(seed, desc._frontAngle);
         hash_combine(seed, desc._neuronMutationRate1._probability);
-        hash_combine(seed, desc._neuronMutationRate1._sigma);
+        hash_combine(seed, desc._neuronMutationRate1._weightSigma);
+        hash_combine(seed, desc._neuronMutationRate1._connectionWeightSigma);
+        hash_combine(seed, desc._neuronMutationRate1._activationFunctionProbability);
         hash_combine(seed, desc._neuronMutationRate2._probability);
-        hash_combine(seed, desc._neuronMutationRate2._sigma);
-        hash_combine(seed, desc._neuronAfMutationRate);
+        hash_combine(seed, desc._neuronMutationRate2._weightSigma);
+        hash_combine(seed, desc._neuronMutationRate2._connectionWeightSigma);
+        hash_combine(seed, desc._neuronMutationRate2._activationFunctionProbability);
         hash_combine(seed, desc._connectionMutationRate1._probability);
         hash_combine(seed, desc._connectionMutationRate1._sigma);
         hash_combine(seed, desc._connectionMutationRate2._probability);

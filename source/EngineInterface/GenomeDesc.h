@@ -410,7 +410,9 @@ struct NeuronMutationRateDesc
     auto operator<=>(NeuronMutationRateDesc const&) const = default;
 
     MEMBER(NeuronMutationRateDesc, float, probability, 0.0f);
-    MEMBER(NeuronMutationRateDesc, float, sigma, 0.0f);
+    MEMBER(NeuronMutationRateDesc, float, weightSigma, 0.0f);
+    MEMBER(NeuronMutationRateDesc, float, connectionWeightSigma, 0.0f);
+    MEMBER(NeuronMutationRateDesc, float, activationFunctionProbability, 0.0f);
 };
 
 struct ConnectionMutationRateDesc
@@ -435,8 +437,6 @@ struct GenomeDesc
 
     MEMBER(GenomeDesc, NeuronMutationRateDesc, neuronMutationRate1, NeuronMutationRateDesc());
     MEMBER(GenomeDesc, NeuronMutationRateDesc, neuronMutationRate2, NeuronMutationRateDesc());
-
-    MEMBER(GenomeDesc, float, neuronAfMutationRate, 0);
 
     MEMBER(GenomeDesc, ConnectionMutationRateDesc, connectionMutationRate1, ConnectionMutationRateDesc());
     MEMBER(GenomeDesc, ConnectionMutationRateDesc, connectionMutationRate2, ConnectionMutationRateDesc());
