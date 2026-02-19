@@ -96,7 +96,9 @@ TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = actualData.getObjectRef(1).getCellRef();
@@ -118,25 +120,6 @@ TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
         }
     }
     EXPECT_TRUE(anyWeightChanged);
-}
-
-TEST_F(MutationTests, neuronWeightMutation_weightsStayClamped)
-{
-    auto genome = createTestGenome();
-    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(10.0f))
-        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).weightSigma(10.0f));
-
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(1).getCellRef();
-    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
-    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
     // All weights must be within [-2, 2] (accounting for NeuralNetWeight quantization)
     for (auto const& gene : actualGenome._genes) {
@@ -189,7 +172,9 @@ TEST_F(MutationTests, neuronBiasMutation_biasesActuallyChange)
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = actualData.getObjectRef(1).getCellRef();
@@ -211,25 +196,6 @@ TEST_F(MutationTests, neuronBiasMutation_biasesActuallyChange)
         }
     }
     EXPECT_TRUE(anyBiasChanged);
-}
-
-TEST_F(MutationTests, neuronBiasMutation_biasesStayClamped)
-{
-    auto genome = createTestGenome();
-    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(0.0f).biasSigma(10.0f))
-        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).weightSigma(0.0f).biasSigma(10.0f));
-
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(1).getCellRef();
-    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
-    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
     // All biases must be within [-2, 2]
     for (auto const& gene : actualGenome._genes) {
@@ -279,7 +245,7 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_activationFunctionsActual
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 100; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
@@ -303,6 +269,16 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_activationFunctionsActual
         }
     }
     EXPECT_TRUE(anyActivationFunctionChanged);
+
+    // All activation functions must be valid
+    for (auto const& gene : actualGenome._genes) {
+        for (auto const& node : gene._nodes) {
+            for (auto const& f : node._neuralNetwork._activationFunctions) {
+                EXPECT_GE(f, 0);
+                EXPECT_LT(f, ActivationFunction_Count);
+            }
+        }
+    }
 }
 
 TEST_F(MutationTests, neuronActivationFunctionMutation_zeroProbabilityNoChange)
@@ -329,35 +305,6 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_zeroProbabilityNoChange)
             auto const& origFunctions = genome._genes.at(g)._nodes.at(n)._neuralNetwork._activationFunctions;
             auto const& actualFunctions = actualGenome._genes.at(g)._nodes.at(n)._neuralNetwork._activationFunctions;
             EXPECT_EQ(origFunctions, actualFunctions);
-        }
-    }
-}
-
-TEST_F(MutationTests, neuronActivationFunctionMutation_validRange)
-{
-    auto genome = createTestGenome();
-    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(1.0f))
-        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(1.0f));
-
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(1).getCellRef();
-    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
-    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
-
-    // All activation functions must be valid
-    for (auto const& gene : actualGenome._genes) {
-        for (auto const& node : gene._nodes) {
-            for (auto const& f : node._neuralNetwork._activationFunctions) {
-                EXPECT_GE(f, 0);
-                EXPECT_LT(f, ActivationFunction_Count);
-            }
         }
     }
 }

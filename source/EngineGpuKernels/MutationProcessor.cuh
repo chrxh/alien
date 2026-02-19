@@ -96,7 +96,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                 auto& node = gene.nodes[nodeIndex];
                 if (laneId < NEURONS_PER_CELL) {
                     int neuronIndex = laneId;
-                    if (isRandomEvent(data, rate.probability)) {
+                    if (data.primaryNumberGen.random() < rate.probability) {
                         if (rate.weightSigma > 0) {
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
                                 auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
@@ -111,9 +111,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                             newBias = max(-2.0f, min(2.0f, newBias));
                             bias = newBias;
                         }
-                        if (rate.activationFunctionProbability > 0 && isRandomEvent(data, rate.activationFunctionProbability)) {
+                        if (rate.activationFunctionProbability > 0 && data.primaryNumberGen.random() < rate.activationFunctionProbability) {
                             node.neuralNetwork.activationFunctions[neuronIndex] =
-                                static_cast<ActivationFunction>(data.primaryNumberGen.random() * ActivationFunction_Count);
+                                static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
                         }
                     }
                 }
