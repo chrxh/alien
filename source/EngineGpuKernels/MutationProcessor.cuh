@@ -65,7 +65,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.probability <= 0 || rate.weightSigma <= 0) {
+        if (rate.probability <= 0 || (rate.weightSigma <= 0 && rate.biasSigma <= 0)) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -74,17 +74,31 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                 auto& node = gene.nodes[nodeIndex];
                 for (int neuronIndex = 0; neuronIndex < NEURONS_PER_CELL; ++neuronIndex) {
                     if (isRandomEvent(data, rate.probability)) {
-                        for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
-                            auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
+                        if (rate.weightSigma > 0) {
+                            for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
+                                auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
+
+                                // Box-Muller transform for Gaussian random
+                                float u1 = max(1.0e-7f, data.primaryNumberGen.random());
+                                float u2 = data.primaryNumberGen.random();
+                                float gaussian = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * Const::PI * u2);
+
+                                float newValue = weight.getValue() + gaussian * rate.weightSigma;
+                                newValue = max(-2.0f, min(2.0f, newValue));
+                                weight = NeuralNetWeight(newValue);
+                            }
+                        }
+                        if (rate.biasSigma > 0) {
+                            auto& bias = node.neuralNetwork.biases[neuronIndex];
 
                             // Box-Muller transform for Gaussian random
                             float u1 = max(1.0e-7f, data.primaryNumberGen.random());
                             float u2 = data.primaryNumberGen.random();
                             float gaussian = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * Const::PI * u2);
 
-                            float newValue = weight.getValue() + gaussian * rate.weightSigma;
-                            newValue = max(-2.0f, min(2.0f, newValue));
-                            weight = NeuralNetWeight(newValue);
+                            float newBias = bias + gaussian * rate.biasSigma;
+                            newBias = max(-2.0f, min(2.0f, newBias));
+                            bias = newBias;
                         }
                     }
                 }
