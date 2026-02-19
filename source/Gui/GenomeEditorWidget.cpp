@@ -134,9 +134,9 @@ void _GenomeEditorWidget::processHeaderData()
                     .name("Weight sigma")
                     .id("NMR1")
                     .min(0.0f)
-                    .max(1.0f)
+                    .max(2.0f)
                     .logarithmic(true)
-                    .format("%.5f")
+                    .format("%.2f")
                     .textWidth(rightColumnWidth),
                 &_editData->genome._neuronMutationRate1._weightSigma);
             AlienGui::SliderFloat(
@@ -144,9 +144,9 @@ void _GenomeEditorWidget::processHeaderData()
                     .name("Bias sigma")
                     .id("NMR1")
                     .min(0.0f)
-                    .max(1.0f)
+                    .max(2.0f)
                     .logarithmic(true)
-                    .format("%.5f")
+                    .format("%.3f")
                     .textWidth(rightColumnWidth),
                 &_editData->genome._neuronMutationRate1._biasSigma);
             AlienGui::SliderFloat(
@@ -177,9 +177,9 @@ void _GenomeEditorWidget::processHeaderData()
                     .name("Weight sigma")
                     .id("NMR2")
                     .min(0.0f)
-                    .max(1.0f)
+                    .max(2.0f)
                     .logarithmic(true)
-                    .format("%.5f")
+                    .format("%.2f")
                     .textWidth(rightColumnWidth),
                 &_editData->genome._neuronMutationRate2._weightSigma);
             AlienGui::SliderFloat(
@@ -187,9 +187,9 @@ void _GenomeEditorWidget::processHeaderData()
                     .name("Bias sigma")
                     .id("NMR2")
                     .min(0.0f)
-                    .max(1.0f)
+                    .max(2.0f)
                     .logarithmic(true)
-                    .format("%.5f")
+                    .format("%.3f")
                     .textWidth(rightColumnWidth),
                 &_editData->genome._neuronMutationRate2._biasSigma);
             AlienGui::SliderFloat(
