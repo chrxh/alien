@@ -2,14 +2,14 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/NeuralNetWeight.h>
+#include <EngineInterface/SimulationParameters.h>
 
-#include "ConstantMemory.cuh"
 #include "CellProcessor.cuh"
+#include "ConstantMemory.cuh"
 #include "Genome.cuh"
-#include "SimulationStatistics.cuh"
 #include "SimulationData.cuh"
+#include "SimulationStatistics.cuh"
 
 class MutationProcessor
 {
@@ -61,6 +61,36 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
 
 __inline__ __device__ void MutationProcessor::applyMutations_neuronWeights(SimulationData& data, Genome* genome)
 {
+    NeuronWeightMutationRate rates[2] = {genome->neuronWeightMutationRate1, genome->neuronWeightMutationRate2};
+
+    for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
+        auto const& rate = rates[rateIndex];
+        if (rate.probability <= 0 || rate.sigma <= 0) {
+            continue;
+        }
+        for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+            auto& gene = genome->genes[geneIndex];
+            for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                auto& node = gene.nodes[nodeIndex];
+                for (int neuronIndex = 0; neuronIndex < NEURONS_PER_CELL; ++neuronIndex) {
+                    if (isRandomEvent(data, rate.probability)) {
+                        for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
+                            auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
+
+                            // Box-Muller transform for Gaussian random
+                            float u1 = max(1.0e-7f, data.primaryNumberGen.random());
+                            float u2 = data.primaryNumberGen.random();
+                            float gaussian = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * Const::PI * u2);
+
+                            float newValue = weight.getValue() + gaussian * rate.sigma;
+                            newValue = max(-2.0f, min(2.0f, newValue));
+                            weight = NeuralNetWeight(newValue);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 __inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)
