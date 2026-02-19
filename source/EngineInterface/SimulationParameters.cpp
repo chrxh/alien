@@ -475,6 +475,12 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 }),
             ParameterGroupSpec()
+                .name("Meta mutations")
+                .parameters({
+                    ParameterSpec()
+                        .name("Neuron mutations").reference(FloatSpec().member(&SimulationParameters::metaMutationNeurons).min(0.0f).max(0.1f)),
+                }),
+            ParameterGroupSpec()
                 .name("Cell type: Attacker")
                 .parameters({
                     ParameterSpec()

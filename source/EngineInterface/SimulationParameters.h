@@ -125,7 +125,8 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};
     static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
-    // Mutations
+    // Meta mutations
+    BaseParameter<float> metaMutationNeurons = {0};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
