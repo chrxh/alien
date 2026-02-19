@@ -18,7 +18,7 @@ public:
     __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
 private:
-    __inline__ __device__ static void applyMutations_neuronWeights(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 };
 
@@ -46,7 +46,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
             auto mutatedGenome = factory.cloneGenome(creature->genome);
 
             // Apply mutations to cloned genome
-            applyMutations_neuronWeights(data, mutatedGenome);
+            applyMutations_neurons(data, mutatedGenome);
 
             // Update genome
             creature->genome = mutatedGenome;
@@ -56,10 +56,10 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
 {
-    applyMutations_neuronWeights(data, genome);
+    applyMutations_neurons(data, genome);
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_neuronWeights(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome)
 {
     NeuronMutationRate rates[2] = {genome->neuronMutationRate1, genome->neuronMutationRate2};
 
