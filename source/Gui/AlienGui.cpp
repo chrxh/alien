@@ -130,7 +130,7 @@ void AlienGui::SliderInputFloat(SliderInputFloatParameters const& parameters, fl
 {
     auto textWidth = StyleRepository::get().scale(parameters._textWidth);
     auto inputWidth = StyleRepository::get().scale(parameters._inputWidth);
-
+    ImGui::PushID(parameters._id.c_str());
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth - inputWidth - ImGui::GetStyle().FramePadding.x * 2);
     ImGui::SliderFloat(("##slider" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str());
     ImGui::SameLine();
@@ -138,6 +138,7 @@ void AlienGui::SliderInputFloat(SliderInputFloatParameters const& parameters, fl
     ImGui::InputFloat(("##input" + parameters._name).c_str(), &value, 0, 0, parameters._format.c_str());
     ImGui::SameLine();
     AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    ImGui::PopID();
 }
 
 bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
@@ -1872,6 +1873,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
     auto constexpr PinnedButtonWidth = 22.0f;
 
     ImGui::PushID(parameters._name.c_str());
+    ImGui::PushID(parameters._id.c_str());
 
     if (parameters._readOnly) {
         ImGui::BeginDisabled();
@@ -2063,6 +2065,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
     if (parameters._readOnly) {
         ImGui::EndDisabled();
     }
+    ImGui::PopID();
     ImGui::PopID();
     return result;
 }

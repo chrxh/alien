@@ -156,29 +156,29 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
 
 std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
 {
-    auto genome = GenomeDesc()
-                      .name("Test Genome")
-                      .lineageId(502)
-                      .frontAngle(270.0f)
-                      .neuronWeightMutationRate1(NeuronWeightMutationRateDesc().probability(0.1f).sigma(0.2f))
-                      .neuronWeightMutationRate2(NeuronWeightMutationRateDesc().probability(0.3f).sigma(0.4f))
-                      .neuronAfMutationRate(0.5f)
-                      .connectionMutationRate1(ConnectionMutationRateDesc().probability(0.6f).sigma(0.7f))
-                      .connectionMutationRate2(ConnectionMutationRateDesc().probability(0.8f).sigma(0.9f))
-                      .genes({
-                          GeneDesc()
-                              .name("Test Gene")
-                              .shape(ConstructorShape_Hexagon)
-                              .numBranches(4)
-                              .separation(true)
-                              .numConcatenations(6)
-                              .angleAlignment(ConstructorAngleAlignment_180)
-                              .stiffness(0.75f)
-                              .connectionDistance(0.8f)
-                              .nodes({
-                                  createNonDefaultNodeDesc(nodeParameter),
-                              }),
-                      });
+    auto genome =
+        GenomeDesc()
+            .name("Test Genome")
+            .lineageId(502)
+            .frontAngle(270.0f)
+            .neuronMutationRate1(NeuronMutationRateDesc().probability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f))
+            .neuronMutationRate2(NeuronMutationRateDesc().probability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f))
+            .connectionMutationRate1(ConnectionMutationRateDesc().probability(0.6f).sigma(0.7f))
+            .connectionMutationRate2(ConnectionMutationRateDesc().probability(0.8f).sigma(0.9f))
+            .genes({
+                GeneDesc()
+                    .name("Test Gene")
+                    .shape(ConstructorShape_Hexagon)
+                    .numBranches(4)
+                    .separation(true)
+                    .numConcatenations(6)
+                    .angleAlignment(ConstructorAngleAlignment_180)
+                    .stiffness(0.75f)
+                    .connectionDistance(0.8f)
+                    .nodes({
+                        createNonDefaultNodeDesc(nodeParameter),
+                    }),
+            });
 
     auto creature =
         CreatureDesc().ancestorId(1001).generation(7).numObjects(25).frontAngleId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);

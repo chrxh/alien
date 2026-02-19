@@ -36,6 +36,7 @@ public:
     struct SliderFloatParameters
     {
         MEMBER(SliderFloatParameters, std::string, name, "");
+        MEMBER(SliderFloatParameters, std::string, id, "");
         MEMBER(SliderFloatParameters, float, min, 0);
         MEMBER(SliderFloatParameters, float, max, 0);
         MEMBER(SliderFloatParameters, std::string, format, "%.3f");
@@ -56,6 +57,7 @@ public:
     struct SliderIntParameters
     {
         MEMBER(SliderIntParameters, std::string, name, "");
+        MEMBER(SliderIntParameters, std::string, id, "");
         MEMBER(SliderIntParameters, int, min, 0);
         MEMBER(SliderIntParameters, int, max, 0);
         MEMBER(SliderIntParameters, std::string, format, "%d");
@@ -92,6 +94,7 @@ public:
     struct SliderInputFloatParameters
     {
         MEMBER(SliderInputFloatParameters, std::string, name, "");
+        MEMBER(SliderInputFloatParameters, std::string, id, "");
         MEMBER(SliderInputFloatParameters, float, min, 0);
         MEMBER(SliderInputFloatParameters, float, max, 0);
         MEMBER(SliderInputFloatParameters, float, textWidth, 100);

@@ -341,10 +341,12 @@ struct GeneTO
     uint64_t nodeArrayIndex;
 };
 
-struct NeuronWeightMutationRateTO
+struct NeuronMutationRateTO
 {
     float probability;
-    float sigma;
+    float weightSigma;
+    float biasSigma;
+    float activationFunctionProbability;
 };
 
 struct ConnectionMutationRateTO
@@ -363,9 +365,8 @@ struct GenomeTO
     uint32_t lineageId;
     float frontAngle;
 
-    NeuronWeightMutationRateTO neuronWeightMutationRate1;
-    NeuronWeightMutationRateTO neuronWeightMutationRate2;
-    float neuronAfMutationRate;
+    NeuronMutationRateTO neuronMutationRate1;
+    NeuronMutationRateTO neuronMutationRate2;
     ConnectionMutationRateTO connectionMutationRate1;
     ConnectionMutationRateTO connectionMutationRate2;
 
