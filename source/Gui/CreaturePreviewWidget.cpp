@@ -333,12 +333,16 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
 void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult)
 {
-    // Check if signal has non-zero values
-    ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(440.0f), ImGui::GetScrollY() + scale(13.0f)});
+    auto width = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(410) : scale(250);
     auto height = _editData->detailSimulation && _selectedCellIdFromPreview.has_value() ? scale(149.0f) : scale(67.0f);
-    if (ImGui::BeginChild("signalEditor", ImVec2(scale(410), height), ImGuiChildFlags_FrameStyle)) {
+    auto contentAvailable = ImGui::GetContentRegionAvail();
+    if (contentAvailable.x < scale(480.0f) || contentAvailable.y < scale(250.0f)) {
+        return;
+    }
+    ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - width - scale(30.0f), ImGui::GetScrollY() + scale(13.0f)});
+    if (ImGui::BeginChild("signalEditor", ImVec2(width, height), ImGuiChildFlags_FrameStyle)) {
 
-        AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
+        AlienGui::Group(AlienGui::GroupParameters().text("Signal editor"));
 
         if (_editData->detailSimulation && _selectedCellIdFromPreview.has_value()) {
             std::optional<CellPreviewDesc> selectedCell;
@@ -383,7 +387,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
             }
         } else {
             if (!_editData->detailSimulation) {
-                AlienGui::Text("Detailed simulation mode needed to edit signals");
+                AlienGui::Text("Detailed simulation mode disabled");
             } else if (!_selectedCellIdFromPreview.has_value()) {
                 AlienGui::Text("No cell selected");
             }
