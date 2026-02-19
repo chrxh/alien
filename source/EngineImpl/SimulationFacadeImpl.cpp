@@ -377,14 +377,9 @@ void _SimulationFacadeImpl::setCurrentTimestepForPreview(uint64_t timestep)
     _worker.setCurrentTimestepForPreview(timestep);
 }
 
-void _SimulationFacadeImpl::testOnly_mutate(uint64_t objectId, MutationType mutationType)
+void _SimulationFacadeImpl::testOnly_mutate(uint64_t objectId)
 {
-    _worker.testOnly_mutate(objectId, mutationType);
-}
-
-void _SimulationFacadeImpl::testOnly_mutationCheck(uint64_t objectId)
-{
-    _worker.testOnly_mutationCheck(objectId);
+    _worker.testOnly_mutate(objectId);
 }
 
 void _SimulationFacadeImpl::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)

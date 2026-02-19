@@ -14,7 +14,6 @@
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
-#include <EngineInterface/MutationType.h>
 #include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
@@ -119,8 +118,7 @@ public:
     void setCurrentTimestepForPreview(uint64_t timestep);
 
     // Only for tests
-    void testOnly_mutate(uint64_t objectId, MutationType mutationType);
-    void testOnly_mutationCheck(uint64_t objectId);
+    void testOnly_mutate(uint64_t objectId);
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();

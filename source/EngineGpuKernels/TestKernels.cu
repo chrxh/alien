@@ -4,7 +4,7 @@
 
 #include "MutationProcessor.cuh"
 
-__global__ void cudaTestMutate(SimulationData data, uint64_t objectId, MutationType mutationType)
+__global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
 {
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -14,11 +14,7 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId, MutationT
         CUDA_CHECK(object->type == ObjectType_Cell);
 
         if (object->id == objectId) {
-            switch (mutationType) {
-            case MutationType::NeuralNet: {
-                MutationProcessor::applyMutations_neuralNetwork(data, object->typeData.cell.creature->genome);
-            } break;
-            }
+            MutationProcessor::applyMutations(data, object->typeData.cell.creature->genome);
         }
     }
 }
@@ -153,17 +149,4 @@ __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
             }
         }
     }
-}
-
-__global__ void cudaTestMutationCheck(SimulationData data, uint64_t objectId)
-{
-    //auto& objects = data.entities.objects;
-    //auto partition = calcAllThreadsPartition(cells.getNumEntries());
-
-    //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-    //    auto& object = cells.at(index);
-    //    if (object->id == objectId) {
-    //        MutationProcessor::checkMutationsForCell(data, object);
-    //    }
-    //}
 }

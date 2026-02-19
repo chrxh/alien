@@ -126,16 +126,6 @@ struct SimulationParameters
     static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Mutations
-    BaseParameter<float> mutationNeuralNet = {0};
-
-    // Expert settings: Customize neuron mutations setting
-    ExpertToggle customizeNeuralNetMutationsToggle = {false};
-    BaseParameter<float> neuralNetworkMutationWeight = {0.2f};
-    BaseParameter<float> neuralNetworkMutationBias = {0.2f};
-    BaseParameter<float> neuralNetworkMutationActivationFunction = {0.05f};
-    BaseParameter<float> neuralNetworkMutationReinforcement = {1.05f};
-    BaseParameter<float> neuralNetworkMutationDamping = {1.05f};
-    BaseParameter<float> neuralNetworkMutationOffset = {0.05f};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};

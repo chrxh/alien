@@ -29,7 +29,6 @@ add_library(EngineInterface
     InspectedEntityIds.h
     LocationHelper.cpp
     LocationHelper.h
-    MutationType.h
     NeuralNetWeight.h
     NumberGenerator.cpp
     NumberGenerator.h

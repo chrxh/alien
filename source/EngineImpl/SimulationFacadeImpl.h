@@ -106,8 +106,7 @@ public:
     void setCurrentTimestepForPreview(uint64_t timestep) override;
 
     // for tests only
-    void testOnly_mutate(uint64_t objectId, MutationType mutationType) override;
-    void testOnly_mutationCheck(uint64_t objectId) override;
+    void testOnly_mutate(uint64_t objectId) override;
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) override;
     void testOnly_cleanupAfterTimestep() override;
     void testOnly_cleanupAfterDataManipulation() override;

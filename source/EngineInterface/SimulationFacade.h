@@ -4,7 +4,6 @@
 #include "DataPointCollection.h"
 #include "Definitions.h"
 #include "GeometryBuffers.h"
-#include "MutationType.h"
 #include "PreviewDesc.h"
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
@@ -122,8 +121,7 @@ public:
     //****************
     //* Only for tests
     //****************
-    virtual void testOnly_mutate(uint64_t objectId, MutationType mutationType) = 0;
-    virtual void testOnly_mutationCheck(uint64_t objectId) = 0;
+    virtual void testOnly_mutate(uint64_t objectId) = 0;
     virtual void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) = 0;
     virtual void testOnly_cleanupAfterTimestep() = 0;
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
