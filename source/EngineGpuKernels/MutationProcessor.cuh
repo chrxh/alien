@@ -61,7 +61,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
 
 __inline__ __device__ void MutationProcessor::applyMutations_neuronWeights(SimulationData& data, Genome* genome)
 {
-    NeuronWeightMutationRate rates[2] = {genome->neuronWeightMutationRate1, genome->neuronWeightMutationRate2};
+    NeuronMutationRate rates[2] = {genome->neuronMutationRate1, genome->neuronMutationRate2};
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];

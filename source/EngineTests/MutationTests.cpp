@@ -65,8 +65,8 @@ protected:
 TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome.neuronWeightMutationRate1(NeuronWeightMutationRateDesc().probability(1.0f).sigma(1.0f))
-        .neuronWeightMutationRate2(NeuronWeightMutationRateDesc().probability(1.0f).sigma(1.0f));
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).sigma(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).sigma(1.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
@@ -87,8 +87,8 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
 {
     auto genome = createTestGenome();
-    genome.neuronWeightMutationRate1(NeuronWeightMutationRateDesc().probability(1.0f).sigma(1.0f))
-        .neuronWeightMutationRate2(NeuronWeightMutationRateDesc().probability(0.0f).sigma(0.0f));
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).sigma(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(0.0f).sigma(0.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
@@ -120,8 +120,8 @@ TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
 TEST_F(MutationTests, neuronWeightMutation_weightsStayClamped)
 {
     auto genome = createTestGenome();
-    genome.neuronWeightMutationRate1(NeuronWeightMutationRateDesc().probability(1.0f).sigma(10.0f))
-        .neuronWeightMutationRate2(NeuronWeightMutationRateDesc().probability(1.0f).sigma(10.0f));
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).sigma(10.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).sigma(10.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
@@ -149,8 +149,8 @@ TEST_F(MutationTests, neuronWeightMutation_weightsStayClamped)
 TEST_F(MutationTests, neuronWeightMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome.neuronWeightMutationRate1(NeuronWeightMutationRateDesc().probability(0.0f).sigma(1.0f))
-        .neuronWeightMutationRate2(NeuronWeightMutationRateDesc().probability(0.0f).sigma(1.0f));
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(0.0f).sigma(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(0.0f).sigma(1.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
