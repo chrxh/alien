@@ -336,7 +336,7 @@ struct Gene
     Node* nodes;
 };
 
-struct NeuronMutationRate
+struct NeuronWeightMutationRate
 {
     float probability;
     float sigma;
@@ -358,9 +358,9 @@ struct Genome
     uint32_t lineageId;
     float frontAngle;
 
-    NeuronMutationRate neuronMutationRate1;
-    NeuronMutationRate neuronMutationRate2;
-    float activationFunctionMutationRate;
+    NeuronWeightMutationRate neuronWeightMutationRate1;
+    NeuronWeightMutationRate neuronWeightMutationRate2;
+    float neuronAfMutationRate;
     ConnectionMutationRate connectionMutationRate1;
     ConnectionMutationRate connectionMutationRate2;
 

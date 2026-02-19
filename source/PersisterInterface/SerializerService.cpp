@@ -171,8 +171,8 @@ namespace
     auto constexpr Id_Genome_LineageId = 3;
     auto constexpr Id_Genome_ActivationFunctionMutationRate = 4;
 
-    auto constexpr Id_NeuronMutationRate_Probability = 0;
-    auto constexpr Id_NeuronMutationRate_Sigma = 1;
+    auto constexpr Id_NeuronWeightMutationRate_Probability = 0;
+    auto constexpr Id_NeuronWeightMutationRate_Sigma = 1;
 
     auto constexpr Id_ConnectionMutationRate_Probability = 0;
     auto constexpr Id_ConnectionMutationRate_Sigma = 1;
@@ -799,15 +799,15 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NeuronMutationRateDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuronWeightMutationRateDesc& data)
     {
-        NeuronMutationRateDesc defaultObject;
+        NeuronWeightMutationRateDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuronMutationRate_Probability, data._probability, defaultObject._probability);
-        loadSave(task, auxiliaries, Id_NeuronMutationRate_Sigma, data._sigma, defaultObject._sigma);
+        loadSave(task, auxiliaries, Id_NeuronWeightMutationRate_Probability, data._probability, defaultObject._probability);
+        loadSave(task, auxiliaries, Id_NeuronWeightMutationRate_Sigma, data._sigma, defaultObject._sigma);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NeuronMutationRateDesc)
+    SPLIT_SERIALIZATION(NeuronWeightMutationRateDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConnectionMutationRateDesc& data)
@@ -830,12 +830,12 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         loadSave(
-            task, auxiliaries, Id_Genome_ActivationFunctionMutationRate, data._activationFunctionMutationRate, defaultObject._activationFunctionMutationRate);
+            task, auxiliaries, Id_Genome_ActivationFunctionMutationRate, data._neuronAfMutationRate, defaultObject._neuronAfMutationRate);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);
-        ar(data._neuronMutationRate1);
-        ar(data._neuronMutationRate2);
+        ar(data._neuronWeightMutationRate1);
+        ar(data._neuronWeightMutationRate2);
         ar(data._connectionMutationRate1);
         ar(data._connectionMutationRate2);
     }

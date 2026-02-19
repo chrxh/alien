@@ -65,8 +65,8 @@ protected:
 TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).sigma(1.0f))
-        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).sigma(1.0f));
+    genome.neuronWeightMutationRate1(NeuronWeightMutationRateDesc().probability(1.0f).sigma(1.0f))
+        .neuronWeightMutationRate2(NeuronWeightMutationRateDesc().probability(1.0f).sigma(1.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 

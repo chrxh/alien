@@ -14,11 +14,11 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
     genome._frontAngle = Math::modulo(genome._frontAngle, 360.0f);
 
     // Validate mutation rate fields
-    genome._neuronMutationRate1._probability = std::clamp(genome._neuronMutationRate1._probability, 0.0f, 1.0f);
-    genome._neuronMutationRate1._sigma = std::max(genome._neuronMutationRate1._sigma, 0.0f);
-    genome._neuronMutationRate2._probability = std::clamp(genome._neuronMutationRate2._probability, 0.0f, 1.0f);
-    genome._neuronMutationRate2._sigma = std::max(genome._neuronMutationRate2._sigma, 0.0f);
-    genome._activationFunctionMutationRate = std::clamp(genome._activationFunctionMutationRate, 0.0f, 1.0f);
+    genome._neuronWeightMutationRate1._probability = std::clamp(genome._neuronWeightMutationRate1._probability, 0.0f, 1.0f);
+    genome._neuronWeightMutationRate1._sigma = std::max(genome._neuronWeightMutationRate1._sigma, 0.0f);
+    genome._neuronWeightMutationRate2._probability = std::clamp(genome._neuronWeightMutationRate2._probability, 0.0f, 1.0f);
+    genome._neuronWeightMutationRate2._sigma = std::max(genome._neuronWeightMutationRate2._sigma, 0.0f);
+    genome._neuronAfMutationRate = std::clamp(genome._neuronAfMutationRate, 0.0f, 1.0f);
     genome._connectionMutationRate1._probability = std::clamp(genome._connectionMutationRate1._probability, 0.0f, 1.0f);
     genome._connectionMutationRate1._sigma = std::max(genome._connectionMutationRate1._sigma, 0.0f);
     genome._connectionMutationRate2._probability = std::clamp(genome._connectionMutationRate2._probability, 0.0f, 1.0f);

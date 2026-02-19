@@ -33,9 +33,9 @@ namespace
             genomeTO.id = genome->id;
             genomeTO.lineageId = genome->lineageId;
             genomeTO.frontAngle = genome->frontAngle;
-            genomeTO.neuronMutationRate1 = {genome->neuronMutationRate1.probability, genome->neuronMutationRate1.sigma};
-            genomeTO.neuronMutationRate2 = {genome->neuronMutationRate2.probability, genome->neuronMutationRate2.sigma};
-            genomeTO.activationFunctionMutationRate = genome->activationFunctionMutationRate;
+            genomeTO.neuronWeightMutationRate1 = {genome->neuronWeightMutationRate1.probability, genome->neuronWeightMutationRate1.sigma};
+            genomeTO.neuronWeightMutationRate2 = {genome->neuronWeightMutationRate2.probability, genome->neuronWeightMutationRate2.sigma};
+            genomeTO.neuronAfMutationRate = genome->neuronAfMutationRate;
             genomeTO.connectionMutationRate1 = {genome->connectionMutationRate1.probability, genome->connectionMutationRate1.sigma};
             genomeTO.connectionMutationRate2 = {genome->connectionMutationRate2.probability, genome->connectionMutationRate2.sigma};
             genomeTO.numGenes = genome->numGenes;

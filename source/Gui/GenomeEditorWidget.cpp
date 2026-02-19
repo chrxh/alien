@@ -90,24 +90,24 @@ void _GenomeEditorWidget::processHeaderData()
             AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 1"));
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Probability").id("NMR1").format("%.3f").textWidth(rightColumnWidth),
-                _editData->genome._neuronMutationRate1._probability);
+                _editData->genome._neuronWeightMutationRate1._probability);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Sigma").id("NMR1").format("%.3f").textWidth(rightColumnWidth),
-                _editData->genome._neuronMutationRate1._sigma);
+                _editData->genome._neuronWeightMutationRate1._sigma);
 
             AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 2"));
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Probability").id("NMR2").format("%.3f").textWidth(rightColumnWidth),
-                _editData->genome._neuronMutationRate2._probability);
+                _editData->genome._neuronWeightMutationRate2._probability);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Sigma").id("NMR2").format("%.3f").textWidth(rightColumnWidth),
-                _editData->genome._neuronMutationRate2._sigma);
+                _editData->genome._neuronWeightMutationRate2._sigma);
             table.next();
 
             AlienGui::Group(AlienGui::GroupParameters().text("Activation function mutation rate"));
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Probability").format("%.3f").textWidth(rightColumnWidth),
-                _editData->genome._activationFunctionMutationRate);
+                _editData->genome._neuronAfMutationRate);
             table.next();
 
             AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 1"));
