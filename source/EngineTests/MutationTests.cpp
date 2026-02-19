@@ -46,22 +46,59 @@ protected:
         return GenomeDesc().genes(genes);
     }
 
-    bool compareAllExceptNeuronWeightsAndBiasesAndActivationFunctions(GenomeDesc expected, GenomeDesc actual)
+    bool compareAllExceptNeuronWeights(GenomeDesc expected, GenomeDesc actual)
     {
-        auto resetNeuralNet = [](GenomeDesc& genome) {
+        auto reset = [](GenomeDesc& genome) {
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._weights.begin(), node._neuralNetwork._weights.end(), 0.0f);
+                }
+            }
+        };
+        reset(expected);
+        reset(actual);
+        return expected == actual;
+    }
+
+    bool compareAllExceptNeuronBiases(GenomeDesc expected, GenomeDesc actual)
+    {
+        auto reset = [](GenomeDesc& genome) {
+            for (auto& gene : genome._genes) {
+                for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._biases.begin(), node._neuralNetwork._biases.end(), 0.0f);
+                }
+            }
+        };
+        reset(expected);
+        reset(actual);
+        return expected == actual;
+    }
+
+    bool compareAllExceptActivationFunctions(GenomeDesc expected, GenomeDesc actual)
+    {
+        auto reset = [](GenomeDesc& genome) {
+            for (auto& gene : genome._genes) {
+                for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._activationFunctions.begin(), node._neuralNetwork._activationFunctions.end(), ActivationFunction_Identity);
+                }
+            }
+        };
+        reset(expected);
+        reset(actual);
+        return expected == actual;
+    }
+
+    bool compareAllExceptConnectionWeights(GenomeDesc expected, GenomeDesc actual)
+    {
+        auto reset = [](GenomeDesc& genome) {
+            for (auto& gene : genome._genes) {
+                for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._connectionWeights.begin(), node._neuralNetwork._connectionWeights.end(), 0.0f);
                 }
             }
         };
-
-        resetNeuralNet(expected);
-        resetNeuralNet(actual);
-
+        reset(expected);
+        reset(actual);
         return expected == actual;
     }
 };
@@ -69,8 +106,8 @@ protected:
 TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(1.0f).biasSigma(1.0f))
-        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).weightSigma(1.0f).biasSigma(1.0f));
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).weightSigma(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).weightSigma(1.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
@@ -84,8 +121,7 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    // Mutated genome must be equal to original genome except the neural network properties
-    EXPECT_TRUE(compareAllExceptNeuronWeightsAndBiasesAndActivationFunctions(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptNeuronWeights(genome, actualGenome));
 }
 
 TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
@@ -237,6 +273,27 @@ TEST_F(MutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
     }
 }
 
+TEST_F(MutationTests, neuronBiasMutation_keepOtherAttributesUnchanged)
+{
+    auto genome = createTestGenome();
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).biasSigma(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).biasSigma(1.0f));
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    EXPECT_TRUE(compareAllExceptNeuronBiases(genome, actualGenome));
+}
+
 TEST_F(MutationTests, neuronActivationFunctionMutation_activationFunctionsActuallyChange)
 {
     auto genome = createTestGenome();
@@ -308,6 +365,27 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_zeroProbabilityNoChange)
             EXPECT_EQ(origFunctions, actualFunctions);
         }
     }
+}
+
+TEST_F(MutationTests, neuronActivationFunctionMutation_keepOtherAttributesUnchanged)
+{
+    auto genome = createTestGenome();
+    genome.neuronMutationRate1(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(1.0f))
+        .neuronMutationRate2(NeuronMutationRateDesc().probability(1.0f).activationFunctionProbability(1.0f));
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    EXPECT_TRUE(compareAllExceptActivationFunctions(genome, actualGenome));
 }
 
 TEST_F(MutationTests, connectionWeightMutation_weightsActuallyChange)
@@ -401,6 +479,5 @@ TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    // Mutated genome must be equal to original genome except the neural network properties
-    EXPECT_TRUE(compareAllExceptNeuronWeightsAndBiasesAndActivationFunctions(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptConnectionWeights(genome, actualGenome));
 }
