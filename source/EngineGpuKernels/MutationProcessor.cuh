@@ -2,23 +2,23 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/NeuralNetWeight.h>
+#include <EngineInterface/SimulationParameters.h>
 
-#include "ConstantMemory.cuh"
 #include "CellProcessor.cuh"
+#include "ConstantMemory.cuh"
 #include "Genome.cuh"
-#include "SimulationStatistics.cuh"
 #include "SimulationData.cuh"
+#include "SimulationStatistics.cuh"
 
 class MutationProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
-
-    __inline__ __device__ static void applyMutations_neuralNetwork(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
 private:
+    __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 };
 
@@ -46,7 +46,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
             auto mutatedGenome = factory.cloneGenome(creature->genome);
 
             // Apply mutations to cloned genome
-            applyMutations_neuralNetwork(data, mutatedGenome);
+            applyMutations_neurons(data, mutatedGenome);
 
             // Update genome
             creature->genome = mutatedGenome;
@@ -54,68 +54,39 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_neuralNetwork(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
 {
-    auto mutationNeuralNet = cudaSimulationParameters.mutationNeuralNet.value;
+    applyMutations_neurons(data, genome);
+}
 
-    auto neuralNetworkMutationWeight =
-        cudaSimulationParameters.customizeNeuralNetMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationWeight.value : 0.2f;
-    auto neuralNetworkMutationBias =
-        cudaSimulationParameters.customizeNeuralNetMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationBias.value : 0.2f;
-    auto neuralNetworkMutationActivationFunction =
-        cudaSimulationParameters.customizeNeuralNetMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationActivationFunction.value : 0.05f;
-    auto neuralNetworkMutationReinforcement =
-        cudaSimulationParameters.customizeNeuralNetMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationReinforcement.value : 1.05f;
-    auto neuralNetworkMutationDamping =
-        cudaSimulationParameters.customizeNeuralNetMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationDamping.value : 1.05f;
-    auto neuralNetworkMutationOffset =
-        cudaSimulationParameters.customizeNeuralNetMutationsToggle.value ? cudaSimulationParameters.neuralNetworkMutationOffset.value : 0.05f;
+__inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome)
+{
+    NeuronMutationRate rates[2] = {genome->neuronMutationRate1, genome->neuronMutationRate2};
 
-    for (int i = 0, numGenes = genome->numGenes; i < numGenes; ++i) {
-        auto gene = &genome->genes[i];
-        for (int j = 0, numNodes = gene->numNodes; j < numNodes; ++j) {
-            if (!isRandomEvent(data, mutationNeuralNet)) {
-                continue;
-            }
-            auto node = &gene->nodes[j];
-            auto neuronMutationType = data.primaryNumberGen.random(3);
+    for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
+        auto const& rate = rates[rateIndex];
+        if (rate.probability <= 0 || rate.weightSigma <= 0) {
+            continue;
+        }
+        for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+            auto& gene = genome->genes[geneIndex];
+            for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                auto& node = gene.nodes[nodeIndex];
+                for (int neuronIndex = 0; neuronIndex < NEURONS_PER_CELL; ++neuronIndex) {
+                    if (isRandomEvent(data, rate.probability)) {
+                        for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
+                            auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
 
-            for (int k = 0; k < MAX_CHANNELS * MAX_CHANNELS; ++k) {
-                if (data.primaryNumberGen.random() < neuralNetworkMutationWeight) {
-                    float property = node->neuralNetwork.weights[k].getValue();
-                    if (neuronMutationType == 0) {
-                        property *= neuralNetworkMutationReinforcement;
-                    } else if (neuronMutationType == 1) {
-                        property /= neuralNetworkMutationDamping;
-                    } else if (neuronMutationType == 2) {
-                        property += neuralNetworkMutationOffset;
-                    } else if (neuronMutationType == 3) {
-                        property -= neuralNetworkMutationOffset;
+                            // Box-Muller transform for Gaussian random
+                            float u1 = max(1.0e-7f, data.primaryNumberGen.random());
+                            float u2 = data.primaryNumberGen.random();
+                            float gaussian = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * Const::PI * u2);
+
+                            float newValue = weight.getValue() + gaussian * rate.weightSigma;
+                            newValue = max(-2.0f, min(2.0f, newValue));
+                            weight = NeuralNetWeight(newValue);
+                        }
                     }
-                    node->neuralNetwork.weights[k] = property;
-                }
-            }
-
-            // Mutate biases
-            for (int k = 0; k < MAX_CHANNELS; ++k) {
-                if (data.primaryNumberGen.random() < neuralNetworkMutationBias) {
-                    auto& property = node->neuralNetwork.biases[k];
-                    if (neuronMutationType == 0) {
-                        property *= neuralNetworkMutationReinforcement;
-                    } else if (neuronMutationType == 1) {
-                        property /= neuralNetworkMutationDamping;
-                    } else if (neuronMutationType == 2) {
-                        property += neuralNetworkMutationOffset;
-                    } else if (neuronMutationType == 3) {
-                        property -= neuralNetworkMutationOffset;
-                    }
-                }
-            }
-
-            // Mutate activation functions
-            for (int k = 0; k < MAX_CHANNELS; ++k) {
-                if (data.primaryNumberGen.random() < neuralNetworkMutationActivationFunction) {
-                    node->neuralNetwork.activationFunctions[k] = data.primaryNumberGen.randomByte();
                 }
             }
         }

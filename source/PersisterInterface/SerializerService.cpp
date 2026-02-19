@@ -170,6 +170,14 @@ namespace
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
 
+    auto constexpr Id_NeuronMutationRate_Probability = 0;
+    auto constexpr Id_NeuronMutationRate_WeightSigma = 1;
+    auto constexpr Id_NeuronMutationRate_BiasSigma = 2;
+    auto constexpr Id_NeuronMutationRate_ActivationFunctionProbability = 3;
+
+    auto constexpr Id_ConnectionMutationRate_Probability = 0;
+    auto constexpr Id_ConnectionMutationRate_Sigma = 1;
+
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
     auto constexpr Id_Gene_NumBranches = 2;
@@ -792,6 +800,35 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, NeuronMutationRateDesc& data)
+    {
+        NeuronMutationRateDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_NeuronMutationRate_Probability, data._probability, defaultObject._probability);
+        loadSave(task, auxiliaries, Id_NeuronMutationRate_WeightSigma, data._weightSigma, defaultObject._weightSigma);
+        loadSave(task, auxiliaries, Id_NeuronMutationRate_BiasSigma, data._biasSigma, defaultObject._biasSigma);
+        loadSave(
+            task,
+            auxiliaries,
+            Id_NeuronMutationRate_ActivationFunctionProbability,
+            data._activationFunctionProbability,
+            defaultObject._activationFunctionProbability);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(NeuronMutationRateDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ConnectionMutationRateDesc& data)
+    {
+        ConnectionMutationRateDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_ConnectionMutationRate_Probability, data._probability, defaultObject._probability);
+        loadSave(task, auxiliaries, Id_ConnectionMutationRate_Sigma, data._sigma, defaultObject._sigma);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ConnectionMutationRateDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GenomeDesc& data)
     {
         GenomeDesc defaultObject;
@@ -803,6 +840,10 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);
+        ar(data._neuronMutationRate1);
+        ar(data._neuronMutationRate2);
+        ar(data._connectionMutationRate1);
+        ar(data._connectionMutationRate2);
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }

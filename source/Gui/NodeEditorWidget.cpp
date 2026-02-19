@@ -205,6 +205,8 @@ void _NodeEditorWidget::processNodeAttributes()
             auto rightColumnWidth = std::max(MinTextWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(MaxWidgetWidth)));
 
             // Angle
+            AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
+
             auto nodeIndex = _editData->getSelectedNodeIndex();
             auto isInnerNode = nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1;
             if (AlienGui::InputFloat(
@@ -235,18 +237,69 @@ void _NodeEditorWidget::processNodeAttributes()
 
             AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(rightColumnWidth), node._color);
 
-            table.next();
-
             // Type
             auto nodeType = node.getCellType();
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeStrings).textWidth(rightColumnWidth), nodeType)) {
                 node._cellType = createCellTypeGenomeDesc(nodeType);
             }
+
+            AlienGui::Group(AlienGui::GroupParameters().text("Construction properties"));
+
+            bool hasConstructor = node._constructor.has_value();
+            if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(rightColumnWidth), hasConstructor)) {
+                if (hasConstructor) {
+                    node._constructor = ConstructorGenomeDesc();
+                } else {
+                    node._constructor = std::nullopt;
+                }
+            }
+            if (hasConstructor) {
+                ImGui::PushID("Constructor");
+                AlienGui::BeginIndent();
+                auto& constructor = node._constructor.value();
+
+                // Gene index
+                std::vector<std::string> genes;
+                for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
+                    auto text = "No. " + std::to_string(index + 1);
+                    if (index == 0) {
+                        text += " (root)";
+                    }
+                    genes.emplace_back(text);
+                }
+                AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._geneIndex);
+
+                // Auto activation interval
+                AlienGui::InputOptionalInt(
+                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
+
+                // Construction activation time
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Offspring trigger time").textWidth(rightColumnWidth), constructor._constructionActivationTime);
+
+                // Construction angle
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
+
+                // Provide energy at construction
+                auto provideEnergy = constructor._provideEnergy == ProvideEnergy_CellAndGene;
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Provide energy").textWidth(rightColumnWidth), provideEnergy);
+                constructor._provideEnergy = provideEnergy ? ProvideEnergy_CellAndGene : ProvideEnergy_CellOnly;
+
+                AlienGui::EndIndent();
+                ImGui::PopID();
+            }
+
+            table.next();
+
+            AlienGui::Group(AlienGui::GroupParameters().text("Type-specific properties"));
+
             if (nodeType == CellType_Base) {
             } else if (nodeType == CellType_Depot) {
                 AlienGui::BeginIndent();
                 auto& depot = std::get<DepotGenomeDesc>(node._cellType);
-                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Max energy for storage").textWidth(rightColumnWidth), depot._storageLimit);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max energy for storage").format("%.1f").textWidth(rightColumnWidth), depot._storageLimit);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Initial stored energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
                 AlienGui::EndIndent();
@@ -586,8 +639,8 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::EndIndent();
                 }
 
-                bool bit[MAX_CHANNELS];
-                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                bool bit[NEURONS_PER_CELL];
+                for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                     bit[i] = (memory._channelBitMask & (1 << i)) != 0;
                 }
                 AlienGui::MultiCheckboxes(
@@ -599,7 +652,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::MultiCheckboxes(
                     AlienGui::MultiCheckboxesParameters().name("Channel mask bit 12-15").textWidth(rightColumnWidth), bit[12], bit[13], bit[14], bit[15]);
                 memory._channelBitMask = 0;
-                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                     if (bit[i]) {
                         memory._channelBitMask |= 1 << i;
                     }
@@ -637,53 +690,6 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 AlienGui::EndIndent();
-            }
-
-            // Optional constructor field (available for all node types)
-            table.next();
-            bool hasConstructor = node._constructor.has_value();
-            if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(rightColumnWidth), hasConstructor)) {
-                if (hasConstructor) {
-                    node._constructor = ConstructorGenomeDesc();
-                } else {
-                    node._constructor = std::nullopt;
-                }
-            }
-            if (hasConstructor) {
-                ImGui::PushID("Constructor");
-                AlienGui::BeginIndent();
-                auto& constructor = node._constructor.value();
-
-                // Gene index
-                std::vector<std::string> genes;
-                for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
-                    auto text = "No. " + std::to_string(index + 1);
-                    if (index == 0) {
-                        text += " (root)";
-                    }
-                    genes.emplace_back(text);
-                }
-                AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._geneIndex);
-
-                // Auto activation interval
-                AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
-
-                // Construction activation time
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Offspring trigger time").textWidth(rightColumnWidth), constructor._constructionActivationTime);
-
-                // Construction angle
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
-
-                // Provide energy at construction
-                auto provideEnergy = constructor._provideEnergy == ProvideEnergy_CellAndGene;
-                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Provide energy").textWidth(rightColumnWidth), provideEnergy);
-                constructor._provideEnergy = provideEnergy ? ProvideEnergy_CellAndGene : ProvideEnergy_CellOnly;
-
-                AlienGui::EndIndent();
-                ImGui::PopID();
             }
 
             table.next();

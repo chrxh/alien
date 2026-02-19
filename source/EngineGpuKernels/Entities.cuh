@@ -53,9 +53,9 @@ struct ObjectConnection
 
 struct __align__(16) NeuralNet
 {
-    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
-    float biases[MAX_CHANNELS];
-    ActivationFunction activationFunctions[MAX_CHANNELS];
+    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
+    float biases[NEURONS_PER_CELL];
+    ActivationFunction activationFunctions[NEURONS_PER_CELL];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -363,7 +363,7 @@ union MemoryModeData
 
 struct __align__(16) SignalEntry
 {
-    float channels[MAX_CHANNELS];
+    float channels[NEURONS_PER_CELL];
 };
 
 struct Memory
@@ -419,7 +419,7 @@ union CellTypeData
 
 struct __align__(16) Signal
 {
-    float channels[MAX_CHANNELS];
+    float channels[NEURONS_PER_CELL];
     int numTimesSent;
 };
 

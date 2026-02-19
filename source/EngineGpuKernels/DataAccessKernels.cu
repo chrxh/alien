@@ -33,6 +33,18 @@ namespace
             genomeTO.id = genome->id;
             genomeTO.lineageId = genome->lineageId;
             genomeTO.frontAngle = genome->frontAngle;
+            genomeTO.neuronMutationRate1 = {
+                genome->neuronMutationRate1.probability,
+                genome->neuronMutationRate1.weightSigma,
+                genome->neuronMutationRate1.biasSigma,
+                genome->neuronMutationRate1.activationFunctionProbability};
+            genomeTO.neuronMutationRate2 = {
+                genome->neuronMutationRate2.probability,
+                genome->neuronMutationRate2.weightSigma,
+                genome->neuronMutationRate2.biasSigma,
+                genome->neuronMutationRate2.activationFunctionProbability};
+            genomeTO.connectionMutationRate1 = {genome->connectionMutationRate1.probability, genome->connectionMutationRate1.sigma};
+            genomeTO.connectionMutationRate2 = {genome->connectionMutationRate2.probability, genome->connectionMutationRate2.sigma};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];
@@ -62,10 +74,10 @@ namespace
                     nodeTO.referenceAngle = node.referenceAngle;
                     nodeTO.color = node.color;
                     nodeTO.numAdditionalConnections = node.numAdditionalConnections;
-                    for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
                         nodeTO.neuralNetwork.weights[i] = node.neuralNetwork.weights[i];
                     }
-                    for (int i = 0; i < MAX_CHANNELS; ++i) {
+                    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                         nodeTO.neuralNetwork.biases[i] = node.neuralNetwork.biases[i];
                         nodeTO.neuralNetwork.activationFunctions[i] = node.neuralNetwork.activationFunctions[i];
                     }
@@ -105,15 +117,11 @@ namespace
                         nodeTO.cellTypeData.generator.additive = node.cellTypeData.generator.additive;
                         nodeTO.cellTypeData.generator.mode = node.cellTypeData.generator.mode;
                         if (node.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
-                            nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude =
-                                node.cellTypeData.generator.modeData.squareSignal.amplitude;
-                            nodeTO.cellTypeData.generator.modeData.squareSignal.period =
-                                node.cellTypeData.generator.modeData.squareSignal.period;
+                            nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude = node.cellTypeData.generator.modeData.squareSignal.amplitude;
+                            nodeTO.cellTypeData.generator.modeData.squareSignal.period = node.cellTypeData.generator.modeData.squareSignal.period;
                         } else if (node.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
-                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude =
-                                node.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
-                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.period =
-                                node.cellTypeData.generator.modeData.sawtoothSignal.period;
+                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude = node.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
+                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.period = node.cellTypeData.generator.modeData.sawtoothSignal.period;
                         }
                         break;
                     case CellType_Attacker:
@@ -317,7 +325,7 @@ namespace
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
+            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                 cellTO.signal.channels[i] = cell.signal.channels[i];
             }
             cellTO.signal.numTimesSent = cell.signal.numTimesSent;
@@ -340,10 +348,10 @@ namespace
                     ABORT();
                 }
                 auto* nnTO = reinterpret_cast<NeuralNetTO*>(&to.heap[cellTO.neuralNetworkDataIndex]);
-                for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
                     nnTO->weights[i] = cell.neuralNetwork->weights[i];
                 }
-                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                     nnTO->biases[i] = cell.neuralNetwork->biases[i];
                     nnTO->activationFunctions[i] = cell.neuralNetwork->activationFunctions[i];
                 }

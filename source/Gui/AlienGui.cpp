@@ -130,7 +130,7 @@ void AlienGui::SliderInputFloat(SliderInputFloatParameters const& parameters, fl
 {
     auto textWidth = StyleRepository::get().scale(parameters._textWidth);
     auto inputWidth = StyleRepository::get().scale(parameters._inputWidth);
-
+    ImGui::PushID(parameters._id.c_str());
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth - inputWidth - ImGui::GetStyle().FramePadding.x * 2);
     ImGui::SliderFloat(("##slider" + parameters._name).c_str(), &value, parameters._min, parameters._max, parameters._format.c_str());
     ImGui::SameLine();
@@ -138,6 +138,7 @@ void AlienGui::SliderInputFloat(SliderInputFloatParameters const& parameters, fl
     ImGui::InputFloat(("##input" + parameters._name).c_str(), &value, 0, 0, parameters._format.c_str());
     ImGui::SameLine();
     AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    ImGui::PopID();
 }
 
 bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
@@ -276,6 +277,7 @@ bool AlienGui::InputOptionalInt(InputIntParameters const& parameters, std::optio
 
 bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
+    ImGui::PushID(parameters._id.c_str());
     auto textWidth = StyleRepository::get().scale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
@@ -298,6 +300,7 @@ bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
     }
+    ImGui::PopID(); 
     return result;
 }
 
@@ -1329,7 +1332,11 @@ void AlienGui::Separator()
 
 void AlienGui::MovableHorizontalSeparator(MovableHorizontalSeparatorParameters const& parameters, float& height)
 {
+    ImGui::PushStyleColor(ImGuiCol_Button, Const::MovableSeparatorColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::MovableSeparatorHoveredColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::MovableSeparatorActiveColor.Value);
     ImGui::Button("###MovableHorizontalSeparator", ImVec2(-1, scale(5.0f)));
+    ImGui::PopStyleColor(3);
     if (ImGui::IsItemActive()) {
         if (parameters._additive) {
             height += ImGui::GetIO().MouseDelta.y;
@@ -1344,8 +1351,11 @@ void AlienGui::MovableHorizontalSeparator(MovableHorizontalSeparatorParameters c
 
 void AlienGui::MovableVerticalSeparator(MovableVerticalSeparatorParameters const& parameters, float& width)
 {
-    auto sizeAvailable = ImGui::GetContentRegionAvail();
-    ImGui::Button("###MovableVerticalSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(parameters._bottomSpace)));
+    ImGui::PushStyleColor(ImGuiCol_Button, Const::MovableSeparatorColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::MovableSeparatorHoveredColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::MovableSeparatorActiveColor.Value);
+    ImGui::Button("###MovableVerticalSeparator", ImVec2(scale(5.0f), ImGui::GetContentRegionAvail().y - scale(parameters._bottomSpace)));
+    ImGui::PopStyleColor(3);
     if (ImGui::IsItemActive()) {
         if (parameters._additive) {
             width += ImGui::GetIO().MouseDelta.x;
@@ -1775,20 +1785,6 @@ bool AlienGui::ToggleButton(ToggleButtonParameters const& parameters, bool& valu
     return value != origValue;
 }
 
-namespace
-{
-    template <typename T>
-    int& getIdBasedValue(std::unordered_map<unsigned int, T>& idToValueMap, T const& defaultValue)
-    {
-        auto id = ImGui::GetID("");
-        if (!idToValueMap.contains(id)) {
-            idToValueMap[id] = defaultValue;
-        }
-        return idToValueMap.at(id);
-    }
-
-}
-
 void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDesc>& entries)
 {
     int numEntries = toInt(entries.size());
@@ -1814,7 +1810,7 @@ void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters
         style.GrabMinSize = scale(8.0f);
 
         AlienGui::BeginIndent();
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).format("%.2f").textWidth(parameters._textWidth).min(-2.0f).max(2.0f),
                 &entries.at(selectedEntry)._channels.at(i));
@@ -1877,6 +1873,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
     auto constexpr PinnedButtonWidth = 22.0f;
 
     ImGui::PushID(parameters._name.c_str());
+    ImGui::PushID(parameters._id.c_str());
 
     if (parameters._readOnly) {
         ImGui::BeginDisabled();
@@ -2068,6 +2065,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
     if (parameters._readOnly) {
         ImGui::EndDisabled();
     }
+    ImGui::PopID();
     ImGui::PopID();
     return result;
 }

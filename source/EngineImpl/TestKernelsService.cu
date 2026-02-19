@@ -13,14 +13,9 @@ void TestKernelsService::shutdown()
     CudaMemoryManager::getInstance().freeMemory(_cudaBoolResult);
 }
 
-void TestKernelsService::testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId, MutationType mutationType)
+void TestKernelsService::testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
 {
-    KERNEL_CALL(cudaTestMutate, data, objectId, mutationType);
-}
-
-void TestKernelsService::testOnly_mutationCheck(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId)
-{
-    KERNEL_CALL(cudaTestMutationCheck, data, objectId);
+    KERNEL_CALL(cudaTestMutate, data, objectId);
 }
 
 void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t objectId1, uint64_t objectId2)

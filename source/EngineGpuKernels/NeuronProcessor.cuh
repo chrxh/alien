@@ -65,6 +65,10 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
         if (object->type != ObjectType_Cell) {
             continue;
         }
+        if (object->typeData.cell.cellState == CellState_Constructing) {
+            continue;
+        }
+
         auto& cell = object->typeData.cell;
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);
@@ -74,7 +78,7 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
 
 __inline__ __device__ void NeuronProcessor::clearSignal(Object* object)
 {
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         object->typeData.cell.signal.channels[i] = 0;
     }
     object->typeData.cell.signal.numTimesSent = 0;
@@ -130,11 +134,11 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
     auto& cell = object->typeData.cell;
     int numConnections = object->numConnections;
 
-    __shared__ __align__(16) float sharedAccumulatedInput[MAX_CHANNELS];
+    __shared__ __align__(16) float sharedAccumulatedInput[NEURONS_PER_CELL];
     __shared__ int sharedMinNumTimesSent;
 
     // Init variables
-    if (laneId < MAX_CHANNELS) {
+    if (laneId < NEURONS_PER_CELL) {
         sharedAccumulatedInput[laneId] = 0.0f;
     }
     if (laneId == 0) {
@@ -158,7 +162,7 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
             sharedMinNumTimesSent = min(sharedMinNumTimesSent, connectedCell.signal.numTimesSent);
         }
         
-        if (laneId < MAX_CHANNELS) {
+        if (laneId < NEURONS_PER_CELL) {
             sharedAccumulatedInput[laneId] += connectedCell.signal.channels[laneId] * cell.neuralNetwork->connectionWeights[connIdx];
         }
     }
@@ -166,17 +170,17 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
 
     // matrix-vector multiplication (16x16 weights * 16 input vector)
     // Each thread computes one output channel
-    if (laneId < MAX_CHANNELS) {
+    if (laneId < NEURONS_PER_CELL) {
         int row = laneId;
         float result = 0.0f;
 
         // Compute dot product: weights[row][0:15] * input[0:15]
         // Weights are stored row-major, so weights[row][col] = weights[row * MAX_CHANNELS + col]
-        auto const* weightsRow = &cell.neuralNetwork->weights[row * MAX_CHANNELS];
+        auto const* weightsRow = &cell.neuralNetwork->weights[row * NEURONS_PER_CELL];
         
         // Unroll the inner loop for better performance
         #pragma unroll
-        for (int col = 0; col < MAX_CHANNELS; ++col) {
+        for (int col = 0; col < NEURONS_PER_CELL; ++col) {
             result += weightsRow[col].getValue() * sharedAccumulatedInput[col];
         }
 

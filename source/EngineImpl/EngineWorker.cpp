@@ -461,16 +461,10 @@ void EngineWorker::setCurrentTimestepForPreview(uint64_t timestep)
     _simulationCudaFacade->setCurrentTimestepForPreview(timestep);
 }
 
-void EngineWorker::testOnly_mutate(uint64_t objectId, MutationType mutationType)
+void EngineWorker::testOnly_mutate(uint64_t objectId)
 {
     EngineWorkerGuard access(this);
-    _simulationCudaFacade->testOnly_mutate(objectId, mutationType);
-}
-
-void EngineWorker::testOnly_mutationCheck(uint64_t objectId)
-{
-    EngineWorkerGuard access(this);
-    _simulationCudaFacade->testOnly_mutationCheck(objectId);
+    _simulationCudaFacade->testOnly_mutate(objectId);
 }
 
 void EngineWorker::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)

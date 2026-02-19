@@ -31,7 +31,7 @@ namespace
     {
         target.resize(numEntries);
         for (int i = 0; i < numEntries; ++i) {
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
+            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
                 target[i]._channels[j] = source[i].channels[j];
             }
         }
@@ -43,7 +43,7 @@ namespace
     {
         for (int i = 0, j = toInt(source.size()); i < j; ++i) {
             auto numChannels = source[i]._channels.size();
-            for (int k = 0; k < MAX_CHANNELS && k < numChannels; ++k) {
+            for (int k = 0; k < NEURONS_PER_CELL && k < numChannels; ++k) {
                 target[i].channels[k] = source[i]._channels[k];
             }
         }
@@ -68,13 +68,13 @@ namespace
     NeuralNetGenomeDesc convert(NeuralNetGenomeTO const& neuralNetworkGenomeTO)
     {
         NeuralNetGenomeDesc result;
-        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
             result._weights[i] = neuralNetworkGenomeTO.weights[i];
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result._biases[i] = neuralNetworkGenomeTO.biases[i];
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result._activationFunctions[i] = neuralNetworkGenomeTO.activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -86,13 +86,13 @@ namespace
     NeuralNetDesc convert(NeuralNetTO const& neuralNetworkTO)
     {
         NeuralNetDesc result;
-        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
             result._weights[i] = neuralNetworkTO.weights[i];
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result._biases[i] = neuralNetworkTO.biases[i];
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result._activationFunctions[i] = neuralNetworkTO.activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -104,13 +104,13 @@ namespace
     NeuralNetGenomeTO convert(NeuralNetGenomeDesc const& neuralNetworkDesc)
     {
         NeuralNetGenomeTO result;
-        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result.biases[i] = neuralNetworkDesc._biases[i];
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -121,19 +121,19 @@ namespace
 
     NeuralNetTO convert(NeuralNetDesc const& neuralNetworkDesc)
     {
-        CHECK(neuralNetworkDesc._weights.size() == MAX_CHANNELS * MAX_CHANNELS);
-        CHECK(neuralNetworkDesc._biases.size() == MAX_CHANNELS);
-        CHECK(neuralNetworkDesc._activationFunctions.size() == MAX_CHANNELS);
+        CHECK(neuralNetworkDesc._weights.size() == NEURONS_PER_CELL * NEURONS_PER_CELL);
+        CHECK(neuralNetworkDesc._biases.size() == NEURONS_PER_CELL);
+        CHECK(neuralNetworkDesc._activationFunctions.size() == NEURONS_PER_CELL);
         CHECK(neuralNetworkDesc._connectionWeights.size() == MAX_OBJECT_CONNECTIONS);
 
         NeuralNetTO result;
-        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
             result.weights[i] = neuralNetworkDesc._weights[i];
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result.biases[i] = neuralNetworkDesc._biases[i];
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
         }
         for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
@@ -608,7 +608,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         auto const& neuralNetworkTO = getFromHeap<NeuralNetTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
         cellDesc._neuralNetwork = convert(*neuralNetworkTO);
 
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
         cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
@@ -873,6 +873,18 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._lineageId = genomeTO.lineageId;
     NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.lineageId});
     result._frontAngle = genomeTO.frontAngle;
+    result._neuronMutationRate1._probability = genomeTO.neuronMutationRate1.probability;
+    result._neuronMutationRate1._weightSigma = genomeTO.neuronMutationRate1.weightSigma;
+    result._neuronMutationRate1._biasSigma = genomeTO.neuronMutationRate1.biasSigma;
+    result._neuronMutationRate1._activationFunctionProbability = genomeTO.neuronMutationRate1.activationFunctionProbability;
+    result._neuronMutationRate2._probability = genomeTO.neuronMutationRate2.probability;
+    result._neuronMutationRate2._weightSigma = genomeTO.neuronMutationRate2.weightSigma;
+    result._neuronMutationRate2._biasSigma = genomeTO.neuronMutationRate2.biasSigma;
+    result._neuronMutationRate2._activationFunctionProbability = genomeTO.neuronMutationRate2.activationFunctionProbability;
+    result._connectionMutationRate1._probability = genomeTO.connectionMutationRate1.probability;
+    result._connectionMutationRate1._sigma = genomeTO.connectionMutationRate1.sigma;
+    result._connectionMutationRate2._probability = genomeTO.connectionMutationRate2.probability;
+    result._connectionMutationRate2._sigma = genomeTO.connectionMutationRate2.sigma;
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -949,6 +961,18 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.id = genome._id;
     genomeTO.lineageId = genome._lineageId;
     genomeTO.frontAngle = genome._frontAngle;
+    genomeTO.neuronMutationRate1 = {
+        genome._neuronMutationRate1._probability,
+        genome._neuronMutationRate1._weightSigma,
+        genome._neuronMutationRate1._biasSigma,
+        genome._neuronMutationRate1._activationFunctionProbability};
+    genomeTO.neuronMutationRate2 = {
+        genome._neuronMutationRate2._probability,
+        genome._neuronMutationRate2._weightSigma,
+        genome._neuronMutationRate2._biasSigma,
+        genome._neuronMutationRate2._activationFunctionProbability};
+    genomeTO.connectionMutationRate1 = {genome._connectionMutationRate1._probability, genome._connectionMutationRate1._sigma};
+    genomeTO.connectionMutationRate2 = {genome._connectionMutationRate2._probability, genome._connectionMutationRate2._sigma};
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;
@@ -1491,7 +1515,7 @@ void DescConverterService::convertObjectToTO(
         }
 
         auto numChannels = cellDesc._signal._channels.size();
-        for (int i = 0; i < MAX_CHANNELS && i < numChannels; ++i) {
+        for (int i = 0; i < NEURONS_PER_CELL && i < numChannels; ++i) {
             objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
         }
         objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;

@@ -11,9 +11,9 @@
 
 struct NeuralNetGenome
 {
-    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
-    float biases[MAX_CHANNELS];
-    ActivationFunction activationFunctions[MAX_CHANNELS];
+    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
+    float biases[NEURONS_PER_CELL];
+    ActivationFunction activationFunctions[NEURONS_PER_CELL];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -254,7 +254,7 @@ union MemoryModeDataGenome
 
 struct SignalEntryGenome
 {
-    float channels[MAX_CHANNELS];
+    float channels[NEURONS_PER_CELL];
 };
 
 struct MemoryGenome
@@ -336,6 +336,20 @@ struct Gene
     Node* nodes;
 };
 
+struct NeuronMutationRate
+{
+    float probability;
+    float weightSigma;
+    float biasSigma;
+    float activationFunctionProbability;
+};
+
+struct ConnectionMutationRate
+{
+    float probability;
+    float sigma;
+};
+
 struct Genome
 {
     uint64_t id;
@@ -345,6 +359,11 @@ struct Genome
 
     uint32_t lineageId;
     float frontAngle;
+
+    NeuronMutationRate neuronMutationRate1;
+    NeuronMutationRate neuronMutationRate2;
+    ConnectionMutationRate connectionMutationRate1;
+    ConnectionMutationRate connectionMutationRate2;
 
     // Temporary data
     uint64_t genomeIndex;  // May be invalid

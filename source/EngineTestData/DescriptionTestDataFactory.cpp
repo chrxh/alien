@@ -156,24 +156,29 @@ NodeDesc DescriptionTestDataFactory::createNonDefaultNodeDesc(NodeParameter node
 
 std::pair<CreatureDesc, GenomeDesc> DescriptionTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
 {
-    auto genome = GenomeDesc()
-                      .name("Test Genome")
-                      .lineageId(502)
-                      .frontAngle(270.0f)
-                      .genes({
-                          GeneDesc()
-                              .name("Test Gene")
-                              .shape(ConstructorShape_Hexagon)
-                              .numBranches(4)
-                              .separation(true)
-                              .numConcatenations(6)
-                              .angleAlignment(ConstructorAngleAlignment_180)
-                              .stiffness(0.75f)
-                              .connectionDistance(0.8f)
-                              .nodes({
-                                  createNonDefaultNodeDesc(nodeParameter),
-                              }),
-                      });
+    auto genome =
+        GenomeDesc()
+            .name("Test Genome")
+            .lineageId(502)
+            .frontAngle(270.0f)
+            .neuronMutationRate1(NeuronMutationRateDesc().probability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f))
+            .neuronMutationRate2(NeuronMutationRateDesc().probability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f))
+            .connectionMutationRate1(ConnectionMutationRateDesc().probability(0.6f).sigma(0.7f))
+            .connectionMutationRate2(ConnectionMutationRateDesc().probability(0.8f).sigma(0.9f))
+            .genes({
+                GeneDesc()
+                    .name("Test Gene")
+                    .shape(ConstructorShape_Hexagon)
+                    .numBranches(4)
+                    .separation(true)
+                    .numConcatenations(6)
+                    .angleAlignment(ConstructorAngleAlignment_180)
+                    .stiffness(0.75f)
+                    .connectionDistance(0.8f)
+                    .nodes({
+                        createNonDefaultNodeDesc(nodeParameter),
+                    }),
+            });
 
     auto creature =
         CreatureDesc().ancestorId(1001).generation(7).numObjects(25).frontAngleId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
@@ -208,12 +213,12 @@ bool DescriptionTestDataFactory::compare(ObjectDesc const& object, NodeDesc cons
     }
     auto const& cell = object.getCellRef();
 
-    for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
         if (cell._neuralNetwork._weights[i] != node._neuralNetwork._weights[i]) {
             return false;
         }
     }
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         if (cell._neuralNetwork._biases[i] != node._neuralNetwork._biases[i]) {
             return false;
         }
@@ -696,31 +701,22 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         MuscleModeDesc muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending: {
-            muscleModeDesc =
-                AutoBendingDesc().maxAngleDeviation(0.6f).forwardBackwardRatio(0.4f).initialAngle(135.0f).forward(false);
+            muscleModeDesc = AutoBendingDesc().maxAngleDeviation(0.6f).forwardBackwardRatio(0.4f).initialAngle(135.0f).forward(false);
         } break;
         case MuscleMode_ManualBending:
-            muscleModeDesc =
-                ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f);
+            muscleModeDesc = ManualBendingDesc().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f);
             break;
         case MuscleMode_AngleBending:
             muscleModeDesc = AngleBendingDesc().maxAngleDeviation(0.7f).attractionRepulsionRatio(0.6f).initialAngle(315.0f);
             break;
         case MuscleMode_AutoCrawling: {
-            muscleModeDesc = AutoCrawlingDesc()
-                                 .maxDistanceDeviation(0.9f)
-                                 .forwardBackwardRatio(0.35f)
-                                 .initialDistance(0.6f)
-                                 .lastActualDistance(0.8f)
-                                 .forward(false);
+            muscleModeDesc =
+                AutoCrawlingDesc().maxDistanceDeviation(0.9f).forwardBackwardRatio(0.35f).initialDistance(0.6f).lastActualDistance(0.8f).forward(false);
         } break;
         case MuscleMode_ManualCrawling:
-            muscleModeDesc = ManualCrawlingDesc()
-                                 .maxDistanceDeviation(0.75f)
-                                 .forwardBackwardRatio(0.45f)
-                                 .initialDistance(0.4f)
-                                 .lastActualDistance(0.9f)
-                                 .lastDistanceDelta(0.65f);
+            muscleModeDesc =
+                ManualCrawlingDesc().maxDistanceDeviation(0.75f).forwardBackwardRatio(0.45f).initialDistance(0.4f).lastActualDistance(0.9f).lastDistanceDelta(
+                    0.65f);
             break;
         case MuscleMode_DirectMovement:
             muscleModeDesc = DirectMovementDesc();
@@ -774,8 +770,8 @@ CellTypeDesc DescriptionTestDataFactory::createNonDefaultCellTypeDesc(ObjectPara
         auto memory = MemoryDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 10; ++i) {
             SignalEntryDesc entry;
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
+            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
+                entry._channels[j] = static_cast<float>(i * NEURONS_PER_CELL + j) * 0.15f;
             }
             memory._signalEntries.emplace_back(entry);
         }
@@ -937,8 +933,8 @@ CellTypeGenomeDesc DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDes
         auto memory = MemoryGenomeDesc().mode(memoryModeDesc).channelBitMask(0b1111000001010101);
         for (int i = 0; i < 5; ++i) {
             SignalEntryGenomeDesc entry;
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
+            for (int j = 0; j < NEURONS_PER_CELL; ++j) {
+                entry._channels[j] = static_cast<float>(i * NEURONS_PER_CELL + j) * 0.15f;
             }
             memory._signalEntries.emplace_back(entry);
         }

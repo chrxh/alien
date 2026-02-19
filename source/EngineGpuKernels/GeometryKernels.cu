@@ -167,7 +167,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         // Compute signal strength from cell signal channels
         float signalStrength = 0.0f;
         if (object->type == ObjectType_Cell) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
+            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                 signalStrength += abs(object->typeData.cell.signal.channels[i]);
             }
             signalStrength = min(1.0f, sqrtf(sqrtf(signalStrength)) / 2.0f);

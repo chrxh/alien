@@ -11,9 +11,9 @@
 
 struct NeuralNetGenomeTO
 {
-    NeuralNetWeight weights[MAX_CHANNELS * MAX_CHANNELS];
-    float biases[MAX_CHANNELS];
-    ActivationFunction activationFunctions[MAX_CHANNELS];
+    NeuralNetWeight weights[NEURONS_PER_CELL * NEURONS_PER_CELL];
+    float biases[NEURONS_PER_CELL];
+    ActivationFunction activationFunctions[NEURONS_PER_CELL];
     float connectionWeights[MAX_OBJECT_CONNECTIONS];
 };
 
@@ -259,7 +259,7 @@ union MemoryModeDataGenomeTO
 
 struct SignalEntryGenomeTO
 {
-    float channels[MAX_CHANNELS];
+    float channels[NEURONS_PER_CELL];
 };
 
 struct MemoryGenomeTO
@@ -341,6 +341,20 @@ struct GeneTO
     uint64_t nodeArrayIndex;
 };
 
+struct NeuronMutationRateTO
+{
+    float probability;
+    float weightSigma;
+    float biasSigma;
+    float activationFunctionProbability;
+};
+
+struct ConnectionMutationRateTO
+{
+    float probability;
+    float sigma;
+};
+
 struct GenomeTO
 {
     uint64_t id;
@@ -350,6 +364,11 @@ struct GenomeTO
 
     uint32_t lineageId;
     float frontAngle;
+
+    NeuronMutationRateTO neuronMutationRate1;
+    NeuronMutationRateTO neuronMutationRate2;
+    ConnectionMutationRateTO connectionMutationRate1;
+    ConnectionMutationRateTO connectionMutationRate2;
 
     // Temporary data
     uint64_t genomeIndexOnGpu;
