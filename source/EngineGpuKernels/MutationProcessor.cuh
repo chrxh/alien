@@ -21,7 +21,6 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
     __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
-    static constexpr int BlockDim = NEURONS_PER_CELL;
 
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
@@ -34,7 +33,7 @@ private:
 /************************************************************************/
 __inline__ __device__ void MutationProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    CUDA_CHECK(blockDim.x == BlockDim);
+    CUDA_CHECK(blockDim.x == NEURONS_PER_CELL);
 
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
