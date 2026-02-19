@@ -46,7 +46,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
             auto mutatedGenome = factory.cloneGenome(creature->genome);
 
             // Apply mutations to cloned genome
-            applyMutations_neurons(data, mutatedGenome);
+            applyMutations(data, mutatedGenome);
 
             // Update genome
             creature->genome = mutatedGenome;
