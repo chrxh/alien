@@ -19,6 +19,7 @@ public:
 
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
+    __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 };
 
@@ -77,26 +78,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                         if (rate.weightSigma > 0) {
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
                                 auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
-
-                                // Box-Muller transform for Gaussian random
-                                float u1 = max(1.0e-7f, data.primaryNumberGen.random());
-                                float u2 = data.primaryNumberGen.random();
-                                float gaussian = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * Const::PI * u2);
-
-                                float newValue = weight.getValue() + gaussian * rate.weightSigma;
+                                float newValue = weight.getValue() + generateGaussian(data) * rate.weightSigma;
                                 newValue = max(-2.0f, min(2.0f, newValue));
                                 weight = NeuralNetWeight(newValue);
                             }
                         }
                         if (rate.biasSigma > 0) {
                             auto& bias = node.neuralNetwork.biases[neuronIndex];
-
-                            // Box-Muller transform for Gaussian random
-                            float u1 = max(1.0e-7f, data.primaryNumberGen.random());
-                            float u2 = data.primaryNumberGen.random();
-                            float gaussian = sqrtf(-2.0f * logf(u1)) * cosf(2.0f * Const::PI * u2);
-
-                            float newBias = bias + gaussian * rate.biasSigma;
+                            float newBias = bias + generateGaussian(data) * rate.biasSigma;
                             newBias = max(-2.0f, min(2.0f, newBias));
                             bias = newBias;
                         }
@@ -105,6 +94,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
             }
         }
     }
+}
+
+__inline__ __device__ float MutationProcessor::generateGaussian(SimulationData& data)
+{
+    // Box-Muller transform for Gaussian random
+    float u1 = max(1.0e-7f, data.primaryNumberGen.random());
+    float u2 = data.primaryNumberGen.random();
+    return sqrtf(-2.0f * logf(u1)) * cosf(2.0f * Const::PI * u2);
 }
 
 __inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data, float probability)
