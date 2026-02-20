@@ -437,8 +437,8 @@ struct GenomeDesc
 
     MEMBER(GenomeDesc, float, lineageMutationProbability, 0.0f);
 
-    MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutationRate1, NeuronMutationDesc());
-    MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutationRate2, NeuronMutationDesc());
+    MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutation1, NeuronMutationDesc());
+    MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutation2, NeuronMutationDesc());
 
     MEMBER(GenomeDesc, ConnectionMutationDesc, connectionMutationRate1, ConnectionMutationDesc());
     MEMBER(GenomeDesc, ConnectionMutationDesc, connectionMutationRate2, ConnectionMutationDesc());

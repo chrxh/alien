@@ -842,8 +842,8 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);
-        ar(data._neuronMutationRate1);
-        ar(data._neuronMutationRate2);
+        ar(data._neuronMutation1);
+        ar(data._neuronMutation2);
         ar(data._connectionMutationRate1);
         ar(data._connectionMutationRate2);
     }

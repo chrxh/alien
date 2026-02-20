@@ -34,16 +34,16 @@ namespace
             genomeTO.lineageId = genome->lineageId;
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.lineageMutationProbability = genome->lineageMutationProbability;
-            genomeTO.neuronMutationRate1 = {
-                genome->neuronMutationRate1.probability,
-                genome->neuronMutationRate1.weightSigma,
-                genome->neuronMutationRate1.biasSigma,
-                genome->neuronMutationRate1.activationFunctionProbability};
-            genomeTO.neuronMutationRate2 = {
-                genome->neuronMutationRate2.probability,
-                genome->neuronMutationRate2.weightSigma,
-                genome->neuronMutationRate2.biasSigma,
-                genome->neuronMutationRate2.activationFunctionProbability};
+            genomeTO.neuronMutation1 = {
+                genome->neuronMutation1.probability,
+                genome->neuronMutation1.weightSigma,
+                genome->neuronMutation1.biasSigma,
+                genome->neuronMutation1.activationFunctionProbability};
+            genomeTO.neuronMutation2 = {
+                genome->neuronMutation2.probability,
+                genome->neuronMutation2.weightSigma,
+                genome->neuronMutation2.biasSigma,
+                genome->neuronMutation2.activationFunctionProbability};
             genomeTO.connectionMutationRate1 = {genome->connectionMutationRate1.probability, genome->connectionMutationRate1.sigma};
             genomeTO.connectionMutationRate2 = {genome->connectionMutationRate2.probability, genome->connectionMutationRate2.sigma};
             genomeTO.numGenes = genome->numGenes;
