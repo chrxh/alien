@@ -297,17 +297,14 @@ void _NodeEditorWidget::processNodeAttributes()
 
             if (nodeType == CellType_Base) {
             } else if (nodeType == CellType_Depot) {
-                AlienGui::BeginIndent();
                 auto& depot = std::get<DepotGenomeDesc>(node._cellType);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Max energy for storage").format("%.1f").textWidth(rightColumnWidth), depot._storageLimit);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Initial stored energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
-                AlienGui::EndIndent();
             } else if (nodeType == CellType_Sensor) {
 
                 ImGui::PushID("Sensor");
-                AlienGui::BeginIndent();
 
                 // Auto activation interval
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
@@ -360,12 +357,9 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Maximum range
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
 
-                AlienGui::EndIndent();
                 ImGui::PopID();
 
             } else if (nodeType == CellType_Generator) {
-
-                AlienGui::BeginIndent();
 
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
 
@@ -405,11 +399,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::EndIndent();
                 }
 
-                AlienGui::EndIndent();
-
             } else if (nodeType == CellType_Attacker) {
-
-                AlienGui::BeginIndent();
 
                 auto& attacker = std::get<AttackerGenomeDesc>(node._cellType);
                 auto mode = attacker.getMode();
@@ -426,21 +416,13 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     AlienGui::EndIndent();
                 }
-
-                AlienGui::EndIndent();
             } else if (nodeType == CellType_Injector) {
-
-                AlienGui::BeginIndent();
 
                 // Gene index
                 auto& injector = std::get<InjectorGenomeDesc>(node._cellType);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(rightColumnWidth), injector._geneIndex);
 
-                AlienGui::EndIndent();
-
             } else if (nodeType == CellType_Muscle) {
-
-                AlienGui::BeginIndent();
 
                 // Mode
                 auto& muscle = std::get<MuscleGenomeDesc>(node._cellType);
@@ -532,21 +514,13 @@ void _NodeEditorWidget::processNodeAttributes()
                 } else if (mode == MuscleMode_DirectMovement) {
                 }
 
-                AlienGui::EndIndent();
-
             } else if (nodeType == CellType_Defender) {
-
-                AlienGui::BeginIndent();
 
                 // Defender mode
                 auto& defender = std::get<DefenderGenomeDesc>(node._cellType);
                 AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::DefenderModeStrings).textWidth(rightColumnWidth), defender._mode);
 
-                AlienGui::EndIndent();
-
             } else if (nodeType == CellType_Reconnector) {
-
-                AlienGui::BeginIndent();
 
                 // Mode selection
                 auto& reconnector = std::get<ReconnectorGenomeDesc>(node._cellType);
@@ -577,19 +551,13 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::EndIndent();
                 }
 
-                AlienGui::EndIndent();
-
             } else if (nodeType == CellType_Detonator) {
-
-                AlienGui::BeginIndent();
 
                 // Countdown
                 auto& detonator = std::get<DetonatorGenomeDesc>(node._cellType);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth), detonator._countdown);
-
-                AlienGui::EndIndent();
             } else if (nodeType == CellType_Digestor) {
-                AlienGui::BeginIndent();
+                
                 auto& digestor = std::get<DigestorGenomeDesc>(node._cellType);
                 AlienGui::SliderFloat(
                     AlienGui::SliderFloatParameters().name("Energy conductivity").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
@@ -598,10 +566,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::SliderFloat(
                     AlienGui::SliderFloatParameters().name("Energy conversion").max(1.0f).format("%.2f").textWidth(rightColumnWidth), &rawEnergyConversionRate);
                 digestor.setRawEnergyConversionRate(rawEnergyConversionRate);
-                AlienGui::EndIndent();
             } else if (nodeType == CellType_Memory) {
-
-                AlienGui::BeginIndent();
 
                 // Mode selection
                 auto& memory = std::get<MemoryGenomeDesc>(node._cellType);
@@ -659,10 +624,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     }
                 }
 
-                AlienGui::EndIndent();
             } else if (nodeType == CellType_Communicator) {
-
-                AlienGui::BeginIndent();
 
                 // Mode selection
                 auto& communicator = std::get<CommunicatorGenomeDesc>(node._cellType);
@@ -689,8 +651,6 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     AlienGui::EndIndent();
                 }
-
-                AlienGui::EndIndent();
             }
 
             table.next();
