@@ -478,20 +478,11 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .name("Meta mutations")
                 .parameters({
                     ParameterSpec()
-                        .name("Neuron mutations probability")
-                        .reference(FloatSpec().member(&SimulationParameters::metaMutationNeuronsProbability).min(0.0f).max(1.0f).logarithmic(true)),
-                    ParameterSpec()
                         .name("Neuron mutations sigma")
                         .reference(FloatSpec().member(&SimulationParameters::metaMutationNeuronsSigma).min(0.0f).max(1.0f).logarithmic(true)),
                     ParameterSpec()
-                        .name("Connection mutations probability")
-                        .reference(FloatSpec().member(&SimulationParameters::metaMutationConnectionsProbability).min(0.0f).max(1.0f).logarithmic(true)),
-                    ParameterSpec()
                         .name("Connection mutations sigma")
                         .reference(FloatSpec().member(&SimulationParameters::metaMutationConnectionsSigma).min(0.0f).max(1.0f).logarithmic(true)),
-                    ParameterSpec()
-                        .name("Lineage mutations probability")
-                        .reference(FloatSpec().member(&SimulationParameters::metaMutationLineagesProbability).min(0.0f).max(1.0f).logarithmic(true)),
                     ParameterSpec()
                         .name("Lineage mutations sigma")
                         .reference(FloatSpec().member(&SimulationParameters::metaMutationLineagesSigma).min(0.0f).max(1.0f).logarithmic(true)),

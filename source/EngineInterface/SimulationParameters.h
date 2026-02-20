@@ -126,11 +126,8 @@ struct SimulationParameters
     static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Meta mutations
-    BaseParameter<float> metaMutationNeuronsProbability = {0};
     BaseParameter<float> metaMutationNeuronsSigma = {0.01f};
-    BaseParameter<float> metaMutationConnectionsProbability = {0};
     BaseParameter<float> metaMutationConnectionsSigma = {0.01f};
-    BaseParameter<float> metaMutationLineagesProbability = {0};
     BaseParameter<float> metaMutationLineagesSigma = {0.01f};
 
     // Cell type: Attacker

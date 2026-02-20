@@ -172,42 +172,33 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
 
     if (laneId == 0) {
         // Meta-mutate neuron mutation rates
-        float neuronProb = cudaSimulationParameters.metaMutationNeuronsProbability.value;
         float neuronSigma = cudaSimulationParameters.metaMutationNeuronsSigma.value;
-        if (neuronProb > 0 && neuronSigma > 0) {
-            if (data.primaryNumberGen.random() < neuronProb) {
-                auto mutateFloat = [&](float& val) { val = max(0.0f, val + generateGaussian(data) * neuronSigma); };
-                mutateFloat(genome->neuronMutation1.probability);
-                mutateFloat(genome->neuronMutation1.weightSigma);
-                mutateFloat(genome->neuronMutation1.biasSigma);
-                mutateFloat(genome->neuronMutation1.activationFunctionProbability);
-                mutateFloat(genome->neuronMutation2.probability);
-                mutateFloat(genome->neuronMutation2.weightSigma);
-                mutateFloat(genome->neuronMutation2.biasSigma);
-                mutateFloat(genome->neuronMutation2.activationFunctionProbability);
-            }
+        if (neuronSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = max(0.0f, val + generateGaussian(data) * neuronSigma); };
+            mutateFloat(genome->neuronMutation1.probability);
+            mutateFloat(genome->neuronMutation1.weightSigma);
+            mutateFloat(genome->neuronMutation1.biasSigma);
+            mutateFloat(genome->neuronMutation1.activationFunctionProbability);
+            mutateFloat(genome->neuronMutation2.probability);
+            mutateFloat(genome->neuronMutation2.weightSigma);
+            mutateFloat(genome->neuronMutation2.biasSigma);
+            mutateFloat(genome->neuronMutation2.activationFunctionProbability);
         }
 
         // Meta-mutate connection mutation rates
-        float connProb = cudaSimulationParameters.metaMutationConnectionsProbability.value;
         float connSigma = cudaSimulationParameters.metaMutationConnectionsSigma.value;
-        if (connProb > 0 && connSigma > 0) {
-            if (data.primaryNumberGen.random() < connProb) {
-                auto mutateFloat = [&](float& val) { val = max(0.0f, val + generateGaussian(data) * connSigma); };
-                mutateFloat(genome->connectionMutationRate1.probability);
-                mutateFloat(genome->connectionMutationRate1.sigma);
-                mutateFloat(genome->connectionMutationRate2.probability);
-                mutateFloat(genome->connectionMutationRate2.sigma);
-            }
+        if (connSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = max(0.0f, val + generateGaussian(data) * connSigma); };
+            mutateFloat(genome->connectionMutationRate1.probability);
+            mutateFloat(genome->connectionMutationRate1.sigma);
+            mutateFloat(genome->connectionMutationRate2.probability);
+            mutateFloat(genome->connectionMutationRate2.sigma);
         }
 
         // Meta-mutate lineage mutation probability
-        float lineageProb = cudaSimulationParameters.metaMutationLineagesProbability.value;
         float lineageSigma = cudaSimulationParameters.metaMutationLineagesSigma.value;
-        if (lineageProb > 0 && lineageSigma > 0) {
-            if (data.primaryNumberGen.random() < lineageProb) {
-                genome->lineageMutationProbability = max(0.0f, genome->lineageMutationProbability + generateGaussian(data) * lineageSigma);
-            }
+        if (lineageSigma > 0) {
+            genome->lineageMutationProbability = max(0.0f, genome->lineageMutationProbability + generateGaussian(data) * lineageSigma);
         }
     }
 }
