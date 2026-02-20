@@ -87,7 +87,7 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
 void _NeuralNetEditorWidget::processChannelWeightSliders(std::vector<NeuralNetWeight>& weights, SelectionData& selectionData, LayoutData& layout)
 {
     pushDefaultColors();
-    ImGui::Button("Neurons", {layout.width - 2 * ImGui::GetStyle().FramePadding.x, 0});
+    ImGui::Button("Neuron weights", {layout.width - 2 * ImGui::GetStyle().FramePadding.x, 0});
     popColors();
 
     ImGui::PushID("ChannelWeightSliders");
