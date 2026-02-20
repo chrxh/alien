@@ -159,7 +159,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_lineages(Simulation
 
     if (laneId == 0 && genome->lineageMutationProbability > 0) {
         if (data.primaryNumberGen.random() < genome->lineageMutationProbability) {
-            genome->lineageId = data.primaryNumberGen.random(0x7FFFFFFF);
+            genome->lineageId = data.primaryNumberGen.createLineageId();
         }
     }
 }
