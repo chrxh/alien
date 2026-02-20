@@ -435,6 +435,8 @@ struct GenomeDesc
     MEMBER(GenomeDesc, int, lineageId, 0);
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
 
+    MEMBER(GenomeDesc, float, lineageMutationProbability, 0.0f);
+
     MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutationRate1, NeuronMutationDesc());
     MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutationRate2, NeuronMutationDesc());
 

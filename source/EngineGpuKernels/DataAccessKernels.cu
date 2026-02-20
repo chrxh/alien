@@ -33,6 +33,7 @@ namespace
             genomeTO.id = genome->id;
             genomeTO.lineageId = genome->lineageId;
             genomeTO.frontAngle = genome->frontAngle;
+            genomeTO.lineageMutationProbability = genome->lineageMutationProbability;
             genomeTO.neuronMutationRate1 = {
                 genome->neuronMutationRate1.probability,
                 genome->neuronMutationRate1.weightSigma,

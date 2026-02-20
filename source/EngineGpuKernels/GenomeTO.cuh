@@ -364,6 +364,7 @@ struct GenomeTO
 
     uint32_t lineageId;
     float frontAngle;
+    float lineageMutationProbability;
 
     NeuronMutationTO neuronMutationRate1;
     NeuronMutationTO neuronMutationRate2;

@@ -169,6 +169,7 @@ namespace
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
+    auto constexpr Id_Genome_LineageMutationProbability = 4;
 
     auto constexpr Id_NeuronMutation_Probability = 0;
     auto constexpr Id_NeuronMutation_WeightSigma = 1;
@@ -837,6 +838,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+        loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);

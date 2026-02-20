@@ -873,6 +873,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._lineageId = genomeTO.lineageId;
     NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.lineageId});
     result._frontAngle = genomeTO.frontAngle;
+    result._lineageMutationProbability = genomeTO.lineageMutationProbability;
     result._neuronMutationRate1._probability = genomeTO.neuronMutationRate1.probability;
     result._neuronMutationRate1._weightSigma = genomeTO.neuronMutationRate1.weightSigma;
     result._neuronMutationRate1._biasSigma = genomeTO.neuronMutationRate1.biasSigma;
@@ -961,6 +962,7 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.id = genome._id;
     genomeTO.lineageId = genome._lineageId;
     genomeTO.frontAngle = genome._frontAngle;
+    genomeTO.lineageMutationProbability = genome._lineageMutationProbability;
     genomeTO.neuronMutationRate1 = {
         genome._neuronMutationRate1._probability,
         genome._neuronMutationRate1._weightSigma,

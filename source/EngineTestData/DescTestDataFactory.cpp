@@ -161,6 +161,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
             .name("Test Genome")
             .lineageId(502)
             .frontAngle(270.0f)
+            .lineageMutationProbability(0.05f)
             .neuronMutationRate1(NeuronMutationDesc().probability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f))
             .neuronMutationRate2(NeuronMutationDesc().probability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f))
             .connectionMutationRate1(ConnectionMutationDesc().probability(0.6f).sigma(0.7f))

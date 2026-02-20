@@ -24,6 +24,7 @@ public:
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations_lineages(SimulationData& data, Genome* genome);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 };
@@ -78,6 +79,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
 {
     applyMutations_neurons(data, genome);
     applyMutations_connections(data, genome);
+    applyMutations_lineages(data, genome);
 }
 
 __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome)
@@ -147,6 +149,17 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
                     }
                 }
             }
+        }
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_lineages(SimulationData& data, Genome* genome)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+
+    if (laneId == 0 && genome->lineageMutationProbability > 0) {
+        if (data.primaryNumberGen.random() < genome->lineageMutationProbability) {
+            genome->lineageId = data.primaryNumberGen.random(0x7FFFFFFF);
         }
     }
 }

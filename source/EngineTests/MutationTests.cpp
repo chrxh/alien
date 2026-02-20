@@ -481,3 +481,66 @@ TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
 
     EXPECT_TRUE(compareAllExceptConnectionWeights(genome, actualGenome));
 }
+
+TEST_F(MutationTests, lineageMutation_lineageIdActuallyChanges)
+{
+    auto genome = createTestGenome();
+    genome.lineageId(42).lineageMutationProbability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    EXPECT_NE(actualGenome._lineageId, 42);
+}
+
+TEST_F(MutationTests, lineageMutation_zeroProbabilityNoChange)
+{
+    auto genome = createTestGenome();
+    genome.lineageId(42).lineageMutationProbability(0.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    EXPECT_EQ(actualGenome._lineageId, 42);
+}
+
+TEST_F(MutationTests, lineageMutation_keepOtherAttributesUnchanged)
+{
+    auto genome = createTestGenome();
+    genome.lineageId(42).lineageMutationProbability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCell = actualData.getObjectRef(1).getCellRef();
+    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
+
+    // Reset lineageId on both to compare everything else
+    genome._lineageId = 0;
+    actualGenome._lineageId = 0;
+    EXPECT_EQ(genome, actualGenome);
+}
