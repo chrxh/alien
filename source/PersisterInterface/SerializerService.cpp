@@ -169,14 +169,15 @@ namespace
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
+    auto constexpr Id_Genome_LineageMutationProbability = 4;
 
-    auto constexpr Id_NeuronMutationRate_Probability = 0;
-    auto constexpr Id_NeuronMutationRate_WeightSigma = 1;
-    auto constexpr Id_NeuronMutationRate_BiasSigma = 2;
-    auto constexpr Id_NeuronMutationRate_ActivationFunctionProbability = 3;
+    auto constexpr Id_NeuronMutation_Probability = 0;
+    auto constexpr Id_NeuronMutation_WeightSigma = 1;
+    auto constexpr Id_NeuronMutation_BiasSigma = 2;
+    auto constexpr Id_NeuronMutation_ActivationFunctionProbability = 3;
 
-    auto constexpr Id_ConnectionMutationRate_Probability = 0;
-    auto constexpr Id_ConnectionMutationRate_Sigma = 1;
+    auto constexpr Id_ConnectionMutation_Probability = 0;
+    auto constexpr Id_ConnectionMutation_Sigma = 1;
 
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
@@ -800,33 +801,33 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NeuronMutationRateDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, NeuronMutationDesc& data)
     {
-        NeuronMutationRateDesc defaultObject;
+        NeuronMutationDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuronMutationRate_Probability, data._probability, defaultObject._probability);
-        loadSave(task, auxiliaries, Id_NeuronMutationRate_WeightSigma, data._weightSigma, defaultObject._weightSigma);
-        loadSave(task, auxiliaries, Id_NeuronMutationRate_BiasSigma, data._biasSigma, defaultObject._biasSigma);
+        loadSave(task, auxiliaries, Id_NeuronMutation_Probability, data._probability, defaultObject._probability);
+        loadSave(task, auxiliaries, Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
+        loadSave(task, auxiliaries, Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
         loadSave(
             task,
             auxiliaries,
-            Id_NeuronMutationRate_ActivationFunctionProbability,
+            Id_NeuronMutation_ActivationFunctionProbability,
             data._activationFunctionProbability,
             defaultObject._activationFunctionProbability);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NeuronMutationRateDesc)
+    SPLIT_SERIALIZATION(NeuronMutationDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ConnectionMutationRateDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, ConnectionMutationDesc& data)
     {
-        ConnectionMutationRateDesc defaultObject;
+        ConnectionMutationDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_ConnectionMutationRate_Probability, data._probability, defaultObject._probability);
-        loadSave(task, auxiliaries, Id_ConnectionMutationRate_Sigma, data._sigma, defaultObject._sigma);
+        loadSave(task, auxiliaries, Id_ConnectionMutation_Probability, data._probability, defaultObject._probability);
+        loadSave(task, auxiliaries, Id_ConnectionMutation_Sigma, data._sigma, defaultObject._sigma);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ConnectionMutationRateDesc)
+    SPLIT_SERIALIZATION(ConnectionMutationDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GenomeDesc& data)
@@ -837,6 +838,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+        loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);

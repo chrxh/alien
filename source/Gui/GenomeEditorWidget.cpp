@@ -85,6 +85,16 @@ void _GenomeEditorWidget::processHeaderData()
 
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
+
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Lineage mutation probability")
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &_editData->genome._lineageMutationProbability);
             table.next();
 
             AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 1"));

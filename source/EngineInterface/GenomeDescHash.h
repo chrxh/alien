@@ -559,6 +559,7 @@ struct std::hash<GenomeDesc>
             hash_combine(seed, std::hash<GeneDesc>{}(gene));
         }
         hash_combine(seed, desc._frontAngle);
+        hash_combine(seed, desc._lineageMutationProbability);
         hash_combine(seed, desc._neuronMutationRate1._probability);
         hash_combine(seed, desc._neuronMutationRate1._weightSigma);
         hash_combine(seed, desc._neuronMutationRate1._biasSigma);
