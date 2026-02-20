@@ -142,7 +142,7 @@ struct SimulationParameters
             {1, 1, 1, 1, 1, 1, 1},
             {1, 1, 1, 1, 1, 1, 1}}};
     BaseParameter<ColorVector<float>> attackerStrength = {{0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f}};
-    BaseParameter<ColorVector<float>> attackerRadius = {{1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f}};
+    BaseParameter<ColorVector<float>> attackerRadius = {{2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}};
     static float constexpr attackerMaxRawEnergyThreshold = 2.0f;
     static float constexpr attackerCreatureSensorRange = 5.0f;
 

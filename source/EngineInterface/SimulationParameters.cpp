@@ -470,13 +470,14 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Neuron mutations sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::metaMutationNeuronsSigma).min(0.0f).max(1.0f).logarithmic(true)),
+                        .reference(FloatSpec().member(&SimulationParameters::metaMutationNeuronsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
                         .name("Connection mutations sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::metaMutationConnectionsSigma).min(0.0f).max(1.0f).logarithmic(true)),
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::metaMutationConnectionsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
                         .name("Lineage mutations sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::metaMutationLineagesSigma).min(0.0f).max(1.0f).logarithmic(true)),
+                        .reference(FloatSpec().member(&SimulationParameters::metaMutationLineagesSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")
