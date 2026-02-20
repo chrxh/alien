@@ -79,21 +79,12 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Primary cell coloring")
                         .reference(AlternativeSpec()
-                                       .member(&SimulationParameters::primaryCellColoring)
+                                       .member(&SimulationParameters::cellColoring)
                                        .alternatives({{"Energy", {}}})
                                        .alternatives({
                                            {"Energy", {}},
                                            {"Standard cell color", {}},
-                                           {"Mutant", {}},
-                                           {"Mutant and cell function", {}},
-                                           {"Cell state", {}},
-                                           {"Genome complexity", {}},
-                                           {"Specific cell function",
-                                            {ParameterSpec()
-                                                 .name("Highlighted cell function")
-                                                 .reference(AlternativeSpec().member(&SimulationParameters::highlightedCellType).alternatives(cellTypeStrings))
-                                                 .description("The specific cell function type to be highlighted can be selected here.")}},
-                                           {"Every cell function", {}},
+                                           {"Lineage", {}},
                                        }))
                         .description(coloringTooltip),
                     ParameterSpec()

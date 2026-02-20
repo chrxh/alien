@@ -29,7 +29,7 @@ struct SimulationParameters
 
     // Visualization
     BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
-    BaseParameter<CellColoring> primaryCellColoring = {CellColoring_CellColor};
+    BaseParameter<CellColoring> cellColoring = {CellColoring_CellColor};
     BaseParameter<CellType> highlightedCellType = {CellType_Base};
     BaseParameter<float> objectRadius = {0.25f};
     BaseParameter<float> zoomLevelForNeuronVisualization = {2.0f};
