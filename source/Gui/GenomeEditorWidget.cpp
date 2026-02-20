@@ -138,7 +138,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &_editData->genome._neuronMutationRate1._probability);
+                &_editData->genome._neuronMutation1._probability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name("Weight sigma")
@@ -148,7 +148,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .logarithmic(true)
                     .format("%.2f")
                     .textWidth(rightColumnWidth),
-                &_editData->genome._neuronMutationRate1._weightSigma);
+                &_editData->genome._neuronMutation1._weightSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name("Bias sigma")
@@ -158,7 +158,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .logarithmic(true)
                     .format("%.3f")
                     .textWidth(rightColumnWidth),
-                &_editData->genome._neuronMutationRate1._biasSigma);
+                &_editData->genome._neuronMutation1._biasSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name("ActFn probability")
@@ -168,7 +168,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &_editData->genome._neuronMutationRate1._activationFunctionProbability);
+                &_editData->genome._neuronMutation1._activationFunctionProbability);
             table.next();
 
             AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 2"));
@@ -181,7 +181,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &_editData->genome._neuronMutationRate2._probability);
+                &_editData->genome._neuronMutation2._probability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name("Weight sigma")
@@ -191,7 +191,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .logarithmic(true)
                     .format("%.2f")
                     .textWidth(rightColumnWidth),
-                &_editData->genome._neuronMutationRate2._weightSigma);
+                &_editData->genome._neuronMutation2._weightSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name("Bias sigma")
@@ -201,7 +201,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .logarithmic(true)
                     .format("%.3f")
                     .textWidth(rightColumnWidth),
-                &_editData->genome._neuronMutationRate2._biasSigma);
+                &_editData->genome._neuronMutation2._biasSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name("ActFn probability")
@@ -211,7 +211,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &_editData->genome._neuronMutationRate2._activationFunctionProbability);
+                &_editData->genome._neuronMutation2._activationFunctionProbability);
             table.next();
 
             table.end();

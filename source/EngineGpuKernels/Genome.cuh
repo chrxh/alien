@@ -361,8 +361,8 @@ struct Genome
     float frontAngle;
     float lineageMutationProbability;
 
-    NeuronMutation neuronMutationRate1;
-    NeuronMutation neuronMutationRate2;
+    NeuronMutation neuronMutation1;
+    NeuronMutation neuronMutation2;
     ConnectionMutation connectionMutationRate1;
     ConnectionMutation connectionMutationRate2;
 

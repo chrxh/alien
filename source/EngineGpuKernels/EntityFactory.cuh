@@ -90,16 +90,16 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->lineageId = genomeTO.lineageId;
     genome->frontAngle = genomeTO.frontAngle;
     genome->lineageMutationProbability = genomeTO.lineageMutationProbability;
-    genome->neuronMutationRate1 = {
-        genomeTO.neuronMutationRate1.probability,
-        genomeTO.neuronMutationRate1.weightSigma,
-        genomeTO.neuronMutationRate1.biasSigma,
-        genomeTO.neuronMutationRate1.activationFunctionProbability};
-    genome->neuronMutationRate2 = {
-        genomeTO.neuronMutationRate2.probability,
-        genomeTO.neuronMutationRate2.weightSigma,
-        genomeTO.neuronMutationRate2.biasSigma,
-        genomeTO.neuronMutationRate2.activationFunctionProbability};
+    genome->neuronMutation1 = {
+        genomeTO.neuronMutation1.probability,
+        genomeTO.neuronMutation1.weightSigma,
+        genomeTO.neuronMutation1.biasSigma,
+        genomeTO.neuronMutation1.activationFunctionProbability};
+    genome->neuronMutation2 = {
+        genomeTO.neuronMutation2.probability,
+        genomeTO.neuronMutation2.weightSigma,
+        genomeTO.neuronMutation2.biasSigma,
+        genomeTO.neuronMutation2.activationFunctionProbability};
     genome->connectionMutationRate1 = {genomeTO.connectionMutationRate1.probability, genomeTO.connectionMutationRate1.sigma};
     genome->connectionMutationRate2 = {genomeTO.connectionMutationRate2.probability, genomeTO.connectionMutationRate2.sigma};
     genome->numGenes = genomeTO.numGenes;

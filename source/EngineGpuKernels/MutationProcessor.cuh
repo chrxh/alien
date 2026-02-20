@@ -88,7 +88,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
-    NeuronMutation rates[2] = {genome->neuronMutationRate1, genome->neuronMutationRate2};
+    NeuronMutation rates[2] = {genome->neuronMutation1, genome->neuronMutation2};
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
@@ -177,14 +177,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (neuronProb > 0 && neuronSigma > 0) {
             if (data.primaryNumberGen.random() < neuronProb) {
                 auto mutateFloat = [&](float& val) { val = max(0.0f, val + generateGaussian(data) * neuronSigma); };
-                mutateFloat(genome->neuronMutationRate1.probability);
-                mutateFloat(genome->neuronMutationRate1.weightSigma);
-                mutateFloat(genome->neuronMutationRate1.biasSigma);
-                mutateFloat(genome->neuronMutationRate1.activationFunctionProbability);
-                mutateFloat(genome->neuronMutationRate2.probability);
-                mutateFloat(genome->neuronMutationRate2.weightSigma);
-                mutateFloat(genome->neuronMutationRate2.biasSigma);
-                mutateFloat(genome->neuronMutationRate2.activationFunctionProbability);
+                mutateFloat(genome->neuronMutation1.probability);
+                mutateFloat(genome->neuronMutation1.weightSigma);
+                mutateFloat(genome->neuronMutation1.biasSigma);
+                mutateFloat(genome->neuronMutation1.activationFunctionProbability);
+                mutateFloat(genome->neuronMutation2.probability);
+                mutateFloat(genome->neuronMutation2.weightSigma);
+                mutateFloat(genome->neuronMutation2.biasSigma);
+                mutateFloat(genome->neuronMutation2.activationFunctionProbability);
             }
         }
 
