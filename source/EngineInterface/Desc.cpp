@@ -198,13 +198,13 @@ CellDesc& CellDesc::signal(std::vector<float> const& value)
 ObjectDesc::ObjectDesc(bool createIds)
 {
     if (createIds) {
-        _id = NumberGenerator::get().createId();
+        _id = NumberGenerator::get().createEntityId();
     }
 }
 
 ObjectDesc ObjectDesc::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.entityId = id});
+    NumberGenerator::get().adaptMaxEntityId(id);
     _id = id;
     return *this;
 }
@@ -277,24 +277,24 @@ float ObjectDesc::getAngleSpan(uint64_t connectedObjectId1, uint64_t connectedOb
 
 EnergyDesc::EnergyDesc()
 {
-    _id = NumberGenerator::get().createId();
+    _id = NumberGenerator::get().createEntityId();
 }
 
 EnergyDesc EnergyDesc::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.entityId = id});
+    NumberGenerator::get().adaptMaxEntityId(id);
     _id = id;
     return *this;
 }
 
 CreatureDesc::CreatureDesc()
 {
-    _id = NumberGenerator::get().createId();
+    _id = NumberGenerator::get().createEntityId();
 }
 
 CreatureDesc CreatureDesc::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.entityId = id});
+    NumberGenerator::get().adaptMaxEntityId(id);
     _id = id;
     return *this;
 }
@@ -315,7 +315,7 @@ bool Desc::isEmpty() const
 Desc& Desc::add(Desc&& other, bool assignNewIds /*= true*/)
 {
     if (assignNewIds) {
-        other.assignNewIds();
+        other.assignNewEntityIds();
     }
     _objects.insert(_objects.end(), other._objects.begin(), other._objects.end());
     _energies.insert(_energies.end(), other._energies.begin(), other._energies.end());
@@ -360,7 +360,7 @@ bool Desc::hasUniqueIds() const
     return true;
 }
 
-void Desc::assignNewIds()
+void Desc::assignNewEntityIds()
 {
     // Create (index, oldCellId) vector sorted by cell id
     std::vector<std::pair<int, uint64_t>> indexToOldCellId;
@@ -380,7 +380,7 @@ void Desc::assignNewIds()
     std::unordered_map<std::optional<uint64_t>, std::set<uint64_t>> creatureIdToNonUniqueCellIds;
 
     for (auto& [index, oldId] : indexToOldCellId) {
-        auto newId = NumberGenerator::get().createId();
+        auto newId = NumberGenerator::get().createEntityId();
 
         auto& object = _objects.at(index);
         {
@@ -459,7 +459,7 @@ void Desc::assignNewIds()
     std::unordered_map<uint64_t, uint64_t> oldToNewCreatureId;
     std::unordered_set<uint64_t> nonUniqueCreatureIds;
     for (auto& creature : _creatures) {
-        auto newId = NumberGenerator::get().createId();
+        auto newId = NumberGenerator::get().createEntityId();
         auto insertionResult = oldToNewCreatureId.insert({creature._id, newId});
         if (!insertionResult.second) {
             nonUniqueCreatureIds.insert(creature._id);
@@ -496,7 +496,7 @@ void Desc::assignNewIds()
     std::unordered_map<uint64_t, uint64_t> oldToNewGenomeId;
     std::unordered_set<uint64_t> nonUniqueGenomeIds;
     for (auto& genome : _genomes) {
-        auto newId = NumberGenerator::get().createId();
+        auto newId = NumberGenerator::get().createEntityId();
         auto insertionResult = oldToNewGenomeId.insert({genome._id, newId});
         if (!insertionResult.second) {
             nonUniqueGenomeIds.insert(genome._id);
@@ -513,7 +513,7 @@ void Desc::assignNewIds()
 
     // Assign new particle ids
     for (auto& energyParticle : _energies) {
-        energyParticle._id = NumberGenerator::get().createId();
+        energyParticle._id = NumberGenerator::get().createEntityId();
     }
 }
 

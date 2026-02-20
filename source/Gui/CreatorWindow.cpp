@@ -300,7 +300,7 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            description._objects.emplace_back(ObjectDesc().id(NumberGenerator::get().createId()).stiffness(_stiffness).sticky(_makeSticky).pos(relPos).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).type(StructureDesc()));
+            description._objects.emplace_back(ObjectDesc().id(NumberGenerator::get().createEntityId()).stiffness(_stiffness).sticky(_makeSticky).pos(relPos).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).type(StructureDesc()));
         }
     }
 

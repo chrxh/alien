@@ -19,9 +19,13 @@ public:
     float getRandomFloat(float min, float max);
     uint32_t getLargeRandomInt(uint32_t range);
 
-    uint64_t createId();
+    uint64_t createEntityId();
+    uint64_t createLineageId();
 
+    void adaptMaxEntityId(uint64_t id);
+    void adaptMaxLineageId(uint32_t id);
     void adaptMaxIds(Ids const& ids);
+
     void setIds(Ids const& ids);
 
 private:

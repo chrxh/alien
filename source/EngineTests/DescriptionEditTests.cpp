@@ -138,7 +138,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
     }
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -162,7 +162,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
     auto data = createCollection();
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -191,7 +191,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
     }
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     auto cells = GetParam() == CellsOnCreature::No ? data._objects : data.getObjectsForCreature(data._creatures.front()._id);
@@ -225,7 +225,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
                     });
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -264,7 +264,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
                     });
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -321,7 +321,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
                         ObjectDesc().id(2).connections({ConnectionDesc().objectId(4)}),
                     });
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -376,7 +376,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
     });
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -412,7 +412,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
     });
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -445,7 +445,7 @@ TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)
     auto data = Desc().energies({EnergyDesc().id(0), EnergyDesc().id(1)});
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -461,7 +461,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameParticleIds)
     auto data = Desc().energies({EnergyDesc().id(0), EnergyDesc().id(0)});
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -479,7 +479,7 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
                     .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(1));
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     {
@@ -506,7 +506,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
                     .addCreature({ObjectDesc().id(0), ObjectDesc().id(0)}, CreatureDesc().id(0));
 
     // Perform action
-    EXPECT_THROW(data.assignNewIds(), std::runtime_error);
+    EXPECT_THROW(data.assignNewEntityIds(), std::runtime_error);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
@@ -517,7 +517,7 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
                     .addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(2));
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
@@ -548,7 +548,7 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
                     .addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(1));
 
     // Perform action
-    data.assignNewIds();
+    data.assignNewEntityIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;

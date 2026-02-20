@@ -589,7 +589,7 @@ struct Desc
     Desc& add(Desc&& other, bool assignNewIds = true);
 
     bool hasUniqueIds() const;
-    void assignNewIds();  // Preserves order of cell ids
+    void assignNewEntityIds();  // Preserves order of cell ids
 
     Desc& addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc const& creature = CreatureDesc(), GenomeDesc const& genome = GenomeDesc());
     Desc& addObjects(std::vector<ObjectDesc> const& objects);

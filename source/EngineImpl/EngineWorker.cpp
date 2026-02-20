@@ -121,7 +121,7 @@ void EngineWorker::addAndSelectSimulationData(Desc&& dataToUpdate)
     auto maxIds = _simulationCudaFacade->getMaxIds();
     NumberGenerator::get().adaptMaxIds(maxIds);
 
-    dataToUpdate.assignNewIds();
+    dataToUpdate.assignNewEntityIds();
 
     auto dataTO = DescConverterService::get().convertDescriptionToTO(dataToUpdate);
 

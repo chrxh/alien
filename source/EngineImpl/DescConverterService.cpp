@@ -286,7 +286,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
 
     auto const& objectTO = to.objects[objectIndex];
     result._id = objectTO.id;
-    NumberGenerator::get().adaptMaxIds({.entityId = objectTO.id});
+    NumberGenerator::get().adaptMaxEntityId(objectTO.id);
     result._pos = RealVector2D{objectTO.pos.x, objectTO.pos.y};
     result._vel = RealVector2D{objectTO.vel.x, objectTO.vel.y};
     result._stiffness = objectTO.stiffness;
@@ -868,10 +868,10 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
 
     GenomeDesc result;
     result._id = genomeTO.id;
-    NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.id});
+    NumberGenerator::get().adaptMaxEntityId(genomeTO.id);
     result._name = char64ToString(genomeTO.name);
     result._lineageId = genomeTO.lineageId;
-    NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.lineageId});
+    NumberGenerator::get().adaptMaxLineageId(genomeTO.lineageId);
     result._frontAngle = genomeTO.frontAngle;
     result._neuronMutationRate1._probability = genomeTO.neuronMutationRate1.probability;
     result._neuronMutationRate1._weightSigma = genomeTO.neuronMutationRate1.weightSigma;
@@ -918,7 +918,7 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
 
     auto const& creatureTO = to.creatures[creatureIndex];
     result._id = creatureTO.id;
-    NumberGenerator::get().adaptMaxIds({.entityId = creatureTO.id});
+    NumberGenerator::get().adaptMaxEntityId(creatureTO.id);
     result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
     result._generation = creatureTO.generation;
     result._numObjects = creatureTO.numObjects;
@@ -931,7 +931,7 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
 EnergyDesc DescConverterService::createEnergyDesc(TOs const& to, int particleIndex) const
 {
     auto const& energyParticle = to.energyParticles[particleIndex];
-    NumberGenerator::get().adaptMaxIds({.entityId = energyParticle.id});
+    NumberGenerator::get().adaptMaxEntityId(energyParticle.id);
     return EnergyDesc()
         .id(energyParticle.id)
         .pos({energyParticle.pos.x, energyParticle.pos.y})

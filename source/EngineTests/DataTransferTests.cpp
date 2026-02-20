@@ -324,7 +324,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_objects)
     NumberGenerator::get().setIds({1});
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto newId = NumberGenerator::get().createId();
+    auto newId = NumberGenerator::get().createEntityId();
     EXPECT_TRUE(newId > HighId);
 }
 
@@ -337,7 +337,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_energyParticles)
     NumberGenerator::get().setIds({1});
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto newId = NumberGenerator::get().createId();
+    auto newId = NumberGenerator::get().createEntityId();
     EXPECT_TRUE(newId > HighId);
 }
 
@@ -350,7 +350,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_creatures)
     NumberGenerator::get().setIds({1});
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto newId = NumberGenerator::get().createId();
+    auto newId = NumberGenerator::get().createEntityId();
     EXPECT_TRUE(newId > HighId);
 }
 
@@ -363,6 +363,6 @@ TEST_F(DataTransferTests, adaptIdGenerator_genomes)
     NumberGenerator::get().setIds({1});
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto newId = NumberGenerator::get().createId();
+    auto newId = NumberGenerator::get().createEntityId();
     EXPECT_TRUE(newId > HighId);
 }

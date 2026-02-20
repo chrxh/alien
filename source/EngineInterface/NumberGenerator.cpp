@@ -39,14 +39,29 @@ uint32_t NumberGenerator::getLargeRandomInt(uint32_t range)
     return getNumberFromArray() % (range + 1);
 }
 
-uint64_t NumberGenerator::createId()
+uint64_t NumberGenerator::createEntityId()
 {
     return _ids.entityId++;
 }
 
+uint64_t NumberGenerator::createLineageId()
+{
+    return _ids.lineageId++;
+}
+
+void NumberGenerator::adaptMaxEntityId(uint64_t id)
+{
+    _ids.entityId = std::max(_ids.entityId, id + 1);
+}
+
+void NumberGenerator::adaptMaxLineageId(uint32_t id)
+{
+    _ids.lineageId = std::max(_ids.lineageId, id + 1);
+}
+
 void NumberGenerator::adaptMaxIds(Ids const& ids)
 {
-    _ids.entityId = std::max(_ids.entityId, ids.entityId + 1);
+    adaptMaxEntityId(ids.entityId);
 }
 
 void NumberGenerator::setIds(Ids const& ids)

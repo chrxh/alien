@@ -28,12 +28,12 @@ NeuralNetGenomeDesc& NeuralNetGenomeDesc::weight(int row, int col, NeuralNetWeig
 
 GenomeDesc::GenomeDesc()
 {
-    _id = NumberGenerator::get().createId();
+    _id = NumberGenerator::get().createEntityId();
 }
 
 GenomeDesc GenomeDesc::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.entityId = id});
+    NumberGenerator::get().adaptMaxEntityId(id);
     _id = id;
     return *this;
 }

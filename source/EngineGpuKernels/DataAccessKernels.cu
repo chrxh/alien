@@ -1034,8 +1034,10 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TOs to)
             if (object.type == ObjectType_Cell) {
                 auto const& creature = to.creatures[object.typeData.cell.creatureIndex];
                 maxIds.entityId = max(maxIds.entityId, creature.id);
+
+                auto const& genome = to.genomes[creature.genomeArrayIndex];
+                maxIds.lineageId = max(maxIds.lineageId, genome.lineageId);
             }
-            //maxIds.currentLineageId = max(maxIds.currentLineageId, cell.lineageId);
         }
     }
     {

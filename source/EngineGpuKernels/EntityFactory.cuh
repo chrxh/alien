@@ -612,7 +612,7 @@ __inline__ __device__ Energy* EntityFactory::createEnergy(float energy, float2 c
     Energy** particlePointer = _data->entities.energies.getNewElement();
     Energy* particle = _data->entities.heap.getTypedSubArray<Energy>(1);
     *particlePointer = particle;
-    particle->id = _data->primaryNumberGen.createId();
+    particle->id = _data->primaryNumberGen.createEntityId();
     particle->selected = 0;
     particle->locked = 0;
     particle->energy = energy;
@@ -629,7 +629,7 @@ __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2
     auto objectPointers = _data->entities.objects.getNewElement();
     *objectPointers = object;
 
-    object->id = _data->primaryNumberGen.createId();
+    object->id = _data->primaryNumberGen.createEntityId();
     object->pos = pos;
     object->vel = vel;
     object->stiffness = _data->primaryNumberGen.random();
@@ -702,7 +702,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     auto object = _data->entities.heap.getTypedSubArray<Object>(1);
     auto objectPointer = _data->entities.objects.getNewElement(&objectIndex);
     *objectPointer = object;
-    object->id = _data->primaryNumberGen.createId();
+    object->id = _data->primaryNumberGen.createEntityId();
     object->pos = pos;
     object->vel = vel;
     object->stiffness = gene->stiffness;
@@ -960,14 +960,14 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
 __inline__ __device__ Genome* EntityFactory::createEmptyGenome()
 {
     auto genome = _data->entities.heap.getTypedSubArray<Genome>(1);
-    genome->id = _data->primaryNumberGen.createId();
+    genome->id = _data->primaryNumberGen.createEntityId();
     return genome;
 }
 
 __inline__ __device__ Creature* EntityFactory::createEmptyCreature()
 {
     auto creature = _data->entities.heap.getTypedSubArray<Creature>(1);
-    creature->id = _data->primaryNumberGen.createId();
+    creature->id = _data->primaryNumberGen.createEntityId();
     return creature;
 }
 

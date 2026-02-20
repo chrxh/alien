@@ -166,7 +166,7 @@ void DescEditService::duplicate(Desc& description, IntVector2D const& origSize, 
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
             auto clone = Desc(description);
-            clone.assignNewIds();
+            clone.assignNewEntityIds();
             for (auto const& creature : clone._creatures) {
                 topologyCorrection(spaceCalc, clone, creature._id);
                 result._creatures.emplace_back(creature);
