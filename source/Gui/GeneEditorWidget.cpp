@@ -124,8 +124,8 @@ void _GeneEditorWidget::processHeaderData()
             AlienGui::BeginIndent();
             if (!gene._separation) {
                 auto numBranches = gene._numBranches - 1;  // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
-                AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth), numBranches);
+                AlienGui::Switcher(
+                    AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth), numBranches);
                 gene._numBranches = numBranches + 1;  // Convert back to 1-based (index 0 -> 1 branch, index 1 -> 2 branches, etc.)
             }/* else {
                 std::string text = "-";
