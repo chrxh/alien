@@ -40,7 +40,52 @@ __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 vis
 
 namespace
 {
-    __device__ __inline__ uint32_t getCellColor(int colorCode)
+    __device__ __inline__ uint32_t hsvToRgb(float h, float s, float v)
+    {
+        float c = v * s;
+        float x = c * (1.0f - fabsf(fmodf(h * 6.0f, 2.0f) - 1.0f));
+        float m = v - c;
+        float r, g, b;
+        int hi = static_cast<int>(h * 6.0f) % 6;
+        switch (hi) {
+        case 0:
+            r = c;
+            g = x;
+            b = 0;
+            break;
+        case 1:
+            r = x;
+            g = c;
+            b = 0;
+            break;
+        case 2:
+            r = 0;
+            g = c;
+            b = x;
+            break;
+        case 3:
+            r = 0;
+            g = x;
+            b = c;
+            break;
+        case 4:
+            r = x;
+            g = 0;
+            b = c;
+            break;
+        default:
+            r = c;
+            g = 0;
+            b = x;
+            break;
+        }
+        auto ri = min(255u, static_cast<uint32_t>((r + m) * 255.0f + 0.5f));
+        auto gi = min(255u, static_cast<uint32_t>((g + m) * 255.0f + 0.5f));
+        auto bi = min(255u, static_cast<uint32_t>((b + m) * 255.0f + 0.5f));
+        return (ri << 16) | (gi << 8) | bi;
+    }
+
+    __device__ __inline__ uint32_t getCellColorByCode(int colorCode)
     {
         uint32_t result;
         switch (calcMod(colorCode, MAX_COLORS)) {
@@ -74,6 +119,26 @@ namespace
         }
         }
         return result;
+    }
+
+    __device__ __inline__ uint32_t getCellColor(Object* object)
+    {
+        auto coloring = cudaSimulationParameters.cellColoring.value;
+        if (coloring == CellColoring_None) {
+            return 0xffffff;
+        }
+        if (coloring == CellColoring_LineageId) {
+            if (object->type != ObjectType_Cell) {
+                return 0xffffff;
+            }
+            auto lineageId = object->typeData.cell.creature->genome->lineageId;
+            uint32_t hash1 = lineageId * 2654435761u;
+            uint32_t hash2 = lineageId * 2246822519u;
+            float h = static_cast<float>(hash1 & 0xFFFFu) / 65535.0f;
+            float s = 0.5f + 0.5f * (static_cast<float>(hash2 & 0xFFFFu) / 65535.0f);
+            return hsvToRgb(h, s, 1.0f);
+        }
+        return getCellColorByCode(object->color);
     }
 }
 
@@ -121,7 +186,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
 
         auto const& pos = object->pos;
 
-        auto const& cellColor = getCellColor(object->color);
+        auto const& cellColor = getCellColor(object);
 
         float luminance;
         float zOffset = 0.0f;
@@ -475,8 +540,8 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
             }
 
             // Get cell colors
-            auto cellColor = getCellColor(object->color);
-            auto connectedObjectColor = getCellColor(connectedObject->color);
+            auto cellColor = getCellColor(object);
+            auto connectedObjectColor = getCellColor(connectedObject);
 
             // Add connection arrow data (2 vertices for the line)
             uint64_t vertexIndex = alienAtomicAdd64(numConnectionArrowVertices, uint64_t(2));

@@ -77,7 +77,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec().name("Background color").reference(ColorSpec().member(&SimulationParameters::backgroundColor)),
                     ParameterSpec()
-                        .name("Primary cell coloring")
+                        .name("Cell coloring")
                         .reference(AlternativeSpec()
                                        .member(&SimulationParameters::cellColoring)
                                        .alternatives({{"Energy", {}}})
