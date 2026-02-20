@@ -243,8 +243,6 @@ void _NodeEditorWidget::processNodeAttributes()
                 node._cellType = createCellTypeGenomeDesc(nodeType);
             }
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Construction properties"));
-
             bool hasConstructor = node._constructor.has_value();
             if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(rightColumnWidth), hasConstructor)) {
                 if (hasConstructor) {
@@ -253,6 +251,9 @@ void _NodeEditorWidget::processNodeAttributes()
                     node._constructor = std::nullopt;
                 }
             }
+
+            AlienGui::Group(AlienGui::GroupParameters().text("Construction properties"));
+
             if (hasConstructor) {
                 ImGui::PushID("Constructor");
                 AlienGui::BeginIndent();

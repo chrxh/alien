@@ -67,8 +67,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
 
             } else if (nodeType == CellType_Sensor) {
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
-                sensor._minRange = std::max(0, std::min(255, sensor._minRange));
-                sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
+                sensor._minRange = std::max(0, std::min(512, sensor._minRange));
+                sensor._maxRange = std::max(0, std::min(512, sensor._maxRange));
 
                 // Validate mode-specific data
                 auto mode = sensor.getMode();
