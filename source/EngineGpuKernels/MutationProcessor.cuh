@@ -24,6 +24,7 @@ public:
 
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 };
@@ -77,6 +78,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
 __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
 {
     applyMutations_neurons(data, genome);
+    applyMutations_connections(data, genome);
 }
 
 __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome)
@@ -115,6 +117,34 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                             node.neuralNetwork.activationFunctions[neuronIndex] =
                                 static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_connections(SimulationData& data, Genome* genome)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+
+    ConnectionMutationRate rates[2] = {genome->connectionMutationRate1, genome->connectionMutationRate2};
+
+    for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
+        auto const& rate = rates[rateIndex];
+        if (rate.probability <= 0 || rate.sigma <= 0) {
+            continue;
+        }
+        for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+            auto& gene = genome->genes[geneIndex];
+            for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                auto& node = gene.nodes[nodeIndex];
+                if (laneId < MAX_OBJECT_CONNECTIONS) {
+                    if (data.primaryNumberGen.random() < rate.probability) {
+                        auto& weight = node.neuralNetwork.connectionWeights[laneId];
+                        float newValue = weight + generateGaussian(data) * rate.sigma;
+                        newValue = max(-2.0f, min(2.0f, newValue));
+                        weight = newValue;
                     }
                 }
             }
