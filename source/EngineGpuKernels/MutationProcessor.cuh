@@ -84,7 +84,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
-    NeuronMutationRate rates[2] = {genome->neuronMutationRate1, genome->neuronMutationRate2};
+    NeuronMutation rates[2] = {genome->neuronMutationRate1, genome->neuronMutationRate2};
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
@@ -127,7 +127,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
-    ConnectionMutationRate rates[2] = {genome->connectionMutationRate1, genome->connectionMutationRate2};
+    ConnectionMutation rates[2] = {genome->connectionMutationRate1, genome->connectionMutationRate2};
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];

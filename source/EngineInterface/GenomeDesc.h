@@ -405,22 +405,22 @@ struct GeneDesc
     static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
 
-struct NeuronMutationRateDesc
+struct NeuronMutationDesc
 {
-    auto operator<=>(NeuronMutationRateDesc const&) const = default;
+    auto operator<=>(NeuronMutationDesc const&) const = default;
 
-    MEMBER(NeuronMutationRateDesc, float, probability, 0.0f);
-    MEMBER(NeuronMutationRateDesc, float, weightSigma, 0.0f);
-    MEMBER(NeuronMutationRateDesc, float, biasSigma, 0.0f);
-    MEMBER(NeuronMutationRateDesc, float, activationFunctionProbability, 0.0f);
+    MEMBER(NeuronMutationDesc, float, probability, 0.0f);
+    MEMBER(NeuronMutationDesc, float, weightSigma, 0.0f);
+    MEMBER(NeuronMutationDesc, float, biasSigma, 0.0f);
+    MEMBER(NeuronMutationDesc, float, activationFunctionProbability, 0.0f);
 };
 
-struct ConnectionMutationRateDesc
+struct ConnectionMutationDesc
 {
-    auto operator<=>(ConnectionMutationRateDesc const&) const = default;
+    auto operator<=>(ConnectionMutationDesc const&) const = default;
 
-    MEMBER(ConnectionMutationRateDesc, float, probability, 0.0f);
-    MEMBER(ConnectionMutationRateDesc, float, sigma, 0.0f);
+    MEMBER(ConnectionMutationDesc, float, probability, 0.0f);
+    MEMBER(ConnectionMutationDesc, float, sigma, 0.0f);
 };
 
 struct GenomeDesc
@@ -435,11 +435,11 @@ struct GenomeDesc
     MEMBER(GenomeDesc, int, lineageId, 0);
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
 
-    MEMBER(GenomeDesc, NeuronMutationRateDesc, neuronMutationRate1, NeuronMutationRateDesc());
-    MEMBER(GenomeDesc, NeuronMutationRateDesc, neuronMutationRate2, NeuronMutationRateDesc());
+    MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutationRate1, NeuronMutationDesc());
+    MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutationRate2, NeuronMutationDesc());
 
-    MEMBER(GenomeDesc, ConnectionMutationRateDesc, connectionMutationRate1, ConnectionMutationRateDesc());
-    MEMBER(GenomeDesc, ConnectionMutationRateDesc, connectionMutationRate2, ConnectionMutationRateDesc());
+    MEMBER(GenomeDesc, ConnectionMutationDesc, connectionMutationRate1, ConnectionMutationDesc());
+    MEMBER(GenomeDesc, ConnectionMutationDesc, connectionMutationRate2, ConnectionMutationDesc());
 };
 
 struct SubGenomeDesc

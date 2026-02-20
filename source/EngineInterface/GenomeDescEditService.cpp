@@ -371,10 +371,10 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
     if (!genome._genes.empty()) {
         genome._genes.at(startGeneIndex)._numBranches = 1;
     }
-    genome._neuronMutationRate1 = NeuronMutationRateDesc();
-    genome._neuronMutationRate2 = NeuronMutationRateDesc();
-    genome._connectionMutationRate1 = ConnectionMutationRateDesc();
-    genome._connectionMutationRate2 = ConnectionMutationRateDesc();
+    genome._neuronMutationRate1 = NeuronMutationDesc();
+    genome._neuronMutationRate2 = NeuronMutationDesc();
+    genome._connectionMutationRate1 = ConnectionMutationDesc();
+    genome._connectionMutationRate2 = ConnectionMutationDesc();
 
     genome._genes.at(startGeneIndex)._separation = true;
     resetUnusedGenes(genome, geneIndices);
