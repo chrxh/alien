@@ -1842,27 +1842,36 @@ namespace
         if (allowInfinity && value == Infinity<T>::value) {
             return "Infinity";
         }
-        if (tryMaintainFormat) {
-            return format;
-        }
         if constexpr (std::is_same_v<T, float>) {
-            // Extract decimal places from format string like "%.3f"
+            // Extract decimal places and prefix/suffix from format string like "%.3f" or "%.0f percent"
             int decimalPlaces = 3;  // default
-            auto dotPos = format.find('.');
-            if (dotPos != std::string::npos) {
-                auto fPos = format.find('f', dotPos);
-                if (fPos != std::string::npos) {
-                    auto decimalStr = format.substr(dotPos + 1, fPos - dotPos - 1);
-                    decimalPlaces = std::stoi(decimalStr);
+            std::string prefix, suffix;
+            auto percentPos = format.find('%');
+            if (percentPos != std::string::npos) {
+                prefix = format.substr(0, percentPos);
+                auto dotPos = format.find('.', percentPos);
+                if (dotPos != std::string::npos) {
+                    auto fPos = format.find('f', dotPos);
+                    if (fPos != std::string::npos) {
+                        decimalPlaces = std::stoi(format.substr(dotPos + 1, fPos - dotPos - 1));
+                        suffix = format.substr(fPos + 1);
+                    }
                 }
+            } else {
+                return format;
             }
-            return StringHelper::format(value, decimalPlaces);
-        } else if constexpr (std::is_same_v<T, int>) {
-            return StringHelper::format(value, 0);
+            return prefix + StringHelper::format(value, decimalPlaces) + suffix;
         } else {
-            char result[16];
-            snprintf(result, sizeof(result), format.c_str(), value);
-            return std::string(result);
+            if (tryMaintainFormat) {
+                return format;
+            }
+            if constexpr (std::is_same_v<T, int>) {
+                return StringHelper::format(value, 0);
+            } else {
+                char result[16];
+                snprintf(result, sizeof(result), format.c_str(), value);
+                return std::string(result);
+            }
         }
     }
 }
@@ -1950,12 +1959,8 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
                 }
             }
             if (minValue != maxValue) {
-                if constexpr (std::is_same<T, float>()) {
-                    format = parameters._format + " ... " + applyFormatToValue(maxValue, parameters._format, parameters._infinity);
-                } else {
-                    format = applyFormatToValue(minValue, parameters._format, parameters._infinity) + " ... "
-                        + applyFormatToValue(maxValue, parameters._format, parameters._infinity);
-                }
+                format = applyFormatToValue(minValue, parameters._format, parameters._infinity) + " ... "
+                    + applyFormatToValue(maxValue, parameters._format, parameters._infinity);
             } else {
                 format = applyFormatToValue(value[color], parameters._format, parameters._infinity, true);
             }
@@ -2174,7 +2179,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
 
             if (minValue != maxValue) {
                 if constexpr (std::is_same<T, float>()) {
-                    format = parameters._format + " ... " + applyFormatToValue(maxValue, parameters._format, false);
+                    format = applyFormatToValue(minValue, parameters._format, false) + " ... " + applyFormatToValue(maxValue, parameters._format, false);
                 } else {
                     format = std::to_string(minValue) + " ... " + std::to_string(maxValue);
                 }
