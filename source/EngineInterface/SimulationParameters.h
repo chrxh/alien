@@ -126,9 +126,9 @@ struct SimulationParameters
     static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Meta mutations
-    BaseParameter<float> metaMutationNeuronsSigma = {0.01f};
-    BaseParameter<float> metaMutationConnectionsSigma = {0.01f};
-    BaseParameter<float> metaMutationLineagesSigma = {0.01f};
+    BaseParameter<float> metaMutationNeuronsSigma = {0};
+    BaseParameter<float> metaMutationConnectionsSigma = {0};
+    BaseParameter<float> metaMutationLineagesSigma = {0};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
