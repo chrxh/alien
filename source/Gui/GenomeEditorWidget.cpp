@@ -72,7 +72,7 @@ void _GenomeEditorWidget::processHeaderData()
         if (table.begin()) {
             auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Base properties"));
+            AlienGui::Group(AlienGui::GroupParameters().text("Base properties and info"));
             AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage").textWidth(rightColumnWidth), _editData->genome._lineageId);
 
