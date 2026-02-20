@@ -19,7 +19,7 @@ class MutationProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
-    __inline__ __device__ static void applyMutations_usingThreadBlock(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
@@ -64,7 +64,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
         if (sharedGenome != nullptr) {
 
             // Apply mutations to cloned genome
-            applyMutations_usingThreadBlock(data, sharedGenome);
+            applyMutations(data, sharedGenome);
 
             if (laneId == 0) {
                 object->typeData.cell.creature->genome = sharedGenome;
@@ -74,7 +74,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_usingThreadBlock(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
 {
     applyMutations_neurons(data, genome);
     applyMutations_connections(data, genome);
