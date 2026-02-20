@@ -1843,6 +1843,9 @@ namespace
             return "Infinity";
         }
         if constexpr (std::is_same_v<T, float>) {
+            if (tryMaintainFormat) {
+                return format;
+            }
             // Extract decimal places and prefix/suffix from format string like "%.3f" or "%.0f percent"
             int decimalPlaces = 3;  // default
             std::string prefix, suffix;
