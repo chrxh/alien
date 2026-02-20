@@ -326,7 +326,7 @@ namespace Const
 
     std::string const CellMaxConnectionTooltip = "The maximum number of bonds a cell can form with other cells.";
 
-    std::string const CellIndestructibleTooltip = "When a cell is set as indestructible wall, it becomes immortal, resistant to external forces, but still "
+    std::string const CellFixedTooltip = "When a cell is set as fixed, it becomes immortal, resistant to external forces, but still "
                                                   "capable of linear movement. Furthermore, unconnected "
                                                   "normal cells and energy particles bounce off from indestructible ones.";
 

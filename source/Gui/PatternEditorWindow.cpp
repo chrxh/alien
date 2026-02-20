@@ -254,13 +254,13 @@ void PatternEditorWindow::processIntern()
         if (ImGui::Button(ICON_FA_LINK)) {
             onSetBarrier(true);
         }
-        AlienGui::Tooltip("Convert to indestructible wall");
+        AlienGui::Tooltip("Fix");
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_UNLINK)) {
             onSetBarrier(false);
         }
-        AlienGui::Tooltip("Convert to destructible cell");
+        AlienGui::Tooltip("Unfix");
         ImGui::EndDisabled();
 
         _lastSelection = selection;

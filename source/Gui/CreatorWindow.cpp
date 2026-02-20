@@ -126,7 +126,7 @@ void CreatorWindow::processIntern()
         }
         if (_mode != CreationMode_CreateParticle) {
             AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Indestructible wall").textWidth(RightColumnWidth).tooltip(Const::CellIndestructibleTooltip), _fixed);
+                AlienGui::CheckboxParameters().name("Fixed").textWidth(RightColumnWidth).tooltip(Const::CellFixedTooltip), _fixed);
         }
     }
     ImGui::EndChild();
