@@ -64,7 +64,7 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
     ImGui::Button("Connection weights", {layout.width - 2 * ImGui::GetStyle().FramePadding.x, 0});
     popColors();
 
-    auto resetButtonWidth = ImGui::CalcTextSize(ICON_FA_UNDO).x + 2 * ImGui::GetStyle().FramePadding.x;
+    auto resetButtonWidth = ImGui::CalcTextSize("x").x /* + 2 * ImGui::GetStyle().FramePadding.x*/;
     auto sliderWidth = layout.connectionButtonWidth - resetButtonWidth - ImGui::GetStyle().ItemSpacing.x;
 
     ImGui::PushID("ConnectionWeightSliders");
@@ -80,9 +80,12 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
         style.GrabMinSize = originalGrabMinSize;
         layout.connectionButtonBottomLeft[i] = {ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y};
         ImGui::SameLine();
-        if (ImGui::Button(ICON_FA_UNDO)) {
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
+        ImGui::SetWindowFontScale(0.5f);
+        if (ImGui::Button(ICON_FA_TIMES)) {
             connectionWeights.at(i) = 0.0f;
         }
+        ImGui::SetWindowFontScale(1.0f);
         layout.connectionButtonBottomRight[i] = {ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y};
         ImGui::PopID();
     }
