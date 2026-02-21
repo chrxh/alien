@@ -65,7 +65,7 @@ TEST_F(ReconnectorTests, structureMode_connectToStructure)
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -82,7 +82,7 @@ TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(FreeCellDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -100,7 +100,7 @@ TEST_F(ReconnectorTests, structureMode_outOfRange)
     data._objects.emplace_back(ObjectDesc().id(10).pos({100.0f - range - 0.1f, 100.0f}).type(StructureDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -121,7 +121,7 @@ TEST_F(ReconnectorTests, freeCellMode_connectToFreeCell)
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(FreeCellDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -138,7 +138,7 @@ TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -155,7 +155,7 @@ TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).color(1).type(FreeCellDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -170,7 +170,7 @@ TEST_F(ReconnectorTests, freeCellMode_colorRestriction_failed)
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).color(0).type(FreeCellDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -193,7 +193,7 @@ TEST_F(ReconnectorTests, creatureMode_connectToDifferentCreature)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -214,7 +214,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -232,7 +232,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreFreeCells)
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(FreeCellDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -252,7 +252,7 @@ TEST_F(ReconnectorTests, creatureMode_colorRestriction_success)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -271,7 +271,7 @@ TEST_F(ReconnectorTests, creatureMode_colorRestriction_failed)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -290,7 +290,7 @@ TEST_F(ReconnectorTests, creatureMode_minNumCells_success)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -309,7 +309,7 @@ TEST_F(ReconnectorTests, creatureMode_minNumCells_failed)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -328,7 +328,7 @@ TEST_F(ReconnectorTests, creatureMode_maxNumCells_success)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -351,7 +351,7 @@ TEST_F(ReconnectorTests, creatureMode_maxNumCells_failed)
     data.addConnection(12, 13);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -371,7 +371,7 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_success)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -391,7 +391,7 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_failed)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -411,7 +411,7 @@ TEST_F(ReconnectorTests, creatureMode_otherLineage_success)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -431,7 +431,7 @@ TEST_F(ReconnectorTests, creatureMode_otherLineage_failed)
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -451,7 +451,7 @@ TEST_F(ReconnectorTests, removeConnections_removeStructureConnection)
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -472,7 +472,7 @@ TEST_F(ReconnectorTests, removeConnections_removeFreeObjectConnection)
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -497,7 +497,7 @@ TEST_F(ReconnectorTests, removeConnections_removeDifferentCreatureConnection)
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -521,7 +521,7 @@ TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
     data.addConnection(1, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -552,7 +552,7 @@ TEST_F(ReconnectorTests, noTrigger_noAction)
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Run several timesteps without trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Run several timesteps without trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -569,7 +569,7 @@ TEST_F(ReconnectorTests, connectsToClosest)
     data._objects.emplace_back(ObjectDesc().id(11).pos({99.0f, 100.0f}).type(StructureDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -587,7 +587,7 @@ TEST_F(ReconnectorTests, skipAlreadyConnected)
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
@@ -606,7 +606,7 @@ TEST_F(ReconnectorTests, energyConservation)
     auto originalEnergy = getEnergy(data);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -636,7 +636,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     data._objects.emplace_back(ObjectDesc().id(10).pos({100.0f, 100.0f - (range - 1.0f)}).type(StructureDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);

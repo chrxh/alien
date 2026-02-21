@@ -51,7 +51,7 @@ TEST_F(MemoryTests, signalIntegrator_firstSignal_storesSignalInMemory)
     auto data = createMemoryCellWithIncomingSignal(SignalIntegratorDesc().newSignalWeight(0.5f), signal);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     // After first signal, the memory cell should store the incoming signal
@@ -81,7 +81,7 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -111,7 +111,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     // With weight 1.0, stored value = (1-1)*stored + 1*incoming = incoming
@@ -138,7 +138,7 @@ TEST_F(MemoryTests, signalIntegrator_weightOfZero_preservesStoredSignal)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     // With weight 0.0, stored value = (1-0)*stored + 0*incoming = stored
@@ -157,7 +157,7 @@ TEST_F(MemoryTests, signalDelay_firstSignal_storesSignalInMemory)
     auto data = createMemoryCellWithIncomingSignal(SignalDelayDesc().delay(5), signal);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     // After first signal, the memory cell should store the incoming signal
@@ -182,7 +182,7 @@ TEST_F(MemoryTests, signalDelay_delayOf0_outputsSameCycleSignal)
     auto data = createMemoryCellWithIncomingSignal(SignalDelayDesc().delay(0), signal);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     // With delay of 1, after first cycle, the buffer is full
@@ -203,14 +203,14 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsDelayedSignal)
     auto data = createMemoryCellWithIncomingSignal(SignalDelayDesc().delay(1), signal1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     // Second signal
     std::vector<float> signal2 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 0, 0, 0, 0};
     auto actualData = _simulationFacade->getSimulationData();
     actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
@@ -234,19 +234,19 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
 
     auto data = createMemoryCellWithIncomingSignal(SignalDelayDesc().delay(2), signal1);
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     // Second signal
     auto actualData = _simulationFacade->getSimulationData();
     actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     // Third signal
     actualData = _simulationFacade->getSimulationData();
     actualData.getObjectRef(2).getCellRef().signal(signal3);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     // After 3 signals, the buffer is full and output should be signal1
     actualData = _simulationFacade->getSimulationData();
@@ -258,7 +258,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsCorrectlyDelayedSignal)
     // Fourth signal - should output signal2
     actualData.getObjectRef(2).getCellRef().signal(signal4);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     actualData = _simulationFacade->getSimulationData();
     memoryCell = actualData.getObjectRef(1);
@@ -273,7 +273,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
 
     auto data = createMemoryCellWithIncomingSignal(SignalDelayDesc().delay(2), signal1);
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
@@ -287,7 +287,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
     // Second signal
     actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     actualData = _simulationFacade->getSimulationData();
     memoryCell = actualData.getObjectRef(1);
@@ -312,7 +312,7 @@ TEST_F(MemoryTests, signalRecorder_positiveChannel0_startsRecording)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false), signal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -334,13 +334,13 @@ TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false), signal1, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     // Second signal - should record and complete
     auto actualData = _simulationFacade->getSimulationData();
     actualData.getObjectRef(2).getCellRef().signal(signal2);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
@@ -366,7 +366,7 @@ TEST_F(MemoryTests, signalRecorder_negativeChannel0_startsReading)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -392,13 +392,13 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     // Second read - should read second entry and complete
     auto actualData = _simulationFacade->getSimulationData();
     actualData.getObjectRef(2).getCellRef().signal(triggerSignal);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
@@ -420,7 +420,7 @@ TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false).numWrittenSignalEntries(1), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -437,13 +437,13 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(false), positiveSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     // Send negative signal - should continue recording, not switch to reading
     auto actualData = _simulationFacade->getSimulationData();
     actualData.getObjectRef(2).getCellRef().signal(negativeSignal);
     _simulationFacade->setSimulationData(actualData);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getObjectRef(1);
@@ -463,7 +463,7 @@ TEST_F(MemoryTests, signalRecorder_readOnly_readingInsteadOfRecording)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(true).numWrittenSignalEntries(3), signal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -484,7 +484,7 @@ TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)
     auto data = createMemoryCellWithIncomingSignal(SignalRecorderDesc().readOnly(true).numWrittenSignalEntries(1), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -515,7 +515,7 @@ TEST_F(MemoryTests, signalStorage_readWithPositiveInput_readsFromIndex)
     auto data = createMemoryCellWithIncomingSignal(SignalStorageDesc().readOnly(false), inputSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -536,7 +536,7 @@ TEST_F(MemoryTests, signalStorage_readWithZeroInput_readsFromIndex0)
     auto data = createMemoryCellWithIncomingSignal(SignalStorageDesc().readOnly(false), inputSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -558,7 +558,7 @@ TEST_F(MemoryTests, signalStorage_readWithMaxInput_readsFromLastIndex)
     auto data = createMemoryCellWithIncomingSignal(SignalStorageDesc().readOnly(false), inputSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -581,7 +581,7 @@ TEST_F(MemoryTests, signalStorage_writeWithNegativeInput_writesToIndex)
     auto data = createMemoryCellWithIncomingSignal(SignalStorageDesc().readOnly(false), inputSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -607,7 +607,7 @@ TEST_F(MemoryTests, signalStorage_readOnly_readsWithPositiveInput)
     auto data = createMemoryCellWithIncomingSignal(SignalStorageDesc().readOnly(true), inputSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -628,7 +628,7 @@ TEST_F(MemoryTests, signalStorage_readOnly_readsWithNegativeInput)
     auto data = createMemoryCellWithIncomingSignal(SignalStorageDesc().readOnly(true), inputSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -653,7 +653,7 @@ TEST_F(MemoryTests, signalStorage_singleEntry_alwaysAccessesIndex0)
     auto data = createMemoryCellWithIncomingSignal(SignalStorageDesc().readOnly(false), inputSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);
@@ -674,7 +674,7 @@ TEST_F(MemoryTests, signalStorage_writeWithMaxNegativeInput_writesToLastIndex)
     auto data = createMemoryCellWithIncomingSignal(SignalStorageDesc().readOnly(false), inputSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getObjectRef(1);

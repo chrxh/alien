@@ -17,7 +17,7 @@ public:
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.attackerEnergyCost.baseValue[i] = 0;
-            _parameters.attackerStrength.value[i] = 0.5f;
+            _parameters.attackerStrength.value[i] = 0.1f;
             _parameters.attackerRadius.value[i] = 3.5f;
         }
         _simulationFacade->setSimulationParameters(_parameters);
@@ -89,7 +89,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
     origTarget.getCellRef()._rawEnergy = 100.0f;
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttacker = actualData.getObjectRef(1);
@@ -114,7 +114,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttacker = actualData.getObjectRef(1);
@@ -140,7 +140,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttacker = actualData.getObjectRef(1);
@@ -164,7 +164,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
     data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);               // Color 1 target
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -186,7 +186,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -202,7 +202,7 @@ TEST_F(AttackerTests, outputSignal_noTarget)
     // No target creature - nothing to attack
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttacker = actualData.getObjectRef(1);
@@ -243,7 +243,7 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
     auto origCell4 = data.getObjectRef(4);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCell3 = actualData.getObjectRef(3);
@@ -276,7 +276,7 @@ TEST_F(AttackerTests, noAttackOnOffspring)
     auto origCell = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = actualData.getObjectRef(100);
@@ -300,7 +300,7 @@ TEST_F(AttackerTests, attackOnNonOffspring)
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -321,7 +321,7 @@ TEST_F(AttackerTests, noAttackOnFixedCells)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -366,7 +366,7 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -413,7 +413,7 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
     data.add(createTargetCreature({100.0f, 97.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget1 = actualData.getObjectRef(100);
@@ -453,7 +453,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
     data.add(createTargetCreature({100.0f, 103.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -475,7 +475,7 @@ TEST_F(AttackerTests, sensorTargeting_matchingCreatureId)
     data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -495,7 +495,7 @@ TEST_F(AttackerTests, sensorTargeting_nonMatchingCreatureId)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -523,7 +523,7 @@ TEST_F(AttackerTests, sensorTargeting_noSensorWithLastMatch)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -566,7 +566,7 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
         CreatureDesc().id(4));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget1 = actualData.getObjectRef(100);
@@ -600,7 +600,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -632,7 +632,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -666,7 +666,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -694,7 +694,7 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -724,7 +724,7 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);

@@ -14,8 +14,9 @@ __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData dat
 __global__ void cudaNextTimestep_signal_calcSignal(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_signal_setSignal(SimulationData data);
 __global__ void cudaNextTimestep_energyFlow(SimulationData data);
+__global__ void cudaNextTimestep_cellState_substep1(SimulationData data);
+__global__ void cudaNextTimestep_cellState_substep2(SimulationData data);
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data);
-__global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data);
 __global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStatistics statistics, bool forPreview);
 __global__ void cudaNextTimestep_applyMutations(SimulationData data, SimulationStatistics statistics);

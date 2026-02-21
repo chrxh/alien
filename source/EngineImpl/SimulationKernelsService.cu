@@ -91,14 +91,17 @@ void SimulationKernelsService::launchTimestepKernels(
     // Energy flow
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
 
-    // Signal processing
+    // Cell state transitions and front angle updates (run every timestep)
+    STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep1, _stream, numBlocks, data);
+    STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep2, _stream, numBlocks, data);
+
+    // Signal processing and cell type-specific functions
     if (executeCellTypeFunctions) {
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, numBlocks, 32, data, statistics);
         STREAM_KERNEL_CALL(cudaNextTimestep_signal_setSignal, _stream, numBlocks, data);
 
         // Cell type-specific functions
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, false);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_injector, _stream, numBlocks, data, statistics);
@@ -165,9 +168,8 @@ cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
 void SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     // Build configuration key for graph caching
-    static uint64_t counter = 0;
-    ++counter;
-    auto config = buildGraphConfig(settings, data, counter);
+    auto config = buildGraphConfig(settings, data, _counter);
+    ++_counter;
 
     // In debug mode, bypass CUDA Graphs to get precise kernel crash information
     if (GlobalSettings::get().isDebugMode()) {
@@ -219,6 +221,7 @@ void SimulationKernelsService::launchPreviewKernels(
     auto numBlocks = config.numBlocks;
     bool considerForcesFromAngleDifferences = (config.counterMod3 == 0);
     bool considerInnerFriction = (config.counterMod3 == 0);
+    bool executeCellTypeFunctions = (config.executeCellFunctions == 0);
 
     if (!config.detailSimulation) {
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
@@ -232,11 +235,16 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
 
-        // Cell type-specific functions
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, _stream, numBlocks, data);
+        // Cell state transitions and front angle updates (run every timestep)
+        STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep1, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep2, _stream, numBlocks, data);
 
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
+        if (executeCellTypeFunctions) {
+            // Cell type-specific functions
+            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
+
+            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
+        }
 
         if (considerInnerFriction) {
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
@@ -256,20 +264,25 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
 
-        // Signal processing
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, numBlocks, 32, data, statistics);
-        STREAM_KERNEL_CALL(cudaNextTimestep_signal_setSignal, _stream, numBlocks, data);
-
         // Energy flow
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
 
-        // Cell type-specific functions
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
+        // Cell state transitions and front angle updates (run every timestep)
+        STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep1, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep2, _stream, numBlocks, data);
 
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
+        if (executeCellTypeFunctions) {
+            // Signal processing
+            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, numBlocks, 32, data, statistics);
+            STREAM_KERNEL_CALL(cudaNextTimestep_signal_setSignal, _stream, numBlocks, data);
+
+            // Cell type-specific functions
+            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
+            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
+
+            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
+            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
+        }
 
         if (considerInnerFriction) {
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
@@ -309,9 +322,8 @@ void SimulationKernelsService::calcTimestepForPreview(
     bool detailSimulation)
 {
     // Build configuration key for graph caching
-    static int counterMod3 = 0;
-    counterMod3 = ++counterMod3 % 3;
-    auto config = buildPreviewGraphConfig(settings, data, counterMod3, detailSimulation);
+    auto config = buildPreviewGraphConfig(settings, data, _previewCounter, detailSimulation);
+    ++_previewCounter;
 
     // In debug mode, bypass CUDA Graphs to get precise kernel crash information
     if (GlobalSettings::get().isDebugMode()) {
@@ -357,6 +369,10 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
         CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(pair.second));
     }
     _previewGraphCache.clear();
+
+    // Reset counters so cell functions execute on the last timestep of each window
+    _counter = 0;
+    _previewCounter = 0;
 
     auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL(cudaResetDensity, data);

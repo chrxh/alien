@@ -73,7 +73,7 @@ TEST_F(NeuronTests, forwardSignalByDefault)
                     .addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -100,7 +100,7 @@ TEST_F(NeuronTests, forwardSignalByDefault_preview)
                     .addConnection(1, 2);
 
     _simulationFacade->setPreviewData(data);
-    _simulationFacade->calcTimestepsForPreview(1, true);
+    _simulationFacade->calcTimestepsForPreview(TIMESTEPS_PER_CELL_FUNCTION, true);
     auto actualData = _simulationFacade->getPreviewData();
 
     EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._signal._channels));
@@ -124,7 +124,7 @@ TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
                     .addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -154,7 +154,7 @@ TEST_F(NeuronTests, forkSignal)
                     .addConnection(5, 6);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -201,7 +201,7 @@ TEST_F(NeuronTests, mergeSignal)
             .addConnection(5, 6);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -288,7 +288,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
                     .addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -335,7 +335,7 @@ TEST_F(NeuronTests, truncateSignal)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
 

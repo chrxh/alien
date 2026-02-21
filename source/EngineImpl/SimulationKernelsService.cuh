@@ -92,4 +92,7 @@ private:
     cudaStream_t _stream = nullptr;
     std::map<CudaGraphConfig, cudaGraphExec_t> _graphCache;
     std::map<CudaGraphPreviewConfig, cudaGraphExec_t> _previewGraphCache;
+
+    uint64_t _counter = 0;
+    int _previewCounter = 0;
 };

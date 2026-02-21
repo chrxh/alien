@@ -40,13 +40,13 @@ INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SquareSignal,
     GeneratorTests_SquareSignal,
     ::testing::Values(
-        SquareSignalTestParams{1, 0, 2.0f, "at the beginning"},                    // timestep 0: 2.0 + 0.1 = 2.1 clamped to 2.0
-        SquareSignalTestParams{30, 0, 2.0f, "before halfway through"},             // timestep 29: 2.0 + 0.1 = 2.1 clamped to 2.0
-        SquareSignalTestParams{51, 0, -1.9f, "at halfway through"},                // timestep 50: -2.0 + 0.1 = -1.9
-        SquareSignalTestParams{80, 0, -1.9f, "before the end"},                    // timestep 79: -2.0 + 0.1 = -1.9
-        SquareSignalTestParams{100, 0, -1.9f, "at the end"},                       // timestep 99: -2.0 + 0.1 = -1.9
-        SquareSignalTestParams{101, 0, 2.0f, "after the end (wrapping)"},          // timestep 0 (wrapped): 2.0 + 0.1 = 2.1 clamped to 2.0
-        SquareSignalTestParams{1, 50, -1.9f, "with timeOffset at second half"}));  // timeOffset 50: effective pos = 50 => -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{1 * TIMESTEPS_PER_CELL_FUNCTION, 0, 2.0f, "at the beginning"},                    // timestep 0: 2.0 + 0.1 = 2.1 clamped to 2.0
+        SquareSignalTestParams{30 * TIMESTEPS_PER_CELL_FUNCTION, 0, 2.0f, "before halfway through"},             // timestep 29: 2.0 + 0.1 = 2.1 clamped to 2.0
+        SquareSignalTestParams{51 * TIMESTEPS_PER_CELL_FUNCTION, 0, -1.9f, "at halfway through"},                // timestep 50: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{80 * TIMESTEPS_PER_CELL_FUNCTION, 0, -1.9f, "before the end"},                    // timestep 79: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{100 * TIMESTEPS_PER_CELL_FUNCTION, 0, -1.9f, "at the end"},                       // timestep 99: -2.0 + 0.1 = -1.9
+        SquareSignalTestParams{101 * TIMESTEPS_PER_CELL_FUNCTION, 0, 2.0f, "after the end (wrapping)"},          // timestep 0 (wrapped): 2.0 + 0.1 = 2.1 clamped to 2.0
+        SquareSignalTestParams{1 * TIMESTEPS_PER_CELL_FUNCTION, 50, -1.9f, "with timeOffset at second half"}));  // timeOffset 50: effective pos = 50 => -2.0 + 0.1 = -1.9
 
 TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
 {
@@ -93,13 +93,13 @@ INSTANTIATE_TEST_SUITE_P(
     GeneratorTests_SawtoothSignal,
     GeneratorTests_SawtoothSignal,
     ::testing::Values(
-        SawtoothSignalTestParams{1, 0, 0.2f, "at the beginning"},                // timestep 0: 2.0 * 0 / 100 + 0.2 = 0.2
-        SawtoothSignalTestParams{30, 0, 0.78f, "before halfway through"},        // timestep 29: 2.0 * 29 / 100 + 0.2 = 0.78
-        SawtoothSignalTestParams{51, 0, 1.2f, "at halfway through"},             // timestep 50: 2.0 * 50 / 100 + 0.2 = 1.2
-        SawtoothSignalTestParams{80, 0, 1.78f, "before the end"},                // timestep 79: 2.0 * 79 / 100 + 0.2 = 1.78
-        SawtoothSignalTestParams{100, 0, 2.0f, "at the end"},                    // timestep 99: 2.0 * 99 / 100 + 0.2 = 2.18 clamped to 2.0
-        SawtoothSignalTestParams{101, 0, 0.2f, "after the end (wrapping)"},      // timestep 0 (wrapped): 2.0 * 0 / 100 + 0.2 = 0.2
-        SawtoothSignalTestParams{1, 50, 1.2f, "with timeOffset at midpoint"}));  // timeOffset 50: effective pos = 50 => 2.0 * 50 / 100 + 0.2 = 1.2
+        SawtoothSignalTestParams{1 * TIMESTEPS_PER_CELL_FUNCTION, 0, 0.2f, "at the beginning"},                // timestep 0: 2.0 * 0 / 100 + 0.2 = 0.2
+        SawtoothSignalTestParams{30 * TIMESTEPS_PER_CELL_FUNCTION, 0, 0.78f, "before halfway through"},        // timestep 29: 2.0 * 29 / 100 + 0.2 = 0.78
+        SawtoothSignalTestParams{51 * TIMESTEPS_PER_CELL_FUNCTION, 0, 1.2f, "at halfway through"},             // timestep 50: 2.0 * 50 / 100 + 0.2 = 1.2
+        SawtoothSignalTestParams{80 * TIMESTEPS_PER_CELL_FUNCTION, 0, 1.78f, "before the end"},                // timestep 79: 2.0 * 79 / 100 + 0.2 = 1.78
+        SawtoothSignalTestParams{100 * TIMESTEPS_PER_CELL_FUNCTION, 0, 2.0f, "at the end"},                    // timestep 99: 2.0 * 99 / 100 + 0.2 = 2.18 clamped to 2.0
+        SawtoothSignalTestParams{101 * TIMESTEPS_PER_CELL_FUNCTION, 0, 0.2f, "after the end (wrapping)"},      // timestep 0 (wrapped): 2.0 * 0 / 100 + 0.2 = 0.2
+        SawtoothSignalTestParams{1 * TIMESTEPS_PER_CELL_FUNCTION, 50, 1.2f, "with timeOffset at midpoint"}));  // timeOffset 50: effective pos = 50 => 2.0 * 50 / 100 + 0.2 = 1.2
 
 TEST_P(GeneratorTests_SawtoothSignal, sawtoothSignal_outputAtVariousTimesteps)
 {
@@ -139,7 +139,7 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
@@ -160,7 +160,7 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
@@ -184,7 +184,7 @@ TEST_F(GeneratorTests, squareSignal_truncation)
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);

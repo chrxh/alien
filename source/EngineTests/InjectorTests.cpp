@@ -64,7 +64,7 @@ TEST_F(InjectorTests, noTargetFound)
     data.add(createTargetCreatureWithConstructor({100.0f, 104.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
+    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
@@ -86,7 +86,7 @@ TEST_F(InjectorTests, successfulInjection)
     data.add(createTargetCreatureWithConstructor({100.0f, 103.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
+    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
@@ -117,7 +117,7 @@ TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
     auto origConstructor = data.getObjectRef(3).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
+    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(3).getCellRef()._constructor.value();
@@ -144,7 +144,7 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
     auto origConstructor = data.getObjectRef(100).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
+    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
@@ -182,7 +182,7 @@ TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
     auto origConstructor = data.getObjectRef(100).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
+    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
@@ -207,7 +207,7 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
+    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();

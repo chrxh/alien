@@ -17,7 +17,7 @@ public:
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.attackerEnergyCost.baseValue[i] = 0;
-            _parameters.attackerStrength.value[i] = 0.5f;
+            _parameters.attackerStrength.value[i] = 0.1f;
             _parameters.attackerRadius.value[i] = 3.5f;
             _parameters.defenderAntiAttackerStrength.value[i] = 1000.0f;
             _parameters.injectorEnergyCost.value[i] = 40.0f;
@@ -63,7 +63,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -105,7 +105,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -154,7 +154,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
@@ -212,7 +212,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
         .addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
