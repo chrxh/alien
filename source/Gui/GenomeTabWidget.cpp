@@ -18,10 +18,7 @@
 #include "PreviewWidget.h"
 #include "StyleRepository.h"
 
-GenomeTabWidget _GenomeTabWidget::createDraftTab(
-    GenomeWindowEditData const& genomeEditData,
-    GenomeDesc const& creature,
-    GenomeTabLayoutData const& layoutData)
+GenomeTabWidget _GenomeTabWidget::createDraftTab(GenomeWindowEditData const& genomeEditData, GenomeDesc const& creature, GenomeTabLayoutData const& layoutData)
 {
     return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, creature, DraftData(), layoutData));
 }
@@ -32,8 +29,10 @@ GenomeTabWidget _GenomeTabWidget::createCreatureTab(
     GenomeDesc const& genome,
     GenomeTabLayoutData const& layoutData)
 {
+    auto validatedGenome = genome;
+    GenomeDescValidationService::get().validateAndCorrect(validatedGenome);
     return GenomeTabWidget(
-        new _GenomeTabWidget(genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
+        new _GenomeTabWidget(genomeEditData, validatedGenome, CreatureData{.creatureId = creatureId, .origGenome = validatedGenome}, layoutData));
 }
 
 void _GenomeTabWidget::process()
@@ -289,6 +288,7 @@ void _GenomeTabWidget::updateSpecificEditDataFromSimulation()
         auto& creatureData = std::get<CreatureData>(_specificEditData);
         auto actualGenome = _SimulationFacade::get()->getGenomeOfCreature(creatureData.creatureId);
         if (actualGenome.has_value()) {
+            GenomeDescValidationService::get().validateAndCorrect(*actualGenome);
             creatureData.origGenome = *actualGenome;
         } else {
             convertToDraftTab();
