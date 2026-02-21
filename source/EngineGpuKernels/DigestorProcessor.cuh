@@ -32,7 +32,8 @@ __device__ __inline__ void DigestorProcessor::process(SimulationData& data, Simu
 __device__ __inline__ void DigestorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto convertedEnergy = object->typeData.cell.rawEnergy;
-    auto threshold = (1.0f - object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity) * cudaSimulationParameters.maxRawEnergyConversion.value[object->color];
+    auto threshold = (1.0f - object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity)
+        * cudaSimulationParameters.maxRawEnergyConversion.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
     convertedEnergy = min(convertedEnergy, threshold);
 
     object->typeData.cell.rawEnergy -= convertedEnergy;
