@@ -25,17 +25,17 @@
 #include <EngineGpuKernels/CudaTOProvider.cuh>
 #include <EngineGpuKernels/DataAccessKernels.cuh>
 #include <EngineGpuKernels/EditKernels.cuh>
+#include <EngineGpuKernels/Entities.cuh>
 #include <EngineGpuKernels/GarbageCollectorKernels.cuh>
 #include <EngineGpuKernels/GeometryKernels.cuh>
 #include <EngineGpuKernels/Map.cuh>
 #include <EngineGpuKernels/MaxAgeBalancer.cuh>
-#include <EngineGpuKernels/Entities.cuh>
 #include <EngineGpuKernels/SelectionResult.cuh>
 #include <EngineGpuKernels/SimulationData.cuh>
 #include <EngineGpuKernels/SimulationStatistics.cuh>
 #include <EngineGpuKernels/StatisticsKernels.cuh>
-#include <EngineGpuKernels/TOs.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
+#include <EngineGpuKernels/TOs.cuh>
 
 #include "DataAccessKernelsService.cuh"
 #include "EditKernelsService.cuh"
@@ -552,6 +552,7 @@ void _SimulationCudaFacade::newPreview(TOs const& to)
 
     DataAccessKernelsService::get().clearData(_settings.cudaSettings, *_cudaPreviewData);
     DataAccessKernelsService::get().addData(_settings.cudaSettings, *_cudaPreviewData, cudaTO, false);
+    SimulationKernelsService::get().resetPreviewCounter();
     syncAndCheck();
 }
 

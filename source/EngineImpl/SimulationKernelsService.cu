@@ -378,6 +378,11 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
     KERNEL_CALL(cudaResetDensity, data);
 }
 
+void SimulationKernelsService::resetPreviewCounter()
+{
+    _previewCounter = 0;
+}
+
 bool SimulationKernelsService::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
 {
     for (int i = 0; i < settings.simulationParameters.numLayers; ++i) {
