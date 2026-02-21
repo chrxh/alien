@@ -12,7 +12,7 @@
 
 namespace
 {
-    auto constexpr MinTextWidth = 150.0f;
+    auto constexpr MinTextWidth = 160.0f;
     auto constexpr MaxWidgetWidth = 200.0f;
     auto constexpr MinColumnWidth = 300.0f;
 }
