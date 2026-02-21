@@ -82,7 +82,7 @@ TEST_F(MuscleTests, noFrontAngle)
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = actualData.getObjectRef(2);
@@ -176,7 +176,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
         ASSERT_EQ(4, actualData._objects.size());
@@ -260,7 +260,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
     auto minAngle = 90.0f;
     auto maxAngle = 90.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(4);
@@ -359,7 +359,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
     for (int i = 0; i < 2000; ++i) {
-        calcTimesteps(1, detailedPreview);
+        calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION, detailedPreview);
 
         auto actualData = getSimulationData(detailedPreview);
         ASSERT_EQ(4, actualData._objects.size());
@@ -456,7 +456,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
     for (int i = 0; i < 2000; ++i) {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(4);
@@ -690,7 +690,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -762,7 +762,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -839,7 +839,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -896,7 +896,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -965,7 +965,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData._objects.size());

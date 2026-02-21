@@ -112,18 +112,22 @@ __global__ void cudaNextTimestep_energyFlow(SimulationData data)
     CellProcessor::performEnergyFlow(data);
 }
 
-__global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
+__global__ void cudaNextTimestep_cellState_substep1(SimulationData data)
 {
     CellProcessor::aging(data);
     CellProcessor::cellStateTransition_calcFutureState(data);
     CellProcessor::frontAngleUpdate_calcFutureValue(data);
 }
 
-__global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
+__global__ void cudaNextTimestep_cellState_substep2(SimulationData data)
 {
-    CellProcessor::collectCellTypeOperations(data);
     CellProcessor::cellStateTransition_applyNextState(data);
     CellProcessor::frontAngleUpdate_applyFutureValue(data);
+}
+
+__global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
+{
+    CellProcessor::collectCellTypeOperations(data);
     CellProcessor::updateCellEvents(data);
 }
 

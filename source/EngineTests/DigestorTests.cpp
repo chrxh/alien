@@ -36,7 +36,7 @@ TEST_F(DigestorTests, conversion_noEnergyConversion)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -58,7 +58,7 @@ TEST_F(DigestorTests, conversion_highEnergyConversionRate)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
 
