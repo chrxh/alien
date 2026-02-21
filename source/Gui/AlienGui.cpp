@@ -1843,6 +1843,9 @@ namespace
             return "Infinity";
         }
         if constexpr (std::is_same_v<T, float>) {
+            if (tryMaintainFormat) {
+                return format;
+            }
             // Extract decimal places and prefix/suffix from format string like "%.3f" or "%.0f percent"
             int decimalPlaces = 3;  // default
             std::string prefix, suffix;
@@ -1975,8 +1978,8 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         }
 
         if constexpr (std::is_same<T, float>()) {
-            result |= ImGui::SliderFloat(
-                "##slider", &sliderValue, parameters._min, parameters._max, format.c_str(), parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+            auto flags = ImGuiSliderFlags_NoRoundToFormat | (parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
+            result |= ImGui::SliderFloat("##slider", &sliderValue, parameters._min, parameters._max, format.c_str(), flags);
         }
         if constexpr (std::is_same<T, int>()) {
             result |= ImGui::SliderInt(
