@@ -14,7 +14,6 @@
 struct CudaGraphConfig
 {
     int counterMod3;         // Not every kernel needs to be executed each time
-    int cellFunction;    // Cell type functions need to be executed each TIMESTEPS_PER_CELL_FUNCTION
     int motionType;          // MotionType_Fluid or MotionType_Collision
     bool hasLayers;          // settings.simulationParameters.numLayers > 0
     bool rigidityEnabled;    // isRigidityUpdateEnabled(settings)
@@ -29,7 +28,6 @@ struct CudaGraphConfig
 struct CudaGraphPreviewConfig
 {
     int counterMod3;         // Not every kernel needs to be executed each time
-    int executeCellFunctions;    // Cell type functions need to be executed each TIMESTEPS_PER_CELL_FUNCTION
     bool detailSimulation;   // Whether detail simulation is enabled
     int fluidKernelThreads;  // calcOptimalThreadsForFluidKernel result
     int numBlocks;           // gpuSettings.numBlocks
@@ -60,7 +58,7 @@ private:
     bool isRigidityUpdateEnabled(SettingsForSimulation const& settings) const;
     int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters) const;
 
-    CudaGraphConfig buildGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, uint64_t counter) const;
+    CudaGraphConfig buildGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, int counterMod3) const;
 
     cudaGraphExec_t captureTimestepGraph(
         CudaGraphConfig const& config,
@@ -74,7 +72,7 @@ private:
         SimulationData const& data,
         SimulationStatistics const& statistics);
 
-    CudaGraphPreviewConfig buildPreviewGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, uint64_t counter, bool detailSimulation)
+    CudaGraphPreviewConfig buildPreviewGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, int counterMod3, bool detailSimulation)
         const;
 
     cudaGraphExec_t capturePreviewGraph(

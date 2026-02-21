@@ -88,11 +88,11 @@ __inline__ __device__ bool NeuronProcessor::isAutoTriggered(SimulationData& data
 {
     CUDA_CHECK(object->type == ObjectType_Cell);
 
-    auto triggerInterval = max(TIMESTEPS_PER_CELL_FUNCTION, autoTriggerInterval);
+    auto triggerInterval = max(3, autoTriggerInterval);
     if (isPreview) {
-        return *data.timestep % triggerInterval < TIMESTEPS_PER_CELL_FUNCTION;
+        return *data.timestep % triggerInterval == 0;
     } else {
-        return (*data.timestep + object->typeData.cell.creature->id) % triggerInterval < TIMESTEPS_PER_CELL_FUNCTION;
+        return (*data.timestep + object->typeData.cell.creature->id) % triggerInterval == 0;
     }
 }
 

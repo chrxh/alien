@@ -373,10 +373,10 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
                 auto maxFlow = 0.0f;
                 if (connectedObject->typeData.cell.cellType == CellType_Digestor) {
                     maxFlow += connectedObject->typeData.cell.cellTypeData.digestor.rawEnergyConductivity
-                        * cudaSimulationParameters.maxRawEnergyConductivity.value[connectedObject->color] * TIMESTEPS_PER_CELL_FUNCTION;
+                        * cudaSimulationParameters.maxRawEnergyConductivity.value[connectedObject->color];
                     if (object->typeData.cell.cellType == CellType_Digestor) {
                         maxFlow += object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity
-                            * cudaSimulationParameters.maxRawEnergyConductivity.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
+                            * cudaSimulationParameters.maxRawEnergyConductivity.value[object->color];
 
                         auto cellConversionRate = 1.0f - object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
                         auto connectedObjectConversionRate = 1.0f - connectedObject->typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
