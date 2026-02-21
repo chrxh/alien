@@ -28,6 +28,7 @@
 namespace
 {
     auto constexpr HoveredTimer = 0.5f;
+    auto constexpr MaxDecimalPlaces = 10;
 }
 
 std::unordered_set<unsigned int> AlienGui::_basicSilderExpanded;
@@ -1867,7 +1868,7 @@ namespace
             if (absValue > 0 && std::isfinite(value)) {
                 auto minDecimals = static_cast<int>(std::ceil(-std::log10(absValue)));
                 if (minDecimals > decimalPlaces) {
-                    decimalPlaces = std::min(minDecimals, 10);
+                    decimalPlaces = std::min(minDecimals, MaxDecimalPlaces);
                     if (tryMaintainFormat) {
                         return prefix + "%." + std::to_string(decimalPlaces) + "f" + suffix;
                     }
