@@ -252,7 +252,7 @@ void _NeuralNetEditorWidget::drawConnectionWeightLines(std::vector<float>& conne
             continue;
         }
         auto halfWidth = layout.connectionButtonWidth * std::min(1.0f, std::abs(value)) * 0.35f;
-        auto centerX = (layout.connectionButtonBottomLeft[i].x + layout.connectionButtonBottomRight[i].x) / 2.0f;
+        auto centerX = (layout.connectionButtonBottomLeft[i].x + layout.connectionButtonBottomRight[i].x) / 2.0f - scale(7.0f);
         auto topY = layout.connectionButtonBottomLeft[i].y;
         drawList->AddQuadFilled(
             {centerX - halfWidth, topY},

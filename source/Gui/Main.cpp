@@ -16,6 +16,8 @@
 #include "HelpStrings.h"
 #include "MainWindow.h"
 
+#include "Base/StringHelper.h"
+
 namespace
 {
     bool hasArgument(int argc, char** argv, const char* arg)
