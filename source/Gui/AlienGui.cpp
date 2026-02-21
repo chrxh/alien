@@ -1,6 +1,7 @@
 #include "AlienGui.h"
 
 #include <chrono>
+#include <cmath>
 #include <ranges>
 
 #include <boost/algorithm/string.hpp>
@@ -1860,6 +1861,19 @@ namespace
             } else {
                 return format;
             }
+
+            // Increase decimal places for small non-zero values to avoid rounding to zero
+            auto absValue = std::abs(value);
+            if (absValue > 0 && std::isfinite(value)) {
+                auto minDecimals = static_cast<int>(std::ceil(-std::log10(absValue)));
+                if (minDecimals > decimalPlaces) {
+                    decimalPlaces = std::min(minDecimals, 10);
+                    if (tryMaintainFormat) {
+                        return prefix + "%." + std::to_string(decimalPlaces) + "f" + suffix;
+                    }
+                }
+            }
+
             return prefix + StringHelper::format(value, decimalPlaces) + suffix;
         } else {
             if (tryMaintainFormat) {
