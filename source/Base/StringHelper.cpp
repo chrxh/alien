@@ -29,14 +29,18 @@ std::string StringHelper::format(float v, int fracPartDecimals)
         result = "-";
         v = -v;
     }
-    result += format(static_cast<uint64_t>(v));
-    if (fracPartDecimals > 0) {
-        result += ".";
-    }
-    while (fracPartDecimals-- > 0) {
-        v *= 10;
-        result += std::to_string(static_cast<uint64_t>(v) % 10);
-    }
+
+    // Use snprintf for proper rounding, then replace integer part with comma-formatted version
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%.*f", fracPartDecimals, static_cast<double>(v));
+    std::string formatted(buf);
+
+    auto dotPos = formatted.find('.');
+    std::string intPart = (dotPos != std::string::npos) ? formatted.substr(0, dotPos) : formatted;
+    std::string fracPart = (dotPos != std::string::npos) ? formatted.substr(dotPos) : "";
+
+    result += format(std::stoull(intPart));
+    result += fracPart;
     return result;
 }
 
