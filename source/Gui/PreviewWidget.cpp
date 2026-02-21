@@ -277,7 +277,7 @@ void _PreviewWidget::onStepForward()
     auto seedCreatureIds = getSeedCreatureIds();
     _savepoints.emplace_back(timestep, data, seedCreatureIds);
 
-    _SimulationFacade::get()->calcTimestepsForPreview(1, _editData->detailSimulation);
+    _SimulationFacade::get()->calcTimestepsForPreview(TIMESTEPS_PER_CELL_FUNCTION, _editData->detailSimulation);
 }
 
 void _PreviewWidget::onRestart()

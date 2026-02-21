@@ -13,7 +13,6 @@
 class ConstructorProcessor
 {
 public:
-    __inline__ __device__ static void completenessCheck(SimulationData& data);
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics, bool isPreview);
 
 private:

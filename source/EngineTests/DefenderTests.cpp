@@ -17,7 +17,7 @@ public:
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.attackerEnergyCost.baseValue[i] = 0;
-            _parameters.attackerStrength.value[i] = 0.5f;
+            _parameters.attackerStrength.value[i] = 0.1f;
             _parameters.attackerRadius.value[i] = 3.5f;
             _parameters.defenderAntiAttackerStrength.value[i] = 1000.0f;
             _parameters.injectorEnergyCost.value[i] = 40.0f;

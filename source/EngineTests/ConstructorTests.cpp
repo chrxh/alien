@@ -1252,7 +1252,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
         EXPECT_TRUE(approxCompare(180.0f + LastAngle, actualData.getConnection(newObject, hostObject)._angleFromPrevious));
     }
 
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->calcTimesteps(1);
     {
         auto actualData = _simulationFacade->getSimulationData();
         auto prevCell = actualData.getObjectRef(1);
