@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 
 #include <imgui.h>
+#include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/Math.h>
 
@@ -63,6 +64,9 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
     ImGui::Button("Connection weights", {layout.width - 2 * ImGui::GetStyle().FramePadding.x, 0});
     popColors();
 
+    auto resetButtonWidth = ImGui::CalcTextSize("x").x /* + 2 * ImGui::GetStyle().FramePadding.x*/;
+    auto sliderWidth = layout.connectionButtonWidth - resetButtonWidth - ImGui::GetStyle().ItemSpacing.x;
+
     ImGui::PushID("ConnectionWeightSliders");
     for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
         if (i > 0) {
@@ -72,12 +76,18 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
         ImGuiStyle& style = ImGui::GetStyle();
         auto originalGrabMinSize = style.GrabMinSize;
         style.GrabMinSize = scale(8.0f);
-        AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().format("%.2f").width(layout.connectionButtonWidth).textWidth(0).min(-1.0f).max(1.0f), &connectionWeights.at(i));
+        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").width(sliderWidth).textWidth(0).min(-1.0f).max(1.0f), &connectionWeights.at(i));
         style.GrabMinSize = originalGrabMinSize;
-        ImGui::PopID();
         layout.connectionButtonBottomLeft[i] = {ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y};
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(7.0f));
+        ImGui::SetWindowFontScale(0.5f);
+        if (ImGui::Button(ICON_FA_TIMES)) {
+            connectionWeights.at(i) = 0.0f;
+        }
+        ImGui::SetWindowFontScale(1.0f);
         layout.connectionButtonBottomRight[i] = {ImGui::GetItemRectMax().x, ImGui::GetItemRectMax().y};
+        ImGui::PopID();
     }
     ImGui::PopID();
 
