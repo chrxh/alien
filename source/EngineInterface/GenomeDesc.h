@@ -335,7 +335,7 @@ struct SenderGenomeDesc
 {
     auto operator<=>(SenderGenomeDesc const&) const = default;
 
-    MEMBER(SenderGenomeDesc, float, range, 100.0f);
+    MEMBER(SenderGenomeDesc, float, range, 10.0f);
     MEMBER(SenderGenomeDesc, int, maxTimesSent, 4);
 };
 

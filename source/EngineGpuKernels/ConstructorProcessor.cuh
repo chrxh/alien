@@ -309,6 +309,7 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
 __inline__ __device__ void ConstructorProcessor::tryScheduleMutations(SimulationData& data, Object* hostObject)
 {
     atomicCAS(&hostObject->typeData.cell.creature->mutationState, MutationState_NotMutated, MutationState_MutationInProgress);
+    hostObject->typeData.cell.constructor.offspring = nullptr;
 }
 
 __inline__ __device__ Object* ConstructorProcessor::getLastConstructedCellOnBranch(Object* hostObject)
