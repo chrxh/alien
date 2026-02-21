@@ -168,9 +168,8 @@ cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
 void SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     // Build configuration key for graph caching
-    static uint64_t counter = 0;
-    ++counter;
-    auto config = buildGraphConfig(settings, data, counter);
+    ++_counter;
+    auto config = buildGraphConfig(settings, data, _counter);
 
     // In debug mode, bypass CUDA Graphs to get precise kernel crash information
     if (GlobalSettings::get().isDebugMode()) {
@@ -323,9 +322,8 @@ void SimulationKernelsService::calcTimestepForPreview(
     bool detailSimulation)
 {
     // Build configuration key for graph caching
-    static int counterMod3 = 0;
-    counterMod3 = ++counterMod3 % 3;
-    auto config = buildPreviewGraphConfig(settings, data, counterMod3, detailSimulation);
+    _previewCounterMod3 = ++_previewCounterMod3 % 3;
+    auto config = buildPreviewGraphConfig(settings, data, _previewCounterMod3, detailSimulation);
 
     // In debug mode, bypass CUDA Graphs to get precise kernel crash information
     if (GlobalSettings::get().isDebugMode()) {
@@ -371,6 +369,10 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
         CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(pair.second));
     }
     _previewGraphCache.clear();
+
+    // Reset counters so cell functions execute on the last timestep of each window
+    _counter = 0;
+    _previewCounterMod3 = 0;
 
     auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL(cudaResetDensity, data);
