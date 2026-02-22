@@ -85,7 +85,7 @@ public:
     virtual std::optional<int> getTpsRestriction() const = 0;
     virtual void setTpsRestriction(std::optional<int> const& value) = 0;
     virtual float getTps() const = 0;
-    
+
     //*********************
     //* Simulation settings
     //*********************
@@ -127,6 +127,8 @@ public:
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
     virtual void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta) = 0;
     virtual bool testOnly_arePointersValid() = 0;
+    virtual void testOnly_calcTimestep() = 0;
+    virtual void testOnly_calcTimestepForPreview(bool detailSimulation = false) = 0;
 
 protected:
     static SimulationFacade _instance;

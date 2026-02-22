@@ -552,7 +552,6 @@ void _SimulationCudaFacade::newPreview(TOs const& to)
 
     DataAccessKernelsService::get().clearData(_settings.cudaSettings, *_cudaPreviewData);
     DataAccessKernelsService::get().addData(_settings.cudaSettings, *_cudaPreviewData, cudaTO, false);
-    SimulationKernelsService::get().resetPreviewCounter();
     syncAndCheck();
 }
 
@@ -657,6 +656,33 @@ bool _SimulationCudaFacade::testOnly_arePointersValid()
     auto result = TestKernelsService::get().testOnly_arePointersValid(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
     return result;
+}
+
+void _SimulationCudaFacade::testOnly_calcTimestep()
+{
+    checkAndProcessSimulationParameterChanges();
+
+    auto simulationData = getSimulationDataPtrCopy();
+    SimulationKernelsService::get().testOnly_calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
+    {
+        std::lock_guard lock(_mutexForSimulationData);
+        ++_simulationTimestep;
+    }
+    syncAndCheck();
+}
+
+void _SimulationCudaFacade::testOnly_calcTimestepForPreview(bool detailSimulation)
+{
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+
+    SimulationKernelsService::get().testOnly_calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
+    syncAndCheck();
+
+    ++_previewTimestep;
+
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
 void _SimulationCudaFacade::initCuda()

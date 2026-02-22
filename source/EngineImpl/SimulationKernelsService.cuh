@@ -47,13 +47,18 @@ public:
     void shutdown();
 
     void calcTimestep(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
+    void testOnly_calcTimestep(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
     void calcTimestepForPreview(
         SettingsForSimulation const& settings,
         SimulationData const& simulationData,
         SimulationStatistics const& statistics,
         bool detailSimulation);
+    void testOnly_calcTimestepForPreview(
+        SettingsForSimulation const& settings,
+        SimulationData const& simulationData,
+        SimulationStatistics const& statistics,
+        bool detailSimulation);
     void prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& simulationData);
-    void resetPreviewCounter();
 
 private:
     SimulationKernelsService() = default;

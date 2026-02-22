@@ -10,8 +10,8 @@
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/NumberGenerator.h>
 
-#include <EngineGpuKernels/TOs.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
+#include <EngineGpuKernels/TOs.cuh>
 
 #include "DescConverterService.h"
 
@@ -495,6 +495,18 @@ bool EngineWorker::testOnly_arePointersValid()
 {
     EngineWorkerGuard access(this);
     return _simulationCudaFacade->testOnly_arePointersValid();
+}
+
+void EngineWorker::testOnly_calcTimestep()
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_calcTimestep();
+}
+
+void EngineWorker::testOnly_calcTimestepForPreview(bool detailSimulation)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_calcTimestepForPreview(detailSimulation);
 }
 
 void EngineWorker::resetTimeIntervalStatistics()

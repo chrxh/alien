@@ -406,3 +406,14 @@ bool _SimulationFacadeImpl::testOnly_arePointersValid()
 {
     return _worker.testOnly_arePointersValid();
 }
+
+void _SimulationFacadeImpl::testOnly_calcTimestep()
+{
+    _worker.testOnly_calcTimestep();
+    _selectionNeedsUpdate = true;
+}
+
+void _SimulationFacadeImpl::testOnly_calcTimestepForPreview(bool detailSimulation)
+{
+    _worker.testOnly_calcTimestepForPreview(detailSimulation);
+}

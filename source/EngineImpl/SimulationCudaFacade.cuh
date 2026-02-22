@@ -111,6 +111,8 @@ public:
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta);
     bool testOnly_arePointersValid();
+    void testOnly_calcTimestep();
+    void testOnly_calcTimestepForPreview(bool detailSimulation);
 
 private:
     void initCuda();
