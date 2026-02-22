@@ -510,6 +510,7 @@ struct Cell
     // Additional rendering data
     CellEvent event;
     uint8_t eventCounter;
+    uint8_t signalChanges;
     float2 eventPos;
 
     __device__ __inline__ bool isSameCreature(Cell* otherCell) { return otherCell->creature->id == this->creature->id; }

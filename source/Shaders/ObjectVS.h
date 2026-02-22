@@ -9,7 +9,7 @@ namespace Shaders
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
 layout (location = 2) in int state;
-layout (location = 3) in float signalStrength;
+layout (location = 3) in float signalChanges;
 
 out vec3 vColor;
 
@@ -36,8 +36,8 @@ void main()
         gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
     }
     
-    vColor = mix(aColor, vec3(1.0), signalStrength * 0.2);
-    gl_PointSize = radius * (0.4 + signalStrength * 0.2);
+    vColor = mix(aColor, vec3(1.0), signalChanges * 0.2);
+    gl_PointSize = radius * (0.4 + signalChanges * 0.2);
 }
 )";
 }
