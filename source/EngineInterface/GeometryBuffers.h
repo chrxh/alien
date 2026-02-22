@@ -26,7 +26,7 @@ struct ObjectVertexData
     int state;             // Bit 0..7 = cell type
                            // Bit 8..15 = object type (ObjectType_Structure, ObjectType_FreeCell, ObjectType_Cell)
                            // Bit 16 = occurrence in triangle or quad
-    float signalStrength;  // signal strength in [0, 1]
+    float signalChanges;  // signal changes in [0, 1]
 };
 
 struct EnergyVertexData

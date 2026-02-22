@@ -395,6 +395,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->signal.channels[i] = cellTO.signal.channels[i];
         }
         cell->signal.numTimesSent = cellTO.signal.numTimesSent;
+        cell->signalChanges = 0;
 
         cell->cellType = cellTO.cellType;
 
@@ -736,6 +737,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         cell.signal.channels[i] = 0.0f;
     }
     cell.signal.numTimesSent = 0;
+    cell.signalChanges = 0;
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
     for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
