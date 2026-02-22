@@ -28,14 +28,16 @@ protected:
     // Helper to create an injector creature with a generator that triggers it
     Desc createInjectorWithGenerator(RealVector2D const& injectorPos, int geneIndex = 0, int injectorColor = 0)
     {
-        auto data = Desc().addCreature({
+        auto data = Desc().addCreature(
+            {
                 ObjectDesc()
                     .id(1)
                     .pos(injectorPos)
                     .color(injectorColor)
                     .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(geneIndex))),
-            ObjectDesc().id(2).pos({injectorPos.x + 1.0f, injectorPos.y}).color(injectorColor),
-        }, CreatureDesc().id(1));
+                ObjectDesc().id(2).pos({injectorPos.x + 1.0f, injectorPos.y}).color(injectorColor),
+            },
+            CreatureDesc().id(1));
         data.addConnection(1, 2);
         return data;
     }
@@ -43,10 +45,12 @@ protected:
     // Helper to create a target creature with a constructor at a given position
     Desc createTargetCreatureWithConstructor(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f)
     {
-        auto data = Desc().addCreature({
-            ObjectDesc().id(100).pos(pos).color(color).type(CellDesc().usableEnergy(usableEnergy).constructor(ConstructorDesc())),
-            ObjectDesc().id(101).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().usableEnergy(usableEnergy)),
-        }, CreatureDesc().id(creatureId));
+        auto data = Desc().addCreature(
+            {
+                ObjectDesc().id(100).pos(pos).color(color).type(CellDesc().usableEnergy(usableEnergy).constructor(ConstructorDesc())),
+                ObjectDesc().id(101).pos({pos.x + 1.0f, pos.y}).color(color).type(CellDesc().usableEnergy(usableEnergy)),
+            },
+            CreatureDesc().id(creatureId));
         data.addConnection(100, 101);
         return data;
     }
@@ -64,7 +68,9 @@ TEST_F(InjectorTests, noTargetFound)
     data.add(createTargetCreatureWithConstructor({100.0f, 104.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
+    for (int i = 0; i < 4; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
+    }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
@@ -86,7 +92,9 @@ TEST_F(InjectorTests, successfulInjection)
     data.add(createTargetCreatureWithConstructor({100.0f, 103.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
+    for (int i = 0; i < 4; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
+    }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
@@ -106,18 +114,22 @@ TEST_F(InjectorTests, successfulInjection)
 TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
 {
     // Create a single creature with injector and constructor
-    auto data = Desc().addCreature({
+    auto data = Desc().addCreature(
+        {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(3))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}),
-        ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),  // Same creature
-    }, CreatureDesc().id(1));
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+            ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),  // Same creature
+        },
+        CreatureDesc().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
     auto origConstructor = data.getObjectRef(3).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
+    for (int i = 0; i < 4; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
+    }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(3).getCellRef()._constructor.value();
@@ -135,16 +147,20 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
     auto data = createInjectorWithGenerator({100.0f, 100.0f}, 3);
 
     // Add target creature with fixed constructor
-    data.addCreature({
-        ObjectDesc().id(100).pos({100.0f, 103.0f}).fixed(true).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
-        ObjectDesc().id(101).pos({101.0f, 103.0f}).fixed(true),
-    }, CreatureDesc().id(2));
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).fixed(true).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}).fixed(true),
+        },
+        CreatureDesc().id(2));
     data.addConnection(100, 101);
 
     auto origConstructor = data.getObjectRef(100).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
+    for (int i = 0; i < 4; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
+    }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
@@ -160,29 +176,35 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
 TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
 {
     // Create injector with connections that block the injection ray
-    auto data = Desc().addCreature({
+    auto data = Desc().addCreature(
+        {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(3))),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}),
-        // Create a connection that crosses the ray path to target at (100, 97)
-        ObjectDesc().id(3).pos({99.0f, 99.0f}),
-        ObjectDesc().id(4).pos({101.0f, 99.0f}),
-    }, CreatureDesc().id(1));
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+            // Create a connection that crosses the ray path to target at (100, 97)
+            ObjectDesc().id(3).pos({99.0f, 99.0f}),
+            ObjectDesc().id(4).pos({101.0f, 99.0f}),
+        },
+        CreatureDesc().id(1));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(3, 4);
     data.addConnection(1, 4);
 
     // Add target creature below (ray to target is blocked by connection 3-4)
-    data.addCreature({
-        ObjectDesc().id(100).pos({100.0f, 97.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
-        ObjectDesc().id(101).pos({101.0f, 97.0f}),
-    }, CreatureDesc().id(2));
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 97.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(101).pos({101.0f, 97.0f}),
+        },
+        CreatureDesc().id(2));
     data.addConnection(100, 101);
 
     auto origConstructor = data.getObjectRef(100).getCellRef()._constructor.value();
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
+    for (int i = 0; i < 4; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
+    }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
@@ -200,14 +222,18 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
 
     // Add target creature with constructor that has some progress
-    data.addCreature({
-        ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(5).currentNodeIndex(3).currentConcatenation(2))),
-        ObjectDesc().id(101).pos({101.0f, 103.0f}),
-    }, CreatureDesc().id(2));
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(5).currentNodeIndex(3).currentConcatenation(2))),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}),
+        },
+        CreatureDesc().id(2));
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
+    for (int i = 0; i < 4; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
+    }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();

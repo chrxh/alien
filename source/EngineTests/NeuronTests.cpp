@@ -73,7 +73,7 @@ TEST_F(NeuronTests, forwardSignalByDefault)
                     .addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -100,7 +100,7 @@ TEST_F(NeuronTests, forwardSignalByDefault_preview)
                     .addConnection(1, 2);
 
     _simulationFacade->setPreviewData(data);
-    _simulationFacade->calcTimestepsForPreview(TIMESTEPS_PER_CELL_FUNCTION, true);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctionsForPreview(true);
     auto actualData = _simulationFacade->getPreviewData();
 
     EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._signal._channels));
@@ -124,7 +124,7 @@ TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
                     .addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -154,7 +154,7 @@ TEST_F(NeuronTests, forkSignal)
                     .addConnection(5, 6);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -192,7 +192,7 @@ TEST_F(NeuronTests, mergeSignal)
                 ObjectDesc().id(5).pos({2, 1}).type(CellDesc()
                                                         .signal(SignalDesc().channels(signal2).numTimesSent(4))
                                                         .neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),  // Gets input from cell 6
-                ObjectDesc().id(6).pos({2, 0}).type(CellDesc()),                                                                     // Gets input from cell 5
+                ObjectDesc().id(6).pos({2, 0}).type(CellDesc()),                                                                 // Gets input from cell 5
             })
             .addConnection(2, 1)
             .addConnection(2, 3)
@@ -201,7 +201,7 @@ TEST_F(NeuronTests, mergeSignal)
             .addConnection(5, 6);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -288,7 +288,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
                     .addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -335,7 +335,7 @@ TEST_F(NeuronTests, truncateSignal)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 

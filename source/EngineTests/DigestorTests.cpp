@@ -29,14 +29,11 @@ public:
 TEST_F(DigestorTests, conversion_noEnergyConversion)
 {
     auto data = Desc().addCreature({
-        ObjectDesc()
-            .id(0)
-            .pos({100.0f, 100.0f})
-            .type(CellDesc().cellType(DigestorDesc().setRawEnergyConversionRate(0.0f)).rawEnergy(100.0f)),
+        ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc().setRawEnergyConversionRate(0.0f)).rawEnergy(100.0f)),
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -51,14 +48,11 @@ TEST_F(DigestorTests, conversion_noEnergyConversion)
 TEST_F(DigestorTests, conversion_highEnergyConversionRate)
 {
     auto data = Desc().addCreature({
-        ObjectDesc()
-            .id(0)
-            .pos({100.0f, 100.0f})
-            .type(CellDesc().cellType(DigestorDesc().setRawEnergyConversionRate(1.0f)).rawEnergy(100.0f)),
+        ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().cellType(DigestorDesc().setRawEnergyConversionRate(1.0f)).rawEnergy(100.0f)),
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 

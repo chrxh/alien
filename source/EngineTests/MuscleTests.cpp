@@ -47,12 +47,12 @@ protected:
         }
     }
 
-    void calcTimesteps(int timesteps, DetailedPreview detailedPreview)
+    void calcTimestepWithCellTypeFunctions(DetailedPreview detailedPreview)
     {
         if (detailedPreview == DetailedPreview::No) {
-            _simulationFacade->calcTimesteps(timesteps);
+            _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
         } else {
-            _simulationFacade->calcTimestepsForPreview(timesteps, true);
+            _simulationFacade->testOnly_calcTimestepWithCellTypeFunctionsForPreview(true);
         }
     }
 
@@ -71,10 +71,7 @@ TEST_F(MuscleTests, noFrontAngle)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}),
-            ObjectDesc()
-                .id(2)
-                .pos({11.0f, 10.0f})
-                .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(MuscleDesc().mode(AutoBendingDesc()))),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(MuscleDesc().mode(AutoBendingDesc()))),
             ObjectDesc().id(3).pos({12.0f, 10.0f}),
         },
         CreatureDesc().id(0));
@@ -82,7 +79,7 @@ TEST_F(MuscleTests, noFrontAngle)
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = actualData.getObjectRef(2);
@@ -130,9 +127,9 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(Side::Left, Channel0::Zero, Channel1::Positive),
         std::make_tuple(Side::Right, Channel0::Zero, Channel1::Positive),
         std::make_tuple(Side::Left, Channel0::Positive, Channel1::Positive),
-        std::make_tuple(Side::Right, Channel0::Positive, Channel1::Positive),   
+        std::make_tuple(Side::Right, Channel0::Positive, Channel1::Positive),
         std::make_tuple(Side::Left, Channel0::Negative, Channel1::Positive),
-        std::make_tuple(Side::Right, Channel0::Negative, Channel1::Positive),   
+        std::make_tuple(Side::Right, Channel0::Negative, Channel1::Positive),
         std::make_tuple(Side::Left, Channel0::Zero, Channel1::Negative),
         std::make_tuple(Side::Right, Channel0::Zero, Channel1::Negative),
         std::make_tuple(Side::Left, Channel0::Positive, Channel1::Negative),
@@ -176,7 +173,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
         auto actualData = _simulationFacade->getSimulationData();
         ASSERT_EQ(4, actualData._objects.size());
@@ -260,7 +257,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
     auto minAngle = 90.0f;
     auto maxAngle = 90.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(4);
@@ -359,7 +356,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
     for (int i = 0; i < 2000; ++i) {
-        calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION, detailedPreview);
+        calcTimestepWithCellTypeFunctions(detailedPreview);
 
         auto actualData = getSimulationData(detailedPreview);
         ASSERT_EQ(4, actualData._objects.size());
@@ -456,7 +453,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
     for (int i = 0; i < 2000; ++i) {
-        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(4);
@@ -690,7 +687,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -749,10 +746,8 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .type(CellDesc()
-                          .frontAngle(180.0f)
-                          .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(nn)),
+                .type(
+                    CellDesc().frontAngle(180.0f).cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(nn)),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -762,7 +757,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -839,7 +834,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -896,7 +891,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
     for (int i = 0; i < 1000; ++i) {
-        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
         auto actualData = _simulationFacade->getSimulationData();
         auto actualMuscleCell = actualData.getObjectRef(2);
@@ -965,7 +960,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData._objects.size());

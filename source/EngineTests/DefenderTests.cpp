@@ -63,7 +63,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     auto origTarget = data.getObjectRef(100);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -105,7 +105,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualTarget = actualData.getObjectRef(100);
@@ -127,18 +127,16 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
         GeneDesc().nodes({NodeDesc().color(1)}),
     });
 
-    auto data = Desc()
-                    .addCreature(
-                        {
-                            ObjectDesc()
-                                .id(1)
-                                .pos({100.0f, 100.0f})
-                                .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
-                            ObjectDesc().id(2).pos({101.0f, 100.0f}),
-                        },
-                        CreatureDesc().id(1),
-                        injectorGenome)
-                    .addConnection(1, 2);
+    auto data =
+        Desc()
+            .addCreature(
+                {
+                    ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                    ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                },
+                CreatureDesc().id(1),
+                injectorGenome)
+            .addConnection(1, 2);
 
     // Target creature with constructor and anti-attacker defender (wrong mode for blocking injector)
     auto targetGenome = GenomeDesc().genes({
@@ -154,7 +152,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);
@@ -185,18 +183,16 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
         GeneDesc().nodes({NodeDesc().color(1)}),
     });
 
-    auto data = Desc()
-                    .addCreature(
-                        {
-                            ObjectDesc()
-                                .id(1)
-                                .pos({100.0f, 100.0f})
-                                .type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
-                            ObjectDesc().id(2).pos({101.0f, 100.0f}),
-                        },
-                        CreatureDesc().id(1),
-                        injectorGenome)
-                    .addConnection(1, 2);
+    auto data =
+        Desc()
+            .addCreature(
+                {
+                    ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().neuralNetwork(NeuralNetDesc().bias(0, 1.0f)).cellType(InjectorDesc().geneIndex(2))),
+                    ObjectDesc().id(2).pos({101.0f, 100.0f}),
+                },
+                CreatureDesc().id(1),
+                injectorGenome)
+            .addConnection(1, 2);
 
     // Target creature with constructor and anti-injector defender (correct mode)
     auto targetGenome = GenomeDesc().genes({
@@ -212,7 +208,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
         .addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualInjector = actualData.getObjectRef(1);

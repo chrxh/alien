@@ -30,9 +30,7 @@ protected:
             ObjectDesc()
                 .id(1)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc()
-                          .cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit))
-                          .usableEnergy(usableEnergy)),
+                .type(CellDesc().cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit)).usableEnergy(usableEnergy)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         });
         data.addConnection(1, 2);
@@ -43,10 +41,7 @@ protected:
     {
         // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
         auto data = Desc().addCreature({
-            ObjectDesc()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .type(CellDesc().cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DepotDesc().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         });
         data.addConnection(1, 2);
@@ -61,14 +56,11 @@ TEST_F(DepotTests, noSignal_noChange)
 
     // Create depot without a cell carrying a signal => no signal will be sent
     auto data = Desc().addCreature({
-        ObjectDesc()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .type(CellDesc().cellType(DepotDesc().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(DepotDesc().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -88,7 +80,7 @@ TEST_F(DepotTests, positiveSignal_storeEnergy)
     auto data = createDepotWithIncomingPositiveSignal(initialUsableEnergy, 0.0f);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getObjectRef(1);
@@ -107,7 +99,7 @@ TEST_F(DepotTests, negativeSignal_releaseEnergy)
     auto data = createDepotWithIncomingNegativeSignal(normalCellEnergy, initialStoredEnergy);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getObjectRef(1);
@@ -126,7 +118,7 @@ TEST_F(DepotTests, positiveSignal_usableEnergyBelowNormal_noStore)
     auto data = createDepotWithIncomingPositiveSignal(initialUsableEnergy, 0.0f);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getObjectRef(1);
@@ -143,7 +135,7 @@ TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
     auto data = createDepotWithIncomingNegativeSignal(normalCellEnergy, 0.0f);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getObjectRef(1);
@@ -163,7 +155,7 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
     auto data = createDepotWithIncomingPositiveSignal(initialUsableEnergy, 0.0f);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto origOtherObject = data.getObjectRef(2);
 
@@ -173,8 +165,7 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
-    EXPECT_TRUE(
-        approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDesc>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
+    EXPECT_TRUE(approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDesc>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(
         initialUsableEnergy + origOtherObject.getCellRef()._usableEnergy - SimulationParameters::depotEnergyTransferUnit,
         actualDepot.getCellRef()._usableEnergy + actualOtherObject.getCellRef()._usableEnergy));
@@ -190,7 +181,7 @@ TEST_F(DepotTests, positiveSignal_reachedStorageLimit1)
     auto data = createDepotWithIncomingPositiveSignal(initialUsableEnergy, initialStoredUsableEnergy, storageLimit);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto origOtherObject = data.getObjectRef(2);
 
@@ -214,7 +205,7 @@ TEST_F(DepotTests, positiveSignal_reachedStorageLimit2)
     auto data = createDepotWithIncomingPositiveSignal(initialUsableEnergy, initialStoredUsableEnergy, storageLimit);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto origOtherObject = data.getObjectRef(2);
 
@@ -237,7 +228,7 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     auto data = createDepotWithIncomingNegativeSignal(origDepotEnergy, initialStoredEnergy);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto origOtherObject = data.getObjectRef(2);
 
@@ -248,8 +239,7 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(
-        initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit,
-        std::get<DepotDesc>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
+        initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDesc>(actualDepot.getCellRef()._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(
         origDepotEnergy + origOtherObject.getCellRef()._usableEnergy + SimulationParameters::depotEnergyTransferUnit,
         actualDepot.getCellRef()._usableEnergy + actualOtherObject.getCellRef()._usableEnergy));
