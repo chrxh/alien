@@ -232,7 +232,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         // Compute signal changes from cell
         float signalChanges = 0.0f;
         if (object->type == ObjectType_Cell) {
-            signalChanges = toFloat(object->typeData.cell.signalChanges) / 255.0f;
+            signalChanges = sqrt(sqrt(toFloat(object->typeData.cell.signalChanges) / 255.0f));
         }
 
         // Pack cellType (bits 0-7), objectType (bits 8-15), and isInTriangleOrQuad (bit 16) into state field
