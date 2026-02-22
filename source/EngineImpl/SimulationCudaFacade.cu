@@ -149,7 +149,7 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
+void _SimulationCudaFacade::calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics)
 {
     static int counter = 0;
 
@@ -552,7 +552,6 @@ void _SimulationCudaFacade::newPreview(TOs const& to)
 
     DataAccessKernelsService::get().clearData(_settings.cudaSettings, *_cudaPreviewData);
     DataAccessKernelsService::get().addData(_settings.cudaSettings, *_cudaPreviewData, cudaTO, false);
-    SimulationKernelsService::get().resetPreviewCounter();
     syncAndCheck();
 }
 
@@ -657,6 +656,18 @@ bool _SimulationCudaFacade::testOnly_arePointersValid()
     auto result = TestKernelsService::get().testOnly_arePointersValid(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
     return result;
+}
+
+void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctions()
+{
+    SimulationKernelsService::get().resetCounter();
+    calcTimesteps(1, true);
+}
+
+void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
+{
+    SimulationKernelsService::get().resetPreviewCounter();
+    calcTimestepsForPreview(1, detailSimulation);
 }
 
 void _SimulationCudaFacade::initCuda()

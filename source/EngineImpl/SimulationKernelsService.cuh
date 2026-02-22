@@ -53,6 +53,7 @@ public:
         SimulationStatistics const& statistics,
         bool detailSimulation);
     void prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& simulationData);
+    void resetCounter();
     void resetPreviewCounter();
 
 private:

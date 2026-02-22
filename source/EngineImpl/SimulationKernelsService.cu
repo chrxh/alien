@@ -370,12 +370,13 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
     }
     _previewGraphCache.clear();
 
-    // Reset counters so cell functions execute on the last timestep of each window
-    _counter = 0;
-    _previewCounter = 0;
-
     auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL(cudaResetDensity, data);
+}
+
+void SimulationKernelsService::resetCounter()
+{
+    _counter = 0;
 }
 
 void SimulationKernelsService::resetPreviewCounter()
