@@ -149,7 +149,7 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
+void _SimulationCudaFacade::calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics)
 {
     static int counter = 0;
 
@@ -658,31 +658,16 @@ bool _SimulationCudaFacade::testOnly_arePointersValid()
     return result;
 }
 
-void _SimulationCudaFacade::testOnly_calcTimestep()
+void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctions()
 {
-    checkAndProcessSimulationParameterChanges();
-
-    auto simulationData = getSimulationDataPtrCopy();
-    SimulationKernelsService::get().testOnly_calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
-    {
-        std::lock_guard lock(_mutexForSimulationData);
-        ++_simulationTimestep;
-    }
-    syncAndCheck();
+    SimulationKernelsService::get().resetCounter();
+    calcTimesteps(1, true);
 }
 
-void _SimulationCudaFacade::testOnly_calcTimestepForPreview(bool detailSimulation)
+void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
 {
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
-
-    SimulationKernelsService::get().testOnly_calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
-    syncAndCheck();
-
-    ++_previewTimestep;
-
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    SimulationKernelsService::get().resetPreviewCounter();
+    calcTimestepsForPreview(1, detailSimulation);
 }
 
 void _SimulationCudaFacade::initCuda()

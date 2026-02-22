@@ -50,7 +50,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -83,7 +83,7 @@ TEST_F(ConstructorTests, emptyGenome)
         GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -117,7 +117,7 @@ TEST_F(ConstructorTests, emptyGene)
         GenomeDesc().genes({GeneDesc().separation(true)}));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -151,7 +151,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
         GenomeDesc().genes({GeneDesc().separation(true)}));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -185,7 +185,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
         GenomeDesc().genes({GeneDesc().separation(true)}));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -216,7 +216,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
         GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -253,7 +253,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -290,7 +290,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -327,7 +327,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -361,7 +361,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
         GenomeDesc().genes({GeneDesc().separation(false).numBranches(1).nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -409,7 +409,7 @@ TEST_F(ConstructorTests, insufficientSpace)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -457,7 +457,7 @@ TEST_F(ConstructorTests, crossingLinks)
     data.addConnection(3, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -491,7 +491,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -537,7 +537,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
         }));
 
     _simulationFacade->setPreviewData(data);
-    _simulationFacade->testOnly_calcTimestepForPreview();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctionsForPreview();
 
     auto actualData = _simulationFacade->getPreviewData();
 
@@ -579,7 +579,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
         }));
 
     _simulationFacade->setPreviewData(data);
-    _simulationFacade->testOnly_calcTimestepForPreview(true);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctionsForPreview(true);
 
     auto actualData = _simulationFacade->getPreviewData();
 
@@ -620,7 +620,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -677,10 +677,10 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
     _simulationFacade->setCurrentTimestep(3);
     for (int i = 0; i < 3; ++i) {
-        _simulationFacade->testOnly_calcTimestep();
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
     }
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -732,10 +732,10 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
     _simulationFacade->setCurrentTimestep(3);
     for (int i = 0; i < 3; ++i) {
-        _simulationFacade->testOnly_calcTimestep();
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
     }
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -769,7 +769,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -809,7 +809,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -849,7 +849,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -893,7 +893,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -967,7 +967,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
     data.addConnection(1, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1022,7 +1022,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
         genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1068,7 +1068,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1113,7 +1113,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
         genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1158,7 +1158,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
         genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1197,7 +1197,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1235,7 +1235,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1278,7 +1278,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1318,7 +1318,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1371,7 +1371,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1416,7 +1416,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
     {
         auto actualData = _simulationFacade->getSimulationData();
 
@@ -1474,7 +1474,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
     data.addConnection(1, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1523,7 +1523,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
     data.addConnection(1, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1568,7 +1568,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1623,7 +1623,7 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1689,7 +1689,7 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
     data.addConnection(2, 0);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1786,7 +1786,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
     data.addConnection(2, 0);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1887,7 +1887,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -1952,7 +1952,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
     data.addConnection(0, 4);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2012,7 +2012,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     data.addConnection(2, 4, cell4_refPos);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2084,7 +2084,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2150,7 +2150,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     data.addConnection(3, 4, cell4_refPos);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2218,7 +2218,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     data.addConnection(3, 4, cell4_refPos);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2284,7 +2284,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     data.addConnection(3, 4, cell4_refPos);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2344,7 +2344,7 @@ TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__nu
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2403,7 +2403,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     data.addConnection(3, 4, cell4_refPos);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2456,7 +2456,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
         genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2508,7 +2508,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2563,7 +2563,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
@@ -2603,7 +2603,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 2; ++i) {
-        _simulationFacade->testOnly_calcTimestep();
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
     }
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -2640,7 +2640,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 2; ++i) {
-        _simulationFacade->testOnly_calcTimestep();
+        _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
     }
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -2822,7 +2822,7 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearObjects)
     data.addConnection(8, 4);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2885,7 +2885,7 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     data.addConnection(5, 6);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -2975,7 +2975,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -3043,7 +3043,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -3095,7 +3095,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -3140,7 +3140,7 @@ TEST_F(ConstructorTests, constructWithReservedEnergy)
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -3221,7 +3221,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -3282,7 +3282,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -3377,7 +3377,7 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
     data.getConnectionRef(4, 3)._angleFromPrevious = 90.0f;
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -3441,7 +3441,7 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
     data.getConnectionRef(4, 3)._angleFromPrevious = 270.0f;
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestep();
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 

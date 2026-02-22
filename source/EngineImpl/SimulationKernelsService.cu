@@ -197,18 +197,6 @@ void SimulationKernelsService::calcTimestep(SettingsForSimulation const& setting
     GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.cudaSettings, data);
 }
 
-void SimulationKernelsService::testOnly_calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
-{
-    auto config = buildGraphConfig(settings, data, _counter);
-    config.cellFunction = 0;
-    ++_counter;
-
-    launchTimestepKernels(config, settings, data, statistics);
-    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
-
-    GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.cudaSettings, data);
-}
-
 CudaGraphPreviewConfig SimulationKernelsService::buildPreviewGraphConfig(
     SettingsForSimulation const& settings,
     SimulationData const& data,
@@ -367,26 +355,6 @@ void SimulationKernelsService::calcTimestepForPreview(
     }
 }
 
-void SimulationKernelsService::testOnly_calcTimestepForPreview(
-    SettingsForSimulation const& settings,
-    SimulationData const& data,
-    SimulationStatistics const& statistics,
-    bool detailSimulation)
-{
-    auto config = buildPreviewGraphConfig(settings, data, _previewCounter, detailSimulation);
-    config.executeCellFunctions = 0;
-    ++_previewCounter;
-
-    launchPreviewKernels(config, settings, data, statistics);
-    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
-
-    if (!detailSimulation) {
-        GarbageCollectorKernelsService::get().cleanupAfterTimestepForPreview(settings.cudaSettings, data);
-    } else {
-        GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.cudaSettings, data);
-    }
-}
-
 void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
 {
     // Invalidate graph cache when simulation parameters change
@@ -404,6 +372,16 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
 
     auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL(cudaResetDensity, data);
+}
+
+void SimulationKernelsService::resetCounter()
+{
+    _counter = 0;
+}
+
+void SimulationKernelsService::resetPreviewCounter()
+{
+    _previewCounter = 0;
 }
 
 bool SimulationKernelsService::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
