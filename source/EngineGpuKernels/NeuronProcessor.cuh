@@ -65,11 +65,11 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
         if (object->type != ObjectType_Cell) {
             continue;
         }
+        auto& cell = object->typeData.cell;
         if (object->typeData.cell.cellState == CellState_Constructing) {
+            cell.signalChanges = 0;
             continue;
         }
-
-        auto& cell = object->typeData.cell;
 
         float totalDeviation = 0;
         for (int i = 0; i < NEURONS_PER_CELL; ++i) {
