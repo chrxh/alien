@@ -189,6 +189,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 energyToTransfer *=
                     ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
 
+                // Evaluate lineage
+                if (cell->creature->genome->lineageId == otherCell->creature->genome->lineageId) {
+                    energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSameLineageProtection.value[object->color]);
+                }
+
                 if (energyToTransfer > NEAR_ZERO) {
 
                     // Notify attacked cell

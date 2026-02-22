@@ -10,8 +10,8 @@
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/NumberGenerator.h>
 
-#include <EngineGpuKernels/TOs.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
+#include <EngineGpuKernels/TOs.cuh>
 
 #include "DescConverterService.h"
 
@@ -236,7 +236,7 @@ void EngineWorker::calcTimesteps(uint64_t timesteps)
 {
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->calcTimestep(timesteps, true);
+    _simulationCudaFacade->calcTimesteps(timesteps, true);
 }
 
 void EngineWorker::applyCataclysm(int power)
@@ -380,7 +380,7 @@ void EngineWorker::runThreadLoop()
 
             if (!_syncSimulationWithRendering && _accessState == 0) {
                 if (_isSimulationRunning.load()) {
-                    _simulationCudaFacade->calcTimestep(1, false);
+                    _simulationCudaFacade->calcTimesteps(1, false);
                 }
                 measureTPS();
                 slowdownTPS();
@@ -495,6 +495,18 @@ bool EngineWorker::testOnly_arePointersValid()
 {
     EngineWorkerGuard access(this);
     return _simulationCudaFacade->testOnly_arePointersValid();
+}
+
+void EngineWorker::testOnly_calcTimestepWithCellTypeFunctions()
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_calcTimestepWithCellTypeFunctions();
+}
+
+void EngineWorker::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_calcTimestepWithCellTypeFunctionsForPreview(detailSimulation);
 }
 
 void EngineWorker::resetTimeIntervalStatistics()

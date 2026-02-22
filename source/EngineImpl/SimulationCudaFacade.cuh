@@ -40,7 +40,7 @@ public:
     _SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings);
     ~_SimulationCudaFacade();
 
-    void calcTimestep(uint64_t timesteps, bool forceUpdateStatistics);
+    void calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
 
     Ids getMaxIds() const;
@@ -111,6 +111,8 @@ public:
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta);
     bool testOnly_arePointersValid();
+    void testOnly_calcTimestepWithCellTypeFunctions();
+    void testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation);
 
 private:
     void initCuda();
