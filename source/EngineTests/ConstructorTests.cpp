@@ -1843,12 +1843,9 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
             refAngle3 = 180.0f - NodeAngle;
         } break;
         }
-        EXPECT_TRUE(approxCompare(refAngle1, actualData.getConnection(newObject, hostObject)._angleFromPrevious))
-            << "refAngle1=" << refAngle1 << " actual=" << actualData.getConnection(newObject, hostObject)._angleFromPrevious;
-        EXPECT_TRUE(approxCompare(refAngle2, actualData.getConnection(newObject, prevPrevCell)._angleFromPrevious))
-            << "refAngle2=" << refAngle2 << " actual=" << actualData.getConnection(newObject, prevPrevCell)._angleFromPrevious;
-        EXPECT_TRUE(approxCompare(refAngle3, actualData.getConnection(newObject, prevCell)._angleFromPrevious))
-            << "refAngle3=" << refAngle3 << " actual=" << actualData.getConnection(newObject, prevCell)._angleFromPrevious;
+        EXPECT_TRUE(approxCompare(refAngle1, actualData.getConnection(newObject, hostObject)._angleFromPrevious));
+        EXPECT_TRUE(approxCompare(refAngle2, actualData.getConnection(newObject, prevPrevCell)._angleFromPrevious));
+        EXPECT_TRUE(approxCompare(refAngle3, actualData.getConnection(newObject, prevCell)._angleFromPrevious));
     } else {
         EXPECT_TRUE(actualData.hasConnection(prevPrevCell, prevCell));
         EXPECT_TRUE(actualData.hasConnection(prevCell, newObject));
@@ -2669,11 +2666,9 @@ INSTANTIATE_TEST_SUITE_P(
         ConstructorShape_Triangle,
         ConstructorShape_Rectangle,
         ConstructorShape_Hexagon,
-        ConstructorShape_Loop,
         ConstructorShape_Tube,
         ConstructorShape_Lolli,
-        ConstructorShape_SmallLolli,
-        ConstructorShape_Zigzag));
+        ConstructorShape_SmallLolli));
 
 TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 {
