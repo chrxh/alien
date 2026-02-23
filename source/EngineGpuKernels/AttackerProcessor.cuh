@@ -121,7 +121,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
 
                 // Only attack cells with energy above base value
-                auto energyToTransfer = atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value[object->color];
+                auto energyToTransfer =
+                    atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
 
                 if (energyToTransfer < 0) {
                     return;
@@ -172,7 +173,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
 
                 // Calculate energy gain
-                auto energyToTransfer = atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color];
+                auto energyToTransfer =
+                    atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
 
                 auto color = calcMod(object->color, MAX_COLORS);
                 auto otherColor = calcMod(otherObject->color, MAX_COLORS);
@@ -186,6 +188,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 // Evaluate food chain color matrix
                 energyToTransfer *=
                     ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
+
+                // Evaluate lineage
+                if (cell->creature->genome->lineageId == otherCell->creature->genome->lineageId) {
+                    energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSameLineageProtection.value[object->color]);
+                }
 
                 if (energyToTransfer > NEAR_ZERO) {
 

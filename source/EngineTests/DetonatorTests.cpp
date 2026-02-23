@@ -34,7 +34,7 @@ TEST_F(DetonatorTests, doNothing)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = actualData.getObjectRef(1);
@@ -57,7 +57,7 @@ TEST_F(DetonatorTests, activateDetonator)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = actualData.getObjectRef(1);
@@ -77,7 +77,7 @@ TEST_F(DetonatorTests, explosion)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(11);
+    _simulationFacade->calcTimesteps(11 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = actualData.getObjectRef(1);
@@ -99,7 +99,7 @@ TEST_F(DetonatorTests, chainExplosion)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(11);
+    _simulationFacade->calcTimesteps(11 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = actualData.getObjectRef(1);
@@ -121,7 +121,7 @@ TEST_F(DetonatorTests, explosionAlsoIfDying)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(11);
+    _simulationFacade->calcTimesteps(11 * TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = actualData.getObjectRef(1);

@@ -13,7 +13,6 @@
 class ConstructorProcessor
 {
 public:
-    __inline__ __device__ static void completenessCheck(SimulationData& data);
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics, bool isPreview);
 
 private:
@@ -120,6 +119,8 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 {
     auto& constructor = object->typeData.cell.constructor;
     if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
+        tryScheduleMutations(data, object); // TODO only when energy for new cell is available
+
         constructor.offspring = findOrCreateNewCreature(data, object);
 
         if (ConstructorHelper::isFinished(constructor, *constructor.offspring->genome)) {
@@ -133,8 +134,6 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         auto constructionData = createConstructionData(object);
         if (tryConstructCell(data, statistics, object, constructionData)) {
-            tryScheduleMutations(data, object);
-
             object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
             ++constructionData.creature->numObjects;

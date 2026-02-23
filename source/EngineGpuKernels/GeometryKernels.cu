@@ -229,18 +229,15 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
-        // Compute signal strength from cell signal channels
-        float signalStrength = 0.0f;
+        // Compute signal changes from cell
+        float signalChanges = 0.0f;
         if (object->type == ObjectType_Cell) {
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
-                signalStrength += abs(object->typeData.cell.signal.channels[i]);
-            }
-            signalStrength = min(1.0f, sqrtf(sqrtf(signalStrength)) / 2.0f);
+            signalChanges = sqrt(sqrt(toFloat(object->typeData.cell.signalChanges) / 255.0f));
         }
 
         // Pack cellType (bits 0-7), objectType (bits 8-15), and isInTriangleOrQuad (bit 16) into state field
         objectData[index].state = cellType | (object->type << 8) | (isInTriangleOrQuad << 16);
-        objectData[index].signalStrength = signalStrength;
+        objectData[index].signalChanges = signalChanges;
 
         // Store cell index for line extraction (just use the index directly)
         object->tempValue.as_uint64 = index;

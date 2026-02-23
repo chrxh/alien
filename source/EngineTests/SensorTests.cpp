@@ -102,17 +102,17 @@ TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
     _simulationFacade->setSimulationData(data);
 
     {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
         auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
         EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     }
     {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
         auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
         EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     }
     {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
         auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
         EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     }
@@ -131,7 +131,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_noSignal)
     _simulationFacade->setSimulationData(data);
 
     for (int i = 0; i < 10; ++i) {
-        _simulationFacade->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
         auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
         EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     }
@@ -151,7 +151,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     // Sensor found nothing (no target in range) - result should be 0
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
@@ -172,7 +172,7 @@ TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
@@ -194,7 +194,7 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove)
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -223,7 +223,7 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -253,7 +253,7 @@ TEST_P(SensorTests_AllDetectionModes, targetBelow)
     addDetectionTargets(data, GetParam(), {98.0f, 180.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -285,7 +285,7 @@ TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
     addDetectionTargets(data, GetParam(), {100.0f, 170.0f}, 12);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -316,7 +316,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_found)
     addDetectionTargets(data, GetParam(), {98.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -341,7 +341,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
     addDetectionTargets(data, GetParam(), {98.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -366,7 +366,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_found)
     addDetectionTargets(data, GetParam(), {98.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -391,7 +391,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
     addDetectionTargets(data, GetParam(), {98.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -421,7 +421,7 @@ TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
@@ -449,7 +449,7 @@ TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     // Sensor detected something (signal has non-zero values)
@@ -490,7 +490,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
 
@@ -520,7 +520,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     // Sensor detected something (signal has non-zero values)
@@ -551,7 +551,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     // Sensor detected something (signal has non-zero values)
@@ -581,7 +581,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
     addDetectionTargets(data, GetParam(), {100.0f, 60.0f});
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -592,7 +592,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
     CHECK(sensorDesc._lastMatch.has_value());
 
     // Second scan - target hasn't moved, should still be found via relocation
-    _simulationFacade->calcTimesteps(1);  // Wait for next trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
@@ -634,7 +634,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 10, false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -656,7 +656,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target has moved, should be relocated via tracking
-    _simulationFacade->calcTimesteps(1);  // Wait for next trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
@@ -697,7 +697,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
     addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 10, false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -724,7 +724,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target has moved outside sensor range, should NOT be found
-    _simulationFacade->calcTimesteps(1);  // Wait for next trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
@@ -758,7 +758,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
     addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 10, false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -785,7 +785,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target has moved inside minRange, should NOT be found
-    _simulationFacade->calcTimesteps(1);  // Wait for next trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
@@ -815,7 +815,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 10, false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -837,7 +837,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - relocation disabled via positive signal, should do initial scan and find closer target
-    _simulationFacade->calcTimesteps(1);  // Wait for next trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
@@ -876,7 +876,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
     addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -896,7 +896,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target disappeared, should not be found
-    _simulationFacade->calcTimesteps(1);  // Wait for next trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
@@ -930,7 +930,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -944,7 +944,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target is now blocked by structure cells
-    _simulationFacade->calcTimesteps(1);  // Wait for next trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
@@ -976,7 +976,7 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
     data._energies.emplace_back(EnergyDesc().id(100).pos({100.0f, 50.0f}).energy(1.0f));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
@@ -1001,7 +1001,7 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
     }
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1030,7 +1030,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
     data._objects.emplace_back(ObjectDesc().id(100).pos({100.0f, 50.0f}).type(FreeCellDesc()));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
@@ -1061,7 +1061,7 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
     }
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1091,7 +1091,7 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
     }
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1141,7 +1141,7 @@ TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
     addDetectionTargets(data, SensorMode_DetectCreature, RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle) * 6.0f, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1194,7 +1194,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_found)
     data.addCreature(targetCells, CreatureDesc().id(1));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1220,7 +1220,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
     data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1244,7 +1244,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_found)
     data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1269,7 +1269,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_notFound)
     data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1293,7 +1293,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_found)
     data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1326,7 +1326,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
     data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1355,7 +1355,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1385,7 +1385,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1414,7 +1414,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1444,7 +1444,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1470,7 +1470,7 @@ TEST_F(SensorTests, detectCreature_ignoreStructureObjects)
     }
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1496,7 +1496,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
     }
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1525,7 +1525,7 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
     }
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1560,7 +1560,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_30cells)
     data.addCreature(targetCells, CreatureDesc().id(1));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1592,7 +1592,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_60cells)
     data.addCreature(targetCells, CreatureDesc().id(1));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1624,7 +1624,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_120cells)
     data.addCreature(targetCells, CreatureDesc().id(1));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1662,7 +1662,7 @@ TEST_F(SensorTests, detectCreature_relocation_densityOutputReflectsCellCount)
     data.addCreature(targetCells, CreatureDesc().id(1));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
@@ -1678,7 +1678,7 @@ TEST_F(SensorTests, detectCreature_relocation_densityOutputReflectsCellCount)
     CHECK(sensorDesc._lastMatch.has_value());
 
     // Second scan - relocation should also report the correct cell count density
-    _simulationFacade->calcTimesteps(1);  // Wait for next trigger
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
@@ -1708,7 +1708,7 @@ TEST_F(SensorTests, telemetry_allOutputs)
         CreatureDesc().id(0));
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
 
     // Sensor detected something (signal has non-zero values)

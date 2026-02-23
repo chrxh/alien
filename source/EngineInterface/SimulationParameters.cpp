@@ -502,6 +502,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
                             "influenced by other factors adjustable within the attacker's simulation parameters."),
                     ParameterSpec()
+                        .name("Same lineage protection")
+                        .reference(FloatSpec().member(&SimulationParameters::attackerSameLineageProtection).min(0.0f).max(1.0f)),
+                    ParameterSpec()
                         .name("Attack radius")
                         .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0.0f).max(4.0f))
                         .description("The maximum distance over which an attacker cell can attack another cell."),

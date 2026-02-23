@@ -463,7 +463,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         startPos_projected = Math::dot(cells.front()._pos - movedRefPoint, movementDirection);
     }
 
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(2000);
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescEditService::get().removeCell(actualData, 0);

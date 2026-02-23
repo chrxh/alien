@@ -65,11 +65,18 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
         if (object->type != ObjectType_Cell) {
             continue;
         }
+        auto& cell = object->typeData.cell;
         if (object->typeData.cell.cellState == CellState_Constructing) {
+            cell.signalChanges = 0;
             continue;
         }
 
-        auto& cell = object->typeData.cell;
+        float totalDeviation = 0;
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            totalDeviation += abs(cell.signal.channels[i] - cell.futureSignal.channels[i]);
+        }
+        // max total deviation = 2.0f per channel * 16 channels = 32.0f
+        cell.signalChanges = static_cast<uint8_t>(min(255.0f, totalDeviation * (255.0f / 32.0f)));
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);
         cell.signal.numTimesSent = cell.futureSignal.numTimesSent;
@@ -88,11 +95,11 @@ __inline__ __device__ bool NeuronProcessor::isAutoTriggered(SimulationData& data
 {
     CUDA_CHECK(object->type == ObjectType_Cell);
 
-    auto triggerInterval = max(3, autoTriggerInterval);
+    auto triggerInterval = max(TIMESTEPS_PER_CELL_FUNCTION, autoTriggerInterval);
     if (isPreview) {
-        return *data.timestep % triggerInterval == 0;
+        return *data.timestep % triggerInterval < TIMESTEPS_PER_CELL_FUNCTION;
     } else {
-        return (*data.timestep + object->typeData.cell.creature->id) % triggerInterval == 0;
+        return (*data.timestep + object->typeData.cell.creature->id) % triggerInterval < TIMESTEPS_PER_CELL_FUNCTION;
     }
 }
 

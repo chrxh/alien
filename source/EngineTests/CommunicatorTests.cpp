@@ -74,7 +74,7 @@ TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
     auto data = createSenderCreature(1, {100.0f, 100.0f});
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto sender = result.getObjectRef(100);
@@ -92,7 +92,7 @@ TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
     data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
@@ -112,7 +112,7 @@ TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
     data.add(createReceiverCreature(2, {115.0f, 100.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
@@ -138,7 +138,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(2);
@@ -158,7 +158,7 @@ TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
     data.add(createReceiverCreature(4, {90.0f, 100.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
 
@@ -187,7 +187,7 @@ TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
     data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
@@ -204,7 +204,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
     data.add(createReceiverCreature(2, {110.0f, 100.0f}, 2), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
@@ -222,7 +222,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_nonMatchingColor)
     data.add(createReceiverCreature(2, {110.0f, 100.0f}, 2), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
@@ -247,7 +247,7 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
     data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
@@ -286,7 +286,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     data.add(createReceiverCreature(3, {100.0f, 110.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(300);
@@ -325,7 +325,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
     data.add(createReceiverCreature(3, {100.0f, 110.0f}), false);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(300);
@@ -379,7 +379,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     data.addConnection(200, 201);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
@@ -449,7 +449,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     data.addConnection(200, 201);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);

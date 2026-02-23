@@ -25,17 +25,17 @@
 #include <EngineGpuKernels/CudaTOProvider.cuh>
 #include <EngineGpuKernels/DataAccessKernels.cuh>
 #include <EngineGpuKernels/EditKernels.cuh>
+#include <EngineGpuKernels/Entities.cuh>
 #include <EngineGpuKernels/GarbageCollectorKernels.cuh>
 #include <EngineGpuKernels/GeometryKernels.cuh>
 #include <EngineGpuKernels/Map.cuh>
 #include <EngineGpuKernels/MaxAgeBalancer.cuh>
-#include <EngineGpuKernels/Entities.cuh>
 #include <EngineGpuKernels/SelectionResult.cuh>
 #include <EngineGpuKernels/SimulationData.cuh>
 #include <EngineGpuKernels/SimulationStatistics.cuh>
 #include <EngineGpuKernels/StatisticsKernels.cuh>
-#include <EngineGpuKernels/TOs.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
+#include <EngineGpuKernels/TOs.cuh>
 
 #include "DataAccessKernelsService.cuh"
 #include "EditKernelsService.cuh"
@@ -149,7 +149,7 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
+void _SimulationCudaFacade::calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics)
 {
     static int counter = 0;
 
@@ -656,6 +656,18 @@ bool _SimulationCudaFacade::testOnly_arePointersValid()
     auto result = TestKernelsService::get().testOnly_arePointersValid(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
     return result;
+}
+
+void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctions()
+{
+    SimulationKernelsService::get().resetCounter();
+    calcTimesteps(1, true);
+}
+
+void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
+{
+    SimulationKernelsService::get().resetPreviewCounter();
+    calcTimestepsForPreview(1, detailSimulation);
 }
 
 void _SimulationCudaFacade::initCuda()
