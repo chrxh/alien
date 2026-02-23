@@ -379,9 +379,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
     }
 
     if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparation) {
-        auto distance = constructionData.isLastNodeOfLastConcatenation && !constructionData.isSeparation
-            ? constructionData.gene->connectionDistance
-            : constructionData.gene->connectionDistance + cudaSimulationParameters.constructorAdditionalOffspringDistance;
+        auto distance = constructionData.gene->connectionDistance;
         if (!ObjectConnectionProcessor::tryAddConnections(data, hostObject, newObject, anglesForNewConnection.referenceAngle, 0, distance)) {
             ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
         }
@@ -406,11 +404,11 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     auto angleFromPreviousForNewObject = 180.0f - constructionData.angle;
 
     auto desiredDistance = constructionData.gene->connectionDistance;
-    auto constructionSiteDistance = hostObject->getRefDistance(lastObject);
-    posDelta = Math::getNormalized(posDelta) * (constructionSiteDistance - desiredDistance);
+    //auto constructionSiteDistance = hostObject->getRefDistance(lastObject);
+    posDelta = Math::getNormalized(posDelta) * desiredDistance / 2 /*(constructionSiteDistance - desiredDistance)*/;
     if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value
-        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minObjectDistance.value) {
-        return nullptr;
+        || /*constructionSiteDistance - desiredDistance*/ desiredDistance < cudaSimulationParameters.minObjectDistance.value) {
+        //return nullptr;
     }
 
     auto newObjectPos = hostObject->pos + posDelta;
@@ -454,14 +452,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         newObject->typeData.cell.cellState = CellState_Dying;
     }
 
-    //float origAngleFromPreviousOnHostCell;
-    //for (int i = 0; i < hostObject->numConnections; ++i) {
-    //    if (hostObject->connections[i].object == constructionData.lastConstructionObject) {
-    //        origAngleFromPreviousOnHostCell = hostObject->connections[i].angleFromPrevious;
-    //        break;
-    //    }
-    //}
-
     float origAngleFromPreviousOnLastConstructedCell;
     for (int i = 0; i < constructionData.lastConstructionObject->numConnections; ++i) {
         if (constructionData.lastConstructionObject->connections[i].object == hostObject) {
@@ -469,7 +459,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         }
     }
 
-    //------------------
     // Move connection between lastConstructionCell and hostObject to a connection between lastConstructionCell and newObject
     auto separation = constructionData.isSeparation && constructionData.isLastNodeOfLastConcatenation;
     bool adaptReferenceAngles = false;
@@ -493,7 +482,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         // Connection between newObject and hostObject
         auto hostDistance = desiredDistance;
         if (!constructionData.isLastNodeOfLastConcatenation) {
-            hostDistance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
+            //hostDistance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
         }
         {
             auto& connection = newObject->connections[0];
@@ -525,51 +514,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             ObjectConnectionProcessor::deleteConnectionOneWay(hostObject, lastObject);
         }
     }
-
-
-    //-----------------
-    //auto separation = constructionData.isSeparation && constructionData.isLastNodeOfLastConcatenation;
-    //for (int i = 0; i < lastObject->numConnections; ++i) {
-    //    auto& connection = lastObject->connections[i];
-    //    if (connection.object == hostObject) {
-    //        connection.object = newObject;
-    //        connection.distance = desiredDistance;
-    //        connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;
-    //        newObject->numConnections = 1;
-    //        newObject->connections[0].object = lastObject;
-    //        newObject->connections[0].distance = desiredDistance;
-    //        newObject->connections[0].angleFromPrevious = 360.0f;
-    //        ObjectConnectionProcessor::deleteConnectionOneWay(hostObject, lastObject);
-    //        break;
-    //    }
-    //}
-
-    //// Possibly connect newObject to hostObject
-    //bool adaptReferenceAngles = false;
-    //if (!separation) {
-
-    //    auto distance = constructionData.gene->connectionDistance;
-    //    if (!constructionData.isLastNodeOfLastConcatenation) {
-    //        distance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
-    //    }
-
-    //    if (!ObjectConnectionProcessor::tryAddConnections(data, newObject, hostObject, 0, origAngleFromPreviousOnHostCell, distance)) {
-    //        ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
-    //        hostObject->typeData.cell.cellState = CellState_Dying;
-    //        for (int i = 0; i < hostObject->numConnections; ++i) {
-    //            auto const& connectedObject = hostObject->connections[i].object;
-    //            if (connectedObject->type != ObjectType_Cell) {
-    //                continue;
-    //            }
-    //            if (connectedObject->typeData.cell.creature == hostObject->typeData.cell.creature) {
-    //                connectedObject->typeData.cell.cellState = CellState_Detaching;
-    //            }
-    //        }
-    //    } else {
-    //        adaptReferenceAngles = true;
-    //    }
-    //}
-    //-----------------
 
     // Get surrounding cells
     if (numObjectsToConnect > 0 && constructionData.numAdditionalConnections != 0) {
@@ -610,6 +554,14 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         auto lastObjectIndex = newObject->getConnectionIndex(constructionData.lastConstructionObject);
         auto hostObjectIndex = newObject->getConnectionIndex(hostObject);
 
+        // Adapt angles on other connected cells
+        for (int i = lastObjectIndex; (i + n) % n != (hostObjectIndex + 1) % n && (i + n) % n != hostObjectIndex; --i) {
+            correctAnglesByInnerAngleSum(newObject->getConnectedObject(i), newObject, newObject->getConnectedObject(i - 1));
+        }
+        for (int i = lastObjectIndex + 1; i % n != hostObjectIndex; ++i) {
+            correctAnglesByInnerAngleSum(newObject->getConnectedObject(i - 1), newObject, newObject->getConnectedObject(i));
+        }
+
         float consumedAngle1 = 0;
         if (n > 2) {
             for (int i = lastObjectIndex; (i + n) % n != (hostObjectIndex + 1) % n && (i + n) % n != hostObjectIndex; --i) {
@@ -626,14 +578,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         if (angleFromPreviousForNewObject - consumedAngle1 >= 0 && 360.0f - angleFromPreviousForNewObject - consumedAngle2 >= 0) {
             newObject->connections[(hostObjectIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewObject - consumedAngle1;
             newObject->connections[hostObjectIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewObject - consumedAngle2;
-        }
-
-        // Adapt angles on other connected cells
-        for (int i = lastObjectIndex; (i + n) % n != (hostObjectIndex + 1) % n && (i + n) % n != hostObjectIndex; --i) {
-            correctAnglesByInnerAngleSum(newObject->getConnectedObject(i), newObject, newObject->getConnectedObject(i - 1));
-        }
-        for (int i = lastObjectIndex + 1; i % n != hostObjectIndex; ++i) {
-            correctAnglesByInnerAngleSum(newObject->getConnectedObject(i - 1), newObject, newObject->getConnectedObject(i));
         }
     }
 
@@ -1049,15 +993,26 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ob
         currentAngleSum += object2->getAngelSpan(object1, object3);
         currentAngleSum += object3->getAngelSpan(object2, object4);
     }
-
     float angleCorrection = expectedAngleSum - currentAngleSum;
 
     int object2Index = object3->getConnectionIndex(object2);
 
     if (!goClockwiseFromObject3) {
         object3->increaseAngle(object2Index, angleCorrection);
+
+        // If adapted angle is 0, try fallback
+        if (abs(object3->getConnection(object2Index).angleFromPrevious) < NEAR_ZERO) {
+            object3->increaseAngle(object2Index, -angleCorrection); // Revert
+            object2->increaseAngle(object1IndexInObject2, angleCorrection);
+        }
     } else {
         object3->increaseAngle(object2Index, -angleCorrection);
+
+        // If adapted angle is 0, try fallback
+        if (abs(object3->getConnection(object2Index).angleFromPrevious) < NEAR_ZERO) {
+            object3->increaseAngle(object2Index, angleCorrection);  // Revert
+            object2->increaseAngle(object1IndexInObject2, -angleCorrection);
+        }
     }
 }
 
