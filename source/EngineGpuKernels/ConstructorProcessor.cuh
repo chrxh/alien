@@ -480,21 +480,17 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         }
 
         // Connection between newObject and hostObject
-        auto hostDistance = desiredDistance;
-        if (!constructionData.isLastNodeOfLastConcatenation) {
-            //hostDistance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
-        }
         {
             auto& connection = newObject->connections[0];
             connection.object = hostObject;
-            connection.distance = hostDistance;
+            connection.distance = desiredDistance;
             connection.angleFromPrevious = 180.0f;
         }
         {
             auto index = hostObject->getConnectionIndex(lastObject);
             auto& connection = hostObject->connections[index];
             connection.object = newObject;
-            connection.distance = hostDistance;
+            connection.distance = desiredDistance;
         }
     } else {
         newObject->numConnections = 1;
