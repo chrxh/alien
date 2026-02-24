@@ -400,15 +400,13 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     ConstructionData const& constructionData)
 {
     auto const& lastObject = constructionData.lastConstructionObject;
-    auto posDelta = data.objectMap.getCorrectedDirection(lastObject->pos - hostObject->pos);
+    auto posDelta = data.objectMap.getCorrectedDirection(lastObject->pos - hostObject->pos) / 2;
     auto angleFromPreviousForNewObject = 180.0f - constructionData.angle;
 
     auto desiredDistance = constructionData.gene->connectionDistance;
-    //auto constructionSiteDistance = hostObject->getRefDistance(lastObject);
-    posDelta = Math::getNormalized(posDelta) * desiredDistance / 2 /*(constructionSiteDistance - desiredDistance)*/;
     if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value
-        || /*constructionSiteDistance - desiredDistance*/ desiredDistance < cudaSimulationParameters.minObjectDistance.value) {
-        //return nullptr;
+        || desiredDistance < cudaSimulationParameters.minObjectDistance.value) {
+        return nullptr;
     }
 
     auto newObjectPos = hostObject->pos + posDelta;
