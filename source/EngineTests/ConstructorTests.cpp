@@ -393,7 +393,7 @@ TEST_F(ConstructorTests, insufficientSpace)
                 .type(CellDesc()
                           .usableEnergy(getConstructorEnergy())
                           .constructor(ConstructorDesc().geneIndex(0).currentConcatenation(0).currentNodeIndex(1).lastConstructedCellId(1))),
-            ObjectDesc().id(2).pos({100.25f, 99.75f}),
+            ObjectDesc().id(2).pos({100.25f, 99.75f}),   // Crossing connection to block construction
             ObjectDesc().id(3).pos({100.25f, 100.25f}),
         },
         CreatureDesc().id(0),
@@ -2679,7 +2679,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     auto const LastAngle = -5.0f;
 
     auto shape = GetParam();
-    auto const n = (shape == ConstructorShape_Loop) ? 5 : 20;
+    auto const n = (shape == ConstructorShape_Loop) ? 5 : 20;  // Loop shapes create crossing links sooner
 
     auto gene = GeneDesc().separation(false).numBranches(1).shape(shape);
     gene._nodes.emplace_back(NodeDesc());
