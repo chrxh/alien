@@ -543,7 +543,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
     if (adaptReferenceAngles) {
 
-        // Adapt angles on new cell
         auto n = newObject->numConnections;
         auto lastObjectIndex = newObject->getConnectionIndex(constructionData.lastConstructionObject);
         auto hostObjectIndex = newObject->getConnectionIndex(hostObject);
@@ -556,13 +555,13 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             correctAnglesByInnerAngleSum(newObject->getConnectedObject(i - 1), newObject, newObject->getConnectedObject(i));
         }
 
+        // Adapt angles on new cell
         float consumedAngle1 = 0;
         if (n > 2) {
             for (int i = lastObjectIndex; (i + n) % n != (hostObjectIndex + 1) % n && (i + n) % n != hostObjectIndex; --i) {
                 consumedAngle1 += newObject->connections[(i + n) % n].angleFromPrevious;
             }
         }
-
         float consumedAngle2 = 0;
         if (n > 2) {
             for (int i = lastObjectIndex + 1; i % n != hostObjectIndex; ++i) {
@@ -996,7 +995,7 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ob
 
         // If adapted angle is 0, try fallback
         if (abs(object3->getConnection(object2Index).angleFromPrevious) < NEAR_ZERO) {
-            object3->increaseAngle(object2Index, -angleCorrection); // Revert
+            object3->increaseAngle(object2Index, -angleCorrection);  // Revert
             object2->increaseAngle(object1IndexInObject2, angleCorrection);
         }
     } else {
