@@ -339,7 +339,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
     auto anglesForNewConnection = ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostObject, constructionData.angle);
 
     auto newObjectDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
-    float2 newObjectPos = hostObject->pos + newObjectDirection;
+    float2 newObjectPos = hostObject->pos + newObjectDirection / 2;
 
     if (ObjectConnectionProcessor::existCrossingConnections(
             data, hostObject->pos, newObjectPos, cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color], hostObject->detached)) {
@@ -367,7 +367,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
             // Update newObject position and direction for corrected angle
             anglesForNewConnection = ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostObject, constructionData.angle);
             newObjectDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
-            newObjectPos = hostObject->pos + newObjectDirection;
+            newObjectPos = hostObject->pos + newObjectDirection / 2;
         }
     }
 

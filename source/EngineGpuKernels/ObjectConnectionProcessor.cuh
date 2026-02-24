@@ -394,53 +394,36 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     }
     object1->connections[index] = newConnection;
     object1->connections[(index + 1) % (object1->numConnections + 1)].angleFromPrevious = refAngle - angleFromPrevious;
+    ++object1->numConnections;
 
-    // alignment
+    // Alignment logic
     if (angleAlignment != ConstructorAngleAlignment_None) {
         auto const angleUnit = 360.0f / toFloat(angleAlignment + 1);
 
-        // align angles
-        auto angleAdded = 0.0f;
-        for (int i = 0; i < object1->numConnections + 2; ++i) {
-            auto index = i % (object1->numConnections + 1);
-            object1->connections[index].angleFromPrevious = Math::alignAngle(object1->connections[index].angleFromPrevious, angleAlignment);
-            if (angleAdded > NEAR_ZERO && object1->connections[index].angleFromPrevious - angleAdded > NEAR_ZERO) {
-                object1->connections[index].angleFromPrevious -= angleUnit;
-            }
-            if (abs(object1->connections[index].angleFromPrevious) < NEAR_ZERO) {
-                object1->connections[index].angleFromPrevious = angleUnit;
-                angleAdded = angleUnit;
-            } else {
-                angleAdded = 0;
-            }
+        // Align angle of new connection and next new connection
+        auto newRefAngle = Math::alignAngle(object1->connections[index].angleFromPrevious, angleAlignment);
+        auto angleRefDiff = newRefAngle - object1->getConnection(index).angleFromPrevious;
+        auto& connection = object1->getConnection(index);
+        auto& nextConnection = object1->getConnection(index + 1);
+        connection.angleFromPrevious = newRefAngle;
+        nextConnection.angleFromPrevious = nextConnection.angleFromPrevious - angleRefDiff;
+
+        // Clamp values
+        if (nextConnection.angleFromPrevious < -NEAR_ZERO) {
+            connection.angleFromPrevious += nextConnection.angleFromPrevious;
+            nextConnection.angleFromPrevious = 0;
         }
 
-        // ensure that sum of angles is 360 deg
-        for (int repetition = 0; repetition < MAX_OBJECT_CONNECTIONS; ++repetition) {
-            float sumAngle = 0;
-            for (int i = 0, j = object1->numConnections + 1; i < j; ++i) {
-                sumAngle += object1->connections[i].angleFromPrevious;
-            }
-            if (sumAngle > 360.0f + NEAR_ZERO || sumAngle < 360.0f - NEAR_ZERO) {
-                int indexWithMaxAngle = -1;
-                float maxAngle = 0;
-                for (int k = 0, l = object1->numConnections + 1; k < l; ++k) {
-                    if (object1->connections[k].angleFromPrevious > maxAngle) {
-                        maxAngle = object1->connections[k].angleFromPrevious;
-                        indexWithMaxAngle = k;
-                    }
-                }
-                if (sumAngle > 360.0f + NEAR_ZERO) {
-                    object1->connections[indexWithMaxAngle].angleFromPrevious -= angleUnit;
-                } else {
-                    object1->connections[indexWithMaxAngle].angleFromPrevious += angleUnit;
-                }
-            } else {
-                break;
-            }
+        // Try to ensure non-zero angles
+        if (connection.angleFromPrevious < NEAR_ZERO && nextConnection.angleFromPrevious > 2 * angleUnit - NEAR_ZERO) {
+            connection.angleFromPrevious += angleUnit;
+            nextConnection.angleFromPrevious -= angleUnit;
+        }
+        if (connection.angleFromPrevious > 2 * angleUnit - NEAR_ZERO && nextConnection.angleFromPrevious < NEAR_ZERO) {
+            connection.angleFromPrevious -= angleUnit;
+            nextConnection.angleFromPrevious += angleUnit;
         }
     }
-    object1->numConnections++;
 
     return true;
 }
