@@ -71,12 +71,8 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
             continue;
         }
 
-        float totalDeviation = 0;
-        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
-            totalDeviation += abs(cell.signal.channels[i] - cell.futureSignal.channels[i]);
-        }
-        // max total deviation = 2.0f per channel * 16 channels = 32.0f
-        cell.signalChanges = static_cast<uint8_t>(min(255.0f, totalDeviation * (255.0f / 32.0f)));
+        float channelZeroDeviation = abs(cell.signal.channels[0] - cell.futureSignal.channels[0]);
+        cell.signalChanges = static_cast<uint8_t>(min(255.0f, channelZeroDeviation * 255 / 2));
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);
         cell.signal.numTimesSent = cell.futureSignal.numTimesSent;
