@@ -512,7 +512,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
     EXPECT_EQ(FrontAngleId, newObject.getCellRef()._frontAngleId);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
     EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -640,7 +640,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
 
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -785,7 +785,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto newObject = actualData.getOtherObjectRef(0);
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -824,7 +824,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto newObject = actualData.getOtherObjectRef(0);
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_FALSE(newObject.getCellRef()._headCell);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -865,7 +865,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
     auto newObject = actualData.getOtherObjectRef(0);
     EXPECT_EQ(CellState_Constructing, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -909,7 +909,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
     auto newObject = actualData.getOtherObjectRef(0);
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -982,7 +982,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
     auto prevCell = actualData.getObjectRef(3);
     auto newObject = actualData.getOtherObjectRef({0, 1, 2, 3});
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
-    EXPECT_TRUE(approxCompare(hostObject._pos + RealVector2D(1.0f, 0.0f), newObject._pos));
+    EXPECT_TRUE(approxCompare(hostObject._pos + RealVector2D(0.5f, 0.0f), newObject._pos));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -1037,7 +1037,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
     auto hostObject = actualData.getObjectRef(0);
     auto newObject = actualData.getOtherObjectRef({0});
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -1083,8 +1083,8 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
     auto newObject = actualData.getOtherObjectRef({0, 1});
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_FALSE(newObject.getCellRef()._headCell);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
-    EXPECT_TRUE(approxCompare(hostObject._pos - RealVector2D(0.0f, 1.0f), newObject._pos));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(hostObject._pos - RealVector2D(0.0f, 0.5f), newObject._pos));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -1127,7 +1127,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
     auto hostObject = actualData.getObjectRef(0);
     auto newObject = actualData.getOtherObjectRef({0});
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostObject._pos - newObject._pos)));
+    EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
 
@@ -1215,7 +1215,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
-    EXPECT_TRUE(approxCompare(hostObject._pos - RealVector2D(1.0f, 0.0f), newObject._pos));
+    EXPECT_TRUE(approxCompare(hostObject._pos - RealVector2D(0.5f, 0.0f), newObject._pos));
     EXPECT_FALSE(actualData.hasConnection(0, newObject._id));
     EXPECT_FALSE(actualData.hasConnection(1, newObject._id));
     EXPECT_TRUE(actualData.hasConnection(0, 1));
@@ -1249,7 +1249,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
     auto newObject = actualData.getOtherObjectRef({0, 1});
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
-    EXPECT_TRUE(approxCompare(hostObject._pos - RealVector2D(1.0f, 0.0f), newObject._pos));
+    EXPECT_TRUE(approxCompare(hostObject._pos - RealVector2D(0.5f, 0.0f), newObject._pos));
     EXPECT_TRUE(actualData.hasConnection(0, newObject._id));
     EXPECT_FALSE(actualData.hasConnection(1, newObject._id));
     EXPECT_TRUE(actualData.hasConnection(0, 1));
@@ -1291,7 +1291,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
     auto hostObject = actualData.getObjectRef(1);
     auto newObject = actualData.getOtherObjectRef({0, 1, 2});
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
-    EXPECT_TRUE(approxCompare(hostObject._pos + RealVector2D(0.0f, 1.0f), newObject._pos));
+    EXPECT_TRUE(approxCompare(hostObject._pos + RealVector2D(0.0f, 0.5f), newObject._pos));
     EXPECT_TRUE(actualData.hasConnection(1, newObject._id));
     EXPECT_FALSE(actualData.hasConnection(0, newObject._id));
     EXPECT_FALSE(actualData.hasConnection(2, newObject._id));
