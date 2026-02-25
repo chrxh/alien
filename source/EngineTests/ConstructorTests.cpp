@@ -2703,14 +2703,14 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 99.0f}),
+            ObjectDesc().id(0).pos({100.0f, 98.5f}),
             ObjectDesc()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
                           .usableEnergy(getConstructorEnergy() * n)
                           .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(200))),
-            ObjectDesc().id(2).pos({100.1f, 101.0f}),
+            ObjectDesc().id(2).pos({100.1f, 101.5f}),
         },
         CreatureDesc().id(0),
         genome);
