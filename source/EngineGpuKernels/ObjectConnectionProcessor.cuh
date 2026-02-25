@@ -415,11 +415,11 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
         }
 
         // Try to ensure non-zero angles
-        if (connection.angleFromPrevious < NEAR_ZERO && nextConnection.angleFromPrevious > 2 * angleUnit - NEAR_ZERO) {
+        if (connection.angleFromPrevious < NEAR_ZERO && nextConnection.angleFromPrevious > angleUnit - NEAR_ZERO) {
             connection.angleFromPrevious += angleUnit;
             nextConnection.angleFromPrevious -= angleUnit;
         }
-        if (connection.angleFromPrevious > 2 * angleUnit - NEAR_ZERO && nextConnection.angleFromPrevious < NEAR_ZERO) {
+        if (connection.angleFromPrevious > angleUnit - NEAR_ZERO && nextConnection.angleFromPrevious < NEAR_ZERO) {
             connection.angleFromPrevious -= angleUnit;
             nextConnection.angleFromPrevious += angleUnit;
         }

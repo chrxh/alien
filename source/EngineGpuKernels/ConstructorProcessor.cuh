@@ -514,9 +514,12 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         // Sort surrounding cells by distance from newObject
         bubbleSort(objectsToConnect, numObjectsToConnect, [&](auto const& object1, auto const& object2) {
-            auto dist1 = data.objectMap.getDistance(object1->pos, newObjectPos);
-            auto dist2 = data.objectMap.getDistance(object2->pos, newObjectPos);
-            return dist1 < dist2;
+            auto lastObjectAngle = Math::angleOfVector(data.objectMap.getCorrectedDirection(lastObject->pos - newObject->pos));
+            auto object1Angle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object1->pos - newObject->pos));
+            auto object2Angle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object2->pos - newObject->pos));
+            auto angleDiff1 = Math::getNormalizedAngle(Math::subtractAngle(object1Angle, lastObjectAngle), -180.0f);
+            auto angleDiff2 = Math::getNormalizedAngle(Math::subtractAngle(object2Angle, lastObjectAngle), -180.0f);
+            return abs(angleDiff1) < abs(angleDiff2);
         });
 
         // Connect surrounding cells if possible
