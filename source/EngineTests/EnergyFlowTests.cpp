@@ -224,7 +224,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
     data.addCreature(
         {ObjectDesc()
              .id(2)
-             .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
+             .pos({100.0f + 1.0f, 100.0f})
              .type(CellDesc().cellState(CellState_Constructing).constructor(ConstructorDesc().currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
         CreatureDesc(),
         genome);

@@ -123,7 +123,6 @@ struct SimulationParameters
 
     // Cell constructor
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};
-    static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Meta mutations
     BaseParameter<float> metaMutationNeuronsSigma = {0};
