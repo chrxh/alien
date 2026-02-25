@@ -2703,19 +2703,23 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 98.5f}),
+            ObjectDesc().id(0).pos({100.0f, 98.0f}),
+            ObjectDesc().id(1).pos({100.0f, 99.0f}),
             ObjectDesc()
-                .id(1)
+                .id(2)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
                           .usableEnergy(getConstructorEnergy() * n)
                           .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(200))),
-            ObjectDesc().id(2).pos({100.1f, 101.5f}),
+            ObjectDesc().id(3).pos({100.1f, 101.0f}),
+            ObjectDesc().id(4).pos({100.1f, 102.0f}),
         },
         CreatureDesc().id(0),
         genome);
     data.addConnection(0, 1);
     data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
 
     _simulationFacade->setSimulationData(data);
 
@@ -2731,14 +2735,16 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
             auto hostCreature = actualData.getCreatureRef(0);
-            ASSERT_EQ(3 + i + 1, actualData.getObjectsForCreature(hostCreature._id).size());
+            ASSERT_EQ(5 + i + 1, actualData.getObjectsForCreature(hostCreature._id).size());
 
-            auto hostObject = actualData.getObjectRef(1);
+            auto hostObject = actualData.getObjectRef(2);
 
             std::set<uint64_t> knownCellIds(createdCellIds.begin(), createdCellIds.end());
             knownCellIds.insert(0);
             knownCellIds.insert(1);
             knownCellIds.insert(2);
+            knownCellIds.insert(3);
+            knownCellIds.insert(4);
             auto newObject = actualData.getOtherObjectRef(knownCellIds);
             createdCellIds.emplace_back(newObject._id);
 
@@ -2775,8 +2781,8 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 
     // Check angles for first node
     {
-        auto const& hostObject = actualData.getObjectRef(1);
-        auto angleSpan_cell2_cell0 = hostObject.getAngleSpan(2, 0);
+        auto const& hostObject = actualData.getObjectRef(2);
+        auto angleSpan_cell2_cell0 = hostObject.getAngleSpan(3, 1);
         auto angleSpan_lastObject_and_cell0 = hostObject._connections.at(0)._angleFromPrevious;
         EXPECT_TRUE(approxCompare(angleSpan_lastObject_and_cell0 + ConstructionAngle, angleSpan_cell2_cell0 / 2));
     }
@@ -2785,7 +2791,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     {
         auto const& object = actualData.getObjectRef(createdCellIds.back());
         auto prevCellId = createdCellIds.at(n - 2);
-        auto nextObjectId = 1;  // = id of hostObject
+        auto nextObjectId = 2;  // = id of hostObject
         auto angle = object.getAngleSpan(prevCellId, nextObjectId);
         angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
         EXPECT_EQ(LastAngle, angle);
