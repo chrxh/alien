@@ -1766,8 +1766,8 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
         }));
     data.addCreature(
         {
-            ObjectDesc().id(1).pos({99.0f, 99.0f}).type(CellDesc().cellState(CellState_Constructing)),
-            ObjectDesc().id(2).pos({99.0f, 100.0f}).type(CellDesc().cellState(CellState_Constructing)),
+            ObjectDesc().id(1).pos({98.0f, 99.0f}).type(CellDesc().cellState(CellState_Constructing)),
+            ObjectDesc().id(2).pos({98.0f, 100.0f}).type(CellDesc().cellState(CellState_Constructing)),
         },
         CreatureDesc().id(1),
         GenomeDesc().genes({
@@ -1781,8 +1781,8 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
                 })
                 .angleAlignment(angleAlignment),
         }));
-    data.addConnection(1, 2);
     data.addConnection(2, 0);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
