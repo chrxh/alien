@@ -3467,14 +3467,79 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
     auto object = [&](uint64_t id) { return actualData.getObjectRef(id); };
     auto constructedCell = actualData.getOtherObjectRef({0, 1, 2, 3, 4});
 
-    EXPECT_EQ(1, object(1)._connections.size());
-    EXPECT_EQ(3, object(2)._connections.size());
-    EXPECT_EQ(2, object(3)._connections.size());
-    EXPECT_EQ(2, object(4)._connections.size());
-    EXPECT_EQ(3, constructedCell._connections.size());
-    EXPECT_EQ(1, object(0)._connections.size());
+    ASSERT_EQ(1, object(1)._connections.size());
+    ASSERT_EQ(3, object(2)._connections.size());
+    ASSERT_EQ(2, object(3)._connections.size());
+    ASSERT_EQ(2, object(4)._connections.size());
+    ASSERT_EQ(3, constructedCell._connections.size());
+    ASSERT_EQ(1, object(0)._connections.size());
 
     EXPECT_TRUE(approxCompare(180.0f, actualData.getConnectionRef(2, constructedCell._id)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(90.0f, actualData.getConnectionRef(2, 1)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(90.0f, actualData.getConnectionRef(2, 3)._angleFromPrevious));
+}
+
+TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_preventZeroAngles)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc()
+            .separation(false)
+            .angleAlignment(ConstructorAngleAlignment_60)
+            .nodes({
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc(),
+                NodeDesc().numAdditionalConnections(2),
+            }),
+    });
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos(RealVector2D{697.63, 356.23})
+                .type(CellDesc().constructor(ConstructorDesc().currentNodeIndex(3).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(1).provideEnergy(
+                    ProvideEnergy_FreeGeneration))),
+            ObjectDesc().id(1).pos({698.22, 355.43}).type(CellDesc().cellState(CellState_Constructing)),
+            ObjectDesc().id(2).pos({697.21, 355.64}).type(CellDesc().cellState(CellState_Constructing)),
+            ObjectDesc().id(3).pos({696.96, 356.55}).type(CellDesc().cellState(CellState_Constructing)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.getConnectionRef(1, 0)._angleFromPrevious = 300.0f;
+    data.getConnectionRef(1, 2)._angleFromPrevious = 60.0f;
+    data.getConnectionRef(2, 1)._angleFromPrevious = 240.0f;
+    data.getConnectionRef(2, 3)._angleFromPrevious = 120.0f;
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellTypeFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(5, actualData.getObjectsForCreature(creature._id).size());
+
+    auto object = [&](uint64_t id) { return actualData.getObjectRef(id); };
+    auto constructedCell = actualData.getOtherObjectRef({0, 1, 2, 3});
+
+    ASSERT_EQ(2, object(1)._connections.size());
+    ASSERT_EQ(3, object(2)._connections.size());
+    ASSERT_EQ(2, object(3)._connections.size());
+    ASSERT_EQ(4, constructedCell._connections.size());
+    ASSERT_EQ(1, object(0)._connections.size());
+
+    EXPECT_TRUE(approxCompare(300.0f, actualData.getConnectionRef(1, constructedCell._id)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnectionRef(1, 2)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(240.0f, actualData.getConnectionRef(2, 1)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnectionRef(2, 3)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnectionRef(2, constructedCell._id)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(300.0f, actualData.getConnectionRef(3, 2)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnectionRef(3, constructedCell._id)._angleFromPrevious));
 }
