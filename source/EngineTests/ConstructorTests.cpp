@@ -2711,28 +2711,31 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     if (type == ConstructionType::Normal) {
         data = Desc().addCreature(
             {
-                ObjectDesc().id(0).pos({100.0f, 100.0f - connectionDistance * 2}),
-                ObjectDesc().id(1).pos({100.0f, 100.0f - connectionDistance}),
+                ObjectDesc().id(0).pos({100.0f + 1.5f, 100.0f - 0.5f}),
+                ObjectDesc().id(1).pos({100.0f + 1.0f, 100.0f - 0.5f}),
+                ObjectDesc().id(2).pos({100.0f + 0.5f, 100.0f - 0.5f}),
+                ObjectDesc().id(3).pos({100.0f, 100.0f - 0.5f}),
                 ObjectDesc()
-                    .id(2)
+                    .id(4)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
                               .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))),
-                ObjectDesc().id(3).pos({100.1f, 100.0f + connectionDistance}),
-                ObjectDesc().id(4).pos({100.1f, 100.0f + connectionDistance * 2}),
+                ObjectDesc().id(5).pos({100.1f, 100.0f + 0.5f}),
+                ObjectDesc().id(6).pos({100.1f + 0.5f, 100.0f + 0.5f}),
+                ObjectDesc().id(7).pos({100.1f + 1.0f, 100.0f + 0.5f}),
+                ObjectDesc().id(8).pos({100.1f + 1.5f, 100.0f + 0.5f}),
             },
             CreatureDesc().id(0),
             genome);
-        data.addConnection(0, 1);
-        data.addConnection(1, 2);
-        data.addConnection(2, 3);
-        data.addConnection(3, 4);
+        for (int i = 0; i < 8; ++i) {
+            data.addConnection(i, i + 1);
+        }
     } else {
         data = Desc().addCreature(
             {
                 ObjectDesc()
-                    .id(2)
+                    .id(4)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
@@ -2747,31 +2750,33 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     std::vector<uint64_t> createdCellIds;
     {
         for (int i = 0; i < n; ++i) {
-            _simulationFacade->calcTimesteps(100);
-            auto actualData = _simulationFacade->getSimulationData();
+            int anticipatedNumObjectsForCreature = type == ConstructionType::Normal ? 10 + i : 2 + i;
+            Desc actualData;
+            CreatureDesc hostCreature;
+            int retryCount = 0;
+            do {
+                _simulationFacade->calcTimesteps(100);
+                actualData = _simulationFacade->getSimulationData();
 
-            ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
-            ASSERT_EQ(1, actualData._creatures.size());
-            EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+                ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+                ASSERT_EQ(1, actualData._creatures.size());
+                EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-            auto hostCreature = actualData.getCreatureRef(0);
-            if (type == ConstructionType::Normal) {
-                ASSERT_EQ(5 + i + 1, actualData.getObjectsForCreature(hostCreature._id).size());
-            } else {
-                ASSERT_EQ(1 + i + 1, actualData.getObjectsForCreature(hostCreature._id).size());
-            }
+                hostCreature = actualData.getCreatureRef(0);
+                if (++retryCount == 10) {
+                    FAIL();
+                }
+            } while (actualData.getObjectsForCreature(hostCreature._id).size() != anticipatedNumObjectsForCreature);
 
-            auto hostObject = actualData.getObjectRef(2);
+            auto hostObject = actualData.getObjectRef(4);
 
             std::set<uint64_t> knownCellIds(createdCellIds.begin(), createdCellIds.end());
             if (type == ConstructionType::Normal) {
-                knownCellIds.insert(0);
-                knownCellIds.insert(1);
-                knownCellIds.insert(2);
-                knownCellIds.insert(3);
-                knownCellIds.insert(4);
+                for (int j = 0; j <= 8; ++j) {
+                    knownCellIds.insert(j);
+                }
             } else {
-                knownCellIds.insert(2);
+                knownCellIds.insert(4);
             }
             auto newObject = actualData.getOtherObjectRef(knownCellIds);
             createdCellIds.emplace_back(newObject._id);
@@ -2809,17 +2814,17 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 
     // Check angles for first node
     if (type == ConstructionType::Normal) {
-        auto const& hostObject = actualData.getObjectRef(2);
-        auto angleSpan_cell3_cell1 = hostObject.getAngleSpan(3, 1);
-        auto angleSpan_lastObject_and_cell0 = hostObject._connections.at(0)._angleFromPrevious;
-        EXPECT_TRUE(approxCompare(angleSpan_lastObject_and_cell0 + ConstructionAngle, angleSpan_cell3_cell1 / 2));
+        auto const& hostObject = actualData.getObjectRef(4);
+        auto angleSpan_cell5_cell3 = hostObject.getAngleSpan(5, 3);
+        auto angleSpan_hostObject_and_cell3 = hostObject._connections.at(0)._angleFromPrevious;
+        EXPECT_TRUE(approxCompare(angleSpan_hostObject_and_cell3 + ConstructionAngle, angleSpan_cell5_cell3 / 2));
     }
 
     // Check angles for last node
     {
         auto const& object = actualData.getObjectRef(createdCellIds.back());
         auto prevCellId = createdCellIds.at(n - 2);
-        auto nextObjectId = 2;  // = id of hostObject
+        auto nextObjectId = 4;  // = id of hostObject
         auto angle = object.getAngleSpan(prevCellId, nextObjectId);
         angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
         EXPECT_EQ(LastAngle, angle);

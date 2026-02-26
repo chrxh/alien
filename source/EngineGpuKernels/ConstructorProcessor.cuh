@@ -74,13 +74,13 @@ private:
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
 
     //
-    // Assumption: object1 is connected with object2 and object2 is connected with cell3
+    // Assumption: object1 is connected with object2 and object2 is connected with object3
     //
-    // If cell3 is connected to object1 directly or via further cells (not object2):
+    // If object3 is connected to object1 directly or via further cells (not object2):
     //  Calculates the inner angle sum of the n-polygon spanned by
     //      (1) object1
     //      (2) object2
-    //      (3) cell3
+    //      (3) object3
     //      + possibly further cells between (3) and (1)
     //  and
     //      set the angle on cell (3) between the connected cells (2) and (4)
@@ -1005,7 +1005,7 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ob
         object3->increaseAngle(object2Index, -angleCorrection);
 
         // If adapted angle is 0, try fallback
-        if (abs(object3->getConnection(object2Index).angleFromPrevious) < NEAR_ZERO) {
+        if (abs(object3->getConnection(object2Index + 1).angleFromPrevious) < NEAR_ZERO) {
             object3->increaseAngle(object2Index, angleCorrection);  // Revert
             object2->increaseAngle(object1IndexInObject2, -angleCorrection);
         }

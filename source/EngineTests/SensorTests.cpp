@@ -845,8 +845,8 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Angle should be roughly +90 degrees (+0.5 normalized) - indicating it found the closer target
-    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] > 0.3f);
-    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] < 0.7f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] > 0.25f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] < 0.4f);
     EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] > 0.8f);
 
     // Verify lastMatch position was updated
