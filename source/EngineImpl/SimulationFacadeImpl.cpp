@@ -407,13 +407,13 @@ bool _SimulationFacadeImpl::testOnly_arePointersValid()
     return _worker.testOnly_arePointersValid();
 }
 
-void _SimulationFacadeImpl::testOnly_calcTimestepWithCellTypeFunctions()
+void _SimulationFacadeImpl::testOnly_calcTimestepWithCellFunctions()
 {
-    _worker.testOnly_calcTimestepWithCellTypeFunctions();
+    _worker.testOnly_calcTimestepWithCellFunctions();
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationFacadeImpl::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
+void _SimulationFacadeImpl::testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation)
 {
-    _worker.testOnly_calcTimestepWithCellTypeFunctionsForPreview(detailSimulation);
+    _worker.testOnly_calcTimestepWithCellFunctionsForPreview(detailSimulation);
 }

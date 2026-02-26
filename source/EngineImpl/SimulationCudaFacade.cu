@@ -151,43 +151,7 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
 
 void _SimulationCudaFacade::calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics)
 {
-    static int counter = 0;
-
-    for (uint64_t i = 0; i < timesteps; ++i) {
-        checkAndProcessSimulationParameterChanges();
-
-        auto simulationData = getSimulationDataPtrCopy();
-        SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
-        {
-            std::lock_guard lock(_mutexForSimulationData);
-            ++_simulationTimestep;  // SimulationData::timestep is already updated in the kernels
-        }
-        syncAndCheck();
-
-        //make check after every 10th call
-        if (++counter % 10 == 0) {
-            counter = 0;
-            resizeArraysIfNecessary();
-        }
-
-        auto statistics = getStatisticsRawData();
-        {
-            std::lock_guard lock(_mutexForSimulationParameters);
-            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(
-                    _settings, _maxAgeBalancer, simulationData, getCurrentTimestep(), statistics)) {
-                CHECK_FOR_CUDA_ERROR(
-                    cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
-            }
-        }
-        auto now = std::chrono::steady_clock::now();
-        if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
-            _lastStatisticsUpdateTime = now;
-            updateStatistics();
-        }
-    }
-    if (forceUpdateStatistics) {
-        updateStatistics();
-    }
+    calcTimestepsInternal(timesteps, forceUpdateStatistics, false);
 }
 
 void _SimulationCudaFacade::applyCataclysm(int power)
@@ -563,7 +527,8 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
     auto startTimepoint = std::chrono::steady_clock::now();
     do {
 
-        SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
+        SimulationKernelsService::get().calcTimestepForPreview(
+            _settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, _previewTimestep, false, detailSimulation);
         syncAndCheck();
 
         ++_previewTimestep;  // SimulationData::timestep is already updated in the kernels
@@ -579,7 +544,8 @@ void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSim
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
     for (int i = 0; i < numSteps; ++i) {
-        SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
+        SimulationKernelsService::get().calcTimestepForPreview(
+            _settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, _previewTimestep, false, detailSimulation);
         syncAndCheck();
 
         ++_previewTimestep;  // SimulationData::timestep is already updated in the kernels
@@ -660,14 +626,22 @@ bool _SimulationCudaFacade::testOnly_arePointersValid()
 
 void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctions()
 {
-    SimulationKernelsService::get().resetCounter();
-    calcTimesteps(1, true);
+    calcTimestepsInternal(1, true, true);
 }
 
 void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
 {
-    SimulationKernelsService::get().resetPreviewCounter();
-    calcTimestepsForPreview(1, detailSimulation);
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+
+    SimulationKernelsService::get().calcTimestepForPreview(
+        _settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, _previewTimestep, true, detailSimulation);
+    syncAndCheck();
+
+    ++_previewTimestep;  // SimulationData::timestep is already updated in the kernels
+
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
 void _SimulationCudaFacade::initCuda()
@@ -773,6 +747,48 @@ void _SimulationCudaFacade::copyDataTOtoHost(TOs const& to, TOs const& cudaTO)
     copyToHost(to.genes, cudaTO.genes, *to.numGenes);
     copyToHost(to.nodes, cudaTO.nodes, *to.numNodes);
     copyToHost(to.heap, cudaTO.heap, *to.heapSize);
+}
+
+void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool forceUpdateStatistics, bool forceCellFunctionExecution)
+{
+    static int counter = 0;
+
+    for (uint64_t i = 0; i < timesteps; ++i) {
+        checkAndProcessSimulationParameterChanges();
+
+        auto simulationData = getSimulationDataPtrCopy();
+        auto timestep = getCurrentTimestep();
+        SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics, timestep, forceCellFunctionExecution);
+        {
+            std::lock_guard lock(_mutexForSimulationData);
+            ++_simulationTimestep;  // SimulationData::timestep is already updated in the kernels
+        }
+        syncAndCheck();
+
+        //make check after every 10th call
+        if (++counter % 10 == 0) {
+            counter = 0;
+            resizeArraysIfNecessary();
+        }
+
+        auto statistics = getStatisticsRawData();
+        {
+            std::lock_guard lock(_mutexForSimulationParameters);
+            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(
+                    _settings, _maxAgeBalancer, simulationData, getCurrentTimestep(), statistics)) {
+                CHECK_FOR_CUDA_ERROR(
+                    cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+            }
+        }
+        auto now = std::chrono::steady_clock::now();
+        if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
+            _lastStatisticsUpdateTime = now;
+            updateStatistics();
+        }
+    }
+    if (forceUpdateStatistics) {
+        updateStatistics();
+    }
 }
 
 void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDelta)

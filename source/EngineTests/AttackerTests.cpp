@@ -484,7 +484,7 @@ TEST_F(AttackerTests, sensorTargeting_matchingCreatureId)
     EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
-TEST_F(AttackerTests, sensorTargeting_nonMatchingCreatureId)
+TEST_F(AttackerTests, sensorTargeting_mismatchingCreatureId)
 {
     // Create attacker with sensor targeting creature 3
     auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 3);
@@ -641,7 +641,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     EXPECT_TRUE(actualTarget.getFreeCellRef()._energy < 100.0f - NEAR_ZERO);
 }
 
-TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
+TEST_F(AttackerTests, freeCellMode_attackFreeCell_mismatchingColor)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
     NeuralNetDesc nn;

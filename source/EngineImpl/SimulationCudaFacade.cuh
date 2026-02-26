@@ -120,6 +120,7 @@ private:
     void syncAndCheck();
     void copyDataTOtoGpu(TOs const& cudaTO, TOs const& to);
     void copyDataTOtoHost(TOs const& to, TOs const& cudaTO);
+    void calcTimestepsInternal(uint64_t timesteps, bool forceUpdateStatistics, bool forceCellFunctionExecution);
     void resizeArrays(ArraySizesForGpuEntities const& sizeDelta = ArraySizesForGpuEntities());
     void checkAndProcessSimulationParameterChanges();
 

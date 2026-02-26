@@ -497,13 +497,13 @@ bool EngineWorker::testOnly_arePointersValid()
     return _simulationCudaFacade->testOnly_arePointersValid();
 }
 
-void EngineWorker::testOnly_calcTimestepWithCellTypeFunctions()
+void EngineWorker::testOnly_calcTimestepWithCellFunctions()
 {
     EngineWorkerGuard access(this);
     _simulationCudaFacade->testOnly_calcTimestepWithCellTypeFunctions();
 }
 
-void EngineWorker::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
+void EngineWorker::testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation)
 {
     EngineWorkerGuard access(this);
     _simulationCudaFacade->testOnly_calcTimestepWithCellTypeFunctionsForPreview(detailSimulation);

@@ -124,8 +124,8 @@ public:
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta);
     bool testOnly_arePointersValid();
-    void testOnly_calcTimestepWithCellTypeFunctions();
-    void testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation);
+    void testOnly_calcTimestepWithCellFunctions();
+    void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation);
 
 private:
     void resetTimeIntervalStatistics();

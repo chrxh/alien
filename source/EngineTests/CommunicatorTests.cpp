@@ -213,7 +213,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
     EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
 }
 
-TEST_F(CommunicatorTests, sender_receiverColorRestriction_nonMatchingColor)
+TEST_F(CommunicatorTests, sender_receiverColorRestriction_mismatchingColor)
 {
     // Create sender with color 3
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 3);
