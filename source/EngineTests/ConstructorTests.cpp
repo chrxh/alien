@@ -2697,9 +2697,9 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     auto const LastAngle = -5.0f;
     auto const n = 20;
 
-    auto [shape, type, ConnectionDistance] = GetParam();
+    auto [shape, type, connectionDistance] = GetParam();
 
-    auto gene = GeneDesc().separation(false).numBranches(1).shape(shape).connectionDistance(ConnectionDistance);
+    auto gene = GeneDesc().separation(false).numBranches(1).shape(shape).connectionDistance(connectionDistance);
     gene._nodes.emplace_back(NodeDesc());
     for (int i = 0; i < n - 2; ++i) {
         gene._nodes.emplace_back(NodeDesc());
@@ -2711,16 +2711,16 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     if (type == ConstructionType::Normal) {
         data = Desc().addCreature(
             {
-                ObjectDesc().id(0).pos({100.0f, 100.0f - ConnectionDistance * 2}),
-                ObjectDesc().id(1).pos({100.0f, 100.0f - ConnectionDistance}),
+                ObjectDesc().id(0).pos({100.0f, 100.0f - connectionDistance * 2}),
+                ObjectDesc().id(1).pos({100.0f, 100.0f - connectionDistance}),
                 ObjectDesc()
                     .id(2)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
                               .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))),
-                ObjectDesc().id(3).pos({100.1f, 100.0f + ConnectionDistance}),
-                ObjectDesc().id(4).pos({100.1f, 100.0f + ConnectionDistance * 2}),
+                ObjectDesc().id(3).pos({100.1f, 100.0f + connectionDistance}),
+                ObjectDesc().id(4).pos({100.1f, 100.0f + connectionDistance * 2}),
             },
             CreatureDesc().id(0),
             genome);
