@@ -2711,31 +2711,43 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     if (type == ConstructionType::Normal) {
         data = Desc().addCreature(
             {
-                ObjectDesc().id(0).pos({100.0f + 1.5f, 100.0f - 0.5f}),
-                ObjectDesc().id(1).pos({100.0f + 1.0f, 100.0f - 0.5f}),
-                ObjectDesc().id(2).pos({100.0f + 0.5f, 100.0f - 0.5f}),
-                ObjectDesc().id(3).pos({100.0f, 100.0f - 0.5f}),
+                ObjectDesc().id(0).pos({100.0f, 100.0f - 5.0f}),
+                ObjectDesc().id(1).pos({100.0f, 100.0f - 4.5f}),
+                ObjectDesc().id(2).pos({100.0f, 100.0f - 4.0f}),
+                ObjectDesc().id(3).pos({100.0f, 100.0f - 3.5f}),
+                ObjectDesc().id(4).pos({100.0f, 100.0f - 3.0f}),
+                ObjectDesc().id(5).pos({100.0f, 100.0f - 2.5f}),
+                ObjectDesc().id(6).pos({100.0f, 100.0f - 2.0f}),
+                ObjectDesc().id(7).pos({100.0f, 100.0f - 1.5f}),
+                ObjectDesc().id(8).pos({100.0f, 100.0f - 1.0f}),
+                ObjectDesc().id(9).pos({100.0f, 100.0f - 0.5f}),
                 ObjectDesc()
-                    .id(4)
+                    .id(10)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
                               .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))),
-                ObjectDesc().id(5).pos({100.1f, 100.0f + 0.5f}),
-                ObjectDesc().id(6).pos({100.1f + 0.5f, 100.0f + 0.5f}),
-                ObjectDesc().id(7).pos({100.1f + 1.0f, 100.0f + 0.5f}),
-                ObjectDesc().id(8).pos({100.1f + 1.5f, 100.0f + 0.5f}),
+                ObjectDesc().id(11).pos({100.1f, 100.0f + 0.5f}),
+                ObjectDesc().id(12).pos({100.1f, 100.0f + 1.0f}),
+                ObjectDesc().id(13).pos({100.1f, 100.0f + 1.5f}),
+                ObjectDesc().id(14).pos({100.1f, 100.0f + 2.0f}),
+                ObjectDesc().id(15).pos({100.1f, 100.0f + 2.5f}),
+                ObjectDesc().id(16).pos({100.1f, 100.0f + 3.0f}),
+                ObjectDesc().id(17).pos({100.1f, 100.0f + 3.5f}),
+                ObjectDesc().id(18).pos({100.1f, 100.0f + 4.0f}),
+                ObjectDesc().id(19).pos({100.1f, 100.0f + 4.5f}),
+                ObjectDesc().id(20).pos({100.1f, 100.0f + 5.0f}),
             },
             CreatureDesc().id(0),
             genome);
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 20; ++i) {
             data.addConnection(i, i + 1);
         }
     } else {
         data = Desc().addCreature(
             {
                 ObjectDesc()
-                    .id(4)
+                    .id(10)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
@@ -2750,7 +2762,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     std::vector<uint64_t> createdCellIds;
     {
         for (int i = 0; i < n; ++i) {
-            int anticipatedNumObjectsForCreature = type == ConstructionType::Normal ? 10 + i : 2 + i;
+            int anticipatedNumObjectsForCreature = type == ConstructionType::Normal ? 22 + i : 2 + i;
             Desc actualData;
             CreatureDesc hostCreature;
             int retryCount = 0;
@@ -2768,15 +2780,15 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                 }
             } while (actualData.getObjectsForCreature(hostCreature._id).size() != anticipatedNumObjectsForCreature);
 
-            auto hostObject = actualData.getObjectRef(4);
+            auto hostObject = actualData.getObjectRef(10);
 
             std::set<uint64_t> knownCellIds(createdCellIds.begin(), createdCellIds.end());
             if (type == ConstructionType::Normal) {
-                for (int j = 0; j <= 8; ++j) {
+                for (int j = 0; j <= 20; ++j) {
                     knownCellIds.insert(j);
                 }
             } else {
-                knownCellIds.insert(4);
+                knownCellIds.insert(10);
             }
             auto newObject = actualData.getOtherObjectRef(knownCellIds);
             createdCellIds.emplace_back(newObject._id);
@@ -2814,17 +2826,17 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 
     // Check angles for first node
     if (type == ConstructionType::Normal) {
-        auto const& hostObject = actualData.getObjectRef(4);
-        auto angleSpan_cell5_cell3 = hostObject.getAngleSpan(5, 3);
-        auto angleSpan_hostObject_and_cell3 = hostObject._connections.at(0)._angleFromPrevious;
-        EXPECT_TRUE(approxCompare(angleSpan_hostObject_and_cell3 + ConstructionAngle, angleSpan_cell5_cell3 / 2));
+        auto const& hostObject = actualData.getObjectRef(10);
+        auto angleSpan_cell11_cell9 = hostObject.getAngleSpan(11, 9);
+        auto angleSpan_hostObject_and_cell9 = hostObject._connections.at(0)._angleFromPrevious;
+        EXPECT_TRUE(approxCompare(angleSpan_hostObject_and_cell9 + ConstructionAngle, angleSpan_cell11_cell9 / 2));
     }
 
     // Check angles for last node
     {
         auto const& object = actualData.getObjectRef(createdCellIds.back());
         auto prevCellId = createdCellIds.at(n - 2);
-        auto nextObjectId = 4;  // = id of hostObject
+        auto nextObjectId = 10;  // = id of hostObject
         auto angle = object.getAngleSpan(prevCellId, nextObjectId);
         angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
         EXPECT_EQ(LastAngle, angle);
