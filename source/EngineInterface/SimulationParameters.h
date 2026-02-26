@@ -122,7 +122,7 @@ struct SimulationParameters
     BaseParameter<CellDeathConsequences> cellDeathConsequences = {CellDeathConsequences_DetachedPartsDie};
 
     // Cell constructor
-    BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};
+    BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f}};
 
     // Meta mutations
     BaseParameter<float> metaMutationNeuronsSigma = {0};

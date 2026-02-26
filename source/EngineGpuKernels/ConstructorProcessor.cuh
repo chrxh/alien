@@ -404,10 +404,10 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     auto angleFromPreviousForNewObject = 180.0f - constructionData.angle;
 
     auto desiredDistance = constructionData.gene->connectionDistance;
-    if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value
-        || desiredDistance < cudaSimulationParameters.minObjectDistance.value) {
-        return nullptr;
-    }
+    //if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value
+    //    || desiredDistance < cudaSimulationParameters.minObjectDistance.value) {
+    //    return nullptr;
+    //}
 
     auto newObjectPos = hostObject->pos + posDelta;
     if (ObjectConnectionProcessor::existCrossingConnections(

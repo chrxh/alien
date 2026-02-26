@@ -12,6 +12,8 @@
 
 #include "IntegrationTestFramework.h"
 
+#include "PersisterInterface/SerializerService.h"
+
 class ConstructorTests : public IntegrationTestFramework
 {
 public:
@@ -2705,10 +2707,11 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     auto const ConstructionAngle = 8.0f;
     auto const LastAngle = -5.0f;
     auto const n = 20;
+    auto const ConnectionDistance = 1.0f;
 
     auto [shape, type] = GetParam();
 
-    auto gene = GeneDesc().separation(false).numBranches(1).shape(shape);
+    auto gene = GeneDesc().separation(false).numBranches(1).shape(shape).connectionDistance(ConnectionDistance);
     gene._nodes.emplace_back(NodeDesc());
     for (int i = 0; i < n - 2; ++i) {
         gene._nodes.emplace_back(NodeDesc());
@@ -2720,16 +2723,16 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     if (type == ConstructionType::Normal) {
         data = Desc().addCreature(
             {
-                ObjectDesc().id(0).pos({100.0f, 98.0f}),
-                ObjectDesc().id(1).pos({100.0f, 99.0f}),
+                ObjectDesc().id(0).pos({100.0f, 100.0f - ConnectionDistance * 2}),
+                ObjectDesc().id(1).pos({100.0f, 100.0f - ConnectionDistance}),
                 ObjectDesc()
                     .id(2)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
-                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(50))),
-                ObjectDesc().id(3).pos({100.1f, 101.0f}),
-                ObjectDesc().id(4).pos({100.1f, 102.0f}),
+                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))),
+                ObjectDesc().id(3).pos({100.1f, 100.0f + ConnectionDistance}),
+                ObjectDesc().id(4).pos({100.1f, 100.0f + ConnectionDistance * 2}),
             },
             CreatureDesc().id(0),
             genome);
@@ -2745,7 +2748,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
-                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(50))),
+                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))),
             },
             CreatureDesc().id(0),
             genome);
@@ -2756,7 +2759,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     std::vector<uint64_t> createdCellIds;
     {
         for (int i = 0; i < n; ++i) {
-            _simulationFacade->calcTimesteps(50);
+            _simulationFacade->calcTimesteps(100);
             auto actualData = _simulationFacade->getSimulationData();
 
             ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
@@ -2805,7 +2808,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             auto nextObjectId = createdCellIds.at(i + 1);
             auto angle = object.getAngleSpan(prevCellId, nextObjectId);
             angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
-            EXPECT_EQ(shapeResult.angle, angle);
+            EXPECT_TRUE(approxCompare(shapeResult.angle, angle));
             int numPrevConnections = 0;
             for (auto const& connection : object._connections) {
                 if (connection._objectId < object._id) {

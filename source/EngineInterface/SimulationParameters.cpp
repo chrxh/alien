@@ -462,7 +462,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Connection distance")
-                        .reference(FloatSpec().member(&SimulationParameters::constructorConnectingCellDistance).min(0.1f).max(3.0f))
+                        .reference(FloatSpec().member(&SimulationParameters::constructorConnectingCellDistance).min(0.1f).max(4.0f))
                         .description("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 }),
             ParameterGroupSpec()
