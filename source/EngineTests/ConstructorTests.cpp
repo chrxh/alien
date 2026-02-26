@@ -2663,24 +2663,39 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
     EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
 }
 
+enum class ConstructionType
+{
+    Normal,
+    Seed
+};
+
 class ConstructorTests_AllShapes
     : public ConstructorTests
-    , public testing::WithParamInterface<ConstructorShape>
+    , public testing::WithParamInterface<std::pair<ConstructorShape, ConstructionType>>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_AllShapes,
     ConstructorTests_AllShapes,
     ::testing::Values(
-        ConstructorShape_Segment,
-        ConstructorShape_Triangle,
-        ConstructorShape_Rectangle,
-        ConstructorShape_Hexagon,
-        ConstructorShape_Loop,
-        ConstructorShape_Tube,
-        ConstructorShape_Lolli,
-        ConstructorShape_SmallLolli,
-        ConstructorShape_Zigzag));
+        std::make_pair(ConstructorShape_Segment, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_Triangle, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_Rectangle, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_Hexagon, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_Loop, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_Tube, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_Lolli, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_SmallLolli, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_Zigzag, ConstructionType::Normal),
+        std::make_pair(ConstructorShape_Segment, ConstructionType::Seed),
+        std::make_pair(ConstructorShape_Triangle, ConstructionType::Seed),
+        std::make_pair(ConstructorShape_Rectangle, ConstructionType::Seed),
+        std::make_pair(ConstructorShape_Hexagon, ConstructionType::Seed),
+        std::make_pair(ConstructorShape_Loop, ConstructionType::Seed),
+        std::make_pair(ConstructorShape_Tube, ConstructionType::Seed),
+        std::make_pair(ConstructorShape_Lolli, ConstructionType::Seed),
+        std::make_pair(ConstructorShape_SmallLolli, ConstructionType::Seed),
+        std::make_pair(ConstructorShape_Zigzag, ConstructionType::Seed)));
 
 TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 {
@@ -2691,7 +2706,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     auto const LastAngle = -5.0f;
     auto const n = 20;
 
-    auto shape = GetParam();
+    auto [shape, type] = GetParam();
 
     auto gene = GeneDesc().separation(false).numBranches(1).shape(shape);
     gene._nodes.emplace_back(NodeDesc());
@@ -2701,33 +2716,47 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     gene._nodes.emplace_back(NodeDesc().referenceAngle(LastAngle));
     auto genome = GenomeDesc().genes({gene});
 
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(0).pos({100.0f, 98.0f}),
-            ObjectDesc().id(1).pos({100.0f, 99.0f}),
-            ObjectDesc()
-                .id(2)
-                .pos({100.0f, 100.0f})
-                .type(CellDesc()
-                          .usableEnergy(getConstructorEnergy() * n)
-                          .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(200))),
-            ObjectDesc().id(3).pos({100.1f, 101.0f}),
-            ObjectDesc().id(4).pos({100.1f, 102.0f}),
-        },
-        CreatureDesc().id(0),
-        genome);
-    data.addConnection(0, 1);
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    data.addConnection(3, 4);
-
+    Desc data;
+    if (type == ConstructionType::Normal) {
+        data = Desc().addCreature(
+            {
+                ObjectDesc().id(0).pos({100.0f, 98.0f}),
+                ObjectDesc().id(1).pos({100.0f, 99.0f}),
+                ObjectDesc()
+                    .id(2)
+                    .pos({100.0f, 100.0f})
+                    .type(CellDesc()
+                              .usableEnergy(getConstructorEnergy() * n)
+                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(50))),
+                ObjectDesc().id(3).pos({100.1f, 101.0f}),
+                ObjectDesc().id(4).pos({100.1f, 102.0f}),
+            },
+            CreatureDesc().id(0),
+            genome);
+        data.addConnection(0, 1);
+        data.addConnection(1, 2);
+        data.addConnection(2, 3);
+        data.addConnection(3, 4);
+    } else {
+        data = Desc().addCreature(
+            {
+                ObjectDesc()
+                    .id(2)
+                    .pos({100.0f, 100.0f})
+                    .type(CellDesc()
+                              .usableEnergy(getConstructorEnergy() * n)
+                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(50))),
+            },
+            CreatureDesc().id(0),
+            genome);
+    }
     _simulationFacade->setSimulationData(data);
 
     // Construct offspring and record ids of constructed cells
     std::vector<uint64_t> createdCellIds;
     {
         for (int i = 0; i < n; ++i) {
-            _simulationFacade->calcTimesteps(200);
+            _simulationFacade->calcTimesteps(50);
             auto actualData = _simulationFacade->getSimulationData();
 
             ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
@@ -2735,16 +2764,24 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
             auto hostCreature = actualData.getCreatureRef(0);
-            ASSERT_EQ(5 + i + 1, actualData.getObjectsForCreature(hostCreature._id).size());
+            if (type == ConstructionType::Normal) {
+                ASSERT_EQ(5 + i + 1, actualData.getObjectsForCreature(hostCreature._id).size());
+            } else {
+                ASSERT_EQ(1 + i + 1, actualData.getObjectsForCreature(hostCreature._id).size());
+            }
 
             auto hostObject = actualData.getObjectRef(2);
 
             std::set<uint64_t> knownCellIds(createdCellIds.begin(), createdCellIds.end());
-            knownCellIds.insert(0);
-            knownCellIds.insert(1);
-            knownCellIds.insert(2);
-            knownCellIds.insert(3);
-            knownCellIds.insert(4);
+            if (type == ConstructionType::Normal) {
+                knownCellIds.insert(0);
+                knownCellIds.insert(1);
+                knownCellIds.insert(2);
+                knownCellIds.insert(3);
+                knownCellIds.insert(4);
+            } else {
+                knownCellIds.insert(2);
+            }
             auto newObject = actualData.getOtherObjectRef(knownCellIds);
             createdCellIds.emplace_back(newObject._id);
 
@@ -2780,11 +2817,11 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     }
 
     // Check angles for first node
-    {
+    if (type == ConstructionType::Normal) {
         auto const& hostObject = actualData.getObjectRef(2);
-        auto angleSpan_cell2_cell0 = hostObject.getAngleSpan(3, 1);
+        auto angleSpan_cell3_cell1 = hostObject.getAngleSpan(3, 1);
         auto angleSpan_lastObject_and_cell0 = hostObject._connections.at(0)._angleFromPrevious;
-        EXPECT_TRUE(approxCompare(angleSpan_lastObject_and_cell0 + ConstructionAngle, angleSpan_cell2_cell0 / 2));
+        EXPECT_TRUE(approxCompare(angleSpan_lastObject_and_cell0 + ConstructionAngle, angleSpan_cell3_cell1 / 2));
     }
 
     // Check angles for last node
