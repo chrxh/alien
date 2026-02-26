@@ -1463,10 +1463,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(3))),
             ObjectDesc().id(2).pos({100.0f, 101.0f}),
-            ObjectDesc()
-                .id(3)
-                .pos(RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(-45.0f) * 1.0f)
-                .type(CellDesc().cellState(CellState_Constructing)),
+            ObjectDesc().id(3).pos(RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(-45.0f) * 1.0f).type(CellDesc().cellState(CellState_Constructing)),
         },
         CreatureDesc().id(0).frontAngleId(InitialFrontAngleId),
         genome);
@@ -1512,10 +1509,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(3))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellState(CellState_Constructing)),
-            ObjectDesc()
-                .id(3)
-                .pos(RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(-45.0f) * 1.0f)
-                .type(CellDesc().cellState(CellState_Constructing)),
+            ObjectDesc().id(3).pos(RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(-45.0f) * 1.0f).type(CellDesc().cellState(CellState_Constructing)),
         },
         CreatureDesc().id(0),
         genome);
@@ -2673,31 +2667,25 @@ enum class ConstructionType
 
 class ConstructorTests_AllShapes
     : public ConstructorTests
-    , public testing::WithParamInterface<std::pair<ConstructorShape, ConstructionType>>
+    , public testing::WithParamInterface<std::tuple<ConstructorShape, ConstructionType, float>>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_AllShapes,
     ConstructorTests_AllShapes,
-    ::testing::Values(
-        std::make_pair(ConstructorShape_Segment, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_Triangle, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_Rectangle, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_Hexagon, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_Loop, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_Tube, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_Lolli, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_SmallLolli, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_Zigzag, ConstructionType::Normal),
-        std::make_pair(ConstructorShape_Segment, ConstructionType::Seed),
-        std::make_pair(ConstructorShape_Triangle, ConstructionType::Seed),
-        std::make_pair(ConstructorShape_Rectangle, ConstructionType::Seed),
-        std::make_pair(ConstructorShape_Hexagon, ConstructionType::Seed),
-        std::make_pair(ConstructorShape_Loop, ConstructionType::Seed),
-        std::make_pair(ConstructorShape_Tube, ConstructionType::Seed),
-        std::make_pair(ConstructorShape_Lolli, ConstructionType::Seed),
-        std::make_pair(ConstructorShape_SmallLolli, ConstructionType::Seed),
-        std::make_pair(ConstructorShape_Zigzag, ConstructionType::Seed)));
+    ::testing::Combine(
+        ::testing::Values(
+            ConstructorShape_Segment,
+            ConstructorShape_Triangle,
+            ConstructorShape_Rectangle,
+            ConstructorShape_Hexagon,
+            ConstructorShape_Loop,
+            ConstructorShape_Tube,
+            ConstructorShape_Lolli,
+            ConstructorShape_SmallLolli,
+            ConstructorShape_Zigzag),
+        ::testing::Values(ConstructionType::Normal, ConstructionType::Seed),
+        ::testing::Values(0.5f, 1.0f, 2.0f)));
 
 TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 {
@@ -2707,9 +2695,8 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     auto const ConstructionAngle = 8.0f;
     auto const LastAngle = -5.0f;
     auto const n = 20;
-    auto const ConnectionDistance = 1.0f;
 
-    auto [shape, type] = GetParam();
+    auto [shape, type, ConnectionDistance] = GetParam();
 
     auto gene = GeneDesc().separation(false).numBranches(1).shape(shape).connectionDistance(ConnectionDistance);
     gene._nodes.emplace_back(NodeDesc());
