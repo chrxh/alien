@@ -142,7 +142,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
     for (int i = 0; i < 300; ++i) {
         data.add(createSmallCreatureSeed());
     }
-    for (int i = 0; i < 15; ++i) {
+    for (int i = 0; i < 16; ++i) {
         data.add(createLargeCreatureSeed(DigestionCapability::High));
     }
 
