@@ -473,8 +473,8 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                     r2 *= -1.0f;
                 }
                 auto g = 5e-4f * abs(Math::getNormalizedAngle(theta - referenceAngleFromPrevious, -180.0f)) * cellStiffnessSquared;
-                auto strength1 = g / max(Math::lengthSquared(r1), cudaSimulationParameters.minObjectDistance.value);
-                auto strength2 = g / max(Math::lengthSquared(r2), cudaSimulationParameters.minObjectDistance.value);
+                auto strength1 = g / max(Math::lengthSquared(r1), 0.7f);
+                auto strength2 = g / max(Math::lengthSquared(r2), 0.7f);
                 auto force2 = r1 * strength1;
                 auto force1 = r2 * strength2;
 

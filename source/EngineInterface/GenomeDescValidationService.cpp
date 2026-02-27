@@ -36,7 +36,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
         gene._numConcatenations = std::max(gene._numConcatenations, 1);
         gene._angleAlignment = std::clamp(gene._angleAlignment, 0, ConstructorAngleAlignment_Count - 1);
         gene._stiffness = std::max(gene._stiffness, 0.0f);
-        gene._connectionDistance = std::clamp(gene._connectionDistance, 0.3f, 2.5f);
+        gene._connectionDistance = std::clamp(gene._connectionDistance, 0.5f, 2.0f);
         gene._shape = std::clamp(gene._shape, 0, ConstructorShape_Count - 1);
 
         // Validate each node in the gene
