@@ -1000,6 +1000,11 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ob
         if (abs(object3->getConnection(object2Index).angleFromPrevious) < NEAR_ZERO) {
             object3->increaseAngle(object2Index, -angleCorrection);  // Revert
             object2->increaseAngle(object1IndexInObject2, angleCorrection);
+
+            // Other angle also 0 => revert
+            if (abs(object2->getConnection(object1IndexInObject2).angleFromPrevious) < NEAR_ZERO) {
+                object2->increaseAngle(object1IndexInObject2, -angleCorrection);
+            }
         }
     } else {
         object3->increaseAngle(object2Index, -angleCorrection);
@@ -1008,6 +1013,11 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ob
         if (abs(object3->getConnection(object2Index + 1).angleFromPrevious) < NEAR_ZERO) {
             object3->increaseAngle(object2Index, angleCorrection);  // Revert
             object2->increaseAngle(object1IndexInObject2, -angleCorrection);
+
+            // Other angle also 0 => revert 
+            if (abs(object2->getConnection(object1IndexInObject2 + 1).angleFromPrevious) < NEAR_ZERO) {
+                object2->increaseAngle(object1IndexInObject2, angleCorrection);
+            }
         }
     }
 }
