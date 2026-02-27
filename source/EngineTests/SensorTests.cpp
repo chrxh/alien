@@ -832,7 +832,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     actualData._objects.emplace_back(auxCell);
     actualData._creatures.emplace_back(creature);
     actualData._genomes.emplace_back(genome);
-    addDetectionTargets(actualData, GetParam(), {120.0f, 80.0f}, 10, false);
+    addDetectionTargets(actualData, GetParam(), {120.0f, 70.0f}, 10, false);
     addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 10, true);  // Add a closer target which should be matched by initial scan
     _simulationFacade->setSimulationData(actualData);
 
