@@ -319,7 +319,7 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 4: Shape
                     ImGui::TableNextColumn();
-                    AlienGui::Text(Const::ConstructorShapeStrings.at(gene._shape));
+                    AlienGui::Text(Const::ConstructorShapeWithoutCustomStrings.at(gene._shape - 1));
 
                     // Column 5: Branches
                     ImGui::TableNextColumn();
@@ -409,7 +409,8 @@ void _GenomeEditorWidget::onAddGene()
     auto& genome = _editData->genome;
     auto name = "Gene " + std::to_string(++_sequenceNumberForCreatedGenes);
     if (genome._genes.empty()) {
-        GenomeDescEditService::get().addGene(genome, 0, GeneDesc().name(name).separation(true).nodes({NodeDesc()}));
+        auto newGene = GeneDesc().name(name).separation(true).nodes({NodeDesc()}).shape(ConstructorShape_Segment);
+        GenomeDescEditService::get().addGene(genome, 0, newGene);
         _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;
@@ -419,7 +420,8 @@ void _GenomeEditorWidget::onAddGene()
             insertIndex = toInt(genome._genes.size()) - 1;
         }
 
-        GenomeDescEditService::get().addGene(genome, insertIndex, GeneDesc().name(name).separation(false).numBranches(1).nodes({NodeDesc()}));
+        auto newGene = GeneDesc().name(name).separation(false).numBranches(1).nodes({NodeDesc()}).shape(ConstructorShape_Segment);
+        GenomeDescEditService::get().addGene(genome, insertIndex, newGene);
 
         // Adapt gene selection
         _editData->selectedGeneIndex = insertIndex + 1;

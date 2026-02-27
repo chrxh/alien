@@ -85,8 +85,11 @@ void _GeneEditorWidget::processHeaderData()
             AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
 
             // Shape
+            auto shapeWithoutCustom = gene._shape - 1;
             if (AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth), gene._shape)) {
+                    AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeWithoutCustomStrings).textWidth(rightColumnWidth),
+                    shapeWithoutCustom)) {
+                gene._shape = shapeWithoutCustom + 1;
                 if (auto shapeGenerator = ShapeGeneratorFactory::create(gene._shape)) {
                     if (_editData->selectedGeneIndex.value() == 0) {
                         _editData->genome._frontAngle = shapeGenerator->getPreferredFrontAngle();
@@ -95,16 +98,13 @@ void _GeneEditorWidget::processHeaderData()
             }
 
             // Angle alignment
-            AlienGui::BeginIndent();
-            if (gene._shape == ConstructorShape_Custom) {
-                AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(rightColumnWidth),
-                    gene._angleAlignment);
-            } /*else {
-            std::string text = Const::ConstructorAlignmentStrings.at(gene._angleAlignment);
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Angle alignment").textWidth(rightColumnWidth).readOnly(true), text);
-        }*/
-            AlienGui::EndIndent();
+            //AlienGui::BeginIndent();
+            //if (gene._shape == ConstructorShape_Custom) {
+            //    AlienGui::Combo(
+            //        AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(rightColumnWidth),
+            //        gene._angleAlignment);
+            //} 
+            //AlienGui::EndIndent();
 
             // Connection distance
             AlienGui::InputFloat(

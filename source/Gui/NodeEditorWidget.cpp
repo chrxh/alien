@@ -209,31 +209,30 @@ void _NodeEditorWidget::processNodeAttributes()
 
             auto nodeIndex = _editData->getSelectedNodeIndex();
             auto isInnerNode = nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1;
-            if (AlienGui::InputFloat(
+            //if (!isInnerNode) {
+                AlienGui::InputFloat(
                     AlienGui::InputFloatParameters()
                         .name("Angle")
                         .textWidth(rightColumnWidth)
+                        .readOnly(isInnerNode)
                         .infoLabel(gene._shape != ConstructorShape_Custom && isInnerNode ? std::make_optional(std::string("Deduced")) : std::nullopt)
                         .format("%.1f"),
-                    node._referenceAngle)) {
-                if (isInnerNode) {
-                    gene._shape = ConstructorShape_Custom;
-                }
-            }
+                    node._referenceAngle);
+            //}
 
             // Previous nodes connections
-            if (nodeIndex != 0) {
-                auto numAdditionalConnections = node._numAdditionalConnections + 1;
-                if (AlienGui::InputInt(
-                        AlienGui::InputIntParameters()
-                            .name("Prev nodes connections")
-                            .infoLabel(gene._shape != ConstructorShape_Custom ? std::make_optional(std::string("Deduced")) : std::nullopt)
-                            .textWidth(rightColumnWidth),
-                        numAdditionalConnections)) {
-                    gene._shape = ConstructorShape_Custom;
-                }
-                node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
-            }
+            //if (nodeIndex != 0) {
+            //    auto numAdditionalConnections = node._numAdditionalConnections + 1;
+            //    if (AlienGui::InputInt(
+            //            AlienGui::InputIntParameters()
+            //                .name("Prev nodes connections")
+            //                .infoLabel(gene._shape != ConstructorShape_Custom ? std::make_optional(std::string("Deduced")) : std::nullopt)
+            //                .textWidth(rightColumnWidth),
+            //            numAdditionalConnections)) {
+            //        gene._shape = ConstructorShape_Custom;
+            //    }
+            //    node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
+            //}
 
             AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(rightColumnWidth), node._color);
 

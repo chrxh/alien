@@ -164,8 +164,8 @@ enum ProvideEnergy_
 
 namespace Const
 {
-    std::vector<std::string> const ConstructorShapeStrings =
-        {"Custom", "Segment", "Triangle", "Rectangle", "Hexagon", "Loop", "Tube", "Lolli", "Small Lolli", "Zigzag"};
+    std::vector<std::string> const ConstructorShapeWithoutCustomStrings =
+        {"Segment", "Triangle", "Rectangle", "Hexagon", "Loop", "Tube", "Lolli", "Small Lolli", "Zigzag"};
 }
 
 //**********************
