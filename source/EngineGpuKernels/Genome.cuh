@@ -358,6 +358,7 @@ struct Genome
     Gene* genes;
 
     uint32_t lineageId;
+    uint32_t prevLineageId;
     float frontAngle;
     float lineageMutationProbability;
 

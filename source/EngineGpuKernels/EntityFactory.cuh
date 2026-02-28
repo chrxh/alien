@@ -88,6 +88,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genomeTO.genomeIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->entities.heap.getArray());
     genome->id = genomeTO.id;
     genome->lineageId = genomeTO.lineageId;
+    genome->prevLineageId = genomeTO.prevLineageId;
     genome->frontAngle = genomeTO.frontAngle;
     genome->lineageMutationProbability = genomeTO.lineageMutationProbability;
     genome->neuronMutation1 = {
