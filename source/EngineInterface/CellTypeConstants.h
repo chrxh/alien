@@ -224,8 +224,8 @@ using LineageRestriction = int;
 enum LineageRestriction_
 {
     LineageRestriction_No,
-    LineageRestriction_SameLineage,
-    LineageRestriction_OtherLineage,
+    LineageRestriction_RelatedLineage,
+    LineageRestriction_UnrelatedLineage,
     LineageRestriction_Count,
 };
 

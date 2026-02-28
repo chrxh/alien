@@ -140,7 +140,7 @@ struct SimulationParameters
             {1, 1, 1, 1, 1, 1, 1},
             {1, 1, 1, 1, 1, 1, 1},
             {1, 1, 1, 1, 1, 1, 1}}};
-    BaseParameter<ColorVector<float>> attackerSameLineageProtection = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
+    BaseParameter<ColorVector<float>> attackerRelatedLineageProtection = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
     BaseParameter<ColorVector<float>> attackerStrength = {{0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f}};
     BaseParameter<ColorVector<float>> attackerRadius = {{2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}};
     static float constexpr attackerMaxRawEnergyThreshold = 2.0f;

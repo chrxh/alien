@@ -358,10 +358,10 @@ TEST_F(ReconnectorTests, creatureMode_maxNumCells_failed)
     EXPECT_FALSE(actualData.hasConnection(1, 10));
 }
 
-TEST_F(ReconnectorTests, creatureMode_sameLineage_success)
+TEST_F(ReconnectorTests, creatureMode_relatedLineage_success)
 {
     auto data = createReconnectorWithPositiveSignal(
-        {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_SameLineage), 0, 5);
+        {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage), 0, 5);
 
     // Add creature with same lineage
     data.addCreature({
@@ -378,10 +378,10 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_success)
     EXPECT_TRUE(actualData.hasConnection(1, 10));
 }
 
-TEST_F(ReconnectorTests, creatureMode_sameLineage_failed)
+TEST_F(ReconnectorTests, creatureMode_relatedLineage_failed)
 {
     auto data = createReconnectorWithPositiveSignal(
-        {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_SameLineage), 0, 5);
+        {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage), 0, 5);
 
     // Add creature with different lineage
     data.addCreature({
@@ -398,10 +398,10 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_failed)
     EXPECT_FALSE(actualData.hasConnection(1, 10));
 }
 
-TEST_F(ReconnectorTests, creatureMode_otherLineage_success)
+TEST_F(ReconnectorTests, creatureMode_unrelatedLineage_success)
 {
     auto data = createReconnectorWithPositiveSignal(
-        {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_OtherLineage), 0, 5);
+        {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_UnrelatedLineage), 0, 5);
 
     // Add creature with different lineage
     data.addCreature({
@@ -418,10 +418,10 @@ TEST_F(ReconnectorTests, creatureMode_otherLineage_success)
     EXPECT_TRUE(actualData.hasConnection(1, 10));
 }
 
-TEST_F(ReconnectorTests, creatureMode_otherLineage_failed)
+TEST_F(ReconnectorTests, creatureMode_unrelatedLineage_failed)
 {
     auto data = createReconnectorWithPositiveSignal(
-        {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_OtherLineage), 0, 5);
+        {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_UnrelatedLineage), 0, 5);
 
     // Add creature with same lineage
     data.addCreature({

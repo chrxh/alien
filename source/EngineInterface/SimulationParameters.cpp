@@ -503,7 +503,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "influenced by other factors adjustable within the attacker's simulation parameters."),
                     ParameterSpec()
                         .name("Same lineage protection")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerSameLineageProtection).min(0.0f).max(1.0f)),
+                        .reference(FloatSpec().member(&SimulationParameters::attackerRelatedLineageProtection).min(0.0f).max(1.0f)),
                     ParameterSpec()
                         .name("Attack radius")
                         .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0.0f).max(4.0f))

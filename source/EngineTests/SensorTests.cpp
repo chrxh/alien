@@ -1327,7 +1327,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
+TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_found)
 {
     auto data = Desc().addCreature(
         {
@@ -1335,7 +1335,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
-                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_SameLineage)))),
+                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),
@@ -1357,7 +1357,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
+TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_notFound)
 {
     auto data = Desc().addCreature(
         {
@@ -1365,7 +1365,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
-                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_SameLineage)))),
+                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),
@@ -1386,7 +1386,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
+TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_found)
 {
     auto data = Desc().addCreature(
         {
@@ -1394,7 +1394,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
-                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_OtherLineage)))),
+                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_UnrelatedLineage)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),
@@ -1416,7 +1416,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
+TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
 {
     auto data = Desc().addCreature(
         {
@@ -1424,7 +1424,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
-                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_OtherLineage)))),
+                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_UnrelatedLineage)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),

@@ -369,4 +369,9 @@ struct Genome
 
     // Temporary data
     uint64_t genomeIndex;  // May be invalid
+
+    __device__ __inline__ bool isRelatedLineage(Genome* other)
+    {
+        return lineageId == other->lineageId || lineageId == other->prevLineageId || prevLineageId == other->lineageId || prevLineageId == other->prevLineageId;
+    }
 };

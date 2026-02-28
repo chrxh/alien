@@ -396,12 +396,12 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 
 /**
  * Parameterized test for lineage restriction.
- * Parameters: (LineageRestriction mode, sameLineage flag, expected acceptance)
+ * Parameters: (LineageRestriction mode, relatedLineage flag, expected acceptance)
  */
 struct LineageRestrictionParams
 {
     LineageRestriction restriction;
-    bool sameLineage;
+    bool relatedLineage;
     bool expectedAccept;
 };
 
@@ -414,10 +414,10 @@ INSTANTIATE_TEST_SUITE_P(
     CommunicatorTests_LineageRestriction,
     CommunicatorTests_LineageRestriction,
     ::testing::Values(
-        LineageRestrictionParams{LineageRestriction_SameLineage, true, true},    // sameLineage, accept
-        LineageRestrictionParams{LineageRestriction_SameLineage, false, false},  // sameLineage, rejected
-        LineageRestrictionParams{LineageRestriction_OtherLineage, false, true},  // otherLineage, accept
-        LineageRestrictionParams{LineageRestriction_OtherLineage, true, false}   // otherLineage, rejected
+        LineageRestrictionParams{LineageRestriction_RelatedLineage, true, true},    // relatedLineage, accept
+        LineageRestrictionParams{LineageRestriction_RelatedLineage, false, false},  // relatedLineage, rejected
+        LineageRestrictionParams{LineageRestriction_UnrelatedLineage, false, true},  // unrelatedLineage, accept
+        LineageRestrictionParams{LineageRestriction_UnrelatedLineage, true, false}   // unrelatedLineage, rejected
         ));
 
 TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
@@ -425,7 +425,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     auto params = GetParam();
 
     uint64_t senderLineageId = 12345;
-    uint64_t receiverLineageId = params.sameLineage ? 12345 : 67890;
+    uint64_t receiverLineageId = params.relatedLineage ? 12345 : 67890;
 
     auto data = Desc().addCreature(
         {

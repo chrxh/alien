@@ -100,12 +100,12 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
 
         // Check lineage restriction
         if (receiver.restrictToLineage != LineageRestriction_No) {
-            if (receiver.restrictToLineage == LineageRestriction_SameLineage) {
-                if (object->typeData.cell.creature->genome->lineageId != otherObject->typeData.cell.creature->genome->lineageId) {
+            if (receiver.restrictToLineage == LineageRestriction_RelatedLineage) {
+                if (!object->typeData.cell.creature->genome->isRelatedLineage(otherObject->typeData.cell.creature->genome)) {
                     return false;
                 }
-            } else if (receiver.restrictToLineage == LineageRestriction_OtherLineage) {
-                if (object->typeData.cell.creature->genome->lineageId == otherObject->typeData.cell.creature->genome->lineageId) {
+            } else if (receiver.restrictToLineage == LineageRestriction_UnrelatedLineage) {
+                if (object->typeData.cell.creature->genome->isRelatedLineage(otherObject->typeData.cell.creature->genome)) {
                     return false;
                 }
             }
