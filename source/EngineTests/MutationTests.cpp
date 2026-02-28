@@ -539,9 +539,11 @@ TEST_F(MutationTests, lineageMutation_keepOtherAttributesUnchanged)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    // Reset lineageId on both to compare everything else
+    // Reset lineageId and prevLineageId on both to compare everything else
     genome._lineageId = 0;
+    genome._prevLineageId = 0;
     actualGenome._lineageId = 0;
+    actualGenome._prevLineageId = 0;
     EXPECT_EQ(genome, actualGenome);
 }
 

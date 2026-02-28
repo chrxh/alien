@@ -1372,9 +1372,10 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_notFound)
         GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
-    // Create a large creature with different lineage
+    // Create a large creature with different lineage (distinct prevLineageId to ensure truly unrelated)
     auto creatureData = createLargeCreature();
     creatureData._genomes.front()._lineageId = 41;
+    creatureData._genomes.front()._prevLineageId = 43;
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
@@ -1401,9 +1402,10 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_found)
         GenomeDesc().lineageId(42));
     data.addConnection(1, 2);
 
-    // Create a large creature with different lineage
+    // Create a large creature with different lineage (distinct prevLineageId to ensure truly unrelated)
     auto creatureData = createLargeCreature();
     creatureData._genomes.front()._lineageId = 41;
+    creatureData._genomes.front()._prevLineageId = 43;
     data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);

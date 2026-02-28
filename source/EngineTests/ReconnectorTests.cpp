@@ -383,11 +383,11 @@ TEST_F(ReconnectorTests, creatureMode_relatedLineage_failed)
     auto data = createReconnectorWithPositiveSignal(
         {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage), 0, 5);
 
-    // Add creature with different lineage
+    // Add creature with different lineage (distinct prevLineageId to ensure truly unrelated)
     data.addCreature({
         ObjectDesc().id(10).pos({99.0f, 100.0f}),
         ObjectDesc().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDesc(), GenomeDesc().lineageId(6));
+    }, CreatureDesc(), GenomeDesc().lineageId(6).prevLineageId(7));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -403,11 +403,11 @@ TEST_F(ReconnectorTests, creatureMode_unrelatedLineage_success)
     auto data = createReconnectorWithPositiveSignal(
         {100.0f, 100.0f}, ReconnectCreatureDesc().restrictToLineage(LineageRestriction_UnrelatedLineage), 0, 5);
 
-    // Add creature with different lineage
+    // Add creature with different lineage (distinct prevLineageId to ensure truly unrelated)
     data.addCreature({
         ObjectDesc().id(10).pos({99.0f, 100.0f}),
         ObjectDesc().id(11).pos({98.0f, 100.0f}),
-    }, CreatureDesc(), GenomeDesc().lineageId(6));
+    }, CreatureDesc(), GenomeDesc().lineageId(6).prevLineageId(7));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);

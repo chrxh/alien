@@ -426,6 +426,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
 
     uint64_t senderLineageId = 12345;
     uint64_t receiverLineageId = params.relatedLineage ? 12345 : 67890;
+    uint64_t receiverPrevLineageId = params.relatedLineage ? 0 : 99999;
 
     auto data = Desc().addCreature(
         {
@@ -445,7 +446,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
             ObjectDesc().id(201).pos({121.0f, 100.0f}),
         },
         CreatureDesc().id(2),
-        GenomeDesc().lineageId(receiverLineageId));
+        GenomeDesc().lineageId(receiverLineageId).prevLineageId(receiverPrevLineageId));
     data.addConnection(200, 201);
 
     _simulationFacade->setSimulationData(data);
