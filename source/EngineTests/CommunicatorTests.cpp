@@ -127,10 +127,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().signal({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
-            ObjectDesc()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
             ObjectDesc().id(2).pos({110.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc()))),
         },
         CreatureDesc().id(1));
@@ -262,10 +259,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f)))),
-            ObjectDesc()
-                .id(101)
-                .pos({101.0f, 100.0f})
-                .type(CellDesc().signal(SignalDesc().channels({1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1));
     data.addConnection(100, 101);
@@ -274,10 +268,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     data.addCreature(
         {
             ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f)))),
-            ObjectDesc()
-                .id(201)
-                .pos({101.0f, 120.0f})
-                .type(CellDesc().signal(SignalDesc().channels({-1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(201).pos({101.0f, 120.0f}).type(CellDesc().signal(SignalDesc().channels({-1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(2));
     data.addConnection(200, 201);
@@ -364,8 +355,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
-                .type(CellDesc()
-                          .signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),  // channel[1] = 0.5 = 90 degrees
+                .type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),  // channel[1] = 0.5 = 90 degrees
         },
         CreatureDesc().id(1));
     data.addConnection(100, 101);
@@ -414,8 +404,8 @@ INSTANTIATE_TEST_SUITE_P(
     CommunicatorTests_LineageRestriction,
     CommunicatorTests_LineageRestriction,
     ::testing::Values(
-        LineageRestrictionParams{LineageRestriction_RelatedLineage, true, true},    // relatedLineage, accept
-        LineageRestrictionParams{LineageRestriction_RelatedLineage, false, false},  // relatedLineage, rejected
+        LineageRestrictionParams{LineageRestriction_RelatedLineage, true, true},     // relatedLineage, accept
+        LineageRestrictionParams{LineageRestriction_RelatedLineage, false, false},   // relatedLineage, rejected
         LineageRestrictionParams{LineageRestriction_UnrelatedLineage, false, true},  // unrelatedLineage, accept
         LineageRestrictionParams{LineageRestriction_UnrelatedLineage, true, false}   // unrelatedLineage, rejected
         ));
@@ -431,10 +421,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
-            ObjectDesc()
-                .id(101)
-                .pos({101.0f, 100.0f})
-                .type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1),
         GenomeDesc().lineageId(senderLineageId));
@@ -461,4 +448,106 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     } else {
         EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
     }
+}
+
+TEST_F(CommunicatorTests, sender_lineageRestriction_relatedViaPrevLineageId)
+{
+    // Sender has lineageId=12345, receiver has prevLineageId=12345 → related via lineageId == other.prevLineageId
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+        },
+        CreatureDesc().id(1),
+        GenomeDesc().lineageId(12345));
+    data.addConnection(100, 101);
+
+    data.addCreature(
+        {
+            ObjectDesc()
+                .id(200)
+                .pos({120.0f, 100.0f})
+                .type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
+            ObjectDesc().id(201).pos({121.0f, 100.0f}),
+        },
+        CreatureDesc().id(2),
+        GenomeDesc().lineageId(67890).prevLineageId(12345));
+    data.addConnection(200, 201);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getObjectRef(200);
+
+    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
+}
+
+TEST_F(CommunicatorTests, sender_lineageRestriction_relatedViaSrcPrevLineageId)
+{
+    // Sender has prevLineageId=67890, receiver has lineageId=67890 → related via prevLineageId == other.lineageId
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+        },
+        CreatureDesc().id(1),
+        GenomeDesc().lineageId(12345).prevLineageId(67890));
+    data.addConnection(100, 101);
+
+    data.addCreature(
+        {
+            ObjectDesc()
+                .id(200)
+                .pos({120.0f, 100.0f})
+                .type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
+            ObjectDesc().id(201).pos({121.0f, 100.0f}),
+        },
+        CreatureDesc().id(2),
+        GenomeDesc().lineageId(67890).prevLineageId(99999));
+    data.addConnection(200, 201);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getObjectRef(200);
+
+    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
+}
+
+TEST_F(CommunicatorTests, sender_lineageRestriction_relatedViaSharedPrevLineageId)
+{
+    // Sender has prevLineageId=55555, receiver has prevLineageId=55555 → related via shared prevLineageId
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+            ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
+        },
+        CreatureDesc().id(1),
+        GenomeDesc().lineageId(12345).prevLineageId(55555));
+    data.addConnection(100, 101);
+
+    data.addCreature(
+        {
+            ObjectDesc()
+                .id(200)
+                .pos({120.0f, 100.0f})
+                .type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
+            ObjectDesc().id(201).pos({121.0f, 100.0f}),
+        },
+        CreatureDesc().id(2),
+        GenomeDesc().lineageId(67890).prevLineageId(55555));
+    data.addConnection(200, 201);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getObjectRef(200);
+
+    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
 }

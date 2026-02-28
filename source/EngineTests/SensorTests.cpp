@@ -1447,6 +1447,96 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
+TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_viaPrevLineageId_found)
+{
+    // Sensor creature has lineageId=42, target has prevLineageId=42 → related via lineageId == other.prevLineageId
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(
+                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().lineageId(42));
+    data.addConnection(1, 2);
+
+    auto creatureData = createLargeCreature();
+    creatureData._genomes.front()._lineageId = 41;
+    creatureData._genomes.front()._prevLineageId = 42;
+    data.add(std::move(creatureData));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getObjectRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_viaSrcPrevLineageId_found)
+{
+    // Sensor creature has prevLineageId=41, target has lineageId=41 → related via prevLineageId == other.lineageId
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(
+                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().lineageId(42).prevLineageId(41));
+    data.addConnection(1, 2);
+
+    auto creatureData = createLargeCreature();
+    creatureData._genomes.front()._lineageId = 41;
+    creatureData._genomes.front()._prevLineageId = 43;
+    data.add(std::move(creatureData));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getObjectRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_viaSharedPrevLineageId_found)
+{
+    // Sensor creature has prevLineageId=50, target has prevLineageId=50 → related via shared prevLineageId
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(
+                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().lineageId(42).prevLineageId(50));
+    data.addConnection(1, 2);
+
+    auto creatureData = createLargeCreature();
+    creatureData._genomes.front()._lineageId = 41;
+    creatureData._genomes.front()._prevLineageId = 50;
+    data.add(std::move(creatureData));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getObjectRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
 TEST_F(SensorTests, detectCreature_ignoreStructureObjects)
 {
     auto data = Desc().addCreature(

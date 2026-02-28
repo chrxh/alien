@@ -106,8 +106,7 @@ protected:
 TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f))
-        .neuronMutation2(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f));
+    genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f)).neuronMutation2(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
@@ -127,8 +126,7 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
 {
     auto genome = createTestGenome();
-    genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f))
-        .neuronMutation2(NeuronMutationDesc().probability(0.0f).weightSigma(0.0f));
+    genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f)).neuronMutation2(NeuronMutationDesc().probability(0.0f).weightSigma(0.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
@@ -276,8 +274,7 @@ TEST_F(MutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
 TEST_F(MutationTests, neuronBiasMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).biasSigma(1.0f))
-        .neuronMutation2(NeuronMutationDesc().probability(1.0f).biasSigma(1.0f));
+    genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).biasSigma(1.0f)).neuronMutation2(NeuronMutationDesc().probability(1.0f).biasSigma(1.0f));
 
     auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
 
