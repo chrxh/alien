@@ -211,6 +211,8 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         if (object->selected == 2) {
             luminance = luminance * 1.3f;
         }
+        luminance = min(3.0f, luminance);
+        white = min(2.0f, white);
 
         // Calculate deterministic z-position based on cell id for lighting
         // Use a simple hash function to get a pseudo-random value in range [0, 1]
