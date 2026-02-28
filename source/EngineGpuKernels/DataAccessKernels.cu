@@ -32,6 +32,7 @@ namespace
             auto& genomeTO = to.genomes[genomeTOIndex];
             genomeTO.id = genome->id;
             genomeTO.lineageId = genome->lineageId;
+            genomeTO.prevLineageId = genome->prevLineageId;
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.lineageMutationProbability = genome->lineageMutationProbability;
             genomeTO.neuronMutation1 = {
