@@ -29,7 +29,6 @@ namespace
     auto constexpr CellTypeDefenderWidth = 100.0f;
     auto constexpr CellTypeBaseTabTextWidth = 150.0f;
     auto constexpr SignalTextWidth = 130.0f;
-    auto constexpr GenomeTabTextWidth = 195.0f;
     auto constexpr ParticleContentTextWidth = 80.0f;
 
     auto constexpr TreeNodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
@@ -100,7 +99,7 @@ std::string _InspectorWindow::generateTitle() const
     } else {
         ss << "Energy particle with id 0x" << std::hex << std::uppercase << _entityId;
     }
-    return ss.str();
+    return "[deprecated] " + ss.str();
 }
 
 void _InspectorWindow::processCell(ExtendedObjectDesc& extendedCell)
@@ -211,7 +210,9 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                     creatureId);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Generation").textWidth(BaseTabTextWidth), extendedCell.creature->_generation);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(BaseTabTextWidth), extendedCell.genome->_lineageId);
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Prev lineage id").textWidth(BaseTabTextWidth), extendedCell.genome->_prevLineageId);
+                if (extendedCell.genome->_prevLineageId.has_value()) {
+                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Prev lineage id").textWidth(BaseTabTextWidth), extendedCell.genome->_prevLineageId.value());
+                }
                 ImGui::TreePop();
             }
             if (ImGui::TreeNodeEx("Genome", TreeNodeFlags)) {

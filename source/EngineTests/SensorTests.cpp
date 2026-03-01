@@ -1357,6 +1357,37 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
+TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage2_found)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(
+                    SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().lineageId(41).prevLineageId(42));
+    data.addConnection(1, 2);
+
+    // Create a large creature with same lineage
+    auto creatureData = createLargeCreature();
+    creatureData._genomes.front().lineageId(43).prevLineageId(42);
+    data.add(std::move(creatureData));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getObjectRef(1);
+
+    // Sensor detected something (signal has non-zero values)
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
+
 TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_notFound)
 {
     auto data = Desc().addCreature(

@@ -74,7 +74,9 @@ void _GenomeEditorWidget::processHeaderData()
 
             AlienGui::Group(AlienGui::GroupParameters().text("Base properties and info"));
             AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage").textWidth(rightColumnWidth), _editData->genome._lineageId);
+            if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage").textWidth(rightColumnWidth), _editData->genome._lineageId)) {
+                _editData->genome._prevLineageId.reset();
+            }
 
             auto numNodesString = std::to_string(GenomeDescInfoService::get().getNumberOfNodes(_editData->genome));
             AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);

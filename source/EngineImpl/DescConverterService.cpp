@@ -872,7 +872,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._name = char64ToString(genomeTO.name);
     result._lineageId = genomeTO.lineageId;
     NumberGenerator::get().adaptMaxLineageId(genomeTO.lineageId);
-    result._prevLineageId = genomeTO.prevLineageId;
+    result._prevLineageId = genomeTO.prevLineageId != 0 ? std::make_optional(genomeTO.prevLineageId) : std::nullopt;
     result._frontAngle = genomeTO.frontAngle;
     result._lineageMutationProbability = genomeTO.lineageMutationProbability;
     result._neuronMutation1._probability = genomeTO.neuronMutation1.probability;
@@ -962,7 +962,7 @@ void DescConverterService::convertGenomeToTO(
     stringToChar64(genomeTO.name, genome._name);
     genomeTO.id = genome._id;
     genomeTO.lineageId = genome._lineageId;
-    genomeTO.prevLineageId = genome._prevLineageId;
+    genomeTO.prevLineageId = genome._prevLineageId.value_or(0);
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.lineageMutationProbability = genome._lineageMutationProbability;
     genomeTO.neuronMutation1 = {

@@ -15,7 +15,9 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
 
     // Validate mutation rate fields
     genome._lineageId = std::max(genome._lineageId, 0);
-    genome._prevLineageId = std::max(genome._prevLineageId, 0);
+    if (genome._prevLineageId.has_value()) {
+        genome._prevLineageId = std::max(genome._prevLineageId.value(), 0);
+    }
     genome._lineageMutationProbability = std::clamp(genome._lineageMutationProbability, 0.0f, 1.0f);
     genome._neuronMutation1._probability = std::clamp(genome._neuronMutation1._probability, 0.0f, 1.0f);
     genome._neuronMutation1._weightSigma = std::max(genome._neuronMutation1._weightSigma, 0.0f);
