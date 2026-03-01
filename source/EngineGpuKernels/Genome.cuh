@@ -372,6 +372,11 @@ struct Genome
 
     __device__ __inline__ bool isRelatedLineage(Genome* other)
     {
-        return lineageId == other->lineageId || lineageId == other->prevLineageId || prevLineageId == other->lineageId || prevLineageId == other->prevLineageId;
+        if (prevLineageId != 0 && other->prevLineageId != 0) {
+            return lineageId == other->lineageId || lineageId == other->prevLineageId || prevLineageId == other->lineageId
+                || prevLineageId == other->prevLineageId;
+        } else {
+            return lineageId == other->lineageId;
+        }
     }
 };
