@@ -329,7 +329,7 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
             int index = 0;
             for (auto& channel : object.getCellRef()._signal._channels) {
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
+                    AlienGui::InputFloatParameters().name("Channel #" + std::to_string(index + 1)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
                     channel);
                 ++index;
             }
