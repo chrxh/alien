@@ -49,6 +49,15 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& object = objects.at(index);
 
+        __shared__ bool mutationNeeded;
+        if (laneId == 0) {
+            mutationNeeded = data.primaryNumberGen.random() < 0.1f;
+        }
+        block.sync();
+        if (mutationNeeded == false) {
+            continue;
+        }
+
         __shared__ Genome* clonedGenome;
 
         if (laneId == 0) {
