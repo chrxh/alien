@@ -242,6 +242,23 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
+    // Draw node indices
+    if (_zoom > ZoomLevelForLabels) {
+        for (auto const& object : desc._objects) {
+            auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
+            auto text = std::to_string(object._nodeIndex);
+            auto fontSize = cellSize * 0.18f;
+            auto textWidth = fontSize * toFloat(text.size()) * 0.55f;
+            AlienGui::AddTextWithSubpixelAccuracy(
+                drawList,
+                style.getSmallBoldFont(),
+                fontSize,
+                {cellPos.x - textWidth / 2, cellPos.y - fontSize / 2},
+                ImColor::HSV(0, 0, 1.0f, 0.7f),
+                text.c_str());
+        }
+    }
+
     // Draw signals
     if (_zoom > ZoomLevelForConnections && _editData->detailSimulation) {
         for (auto const& object : desc._objects) {
