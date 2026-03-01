@@ -26,10 +26,12 @@ public:
         auto& numberGen = NumberGenerator::get();
         return Desc().addCreature(
             {
-                ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
+                ObjectDesc()
+                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
+                    .type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDesc(),
-            GenomeDesc().lineageId(0).genes({
+            GenomeDesc().lineageId(0).prevLineageId(0).genes({
                 GeneDesc()
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
@@ -61,7 +63,7 @@ public:
                 ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDesc(),
-            GenomeDesc().lineageId(1).genes({
+            GenomeDesc().lineageId(1).prevLineageId(1).genes({
                 GeneDesc()
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
