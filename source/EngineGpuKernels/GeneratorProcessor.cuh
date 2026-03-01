@@ -66,9 +66,9 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
             max(-2.0f, min(2.0f, object->typeData.cell.signal.channels[Channels::GeneratorOutput]));
 
         // Increment timestep counter and wrap around at period
-        ++generator.numPulses;
+        generator.numPulses += TIMESTEPS_PER_CELL_FUNCTION;
         if (generator.numPulses >= period) {
-            generator.numPulses = 0;
+            generator.numPulses -= period;
         }
 
         statistics.incNumGeneratorPulses(object->color);
