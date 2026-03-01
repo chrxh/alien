@@ -210,6 +210,8 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                     AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),
                     creatureId);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Generation").textWidth(BaseTabTextWidth), extendedCell.creature->_generation);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(BaseTabTextWidth), extendedCell.genome->_lineageId);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Prev lineage id").textWidth(BaseTabTextWidth), extendedCell.genome->_prevLineageId);
                 ImGui::TreePop();
             }
             if (ImGui::TreeNodeEx("Genome", TreeNodeFlags)) {
@@ -686,7 +688,7 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
             AlienGui::Combo(
                 AlienGui::ComboParameters()
                     .name("Restrict to lineage")
-                    .values({"No", "Same lineage", "Other lineage"})
+                    .values({"No", "Related lineage", "Unrelated lineage"})
                     .textWidth(CellTypeTextWidth),
                 detectCreature._restrictToLineage);
         }
@@ -729,7 +731,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
             AlienGui::Combo(
                 AlienGui::ComboParameters()
                     .name("Restrict to lineage")
-                    .values({"No", "Same lineage", "Other lineage"})
+                    .values({"No", "Related lineage", "Unrelated lineage"})
                     .textWidth(CellTypeTextWidth),
                 creature._restrictToLineage);
         }

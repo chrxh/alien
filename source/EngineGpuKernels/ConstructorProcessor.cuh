@@ -834,8 +834,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }();
 
-    auto energyNeededFromHost =
-        max(0.0f, requiredEnergy - normalCellEnergy) + min(requiredEnergy, normalCellEnergy) * (1.0f - externalEnergyConditionalInflowFactor);
+    auto energyNeededFromHost = requiredEnergy * (1.0f - externalEnergyConditionalInflowFactor);
 
     if (externalEnergyConditionalInflowFactor < 1.0f
         && hostObject->typeData.cell.usableEnergy + hostObject->typeData.cell.reservedEnergy < normalCellEnergy + energyNeededFromHost) {
