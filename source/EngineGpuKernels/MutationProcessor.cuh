@@ -49,27 +49,27 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& object = objects.at(index);
 
-        __shared__ Genome* sharedGenome;
+        __shared__ Genome* clonedGenome;
 
         if (laneId == 0) {
-            sharedGenome = nullptr;
+            clonedGenome = nullptr;
             if (object->type == ObjectType_Cell) {
                 auto& creature = object->typeData.cell.creature;
                 int origMutationState = atomicCAS(&creature->mutationState, MutationState_MutationInProgress, MutationState_Mutated);
                 if (origMutationState == MutationState_MutationInProgress) {
-                    sharedGenome = factory.cloneGenome(creature->genome);
+                    clonedGenome = factory.cloneGenome(creature->genome);
                 }
             }
         }
         block.sync();
 
-        if (sharedGenome != nullptr) {
+        if (clonedGenome != nullptr) {
 
             // Apply mutations to cloned genome
-            applyMutations(data, sharedGenome);
+            applyMutations(data, clonedGenome);
 
             if (laneId == 0) {
-                object->typeData.cell.creature->genome = sharedGenome;
+                object->typeData.cell.creature->genome = clonedGenome;
             }
         }
         block.sync();
