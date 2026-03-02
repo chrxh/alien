@@ -139,7 +139,7 @@ TEST_F(GeneratorTests, squareSignal_nonAdditiveMode_replacesSignal)
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
@@ -160,7 +160,7 @@ TEST_F(GeneratorTests, squareSignal_additiveMode_addsToBaseSignal)
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
@@ -184,7 +184,7 @@ TEST_F(GeneratorTests, squareSignal_truncation)
         CreatureDesc().id(0));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto generator = actualData.getObjectRef(1);
