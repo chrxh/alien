@@ -24,7 +24,8 @@
 
 namespace
 {
-    auto constexpr ZoomLevelForLabels = 16.0f;
+    auto constexpr ZoomLevelForGeneReferences = 16.0f;
+    auto constexpr ZoomLevelForNodeIndices = 32.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
     auto constexpr SignalTextWidth = 40.0f;
 }
@@ -226,7 +227,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
         if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == object._id) {
-            if (_zoom > ZoomLevelForLabels) {
+            if (_zoom > ZoomLevelForGeneReferences) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.15f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f /*cellSize * 0.05f*/);
             }
         }
@@ -239,6 +240,23 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 _selectedNodeFromPreview = selectedNode;
                 _selectedCellIdFromPreview = object._id;
             }
+        }
+    }
+
+    // Draw node indices
+    if (_zoom > ZoomLevelForNodeIndices) {
+        for (auto const& object : desc._objects) {
+            auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
+            auto text = std::to_string(object._nodeIndex + 1);
+            auto fontSize = cellSize * 0.18f;
+            auto textWidth = fontSize * toFloat(text.size()) * 0.55f;
+            AlienGui::AddTextWithSubpixelAccuracy(
+                drawList,
+                style.getSmallBoldFont(),
+                fontSize,
+                {cellPos.x - textWidth / 2, cellPos.y - fontSize / 2},
+                ImColor::HSV(0, 0, 1.0f, 0.7f),
+                text.c_str());
         }
     }
 
@@ -302,7 +320,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 
     // Draw gene references
-    if (_zoom > ZoomLevelForLabels) {
+    if (_zoom > ZoomLevelForGeneReferences) {
         for (auto const& object : desc._objects) {
             if (object._constructorGeneIndex.has_value()) {
                 auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
