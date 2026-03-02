@@ -134,45 +134,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        .min(RealVector2D{-4.0f, -4.0f})
                                        .max(RealVector2D{4.0f, 4.0f})
                                        .format("%.2f")),
-                    ParameterSpec().name("Shape").reference(
-                        AlternativeSpec()
-                            .member(&SimulationParameters::layerShape)
-                            .alternatives(
-                                {{"Circular",
-                                  {ParameterSpec()
-                                       .name("Core radius")
-                                       .reference(
-                                           FloatSpec().member(&SimulationParameters::layerCoreRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))}},
-                                 {"Rectangular",
-                                  {ParameterSpec()
-                                       .name("Core size (width,height)")
-                                       .reference(Float2Spec()
-                                                      .member(&SimulationParameters::layerCoreRect)
-                                                      .min(RealVector2D{0.0f, 0.0f})
-                                                      .max(WorldSize())
-                                                      .format("%.2f"))}}})),
-                    ParameterSpec()
-                        .name("Fade-out radius")
-                        .reference(FloatSpec().member(&SimulationParameters::layerFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
-                    ParameterSpec().name("Shape").reference(
-                        AlternativeSpec()
-                            .member(&SimulationParameters::sourceShapeType)
-                            .alternatives(
-                                {{"Circular",
-                                  {
-                                      ParameterSpec().name("Radius").reference(
-                                          FloatSpec().member(&SimulationParameters::sourceCircularRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
-                                  }},
-                                 {"Rectangular",
-                                  {
-                                      ParameterSpec()
-                                          .name("Size (width, height)")
-                                          .reference(Float2Spec()
-                                                         .member(&SimulationParameters::sourceRectangularRect)
-                                                         .min(RealVector2D{0.0f, 0.0f})
-                                                         .max(WorldSize())
-                                                         .format("%.2f")),
-                                  }}})),
                     ParameterSpec()
                         .name("Position (x,y)")
                         .reference(Float2Spec()
@@ -189,6 +150,46 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        .max(RealVector2D{4.0f, 4.0f})
                                        .format("%.2f")),
                 }),
+            ParameterGroupSpec().name("Shape").parameters({
+                ParameterSpec().name("Shape").reference(
+                    AlternativeSpec()
+                        .member(&SimulationParameters::layerShape)
+                        .alternatives(
+                            {{"Circular",
+                              {ParameterSpec()
+                                   .name("Core radius")
+                                   .reference(FloatSpec().member(&SimulationParameters::layerCoreRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))}},
+                             {"Rectangular",
+                              {ParameterSpec()
+                                   .name("Core size (width,height)")
+                                   .reference(Float2Spec()
+                                                  .member(&SimulationParameters::layerCoreRect)
+                                                  .min(RealVector2D{0.0f, 0.0f})
+                                                  .max(WorldSize())
+                                                  .format("%.2f"))}}})),
+                ParameterSpec()
+                    .name("Fade-out radius")
+                    .reference(FloatSpec().member(&SimulationParameters::layerFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
+                ParameterSpec().name("Shape").reference(
+                    AlternativeSpec()
+                        .member(&SimulationParameters::sourceShapeType)
+                        .alternatives(
+                            {{"Circular",
+                              {
+                                  ParameterSpec().name("Radius").reference(
+                                      FloatSpec().member(&SimulationParameters::sourceCircularRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
+                              }},
+                             {"Rectangular",
+                              {
+                                  ParameterSpec()
+                                      .name("Size (width, height)")
+                                      .reference(Float2Spec()
+                                                     .member(&SimulationParameters::sourceRectangularRect)
+                                                     .min(RealVector2D{0.0f, 0.0f})
+                                                     .max(WorldSize())
+                                                     .format("%.2f")),
+                              }}})),
+            }),
             ParameterGroupSpec()
                 .name("Force field")
                 .parameters({
