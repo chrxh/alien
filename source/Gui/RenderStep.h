@@ -163,16 +163,16 @@ private:
     _ForwardRenderStep(StepParameters const& parameters);
 };
 
-class _EnergyParticleRenderStep : public _RenderStep
+class _BlurryParticleRenderStep : public _RenderStep
 {
 public:
-    static EnergyParticleRenderStep create(StepParameters const& parameters);
+    static BlurryParticleRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(ExecutionParameters parameters) override;
 
 private:
-    _EnergyParticleRenderStep(StepParameters const& parameters);
+    _BlurryParticleRenderStep(StepParameters const& parameters);
 };
 
 class _LocationRenderStep : public _RenderStep

@@ -48,7 +48,7 @@ TEST_F(GeometryTests, copyBuffers_emptySim)
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(0u, numObjects.objects);
-    EXPECT_EQ(0u, numObjects.energies);
+    EXPECT_EQ(0u, numObjects.blurryParticles);
     EXPECT_EQ(0u, numObjects.lineIndices);
     EXPECT_EQ(0u, numObjects.triangleIndices);
 }
@@ -68,14 +68,14 @@ TEST_F(GeometryTests, copyBuffers_objects)
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.objects);
-    EXPECT_EQ(0u, numObjects.energies);
+    EXPECT_EQ(0u, numObjects.blurryParticles);
 
     // Verify buffer entries
     auto cellData = geometryBuffers->getCellData();
     EXPECT_EQ(3u, cellData.size());
 }
 
-TEST_F(GeometryTests, copyBuffers_energyParticles)
+TEST_F(GeometryTests, copyBuffers_blurryParticles)
 {
     auto data = Desc().energies({
         EnergyDesc().id(1).pos({100.0f, 100.0f}).energy(10.0f),
@@ -90,10 +90,10 @@ TEST_F(GeometryTests, copyBuffers_energyParticles)
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 
     auto numObjects = geometryBuffers->getNumObjects();
-    EXPECT_EQ(4u, numObjects.energies);
+    EXPECT_EQ(4u, numObjects.blurryParticles);
 
     // Verify buffer entries
-    auto particleData = geometryBuffers->getEnergyParticleData();
+    auto particleData = geometryBuffers->getBlurryParticleData();
     EXPECT_EQ(4u, particleData.size());
 }
 
@@ -200,10 +200,10 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.objects);
-    EXPECT_EQ(3u, numObjects.energies);
+    EXPECT_EQ(3u, numObjects.blurryParticles);
 
     // Verify buffer entries
-    auto particleData = geometryBuffers->getEnergyParticleData();
+    auto particleData = geometryBuffers->getBlurryParticleData();
     EXPECT_EQ(3u, particleData.size());
 
     auto cellData = geometryBuffers->getCellData();
@@ -212,11 +212,13 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 
 TEST_F(GeometryTests, copyBuffers_creature)
 {
-    auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}),
-        ObjectDesc().id(3).pos({102.0f, 100.0f}),
-    }, CreatureDesc().id(1));
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+            ObjectDesc().id(3).pos({102.0f, 100.0f}),
+        },
+        CreatureDesc().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     _simulationFacade->setSimulationData(data);
@@ -237,4 +239,3 @@ TEST_F(GeometryTests, copyBuffers_creature)
     auto lines = geometryBuffers->getLineIndices();
     EXPECT_EQ(4u, lines.size());
 }
-

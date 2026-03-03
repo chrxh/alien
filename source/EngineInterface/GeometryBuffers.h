@@ -8,7 +8,7 @@
 struct NumRenderObjects
 {
     uint64_t objects;
-    uint64_t energies;
+    uint64_t blurryParticles;
     uint64_t locations;
     uint64_t lineIndices;
 
@@ -21,15 +21,15 @@ struct NumRenderObjects
 
 struct ObjectVertexData
 {
-    float pos[3];          // x, y, z position (z used for lighting)
-    float color[3];        // r, g, b color
-    int state;             // Bit 0..7 = cell type
-                           // Bit 8..15 = object type (ObjectType_Structure, ObjectType_FreeCell, ObjectType_Cell)
-                           // Bit 16 = occurrence in triangle or quad
+    float pos[3];         // x, y, z position (z used for lighting)
+    float color[3];       // r, g, b color
+    int state;            // Bit 0..7 = cell type
+                          // Bit 8..15 = object type (ObjectType_Structure, ObjectType_FreeCell, ObjectType_Cell)
+                          // Bit 16 = occurrence in triangle or quad
     float signalChanges;  // signal changes in [0, 1]
 };
 
-struct EnergyVertexData
+struct BlurryParticleVertexData
 {
     float pos[3];    // x, y, z position
     float color[3];  // r, g, b color
@@ -78,14 +78,14 @@ public:
 
     unsigned int getVaoForPointsAndLines() const { return _vaoForPointsAndLines; }
     unsigned int getVaoForTriangles() const { return _vaoForTriangles; }
-    unsigned int getVaoForEnergyParticles() const { return _vaoForEnergyParticles; }
+    unsigned int getVaoForBlurryParticles() const { return _vaoForBlurryParticles; }
     unsigned int getVaoForLocations() const { return _vaoForLocations; }
     unsigned int getVaoForSelectedObjects() const { return _vaoForSelectedObjects; }
     unsigned int getVaoForSelectedConnections() const { return _vaoForSelectedConnections; }
     unsigned int getVaoForAttackEvents() const { return _vaoForAttackEvents; }
     unsigned int getVaoForDetonationEvents() const { return _vaoForDetonationEvents; }
     unsigned int getVboForObjects() const { return _vboForObjects; }
-    unsigned int getVboForEnergies() const { return _vboForEnergies; }
+    unsigned int getVboForBlurryParticles() const { return _vboForBlurryParticles; }
     unsigned int getVboForLocations() const { return _vboForLocations; }
     unsigned int getVboForSelectedObjects() const { return _vboForSelectedObjects; }
     unsigned int getVboForSelectedConnections() const { return _vboForSelectedConnections; }
@@ -100,7 +100,7 @@ public:
 
     // Methods for uploading data from host memory (used in no-interop mode)
     void setCellData(ObjectVertexData const* data, uint64_t count);
-    void setEnergyParticleData(EnergyVertexData const* data, uint64_t count);
+    void setBlurryParticleData(BlurryParticleVertexData const* data, uint64_t count);
     void setLocationData(LocationVertexData const* data, uint64_t count);
     void setSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count);
     void setLineIndices(unsigned int const* data, uint64_t count);
@@ -111,7 +111,7 @@ public:
 
     // Methods for downloading data from OpenGL buffers to host memory (for tests)
     std::vector<ObjectVertexData> getCellData() const;
-    std::vector<EnergyVertexData> getEnergyParticleData() const;
+    std::vector<BlurryParticleVertexData> getBlurryParticleData() const;
     std::vector<LocationVertexData> getLocationData() const;
     std::vector<SelectedObjectVertexData> getSelectedObjectData() const;
     std::vector<unsigned int> getLineIndices() const;
@@ -123,14 +123,14 @@ public:
 private:
     unsigned int _vaoForPointsAndLines = 0;
     unsigned int _vaoForTriangles = 0;
-    unsigned int _vaoForEnergyParticles = 0;
+    unsigned int _vaoForBlurryParticles = 0;
     unsigned int _vaoForLocations = 0;
     unsigned int _vaoForSelectedObjects = 0;
     unsigned int _vaoForSelectedConnections = 0;
     unsigned int _vaoForAttackEvents = 0;
     unsigned int _vaoForDetonationEvents = 0;
     unsigned int _vboForObjects = 0;
-    unsigned int _vboForEnergies = 0;
+    unsigned int _vboForBlurryParticles = 0;
     unsigned int _vboForLocations = 0;
     unsigned int _vboForSelectedObjects = 0;
     unsigned int _vboForSelectedConnections = 0;
@@ -140,7 +140,7 @@ private:
     unsigned int _eboForTriangles = 0;
 
     uint64_t _vertexBufferCapacity = 0;
-    uint64_t _energyParticleBufferCapacity = 0;
+    uint64_t _blurryParticleBufferCapacity = 0;
     uint64_t _locationBufferCapacity = 0;
     uint64_t _selectedObjectBufferCapacity = 0;
     uint64_t _connectionArrowVertexBufferCapacity = 0;

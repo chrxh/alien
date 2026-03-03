@@ -290,12 +290,12 @@ _ForwardRenderStep::_ForwardRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
 
-EnergyParticleRenderStep _EnergyParticleRenderStep::create(StepParameters const& parameters)
+BlurryParticleRenderStep _BlurryParticleRenderStep::create(StepParameters const& parameters)
 {
-    return EnergyParticleRenderStep(new _EnergyParticleRenderStep(parameters));
+    return BlurryParticleRenderStep(new _BlurryParticleRenderStep(parameters));
 }
 
-void _EnergyParticleRenderStep::execute(ExecutionParameters parameters)
+void _BlurryParticleRenderStep::execute(ExecutionParameters parameters)
 {
     if (!_previousTargetSelection.has_value()) {
         parameters._clearBackground = true;
@@ -307,20 +307,20 @@ void _EnergyParticleRenderStep::execute(ExecutionParameters parameters)
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
-    // Enable additive blending for energy particles
+    // Enable additive blending for blurry particles
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-    // Draw energy particles
-    glBindVertexArray(parameters._geometryBuffers->getVaoForEnergyParticles());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().energies));
+    // Draw blurry particles
+    glBindVertexArray(parameters._geometryBuffers->getVaoForBlurryParticles());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().blurryParticles));
 
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
 }
 
-_EnergyParticleRenderStep::_EnergyParticleRenderStep(StepParameters const& parameters)
+_BlurryParticleRenderStep::_BlurryParticleRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
 

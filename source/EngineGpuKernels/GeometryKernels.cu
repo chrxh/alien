@@ -223,13 +223,22 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         float zPos = normalizedHash * 0.05f;
 
+        // Isolated structures (no connections) will be rendered as blurry particles instead
+        bool isIsolatedStructure = (object->type == ObjectType_Structure && object->numConnections == 0);
+
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
         objectData[index].pos[1] = pos.y;
         objectData[index].pos[2] = zPos + zOffset;
-        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
-        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
-        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
+        if (isIsolatedStructure) {
+            objectData[index].color[0] = 0.0f;
+            objectData[index].color[1] = 0.0f;
+            objectData[index].color[2] = 0.0f;
+        } else {
+            objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
+            objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
+            objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
+        }
 
         // Compute signal changes from cell
         float signalChanges = 0.0f;
@@ -335,32 +344,60 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     }
 }
 
-__global__ void cudaExtractEnergyData(SimulationData data, EnergyVertexData* energyParticleData)
+__global__ void cudaExtractBlurryParticleData(SimulationData data, BlurryParticleVertexData* blurryParticleData, uint64_t* numBlurryParticles)
 {
     // Process energy particles - each particle goes to its index position
-    auto const& energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
-    for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
-        auto const& energy = data.entities.energies.at(index);
-        if (!energy) {
-            continue;
+    {
+        auto const& energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
+        for (int index = energyPartition.startIndex; index <= energyPartition.endIndex; index += energyPartition.step) {
+            auto const& energy = data.entities.energies.at(index);
+            if (!energy) {
+                continue;
+            }
+
+            auto pos = energy->pos;
+
+            float intensity = (energy->energy + 5.0f) / 200.0f;
+            if (energy->selected) {
+                intensity *= 2.5f;
+            }
+
+            auto idx = alienAtomicAdd64(numBlurryParticles, uint64_t(1));
+            if (blurryParticleData != nullptr) {
+                blurryParticleData[idx].pos[0] = pos.x;
+                blurryParticleData[idx].pos[1] = pos.y;
+                blurryParticleData[idx].pos[2] = 0.0f;
+                blurryParticleData[idx].color[0] = intensity * 0.25f;
+                blurryParticleData[idx].color[1] = intensity * 0.25f;
+                blurryParticleData[idx].color[2] = intensity * 1.0f;
+            }
         }
+    }
 
-        auto pos = energy->pos;
+    // Process isolated structure objects (no connections) - render them like energy particles
+    {
+        auto const& objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+        for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
+            auto const& object = data.entities.objects.at(index);
+            if (object->type != ObjectType_Structure || object->numConnections != 0) {
+                continue;
+            }
 
-        // Light yellow color for energy particles
-        float intensity = (energy->energy + 5.0f) / 200.0f;
-        //max(min((particle->energy + 10.0f) * 5, 450.0f), 20.0f) / 1000.0f;
-        if (energy->selected) {
-            intensity *= 2.5f;
+            float intensity = (object->typeData.structure.energy + 5.0f) / 200.0f;
+            if (object->selected) {
+                intensity *= 2.5f;
+            }
+
+            auto idx = alienAtomicAdd64(numBlurryParticles, uint64_t(1));
+            if (blurryParticleData != nullptr) {
+                blurryParticleData[idx].pos[0] = object->pos.x;
+                blurryParticleData[idx].pos[1] = object->pos.y;
+                blurryParticleData[idx].pos[2] = 0.0f;
+                blurryParticleData[idx].color[0] = intensity * 0.25f;
+                blurryParticleData[idx].color[1] = intensity * 0.25f;
+                blurryParticleData[idx].color[2] = intensity * 1.0f;
+            }
         }
-
-        // Write energy particle data
-        energyParticleData[index].pos[0] = pos.x;
-        energyParticleData[index].pos[1] = pos.y;
-        energyParticleData[index].pos[2] = 0.0f;                 // Energy particles don't need z-position for lighting
-        energyParticleData[index].color[0] = intensity * 0.25f;  // Red component
-        energyParticleData[index].color[1] = intensity * 0.25f;  // Green component
-        energyParticleData[index].color[2] = intensity * 1.0f;   // Blue component (reduced for yellow tint)
     }
 }
 

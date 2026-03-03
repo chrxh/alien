@@ -4,9 +4,9 @@
 #include <windows.h>
 #endif
 
-#include <cuda_gl_interop.h>
 #include <algorithm>
 #include <vector>
+#include <cuda_gl_interop.h>
 
 #include "CudaMemoryManager.cuh"
 
@@ -33,10 +33,10 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
     }
     vertexBuffer = registerBufferResource(buffers->getVboForObjects());
 
-    if (energyParticleBuffer != nullptr) {
-        unregisterBufferResource(energyParticleBuffer);
+    if (blurryParticleBuffer != nullptr) {
+        unregisterBufferResource(blurryParticleBuffer);
     }
-    energyParticleBuffer = registerBufferResource(buffers->getVboForEnergies());
+    blurryParticleBuffer = registerBufferResource(buffers->getVboForBlurryParticles());
 
     if (locationBuffer != nullptr) {
         unregisterBufferResource(locationBuffer);
@@ -88,14 +88,14 @@ void CudaGeometryBuffers::allocateBuffersForNoInterop(NumRenderObjects const& nu
         deviceObjectBufferCapacity = requiredCellCapacity;
     }
 
-    // Allocate or reallocate energy particle buffer
-    auto requiredEnergyParticleCapacity = std::max(numObjects.energies * 2, static_cast<uint64_t>(100000));
-    if (numObjects.energies >= deviceEnergyBufferCapacity) {
-        if (deviceEnergyBuffer != nullptr) {
-            memoryManager.freeMemory(deviceEnergyBuffer);
+    // Allocate or reallocate blurry particle buffer
+    auto requiredBlurryParticleCapacity = std::max(numObjects.blurryParticles * 2, static_cast<uint64_t>(100000));
+    if (numObjects.blurryParticles >= deviceBlurryParticleBufferCapacity) {
+        if (deviceBlurryParticleBuffer != nullptr) {
+            memoryManager.freeMemory(deviceBlurryParticleBuffer);
         }
-        memoryManager.acquireMemory(requiredEnergyParticleCapacity, deviceEnergyBuffer);
-        deviceEnergyBufferCapacity = requiredEnergyParticleCapacity;
+        memoryManager.acquireMemory(requiredBlurryParticleCapacity, deviceBlurryParticleBuffer);
+        deviceBlurryParticleBufferCapacity = requiredBlurryParticleCapacity;
     }
 
     // Allocate or reallocate location buffer
@@ -174,7 +174,7 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
     auto& memoryManager = CudaMemoryManager::getInstance();
 
     memoryManager.freeMemory(deviceObjectBuffer);
-    memoryManager.freeMemory(deviceEnergyBuffer);
+    memoryManager.freeMemory(deviceBlurryParticleBuffer);
     memoryManager.freeMemory(deviceLocationBuffer);
     memoryManager.freeMemory(deviceSelectedObjectBuffer);
     memoryManager.freeMemory(deviceLineIndexBuffer);
@@ -192,51 +192,71 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
         geometryBuffers->setCellData(hostObjectBuffer.data(), numObjects.objects);
     }
 
-    if (numObjects.energies > 0) {
-        std::vector<EnergyVertexData> hostEnergyParticleBuffer(numObjects.energies);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostEnergyParticleBuffer.data(), deviceEnergyBuffer, numObjects.energies * sizeof(EnergyVertexData), cudaMemcpyDeviceToHost));
-        geometryBuffers->setEnergyParticleData(hostEnergyParticleBuffer.data(), numObjects.energies);
+    if (numObjects.blurryParticles > 0) {
+        std::vector<BlurryParticleVertexData> hostBlurryParticleBuffer(numObjects.blurryParticles);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+            hostBlurryParticleBuffer.data(),
+            deviceBlurryParticleBuffer,
+            numObjects.blurryParticles * sizeof(BlurryParticleVertexData),
+            cudaMemcpyDeviceToHost));
+        geometryBuffers->setBlurryParticleData(hostBlurryParticleBuffer.data(), numObjects.blurryParticles);
     }
 
     if (numObjects.locations > 0) {
         std::vector<LocationVertexData> hostLocationBuffer(numObjects.locations);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostLocationBuffer.data(), deviceLocationBuffer, numObjects.locations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(
+            cudaMemcpy(hostLocationBuffer.data(), deviceLocationBuffer, numObjects.locations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setLocationData(hostLocationBuffer.data(), numObjects.locations);
     }
 
     if (numObjects.selectedObjects > 0) {
         std::vector<SelectedObjectVertexData> hostSelectedObjectBuffer(numObjects.selectedObjects);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedObjectBuffer.data(), deviceSelectedObjectBuffer, numObjects.selectedObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+            hostSelectedObjectBuffer.data(),
+            deviceSelectedObjectBuffer,
+            numObjects.selectedObjects * sizeof(SelectedObjectVertexData),
+            cudaMemcpyDeviceToHost));
         geometryBuffers->setSelectedObjectData(hostSelectedObjectBuffer.data(), numObjects.selectedObjects);
     }
 
     if (numObjects.lineIndices > 0) {
         std::vector<unsigned int> hostLineIndexBuffer(numObjects.lineIndices);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostLineIndexBuffer.data(), deviceLineIndexBuffer, numObjects.lineIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(
+            cudaMemcpy(hostLineIndexBuffer.data(), deviceLineIndexBuffer, numObjects.lineIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
         geometryBuffers->setLineIndices(hostLineIndexBuffer.data(), numObjects.lineIndices);
     }
 
     if (numObjects.triangleIndices > 0) {
         std::vector<unsigned int> hostTriangleIndexBuffer(numObjects.triangleIndices);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostTriangleIndexBuffer.data(), deviceTriangleIndexBuffer, numObjects.triangleIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(
+            cudaMemcpy(hostTriangleIndexBuffer.data(), deviceTriangleIndexBuffer, numObjects.triangleIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
         geometryBuffers->setTriangleIndices(hostTriangleIndexBuffer.data(), numObjects.triangleIndices);
     }
 
     if (numObjects.connectionArrowVertices > 0) {
         std::vector<ConnectionArrowVertexData> hostSelectedConnectionBuffer(numObjects.connectionArrowVertices);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedConnectionBuffer.data(), deviceSelectedConnectionBuffer, numObjects.connectionArrowVertices * sizeof(ConnectionArrowVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+            hostSelectedConnectionBuffer.data(),
+            deviceSelectedConnectionBuffer,
+            numObjects.connectionArrowVertices * sizeof(ConnectionArrowVertexData),
+            cudaMemcpyDeviceToHost));
         geometryBuffers->setSelectedConnectionData(hostSelectedConnectionBuffer.data(), numObjects.connectionArrowVertices);
     }
 
     if (numObjects.attackEventVertices > 0) {
         std::vector<AttackEventVertexData> hostAttackEventBuffer(numObjects.attackEventVertices);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostAttackEventBuffer.data(), deviceAttackEventBuffer, numObjects.attackEventVertices * sizeof(AttackEventVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+            hostAttackEventBuffer.data(), deviceAttackEventBuffer, numObjects.attackEventVertices * sizeof(AttackEventVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setAttackEventData(hostAttackEventBuffer.data(), numObjects.attackEventVertices);
     }
 
     if (numObjects.detonationEventVertices > 0) {
         std::vector<DetonationEventVertexData> hostDetonationEventBuffer(numObjects.detonationEventVertices);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostDetonationEventBuffer.data(), deviceDetonationEventBuffer, numObjects.detonationEventVertices * sizeof(DetonationEventVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+            hostDetonationEventBuffer.data(),
+            deviceDetonationEventBuffer,
+            numObjects.detonationEventVertices * sizeof(DetonationEventVertexData),
+            cudaMemcpyDeviceToHost));
         geometryBuffers->setDetonationEventData(hostDetonationEventBuffer.data(), numObjects.detonationEventVertices);
     }
 }

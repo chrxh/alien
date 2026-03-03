@@ -12,6 +12,7 @@
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SpaceCalculator.h>
 
+#include <EngineInterface/SimulationFacade.h>
 #include "AlienGui.h"
 #include "RenderPipeline.h"
 #include "RenderStep.h"
@@ -19,7 +20,6 @@
 #include "SimulationScrollbars.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include <EngineInterface/SimulationFacade.h>
 
 void SimulationView::setup()
 {
@@ -223,171 +223,170 @@ void SimulationView::setupRenderPipeline()
     };
 
     // Define render pipeline
-    _renderPipeline = std::make_shared<_RenderPipeline>(
-        RenderBlocks{
+    _renderPipeline = std::make_shared<_RenderPipeline>(RenderBlocks{
 
-            // Render block: Render energy particles
-            RenderBlock{
-                RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(
-                        StepParameters().shader(ShaderSources::EnergyParticle).addUniform("ballSize", 10.0f).addUniform("onBackground", true)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
-                }),
-            },
+        // Render block: Render blurry particles
+        RenderBlock{
+            RenderSequence().steps({
+                _BlurryParticleRenderStep::create(
+                    StepParameters().shader(ShaderSources::BlurryParticle).addUniform("ballSize", 10.0f).addUniform("onBackground", true)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
+            }),
+        },
 
-            // Render block: Downscale blur for energy particles
-            RenderBlock{
-                RenderSequence().repetitions(1).steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
-                }),
-                RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(
-                        StepParameters().shader(ShaderSources::EnergyParticle).addUniform("ballSize", 0.2f).addUniform("onBackground", false)),
-                }),
-            },
+        // Render block: Downscale blur for blurry particles
+        RenderBlock{
+            RenderSequence().repetitions(1).steps({
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
+            }),
+            RenderSequence().steps({
+                _BlurryParticleRenderStep::create(
+                    StepParameters().shader(ShaderSources::BlurryParticle).addUniform("ballSize", 0.2f).addUniform("onBackground", false)),
+            }),
+        },
 
-            // Render block: Upscale blur for energy particles
-            RenderBlock{
-                RenderSequence().repetitions(1).steps({
+        // Render block: Upscale blur for blurry particles
+        RenderBlock{
+            RenderSequence().repetitions(1).steps({
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+            }),
+            RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+            }),
+        },
+
+        // Render block: Merge energy particles for bloom
+        RenderBlock{
+            RenderSequence().steps({
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeMax).addUniform("colorFactor1", 0.8f)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
+            }),
+        },
+
+        // Render block: Render cells in different sequences
+        RenderBlock{
+            RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+            }),
+            RenderSequence().steps({
+                _LineRenderStep::create(StepParameters().shader(ShaderSources::Line)),
+                _TriangleRenderStep::create(StepParameters().shader(ShaderSources::Triangle).previousTargetSelection(0)),
+                _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
+                _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent).previousTargetSelection(0)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
+                //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Fresnel)),
+                //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::SubsurfaceScatter)),
+            }),
+            RenderSequence().steps({
+                _ObjectRenderStep::create(StepParameters().shader(ShaderSources::Object)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
+            }),
+        },
+
+        // Render block: Merge energy, blur cells and cells
+        RenderBlock{
+            RenderSequence().steps({
+                _PostProcessingRenderStep::create(StepParameters()
+                                                      .shader(ShaderSources::MergeAdditive)
+                                                      .addUniform("colorFactor1", 1.0f)
+                                                      .addUniform("colorFactor2", 0.6f)
+                                                      .addUniform("colorFactor3", 1.5f)),
+            }),
+        },
+
+        // Render block: Two outputs: Threshold and original
+        RenderBlock{
+            RenderSequence().steps({
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Threshold)),
+            }),
+            RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+            }),
+        },
+
+        // Render block: Two outputs: downscale blur and original
+        RenderBlock{
+            RenderSequence()
+                .repetitions(blurRepetitionsFunc)
+                .steps({
+                    _PostProcessingRenderStep::create(StepParameters()
+                                                          .shader(ShaderSources::BlurHorizontal)
+                                                          .uniformFunc(blurStrengthFunc)
+                                                          //.addUniform("strength", 0.12f / 8)
+                                                          .addUniform("zoomDependent", true)),
+                    _PostProcessingRenderStep::create(StepParameters()
+                                                          .shader(ShaderSources::BlurVertical)
+                                                          .uniformFunc(blurStrengthFunc)
+                                                          //.addUniform("strength", 0.12f / 8)
+                                                          .addUniform("zoomDependent", true)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 2.0f)),
+                }),
+            RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+            })},
+
+        // Render block: Two outputs: upscale blur and original
+        RenderBlock{
+            RenderSequence()
+                .repetitions(blurRepetitionsFunc)
+                .steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
+                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
                 }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-                }),
-            },
+            RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+            })},
 
-            // Render block: Merge energy particles for bloom
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeMax).addUniform("colorFactor1", 0.8f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
-                }),
-            },
+        // Render block: Merge and tone mapping
+        RenderBlock{
+            RenderSequence().steps({
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 0.5f).addUniform("colorFactor2", 1.0f)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ToneMapping)),
+            }),
+        },
 
-            // Render block: Render cells in different sequences
-            RenderBlock{
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-                }),
-                RenderSequence().steps({
-                    _LineRenderStep::create(StepParameters().shader(ShaderSources::Line)),
-                    _TriangleRenderStep::create(StepParameters().shader(ShaderSources::Triangle).previousTargetSelection(0)),
-                    _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
-                    _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent).previousTargetSelection(0)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
-                    //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Fresnel)),
-                    //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::SubsurfaceScatter)),
-                }),
-                RenderSequence().steps({
-                    _ObjectRenderStep::create(StepParameters().shader(ShaderSources::Object)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
-                }),
-            },
+        // Render block: Background
+        RenderBlock{
+            RenderSequence().steps({
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(backgroundUniformFunc)),
+                _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
+                _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
+            }),
+            RenderSequence().steps({
+                _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+            }),
+        },
 
-            // Render block: Merge energy, blur cells and cells
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters()
-                                                          .shader(ShaderSources::MergeAdditive)
-                                                          .addUniform("colorFactor1", 1.0f)
-                                                          .addUniform("colorFactor2", 0.6f)
-                                                          .addUniform("colorFactor3", 1.5f)),
-                }),
-            },
-
-            // Render block: Two outputs: Threshold and original
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Threshold)),
-                }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-                }),
-            },
-
-            // Render block: Two outputs: downscale blur and original
-            RenderBlock{
-                RenderSequence()
-                    .repetitions(blurRepetitionsFunc)
-                    .steps({
-                        _PostProcessingRenderStep::create(StepParameters()
-                                                              .shader(ShaderSources::BlurHorizontal)
-                                                              .uniformFunc(blurStrengthFunc)
-                                                              //.addUniform("strength", 0.12f / 8)
-                                                              .addUniform("zoomDependent", true)),
-                        _PostProcessingRenderStep::create(StepParameters()
-                                                              .shader(ShaderSources::BlurVertical)
-                                                              .uniformFunc(blurStrengthFunc)
-                                                              //.addUniform("strength", 0.12f / 8)
-                                                              .addUniform("zoomDependent", true)),
-                        _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 2.0f)),
-                    }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-                })},
-
-            // Render block: Two outputs: upscale blur and original
-            RenderBlock{
-                RenderSequence()
-                    .repetitions(blurRepetitionsFunc)
-                    .steps({
-                        _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
-                        _PostProcessingRenderStep::create(
-                            StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
-                        _PostProcessingRenderStep::create(
-                            StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
-                    }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-                })},
-
-            // Render block: Merge and tone mapping
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 0.5f).addUniform("colorFactor2", 1.0f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ToneMapping)),
-                }),
-            },
-
-            // Render block: Background
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(backgroundUniformFunc)),
-                    _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
-                    _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
-                }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-                }),
-            },
-
-            // Render block: Merge background and foreground
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
-                    _SelectedConnectionRenderStep::create(StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
-                    _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DeNoise)),
-                }),
-            },
-        });
+        // Render block: Merge background and foreground
+        RenderBlock{
+            RenderSequence().steps({
+                _PostProcessingRenderStep::create(
+                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
+                _SelectedConnectionRenderStep::create(StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
+                _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DeNoise)),
+            }),
+        },
+    });
 }
 
 void SimulationView::markReferenceDomain()

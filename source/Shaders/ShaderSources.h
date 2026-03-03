@@ -22,7 +22,7 @@ namespace ShaderSources
     inline ShaderSource const DetonationEvent{Shaders::DetonationEventVS, Shaders::DetonationEventFS, Shaders::DetonationEventGS};
     inline ShaderSource const DeNoise{Shaders::DeNoiseVS, Shaders::DeNoiseFS};
     inline ShaderSource const DownSampler{Shaders::DownSamplerVS, Shaders::DownSamplerFS};
-    inline ShaderSource const EnergyParticle{Shaders::EnergyParticleVS, Shaders::EnergyParticleFS};
+    inline ShaderSource const BlurryParticle{Shaders::BlurryParticleVS, Shaders::BlurryParticleFS};
     inline ShaderSource const Fresnel{Shaders::FresnelVS, Shaders::FresnelFS};
     inline ShaderSource const Line{Shaders::LineVS, Shaders::LineFS, Shaders::LineGS};
     inline ShaderSource const Location{Shaders::LocationVS, Shaders::LocationFS, Shaders::LocationGS};
