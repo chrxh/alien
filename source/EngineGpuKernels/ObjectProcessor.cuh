@@ -196,7 +196,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             if (!otherObject->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherObject->detached != 1) {
 
                 // Calc density
-                localDensity += calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
+                auto otherMass = otherObject->getMass();
+                localDensity += otherMass * calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
 
                 if (object != otherObject) {
 
@@ -224,11 +225,12 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                         if (adaptedDistance > NEAR_ZERO) {
                             float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
-                            auto F_pressureDelta = posDelta / (-adaptedDistance) * factor * kernel_d;
+                            auto F_pressureDelta = posDelta / (-adaptedDistance) * factor * kernel_d * otherMass;
                             localF_pressure.x += F_pressureDelta.x;
                             localF_pressure.y += F_pressureDelta.y;
 
-                            auto F_viscosityDelta = velDelta / otherObject->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f);
+                            auto F_viscosityDelta =
+                                velDelta / otherObject->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f) * otherMass;
                             localF_viscosity.x += F_viscosityDelta.x;
                             localF_viscosity.y += F_viscosityDelta.y;
                         }
@@ -236,8 +238,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
                     // Fusion
                     if (Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_OBJECT_CONNECTIONS
-                        && otherObject->numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || otherObject->sticky)
-                        && !object->fixed && !otherObject->fixed) {
+                        && otherObject->numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || otherObject->sticky) && !object->fixed
+                        && !otherObject->fixed) {
                         ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                     }
                 }
@@ -356,29 +358,34 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                 auto velDelta = object->vel - otherObject->vel;
                 auto isApproaching = Math::dot(posDelta, velDelta) < 0;
                 auto fixedFactor = object->fixed ? 2 : 1;
+                auto massObj = object->getMass();
+                auto massOther = otherObject->getMass();
+                auto totalMass = massObj + massOther;
 
                 if (Math::length(object->vel) > 0.5f && isApproaching) {
                     auto distanceSquared = distance * distance + 0.25f;
-                    auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * fixedFactor;
-                    atomicAdd(&object->shared1.x, force.x);
-                    atomicAdd(&object->shared1.y, force.y);
-                    atomicAdd(&otherObject->shared1.x, -force.x);
-                    atomicAdd(&otherObject->shared1.y, -force.y);
+                    auto baseImpulse = posDelta * Math::dot(velDelta, posDelta) / (-distanceSquared) * fixedFactor;
+                    auto forceObj = baseImpulse * (massOther / totalMass);
+                    auto forceOther = baseImpulse * (massObj / totalMass);
+                    atomicAdd(&object->shared1.x, forceObj.x);
+                    atomicAdd(&object->shared1.y, forceObj.y);
+                    atomicAdd(&otherObject->shared1.x, -forceOther.x);
+                    atomicAdd(&otherObject->shared1.y, -forceOther.y);
                 } else {
                     auto force = Math::getNormalized(posDelta) * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
                         * cudaSimulationParameters.repulsionStrength.value * fixedFactor;
-                    atomicAdd(&object->shared1.x, force.x);
-                    atomicAdd(&object->shared1.y, force.y);
-                    atomicAdd(&otherObject->shared1.x, -force.x);
-                    atomicAdd(&otherObject->shared1.y, -force.y);
+                    atomicAdd(&object->shared1.x, force.x / massObj);
+                    atomicAdd(&object->shared1.y, force.y / massObj);
+                    atomicAdd(&otherObject->shared1.x, -force.x / massOther);
+                    atomicAdd(&otherObject->shared1.y, -force.y / massOther);
                 }
 
                 //fusion
                 auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
                 if (object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS
-                    && (object->sticky || otherObject->sticky) && Math::length(velDelta) >= cellFusionVelocity && isApproaching
-                    && !object->fixed && !otherObject->fixed) {
+                    && (object->sticky || otherObject->sticky) && Math::length(velDelta) >= cellFusionVelocity && isApproaching && !object->fixed
+                    && !otherObject->fixed) {
                     ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                 }
             }
@@ -435,6 +442,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
         if (0 == object->numConnections || object->fixed) {
             continue;
         }
+        auto massObj = object->getMass();
         float2 force{0, 0};
         float2 prevDisplacement = object->connections[object->numConnections - 1].object->pos - object->pos;
         data.objectMap.correctDirection(prevDisplacement);
@@ -479,18 +487,20 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                 auto force1 = r2 * strength2;
 
                 if (!connectedObject->fixed && !lastConnectedObject->fixed) {
-                    atomicAdd(&connectedObject->shared1.x, force1.x);
-                    atomicAdd(&connectedObject->shared1.y, force1.y);
-                    atomicAdd(&lastConnectedObject->shared1.x, force2.x);
-                    atomicAdd(&lastConnectedObject->shared1.y, force2.y);
+                    auto massConnected = connectedObject->getMass();
+                    auto massLast = lastConnectedObject->getMass();
+                    atomicAdd(&connectedObject->shared1.x, force1.x / massConnected);
+                    atomicAdd(&connectedObject->shared1.y, force1.y / massConnected);
+                    atomicAdd(&lastConnectedObject->shared1.x, force2.x / massLast);
+                    atomicAdd(&lastConnectedObject->shared1.y, force2.y / massLast);
                 }
                 force -= force1 + force2;
             }
 
             prevDisplacement = displacement;
         }
-        atomicAdd(&object->shared1.x, force.x);
-        atomicAdd(&object->shared1.y, force.y);
+        atomicAdd(&object->shared1.x, force.x / massObj);
+        atomicAdd(&object->shared1.y, force.y / massObj);
     }
 }
 
@@ -585,10 +595,13 @@ __inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& d
                 auto velDelta_part = Math::dot(velDelta, direction);
 
                 auto delta = direction * innerFriction * velDelta_part;
-                atomicAdd(&object->vel.x, -delta.x * 0.5f);
-                atomicAdd(&object->vel.y, -delta.y * 0.5f);
-                atomicAdd(&connectedObject->vel.x, delta.x * 0.5f);
-                atomicAdd(&connectedObject->vel.y, delta.y * 0.5f);
+                auto massObj = object->getMass();
+                auto massConnected = connectedObject->getMass();
+                auto totalMass = massObj + massConnected;
+                atomicAdd(&object->vel.x, -delta.x * massConnected / totalMass);
+                atomicAdd(&object->vel.y, -delta.y * massConnected / totalMass);
+                atomicAdd(&connectedObject->vel.x, delta.x * massObj / totalMass);
+                atomicAdd(&connectedObject->vel.y, delta.y * massObj / totalMass);
             }
         }
     }
