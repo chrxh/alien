@@ -196,8 +196,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             if (!otherObject->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherObject->detached != 1) {
 
                 // Calc density
-                auto otherMass = otherObject->getMass();
-                localDensity += otherMass * calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
+                localDensity += calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
 
                 if (object != otherObject) {
 
@@ -225,12 +224,11 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                         if (adaptedDistance > NEAR_ZERO) {
                             float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
-                            auto F_pressureDelta = posDelta / (-adaptedDistance) * factor * kernel_d * otherMass;
+                            auto F_pressureDelta = posDelta / (-adaptedDistance) * factor * kernel_d;
                             localF_pressure.x += F_pressureDelta.x;
                             localF_pressure.y += F_pressureDelta.y;
 
-                            auto F_viscosityDelta =
-                                velDelta / otherObject->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f) * otherMass;
+                            auto F_viscosityDelta = velDelta / otherObject->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f);
                             localF_viscosity.x += F_viscosityDelta.x;
                             localF_viscosity.y += F_viscosityDelta.y;
                         }
@@ -595,13 +593,10 @@ __inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& d
                 auto velDelta_part = Math::dot(velDelta, direction);
 
                 auto delta = direction * innerFriction * velDelta_part;
-                auto massObj = object->getMass();
-                auto massConnected = connectedObject->getMass();
-                auto totalMass = massObj + massConnected;
-                atomicAdd(&object->vel.x, -delta.x * massConnected / totalMass);
-                atomicAdd(&object->vel.y, -delta.y * massConnected / totalMass);
-                atomicAdd(&connectedObject->vel.x, delta.x * massObj / totalMass);
-                atomicAdd(&connectedObject->vel.y, delta.y * massObj / totalMass);
+                atomicAdd(&object->vel.x, -delta.x * 0.5f);
+                atomicAdd(&object->vel.y, -delta.y * 0.5f);
+                atomicAdd(&connectedObject->vel.x, delta.x * 0.5f);
+                atomicAdd(&connectedObject->vel.y, delta.y * 0.5f);
             }
         }
     }
