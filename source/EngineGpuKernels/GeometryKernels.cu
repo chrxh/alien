@@ -223,22 +223,13 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         float zPos = normalizedHash * 0.05f;
 
-        // Isolated structures (no connections) will be rendered as energy particles instead
-        bool isIsolatedStructure = (object->type == ObjectType_Structure && object->numConnections == 0);
-
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
         objectData[index].pos[1] = pos.y;
         objectData[index].pos[2] = zPos + zOffset;
-        if (isIsolatedStructure) {
-            objectData[index].color[0] = 0.0f;
-            objectData[index].color[1] = 0.0f;
-            objectData[index].color[2] = 0.0f;
-        } else {
-            objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
-            objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
-            objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
-        }
+        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
+        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
+        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
         // Compute signal changes from cell
         float signalChanges = 0.0f;
@@ -370,34 +361,6 @@ __global__ void cudaExtractEnergyData(SimulationData data, EnergyVertexData* ene
         energyParticleData[index].color[0] = intensity * 0.25f;  // Red component
         energyParticleData[index].color[1] = intensity * 0.25f;  // Green component
         energyParticleData[index].color[2] = intensity * 1.0f;   // Blue component (reduced for yellow tint)
-    }
-}
-
-__global__ void
-cudaConvertIsolatedStructuresToEnergy(SimulationData data, EnergyVertexData* energyParticleData, uint64_t energyOffset, uint64_t* numIsolatedStructures)
-{
-    auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto const& object = data.entities.objects.at(index);
-        if (object->type != ObjectType_Structure || object->numConnections != 0) {
-            continue;
-        }
-
-        auto idx = alienAtomicAdd64(numIsolatedStructures, uint64_t(1));
-        if (energyParticleData != nullptr) {
-            auto writeIdx = energyOffset + idx;
-            float intensity = (object->typeData.structure.energy + 5.0f) / 200.0f;
-            if (object->selected) {
-                intensity *= 2.5f;
-            }
-
-            energyParticleData[writeIdx].pos[0] = object->pos.x;
-            energyParticleData[writeIdx].pos[1] = object->pos.y;
-            energyParticleData[writeIdx].pos[2] = 0.0f;
-            energyParticleData[writeIdx].color[0] = intensity * 0.25f;
-            energyParticleData[writeIdx].color[1] = intensity * 0.25f;
-            energyParticleData[writeIdx].color[2] = intensity * 1.0f;
-        }
     }
 }
 
