@@ -142,7 +142,7 @@ namespace
     }
 }
 
-__global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objectData)
+__global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData)
 {
     // Process cells - each cell goes to its index position
     auto const& objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());

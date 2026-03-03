@@ -8,7 +8,7 @@
 #include "TOs.cuh"
 
 __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft);
-__global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objectData);
+__global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData);
 __global__ void cudaExtractBlurryParticleData(SimulationData data, BlurryParticleVertexData* blurryParticleData, uint64_t* numBlurryParticles);
 __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 visibleTopLeft);
 __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects);

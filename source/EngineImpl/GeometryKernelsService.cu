@@ -115,7 +115,7 @@ void GeometryKernelsService::extractObjectData(
         ObjectVertexData* mappedCellBuffer;
         size_t bufferSize;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedCellBuffer), &bufferSize, renderingData.vertexBuffer));
-        KERNEL_CALL(cudaExtractCellData, data, mappedCellBuffer);
+        KERNEL_CALL(cudaExtractObjectData, data, mappedCellBuffer);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.blurryParticleBuffer));
@@ -191,7 +191,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
     } else {
         // No-interop mode: extract to device buffers
-        KERNEL_CALL(cudaExtractCellData, data, renderingData.deviceObjectBuffer);
+        KERNEL_CALL(cudaExtractObjectData, data, renderingData.deviceObjectBuffer);
 
         setValueToDevice(_numBlurryParticles, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractBlurryParticleData, data, renderingData.deviceBlurryParticleBuffer, _numBlurryParticles);
