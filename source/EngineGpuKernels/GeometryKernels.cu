@@ -142,9 +142,8 @@ namespace
     }
 }
 
-__global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData)
+__global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects)
 {
-    // Process cells - each cell goes to its index position
     auto const& objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
@@ -154,100 +153,101 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             continue;
         }
 
-        int isInTriangleOrQuad = 0;
-        if (object->numConnections > 1) {
-            bool first = true;
-            int backIndices[MAX_OBJECT_CONNECTIONS];
-            for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
-                auto connectionIndex = i % numConnections;
-                auto const& connectedObject = object->connections[connectionIndex].object;
-                auto backIndex = connectedObject->getConnectionIndex(object);
-                backIndices[connectionIndex] = backIndex;
-                if (first) {
-                    first = false;
-                    continue;
-                }
-                auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
-                auto const& prevConnectedObject = object->connections[prevIndex].object;
-                auto prevBackIndex = backIndices[prevIndex];
+        auto idx = alienAtomicAdd64(numObjects, uint64_t(1));
+        if (objectData != nullptr) {
+            int isInTriangleOrQuad = 0;
+            if (object->numConnections > 1) {
+                bool first = true;
+                int backIndices[MAX_OBJECT_CONNECTIONS];
+                for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
+                    auto connectionIndex = i % numConnections;
+                    auto const& connectedObject = object->connections[connectionIndex].object;
+                    auto backIndex = connectedObject->getConnectionIndex(object);
+                    backIndices[connectionIndex] = backIndex;
+                    if (first) {
+                        first = false;
+                        continue;
+                    }
+                    auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
+                    auto const& prevConnectedObject = object->connections[prevIndex].object;
+                    auto prevBackIndex = backIndices[prevIndex];
 
-                // Triangle?
-                if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
-                    isInTriangleOrQuad = 1;
-                    break;
-                }
+                    // Triangle?
+                    if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
+                        isInTriangleOrQuad = 1;
+                        break;
+                    }
 
-                // Rectangle?
-                auto fourthCellCandidate1 = connectedObject->getConnectedObject(backIndex + 1);
-                auto fourthCellCandidate2 = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
-                if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
-                    && connectedObject != prevConnectedObject) {
-                    isInTriangleOrQuad = 1;
-                    break;
+                    // Rectangle?
+                    auto fourthCellCandidate1 = connectedObject->getConnectedObject(backIndex + 1);
+                    auto fourthCellCandidate2 = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
+                    if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
+                        && connectedObject != prevConnectedObject) {
+                        isInTriangleOrQuad = 1;
+                        break;
+                    }
                 }
             }
+
+
+            auto const& pos = object->pos;
+
+            auto const& cellColor = getCellColor(object);
+
+            float luminance;
+            float zOffset = 0.0f;
+            int cellType = 0;
+
+            if (object->type == ObjectType_Cell) {
+                luminance = object->typeData.cell.getEnergy() / 300.0f;
+                zOffset = toFloat(object->typeData.cell.creature->id % 1000) / 2000;
+                cellType = object->typeData.cell.cellType;
+            } else if (object->type == ObjectType_FreeCell) {
+                luminance = object->typeData.freeCell.energy / 300.0f;
+            } else {
+                // Structure - use energy for luminance if available
+                luminance = object->typeData.structure.energy / 300.0f;
+            }
+
+            auto white = luminance / 10.0f;
+            if (object->selected == 1) {
+                luminance = (luminance + 0.1f) * 1.7f;
+                white = 0.5f;
+            }
+            if (object->selected == 2) {
+                luminance = luminance * 1.3f;
+            }
+            luminance = min(3.0f, luminance);
+            white = min(2.0f, white);
+
+            // Calculate deterministic z-position based on cell id for lighting
+            // Use a simple hash function to get a pseudo-random value in range [0, 1]
+            uint64_t hash = object->id * 2654435761u;  // Knuth's multiplicative hash
+            hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
+            hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
+            hash = hash ^ (hash >> 16);
+            float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
+            float zPos = normalizedHash * 0.05f;
+
+            objectData[idx].pos[0] = pos.x;
+            objectData[idx].pos[1] = pos.y;
+            objectData[idx].pos[2] = zPos + zOffset;
+            objectData[idx].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
+            objectData[idx].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
+            objectData[idx].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
+
+            // Compute signal changes from cell
+            float signalChanges = 0.0f;
+            if (object->type == ObjectType_Cell) {
+                signalChanges = toFloat(object->typeData.cell.signalChanges) / 255.0f;
+            }
+
+            // Pack cellType (bits 0-7), objectType (bits 8-15), and isInTriangleOrQuad (bit 16) into state field
+            objectData[idx].state = cellType | (object->type << 8) | (isInTriangleOrQuad << 16);
+            objectData[idx].signalChanges = signalChanges;
+
+            object->tempValue.as_uint64 = idx;
         }
-
-
-        auto const& pos = object->pos;
-
-        auto const& cellColor = getCellColor(object);
-
-        float luminance;
-        float zOffset = 0.0f;
-        int cellType = 0;
-
-        if (object->type == ObjectType_Cell) {
-            luminance = object->typeData.cell.getEnergy() / 300.0f;
-            zOffset = toFloat(object->typeData.cell.creature->id % 1000) / 2000;
-            cellType = object->typeData.cell.cellType;
-        } else if (object->type == ObjectType_FreeCell) {
-            luminance = object->typeData.freeCell.energy / 300.0f;
-        } else {
-            // Structure - use energy for luminance if available
-            luminance = object->typeData.structure.energy / 300.0f;
-        }
-
-        auto white = luminance / 10.0f;
-        if (object->selected == 1) {
-            luminance = (luminance + 0.1f) * 1.7f;
-            white = 0.5f;
-        }
-        if (object->selected == 2) {
-            luminance = luminance * 1.3f;
-        }
-        luminance = min(3.0f, luminance);
-        white = min(2.0f, white);
-
-        // Calculate deterministic z-position based on cell id for lighting
-        // Use a simple hash function to get a pseudo-random value in range [0, 1]
-        uint64_t hash = object->id * 2654435761u;  // Knuth's multiplicative hash
-        hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
-        hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
-        hash = hash ^ (hash >> 16);
-        float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
-        float zPos = normalizedHash * 0.05f;
-
-        // Write cell data at cell index position
-        objectData[index].pos[0] = pos.x;
-        objectData[index].pos[1] = pos.y;
-        objectData[index].pos[2] = zPos + zOffset;
-        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
-        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
-        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
-
-        // Compute signal changes from cell
-        float signalChanges = 0.0f;
-        if (object->type == ObjectType_Cell) {
-            signalChanges = toFloat(object->typeData.cell.signalChanges) / 255.0f;
-        }
-
-        // Pack cellType (bits 0-7), objectType (bits 8-15), and isInTriangleOrQuad (bit 16) into state field
-        objectData[index].state = cellType | (object->type << 8) | (isInTriangleOrQuad << 16);
-        objectData[index].signalChanges = signalChanges;
-
-        // Store cell index for line extraction (just use the index directly)
-        object->tempValue.as_uint64 = index;
     }
 }
 
@@ -322,7 +322,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             // Triangle?
             if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
                 if (object->id < connectedObject->id && object->id < prevConnectedObject->id) {
-                    addTriangle(object, index, prevConnectedObject, connectedObject);
+                    addTriangle(object, object->tempValue.as_uint64, prevConnectedObject, connectedObject);
                 }
             }
 
@@ -332,8 +332,8 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
                 && connectedObject != prevConnectedObject) {
                 if (object->id < connectedObject->id && object->id < prevConnectedObject->id && object->id < fourthCellCandidate2->id) {
-                    addTriangle(object, index, connectedObject, fourthCellCandidate1);
-                    addTriangle(object, index, fourthCellCandidate1, prevConnectedObject);
+                    addTriangle(object, object->tempValue.as_uint64, connectedObject, fourthCellCandidate1);
+                    addTriangle(object, object->tempValue.as_uint64, fourthCellCandidate1, prevConnectedObject);
                 }
             }
         }
