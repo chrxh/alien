@@ -30,6 +30,7 @@ public:
 private:
     GeometryKernelsService() = default;
 
+    uint64_t* _numObjects = nullptr;
     uint64_t* _numLineIndices = nullptr;
     uint64_t* _numTriangleIndices = nullptr;
     uint64_t* _numSelectedConnectionVertices = nullptr;

@@ -10,6 +10,7 @@
 void GeometryKernelsService::init()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
+    memoryManager.acquireMemory(1, _numObjects);
     memoryManager.acquireMemory(1, _numLineIndices);
     memoryManager.acquireMemory(1, _numTriangleIndices);
     memoryManager.acquireMemory(1, _numSelectedConnectionVertices);
@@ -23,6 +24,7 @@ void GeometryKernelsService::init()
 void GeometryKernelsService::shutdown()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
+    memoryManager.freeMemory(_numObjects);
     memoryManager.freeMemory(_numLineIndices);
     memoryManager.freeMemory(_numTriangleIndices);
     memoryManager.freeMemory(_numSelectedConnectionVertices);
@@ -54,7 +56,10 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
     NumRenderObjects result;
-    result.objects = data.entities.objects.getNumEntries_host();
+    setValueToDevice(_numObjects, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractObjectData, data, nullptr, _numObjects);
+    cudaDeviceSynchronize();
+    result.objects = copyToHost(_numObjects);
 
     setValueToDevice(_numBlurryParticles, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractBlurryParticleData, data, nullptr, _numBlurryParticles);
@@ -115,7 +120,8 @@ void GeometryKernelsService::extractObjectData(
         ObjectVertexData* mappedCellBuffer;
         size_t bufferSize;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedCellBuffer), &bufferSize, renderingData.vertexBuffer));
-        KERNEL_CALL(cudaExtractObjectData, data, mappedCellBuffer);
+        setValueToDevice(_numObjects, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractObjectData, data, mappedCellBuffer, _numObjects);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.blurryParticleBuffer));
@@ -191,7 +197,8 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
     } else {
         // No-interop mode: extract to device buffers
-        KERNEL_CALL(cudaExtractObjectData, data, renderingData.deviceObjectBuffer);
+        setValueToDevice(_numObjects, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractObjectData, data, renderingData.deviceObjectBuffer, _numObjects);
 
         setValueToDevice(_numBlurryParticles, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractBlurryParticleData, data, renderingData.deviceBlurryParticleBuffer, _numBlurryParticles);
