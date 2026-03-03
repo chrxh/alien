@@ -246,6 +246,7 @@ void SimulationView::setupRenderPipeline()
                 _PostProcessingRenderStep::create(
                     StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
             }),
             RenderSequence().steps({
                 _BlurryParticleRenderStep::create(
