@@ -4,9 +4,9 @@
 #include <windows.h>
 #endif
 
+#include <cuda_gl_interop.h>
 #include <algorithm>
 #include <vector>
-#include <cuda_gl_interop.h>
 
 #include "CudaMemoryManager.cuh"
 

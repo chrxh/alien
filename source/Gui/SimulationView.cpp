@@ -12,7 +12,6 @@
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SpaceCalculator.h>
 
-#include <EngineInterface/SimulationFacade.h>
 #include "AlienGui.h"
 #include "RenderPipeline.h"
 #include "RenderStep.h"
