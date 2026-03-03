@@ -149,6 +149,11 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
 
+        // Isolated structures (no connections) are rendered as blurry particles instead
+        if (object->type == ObjectType_Structure && object->numConnections == 0) {
+            continue;
+        }
+
         int isInTriangleOrQuad = 0;
         if (object->numConnections > 1) {
             bool first = true;
@@ -223,22 +228,13 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         float zPos = normalizedHash * 0.05f;
 
-        // Isolated structures (no connections) will be rendered as blurry particles instead
-        bool isIsolatedStructure = (object->type == ObjectType_Structure && object->numConnections == 0);
-
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
         objectData[index].pos[1] = pos.y;
         objectData[index].pos[2] = zPos + zOffset;
-        if (isIsolatedStructure) {
-            objectData[index].color[0] = 0.0f;
-            objectData[index].color[1] = 0.0f;
-            objectData[index].color[2] = 0.0f;
-        } else {
-            objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
-            objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
-            objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
-        }
+        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
+        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
+        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
         // Compute signal changes from cell
         float signalChanges = 0.0f;
