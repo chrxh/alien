@@ -103,9 +103,9 @@ void MassOperationsDialog::processIntern()
     AlienGui::Text("Randomize mutation ids");
 
     AlienGui::Group(AlienGui::GroupParameters().text("Options"));
-    ImGui::Checkbox("##restrictToSelectedCreatures", &_restrictToSelectedCreatures);
+    ImGui::Checkbox("##restrictToSelection", &_restrictToSelectedCreatures);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text("Restrict to selected creatures");
+    AlienGui::Text("Restrict to selection");
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();

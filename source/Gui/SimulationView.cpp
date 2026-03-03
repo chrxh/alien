@@ -179,6 +179,11 @@ void SimulationView::setupRenderPipeline()
     auto moduloUniformFunc = [](SimulationParameters const& parameters) {
         return UniformValueMap{{"borderlessRendering", parameters.borderlessRendering.value}};
     };
+    auto blurryParticleRadius = [](SimulationParameters const& parameters) {
+        auto zoom = Viewport::get().getZoomFactor();
+        return UniformValueMap{{"ballSize", zoom < 7.0f ? 0 : 0.2f}};
+    };
+
     // Number of blur repetitions and blur strengths is based on zoom level to balance performance and quality
     auto blurStrengthFunc = [](SimulationParameters const& parameters) {
         auto zoom = Viewport::get().getZoomFactor();
@@ -244,7 +249,7 @@ void SimulationView::setupRenderPipeline()
             }),
             RenderSequence().steps({
                 _BlurryParticleRenderStep::create(
-                    StepParameters().shader(ShaderSources::BlurryParticle).addUniform("ballSize", 0.2f).addUniform("onBackground", false)),
+                    StepParameters().shader(ShaderSources::BlurryParticle).uniformFunc(blurryParticleRadius).addUniform("onBackground", false)),
             }),
         },
 
