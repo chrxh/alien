@@ -17,6 +17,7 @@ void GeometryKernelsService::init()
     memoryManager.acquireMemory(1, _numAttackEventVertices);
     memoryManager.acquireMemory(1, _numDetonationEventVertices);
     memoryManager.acquireMemory(1, _numLocations);
+    memoryManager.acquireMemory(1, _numIsolatedStructures);
 }
 
 void GeometryKernelsService::shutdown()
@@ -29,6 +30,7 @@ void GeometryKernelsService::shutdown()
     memoryManager.freeMemory(_numAttackEventVertices);
     memoryManager.freeMemory(_numDetonationEventVertices);
     memoryManager.freeMemory(_numLocations);
+    memoryManager.freeMemory(_numIsolatedStructures);
 }
 
 void GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
@@ -54,6 +56,11 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
     NumRenderObjects result;
     result.objects = data.entities.objects.getNumEntries_host();
     result.energies = data.entities.energies.getNumEntries_host();
+
+    setValueToDevice(_numIsolatedStructures, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaConvertIsolatedStructuresToEnergy, data, nullptr, result.energies, _numIsolatedStructures);
+    cudaDeviceSynchronize();
+    result.energies += copyToHost(_numIsolatedStructures);
 
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects);
@@ -118,6 +125,9 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedEnergyParticleBuffer), &energyParticleBufferSize, renderingData.energyParticleBuffer));
         KERNEL_CALL(cudaExtractEnergyData, data, mappedEnergyParticleBuffer);
+        auto energyOffset = data.entities.energies.getNumEntries_host();
+        setValueToDevice(_numIsolatedStructures, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaConvertIsolatedStructuresToEnergy, data, mappedEnergyParticleBuffer, energyOffset, _numIsolatedStructures);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
@@ -187,6 +197,9 @@ void GeometryKernelsService::extractObjectData(
         KERNEL_CALL(cudaExtractCellData, data, renderingData.deviceObjectBuffer);
 
         KERNEL_CALL(cudaExtractEnergyData, data, renderingData.deviceEnergyBuffer);
+        auto energyOffset = data.entities.energies.getNumEntries_host();
+        setValueToDevice(_numIsolatedStructures, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaConvertIsolatedStructuresToEnergy, data, renderingData.deviceEnergyBuffer, energyOffset, _numIsolatedStructures);
 
         setValueToDevice(_numLocations, static_cast<uint64_t>(0));
         KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);

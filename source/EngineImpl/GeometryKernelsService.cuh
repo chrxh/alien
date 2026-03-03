@@ -37,4 +37,5 @@ private:
     uint64_t* _numAttackEventVertices = nullptr;
     uint64_t* _numDetonationEventVertices = nullptr;
     uint64_t* _numLocations = nullptr;
+    uint64_t* _numIsolatedStructures = nullptr;
 };
