@@ -389,9 +389,10 @@ __global__ void cudaExtractBlurryParticleData(SimulationData data, BlurryParticl
                 blurryParticleData[idx].pos[0] = object->pos.x;
                 blurryParticleData[idx].pos[1] = object->pos.y;
                 blurryParticleData[idx].pos[2] = 0.0f;
-                blurryParticleData[idx].color[0] = intensity * 0.25f;
-                blurryParticleData[idx].color[1] = intensity * 0.25f;
-                blurryParticleData[idx].color[2] = intensity * 1.0f;
+                auto color = getCellColorByCode(object->color);
+                blurryParticleData[idx].color[0] = intensity * toFloat((color >> 16) & 0xff) / 255;
+                blurryParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;
+                blurryParticleData[idx].color[2] = intensity * toFloat(color & 0xff) / 255;
             }
         }
     }
