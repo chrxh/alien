@@ -79,6 +79,7 @@ struct SimulationParameters
     BaseParameter<float> maxVelocity = {2.0f};
     BaseLayerParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
     BaseParameter<float> minObjectDistance = {0.3f};
+    static float constexpr maxAcceleration = 0.4f;
     static float constexpr maxForceDecayProbability = 0.2f;
 
     // Physics: Binding
