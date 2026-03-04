@@ -217,7 +217,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     }
                     if (!isConnected) {
 
-                        // SPH pressure acceleration: a_i = -sum_j m_j * (P_i/rho_i^2 + P_j/rho_j^2) * grad_W
+                        // SPH pressure force: F_i = -sum_j m_j * (P_i/rho_i^2 + P_j/rho_j^2) * grad_W
                         // For simplicity: pressure = density
                         auto const& cellPressure = object->density;              // Optimization: using the density from last time step
                         auto const& otherObjectPressure = otherObject->density;  // Optimization: using the density from last time step
@@ -226,15 +226,15 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                         if (adaptedDistance > NEAR_ZERO) {
                             float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
-                            auto pressureAccelDelta = posDelta / (-adaptedDistance) * factor * kernel_d * otherMass;
-                            localF_pressure.x += pressureAccelDelta.x;
-                            localF_pressure.y += pressureAccelDelta.y;
+                            auto F_pressureDelta = posDelta / (-adaptedDistance) * factor * kernel_d * otherMass;
+                            localF_pressure.x += F_pressureDelta.x;
+                            localF_pressure.y += F_pressureDelta.y;
 
-                            // SPH viscosity acceleration: a_i = mu * sum_j m_j * (v_j - v_i) / rho_j * f(r) * grad_W
-                            auto viscosityAccelDelta =
+                            // SPH viscosity force: F_visc = mu * sum_j m_j * (v_j - v_i) / rho_j * f(r) * grad_W
+                            auto F_viscosityDelta =
                                 velDelta * otherMass / otherObject->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f);
-                            localF_viscosity.x += viscosityAccelDelta.x;
-                            localF_viscosity.y += viscosityAccelDelta.y;
+                            localF_viscosity.x += F_viscosityDelta.x;
+                            localF_viscosity.y += F_viscosityDelta.y;
                         }
                     }
 
@@ -376,10 +376,10 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                 } else {
                     auto force = Math::getNormalized(posDelta) * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
                         * cudaSimulationParameters.repulsionStrength.value * fixedFactor;
-                    atomicAdd(&object->shared1.x, force.x / massObj);
-                    atomicAdd(&object->shared1.y, force.y / massObj);
-                    atomicAdd(&otherObject->shared1.x, -force.x / massOther);
-                    atomicAdd(&otherObject->shared1.y, -force.y / massOther);
+                    atomicAdd(&object->shared1.x, force.x);
+                    atomicAdd(&object->shared1.y, force.y);
+                    atomicAdd(&otherObject->shared1.x, -force.x);
+                    atomicAdd(&otherObject->shared1.y, -force.y);
                 }
 
                 //fusion
@@ -444,7 +444,6 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
         if (0 == object->numConnections || object->fixed) {
             continue;
         }
-        auto massObj = object->getMass();
         float2 force{0, 0};
         float2 prevDisplacement = object->connections[object->numConnections - 1].object->pos - object->pos;
         data.objectMap.correctDirection(prevDisplacement);
@@ -489,20 +488,18 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                 auto force1 = r2 * strength2;
 
                 if (!connectedObject->fixed && !lastConnectedObject->fixed) {
-                    auto massConnected = connectedObject->getMass();
-                    auto massLast = lastConnectedObject->getMass();
-                    atomicAdd(&connectedObject->shared1.x, force1.x / massConnected);
-                    atomicAdd(&connectedObject->shared1.y, force1.y / massConnected);
-                    atomicAdd(&lastConnectedObject->shared1.x, force2.x / massLast);
-                    atomicAdd(&lastConnectedObject->shared1.y, force2.y / massLast);
+                    atomicAdd(&connectedObject->shared1.x, force1.x);
+                    atomicAdd(&connectedObject->shared1.y, force1.y);
+                    atomicAdd(&lastConnectedObject->shared1.x, force2.x);
+                    atomicAdd(&lastConnectedObject->shared1.y, force2.y);
                 }
                 force -= force1 + force2;
             }
 
             prevDisplacement = displacement;
         }
-        atomicAdd(&object->shared1.x, force.x / massObj);
-        atomicAdd(&object->shared1.y, force.y / massObj);
+        atomicAdd(&object->shared1.x, force.x);
+        atomicAdd(&object->shared1.y, force.y);
     }
 }
 
