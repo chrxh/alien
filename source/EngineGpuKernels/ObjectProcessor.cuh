@@ -385,8 +385,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidDragForces(SimulationData& 
                     if (distance <= smoothingLength_fluid * 2) {
                         auto w = calcKernel(distance / smoothingLength_fluid) / (smoothingLength_fluid * smoothingLength_fluid);
                         localWeight += w;
-                        localWeightedVel.x += otherObject->vel.x * w;
-                        localWeightedVel.y += otherObject->vel.y * w;
+                        localWeightedVel += otherObject->vel * w;
                     }
                 }
                 otherObject = otherObject->nextObject;
@@ -408,11 +407,10 @@ __inline__ __device__ void ObjectProcessor::calcFluidDragForces(SimulationData& 
         // Thread 0: compute the drag force and apply to non-fluid object
         if (block.thread_rank() == 0) {
             if (totalWeight > NEAR_ZERO) {
-                auto fluidVel = float2{F_drag.x / totalWeight, F_drag.y / totalWeight};
-                auto velDiff = float2{fluidVel.x - object->vel.x, fluidVel.y - object->vel.y};
-                F_drag = {velDiff.x * dragStrength * totalWeight, velDiff.y * dragStrength * totalWeight};
-                object->shared1.x += F_drag.x;
-                object->shared1.y += F_drag.y;
+                auto fluidVel = F_drag / totalWeight;
+                auto velDiff = fluidVel - object->vel;
+                F_drag = velDiff * dragStrength * totalWeight;
+                object->shared1 += F_drag;
             } else {
                 F_drag = {0, 0};
             }
