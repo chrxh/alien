@@ -132,13 +132,15 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     auto& objects = data.entities.objects;
     auto blockPartition = calcBlockPartition(objects.getNumEntries());
     auto const& smoothingLength_base = cudaSimulationParameters.smoothingLength.value;
+    constexpr float fluidSmoothingLengthMultiplier = 2.0f;
 
     for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
         auto& object = objects.at(objectIndex);
         auto smoothingLength = smoothingLength_base;
+        auto const fluidSmoothingLength = smoothingLength_base * fluidSmoothingLengthMultiplier;
         auto isObjectFluid = object->isFluid();
         if (isObjectFluid) {
-            smoothingLength *= 2.0f;    // Use larger smoothing length for fluids
+            smoothingLength *= fluidSmoothingLengthMultiplier;  // Use larger smoothing length for fluids
         }
 
         __shared__ float cellFusionVelocity;
@@ -151,6 +153,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
         __shared__ float2 F_pressure;
         __shared__ float2 F_viscosity;
+        __shared__ float2 F_fluidDrag;
         __shared__ float2 cellPosDelta;
         __shared__ float density;
 
@@ -164,6 +167,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             numFixedCells = 0;
             F_pressure = {0, 0};
             F_viscosity = {0, 0};
+            F_fluidDrag = {0, 0};
             cellPosDelta = {0, 0};
             density = 0;
         }
@@ -172,6 +176,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         // Per-thread accumulators
         float2 localF_pressure = {0, 0};
         float2 localF_viscosity = {0, 0};
+        float2 localF_fluidDrag = {0, 0};
         float2 localCellPosDelta = {0, 0};
         float localDensity = 0;
 
@@ -253,6 +258,22 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                             }
                         }
                     }
+                } else if (!isObjectFluid && otherObject->isFluid()) {
+                    auto posDelta = object->pos - otherObject->pos;
+
+                    data.objectMap.correctDirection(posDelta);
+                    auto adaptedDistance = Math::length(posDelta);
+                    if (adaptedDistance <= fluidSmoothingLength * 2 && object->detached + otherObject->detached != 1) {
+                        auto const otherMass = otherObject->getFluidMass();
+                        auto const kernel = calcKernel(adaptedDistance / fluidSmoothingLength) / (fluidSmoothingLength * fluidSmoothingLength);
+                        auto const F_fluidDragDelta = (otherObject->vel - object->vel) * otherMass * kernel;
+                        auto const scaledFluidDragForceDelta = F_fluidDragDelta * cudaSimulationParameters.viscosityStrength.value;
+                        localF_fluidDrag.x += scaledFluidDragForceDelta.x;
+                        localF_fluidDrag.y += scaledFluidDragForceDelta.y;
+
+                        atomicAdd(&otherObject->shared1.x, -scaledFluidDragForceDelta.x);
+                        atomicAdd(&otherObject->shared1.y, -scaledFluidDragForceDelta.y);
+                    }
                 }
                 otherObject = otherObject->nextObject;
             }
@@ -263,6 +284,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         float sumF_pressure_y = cg::reduce(warp, localF_pressure.y, cg::plus<float>());
         float sumF_viscosity_x = cg::reduce(warp, localF_viscosity.x, cg::plus<float>());
         float sumF_viscosity_y = cg::reduce(warp, localF_viscosity.y, cg::plus<float>());
+        float sumF_fluidDrag_x = cg::reduce(warp, localF_fluidDrag.x, cg::plus<float>());
+        float sumF_fluidDrag_y = cg::reduce(warp, localF_fluidDrag.y, cg::plus<float>());
         float sumCellPosDelta_x = cg::reduce(warp, localCellPosDelta.x, cg::plus<float>());
         float sumCellPosDelta_y = cg::reduce(warp, localCellPosDelta.y, cg::plus<float>());
         float sumDensity = cg::reduce(warp, localDensity, cg::plus<float>());
@@ -273,6 +296,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             atomicAdd_block(&F_pressure.y, sumF_pressure_y);
             atomicAdd_block(&F_viscosity.x, sumF_viscosity_x);
             atomicAdd_block(&F_viscosity.y, sumF_viscosity_y);
+            atomicAdd_block(&F_fluidDrag.x, sumF_fluidDrag_x);
+            atomicAdd_block(&F_fluidDrag.y, sumF_fluidDrag_y);
             atomicAdd_block(&cellPosDelta.x, sumCellPosDelta_x);
             atomicAdd_block(&cellPosDelta.y, sumCellPosDelta_y);
             atomicAdd_block(&density, sumDensity);
@@ -323,7 +348,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             }
 
             object->pos += cellPosDelta;
-            object->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
+            object->shared1 +=
+                F_pressure * cudaSimulationParameters.pressureStrength.value + F_viscosity * cudaSimulationParameters.viscosityStrength.value + F_fluidDrag;
             object->shared2.x = density;
         }
         block.sync();
@@ -390,8 +416,8 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                 auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
                 if (object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS
-                    && (object->sticky || otherObject->sticky) && Math::length(velDelta) >= cellFusionVelocity && isApproaching
-                    && !object->fixed && !otherObject->fixed) {
+                    && (object->sticky || otherObject->sticky) && Math::length(velDelta) >= cellFusionVelocity && isApproaching && !object->fixed
+                    && !otherObject->fixed) {
                     ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                 }
             }

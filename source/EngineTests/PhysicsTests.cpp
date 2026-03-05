@@ -134,3 +134,27 @@ TEST_F(PhysicsTests, noGhostRotations)
     EXPECT_TRUE(Math::length(savedPos2 - currentPos2) < 0.01f);
     EXPECT_TRUE(Math::length(savedPos3 - currentPos3) < 0.01f);
 }
+
+TEST_F(PhysicsTests, fluidViscousDragInteractsWithCells)
+{
+    _parameters.friction.baseValue = 0.0f;
+    _parameters.pressureStrength.value = 0.0f;
+    _parameters.viscosityStrength.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto data = Desc().objects(
+        {ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).type(StructureDesc()),
+         ObjectDesc().id(2).pos({101.0f, 100.0f}).vel({0.0f, 0.0f}).type(StructureDesc()),
+         ObjectDesc().id(3).pos({100.5f, 101.0f}).vel({1.0f, 0.0f}).type(StructureDesc())});
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(20);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto const& cell = actualData.getObjectRef(1);
+    auto const& fluid = actualData.getObjectRef(3);
+
+    EXPECT_GT(cell._vel.x, 0.0f);
+    EXPECT_LT(fluid._vel.x, 1.0f);
+}
