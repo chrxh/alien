@@ -420,7 +420,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidDragForces(SimulationData& 
         block.sync();
 
         // Phase 2: Distribute counter-force to neighboring fluid particles
-        if (Math::length(F_drag) > NEAR_ZERO) {
+        if (totalWeight > NEAR_ZERO && Math::length(F_drag) > NEAR_ZERO) {
             for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
                 int2 scanPos{cellPosInt.x + (scanIndex % scanLength), cellPosInt.y + (scanIndex / scanLength)};
                 data.objectMap.correctPosition(scanPos);
