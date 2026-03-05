@@ -69,6 +69,7 @@ struct SimulationParameters
     BaseParameter<float> smoothingLength = {0.8f};       // for MotionType_Fluid
     BaseParameter<float> viscosityStrength = {0.1f};     // for MotionType_Fluid
     BaseParameter<float> pressureStrength = {0.1f};      // for MotionType_Fluid
+    BaseParameter<float> fluidDragStrength = {0.1f};     // for MotionType_Fluid
     BaseParameter<float> maxCollisionDistance = {1.3f};  // for MotionType_Collision
     BaseParameter<float> repulsionStrength = {0.08f};    // for MotionType_Collision
     BaseLayerParameter<float> friction = {.baseValue = 0.001f};

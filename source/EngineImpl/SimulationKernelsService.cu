@@ -77,6 +77,7 @@ void SimulationKernelsService::launchTimestepKernels(
 
     if (config.motionType == MotionType_Fluid) {
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidDragForces, _stream, numBlocks, config.fluidKernelThreads, data);
     } else {
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, _stream, numBlocks, data);
     }
@@ -236,6 +237,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidDragForces, _stream, numBlocks, config.fluidKernelThreads, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
@@ -265,6 +267,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidDragForces, _stream, numBlocks, config.fluidKernelThreads, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);

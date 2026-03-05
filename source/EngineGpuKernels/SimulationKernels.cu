@@ -1,23 +1,23 @@
 #include "AttackerProcessor.cuh"
 #include "CellProcessor.cuh"
-#include "ObjectProcessor.cuh"
 #include "ClusterProcessor.cuh"
 #include "CommunicatorProcessor.cuh"
 #include "ConstructorProcessor.cuh"
 #include "DepotProcessor.cuh"
 #include "DetonatorProcessor.cuh"
 #include "DigestorProcessor.cuh"
+#include "EnergyProcessor.cuh"
 #include "ForceFieldKernels.cuh"
 #include "GeneratorProcessor.cuh"
 #include "InjectorProcessor.cuh"
 #include "MemoryProcessor.cuh"
 #include "MuscleProcessor.cuh"
+#include "MutationProcessor.cuh"
 #include "NeuronProcessor.cuh"
-#include "EnergyProcessor.cuh"
+#include "ObjectProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "SimulationKernels.cuh"
-#include "MutationProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data)
 {
@@ -59,6 +59,11 @@ __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
     EnergyProcessor::fillDensityMap(data);
 
     EnergyProcessor::updateMap(data);
+}
+
+__global__ void cudaNextTimestep_physics_calcFluidDragForces(SimulationData data)
+{
+    ObjectProcessor::calcFluidDragForces(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data)

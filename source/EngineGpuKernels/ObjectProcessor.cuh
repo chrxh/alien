@@ -30,6 +30,7 @@ public:
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
 
     __inline__ __device__ static void calcFluidForces_reconnectCells_correctOverlap(SimulationData& data);
+    __inline__ __device__ static void calcFluidDragForces(SimulationData& data);
     __inline__ __device__ static void calcCollisions_reconnectCells_correctOverlap(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
     __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisions_reconnectCells_correctOverlap
@@ -138,7 +139,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         auto smoothingLength = smoothingLength_base;
         auto isObjectFluid = object->isFluid();
         if (isObjectFluid) {
-            smoothingLength *= 2.0f;    // Use larger smoothing length for fluids
+            smoothingLength *= 2.0f;  // Use larger smoothing length for fluids
         }
 
         __shared__ float cellFusionVelocity;
@@ -330,6 +331,124 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     }
 }
 
+__inline__ __device__ void ObjectProcessor::calcFluidDragForces(SimulationData& data)
+{
+    auto block = cg::this_thread_block();
+    auto warp = cg::tiled_partition<32>(block);
+
+    auto& objects = data.entities.objects;
+    auto blockPartition = calcBlockPartition(objects.getNumEntries());
+    auto const& smoothingLength_base = cudaSimulationParameters.smoothingLength.value;
+    auto const smoothingLength_fluid = smoothingLength_base * 2.0f;
+    auto const dragStrength = cudaSimulationParameters.fluidDragStrength.value;
+
+    for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
+        auto& object = objects.at(objectIndex);
+
+        // Only process non-fluid objects
+        if (object->isFluid() || object->fixed) {
+            block.sync();
+            continue;
+        }
+
+        __shared__ int scanLength;
+        __shared__ int2 cellPosInt;
+        __shared__ float2 F_drag;
+        __shared__ float totalWeight;
+
+        if (block.thread_rank() == 0) {
+            int radiusInt = ceilf(smoothingLength_fluid * 2);
+            scanLength = radiusInt * 2 + 1;
+            cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
+            F_drag = {0, 0};
+            totalWeight = 0;
+        }
+        block.sync();
+
+        // Phase 1: Compute weighted average fluid velocity
+        float2 localWeightedVel = {0, 0};
+        float localWeight = 0;
+
+        for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
+            int2 scanPos{cellPosInt.x + (scanIndex % scanLength), cellPosInt.y + (scanIndex / scanLength)};
+            data.objectMap.correctPosition(scanPos);
+            auto otherObject = data.objectMap.getFirst(scanPos);
+            for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
+                if (!otherObject) {
+                    break;
+                }
+                if (otherObject->isFluid() && object->detached + otherObject->detached != 1) {
+                    auto posDelta = object->pos - otherObject->pos;
+                    data.objectMap.correctDirection(posDelta);
+                    auto distance = Math::length(posDelta);
+
+                    if (distance <= smoothingLength_fluid * 2) {
+                        auto w = calcKernel(distance / smoothingLength_fluid) / (smoothingLength_fluid * smoothingLength_fluid);
+                        localWeight += w;
+                        localWeightedVel.x += otherObject->vel.x * w;
+                        localWeightedVel.y += otherObject->vel.y * w;
+                    }
+                }
+                otherObject = otherObject->nextObject;
+            }
+        }
+
+        // Warp-level reduction
+        float sumWeightedVel_x = cg::reduce(warp, localWeightedVel.x, cg::plus<float>());
+        float sumWeightedVel_y = cg::reduce(warp, localWeightedVel.y, cg::plus<float>());
+        float sumWeight = cg::reduce(warp, localWeight, cg::plus<float>());
+
+        if (warp.thread_rank() == 0) {
+            atomicAdd_block(&F_drag.x, sumWeightedVel_x);
+            atomicAdd_block(&F_drag.y, sumWeightedVel_y);
+            atomicAdd_block(&totalWeight, sumWeight);
+        }
+        block.sync();
+
+        // Thread 0: compute the drag force and apply to non-fluid object
+        if (block.thread_rank() == 0) {
+            if (totalWeight > NEAR_ZERO) {
+                auto fluidVel = float2{F_drag.x / totalWeight, F_drag.y / totalWeight};
+                auto velDiff = float2{fluidVel.x - object->vel.x, fluidVel.y - object->vel.y};
+                F_drag = {velDiff.x * dragStrength * totalWeight, velDiff.y * dragStrength * totalWeight};
+                object->shared1.x += F_drag.x;
+                object->shared1.y += F_drag.y;
+            } else {
+                F_drag = {0, 0};
+            }
+        }
+        block.sync();
+
+        // Phase 2: Distribute counter-force to neighboring fluid particles
+        if (Math::length(F_drag) > NEAR_ZERO) {
+            for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
+                int2 scanPos{cellPosInt.x + (scanIndex % scanLength), cellPosInt.y + (scanIndex / scanLength)};
+                data.objectMap.correctPosition(scanPos);
+                auto otherObject = data.objectMap.getFirst(scanPos);
+                for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
+                    if (!otherObject) {
+                        break;
+                    }
+                    if (otherObject->isFluid() && !otherObject->fixed && object->detached + otherObject->detached != 1) {
+                        auto posDelta = object->pos - otherObject->pos;
+                        data.objectMap.correctDirection(posDelta);
+                        auto distance = Math::length(posDelta);
+
+                        if (distance <= smoothingLength_fluid * 2) {
+                            auto w = calcKernel(distance / smoothingLength_fluid) / (smoothingLength_fluid * smoothingLength_fluid);
+                            auto fraction = w / totalWeight;
+                            atomicAdd(&otherObject->shared1.x, -F_drag.x * fraction);
+                            atomicAdd(&otherObject->shared1.y, -F_drag.y * fraction);
+                        }
+                    }
+                    otherObject = otherObject->nextObject;
+                }
+            }
+        }
+        block.sync();
+    }
+}
+
 __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correctOverlap(SimulationData& data)
 {
     auto& objects = data.entities.objects;
@@ -390,8 +509,8 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                 auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
 
                 if (object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS
-                    && (object->sticky || otherObject->sticky) && Math::length(velDelta) >= cellFusionVelocity && isApproaching
-                    && !object->fixed && !otherObject->fixed) {
+                    && (object->sticky || otherObject->sticky) && Math::length(velDelta) >= cellFusionVelocity && isApproaching && !object->fixed
+                    && !otherObject->fixed) {
                     ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
                 }
             }

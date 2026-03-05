@@ -290,6 +290,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                                               .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0.0f).max(0.3f))
                                               .description("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother "
                                                            "movement."),
+                                          ParameterSpec()
+                                              .name("Fluid drag")
+                                              .reference(FloatSpec().member(&SimulationParameters::fluidDragStrength).min(0.0f).max(1.0f))
+                                              .description("Controls the viscous drag between fluid particles and non-fluid objects. "
+                                                           "This creates a 2-way coupling where non-fluid objects are dragged toward "
+                                                           "the local fluid velocity, and an equal counter-force is distributed to "
+                                                           "the neighboring fluid particles."),
                                       }},
                                      {"Collision-based solver",
                                       {
