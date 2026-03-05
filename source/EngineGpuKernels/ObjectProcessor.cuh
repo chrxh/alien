@@ -384,8 +384,9 @@ __inline__ __device__ void ObjectProcessor::calcFluidDragForces(SimulationData& 
 
                     if (distance <= smoothingLength_fluid * 2) {
                         auto w = calcKernel(distance / smoothingLength_fluid) / (smoothingLength_fluid * smoothingLength_fluid);
-                        localWeight += w;
-                        localWeightedVel += otherObject->vel * w;
+                        auto mw = otherObject->getFluidMass() * w;
+                        localWeight += mw;
+                        localWeightedVel += otherObject->vel * mw;
                     }
                 }
                 otherObject = otherObject->nextObject;
@@ -407,9 +408,10 @@ __inline__ __device__ void ObjectProcessor::calcFluidDragForces(SimulationData& 
         // Thread 0: compute the drag force and apply to non-fluid object
         if (block.thread_rank() == 0) {
             if (totalWeight > NEAR_ZERO) {
+                auto objectMass = object->getFluidMass();
                 auto fluidVel = F_drag / totalWeight;
                 auto velDiff = fluidVel - object->vel;
-                F_drag = velDiff * dragStrength * totalWeight;
+                F_drag = velDiff * dragStrength * totalWeight / objectMass;
                 object->shared1 += F_drag;
             } else {
                 F_drag = {0, 0};
@@ -434,7 +436,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidDragForces(SimulationData& 
 
                         if (distance <= smoothingLength_fluid * 2) {
                             auto w = calcKernel(distance / smoothingLength_fluid) / (smoothingLength_fluid * smoothingLength_fluid);
-                            auto fraction = w / totalWeight;
+                            auto mw = otherObject->getFluidMass() * w;
+                            auto fraction = mw / totalWeight;
                             atomicAdd(&otherObject->shared1.x, -F_drag.x * fraction);
                             atomicAdd(&otherObject->shared1.y, -F_drag.y * fraction);
                         }
