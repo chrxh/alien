@@ -183,8 +183,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 if (!otherObject) {
                     break;
                 }
-                if (true/*isObjectFluid || !otherObject->isFluid()*/) {
-                //if (/*(isObjectFluid && otherObject->isFluid()) ||*/ (!isObjectFluid && !otherObject->isFluid())) {
+                if ((isObjectFluid && otherObject->isFluid()) || (!isObjectFluid && !otherObject->isFluid())) {
                     auto posDelta = object->pos - otherObject->pos;
 
                     data.objectMap.correctDirection(posDelta);
@@ -430,16 +429,14 @@ __inline__ __device__ void ObjectProcessor::applyForces(SimulationData& data)
         if (object->fixed) {
             continue;
         }
-        //if (object->isFluid()) {
-            auto acceleration = object->shared1 / max(0.05f, object->density) * 0.5f; /** object->getMass();*/
-            if (Math::length(acceleration) > cudaSimulationParameters.maxAcceleration) {
-                acceleration = Math::getNormalized(acceleration) * cudaSimulationParameters.maxAcceleration;
-            }
-            object->vel += acceleration;
-            if (Math::length(object->vel) > cudaSimulationParameters.maxVelocity.value) {
-                object->vel = Math::getNormalized(object->vel) * cudaSimulationParameters.maxVelocity.value;
-            }
-        //}
+        auto acceleration = object->shared1 / max(0.05f, object->density) * 0.5f;
+        if (Math::length(acceleration) > cudaSimulationParameters.maxAcceleration) {
+            acceleration = Math::getNormalized(acceleration) * cudaSimulationParameters.maxAcceleration;
+        }
+        object->vel += acceleration;
+        if (Math::length(object->vel) > cudaSimulationParameters.maxVelocity.value) {
+            object->vel = Math::getNormalized(object->vel) * cudaSimulationParameters.maxVelocity.value;
+        }
         object->shared1 = {0, 0};
     }
 }
