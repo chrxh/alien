@@ -148,7 +148,7 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
 
-        // Isolated structures (no connections) are rendered as blurry particles instead
+        // Isolated structures (no connections) are rendered as fluid particles instead
         if (object->type == ObjectType_Structure && object->numConnections == 0) {
             continue;
         }
@@ -340,7 +340,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     }
 }
 
-__global__ void cudaExtractBlurryParticleData(SimulationData data, BlurryParticleVertexData* blurryParticleData, uint64_t* numBlurryParticles)
+__global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles)
 {
     // Process energy particles - each particle goes to its index position
     {
@@ -358,14 +358,14 @@ __global__ void cudaExtractBlurryParticleData(SimulationData data, BlurryParticl
                 intensity *= 2.5f;
             }
 
-            auto idx = alienAtomicAdd64(numBlurryParticles, uint64_t(1));
-            if (blurryParticleData != nullptr) {
-                blurryParticleData[idx].pos[0] = pos.x;
-                blurryParticleData[idx].pos[1] = pos.y;
-                blurryParticleData[idx].pos[2] = 0.0f;
-                blurryParticleData[idx].color[0] = intensity * 0.25f;
-                blurryParticleData[idx].color[1] = intensity * 0.25f;
-                blurryParticleData[idx].color[2] = intensity * 1.0f;
+            auto idx = alienAtomicAdd64(numFluidParticles, uint64_t(1));
+            if (fluidParticleData != nullptr) {
+                fluidParticleData[idx].pos[0] = pos.x;
+                fluidParticleData[idx].pos[1] = pos.y;
+                fluidParticleData[idx].pos[2] = 0.0f;
+                fluidParticleData[idx].color[0] = intensity * 0.25f;
+                fluidParticleData[idx].color[1] = intensity * 0.25f;
+                fluidParticleData[idx].color[2] = intensity * 1.0f;
             }
         }
     }
@@ -384,15 +384,15 @@ __global__ void cudaExtractBlurryParticleData(SimulationData data, BlurryParticl
                 intensity *= 2.5f;
             }
 
-            auto idx = alienAtomicAdd64(numBlurryParticles, uint64_t(1));
-            if (blurryParticleData != nullptr) {
-                blurryParticleData[idx].pos[0] = object->pos.x;
-                blurryParticleData[idx].pos[1] = object->pos.y;
-                blurryParticleData[idx].pos[2] = 0.0f;
+            auto idx = alienAtomicAdd64(numFluidParticles, uint64_t(1));
+            if (fluidParticleData != nullptr) {
+                fluidParticleData[idx].pos[0] = object->pos.x;
+                fluidParticleData[idx].pos[1] = object->pos.y;
+                fluidParticleData[idx].pos[2] = 0.0f;
                 auto color = getCellColorByCode(object->color);
-                blurryParticleData[idx].color[0] = intensity * toFloat((color >> 16) & 0xff) / 255;
-                blurryParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;
-                blurryParticleData[idx].color[2] = intensity * toFloat(color & 0xff) / 255;
+                fluidParticleData[idx].color[0] = intensity * toFloat((color >> 16) & 0xff) / 255;
+                fluidParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;
+                fluidParticleData[idx].color[2] = intensity * toFloat(color & 0xff) / 255;
             }
         }
     }

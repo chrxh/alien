@@ -9,7 +9,7 @@ struct CudaGeometryBuffers
 {
     // CUDA-OpenGL interop resources (used when interop is enabled)
     cudaGraphicsResource* vertexBuffer = nullptr;
-    cudaGraphicsResource* blurryParticleBuffer = nullptr;
+    cudaGraphicsResource* fluidParticleBuffer = nullptr;
     cudaGraphicsResource* locationBuffer = nullptr;
     cudaGraphicsResource* selectedObjectBuffer = nullptr;
     cudaGraphicsResource* lineIndexBuffer = nullptr;
@@ -20,7 +20,7 @@ struct CudaGeometryBuffers
 
     // CUDA device buffers for non-interop mode (data is copied to CPU then uploaded to OpenGL)
     ObjectVertexData* deviceObjectBuffer = nullptr;
-    BlurryParticleVertexData* deviceBlurryParticleBuffer = nullptr;
+    FluidParticleVertexData* deviceFluidParticleBuffer = nullptr;
     LocationVertexData* deviceLocationBuffer = nullptr;
     SelectedObjectVertexData* deviceSelectedObjectBuffer = nullptr;
     unsigned int* deviceLineIndexBuffer = nullptr;
@@ -31,7 +31,7 @@ struct CudaGeometryBuffers
 
     // Capacity tracking for device buffers
     uint64_t deviceObjectBufferCapacity = 0;
-    uint64_t deviceBlurryParticleBufferCapacity = 0;
+    uint64_t deviceFluidParticleBufferCapacity = 0;
     uint64_t deviceLocationBufferCapacity = 0;
     uint64_t deviceSelectedObjectBufferCapacity = 0;
     uint64_t deviceLineIndexBufferCapacity = 0;

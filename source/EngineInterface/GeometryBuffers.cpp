@@ -12,8 +12,8 @@ GeometryBuffers _GeometryBuffers::create()
     glGenBuffers(1, &result->_eboForLines);
     glGenVertexArrays(1, &result->_vaoForTriangles);
     glGenBuffers(1, &result->_eboForTriangles);
-    glGenVertexArrays(1, &result->_vaoForBlurryParticles);
-    glGenBuffers(1, &result->_vboForBlurryParticles);
+    glGenVertexArrays(1, &result->_vaoForFluidParticles);
+    glGenBuffers(1, &result->_vboForFluidParticles);
     glGenVertexArrays(1, &result->_vaoForLocations);
     glGenBuffers(1, &result->_vboForLocations);
     glGenVertexArrays(1, &result->_vaoForSelectedObjects);
@@ -35,10 +35,10 @@ void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects
         glBindBuffer(GL_ARRAY_BUFFER, getVboForObjects());
         glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(ObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
-    if (numRenderObjects.blurryParticles >= _blurryParticleBufferCapacity) {
-        _blurryParticleBufferCapacity = std::max(numRenderObjects.blurryParticles * 2, static_cast<uint64_t>(100000));
-        glBindBuffer(GL_ARRAY_BUFFER, getVboForBlurryParticles());
-        glBufferData(GL_ARRAY_BUFFER, toInt(_blurryParticleBufferCapacity * sizeof(BlurryParticleVertexData)), nullptr, GL_DYNAMIC_DRAW);
+    if (numRenderObjects.fluidParticles >= _fluidParticleBufferCapacity) {
+        _fluidParticleBufferCapacity = std::max(numRenderObjects.fluidParticles * 2, static_cast<uint64_t>(100000));
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForFluidParticles());
+        glBufferData(GL_ARRAY_BUFFER, toInt(_fluidParticleBufferCapacity * sizeof(FluidParticleVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.locations >= _locationBufferCapacity) {
         _locationBufferCapacity = std::max(numRenderObjects.locations * 2, static_cast<uint64_t>(1000));
@@ -92,12 +92,12 @@ void _GeometryBuffers::setCellData(ObjectVertexData const* data, uint64_t count)
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(ObjectVertexData)), data);
 }
 
-void _GeometryBuffers::setBlurryParticleData(BlurryParticleVertexData const* data, uint64_t count)
+void _GeometryBuffers::setFluidParticleData(FluidParticleVertexData const* data, uint64_t count)
 {
     if (count == 0)
         return;
-    glBindBuffer(GL_ARRAY_BUFFER, getVboForBlurryParticles());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(BlurryParticleVertexData)), data);
+    glBindBuffer(GL_ARRAY_BUFFER, getVboForFluidParticles());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(FluidParticleVertexData)), data);
 }
 
 void _GeometryBuffers::setLocationData(LocationVertexData const* data, uint64_t count)
@@ -168,13 +168,13 @@ std::vector<ObjectVertexData> _GeometryBuffers::getCellData() const
     return result;
 }
 
-std::vector<BlurryParticleVertexData> _GeometryBuffers::getBlurryParticleData() const
+std::vector<FluidParticleVertexData> _GeometryBuffers::getFluidParticleData() const
 {
-    std::vector<BlurryParticleVertexData> result(_numObjects.blurryParticles);
-    if (_numObjects.blurryParticles == 0)
+    std::vector<FluidParticleVertexData> result(_numObjects.fluidParticles);
+    if (_numObjects.fluidParticles == 0)
         return result;
-    glBindBuffer(GL_ARRAY_BUFFER, _vboForBlurryParticles);
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.blurryParticles * sizeof(BlurryParticleVertexData)), result.data());
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForFluidParticles);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.fluidParticles * sizeof(FluidParticleVertexData)), result.data());
     return result;
 }
 
