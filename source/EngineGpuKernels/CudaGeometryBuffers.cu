@@ -33,10 +33,10 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
     }
     vertexBuffer = registerBufferResource(buffers->getVboForObjects());
 
-    if (blurryParticleBuffer != nullptr) {
-        unregisterBufferResource(blurryParticleBuffer);
+    if (fluidParticleBuffer != nullptr) {
+        unregisterBufferResource(fluidParticleBuffer);
     }
-    blurryParticleBuffer = registerBufferResource(buffers->getVboForBlurryParticles());
+    fluidParticleBuffer = registerBufferResource(buffers->getVboForFluidParticles());
 
     if (locationBuffer != nullptr) {
         unregisterBufferResource(locationBuffer);
@@ -88,14 +88,14 @@ void CudaGeometryBuffers::allocateBuffersForNoInterop(NumRenderObjects const& nu
         deviceObjectBufferCapacity = requiredCellCapacity;
     }
 
-    // Allocate or reallocate blurry particle buffer
-    auto requiredBlurryParticleCapacity = std::max(numObjects.blurryParticles * 2, static_cast<uint64_t>(100000));
-    if (numObjects.blurryParticles >= deviceBlurryParticleBufferCapacity) {
-        if (deviceBlurryParticleBuffer != nullptr) {
-            memoryManager.freeMemory(deviceBlurryParticleBuffer);
+    // Allocate or reallocate fluid particle buffer
+    auto requiredFluidParticleCapacity = std::max(numObjects.fluidParticles * 2, static_cast<uint64_t>(100000));
+    if (numObjects.fluidParticles >= deviceFluidParticleBufferCapacity) {
+        if (deviceFluidParticleBuffer != nullptr) {
+            memoryManager.freeMemory(deviceFluidParticleBuffer);
         }
-        memoryManager.acquireMemory(requiredBlurryParticleCapacity, deviceBlurryParticleBuffer);
-        deviceBlurryParticleBufferCapacity = requiredBlurryParticleCapacity;
+        memoryManager.acquireMemory(requiredFluidParticleCapacity, deviceFluidParticleBuffer);
+        deviceFluidParticleBufferCapacity = requiredFluidParticleCapacity;
     }
 
     // Allocate or reallocate location buffer
@@ -174,7 +174,7 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
     auto& memoryManager = CudaMemoryManager::getInstance();
 
     memoryManager.freeMemory(deviceObjectBuffer);
-    memoryManager.freeMemory(deviceBlurryParticleBuffer);
+    memoryManager.freeMemory(deviceFluidParticleBuffer);
     memoryManager.freeMemory(deviceLocationBuffer);
     memoryManager.freeMemory(deviceSelectedObjectBuffer);
     memoryManager.freeMemory(deviceLineIndexBuffer);
@@ -192,14 +192,14 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
         geometryBuffers->setCellData(hostObjectBuffer.data(), numObjects.objects);
     }
 
-    if (numObjects.blurryParticles > 0) {
-        std::vector<BlurryParticleVertexData> hostBlurryParticleBuffer(numObjects.blurryParticles);
+    if (numObjects.fluidParticles > 0) {
+        std::vector<FluidParticleVertexData> hostFluidParticleBuffer(numObjects.fluidParticles);
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-            hostBlurryParticleBuffer.data(),
-            deviceBlurryParticleBuffer,
-            numObjects.blurryParticles * sizeof(BlurryParticleVertexData),
+            hostFluidParticleBuffer.data(),
+            deviceFluidParticleBuffer,
+            numObjects.fluidParticles * sizeof(FluidParticleVertexData),
             cudaMemcpyDeviceToHost));
-        geometryBuffers->setBlurryParticleData(hostBlurryParticleBuffer.data(), numObjects.blurryParticles);
+        geometryBuffers->setFluidParticleData(hostFluidParticleBuffer.data(), numObjects.fluidParticles);
     }
 
     if (numObjects.locations > 0) {

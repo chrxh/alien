@@ -171,8 +171,8 @@ using PostProcessingRenderStep = std::shared_ptr<_PostProcessingRenderStep>;
 class _ForwardRenderStep;
 using ForwardRenderStep = std::shared_ptr<_ForwardRenderStep>;
 
-class _BlurryParticleRenderStep;
-using BlurryParticleRenderStep = std::shared_ptr<_BlurryParticleRenderStep>;
+class _FluidParticleRenderStep;
+using FluidParticleRenderStep = std::shared_ptr<_FluidParticleRenderStep>;
 
 class _LocationRenderStep;
 using LocationRenderStep = std::shared_ptr<_LocationRenderStep>;

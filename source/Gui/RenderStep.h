@@ -163,16 +163,16 @@ private:
     _ForwardRenderStep(StepParameters const& parameters);
 };
 
-class _BlurryParticleRenderStep : public _RenderStep
+class _FluidParticleRenderStep : public _RenderStep
 {
 public:
-    static BlurryParticleRenderStep create(StepParameters const& parameters);
+    static FluidParticleRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(ExecutionParameters parameters) override;
 
 private:
-    _BlurryParticleRenderStep(StepParameters const& parameters);
+    _FluidParticleRenderStep(StepParameters const& parameters);
 };
 
 class _LocationRenderStep : public _RenderStep

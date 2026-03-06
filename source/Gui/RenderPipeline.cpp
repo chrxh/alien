@@ -72,19 +72,19 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     }
     {
-        auto vao = _geometryBuffers->getVaoForBlurryParticles();
-        auto vbo = _geometryBuffers->getVboForBlurryParticles();
+        auto vao = _geometryBuffers->getVaoForFluidParticles();
+        auto vbo = _geometryBuffers->getVboForFluidParticles();
 
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        // Setup vertex attributes for BlurryParticleVertexData
+        // Setup vertex attributes for FluidParticleVertexData
         // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BlurryParticleVertexData), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(FluidParticleVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(BlurryParticleVertexData), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(FluidParticleVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
     }
     {

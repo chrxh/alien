@@ -19,8 +19,8 @@ add_library(Shaders INTERFACE
     DetonationEventVS.h
     DownSamplerFS.h
     DownSamplerVS.h
-    BlurryParticleFS.h
-    BlurryParticleVS.h
+    FluidParticleFS.h
+    FluidParticleVS.h
     FresnelFS.h
     FresnelVS.h
     LineFS.h
