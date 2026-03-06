@@ -395,6 +395,7 @@ struct SignalTO
 struct StructureTO
 {
     float energy;
+    bool glow;
 };
 
 struct FreeCellTO

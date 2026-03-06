@@ -366,6 +366,7 @@ __global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleV
                 fluidParticleData[idx].color[0] = intensity * 0.25f;
                 fluidParticleData[idx].color[1] = intensity * 0.25f;
                 fluidParticleData[idx].color[2] = intensity * 1.0f;
+                fluidParticleData[idx].glow = 0.0f;
             }
         }
     }
@@ -393,6 +394,7 @@ __global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleV
                 fluidParticleData[idx].color[0] = intensity * toFloat((color >> 16) & 0xff) / 255;
                 fluidParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;
                 fluidParticleData[idx].color[2] = intensity * toFloat(color & 0xff) / 255;
+                fluidParticleData[idx].glow = object->typeData.structure.glow ? 1.0f : 0.0f;
             }
         }
     }

@@ -86,6 +86,10 @@ _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
         // Color (3 floats: r, g, b)
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(FluidParticleVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
+
+        // Glow (1 float)
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(FluidParticleVertexData), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
     }
     {
         auto vao = _geometryBuffers->getVaoForLocations();

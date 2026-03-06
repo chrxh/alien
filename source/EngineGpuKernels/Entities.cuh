@@ -455,6 +455,7 @@ struct Creature
 struct Structure
 {
     float energy;
+    bool glow;
 
     // Cluster data
     uint32_t clusterIndex;
@@ -607,10 +608,7 @@ struct Object
         }
     }
 
-    __device__ __inline__ bool isFluid() const
-    {
-        return type == ObjectType_Structure && numConnections == 0;
-    }
+    __device__ __inline__ bool isFluid() const { return type == ObjectType_Structure && numConnections == 0; }
 
     __device__ __inline__ float getMassForSPH() const
     {
