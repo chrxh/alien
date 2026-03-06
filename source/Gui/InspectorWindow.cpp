@@ -102,13 +102,13 @@ std::string _InspectorWindow::generateTitle() const
     return "[deprecated] " + ss.str();
 }
 
-void _InspectorWindow::processObject(ExtendedObjectDesc& extendedCell)
+void _InspectorWindow::processObject(ExtendedObjectDesc& extendedObject)
 {
     if (ImGui::BeginTabBar("##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-        auto& object = extendedCell.object;
+        auto& object = extendedObject.object;
         auto origCell = object;
         if (object.getObjectType() == ObjectType_Cell) {
-            processCellGeneralTab(extendedCell);
+            processCellGeneralTab(extendedObject);
             processCellTypeTab(object);
             processCellTypePropertiesTab(object);
             if (object.getCellRef()._constructor.has_value()) {
@@ -123,7 +123,7 @@ void _InspectorWindow::processObject(ExtendedObjectDesc& extendedCell)
         ImGui::EndTabBar();
 
         if (object != origCell) {
-            _SimulationFacade::get()->changeCell(extendedCell);
+            _SimulationFacade::get()->changeCell(extendedObject);
         }
     }
 }
