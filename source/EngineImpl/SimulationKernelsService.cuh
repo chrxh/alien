@@ -15,7 +15,6 @@ struct CudaGraphConfig
 {
     int timestepMod3;         // Not every kernel needs to be executed each time
     bool executeCellFunction;       // Cell type functions need to be executed
-    int motionType;          // MotionType_Fluid or MotionType_Collision
     bool hasLayers;          // settings.simulationParameters.numLayers > 0
     bool rigidityEnabled;    // isRigidityUpdateEnabled(settings)
     int fluidKernelThreads;          // calcOptimalThreadsForFluidKernel result

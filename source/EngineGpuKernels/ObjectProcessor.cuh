@@ -31,7 +31,6 @@ public:
 
     __inline__ __device__ static void calcFluidForces_reconnectCells_correctOverlap(SimulationData& data);
     __inline__ __device__ static void calcFluidBoundaryForces(SimulationData& data);
-    __inline__ __device__ static void calcCollisions_reconnectCells_correctOverlap(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
     __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisions_reconnectCells_correctOverlap
 
@@ -205,7 +204,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     if (!otherObject->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherObject->detached != 1) {
 
                         // Calc density
-                        auto otherMass = otherObject->getFluidMass();
+                        auto otherMass = otherObject->getMassForSPH();
                         localDensity += otherMass * calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
 
                         if (object != otherObject) {
@@ -377,7 +376,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                     auto adaptedDistance = Math::length(posDelta);
 
                     if (adaptedDistance <= smoothingLength * 2 && adaptedDistance > NEAR_ZERO) {
-                        auto solidMass = otherObject->getFluidMass();
+                        auto solidMass = otherObject->getMassForSPH();
 
                         float kernel_d_val = calcKernel_d(adaptedDistance / smoothingLength)
                             / (smoothingLength * smoothingLength * smoothingLength);
@@ -412,75 +411,6 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
             object->shared1 += F_boundary * cudaSimulationParameters.pressureStrength.value;
         }
         block.sync();
-    }
-}
-
-__inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correctOverlap(SimulationData& data)
-{
-    auto& objects = data.entities.objects;
-    auto partition = calcSystemThreadPartition(objects.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = objects.at(index);
-        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.maxCollisionDistance.value, object->detached, [&](auto const& otherObject) {
-            if (otherObject == object) {
-                return;
-            }
-
-            auto posDelta = object->pos - otherObject->pos;
-            data.objectMap.correctDirection(posDelta);
-
-            auto distance = Math::length(posDelta);
-
-            //overlap correction
-            if (!object->fixed) {
-                if (distance < cudaSimulationParameters.minObjectDistance.value) {
-                    object->pos += posDelta * cudaSimulationParameters.minObjectDistance.value / 5;
-                }
-            }
-
-            bool alreadyConnected = false;
-            for (int i = 0; i < object->numConnections; ++i) {
-                auto const& connectedObject = object->connections[i].object;
-                if (connectedObject == otherObject) {
-                    alreadyConnected = true;
-                    break;
-                }
-            }
-
-            if (!alreadyConnected) {
-
-                //collision algorithm
-                auto velDelta = object->vel - otherObject->vel;
-                auto isApproaching = Math::dot(posDelta, velDelta) < 0;
-                auto fixedFactor = object->fixed ? 2 : 1;
-
-                if (Math::length(object->vel) > 0.5f && isApproaching) {
-                    auto distanceSquared = distance * distance + 0.25f;
-                    auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * fixedFactor;
-                    atomicAdd(&object->shared1.x, force.x);
-                    atomicAdd(&object->shared1.y, force.y);
-                    atomicAdd(&otherObject->shared1.x, -force.x);
-                    atomicAdd(&otherObject->shared1.y, -force.y);
-                } else {
-                    auto force = Math::getNormalized(posDelta) * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
-                        * cudaSimulationParameters.repulsionStrength.value * fixedFactor;
-                    atomicAdd(&object->shared1.x, force.x);
-                    atomicAdd(&object->shared1.y, force.y);
-                    atomicAdd(&otherObject->shared1.x, -force.x);
-                    atomicAdd(&otherObject->shared1.y, -force.y);
-                }
-
-                //fusion
-                auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.objectFusionVelocity, data, object->pos);
-
-                if (object->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS
-                    && (object->sticky || otherObject->sticky) && Math::length(velDelta) >= cellFusionVelocity && isApproaching
-                    && !object->fixed && !otherObject->fixed) {
-                    ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
-                }
-            }
-        });
     }
 }
 

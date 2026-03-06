@@ -66,15 +66,6 @@ __global__ void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData 
     ObjectProcessor::calcFluidBoundaryForces(data);
 }
 
-__global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data)
-{
-    ObjectProcessor::calcCollisions_reconnectCells_correctOverlap(data);
-    ObjectProcessor::fillDensityMap(data);
-    EnergyProcessor::fillDensityMap(data);
-
-    EnergyProcessor::updateMap(data);
-}
-
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
 {
     ObjectProcessor::checkForces(data);
