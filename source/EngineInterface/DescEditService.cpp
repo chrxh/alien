@@ -315,12 +315,7 @@ Desc DescEditService::randomMultiply(
     return result;
 }
 
-void DescEditService::addIfSpaceAvailable(
-    Desc& result,
-    Occupancy& cellOccupancy,
-    Desc const& toAdd,
-    float distance,
-    IntVector2D const& worldSize) const
+void DescEditService::addIfSpaceAvailable(Desc& result, Occupancy& cellOccupancy, Desc const& toAdd, float distance, IntVector2D const& worldSize) const
 {
     SpaceCalculator space(worldSize);
 
@@ -510,6 +505,15 @@ void DescEditService::randomizeLineageIds(Desc& description) const
     }
 }
 
+void DescEditService::setGlow(Desc& description, bool glow) const
+{
+    for (auto& object : description._objects) {
+        if (object.getObjectType() == ObjectType_Structure) {
+            object.getStructureRef()._glow = glow;
+        }
+    }
+}
+
 void DescEditService::setCenter(Desc& description, RealVector2D const& center) const
 {
     auto origCenter = calcCenter(description);
@@ -664,11 +668,8 @@ void DescEditService::removeCellIf(Desc& description, std::function<bool(ObjectD
     }
 }
 
-bool DescEditService::isCellPresent(
-    Occupancy const& cellPosBySlot,
-    SpaceCalculator const& spaceCalculator,
-    RealVector2D const& posToCheck,
-    float distance) const
+bool DescEditService::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance)
+    const
 {
     auto intPos = toIntVector2D(posToCheck);
 
@@ -734,7 +735,7 @@ std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(Desc const& 
         }
     }
     auto cache = description.createCache();
-    
+
     for (auto const& object : description._objects) {
         ExtendedObjectDesc extObject;
         extObject.object = object;

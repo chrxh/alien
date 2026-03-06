@@ -9,19 +9,16 @@
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
+#include <EngineInterface/SimulationFacade.h>
 #include "AlienGui.h"
 #include "StyleRepository.h"
-#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
     auto constexpr RightColumnWidth = 120.0f;
 }
 
-void MassOperationsDialog::initIntern()
-{
-
-}
+void MassOperationsDialog::initIntern() {}
 
 void MassOperationsDialog::processIntern()
 {
@@ -101,6 +98,13 @@ void MassOperationsDialog::processIntern()
     ImGui::Checkbox("##lineageId", &_randomizeLineageId);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienGui::Text("Randomize mutation ids");
+
+    AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
+    ImGui::Checkbox("##setGlow", &_setGlow);
+    ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
+    ImGui::BeginDisabled(!_setGlow);
+    ImGui::Checkbox("Set glow", &_glowValue);
+    ImGui::EndDisabled();
 
     AlienGui::Group(AlienGui::GroupParameters().text("Options"));
     ImGui::Checkbox("##restrictToSelection", &_restrictToSelectedCreatures);
@@ -182,6 +186,9 @@ void MassOperationsDialog::onExecute()
     if (_randomizeLineageId) {
         DescEditService::get().randomizeLineageIds(content);
     }
+    if (_setGlow) {
+        DescEditService::get().setGlow(content, _glowValue);
+    }
 
     if (_restrictToSelectedCreatures) {
         _SimulationFacade::get()->removeSelectedObjects(true);
@@ -217,6 +224,9 @@ bool MassOperationsDialog::isOkEnabled()
         result = true;
     }
     if (_randomizeLineageId) {
+        result = true;
+    }
+    if (_setGlow) {
         result = true;
     }
     return result;
