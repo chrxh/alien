@@ -268,7 +268,7 @@ void SimulationView::setupRenderPipeline()
             }),
         },
 
-        // Render block: Merge energy particles for bloom
+        // Render block: Merge blurry particles for bloom
         RenderBlock{
             RenderSequence().steps({
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeMax).addUniform("colorFactor1", 0.8f)),
