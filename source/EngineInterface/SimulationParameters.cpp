@@ -266,46 +266,19 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .name("Physics: Motion")
                 .parameters({
                     ParameterSpec()
-                        .name("Motion type")
-                        .reference(
-                            AlternativeSpec()
-                                .member(&SimulationParameters::motionType)
-                                .alternatives(
-                                    {{"Fluid solver",
-                                      {
-                                          ParameterSpec()
-                                              .name("Smoothing length")
-                                              .reference(FloatSpec().member(&SimulationParameters::smoothingLength).min(0.0f).max(3.0f))
-                                              .description(
-                                                  "The smoothing length determines the region of influence of the neighboring particles for the calculation of "
-                                                  "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values "
-                                                  "that "
-                                                  "are too large cause the particles to drift apart."),
-                                          ParameterSpec()
-                                              .name("Pressure")
-                                              .reference(FloatSpec().member(&SimulationParameters::pressureStrength).min(0.0f).max(0.3f))
-                                              .description("This parameter allows to control the strength of the pressure."),
-                                          ParameterSpec()
-                                              .name("Viscosity")
-                                              .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0.0f).max(0.3f))
-                                              .description("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother "
-                                                           "movement."),
-                                      }},
-                                     {"Collision-based solver",
-                                      {
-                                          ParameterSpec()
-                                              .name("Repulsion strength")
-                                              .reference(FloatSpec().member(&SimulationParameters::repulsionStrength).min(0.0f).max(0.3f))
-                                              .description("The strength of the repulsive forces, between two cells that are not connected."),
-                                          ParameterSpec()
-                                              .name("Maximum collision distance")
-                                              .reference(FloatSpec().member(&SimulationParameters::maxCollisionDistance).min(0.0f).max(3.0f))
-                                              .description("Maximum distance up to which a collision of two cells is possible."),
-                                      }}}))
-                        .description(std::string(
-                            "The algorithm for the particle motions is defined here. If 'Fluid dynamics' is selected, an SPH fluid solver is used for the "
-                            "calculation of the forces. The particles then behave like (compressible) liquids or gases. The other option 'Collision-based' "
-                            "calculates the forces based on particle collisions and should be preferred for mechanical simulation with solids.")),
+                        .name("Smoothing length")
+                        .reference(FloatSpec().member(&SimulationParameters::smoothingLength).min(0.0f).max(3.0f))
+                        .description("The smoothing length determines the region of influence of the neighboring particles for the calculation of "
+                                     "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values "
+                                     "that are too large cause the particles to drift apart."),
+                    ParameterSpec()
+                        .name("Pressure")
+                        .reference(FloatSpec().member(&SimulationParameters::pressureStrength).min(0.0f).max(0.3f))
+                        .description("This parameter allows to control the strength of the pressure."),
+                    ParameterSpec()
+                        .name("Viscosity")
+                        .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0.0f).max(0.3f))
+                        .description("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother movement."),
                     ParameterSpec()
                         .name("Friction")
                         .reference(FloatSpec().member(&SimulationParameters::friction).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))

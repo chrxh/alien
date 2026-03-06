@@ -161,13 +161,6 @@ enum CellDeathConsequences_
     CellDeathConsequences_DetachedPartsDie
 };
 
-using MotionType = int;
-enum MotionType_
-{
-    MotionType_Fluid,
-    MotionType_Collision
-};
-
 using Orientation = int;
 enum Orientation_
 {

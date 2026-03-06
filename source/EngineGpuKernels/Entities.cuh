@@ -612,7 +612,7 @@ struct Object
         return type == ObjectType_Structure && numConnections == 0;
     }
 
-    __device__ __inline__ float getFluidMass() const
+    __device__ __inline__ float getMassForSPH() const
     {
         if (isFluid()) {
             return 0.1f;
