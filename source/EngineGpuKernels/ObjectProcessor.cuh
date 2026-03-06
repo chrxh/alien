@@ -30,6 +30,7 @@ public:
     __inline__ __device__ static void fillDensityMap(SimulationData& data);
 
     __inline__ __device__ static void calcFluidForces_reconnectCells_correctOverlap(SimulationData& data);
+    __inline__ __device__ static void calcFluidBoundaryForces(SimulationData& data);
     __inline__ __device__ static void calcCollisions_reconnectCells_correctOverlap(SimulationData& data);
     __inline__ __device__ static void checkForces(SimulationData& data);
     __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisions_reconnectCells_correctOverlap
@@ -325,6 +326,90 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             object->pos += cellPosDelta;
             object->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
             object->shared2.x = density;
+        }
+        block.sync();
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationData& data)
+{
+    auto block = cg::this_thread_block();
+    auto warp = cg::tiled_partition<32>(block);
+
+    auto& objects = data.entities.objects;
+    auto blockPartition = calcBlockPartition(objects.getNumEntries());
+    auto const smoothingLength = cudaSimulationParameters.smoothingLength.value * 2.0f;  // Fluid uses 2x base smoothing length
+
+    for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
+        auto& object = objects.at(objectIndex);
+
+        __shared__ int scanLength;
+        __shared__ int2 cellPosInt;
+        __shared__ float2 F_boundary;
+
+        if (block.thread_rank() == 0) {
+            F_boundary = {0, 0};
+            if (object->isFluid()) {
+                int radiusInt = ceilf(smoothingLength * 2);
+                scanLength = radiusInt * 2 + 1;
+                cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
+            } else {
+                scanLength = 0;
+            }
+        }
+        block.sync();
+
+        float2 localF_boundary = {0, 0};
+
+        for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
+            int2 scanPos{cellPosInt.x + (scanIndex % scanLength), cellPosInt.y + (scanIndex / scanLength)};
+            data.objectMap.correctPosition(scanPos);
+            auto otherObject = data.objectMap.getFirst(scanPos);
+            for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
+                if (!otherObject) {
+                    break;
+                }
+                if (!otherObject->isFluid() && otherObject != object
+                    && object->detached + otherObject->detached != 1) {
+
+                    auto posDelta = object->pos - otherObject->pos;
+                    data.objectMap.correctDirection(posDelta);
+                    auto adaptedDistance = Math::length(posDelta);
+
+                    if (adaptedDistance <= smoothingLength * 2 && adaptedDistance > NEAR_ZERO) {
+                        auto solidMass = otherObject->getFluidMass();
+
+                        float kernel_d_val = calcKernel_d(adaptedDistance / smoothingLength)
+                            / (smoothingLength * smoothingLength * smoothingLength);
+
+                        // Repulsion force on fluid from solid boundary.
+                        // Factor 2/rho_f mirrors the symmetric SPH pressure factor (1/rho_f + 1/rho_f)
+                        // and is proportional to solid mass so that a heavier boundary repels more strongly.
+                        auto F_on_fluid = posDelta / (-adaptedDistance) * (2.0f / max(NEAR_ZERO, object->density)) * kernel_d_val * solidMass;
+                        localF_boundary += F_on_fluid;
+
+                        // Counter-force on solid: equal and opposite (Newton's 3rd law).
+                        // pressureStrength is applied here directly since this force bypasses the
+                        // block-local F_boundary accumulation path (which gets pressureStrength at the end).
+                        atomicAdd(&otherObject->shared1.x, -F_on_fluid.x * cudaSimulationParameters.pressureStrength.value);
+                        atomicAdd(&otherObject->shared1.y, -F_on_fluid.y * cudaSimulationParameters.pressureStrength.value);
+                    }
+                }
+                otherObject = otherObject->nextObject;
+            }
+        }
+
+        // Warp-level reduction followed by atomic accumulation across warps
+        float sumFx = cg::reduce(warp, localF_boundary.x, cg::plus<float>());
+        float sumFy = cg::reduce(warp, localF_boundary.y, cg::plus<float>());
+        if (warp.thread_rank() == 0) {
+            atomicAdd_block(&F_boundary.x, sumFx);
+            atomicAdd_block(&F_boundary.y, sumFy);
+        }
+        block.sync();
+
+        if (block.thread_rank() == 0) {
+            object->shared1 += F_boundary * cudaSimulationParameters.pressureStrength.value;
         }
         block.sync();
     }
