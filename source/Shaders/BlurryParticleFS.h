@@ -26,7 +26,7 @@ void main()
     // Simple falloff for alpha based on distance from center
     float alpha;
     if (onBackground) {
-        alpha = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.05;
+        alpha = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.15;
     } else {
         alpha = 1.0 - smoothstep(0.2, 0.5, dist);
     }

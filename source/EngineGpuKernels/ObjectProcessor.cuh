@@ -369,7 +369,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                 if (!otherObject) {
                     break;
                 }
-                if (!otherObject->isFluid() && !otherObject->fixed && otherObject != object
+                if (!otherObject->isFluid() && otherObject != object
                     && object->detached + otherObject->detached != 1) {
 
                     auto posDelta = object->pos - otherObject->pos;
@@ -378,7 +378,6 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
 
                     if (adaptedDistance <= smoothingLength * 2 && adaptedDistance > NEAR_ZERO) {
                         auto solidMass = otherObject->getFluidMass();
-                        auto fluidMass = object->getFluidMass();
 
                         float kernel_d_val = calcKernel_d(adaptedDistance / smoothingLength)
                             / (smoothingLength * smoothingLength * smoothingLength);
