@@ -48,7 +48,7 @@ void _InspectorWindow::process()
         return;
     }
     auto width = calcWindowWidth();
-    auto height = isCell() ? StyleRepository::get().scale(370.0f) : StyleRepository::get().scale(70.0f);
+    auto height = isObject() ? StyleRepository::get().scale(370.0f) : StyleRepository::get().scale(70.0f);
     auto borderlessRendering = _SimulationFacade::get()->getSimulationParameters().borderlessRendering.value;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
@@ -56,8 +56,8 @@ void _InspectorWindow::process()
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
     if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto windowPos = ImGui::GetWindowPos();
-        if (isCell()) {
-            processCell(std::get<ExtendedObjectDesc>(entity));
+        if (isObject()) {
+            processObject(std::get<ExtendedObjectDesc>(entity));
         } else {
             processParticle(std::get<EnergyDesc>(entity));
         }
@@ -84,7 +84,7 @@ uint64_t _InspectorWindow::getId() const
     return _entityId;
 }
 
-bool _InspectorWindow::isCell() const
+bool _InspectorWindow::isObject() const
 {
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
     return std::holds_alternative<ExtendedObjectDesc>(entity);
@@ -94,7 +94,7 @@ std::string _InspectorWindow::generateTitle() const
 {
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
     std::stringstream ss;
-    if (isCell()) {
+    if (isObject()) {
         ss << "Cell with id 0x" << std::hex << std::uppercase << _entityId;
     } else {
         ss << "Energy particle with id 0x" << std::hex << std::uppercase << _entityId;
@@ -102,7 +102,7 @@ std::string _InspectorWindow::generateTitle() const
     return "[deprecated] " + ss.str();
 }
 
-void _InspectorWindow::processCell(ExtendedObjectDesc& extendedCell)
+void _InspectorWindow::processObject(ExtendedObjectDesc& extendedCell)
 {
     if (ImGui::BeginTabBar("##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto& object = extendedCell.object;
@@ -773,7 +773,7 @@ void _InspectorWindow::processParticle(EnergyDesc particle)
 
 float _InspectorWindow::calcWindowWidth() const
 {
-    if (isCell()) {
+    if (isObject()) {
         return StyleRepository::get().scale(CellWindowWidth);
     } else {
         return StyleRepository::get().scale(ParticleWindowWidth);
