@@ -353,7 +353,7 @@ __global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleV
 
             auto pos = energy->pos;
 
-            float intensity = (energy->energy + 5.0f) / 200.0f;
+            float intensity = (energy->energy) / 350.0f + 0.10f;
             if (energy->selected) {
                 intensity *= 2.5f;
             }

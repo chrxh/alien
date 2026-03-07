@@ -59,7 +59,7 @@ struct SimulationParameters
     LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial
     LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};                          // for ForceField_Central
     LayerParameter<float> layerLinearForceFieldAngle = {{0}};
-    LayerParameter<float> layerLinearForceFieldStrength = {{0.01f}};
+    LayerParameter<float> layerLinearForceFieldStrength = {{0.0001f}};
 
     // Numerics
     BaseParameter<float> timestepSize = {1.0f};
@@ -201,11 +201,6 @@ struct SimulationParameters
     // Expert settings: Cell color transition rules
     ExpertToggle colorTransitionRulesToggle = {false};
     BaseLayerParameter<ColorVector<ColorTransitionRule>> colorTransitionRules;
-
-    // Expert settings: Object glow
-    ExpertToggle objectGlowToggle = {false};
-    BaseParameter<float> objectGlowRadius = {4.0f};
-    BaseParameter<ColorVector<float>> objectGlowStrength = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
 
     // Expert settings: Customize deletion mutations setting
     ExpertToggle customizeDeletionMutationsToggle = {false};

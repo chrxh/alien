@@ -47,5 +47,5 @@ private:
     bool _setGlow = false;
     bool _glowValue = false;
 
-    bool _restrictToSelectedCreatures = false;
+    bool _restrictToSelectedCreatures = true;
 };

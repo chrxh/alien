@@ -21,8 +21,6 @@ uniform bool onBackground;
 
 void main()
 {
-    vColor = aColor;
-    
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos.xy - rectUpperLeft;
     vec2 screenPos = relativePos * zoom;
@@ -32,14 +30,20 @@ void main()
 
     float ballSize;
     if (onBackground) {
-        ballSize = 10.0;
+        ballSize = 15.0;
     } else {
         ballSize = zoom < 7.0 ? 0.0 : 0.2;
     }
 
-    if (aGlow > 0.5 && !onBackground) {
-        ballSize = 0.5;
-        vColor = aColor * 10.0;
+    if (aGlow > 0.5) {
+        if (onBackground) {
+            vColor = aColor * 4;
+        } else {
+            ballSize = 1.0;
+            vColor = aColor * 20;
+        }
+    } else {
+        vColor = aColor;
     }
 
     gl_PointSize = radius * ballSize;
