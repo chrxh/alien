@@ -29,6 +29,14 @@ include_directories(
     external)
 
 if (MSVC)
+    option(ALIEN_MSVC_FAST_BUILD "Enable faster MSVC debug info generation and linking for local development builds" ON)
+    if (ALIEN_MSVC_FAST_BUILD)
+        # Prefer /Z7 over /Zi in Debug/RelWithDebInfo to reduce PDB writer contention with /MP.
+        set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
+        # Reduce debug link time in Visual Studio builds.
+        add_link_options($<$<CONFIG:Debug,RelWithDebInfo>:/DEBUG:FASTLINK>)
+    endif()
+
     # Suppress `warning C4005: 'FOO': macro redefinition`
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-wd4005>)
     
