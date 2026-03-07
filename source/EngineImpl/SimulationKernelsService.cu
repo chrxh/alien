@@ -42,6 +42,14 @@ int SimulationKernelsService::calcOptimalThreadsForFluidKernel(SimulationParamet
     return static_cast<int>(scanRectLength * scanRectLength);
 }
 
+int SimulationKernelsService::calcOptimalThreadsForFluidBoundaryKernel(SimulationParameters const& parameters) const
+{
+    // Fluid particles use 2x base smoothing length; the kernel support extends to 2x that,
+    // so the scan rect length is based on smoothingLength_base * 2 * 2 = smoothingLength_base * 4.
+    auto scanRectLength = ceilf(parameters.smoothingLength.value * 4) * 2 + 1;
+    return static_cast<int>(scanRectLength * scanRectLength);
+}
+
 CudaGraphConfig SimulationKernelsService::buildGraphConfig(
     SettingsForSimulation const& settings,
     SimulationData const& data,
@@ -51,10 +59,10 @@ CudaGraphConfig SimulationKernelsService::buildGraphConfig(
     CudaGraphConfig config;
     config.timestepMod3 = toInt(timestep % 3);
     config.executeCellFunction = forceCellFunctionExecution ? true : timestep % TIMESTEPS_PER_CELL_FUNCTION == 0;
-    config.motionType = settings.simulationParameters.motionType.value;
     config.hasLayers = settings.simulationParameters.numLayers > 0;
     config.rigidityEnabled = isRigidityUpdateEnabled(settings);
     config.fluidKernelThreads = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
+    config.fluidBoundaryKernelThreads = calcOptimalThreadsForFluidBoundaryKernel(settings.simulationParameters);
     config.numBlocks = settings.cudaSettings.numBlocks;
     return config;
 }
@@ -75,11 +83,8 @@ void SimulationKernelsService::launchTimestepKernels(
     STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
 
-    if (config.motionType == MotionType_Fluid) {
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
-    } else {
-        STREAM_KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, _stream, numBlocks, data);
-    }
+    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, numBlocks, config.fluidBoundaryKernelThreads, data);
 
     if (config.hasLayers) {
         STREAM_KERNEL_CALL(cudaApplyForceFieldSettings, _stream, numBlocks, data);
@@ -216,6 +221,7 @@ CudaGraphPreviewConfig SimulationKernelsService::buildPreviewGraphConfig(
     config.executeCellFunctions = forceCellFunctionExecution ? true : timestep % TIMESTEPS_PER_CELL_FUNCTION == 0;
     config.detailSimulation = detailSimulation;
     config.fluidKernelThreads = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
+    config.fluidBoundaryKernelThreads = calcOptimalThreadsForFluidBoundaryKernel(settings.simulationParameters);
     config.numBlocks = settings.cudaSettings.numBlocks;
     return config;
 }
@@ -236,6 +242,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, numBlocks, config.fluidBoundaryKernelThreads, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
@@ -265,6 +272,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, numBlocks, config.fluidBoundaryKernelThreads, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);

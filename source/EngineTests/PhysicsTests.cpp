@@ -134,3 +134,37 @@ TEST_F(PhysicsTests, noGhostRotations)
     EXPECT_TRUE(Math::length(savedPos2 - currentPos2) < 0.01f);
     EXPECT_TRUE(Math::length(savedPos3 - currentPos3) < 0.01f);
 }
+
+TEST_F(PhysicsTests, noGhostMovements)
+{
+    _parameters.friction.baseValue = 0.001f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto data = Desc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({34.97, 11.14}),
+                    })
+                    .addCreature({
+                        ObjectDesc().id(2).pos({33.95, 11.14}),
+                        ObjectDesc().id(3).pos({34.01, 12.16}),
+                        ObjectDesc().id(4).pos({34.88, 12.66}),
+                    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+
+    data.getConnectionRef(2, 1)._angleFromPrevious = 300.0f;
+    data.getConnectionRef(2, 3)._angleFromPrevious = 60.0f;
+    data.getConnectionRef(3, 2)._angleFromPrevious = 240.0f;
+    data.getConnectionRef(3, 4)._angleFromPrevious = 120.0f;
+
+    auto center = DescEditService::get().calcCenter(data);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1000);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto newCenter = DescEditService::get().calcCenter(actualData);
+
+    EXPECT_TRUE(approxCompare(center, newCenter, 0.01f));
+}

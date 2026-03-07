@@ -9,7 +9,7 @@
 
 __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft);
 __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects);
-__global__ void cudaExtractBlurryParticleData(SimulationData data, BlurryParticleVertexData* blurryParticleData, uint64_t* numBlurryParticles);
+__global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles);
 __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 visibleTopLeft);
 __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects);
 __global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices);

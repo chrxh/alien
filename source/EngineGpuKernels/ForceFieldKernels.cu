@@ -68,7 +68,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
             if (object->fixed) {
                 continue;
             }
-            object->shared1 += calcResultingAcceleration(object->pos);
+            object->vel += calcResultingAcceleration(object->pos);
         }
     }
     {

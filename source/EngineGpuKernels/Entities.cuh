@@ -455,6 +455,7 @@ struct Creature
 struct Structure
 {
     float energy;
+    float glow;
 
     // Cluster data
     uint32_t clusterIndex;
@@ -606,6 +607,18 @@ struct Object
             return 0;
         }
     }
+
+    __device__ __inline__ bool isFluid() const { return type == ObjectType_Structure && numConnections == 0; }
+
+    __device__ __inline__ float getMassForSPH() const
+    {
+        if (isFluid()) {
+            return 0.1f;
+        } else {
+            return 1.0f;
+        }
+    }
+
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
         if ((connectionIndex1 - connectionIndex2 + numConnections) % numConnections == 0) {

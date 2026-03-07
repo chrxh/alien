@@ -52,7 +52,7 @@ using GeometryBuffers = std::shared_ptr<_GeometryBuffers>;
 
 struct NumRenderObjects;
 struct ObjectVertexData;
-struct BlurryParticleVertexData;
+struct FluidParticleVertexData;
 
 struct ParametersFilter;
 

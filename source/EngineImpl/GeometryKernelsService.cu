@@ -18,7 +18,7 @@ void GeometryKernelsService::init()
     memoryManager.acquireMemory(1, _numAttackEventVertices);
     memoryManager.acquireMemory(1, _numDetonationEventVertices);
     memoryManager.acquireMemory(1, _numLocations);
-    memoryManager.acquireMemory(1, _numBlurryParticles);
+    memoryManager.acquireMemory(1, _numFluidParticles);
 }
 
 void GeometryKernelsService::shutdown()
@@ -32,7 +32,7 @@ void GeometryKernelsService::shutdown()
     memoryManager.freeMemory(_numAttackEventVertices);
     memoryManager.freeMemory(_numDetonationEventVertices);
     memoryManager.freeMemory(_numLocations);
-    memoryManager.freeMemory(_numBlurryParticles);
+    memoryManager.freeMemory(_numFluidParticles);
 }
 
 void GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
@@ -61,10 +61,10 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
     cudaDeviceSynchronize();
     result.objects = copyToHost(_numObjects);
 
-    setValueToDevice(_numBlurryParticles, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractBlurryParticleData, data, nullptr, _numBlurryParticles);
+    setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractFluidParticleData, data, nullptr, _numFluidParticles);
     cudaDeviceSynchronize();
-    result.blurryParticles = copyToHost(_numBlurryParticles);
+    result.fluidParticles = copyToHost(_numFluidParticles);
 
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects);
@@ -124,14 +124,14 @@ void GeometryKernelsService::extractObjectData(
         KERNEL_CALL(cudaExtractObjectData, data, mappedCellBuffer, _numObjects);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.blurryParticleBuffer));
-        BlurryParticleVertexData* mappedBlurryParticleBuffer;
-        size_t blurryParticleBufferSize;
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.fluidParticleBuffer));
+        FluidParticleVertexData* mappedFluidParticleBuffer;
+        size_t fluidParticleBufferSize;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
-            reinterpret_cast<void**>(&mappedBlurryParticleBuffer), &blurryParticleBufferSize, renderingData.blurryParticleBuffer));
-        setValueToDevice(_numBlurryParticles, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractBlurryParticleData, data, mappedBlurryParticleBuffer, _numBlurryParticles);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.blurryParticleBuffer));
+            reinterpret_cast<void**>(&mappedFluidParticleBuffer), &fluidParticleBufferSize, renderingData.fluidParticleBuffer));
+        setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractFluidParticleData, data, mappedFluidParticleBuffer, _numFluidParticles);
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.fluidParticleBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
         LocationVertexData* mappedLocationBuffer;
@@ -200,8 +200,8 @@ void GeometryKernelsService::extractObjectData(
         setValueToDevice(_numObjects, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractObjectData, data, renderingData.deviceObjectBuffer, _numObjects);
 
-        setValueToDevice(_numBlurryParticles, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractBlurryParticleData, data, renderingData.deviceBlurryParticleBuffer, _numBlurryParticles);
+        setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractFluidParticleData, data, renderingData.deviceFluidParticleBuffer, _numFluidParticles);
 
         setValueToDevice(_numLocations, static_cast<uint64_t>(0));
         KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);

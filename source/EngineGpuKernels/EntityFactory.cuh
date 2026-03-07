@@ -365,6 +365,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
 
     if (objectTO.type == ObjectType_Structure) {
         object->typeData.structure.energy = objectTO.typeData.structure.energy;
+        object->typeData.structure.glow = objectTO.typeData.structure.glow;
     } else if (objectTO.type == ObjectType_FreeCell) {
         object->typeData.freeCell.energy = objectTO.typeData.freeCell.energy;
         object->typeData.freeCell.age = objectTO.typeData.freeCell.age;

@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    std::string_view const BlurryParticleFS = R"(
+    std::string_view const FluidParticleFS = R"(
 #version 330 core
 out vec4 FragColor;
 
@@ -26,7 +26,7 @@ void main()
     // Simple falloff for alpha based on distance from center
     float alpha;
     if (onBackground) {
-        alpha = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.05;
+        alpha = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.15;
     } else {
         alpha = 1.0 - smoothstep(0.2, 0.5, dist);
     }

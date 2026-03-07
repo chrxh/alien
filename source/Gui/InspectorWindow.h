@@ -20,10 +20,10 @@ public:
     uint64_t getId() const;
 
 private:
-    bool isCell() const;
+    bool isObject() const;
     std::string generateTitle() const;
 
-    void processCell(ExtendedObjectDesc& creatureCell);
+    void processObject(ExtendedObjectDesc& creatureCell);
     void processCellGeneralTab(ExtendedObjectDesc& creatureCell);
     void processCellTypeTab(ObjectDesc& cell);
     void processCellTypePropertiesTab(ObjectDesc& cell);
@@ -41,6 +41,8 @@ private:
     void processSensorContent(SensorDesc& sensor);
     void processReconnectorContent(ReconnectorDesc& reconnector);
     void processDetonatorContent(DetonatorDesc& detonator);
+
+    void processStructureTab(ObjectDesc& object);
 
     void processParticle(EnergyDesc particle);
 

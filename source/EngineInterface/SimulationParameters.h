@@ -59,18 +59,15 @@ struct SimulationParameters
     LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial
     LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};                          // for ForceField_Central
     LayerParameter<float> layerLinearForceFieldAngle = {{0}};
-    LayerParameter<float> layerLinearForceFieldStrength = {{0.01f}};
+    LayerParameter<float> layerLinearForceFieldStrength = {{0.0001f}};
 
     // Numerics
     BaseParameter<float> timestepSize = {1.0f};
 
     // Physics: Motion
-    BaseParameter<MotionType> motionType = {MotionType_Fluid};
     BaseParameter<float> smoothingLength = {0.8f};       // for MotionType_Fluid
     BaseParameter<float> viscosityStrength = {0.1f};     // for MotionType_Fluid
     BaseParameter<float> pressureStrength = {0.1f};      // for MotionType_Fluid
-    BaseParameter<float> maxCollisionDistance = {1.3f};  // for MotionType_Collision
-    BaseParameter<float> repulsionStrength = {0.08f};    // for MotionType_Collision
     BaseLayerParameter<float> friction = {.baseValue = 0.001f};
     BaseParameter<float> innerFriction = {0.6f};
     BaseLayerParameter<float> rigidity = {.baseValue = 0.0f};
@@ -79,6 +76,7 @@ struct SimulationParameters
     BaseParameter<float> maxVelocity = {2.0f};
     BaseLayerParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
     BaseParameter<float> minObjectDistance = {0.3f};
+    static float constexpr maxAcceleration = 0.4f;
     static float constexpr maxForceDecayProbability = 0.2f;
 
     // Physics: Binding
@@ -203,11 +201,6 @@ struct SimulationParameters
     // Expert settings: Cell color transition rules
     ExpertToggle colorTransitionRulesToggle = {false};
     BaseLayerParameter<ColorVector<ColorTransitionRule>> colorTransitionRules;
-
-    // Expert settings: Object glow
-    ExpertToggle objectGlowToggle = {false};
-    BaseParameter<float> objectGlowRadius = {4.0f};
-    BaseParameter<ColorVector<float>> objectGlowStrength = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
 
     // Expert settings: Customize deletion mutations setting
     ExpertToggle customizeDeletionMutationsToggle = {false};

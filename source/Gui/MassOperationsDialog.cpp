@@ -9,19 +9,16 @@
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
+#include <EngineInterface/SimulationFacade.h>
 #include "AlienGui.h"
 #include "StyleRepository.h"
-#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
     auto constexpr RightColumnWidth = 120.0f;
 }
 
-void MassOperationsDialog::initIntern()
-{
-
-}
+void MassOperationsDialog::initIntern() {}
 
 void MassOperationsDialog::processIntern()
 {
@@ -100,9 +97,19 @@ void MassOperationsDialog::processIntern()
     AlienGui::Group(AlienGui::GroupParameters().text("Mutants"));
     ImGui::Checkbox("##lineageId", &_randomizeLineageId);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text("Randomize mutation ids");
+    AlienGui::Text("Randomize lineage ids");
 
-    AlienGui::Group(AlienGui::GroupParameters().text("Options"));
+    AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
+    ImGui::Checkbox("##glow", &_randomizeGlow);
+    ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
+    posX = ImGui::GetCursorPos().x;
+    ImGui::BeginDisabled(!_randomizeGlow);
+    AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").name("Minimum glow").min(0).max(1).textWidth(RightColumnWidth), &_minGlow);
+    ImGui::SetCursorPosX(posX);
+    AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").name("Maximum glow").min(0).max(1).textWidth(RightColumnWidth), &_maxGlow);
+    ImGui::EndDisabled();
+
+    AlienGui::Group(AlienGui::GroupParameters().text("Options").highlighted(true));
     ImGui::Checkbox("##restrictToSelection", &_restrictToSelectedCreatures);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienGui::Text("Restrict to selection");
@@ -128,7 +135,8 @@ void MassOperationsDialog::processIntern()
 
 MassOperationsDialog::MassOperationsDialog()
     : AlienDialog("Mass operations")
-{}
+{
+}
 
 void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
@@ -182,6 +190,9 @@ void MassOperationsDialog::onExecute()
     if (_randomizeLineageId) {
         DescEditService::get().randomizeLineageIds(content);
     }
+    if (_randomizeGlow) {
+        DescEditService::get().randomizeGlow(content, _minGlow, _maxGlow);
+    }
 
     if (_restrictToSelectedCreatures) {
         _SimulationFacade::get()->removeSelectedObjects(true);
@@ -219,6 +230,9 @@ bool MassOperationsDialog::isOkEnabled()
     if (_randomizeLineageId) {
         result = true;
     }
+    if (_randomizeGlow) {
+        result = true;
+    }
     return result;
 }
 
@@ -230,6 +244,8 @@ void MassOperationsDialog::validateAndCorrect()
     _maxEnergy = std::max(0.0f, _maxEnergy);
     _minCountdown = std::max(0, _minCountdown);
     _maxCountdown = std::max(0, _maxCountdown);
+    _minGlow = std::clamp(_minGlow, 0.0f, 1.0f);
+    _maxGlow = std::clamp(_maxGlow, 0.0f, 1.0f);
 
     if (_minAge > _maxAge) {
         _maxAge = _minAge;
@@ -239,5 +255,8 @@ void MassOperationsDialog::validateAndCorrect()
     }
     if (_minCountdown > _maxCountdown) {
         _maxCountdown = _minCountdown;
+    }
+    if (_minGlow > _maxGlow) {
+        _maxGlow = _minGlow;
     }
 }
