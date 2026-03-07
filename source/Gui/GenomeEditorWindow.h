@@ -33,7 +33,7 @@ private:
     void onCopyGenome();
     void onPasteGenome();
     void onInjectGenome();
-    void onCreateSeed();
+    void onCreateSeed(bool provideEnergy);
     void onScheduleAddCreatureTab(uint64_t creatureId, GenomeDesc const& genome);
     void onScheduleAddDraftTab(GenomeDesc const& genome);
 

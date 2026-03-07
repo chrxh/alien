@@ -152,8 +152,17 @@ void GenomeEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EGG).tooltip("Create a seed with current genome"))) {
-        onCreateSeed();
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_SEEDLING).tooltip("Create a seed with current genome without free energy supply"))) {
+        onCreateSeed(false);
+    }
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
+                                    .text(ICON_FA_SEEDLING)
+                                    .secondText(ICON_FA_BOLT)
+                                    .secondTextOffset({30.0f, 25.0f})
+                                    .tooltip("Create a seed with current genome with free energy supply"))) {
+        onCreateSeed(true);
     }
 
     AlienGui::Separator();
@@ -271,7 +280,7 @@ void GenomeEditorWindow::onInjectGenome()
     }
 }
 
-void GenomeEditorWindow::onCreateSeed()
+void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
 {
     auto pos = Viewport::get().getCenterInWorldPos();
     pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
@@ -282,7 +291,11 @@ void GenomeEditorWindow::onCreateSeed()
 
     Desc seed;
     seed.addCreature(
-        {ObjectDesc().pos(pos).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc()
+             .pos(pos)
+             .stiffness(1.0f)
+             .color(EditorModel::get().getDefaultColorCode())
+             .type(CellDesc().constructor(ConstructorDesc().provideEnergy(provideEnergy ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
