@@ -19,6 +19,14 @@ enum CreationMode_
     CreationMode_Drawing
 };
 
+using DrawingType = int;
+enum DrawingType_
+{
+    DrawingType_Solid,
+    DrawingType_Fluid,
+    DrawingType_Count
+};
+
 class CreatorWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatorWindow);
@@ -62,6 +70,7 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
+    DrawingType _drawingType = DrawingType_Solid;
     Desc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;

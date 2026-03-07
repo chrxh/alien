@@ -466,6 +466,8 @@ namespace Const
 
     std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of cells.";
 
+    std::string const CreatorDrawingTypeTooltip = "Specifies whether the drawn cells should form a solid body (with connections) or a fluid (without connections).";
+
     std::string const CreatorRectangleWidthTooltip = "The width of the rectangle in cells.";
 
     std::string const CreatorRectangleHeightTooltip = "The height of the rectangle in cells.";

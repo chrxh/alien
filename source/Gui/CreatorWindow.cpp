@@ -32,7 +32,7 @@ namespace
         {CreationMode_CreateRectangle, "Create a rectangular cell network"},
         {CreationMode_CreateHexagon, "Create a hexagonal cell network"},
         {CreationMode_CreateDisc, "Create a disc-shaped cell network"},
-        {CreationMode_Drawing, "Draw freehand cell network"},
+        {CreationMode_Drawing, "Draw freehand"},
     };
 
     auto const RightColumnWidth = 160.0f;
@@ -83,6 +83,13 @@ void CreatorWindow::processIntern()
                     .tooltip(Const::CreatorPencilRadiusTooltip),
                 &pencilWidth);
             EditorModel::get().setPencilWidth(pencilWidth);
+            AlienGui::Switcher(
+                AlienGui::SwitcherParameters()
+                    .name("Drawing type")
+                    .textWidth(RightColumnWidth)
+                    .values({"Solid", "Fluid"})
+                    .tooltip(Const::CreatorDrawingTypeTooltip),
+                _drawingType);
         }
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
@@ -208,10 +215,14 @@ void CreatorWindow::onDrawing()
             }
         }
     }
-    DescEditService::get().reconnectCells(_drawingDescription, 1.5f);
+    if (_drawingType == DrawingType_Solid) {
+        DescEditService::get().reconnectCells(_drawingDescription, 1.5f);
+    }
     _SimulationFacade::get()->addAndSelectSimulationData(Desc(_drawingDescription));
 
-    _SimulationFacade::get()->reconnectSelectedObjects();
+    if (_drawingType == DrawingType_Solid) {
+        _SimulationFacade::get()->reconnectSelectedObjects();
+    }
     EditorModel::get().update();
 }
 
