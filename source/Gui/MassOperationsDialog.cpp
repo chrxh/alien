@@ -100,10 +100,13 @@ void MassOperationsDialog::processIntern()
     AlienGui::Text("Randomize mutation ids");
 
     AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
-    ImGui::Checkbox("##setGlow", &_setGlow);
+    ImGui::Checkbox("##glow", &_randomizeGlow);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    ImGui::BeginDisabled(!_setGlow);
-    AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Set glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glowValue);
+    posX = ImGui::GetCursorPos().x;
+    ImGui::BeginDisabled(!_randomizeGlow);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.2f").name("Minimum glow").textWidth(RightColumnWidth), _minGlow);
+    ImGui::SetCursorPosX(posX);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.2f").name("Maximum glow").textWidth(RightColumnWidth), _maxGlow);
     ImGui::EndDisabled();
 
     AlienGui::Group(AlienGui::GroupParameters().text("Options"));
@@ -132,7 +135,9 @@ void MassOperationsDialog::processIntern()
 
 MassOperationsDialog::MassOperationsDialog()
     : AlienDialog("Mass operations")
-{}
+{
+    _defaultHeight = 500.0f;
+}
 
 void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
@@ -186,8 +191,8 @@ void MassOperationsDialog::onExecute()
     if (_randomizeLineageId) {
         DescEditService::get().randomizeLineageIds(content);
     }
-    if (_setGlow) {
-        DescEditService::get().setGlow(content, _glowValue);
+    if (_randomizeGlow) {
+        DescEditService::get().randomizeGlow(content, _minGlow, _maxGlow);
     }
 
     if (_restrictToSelectedCreatures) {
@@ -226,7 +231,7 @@ bool MassOperationsDialog::isOkEnabled()
     if (_randomizeLineageId) {
         result = true;
     }
-    if (_setGlow) {
+    if (_randomizeGlow) {
         result = true;
     }
     return result;
@@ -240,6 +245,8 @@ void MassOperationsDialog::validateAndCorrect()
     _maxEnergy = std::max(0.0f, _maxEnergy);
     _minCountdown = std::max(0, _minCountdown);
     _maxCountdown = std::max(0, _maxCountdown);
+    _minGlow = std::clamp(_minGlow, 0.0f, 1.0f);
+    _maxGlow = std::clamp(_maxGlow, 0.0f, 1.0f);
 
     if (_minAge > _maxAge) {
         _maxAge = _minAge;
@@ -249,5 +256,8 @@ void MassOperationsDialog::validateAndCorrect()
     }
     if (_minCountdown > _maxCountdown) {
         _maxCountdown = _minCountdown;
+    }
+    if (_minGlow > _maxGlow) {
+        _maxGlow = _minGlow;
     }
 }

@@ -44,8 +44,9 @@ private:
 
     bool _randomizeLineageId = false;
 
-    bool _setGlow = false;
-    float _glowValue = 0;
+    bool _randomizeGlow = false;
+    float _minGlow = 0;
+    float _maxGlow = 1.0f;
 
     bool _restrictToSelectedCreatures = true;
 };

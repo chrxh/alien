@@ -23,6 +23,8 @@ protected:
 
     virtual void openIntern() {}
 
+    float _defaultHeight = 150.0f;
+
     void changeTitle(std::string const& title);
     virtual void close();
 
