@@ -155,40 +155,7 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
 
         auto idx = alienAtomicAdd64(numObjects, uint64_t(1));
         if (objectData != nullptr) {
-            int isInTriangleOrQuad = 0;
-            if (object->numConnections > 1) {
-                bool first = true;
-                int backIndices[MAX_OBJECT_CONNECTIONS];
-                for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
-                    auto connectionIndex = i % numConnections;
-                    auto const& connectedObject = object->connections[connectionIndex].object;
-                    auto backIndex = connectedObject->getConnectionIndex(object);
-                    backIndices[connectionIndex] = backIndex;
-                    if (first) {
-                        first = false;
-                        continue;
-                    }
-                    auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
-                    auto const& prevConnectedObject = object->connections[prevIndex].object;
-                    auto prevBackIndex = backIndices[prevIndex];
-
-                    // Triangle?
-                    if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
-                        isInTriangleOrQuad = 1;
-                        break;
-                    }
-
-                    // Rectangle?
-                    auto fourthCellCandidate1 = connectedObject->getConnectedObject(backIndex + 1);
-                    auto fourthCellCandidate2 = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
-                    if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
-                        && connectedObject != prevConnectedObject) {
-                        isInTriangleOrQuad = 1;
-                        break;
-                    }
-                }
-            }
-
+            int isIsolated = (object->numConnections == 0) ? 1 : 0;
 
             auto const& pos = object->pos;
 
@@ -242,8 +209,8 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
                 signalChanges = toFloat(object->typeData.cell.signalChanges) / 255.0f;
             }
 
-            // Pack cellType (bits 0-7), objectType (bits 8-15), and isInTriangleOrQuad (bit 16) into state field
-            objectData[idx].state = cellType | (object->type << 8) | (isInTriangleOrQuad << 16);
+            // Pack cellType (bits 0-7), objectType (bits 8-15), and isIsolated (bit 16) into state field
+            objectData[idx].state = cellType | (object->type << 8) | (isIsolated << 16);
             objectData[idx].signalChanges = signalChanges;
 
             object->tempValue.as_uint64 = idx;

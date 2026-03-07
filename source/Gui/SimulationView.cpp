@@ -302,7 +302,7 @@ void SimulationView::setupRenderPipeline()
                 _PostProcessingRenderStep::create(StepParameters()
                                                       .shader(ShaderSources::MergeAdditive)
                                                       .addUniform("colorFactor1", 1.0f)
-                                                      .addUniform("colorFactor2", 0.6f)
+                                                      .addUniform("colorFactor2", 2.0f)
                                                       .addUniform("colorFactor3", 1.5f)),
             }),
         },
