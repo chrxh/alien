@@ -97,7 +97,7 @@ void MassOperationsDialog::processIntern()
     AlienGui::Group(AlienGui::GroupParameters().text("Mutants"));
     ImGui::Checkbox("##lineageId", &_randomizeLineageId);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text("Randomize mutation ids");
+    AlienGui::Text("Randomize lineage ids");
 
     AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
     ImGui::Checkbox("##glow", &_randomizeGlow);

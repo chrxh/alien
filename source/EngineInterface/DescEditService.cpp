@@ -502,6 +502,7 @@ void DescEditService::randomizeLineageIds(Desc& description) const
 {
     for (auto& genome : description._genomes) {
         genome._lineageId = NumberGenerator::get().getRandomInt();
+        genome._prevLineageId = 0;
     }
 }
 
