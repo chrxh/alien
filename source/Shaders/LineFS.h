@@ -9,12 +9,13 @@ namespace Shaders
 in vec3 fragColor;
 in float edgeDist;
 in float lineAlpha;
+in float coreEdge;
 out vec4 FragColor;
 
 void main()
 {
-    // Smooth edge falloff for anti-aliasing
-    float edgeAlpha = 1.0 - smoothstep(0.5, 1.0, abs(edgeDist));
+    // Core region at full brightness, fade only in the AA margin
+    float edgeAlpha = 1.0 - smoothstep(coreEdge, 1.0, abs(edgeDist));
     float alpha = edgeAlpha * lineAlpha;
     FragColor = vec4(fragColor * alpha, 1.0);
 }

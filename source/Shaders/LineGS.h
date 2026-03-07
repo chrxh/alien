@@ -13,6 +13,7 @@ in vec3 vertexColor[];
 out vec3 fragColor;
 out float edgeDist;
 out float lineAlpha;
+out float coreEdge;
 
 uniform vec2 viewportSize;
 uniform float zoom;
@@ -35,15 +36,23 @@ void main()
     // Calculate perpendicular direction (for line thickness)
     vec2 perp = vec2(-dir.y, dir.x);
     
-    // Line half-width in pixels with minimum to prevent sub-pixel disappearance
-    float halfWidth = zoom * 0.15 * 0.5;
-    float minHalfWidth = 1.0;
+    // Core half-width in pixels (same as original line width)
+    float coreHalfWidth = zoom * 0.15 * 0.5;
+    
+    // Add AA margin for smooth edges without shrinking the visible line
+    float aaMargin = 1.0;
+    
+    // For sub-pixel lines, clamp minimum core size and reduce alpha proportionally
+    // (0.5px half-width = 1px full width is the minimum visible line)
     float alpha = 1.0;
-    if (halfWidth < minHalfWidth) {
-        alpha = halfWidth / minHalfWidth;
-        halfWidth = minHalfWidth;
+    if (coreHalfWidth < 0.5) {
+        alpha = max(coreHalfWidth * 2.0, 0.0);
+        coreHalfWidth = 0.5;
     }
-    vec2 offset = perp * halfWidth;
+    
+    float totalHalfWidth = coreHalfWidth + aaMargin;
+    float coreRatio = coreHalfWidth / totalHalfWidth;
+    vec2 offset = perp * totalHalfWidth;
     
     // Create 3D positions for lighting calculation
     vec3 pos0 = vec3(p0.xyz);
@@ -69,6 +78,7 @@ void main()
     fragColor = color0;
     edgeDist = -1.0;
     lineAlpha = alpha;
+    coreEdge = coreRatio;
     EmitVertex();
     
     // Vertex 1 (top-left)
@@ -76,6 +86,7 @@ void main()
     fragColor = color0;
     edgeDist = 1.0;
     lineAlpha = alpha;
+    coreEdge = coreRatio;
     EmitVertex();
     
     // Vertex 2 (bottom-right)
@@ -83,6 +94,7 @@ void main()
     fragColor = color1;
     edgeDist = -1.0;
     lineAlpha = alpha;
+    coreEdge = coreRatio;
     EmitVertex();
     
     // Vertex 3 (top-right)
@@ -90,6 +102,7 @@ void main()
     fragColor = color1;
     edgeDist = 1.0;
     lineAlpha = alpha;
+    coreEdge = coreRatio;
     EmitVertex();
     
     EndPrimitive();
