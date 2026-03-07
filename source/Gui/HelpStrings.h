@@ -464,9 +464,9 @@ namespace Const
         "The following cell functions obtain their input from channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions obtain their input from channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron"};
 
-    std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of cells.";
+    std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of structure objects.";
 
-    std::string const CreatorDrawingTypeTooltip = "Specifies whether the drawn cells should form a solid body (with connections) or a fluid (without connections).";
+    std::string const CreatorDrawingTypeTooltip = "Specifies whether the drawn structure objects should form a solid body (with connections) or a fluid (without connections).";
 
     std::string const CreatorRectangleWidthTooltip = "The width of the rectangle in cells.";
 
