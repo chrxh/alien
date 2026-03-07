@@ -86,7 +86,7 @@ __inline__ __device__ void ObjectProcessor::fillDensityMap(SimulationData& data)
         auto object = data.entities.objects.at(index);
         if (object->type == ObjectType_FreeCell) {
             data.preprocessedSimulationData.densityMap.addFreeCell(object);
-        } else if (object->type == ObjectType_Structure) {
+        } else if (object->type == ObjectType_Structure && !object->isFluid()) {
             data.preprocessedSimulationData.densityMap.addStructureObject(object);
         }
     }
