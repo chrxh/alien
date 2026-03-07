@@ -136,7 +136,6 @@ void MassOperationsDialog::processIntern()
 MassOperationsDialog::MassOperationsDialog()
     : AlienDialog("Mass operations")
 {
-    _defaultHeight = 500.0f;
 }
 
 void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)

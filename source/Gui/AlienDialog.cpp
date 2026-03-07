@@ -36,7 +36,7 @@ void AlienDialog::process()
     }
     if (_state == DialogState::JustOpened) {
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowSize({scale(450.0f), scale(_defaultHeight)}, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize({scale(450.0f), scale(150.0f)}, ImGuiCond_FirstUseEver);
         ImGui::OpenPopup(_title.c_str());
         _state = DialogState::Open;
     }
