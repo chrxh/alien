@@ -47,7 +47,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
 {
     switch (objectParameter.objectType) {
     case ObjectType_Structure:
-        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(StructureDesc().energy(42.0f));
+        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(StructureDesc().energy(42.0f).glow(1.0f));
     case ObjectType_FreeCell:
         return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FreeCellDesc().energy(42.0f).age(7));
     case ObjectType_Cell: {
@@ -156,31 +156,30 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
 
 std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
 {
-    auto genome =
-        GenomeDesc()
-            .name("Test Genome")
-            .lineageId(502)
-            .prevLineageId(501)
-            .frontAngle(270.0f)
-            .lineageMutationProbability(0.05f)
-            .neuronMutation1(NeuronMutationDesc().probability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f))
-            .neuronMutation2(NeuronMutationDesc().probability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f))
-            .connectionMutationRate1(ConnectionMutationDesc().probability(0.6f).sigma(0.7f))
-            .connectionMutationRate2(ConnectionMutationDesc().probability(0.8f).sigma(0.9f))
-            .genes({
-                GeneDesc()
-                    .name("Test Gene")
-                    .shape(ConstructorShape_Hexagon)
-                    .numBranches(4)
-                    .separation(true)
-                    .numConcatenations(6)
-                    .angleAlignment(ConstructorAngleAlignment_180)
-                    .stiffness(0.75f)
-                    .connectionDistance(0.8f)
-                    .nodes({
-                        createNonDefaultNodeDesc(nodeParameter),
-                    }),
-            });
+    auto genome = GenomeDesc()
+                      .name("Test Genome")
+                      .lineageId(502)
+                      .prevLineageId(501)
+                      .frontAngle(270.0f)
+                      .lineageMutationProbability(0.05f)
+                      .neuronMutation1(NeuronMutationDesc().probability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f))
+                      .neuronMutation2(NeuronMutationDesc().probability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f))
+                      .connectionMutationRate1(ConnectionMutationDesc().probability(0.6f).sigma(0.7f))
+                      .connectionMutationRate2(ConnectionMutationDesc().probability(0.8f).sigma(0.9f))
+                      .genes({
+                          GeneDesc()
+                              .name("Test Gene")
+                              .shape(ConstructorShape_Hexagon)
+                              .numBranches(4)
+                              .separation(true)
+                              .numConcatenations(6)
+                              .angleAlignment(ConstructorAngleAlignment_180)
+                              .stiffness(0.75f)
+                              .connectionDistance(0.8f)
+                              .nodes({
+                                  createNonDefaultNodeDesc(nodeParameter),
+                              }),
+                      });
 
     auto creature =
         CreatureDesc().ancestorId(1001).generation(7).numObjects(25).frontAngleId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
@@ -740,7 +739,8 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
             reconnectorModeDesc = ReconnectFreeCellDesc().restrictToColor(2);
             break;
         case ReconnectorMode_Creature:
-            reconnectorModeDesc = ReconnectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_RelatedLineage);
+            reconnectorModeDesc =
+                ReconnectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeDesc();
@@ -835,7 +835,8 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
             sensorModeDesc = DetectFreeCellGenomeDesc().minDensity(0.20f).restrictToColor(6);
             break;
         case SensorMode_DetectCreature:
-            sensorModeDesc = DetectCreatureGenomeDesc().minNumCells(3).maxNumCells(15).restrictToColor(4).restrictToLineage(LineageRestriction_UnrelatedLineage);
+            sensorModeDesc =
+                DetectCreatureGenomeDesc().minNumCells(3).maxNumCells(15).restrictToColor(4).restrictToLineage(LineageRestriction_UnrelatedLineage);
             break;
         default:
             sensorModeDesc = SensorModeGenomeDesc();

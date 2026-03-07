@@ -179,10 +179,6 @@ void SimulationView::setupRenderPipeline()
     auto moduloUniformFunc = [](SimulationParameters const& parameters) {
         return UniformValueMap{{"borderlessRendering", parameters.borderlessRendering.value}};
     };
-    auto fluidParticleRadius = [](SimulationParameters const& parameters) {
-        auto zoom = Viewport::get().getZoomFactor();
-        return UniformValueMap{{"ballSize", zoom < 7.0f ? 0 : 0.2f}};
-    };
 
     // Number of blur repetitions and blur strengths is based on zoom level to balance performance and quality
     auto blurStrengthFunc = [](SimulationParameters const& parameters) {
@@ -232,8 +228,7 @@ void SimulationView::setupRenderPipeline()
         // Render block: Render fluid particles
         RenderBlock{
             RenderSequence().steps({
-                _FluidParticleRenderStep::create(
-                    StepParameters().shader(ShaderSources::FluidParticle).addUniform("ballSize", 10.0f).addUniform("onBackground", true)),
+                _FluidParticleRenderStep::create(StepParameters().shader(ShaderSources::FluidParticle).addUniform("onBackground", true)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
             }),
         },
@@ -248,8 +243,7 @@ void SimulationView::setupRenderPipeline()
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
             }),
             RenderSequence().steps({
-                _FluidParticleRenderStep::create(
-                    StepParameters().shader(ShaderSources::FluidParticle).uniformFunc(fluidParticleRadius).addUniform("onBackground", false)),
+                _FluidParticleRenderStep::create(StepParameters().shader(ShaderSources::FluidParticle).addUniform("onBackground", false)),
             }),
         },
 

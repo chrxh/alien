@@ -313,6 +313,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
     if (objectTO.type == ObjectType_Structure) {
         StructureDesc structureDesc;
         structureDesc._energy = objectTO.typeData.structure.energy;
+        structureDesc._glow = objectTO.typeData.structure.glow;
         result._type = structureDesc;
 
     } else if (objectTO.type == ObjectType_FreeCell) {
@@ -1265,6 +1266,7 @@ void DescConverterService::convertObjectToTO(
     if (objectTO.type == ObjectType_Structure) {
         StructureDesc const& structureDesc = objectDesc.getStructureRef();
         objectTO.typeData.structure.energy = structureDesc._energy;
+        objectTO.typeData.structure.glow = structureDesc._glow;
     } else if (objectTO.type == ObjectType_FreeCell) {
         FreeCellDesc const& freeCellDesc = objectDesc.getFreeCellRef();
         objectTO.typeData.freeCell.energy = freeCellDesc._energy;

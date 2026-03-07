@@ -33,6 +33,7 @@ struct FluidParticleVertexData
 {
     float pos[3];    // x, y, z position
     float color[3];  // r, g, b color
+    float glow;      // glow intensity (0.0 = no glow, 1.0 = full glow)
 };
 
 struct LocationVertexData

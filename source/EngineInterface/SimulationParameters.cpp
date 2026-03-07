@@ -634,19 +634,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                                      "corresponding color are kept."),
                 }),
             ParameterGroupSpec()
-                .name("Cell glow")
-                .expertToggle(&SimulationParameters::objectGlowToggle)
-                .parameters({
-                    ParameterSpec()
-                        .name("Radius")
-                        .reference(FloatSpec().member(&SimulationParameters::objectGlowRadius).min(1.0f).max(8.0f))
-                        .description("The radius of the glow. Please note that a large radius affects the performance."),
-                    ParameterSpec()
-                        .name("Strength")
-                        .reference(FloatSpec().member(&SimulationParameters::objectGlowStrength).min(0.0f).max(1.0f))
-                        .description("The strength of the glow."),
-                }),
-            ParameterGroupSpec()
                 .name("Customize deletion mutations")
                 .expertToggle(&SimulationParameters::customizeDeletionMutationsToggle)
                 .parameters({

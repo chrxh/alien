@@ -42,6 +42,8 @@ private:
     void processReconnectorContent(ReconnectorDesc& reconnector);
     void processDetonatorContent(DetonatorDesc& detonator);
 
+    void processStructureTab(ObjectDesc& object);
+
     void processParticle(EnergyDesc particle);
 
     float calcWindowWidth() const;
