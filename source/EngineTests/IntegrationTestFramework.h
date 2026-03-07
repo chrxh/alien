@@ -28,7 +28,10 @@ protected:
 
     bool approxCompare(float expected, float actual, float precision = 0.001f) const { return TestHelper::approxCompare(expected, actual, precision); }
 
-    bool approxCompare(RealVector2D const& expected, RealVector2D const& actual) const { return TestHelper::approxCompare(expected, actual); }
+    bool approxCompare(RealVector2D const& expected, RealVector2D const& actual, float precision = 0.001f) const
+    {
+        return TestHelper::approxCompare(expected, actual, precision);
+    }
 
     bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const { return TestHelper::approxCompare(expected, actual); }
 
