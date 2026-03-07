@@ -39,12 +39,16 @@ if (MSVC)
         add_link_options($<$<CONFIG:Debug,RelWithDebInfo>:/DEBUG:FASTLINK>)
     endif()
 
+    option(ALIEN_MSVC_DISABLE_MODULE_SCAN "Disable MSVC C++ module scanning for faster non-module builds" ON)
+    if (ALIEN_MSVC_DISABLE_MODULE_SCAN)
+        # This project does not use C++ modules; dependency scanning adds avoidable overhead in Visual Studio builds.
+        set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+    endif()
+
     option(ALIEN_MSVC_FAST_RELEASE_BUILD "Enable faster MSVC release linking for local development builds" ON)
     if (ALIEN_MSVC_FAST_RELEASE_BUILD)
-        # Favor release link throughput over final binary size/optimization for local iteration.
-        add_link_options($<$<CONFIG:Release>:/INCREMENTAL>)
-        add_link_options($<$<CONFIG:Release>:/OPT:NOREF>)
-        add_link_options($<$<CONFIG:Release>:/OPT:NOICF>)
+        # Improve /GL + /LTCG release link throughput without forcing /INCREMENTAL.
+        add_link_options($<$<CONFIG:Release>:/LTCG:INCREMENTAL>)
     endif()
 
     # Suppress `warning C4005: 'FOO': macro redefinition`
