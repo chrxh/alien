@@ -17,6 +17,7 @@ public:
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.reconnectorRadius.value[i] = 3.5f;
+            _parameters.maxForce.baseValue[i] = 100.0f;
         }
         _simulationFacade->setSimulationParameters(_parameters);
     }
