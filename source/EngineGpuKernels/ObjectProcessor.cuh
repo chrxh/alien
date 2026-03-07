@@ -138,7 +138,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         auto smoothingLength = smoothingLength_base;
         auto isObjectFluid = object->isFluid();
         if (isObjectFluid) {
-            smoothingLength *= 2.0f;    // Use larger smoothing length for fluids
+            smoothingLength *= 2.0f;  // Use larger smoothing length for fluids
         }
 
         __shared__ float cellFusionVelocity;
@@ -323,7 +323,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             }
 
             object->pos += cellPosDelta;
-            object->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
+            object->shared1 +=
+                F_pressure * cudaSimulationParameters.pressureStrength.value * density + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
             object->shared2.x = density;
         }
         block.sync();
@@ -368,8 +369,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                 if (!otherObject) {
                     break;
                 }
-                if (!otherObject->isFluid() && otherObject != object
-                    && object->detached + otherObject->detached != 1) {
+                if (!otherObject->isFluid() && otherObject != object && object->detached + otherObject->detached != 1) {
 
                     auto posDelta = object->pos - otherObject->pos;
                     data.objectMap.correctDirection(posDelta);
@@ -378,8 +378,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                     if (adaptedDistance <= smoothingLength * 2 && adaptedDistance > NEAR_ZERO) {
                         auto solidMass = otherObject->getMassForSPH();
 
-                        float kernel_d_val = calcKernel_d(adaptedDistance / smoothingLength)
-                            / (smoothingLength * smoothingLength * smoothingLength);
+                        float kernel_d_val = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
                         // Repulsion force on fluid from solid boundary.
                         // Factor 2/rho_f mirrors the symmetric SPH pressure factor (1/rho_f + 1/rho_f)
