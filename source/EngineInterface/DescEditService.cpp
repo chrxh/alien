@@ -505,7 +505,7 @@ void DescEditService::randomizeLineageIds(Desc& description) const
     }
 }
 
-void DescEditService::setGlow(Desc& description, bool glow) const
+void DescEditService::setGlow(Desc& description, float glow) const
 {
     for (auto& object : description._objects) {
         if (object.getObjectType() == ObjectType_Structure) {

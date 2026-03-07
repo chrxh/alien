@@ -35,15 +35,12 @@ void main()
         ballSize = zoom < 7.0 ? 0.0 : 0.2;
     }
 
-    if (aGlow > 0.5) {
-        if (onBackground) {
-            vColor = aColor * 4;
-        } else {
-            ballSize = 1.0;
-            vColor = aColor * 20;
-        }
+    float g = clamp(aGlow, 0.0, 1.0);
+    if (onBackground) {
+        vColor = aColor * mix(1.0, 4.0, g);
     } else {
-        vColor = aColor;
+        ballSize = mix(ballSize, 1.0, g);
+        vColor = aColor * mix(1.0, 20.0, g);
     }
 
     gl_PointSize = radius * ballSize;

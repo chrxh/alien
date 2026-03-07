@@ -455,7 +455,7 @@ struct Creature
 struct Structure
 {
     float energy;
-    bool glow;
+    float glow;
 
     // Cluster data
     uint32_t clusterIndex;

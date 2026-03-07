@@ -47,7 +47,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
 {
     switch (objectParameter.objectType) {
     case ObjectType_Structure:
-        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(StructureDesc().energy(42.0f).glow(true));
+        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(StructureDesc().energy(42.0f).glow(1.0f));
     case ObjectType_FreeCell:
         return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FreeCellDesc().energy(42.0f).age(7));
     case ObjectType_Cell: {

@@ -103,7 +103,7 @@ void MassOperationsDialog::processIntern()
     ImGui::Checkbox("##setGlow", &_setGlow);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     ImGui::BeginDisabled(!_setGlow);
-    ImGui::Checkbox("Set glow", &_glowValue);
+    AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Set glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glowValue);
     ImGui::EndDisabled();
 
     AlienGui::Group(AlienGui::GroupParameters().text("Options"));

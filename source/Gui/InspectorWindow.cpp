@@ -740,7 +740,7 @@ void _InspectorWindow::processStructureTab(ObjectDesc& object)
     if (ImGui::BeginTabItem("Structure", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto& structure = object.getStructureRef();
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Glow").textWidth(BaseTabTextWidth), structure._glow);
+            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(BaseTabTextWidth), &structure._glow);
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
