@@ -17,7 +17,6 @@ public:
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.reconnectorRadius.value[i] = 3.5f;
-            _parameters.maxForce.baseValue[i] = 100.0f;
         }
         _simulationFacade->setSimulationParameters(_parameters);
     }
@@ -447,8 +446,10 @@ TEST_F(ReconnectorTests, removeConnections_removeStructureConnection)
 {
     auto data = createReconnectorWithNegativeSignal({100.0f, 100.0f}, ReconnectCreatureDesc());
 
-    // Add structure cell and connect it to reconnector
+    // Add two connected structure cells; the first is connected to the reconnector
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
+    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
+    data.addConnection(10, 11);
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
