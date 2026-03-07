@@ -42,7 +42,7 @@ void main()
     vec3 toneMappedColor = toneMapACES(color.rgb);
     
     // Apply gamma correction (standard gamma 2.2)
-    vec3 gammaCorrectedColor = gammaCorrect(toneMappedColor, 2.2);
+    vec3 gammaCorrectedColor = gammaCorrect(toneMappedColor.rgb, 1.6);
     
     FragColor = vec4(gammaCorrectedColor, color.a);
 }
