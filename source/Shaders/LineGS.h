@@ -12,7 +12,6 @@ layout (triangle_strip, max_vertices = 4) out;
 in vec3 vertexColor[];
 out vec3 fragColor;
 out float edgeDist;
-out float lineAlpha;
 out float coreEdge;
 
 uniform vec2 viewportSize;
@@ -37,18 +36,10 @@ void main()
     vec2 perp = vec2(-dir.y, dir.x);
     
     // Core half-width in pixels (same as original line width)
-    float coreHalfWidth = zoom * 0.15 * 0.5;
+    float coreHalfWidth = max(zoom * 0.15 * 0.5, 0.5);
     
     // Add AA margin for smooth edges without shrinking the visible line
     float aaMargin = 1.0;
-    
-    // For sub-pixel lines, clamp minimum core size and reduce alpha proportionally
-    // (0.5px half-width = 1px full width is the minimum visible line)
-    float alpha = 1.0;
-    if (coreHalfWidth < 0.5) {
-        alpha = max(coreHalfWidth * 2.0, 0.0);
-        coreHalfWidth = 0.5;
-    }
     
     float totalHalfWidth = coreHalfWidth + aaMargin;
     float coreRatio = coreHalfWidth / totalHalfWidth;
@@ -77,7 +68,6 @@ void main()
     gl_Position = vec4(transform(p0.xy - offset), p0.z, 1.0);
     fragColor = color0;
     edgeDist = -1.0;
-    lineAlpha = alpha;
     coreEdge = coreRatio;
     EmitVertex();
     
@@ -85,7 +75,6 @@ void main()
     gl_Position = vec4(transform(p0.xy + offset), p0.z, 1.0);
     fragColor = color0;
     edgeDist = 1.0;
-    lineAlpha = alpha;
     coreEdge = coreRatio;
     EmitVertex();
     
@@ -93,7 +82,6 @@ void main()
     gl_Position = vec4(transform(p1.xy - offset), p1.z, 1.0);
     fragColor = color1;
     edgeDist = -1.0;
-    lineAlpha = alpha;
     coreEdge = coreRatio;
     EmitVertex();
     
@@ -101,7 +89,6 @@ void main()
     gl_Position = vec4(transform(p1.xy + offset), p1.z, 1.0);
     fragColor = color1;
     edgeDist = 1.0;
-    lineAlpha = alpha;
     coreEdge = coreRatio;
     EmitVertex();
     
