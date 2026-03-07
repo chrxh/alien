@@ -39,6 +39,14 @@ if (MSVC)
         add_link_options($<$<CONFIG:Debug,RelWithDebInfo>:/DEBUG:FASTLINK>)
     endif()
 
+    option(ALIEN_MSVC_FAST_RELEASE_BUILD "Enable faster MSVC release linking for local development builds" ON)
+    if (ALIEN_MSVC_FAST_RELEASE_BUILD)
+        # Favor release link throughput over final binary size/optimization for local iteration.
+        add_link_options($<$<CONFIG:Release>:/INCREMENTAL>)
+        add_link_options($<$<CONFIG:Release>:/OPT:NOREF>)
+        add_link_options($<$<CONFIG:Release>:/OPT:NOICF>)
+    endif()
+
     # Suppress `warning C4005: 'FOO': macro redefinition`
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-wd4005>)
     
