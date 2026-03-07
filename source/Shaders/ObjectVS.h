@@ -30,9 +30,9 @@ void main()
     // Cells are rendered in front of lines (apply negative bias to bring forward)
     gl_Position = vec4(ndc, aPos.z, 1.0);
 
-    bool isInTriangleOrQuad = ((state >> 16) & 0x1) == 1;
-    if (isInTriangleOrQuad && zoom < 3.0) {
-        // Discard cells that are part of triangles/quads when zoomed out to avoid Moire patterns
+    bool isIsolated = ((state >> 16) & 0x1) == 1;
+    if (!isIsolated && zoom < 3.0) {
+        // Discard cells that have connections when zoomed out to avoid Moire patterns
         gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
     }
     
