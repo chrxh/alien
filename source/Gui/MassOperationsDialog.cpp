@@ -104,12 +104,12 @@ void MassOperationsDialog::processIntern()
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     posX = ImGui::GetCursorPos().x;
     ImGui::BeginDisabled(!_randomizeGlow);
-    AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.2f").name("Minimum glow").textWidth(RightColumnWidth), _minGlow);
+    AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").name("Minimum glow").min(0).max(1).textWidth(RightColumnWidth), &_minGlow);
     ImGui::SetCursorPosX(posX);
-    AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.2f").name("Maximum glow").textWidth(RightColumnWidth), _maxGlow);
+    AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").name("Maximum glow").min(0).max(1).textWidth(RightColumnWidth), &_maxGlow);
     ImGui::EndDisabled();
 
-    AlienGui::Group(AlienGui::GroupParameters().text("Options"));
+    AlienGui::Group(AlienGui::GroupParameters().text("Options").highlighted(true));
     ImGui::Checkbox("##restrictToSelection", &_restrictToSelectedCreatures);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienGui::Text("Restrict to selection");

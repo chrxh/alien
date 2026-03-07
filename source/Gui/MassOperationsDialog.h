@@ -46,7 +46,7 @@ private:
 
     bool _randomizeGlow = false;
     float _minGlow = 0;
-    float _maxGlow = 1.0f;
+    float _maxGlow = 0.0f;
 
     bool _restrictToSelectedCreatures = true;
 };
