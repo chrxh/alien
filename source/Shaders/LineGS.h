@@ -11,11 +11,11 @@ layout (triangle_strip, max_vertices = 4) out;
 
 in vec3 vertexColor[];
 out vec3 fragColor;
+out float edgeDist;
+out float coreEdge;
 
 uniform vec2 viewportSize;
 uniform float zoom;
-
-#define PI 3.1415926538
 
 vec2 transform(vec2 v)
 {
@@ -35,9 +35,15 @@ void main()
     // Calculate perpendicular direction (for line thickness)
     vec2 perp = vec2(-dir.y, dir.x);
     
-    // Line width in pixels
-    float lineWidthPixels = zoom * 0.15;
-    vec2 offset = perp * lineWidthPixels * 0.5;
+    // Core half-width in pixels (same as original line width)
+    float coreHalfWidth = max(zoom * 0.15 * 0.5, 0.5);
+    
+    // Add AA margin for smooth edges without shrinking the visible line
+    float aaMargin = 1.0;
+    
+    float totalHalfWidth = coreHalfWidth + aaMargin;
+    float coreRatio = coreHalfWidth / totalHalfWidth;
+    vec2 offset = perp * totalHalfWidth;
     
     // Create 3D positions for lighting calculation
     vec3 pos0 = vec3(p0.xyz);
@@ -61,21 +67,29 @@ void main()
     // Vertex 0 (bottom-left)
     gl_Position = vec4(transform(p0.xy - offset), p0.z, 1.0);
     fragColor = color0;
+    edgeDist = -1.0;
+    coreEdge = coreRatio;
     EmitVertex();
     
     // Vertex 1 (top-left)
     gl_Position = vec4(transform(p0.xy + offset), p0.z, 1.0);
     fragColor = color0;
+    edgeDist = 1.0;
+    coreEdge = coreRatio;
     EmitVertex();
     
     // Vertex 2 (bottom-right)
     gl_Position = vec4(transform(p1.xy - offset), p1.z, 1.0);
     fragColor = color1;
+    edgeDist = -1.0;
+    coreEdge = coreRatio;
     EmitVertex();
     
     // Vertex 3 (top-right)
     gl_Position = vec4(transform(p1.xy + offset), p1.z, 1.0);
     fragColor = color1;
+    edgeDist = 1.0;
+    coreEdge = coreRatio;
     EmitVertex();
     
     EndPrimitive();
