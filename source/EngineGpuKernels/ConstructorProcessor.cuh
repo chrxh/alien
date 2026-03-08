@@ -384,7 +384,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
             ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
         }
     }
-    if ((constructionData.isSeparation || constructor.geneIndex == 0) && constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
+    if ((constructionData.isSeparation || constructor.geneIndex == 0) && constructionData.isLastNode) {
         newObject->typeData.cell.headCell = true;
     }
     activateNewObjectOnLastNode(newObject, hostObject, constructionData);

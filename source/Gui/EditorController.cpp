@@ -317,7 +317,7 @@ void EditorController::onApplyForces(RealVector2D const& viewPos, RealVector2D c
     auto start = prevWorldPos;
     auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto zoom = Viewport::get().getZoomFactor();
-    _SimulationFacade::get()->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
+    _SimulationFacade::get()->applyForce_async(start, end, (end - start) / 200.0 * std::min(5.0f, zoom), 20.0f / zoom);
 }
 
 void EditorController::onUpdateSelectionRect(RealRect const& rect)
