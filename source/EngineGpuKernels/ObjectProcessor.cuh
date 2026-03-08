@@ -569,29 +569,37 @@ __inline__ __device__ void ObjectProcessor::checkCrossingConnections(SimulationD
             continue;
         }
 
+        Object* nearObjects[MAX_OBJECT_CONNECTIONS * 4];
+        int numNearObjects;
+        data.objectMap.getMatchingObjects(
+            nearObjects,
+            MAX_OBJECT_CONNECTIONS * 4,
+            numNearObjects,
+            object->pos,
+            cudaSimulationParameters.maxBindingDistance.value[object->color],
+            object->detached,
+            [&](Object* const& candidate) { return candidate != object; });
+
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
 
             bool crossingFound = false;
-            data.objectMap.executeForEach(
-                object->pos, cudaSimulationParameters.maxBindingDistance.value[object->color], object->detached, [&](Object* nearObject) {
-                    if (crossingFound) {
-                        return;
+            for (int n = 0; n < numNearObjects && !crossingFound; ++n) {
+                auto nearObject = nearObjects[n];
+                if (nearObject == connectedObject) {
+                    continue;
+                }
+                for (int j = 0; j < nearObject->numConnections; ++j) {
+                    auto connectedNearObject = nearObject->connections[j].object;
+                    if (connectedNearObject == object || connectedNearObject == connectedObject) {
+                        continue;
                     }
-                    if (nearObject == object || nearObject == connectedObject) {
-                        return;
+                    if (Math::crossing(object->pos, connectedObject->pos, nearObject->pos, connectedNearObject->pos)) {
+                        crossingFound = true;
+                        break;
                     }
-                    for (int j = 0; j < nearObject->numConnections; ++j) {
-                        auto connectedNearObject = nearObject->connections[j].object;
-                        if (connectedNearObject == object || connectedNearObject == connectedObject) {
-                            continue;
-                        }
-                        if (Math::crossing(object->pos, connectedObject->pos, nearObject->pos, connectedNearObject->pos)) {
-                            crossingFound = true;
-                            return;
-                        }
-                    }
-                });
+                }
+            }
 
             if (crossingFound) {
                 ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
