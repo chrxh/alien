@@ -61,6 +61,7 @@ CudaGraphConfig SimulationKernelsService::buildGraphConfig(
     config.executeCellFunction = forceCellFunctionExecution ? true : timestep % TIMESTEPS_PER_CELL_FUNCTION == 0;
     config.hasLayers = settings.simulationParameters.numLayers > 0;
     config.rigidityEnabled = isRigidityUpdateEnabled(settings);
+    config.checkCrossingConnections = (timestep > 0 && timestep % TIMESTEPS_PER_CROSSING_CHECK == 0);
     config.fluidKernelThreads = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
     config.fluidBoundaryKernelThreads = calcOptimalThreadsForFluidBoundaryKernel(settings.simulationParameters);
     config.numBlocks = settings.cudaSettings.numBlocks;
@@ -140,6 +141,10 @@ void SimulationKernelsService::launchTimestepKernels(
         STREAM_KERNEL_CALL(cudaAccumulateClusterPosAndVel, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaAccumulateClusterAngularProp, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaApplyClusterData, _stream, numBlocks, data);
+    }
+
+    if (config.checkCrossingConnections) {
+        STREAM_KERNEL_CALL(cudaNextTimestep_physics_checkCrossingConnections, _stream, numBlocks, data);
     }
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);

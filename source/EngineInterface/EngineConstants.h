@@ -9,6 +9,7 @@ auto constexpr MAX_COLORS = 7;
 auto constexpr MAX_CELL_MEMORY_ENTRIES = 32;
 
 auto constexpr TIMESTEPS_PER_CELL_FUNCTION = 3;
+auto constexpr TIMESTEPS_PER_CROSSING_CHECK = 50;
 
 auto constexpr MAX_LAYERS = 20;
 auto constexpr MAX_SOURCES = 40;

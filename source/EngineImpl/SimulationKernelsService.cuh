@@ -17,6 +17,7 @@ struct CudaGraphConfig
     bool executeCellFunction;       // Cell type functions need to be executed
     bool hasLayers;          // settings.simulationParameters.numLayers > 0
     bool rigidityEnabled;    // isRigidityUpdateEnabled(settings)
+    bool checkCrossingConnections;   // Crossing connection check every TIMESTEPS_PER_CROSSING_CHECK
     int fluidKernelThreads;          // calcOptimalThreadsForFluidKernel result
     int fluidBoundaryKernelThreads;  // calcOptimalThreadsForFluidBoundaryKernel result
     int numBlocks;                   // gpuSettings.numBlocks

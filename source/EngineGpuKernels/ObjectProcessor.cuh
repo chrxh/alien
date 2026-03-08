@@ -39,6 +39,8 @@ public:
     __inline__ __device__ static void verletPositionUpdate(SimulationData& data);
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
+    __inline__ __device__ static void checkCrossingConnections(SimulationData& data);
+
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
     __inline__ __device__ static void applyFriction(SimulationData& data);
 
@@ -550,6 +552,50 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
             ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
             for (int i = 0; i < object->numConnections; ++i) {
                 auto connectedObject = object->connections[i].object;
+                connectedObject->typeData.cell.cellState = CellState_Detaching;
+            }
+        }
+    }
+}
+
+__inline__ __device__ void ObjectProcessor::checkCrossingConnections(SimulationData& data)
+{
+    auto& objects = data.entities.objects;
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->type != ObjectType_Cell || object->numConnections == 0) {
+            continue;
+        }
+
+        for (int i = 0; i < object->numConnections; ++i) {
+            auto connectedObject = object->connections[i].object;
+
+            bool crossingFound = false;
+            data.objectMap.executeForEach(
+                object->pos, cudaSimulationParameters.maxBindingDistance.value[object->color], object->detached, [&](Object* nearObject) {
+                    if (crossingFound) {
+                        return;
+                    }
+                    if (nearObject == object || nearObject == connectedObject) {
+                        return;
+                    }
+                    for (int j = 0; j < nearObject->numConnections; ++j) {
+                        auto connectedNearObject = nearObject->connections[j].object;
+                        if (connectedNearObject == object || connectedNearObject == connectedObject) {
+                            continue;
+                        }
+                        if (Math::crossing(object->pos, connectedObject->pos, nearObject->pos, connectedNearObject->pos)) {
+                            crossingFound = true;
+                            return;
+                        }
+                    }
+                });
+
+            if (crossingFound) {
+                ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
+                object->typeData.cell.cellState = CellState_Detaching;
                 connectedObject->typeData.cell.cellState = CellState_Detaching;
             }
         }

@@ -192,6 +192,11 @@ __global__ void cudaNextTimestep_cellType_communicator(SimulationData data, Simu
     CommunicatorProcessor::process(data, statistics);
 }
 
+__global__ void cudaNextTimestep_physics_checkCrossingConnections(SimulationData data)
+{
+    ObjectProcessor::checkCrossingConnections(data);
+}
+
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
 {
     ObjectProcessor::applyInnerFriction(data);
