@@ -166,7 +166,7 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             int cellType = 0;
 
             if (object->type == ObjectType_Cell) {
-                luminance = object->typeData.cell.getEnergy() / 300.0f;
+                luminance = object->typeData.cell.getEnergy() / 350.0f;
                 zOffset = toFloat(object->typeData.cell.creature->id % 1000) / 2000;
                 cellType = object->typeData.cell.cellType;
             } else if (object->type == ObjectType_FreeCell) {
