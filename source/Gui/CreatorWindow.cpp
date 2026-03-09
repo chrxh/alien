@@ -347,7 +347,8 @@ void CreatorWindow::applySmoothingToDrawing()
     _SimulationFacade::get()->removeSelectedObjects(false);
 
     auto constexpr Sigma = 3.0f;
-    auto const kernelRadius = static_cast<int>(std::ceil(Sigma * 3));
+    auto constexpr SigmaMultiplier = 3;
+    auto const kernelRadius = static_cast<int>(std::ceil(Sigma * SigmaMultiplier));
     std::vector<float> kernel(2 * kernelRadius + 1);
     float kernelSum = 0;
     for (int i = -kernelRadius; i <= kernelRadius; ++i) {
