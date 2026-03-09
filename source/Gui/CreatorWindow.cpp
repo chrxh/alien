@@ -15,6 +15,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
+#include "EditorController.h"
 #include "EditorModel.h"
 #include "HelpStrings.h"
 #include "SimulationInteractionController.h"
@@ -170,7 +171,7 @@ void CreatorWindow::processIntern()
 
 bool CreatorWindow::isShown()
 {
-    return _on;
+    return _on && EditorController::get().isOn();
 }
 
 void CreatorWindow::onDrawing()

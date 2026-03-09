@@ -867,7 +867,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
     auto hostObject = actualData.getObjectRef(0);
     auto newObject = actualData.getOtherObjectRef(0);
     EXPECT_EQ(CellState_Constructing, newObject.getCellRef()._cellState);
-    EXPECT_FALSE(newObject.getCellRef()._headCell);
+    EXPECT_TRUE(newObject.getCellRef()._headCell);
     EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostObject._id, newObject._id));
