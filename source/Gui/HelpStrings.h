@@ -328,7 +328,7 @@ namespace Const
 
     std::string const CellFixedTooltip = "When a cell is set as fixed, it becomes immortal, resistant to external forces, but still "
                                                   "capable of linear movement. Furthermore, unconnected "
-                                                  "normal cells and energy particles bounce off from indestructible ones.";
+                                                  "normal cells and energy particles bounce off from fixed ones.";
 
     std::string const CellReferenceDistanceTooltip =
         "The reference distance defines the distance at which no forces act between two connected cells. If the actual distance is greater than the reference "
