@@ -468,6 +468,8 @@ namespace Const
 
     std::string const CreatorDrawingTypeTooltip = "Specifies whether the drawn structure objects should form a solid body (with connections) or a fluid (without connections).";
 
+    std::string const CreatorSmoothingTooltip = "When activated, the freehand drawing path is smoothed using Gaussian convolution after drawing is finished. The objects are aligned in hexagonal patterns.";
+
     std::string const CreatorRectangleWidthTooltip = "The width of the rectangle in cells.";
 
     std::string const CreatorRectangleHeightTooltip = "The height of the rectangle in cells.";

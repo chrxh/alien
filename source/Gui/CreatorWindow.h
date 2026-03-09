@@ -49,6 +49,8 @@ private:
     void createDisc();
 
     void validateAndCorrect();
+    Desc createAlignedCircle(RealVector2D pos) const;
+    void applySmoothingToDrawing();
 
     RealVector2D getRandomPos() const;
 
@@ -71,9 +73,11 @@ private:
 
     //drawing
     DrawingType _drawingType = DrawingType_Solid;
+    bool _smoothing = false;
     Desc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
+    std::vector<RealVector2D> _drawingPath;
 
     CreationMode _mode = CreationMode_Drawing;
 };
