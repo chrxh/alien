@@ -35,8 +35,13 @@ if (MSVC)
     if (ALIEN_MSVC_FAST_BUILD)
         # Prefer /Z7 over /Zi in Debug/RelWithDebInfo to reduce PDB writer contention with /MP.
         set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
-        # Reduce debug link time in Visual Studio builds.
-        add_link_options($<$<CONFIG:Debug,RelWithDebInfo>:/DEBUG:FASTLINK>)
+        # Reduce debug link time in Visual Studio builds for real linker invocations.
+        string(APPEND CMAKE_EXE_LINKER_FLAGS_DEBUG " /DEBUG:FASTLINK")
+        string(APPEND CMAKE_SHARED_LINKER_FLAGS_DEBUG " /DEBUG:FASTLINK")
+        string(APPEND CMAKE_MODULE_LINKER_FLAGS_DEBUG " /DEBUG:FASTLINK")
+        string(APPEND CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO " /DEBUG:FASTLINK")
+        string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO " /DEBUG:FASTLINK")
+        string(APPEND CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO " /DEBUG:FASTLINK")
     endif()
 
     option(ALIEN_MSVC_DISABLE_MODULE_SCAN "Disable MSVC C++ module scanning for faster non-module builds" ON)
@@ -47,8 +52,10 @@ if (MSVC)
 
     option(ALIEN_MSVC_FAST_RELEASE_BUILD "Enable faster MSVC release linking for local development builds" ON)
     if (ALIEN_MSVC_FAST_RELEASE_BUILD)
-        # Improve /GL + /LTCG release link throughput without forcing /INCREMENTAL.
-        add_link_options($<$<CONFIG:Release>:/LTCG:INCREMENTAL>)
+        # Improve /GL + /LTCG release link throughput for real linker invocations.
+        string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /LTCG:INCREMENTAL")
+        string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /LTCG:INCREMENTAL")
+        string(APPEND CMAKE_MODULE_LINKER_FLAGS_RELEASE " /LTCG:INCREMENTAL")
     endif()
 
     # Suppress `warning C4005: 'FOO': macro redefinition`

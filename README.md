@@ -94,10 +94,10 @@ mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release -j8
 ```
-On MSVC, CMake enables `ALIEN_MSVC_FAST_BUILD=ON` by default, which uses `/Z7` for Debug/RelWithDebInfo and `/DEBUG:FASTLINK` to shorten local incremental build times.
+On MSVC, CMake enables `ALIEN_MSVC_FAST_BUILD=ON` by default, which uses `/Z7` for Debug/RelWithDebInfo and applies `/DEBUG:FASTLINK` on executable/shared/module link steps to shorten local incremental build times.
 Release builds no longer include CUDA debug info flags by default (`-g`, `-lineinfo`), which shortens release compile times (including MSVC toolchains).
 For MSVC, `ALIEN_MSVC_DISABLE_MODULE_SCAN=ON` is enabled by default to skip C++ module dependency scanning in non-module builds and reduce compile overhead in Visual Studio.
-`ALIEN_MSVC_FAST_RELEASE_BUILD=ON` is also enabled by default and uses `/LTCG:INCREMENTAL` for faster local Release links without forcing `/INCREMENTAL`.
+`ALIEN_MSVC_FAST_RELEASE_BUILD=ON` is also enabled by default and applies `/LTCG:INCREMENTAL` on executable/shared/module link steps for faster local Release links without forcing `/INCREMENTAL`.
 
 If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
