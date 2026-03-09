@@ -53,6 +53,8 @@ protected:
         return result;
     }
 
+    int _nextStructureId = 10000;
+
     // Helper to add detection targets
     void addDetectionTargets(Desc& data, SensorMode const& mode, RealVector2D const& startPos, int count = 8, bool assignNewIds = true)
     {
@@ -65,7 +67,8 @@ protected:
                 data._objects.emplace_back(ObjectDesc().pos({startPos.x + i, startPos.y}).type(FreeCellDesc()));
             }
         } else if (mode == SensorMode_DetectStructure) {
-            auto baseId = 10000;
+            auto baseId = _nextStructureId;
+            _nextStructureId += count;
             for (int i = 0; i < count; ++i) {
                 data._objects.emplace_back(ObjectDesc().id(baseId + i).pos({startPos.x + i, startPos.y}).type(StructureDesc()));
             }
@@ -950,10 +953,13 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     auto actualSensor = actualData.getObjectRef(1);
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
-    // Add structure cells between sensor and target to block the ray
+    // Add structure cells between sensor and target to block the ray (need connections so they are not fluid particles)
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 30; ++i) {
         actualData._objects.emplace_back(ObjectDesc().id(50 + i).pos({85.0f + i, 70.0f}).type(StructureDesc()));
+    }
+    for (int i = 0; i < 29; ++i) {
+        actualData.addConnection(50 + i, 50 + i + 1);
     }
     _simulationFacade->setSimulationData(actualData);
 
