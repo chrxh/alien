@@ -56,6 +56,7 @@ namespace
             cellColors.emplace_back(toHsv(Const::IndividualObjectColor5));
             cellColors.emplace_back(toHsv(Const::IndividualObjectColor6));
             cellColors.emplace_back(toHsv(Const::IndividualObjectColor7));
+            cellColors.emplace_back(toHsv(Const::IndividualObjectColor8));
         }
 
         std::optional<int> bestMatchIndex;

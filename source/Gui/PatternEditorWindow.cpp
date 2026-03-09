@@ -223,6 +223,11 @@ void PatternEditorWindow::processIntern()
             _SimulationFacade::get()->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(6);
         }
+        ImGui::SameLine();
+        if (colorButton("    ##color8", Const::IndividualObjectColor8)) {
+            _SimulationFacade::get()->colorSelectedObjects(7, EditorModel::get().isRolloutToClusters());
+            EditorModel::get().setDefaultColorCode(7);
+        }
         AlienGui::Group(AlienGui::GroupParameters().text("Tools"));
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
         if (ImGui::Button(ICON_FA_WIND)) {

@@ -40,6 +40,8 @@ void MassOperationsDialog::processIntern()
     colorCheckbox("##color6", Const::IndividualObjectColor6, _checkedCellColors[5]);
     ImGui::SameLine();
     colorCheckbox("##color7", Const::IndividualObjectColor7, _checkedCellColors[6]);
+    ImGui::SameLine();
+    colorCheckbox("##color8", Const::IndividualObjectColor8, _checkedCellColors[7]);
     ImGui::EndDisabled();
     ImGui::PopID();
 
@@ -61,6 +63,8 @@ void MassOperationsDialog::processIntern()
     colorCheckbox("##color6", Const::IndividualObjectColor6, _checkedGenomeColors[5]);
     ImGui::SameLine();
     colorCheckbox("##color7", Const::IndividualObjectColor7, _checkedGenomeColors[6]);
+    ImGui::SameLine();
+    colorCheckbox("##color8", Const::IndividualObjectColor8, _checkedGenomeColors[7]);
     ImGui::EndDisabled();
     ImGui::PopID();
 

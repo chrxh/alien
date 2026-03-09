@@ -117,6 +117,10 @@ namespace
             result = Const::IndividualObjectColor7;
             break;
         }
+        case 7: {
+            result = Const::IndividualObjectColor8;
+            break;
+        }
         }
         return result;
     }
