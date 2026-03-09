@@ -417,13 +417,21 @@ void MainLoopController::processMenubar()
     AlienGui::BeginMenu(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuOpened);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
-            .name("Activate")
+            .name("Genome editor")
+            .keyAlt(true)
+            .key(ImGuiKey_B)
+            .selected(GenomeEditorWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn()); });
+    AlienGui::MenuSeparator();
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters()
+            .name("Allow object editing")
             .keyAlt(true)
             .key(ImGuiKey_E)
             .selected(SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode()); });
-    AlienGui::MenuSeparator();
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Selection")
@@ -451,15 +459,6 @@ void MainLoopController::processMenubar()
             .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Genome editor")
-            .keyAlt(true)
-            .key(ImGuiKey_B)
-            .selected(GenomeEditorWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
-            .closeMenuWhenItemClicked(false),
-        [&] { GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Multiplier")

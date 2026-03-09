@@ -86,7 +86,7 @@ void GenomeEditorWindow::processIntern()
 
 bool GenomeEditorWindow::isShown()
 {
-    return _on && EditorController::get().isOn();
+    return _on;
 }
 
 void GenomeEditorWindow::processToolbar()
