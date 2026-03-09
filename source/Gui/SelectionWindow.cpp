@@ -5,7 +5,6 @@
 #include <Base/StringHelper.h>
 
 #include "AlienGui.h"
-#include "EditorController.h"
 #include "EditorModel.h"
 #include "StyleRepository.h"
 
@@ -62,5 +61,5 @@ void SelectionWindow::processIntern()
 
 bool SelectionWindow::isShown()
 {
-    return _on && EditorController::get().isOn();
+    return _on;
 }

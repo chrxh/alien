@@ -47,10 +47,6 @@ void EditorController::setOn(bool value)
 
 void EditorController::process()
 {
-    if (!_on) {
-        return;
-    }
-
     processInspectorWindows();
 
     EditorModel::get().setForceNoRollout(ImGui::GetIO().KeyShift);

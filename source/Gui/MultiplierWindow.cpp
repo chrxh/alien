@@ -7,7 +7,6 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "EditorController.h"
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
@@ -79,7 +78,7 @@ void MultiplierWindow::processIntern()
 
 bool MultiplierWindow::isShown()
 {
-    return _on && EditorController::get().isOn();
+    return _on;
 }
 
 void MultiplierWindow::processGridPanel()

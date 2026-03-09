@@ -16,7 +16,6 @@
 
 #include "AlienGui.h"
 #include "ChangeColorDialog.h"
-#include "EditorController.h"
 #include "EditorModel.h"
 #include "FileTransferController.h"
 #include "GenericFileDialog.h"
@@ -86,7 +85,7 @@ void GenomeEditorWindow::processIntern()
 
 bool GenomeEditorWindow::isShown()
 {
-    return _on && EditorController::get().isOn();
+    return _on;
 }
 
 void GenomeEditorWindow::processToolbar()
