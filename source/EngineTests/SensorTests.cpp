@@ -53,6 +53,8 @@ protected:
         return result;
     }
 
+    int _nextStructureId = 10000;
+
     // Helper to add detection targets
     void addDetectionTargets(Desc& data, SensorMode const& mode, RealVector2D const& startPos, int count = 8, bool assignNewIds = true)
     {
@@ -65,8 +67,13 @@ protected:
                 data._objects.emplace_back(ObjectDesc().pos({startPos.x + i, startPos.y}).type(FreeCellDesc()));
             }
         } else if (mode == SensorMode_DetectStructure) {
+            auto baseId = _nextStructureId;
+            _nextStructureId += count;
             for (int i = 0; i < count; ++i) {
-                data._objects.emplace_back(ObjectDesc().pos({startPos.x + i, startPos.y}).type(StructureDesc()));
+                data._objects.emplace_back(ObjectDesc().id(baseId + i).pos({startPos.x + i, startPos.y}).type(StructureDesc()));
+            }
+            for (int i = 0; i < count - 1; ++i) {
+                data.addConnection(baseId + i, baseId + i + 1);
             }
         } else if (mode == SensorMode_DetectCreature) {
             data.add(createLargeCreature(startPos, count), assignNewIds);
@@ -485,6 +492,9 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
     for (int i = 0; i < 10; ++i) {
         data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 50.0f}).type(StructureDesc()));
     }
+    for (int i = 0; i < 9; ++i) {
+        data.addConnection(50 + i, 50 + i + 1);
+    }
 
     // Add target behind the structure cells
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
@@ -514,6 +524,9 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
     // Add structure cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
         data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 5.0f}).type(StructureDesc()));
+    }
+    for (int i = 0; i < 9; ++i) {
+        data.addConnection(50 + i, 50 + i + 1);
     }
 
     // Add target behind the structure cells
@@ -545,6 +558,9 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
     // Add structure cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
         data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 150.0f}).type(StructureDesc()));
+    }
+    for (int i = 0; i < 9; ++i) {
+        data.addConnection(50 + i, 50 + i + 1);
     }
 
     // Add target at different angle (not blocking)
@@ -937,10 +953,13 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     auto actualSensor = actualData.getObjectRef(1);
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
-    // Add structure cells between sensor and target to block the ray
+    // Add structure cells between sensor and target to block the ray (need connections so they are not fluid particles)
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 30; ++i) {
         actualData._objects.emplace_back(ObjectDesc().id(50 + i).pos({85.0f + i, 70.0f}).type(StructureDesc()));
+    }
+    for (int i = 0; i < 29; ++i) {
+        actualData.addConnection(50 + i, 50 + i + 1);
     }
     _simulationFacade->setSimulationData(actualData);
 
@@ -1009,6 +1028,63 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
 
     // Should not find anything because only non-structure cells are present
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectStructure_ignoreFluidParticles)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectStructureDesc()))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+
+    // Add structure cells with no connections (fluid particles) - should be ignored
+    for (int i = 0; i < 20; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(StructureDesc()));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getObjectRef(1);
+
+    // Should not find anything because only fluid particles (structure with no connections) are present
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, rayNotBlockedByFluidParticles)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f)))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+
+    // Add fluid particles (structure with no connections) between sensor and target - should not block ray
+    for (int i = 0; i < 10; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 50.0f}).type(StructureDesc()));
+    }
+
+    // Add free cell target behind the fluid particles
+    for (int i = 0; i < 8; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(200 + i).pos({98.0f + i, 20.0f}).type(FreeCellDesc()));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+
+    // Should find target because fluid particles do not block rays
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 /**

@@ -311,7 +311,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         auto i = *data.timestep % object->numConnections;
         auto& connectedObject = object->connections[i].object;
         // Skip if connected object is not a Cell
-        if (object->type != ObjectType_Cell) {
+        if (connectedObject->type != ObjectType_Cell) {
             continue;
         }
 
