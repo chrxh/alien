@@ -101,11 +101,11 @@ void CreatorWindow::processIntern()
 
         if (_mode == CreationMode_CreateRectangle) {
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
-                _rectHorizontalCells);
+                AlienGui::InputIntParameters().name("Horizontal objects").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
+                _rectHorizontalObjects);
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Vertical cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
-                _rectVerticalCells);
+                AlienGui::InputIntParameters().name("Vertical objects").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
+                _rectVerticalObjects);
         }
         if (_mode == CreationMode_CreateHexagon) {
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
@@ -121,12 +121,12 @@ void CreatorWindow::processIntern()
         if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc) {
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
-                    .name("Cell distance")
+                    .name("Object distance")
                     .format("%.2f")
                     .step(0.1)
                     .textWidth(RightColumnWidth)
                     .tooltip(Const::CreatorDistanceTooltip),
-                _cellDistance);
+                _objectDistance);
         }
         if (_mode != CreationMode_CreateParticle & _mode != CreationMode_CreateObject) {
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
@@ -149,7 +149,7 @@ void CreatorWindow::processIntern()
         simInteractionController.setDrawMode(false);
         if (AlienGui::Button("Build")) {
             if (_mode == CreationMode_CreateObject) {
-                createCell();
+                createObject();
             }
             if (_mode == CreationMode_CreateParticle) {
                 createParticle();
@@ -216,7 +216,7 @@ void CreatorWindow::onDrawing()
         }
     }
     if (_drawingType == DrawingType_Solid) {
-        DescEditService::get().reconnectCells(_drawingDescription, 1.5f);
+        DescEditService::get().reconnectObjects(_drawingDescription, 1.5f);
     }
     _SimulationFacade::get()->addAndSelectSimulationData(Desc(_drawingDescription));
 
@@ -236,7 +236,7 @@ CreatorWindow::CreatorWindow()
     : AlienWindow("Creator", "editors.creator", false)
 {}
 
-void CreatorWindow::createCell()
+void CreatorWindow::createObject()
 {
     auto object = ObjectDesc().pos(getRandomPos()).stiffness(_stiffness).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).sticky(_makeSticky).type(StructureDesc());
     Desc description;
@@ -254,15 +254,15 @@ void CreatorWindow::createParticle()
 
 void CreatorWindow::createRectangle()
 {
-    if (_rectHorizontalCells <= 0 || _rectVerticalCells <= 0) {
+    if (_rectHorizontalObjects <= 0 || _rectVerticalObjects <= 0) {
         return;
     }
 
     auto description = DescEditService::get().createRect(DescEditService::CreateRectParameters()
                                                                     .objectType(StructureDesc())
-                                                                    .width(_rectHorizontalCells)
-                                                                    .height(_rectVerticalCells)
-                                                                    .cellDistance(_cellDistance)
+                                                                    .width(_rectHorizontalObjects)
+                                                                    .height(_rectVerticalObjects)
+                                                                    .cellDistance(_objectDistance)
                                                                     .usableEnergy(_energy)
                                                                     .stiffness(_stiffness)
                                                                     .sticky(_makeSticky)
@@ -281,7 +281,7 @@ void CreatorWindow::createHexagon()
     Desc description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
                                                                           .objectType(StructureDesc())
                                                                           .layers(_layers)
-                                                                          .cellDistance(_cellDistance)
+                                                                          .cellDistance(_objectDistance)
                                                                           .usableEnergy(_energy)
                                                                           .stiffness(_stiffness)
                                                                           .sticky(_makeSticky)
@@ -299,15 +299,15 @@ void CreatorWindow::createDisc()
 
     Desc description;
     auto constexpr SmallValue = 0.01f;
-    for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
+    for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _objectDistance) {
         float angleInc = [&] {
             if (radius > SmallValue) {
-                auto result = asinf(_cellDistance / (2 * radius)) * 2 * toFloat(Const::RadToDeg);
+                auto result = asinf(_objectDistance / (2 * radius)) * 2 * toFloat(Const::RadToDeg);
                 return 360.0f / floorf(360.0f / result);
             }
             return 360.0f;
         }();
-        std::unordered_set<uint64_t> cellIds;
+        std::unordered_set<uint64_t> objectIds;
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
@@ -315,7 +315,7 @@ void CreatorWindow::createDisc()
         }
     }
 
-    DescEditService::get().reconnectCells(description, _cellDistance * 1.7f);
+    DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
     DescEditService::get().setCenter(description, getRandomPos());
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
@@ -324,9 +324,9 @@ void CreatorWindow::validateAndCorrect()
 {
     _energy = std::max(0.0f, _energy);
     _stiffness = std::min(1.0f, std::max(0.0f, _stiffness));
-    _cellDistance = std::min(10.0f, std::max(0.1f, _cellDistance));
-    _rectHorizontalCells = std::max(1, _rectHorizontalCells);
-    _rectVerticalCells = std::max(1, _rectVerticalCells);
+    _objectDistance = std::min(10.0f, std::max(0.1f, _objectDistance));
+    _rectHorizontalObjects = std::max(1, _rectHorizontalObjects);
+    _rectVerticalObjects = std::max(1, _rectVerticalObjects);
     _layers = std::max(1, _layers);
     _outerRadius = std::max(_innerRadius, _outerRadius);
     _innerRadius = std::max(1.0f, _innerRadius);

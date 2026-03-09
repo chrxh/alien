@@ -42,7 +42,7 @@ private:
     void processIntern() override;
     bool isShown() override;
 
-    void createCell();
+    void createObject();
     void createParticle();
     void createRectangle();
     void createHexagon();
@@ -55,12 +55,12 @@ private:
     float _energy = 100.0f;
     float _stiffness = 1.0f;
     bool _fixed = false;
-    float _cellDistance = 1.0f;
+    float _objectDistance = 1.0f;
     bool _makeSticky = false;
 
     //rectangle
-    int _rectHorizontalCells = 10;
-    int _rectVerticalCells = 10;
+    int _rectHorizontalObjects = 10;
+    int _rectVerticalObjects = 10;
 
     //hexagon
     int _layers = 10;

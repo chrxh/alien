@@ -28,7 +28,7 @@ Desc DescEditService::createRect(CreateRectParameters const& parameters) const
                                              .type(parameters._objectType));
         }
     }
-    reconnectCells(result, parameters._cellDistance * 1.1f);
+    reconnectObjects(result, parameters._cellDistance * 1.1f);
     setCenter(result, parameters._center);
     return result;
 }
@@ -61,7 +61,7 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
         }
     }
 
-    reconnectCells(result, parameters._cellDistance * 1.5f);
+    reconnectObjects(result, parameters._cellDistance * 1.5f);
     setCenter(result, parameters._center);
 
     return result;
@@ -368,7 +368,7 @@ void DescEditService::flattenTopology(Desc& description, IntVector2D const& worl
     }
 }
 
-void DescEditService::reconnectCells(Desc& description, float maxDistance) const
+void DescEditService::reconnectObjects(Desc& description, float maxDistance) const
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 

@@ -97,7 +97,7 @@ public:
 
     void flattenTopology(Desc& description, IntVector2D const& worldSize) const;
 
-    void reconnectCells(Desc& description, float maxDistance) const;  // For non-creatures
+    void reconnectObjects(Desc& description, float maxDistance) const;  // For non-creatures
 
     void randomizeCellColors(Desc& description, std::vector<int> const& colorCodes) const;
     void randomizeGenomeColors(Desc& description, std::vector<int> const& colorCodes) const;

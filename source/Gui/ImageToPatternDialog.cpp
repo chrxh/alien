@@ -107,7 +107,7 @@ void ImageToPatternDialog::show()
             }
         }
 
-        DescEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
+        DescEditService::get().reconnectObjects(dataDesc, 1 * 1.5f);
         DescEditService::get().setCenter(dataDesc, Viewport::get().getCenterInWorldPos());
 
         _SimulationFacade::get()->addAndSelectSimulationData(std::move(dataDesc));
