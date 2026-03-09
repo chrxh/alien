@@ -27,21 +27,13 @@ void MassOperationsDialog::processIntern()
     ImGui::Checkbox("##colors", &_randomizeCellColors);
     ImGui::BeginDisabled(!_randomizeCellColors);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    colorCheckbox("##color1", Const::IndividualObjectColor1, _checkedCellColors[0]);
-    ImGui::SameLine();
-    colorCheckbox("##color2", Const::IndividualObjectColor2, _checkedCellColors[1]);
-    ImGui::SameLine();
-    colorCheckbox("##color3", Const::IndividualObjectColor3, _checkedCellColors[2]);
-    ImGui::SameLine();
-    colorCheckbox("##color4", Const::IndividualObjectColor4, _checkedCellColors[3]);
-    ImGui::SameLine();
-    colorCheckbox("##color5", Const::IndividualObjectColor5, _checkedCellColors[4]);
-    ImGui::SameLine();
-    colorCheckbox("##color6", Const::IndividualObjectColor6, _checkedCellColors[5]);
-    ImGui::SameLine();
-    colorCheckbox("##color7", Const::IndividualObjectColor7, _checkedCellColors[6]);
-    ImGui::SameLine();
-    colorCheckbox("##color8", Const::IndividualObjectColor8, _checkedCellColors[7]);
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        if (i > 0) {
+            ImGui::SameLine();
+        }
+        auto id = "##color" + std::to_string(i + 1);
+        colorCheckbox(id, Const::IndividualObjectColors[i], _checkedCellColors[i]);
+    }
     ImGui::EndDisabled();
     ImGui::PopID();
 
@@ -50,21 +42,13 @@ void MassOperationsDialog::processIntern()
     ImGui::Checkbox("##colors", &_randomizeGenomeColors);
     ImGui::BeginDisabled(!_randomizeGenomeColors);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    colorCheckbox("##color1", Const::IndividualObjectColor1, _checkedGenomeColors[0]);
-    ImGui::SameLine();
-    colorCheckbox("##color2", Const::IndividualObjectColor2, _checkedGenomeColors[1]);
-    ImGui::SameLine();
-    colorCheckbox("##color3", Const::IndividualObjectColor3, _checkedGenomeColors[2]);
-    ImGui::SameLine();
-    colorCheckbox("##color4", Const::IndividualObjectColor4, _checkedGenomeColors[3]);
-    ImGui::SameLine();
-    colorCheckbox("##color5", Const::IndividualObjectColor5, _checkedGenomeColors[4]);
-    ImGui::SameLine();
-    colorCheckbox("##color6", Const::IndividualObjectColor6, _checkedGenomeColors[5]);
-    ImGui::SameLine();
-    colorCheckbox("##color7", Const::IndividualObjectColor7, _checkedGenomeColors[6]);
-    ImGui::SameLine();
-    colorCheckbox("##color8", Const::IndividualObjectColor8, _checkedGenomeColors[7]);
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        if (i > 0) {
+            ImGui::SameLine();
+        }
+        auto id = "##color" + std::to_string(i + 1);
+        colorCheckbox(id, Const::IndividualObjectColors[i], _checkedGenomeColors[i]);
+    }
     ImGui::EndDisabled();
     ImGui::PopID();
 

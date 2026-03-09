@@ -677,7 +677,7 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
     auto colorFieldWidth1 = comboWidth - scale(25.0f);
     auto colorFieldWidth2 = comboWidth - scale(30.0f);
 
-    const char* items[] = {"##1", "##2", "##3", "##4", "##5", "##6", "##7", "##8"};
+    const char* items[] = {"##1", "##2", "##3", "##4", "##5", "##6", "##7", "##8", "##9", "##10", "##11", "##12", "##13", "##14", "##15", "##16"};
 
     ImVec2 comboPos = ImGui::GetCursorScreenPos();
 
