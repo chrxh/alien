@@ -430,7 +430,6 @@ void MainLoopController::processMenubar()
             .keyAlt(true)
             .key(ImGuiKey_S)
             .selected(SelectionWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { SelectionWindow::get().setOn(!SelectionWindow::get().isOn()); });
     AlienGui::MenuItem(
@@ -439,7 +438,6 @@ void MainLoopController::processMenubar()
             .keyAlt(true)
             .key(ImGuiKey_G)
             .selected(CreatorWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { CreatorWindow::get().setOn(!CreatorWindow::get().isOn()); });
     AlienGui::MenuItem(
@@ -448,7 +446,6 @@ void MainLoopController::processMenubar()
             .keyAlt(true)
             .key(ImGuiKey_M)
             .selected(PatternEditorWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn()); });
     AlienGui::MenuItem(
@@ -457,7 +454,6 @@ void MainLoopController::processMenubar()
             .keyAlt(true)
             .key(ImGuiKey_B)
             .selected(GenomeEditorWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn()); });
     AlienGui::MenuItem(
@@ -466,7 +462,6 @@ void MainLoopController::processMenubar()
             .keyAlt(true)
             .key(ImGuiKey_A)
             .selected(MultiplierWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { MultiplierWindow::get().setOn(!MultiplierWindow::get().isOn()); });
     AlienGui::MenuSeparator();
@@ -475,20 +470,20 @@ void MainLoopController::processMenubar()
             .name("Inspect objects")
             .keyAlt(true)
             .key(ImGuiKey_N)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isObjectInspectionPossible()),
+            .disabled(!PatternEditorWindow::get().isObjectInspectionPossible()),
         [&] { EditorController::get().onInspectSelectedObjects(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Inspect principal genome")
             .keyAlt(true)
             .key(ImGuiKey_F)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isGenomeInspectionPossible()),
+            .disabled(!PatternEditorWindow::get().isGenomeInspectionPossible()),
         [&] { EditorController::get().onInspectSelectedGenomes(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Close inspections")
             .key(ImGuiKey_Escape)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive()),
+            .disabled(!EditorController::get().areInspectionWindowsActive()),
         [&] { EditorController::get().onCloseAllInspectorWindows(); });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(
@@ -496,20 +491,20 @@ void MainLoopController::processMenubar()
             .name("Copy")
             .keyCtrl(true)
             .key(ImGuiKey_C)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCopyingPossible()),
+            .disabled(!EditorController::get().isCopyingPossible()),
         [&] { EditorController::get().onCopy(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Paste")
             .keyCtrl(true)
             .key(ImGuiKey_V)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isPastingPossible()),
+            .disabled(!EditorController::get().isPastingPossible()),
         [&] { EditorController::get().onPaste(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Delete")
             .key(ImGuiKey_Delete)
-            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCopyingPossible()),
+            .disabled(!EditorController::get().isCopyingPossible()),
         [&] { EditorController::get().onDelete(); });
     AlienGui::EndMenu();
 

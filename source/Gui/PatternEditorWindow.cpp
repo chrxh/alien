@@ -283,7 +283,7 @@ void PatternEditorWindow::processIntern()
 
 bool PatternEditorWindow::isShown()
 {
-    return _on && EditorController::get().isOn();
+    return _on;
 }
 
 void PatternEditorWindow::onOpenPattern()
