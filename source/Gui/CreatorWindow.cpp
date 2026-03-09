@@ -85,7 +85,7 @@ void CreatorWindow::processIntern()
             EditorModel::get().setPencilWidth(pencilWidth);
             AlienGui::Switcher(
                 AlienGui::SwitcherParameters()
-                    .name("Drawing type")
+                    .name("Material type")
                     .textWidth(RightColumnWidth)
                     .values({"Solid", "Fluid"})
                     .tooltip(Const::CreatorDrawingTypeTooltip),
