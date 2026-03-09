@@ -25,6 +25,7 @@ private:
         bool isSeparation;
 
         // Construction position
+        bool isFirstNode;
         bool isFirstNodeOfFirstConcatenation;
         bool isLastNode;
         bool isLastNodeOfLastConcatenation;
@@ -208,7 +209,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     auto& constructor = object->typeData.cell.constructor;
     auto& genome = constructor.offspring->genome;
 
-    auto isFirstNode = ConstructorHelper::isFirstNode(constructor);
     auto isFirstConcatenation = ConstructorHelper::isFirstConcatenation(constructor);
 
     ConstructionData result;
@@ -216,7 +216,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.gene = ConstructorHelper::getCurrentGene(constructor, *genome);
     result.node = ConstructorHelper::getCurrentNode(constructor, *genome);
     result.isSeparation = result.gene->separation;
-    result.isFirstNodeOfFirstConcatenation = isFirstNode && isFirstConcatenation;
+    result.isFirstNode = ConstructorHelper::isFirstNode(constructor);
+    result.isFirstNodeOfFirstConcatenation = result.isFirstNode && isFirstConcatenation;
     result.isLastNode = ConstructorHelper::isLastNode(constructor, *genome);
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, *genome);
 
@@ -266,7 +267,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         result.numAdditionalConnections = 0;
     }
 
-    if (isFirstNode) {
+    if (result.isFirstNode) {
         if (result.isFirstNodeOfFirstConcatenation && ConstructorHelper::isFirstBranch(constructor)) {
             result.angle = constructor.constructionAngle;
         } else if (isFirstConcatenation) {
@@ -384,7 +385,9 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
             ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
         }
     }
-    if ((constructionData.isSeparation || constructor.geneIndex == 0) && constructionData.isLastNode) {
+
+    // Head cell should be first (=> connection[0] points to nodeIndex=1 in each concatenation)
+    if ((constructionData.isSeparation || constructor.geneIndex == 0) && constructionData.isFirstNode) {
         newObject->typeData.cell.headCell = true;
     }
     activateNewObjectOnLastNode(newObject, hostObject, constructionData);
