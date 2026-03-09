@@ -28,10 +28,10 @@ namespace
 {
     auto const ModeText = std::unordered_map<CreationMode, std::string>{
         {CreationMode_CreateParticle, "Create a single energy particle"},
-        {CreationMode_CreateCell, "Create a single cell"},
-        {CreationMode_CreateRectangle, "Create a rectangular cell network"},
-        {CreationMode_CreateHexagon, "Create a hexagonal cell network"},
-        {CreationMode_CreateDisc, "Create a disc-shaped cell network"},
+        {CreationMode_CreateObject, "Create a single object"},
+        {CreationMode_CreateRectangle, "Create a rectangular object network"},
+        {CreationMode_CreateHexagon, "Create a hexagonal object network"},
+        {CreationMode_CreateDisc, "Create a disc-shaped object network"},
         {CreationMode_Drawing, "Draw freehand"},
     };
 
@@ -46,8 +46,8 @@ void CreatorWindow::processIntern()
     AlienGui::Tooltip(ModeText.at(CreationMode_CreateParticle));
 
     ImGui::SameLine();
-    AlienGui::SelectableToolbarButton(ICON_DOT, _mode, CreationMode_CreateCell, CreationMode_CreateCell);
-    AlienGui::Tooltip(ModeText.at(CreationMode_CreateCell));
+    AlienGui::SelectableToolbarButton(ICON_DOT, _mode, CreationMode_CreateObject, CreationMode_CreateObject);
+    AlienGui::Tooltip(ModeText.at(CreationMode_CreateObject));
 
     ImGui::SameLine();
     AlienGui::SelectableToolbarButton(ICON_RECTANGLE, _mode, CreationMode_CreateRectangle, CreationMode_CreateRectangle);
@@ -128,7 +128,7 @@ void CreatorWindow::processIntern()
                     .tooltip(Const::CreatorDistanceTooltip),
                 _cellDistance);
         }
-        if (_mode != CreationMode_CreateParticle & _mode != CreationMode_CreateCell) {
+        if (_mode != CreationMode_CreateParticle & _mode != CreationMode_CreateObject) {
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
         }
         if (_mode != CreationMode_CreateParticle) {
@@ -148,7 +148,7 @@ void CreatorWindow::processIntern()
     } else {
         simInteractionController.setDrawMode(false);
         if (AlienGui::Button("Build")) {
-            if (_mode == CreationMode_CreateCell) {
+            if (_mode == CreationMode_CreateObject) {
                 createCell();
             }
             if (_mode == CreationMode_CreateParticle) {

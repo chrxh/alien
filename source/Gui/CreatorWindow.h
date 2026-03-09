@@ -12,7 +12,7 @@ using CreationMode = int;
 enum CreationMode_
 {
     CreationMode_CreateParticle,
-    CreationMode_CreateCell,
+    CreationMode_CreateObject,
     CreationMode_CreateRectangle,
     CreationMode_CreateHexagon,
     CreationMode_CreateDisc,
