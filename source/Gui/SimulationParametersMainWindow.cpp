@@ -20,8 +20,8 @@
 #include "SpecificationGuiService.h"
 #include "Viewport.h"
 
-#include <ImFileDialog.h>
 #include <EngineInterface/SimulationFacade.h>
+#include <ImFileDialog.h>
 
 namespace
 {
@@ -462,6 +462,9 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     parameters.layerRadialForceFieldOrientation.layerValues[index] = Orientation_Clockwise;
     parameters.layerRadialForceFieldStrength.layerValues[index] = 0.001f;
     parameters.layerRadialForceFieldDriftAngle.layerValues[index] = 0.0f;
+    parameters.layerPerlinNoiseForceFieldStrength.layerValues[index] = 0.001f;
+    parameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index] = 20.0f;
+    parameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index] = 100.0f;
 
     origParameters.backgroundColor.layerValues[index] = parameters.backgroundColor.layerValues[index];
     origParameters.layerShape.layerValues[index] = parameters.layerShape.layerValues[index];
@@ -473,6 +476,9 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     origParameters.layerRadialForceFieldOrientation.layerValues[index] = parameters.layerRadialForceFieldOrientation.layerValues[index];
     origParameters.layerRadialForceFieldStrength.layerValues[index] = parameters.layerRadialForceFieldStrength.layerValues[index];
     origParameters.layerRadialForceFieldDriftAngle.layerValues[index] = parameters.layerRadialForceFieldDriftAngle.layerValues[index];
+    origParameters.layerPerlinNoiseForceFieldStrength.layerValues[index] = parameters.layerPerlinNoiseForceFieldStrength.layerValues[index];
+    origParameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index] = parameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index];
+    origParameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index] = parameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index];
 
     _SimulationFacade::get()->setSimulationParameters(parameters);
     _SimulationFacade::get()->setOriginalSimulationParameters(origParameters);

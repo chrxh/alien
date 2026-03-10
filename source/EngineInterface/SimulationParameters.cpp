@@ -250,6 +250,36 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .max(0.5f)
                                                       .logarithmic(true)
                                                       .format("%.6f")),
+                                      }},
+                                     {"Perlin noise",
+                                      {
+                                          ParameterSpec()
+                                              .name("Strength")
+                                              .reference(
+                                                  FloatSpec()
+                                                      .member(&SimulationParameters::layerPerlinNoiseForceFieldStrength)
+                                                      .min(0.0f)
+                                                      .max(0.5f)
+                                                      .logarithmic(true)
+                                                      .format("%.6f")),
+                                          ParameterSpec()
+                                              .name("Spatial structure size")
+                                              .reference(
+                                                  FloatSpec()
+                                                      .member(&SimulationParameters::layerPerlinNoiseForceFieldSpatialSize)
+                                                      .min(0.1f)
+                                                      .max(1000.0f)
+                                                      .logarithmic(true)
+                                                      .format("%.0f")),
+                                          ParameterSpec()
+                                              .name("Temporal structure size")
+                                              .reference(
+                                                  FloatSpec()
+                                                      .member(&SimulationParameters::layerPerlinNoiseForceFieldTemporalSize)
+                                                      .min(1.0f)
+                                                      .max(1000000.0f)
+                                                      .logarithmic(true)
+                                                      .format("%.0f")),
                                       }}})),
                 }),
             ParameterGroupSpec()

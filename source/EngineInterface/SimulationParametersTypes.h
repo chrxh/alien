@@ -174,7 +174,8 @@ enum ForceField_
     ForceField_None,
     ForceField_Radial,
     ForceField_Central,
-    ForceField_Linear
+    ForceField_Linear,
+    ForceField_PerlinNoise
 };
 
 using LayerShapeType = int;
