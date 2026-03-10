@@ -379,14 +379,25 @@ void DescEditService::reconnectObjects(Desc& description, float maxDistance) con
         ++index;
     }
 
-    std::unordered_map<uint64_t, int> objectIdToIndex;
     auto cache = description.createCache();
+    auto existsCrossingConnection = [&](RealVector2D const& pos1, RealVector2D const& pos2) {
+        for (auto const& object : description._objects) {
+            for (auto const& connection : object._connections) {
+                auto const& connectedObject = description.getObjectRef(connection._objectId, cache);
+                if (Math::isCrossing(pos1, pos2, object._pos, connectedObject._pos)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
     for (auto& object : description._objects) {
         auto nearbyCellIndices = getObjectIndicesWithinRadius(description, cellIndicesBySlot, object._pos, maxDistance);
         for (auto const& nearbyCellIndex : nearbyCellIndices) {
             auto const& nearbyCell = description._objects.at(nearbyCellIndex);
             if (object._id != nearbyCell._id && object._connections.size() < MAX_OBJECT_CONNECTIONS && nearbyCell._connections.size() < MAX_OBJECT_CONNECTIONS
-                && !object.isConnectedTo(nearbyCell._id)) {
+                && !object.isConnectedTo(nearbyCell._id) && !existsCrossingConnection(object._pos, nearbyCell._pos)) {
                 description.addConnection(object._id, nearbyCell._id, cache);
             }
         }
