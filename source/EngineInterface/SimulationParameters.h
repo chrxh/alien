@@ -60,6 +60,7 @@ struct SimulationParameters
     LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};                          // for ForceField_Central
     LayerParameter<float> layerLinearForceFieldAngle = {{0}};
     LayerParameter<float> layerLinearForceFieldStrength = {{0.0001f}};
+    LayerParameter<float> layerPerlinNoiseForceFieldStrength = {{0.001f}};  // for ForceField_PerlinNoise
 
     // Physics: Motion
     BaseParameter<float> timestepSize = {1.0f};

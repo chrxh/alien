@@ -250,6 +250,18 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .max(0.5f)
                                                       .logarithmic(true)
                                                       .format("%.6f")),
+                                      }},
+                                     {"Perlin noise",
+                                      {
+                                          ParameterSpec()
+                                              .name("Strength")
+                                              .reference(
+                                                  FloatSpec()
+                                                      .member(&SimulationParameters::layerPerlinNoiseForceFieldStrength)
+                                                      .min(0.0f)
+                                                      .max(0.5f)
+                                                      .logarithmic(true)
+                                                      .format("%.6f")),
                                       }}})),
                 }),
             ParameterGroupSpec()
