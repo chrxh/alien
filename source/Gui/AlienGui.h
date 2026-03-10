@@ -46,6 +46,7 @@ public:
         MEMBER(SliderFloatParameters, float, textWidth, 100);
         MEMBER(SliderFloatParameters, bool, colorDependence, false);
         MEMBER(SliderFloatParameters, bool, readOnly, false);
+        MEMBER(SliderFloatParameters, bool, small, false);
         MEMBER(SliderFloatParameters, float const*, defaultValue, nullptr);
         MEMBER(SliderFloatParameters, float const*, disabledValue, nullptr);
         MEMBER(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
@@ -67,6 +68,7 @@ public:
         MEMBER(SliderIntParameters, float, textWidth, 100);
         MEMBER(SliderIntParameters, bool, colorDependence, false);
         MEMBER(SliderIntParameters, bool, readOnly, false);
+        MEMBER(SliderIntParameters, bool, small, false);
         MEMBER(SliderIntParameters, int const*, defaultValue, nullptr);
         MEMBER(SliderIntParameters, int const*, disabledValue, nullptr);
         MEMBER(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);

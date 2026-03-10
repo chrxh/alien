@@ -300,7 +300,7 @@ bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
     }
-    ImGui::PopID(); 
+    ImGui::PopID();
     return result;
 }
 
@@ -1540,7 +1540,9 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
         highlightCountdown = std::max(
             0,
             toInt(
-                1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - treeNodeInfo.startBlinkingTimepoint.value()).count()));
+                1000
+                - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - treeNodeInfo.startBlinkingTimepoint.value())
+                      .count()));
         if (highlightCountdown > 0) {
             ImGui::SetScrollHereY();
         }
@@ -1593,10 +1595,10 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     ImGui::PopStyleColor(3);
 
     treeNodeInfo.isOpen = result;
-    
+
     // Store the ID on the stack so EndTreeNode can retrieve it
     _treeNodeIdStack.push_back(id);
-    
+
     return result;
 }
 
@@ -1879,6 +1881,15 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         ImGui::BeginDisabled();
     }
 
+    //small mode
+    float originalGrabMinSize = 0;
+    if (parameters._small) {
+        ImGui::SetWindowFontScale(0.8f);
+        ImGuiStyle& style = ImGui::GetStyle();
+        originalGrabMinSize = style.GrabMinSize;
+        style.GrabMinSize = scale(4.0f);
+    }
+
     //enable button
     if (enabled) {
         ImGui::Checkbox("##checkbox", enabled);
@@ -2065,6 +2076,13 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
     if (parameters._readOnly) {
         ImGui::EndDisabled();
     }
+
+    //restore small mode
+    if (parameters._small) {
+        ImGui::GetStyle().GrabMinSize = originalGrabMinSize;
+        ImGui::SetWindowFontScale(1.0f);
+    }
+
     ImGui::PopID();
     ImGui::PopID();
     return result;
@@ -2133,10 +2151,20 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
                         ColorField(Const::IndividualObjectColors[row - 1], -1);
                     } else if (row > 0 && col > 0) {
                         if constexpr (std::is_same<T, float>()) {
-                            ImGui::InputFloat(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0, parameters._format.c_str());
+                            SliderFloat(
+                                SliderFloatParameters()
+                                    .format(parameters._format)
+                                    .small(true)
+                                    .textWidth(0)
+                                    .min(parameters._min)
+                                    .max(parameters._max)
+                                    .logarithmic(parameters._logarithmic),
+                                &value[row - 1][col - 1]);
                         }
                         if constexpr (std::is_same<T, int>()) {
-                            ImGui::InputInt(("##" + parameters._name).c_str(), &value[row - 1][col - 1], 0, 0);
+                            SliderInt(
+                                SliderIntParameters().small(true).textWidth(0).min(parameters._min).max(parameters._max).logarithmic(parameters._logarithmic),
+                                &value[row - 1][col - 1]);
                         }
                         if constexpr (std::is_same<T, bool>()) {
                             ImGui::Checkbox(("##" + parameters._name).c_str(), &value[row - 1][col - 1]);
@@ -2279,7 +2307,7 @@ void AlienGui::drawTextWithInfoLabel(
         ImVec2 labelSize = ImGui::CalcTextSize(infoLabel->c_str());
         auto const& style = ImGui::GetStyle();
         labelPos.y += scale(1.0f);
-        labelSize.x += style.FramePadding.x * 2; // padding left+right
+        labelSize.x += style.FramePadding.x * 2;  // padding left+right
         labelSize.y += style.FramePadding.y * 2;  // padding top+bottom
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         ImU32 borderColor = ImGui::GetColorU32(ImGuiCol_Border);
@@ -2289,7 +2317,7 @@ void AlienGui::drawTextWithInfoLabel(
             borderColor,
             4.0f,
             0,
-            2.0f // thickness
+            2.0f  // thickness
         );
         ImGui::SetCursorScreenPos(ImVec2(labelPos.x + style.FramePadding.x, labelPos.y));
         ImGui::TextDisabled("%s", infoLabel->c_str());
@@ -2330,7 +2358,7 @@ AlienGui::DynamicTableLayout::DynamicTableLayout(float columnWidth)
 
 bool AlienGui::DynamicTableLayout::begin()
 {
-    auto result = ImGui::BeginTable("##", _numColumns, /*ImGuiTableFlags_BordersInnerV*/0);
+    auto result = ImGui::BeginTable("##", _numColumns, /*ImGuiTableFlags_BordersInnerV*/ 0);
     if (result) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
