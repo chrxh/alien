@@ -356,8 +356,13 @@ void SimulationView::setupRenderPipeline()
         // Render block: Merge and tone mapping
         RenderBlock{
             RenderSequence().steps({
-                _PostProcessingRenderStep::create(
-                    StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 0.5f).addUniform("colorFactor2", 1.0f)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeAdditive).uniformFunc([](SimulationParameters const& parameters) {
+                    float bloom = parameters.bloom.value;
+                    return UniformValueMap{
+                        {"colorFactor1", bloom},
+                        {"colorFactor2", 1.5f - bloom},
+                    };
+                })),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ToneMapping)),
             }),
         },
