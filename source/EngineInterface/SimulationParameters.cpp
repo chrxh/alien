@@ -262,6 +262,22 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .max(0.5f)
                                                       .logarithmic(true)
                                                       .format("%.6f")),
+                                          ParameterSpec()
+                                              .name("Spatial structure size")
+                                              .reference(
+                                                  FloatSpec()
+                                                      .member(&SimulationParameters::layerPerlinNoiseForceFieldSpatialSize)
+                                                      .min(0.1f)
+                                                      .max(1000.0f)
+                                                      .format("%.1f")),
+                                          ParameterSpec()
+                                              .name("Temporal structure size")
+                                              .reference(
+                                                  FloatSpec()
+                                                      .member(&SimulationParameters::layerPerlinNoiseForceFieldTemporalSize)
+                                                      .min(1.0f)
+                                                      .max(100000.0f)
+                                                      .format("%.0f")),
                                       }}})),
                 }),
             ParameterGroupSpec()

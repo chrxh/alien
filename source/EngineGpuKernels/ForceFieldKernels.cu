@@ -30,9 +30,9 @@ namespace
         return x;
     }
 
-    __device__ __inline__ float2 perlinGradient(int ix, int iy)
+    __device__ __inline__ float2 perlinGradient(int ix, int iy, int seed)
     {
-        int h = perlinHash(perlinHash(ix) + iy) & 3;
+        int h = perlinHash(perlinHash(ix) + iy + seed) & 3;
         switch (h) {
         case 0:
             return {1.0f, 0.0f};
@@ -45,7 +45,7 @@ namespace
         }
     }
 
-    __device__ __inline__ float perlinNoise(float x, float y)
+    __device__ __inline__ float perlinNoise(float x, float y, int seed)
     {
         int ix = __float2int_rd(x);
         int iy = __float2int_rd(y);
@@ -55,10 +55,10 @@ namespace
         float u = perlinFade(fx);
         float v = perlinFade(fy);
 
-        float2 g00 = perlinGradient(ix, iy);
-        float2 g10 = perlinGradient(ix + 1, iy);
-        float2 g01 = perlinGradient(ix, iy + 1);
-        float2 g11 = perlinGradient(ix + 1, iy + 1);
+        float2 g00 = perlinGradient(ix, iy, seed);
+        float2 g10 = perlinGradient(ix + 1, iy, seed);
+        float2 g01 = perlinGradient(ix, iy + 1, seed);
+        float2 g11 = perlinGradient(ix + 1, iy + 1, seed);
 
         float n00 = g00.x * fx + g00.y * fy;
         float n10 = g10.x * (fx - 1.0f) + g10.y * fy;
@@ -71,7 +71,7 @@ namespace
         return nx0 + v * (nx1 - nx0);
     }
 
-    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& index)
+    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& index, uint64_t timestep)
     {
         switch (cudaSimulationParameters.layerForceFieldType.layerValues[index].value) {
         case ForceField_Radial: {
@@ -96,12 +96,25 @@ namespace
             auto layerPos = cudaSimulationParameters.layerPosition.layerValues[index];
             float2 relPos{pos.x - layerPos.x, pos.y - layerPos.y};
             map.correctDirection(relPos);
-            auto scale = 0.05f;
+            auto spatialSize = cudaSimulationParameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index];
+            auto scale = 1.0f / max(spatialSize, 0.1f);
             auto sx = relPos.x * scale;
             auto sy = relPos.y * scale;
-            auto baseValue = perlinNoise(sx, sy);
-            auto rightValue = perlinNoise(sx + scale, sy);
-            auto downValue = perlinNoise(sx, sy + scale);
+            auto temporalSize = cudaSimulationParameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index];
+            auto t = static_cast<float>(timestep) / max(temporalSize, 1.0f);
+            auto tIndex = __float2int_rd(t);
+            auto tFrac = t - tIndex;
+            int seed0 = perlinHash(tIndex);
+            int seed1 = perlinHash(tIndex + 1);
+            auto baseValue0 = perlinNoise(sx, sy, seed0);
+            auto rightValue0 = perlinNoise(sx + scale, sy, seed0);
+            auto downValue0 = perlinNoise(sx, sy + scale, seed0);
+            auto baseValue1 = perlinNoise(sx, sy, seed1);
+            auto rightValue1 = perlinNoise(sx + scale, sy, seed1);
+            auto downValue1 = perlinNoise(sx, sy + scale, seed1);
+            auto baseValue = baseValue0 + tFrac * (baseValue1 - baseValue0);
+            auto rightValue = rightValue0 + tFrac * (rightValue1 - rightValue0);
+            auto downValue = downValue0 + tFrac * (downValue1 - downValue0);
             auto strength = cudaSimulationParameters.layerPerlinNoiseForceFieldStrength.layerValues[index];
             return float2{rightValue - baseValue, downValue - baseValue} * strength;
         }
@@ -117,9 +130,10 @@ __global__ void cudaApplyForceFields(SimulationData data)
     float2 accelerations[MAX_LAYERS];
 
     auto calcResultingAcceleration = [&](float2 const& pos) {
+        auto timestep = *data.timestep;
         for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
             if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
-                accelerations[i] = calcAcceleration(data.objectMap, pos, i);
+                accelerations[i] = calcAcceleration(data.objectMap, pos, i, timestep);
             } else {
                 accelerations[i] = float2{0, 0};
             }
