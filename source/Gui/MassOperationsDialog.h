@@ -25,10 +25,10 @@ private:
     void validateAndCorrect();
 
     bool _randomizeCellColors = false;
-    bool _checkedCellColors[MAX_COLORS] = {false, false, false, false, false, false, false};
+    bool _checkedCellColors[MAX_COLORS] = {};
 
     bool _randomizeGenomeColors = false;
-    bool _checkedGenomeColors[MAX_COLORS] = {false, false, false, false, false, false, false};
+    bool _checkedGenomeColors[MAX_COLORS] = {};
 
     bool _randomizeEnergies = false;
     float _minEnergy = 200.0;

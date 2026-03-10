@@ -189,39 +189,15 @@ void PatternEditorWindow::processIntern()
 
 
         AlienGui::Group(AlienGui::GroupParameters().text("Color"));
-        if (colorButton("    ##color1", Const::IndividualObjectColor1)) {
-            _SimulationFacade::get()->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
-            EditorModel::get().setDefaultColorCode(0);
-        }
-        ImGui::SameLine();
-        if (colorButton("    ##color2", Const::IndividualObjectColor2)) {
-            _SimulationFacade::get()->colorSelectedObjects(1, EditorModel::get().isRolloutToClusters());
-            EditorModel::get().setDefaultColorCode(1);
-        }
-        ImGui::SameLine();
-        if (colorButton("    ##color3", Const::IndividualObjectColor3)) {
-            _SimulationFacade::get()->colorSelectedObjects(2, EditorModel::get().isRolloutToClusters());
-            EditorModel::get().setDefaultColorCode(2);
-        }
-        ImGui::SameLine();
-        if (colorButton("    ##color4", Const::IndividualObjectColor4)) {
-            _SimulationFacade::get()->colorSelectedObjects(3, EditorModel::get().isRolloutToClusters());
-            EditorModel::get().setDefaultColorCode(3);
-        }
-        ImGui::SameLine();
-        if (colorButton("    ##color5", Const::IndividualObjectColor5)) {
-            _SimulationFacade::get()->colorSelectedObjects(4, EditorModel::get().isRolloutToClusters());
-            EditorModel::get().setDefaultColorCode(4);
-        }
-        ImGui::SameLine();
-        if (colorButton("    ##color6", Const::IndividualObjectColor6)) {
-            _SimulationFacade::get()->colorSelectedObjects(5, EditorModel::get().isRolloutToClusters());
-            EditorModel::get().setDefaultColorCode(5);
-        }
-        ImGui::SameLine();
-        if (colorButton("    ##color7", Const::IndividualObjectColor7)) {
-            _SimulationFacade::get()->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
-            EditorModel::get().setDefaultColorCode(6);
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (i > 0) {
+                ImGui::SameLine();
+            }
+            auto label = "    ##color" + std::to_string(i + 1);
+            if (colorButton(label.c_str(), Const::IndividualObjectColors[i])) {
+                _SimulationFacade::get()->colorSelectedObjects(i, EditorModel::get().isRolloutToClusters());
+                EditorModel::get().setDefaultColorCode(i);
+            }
         }
         AlienGui::Group(AlienGui::GroupParameters().text("Tools"));
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());

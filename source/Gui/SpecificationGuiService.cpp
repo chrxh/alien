@@ -17,8 +17,8 @@
 
 namespace
 {
-    auto constexpr ColumnWidth = 500.0f;
-    auto constexpr TextColumnWidth = 285.0f;
+    auto constexpr ColumnWidth = 550.0f;
+    auto constexpr TextColumnWidth = 260.0f;
 }
 
 void SpecificationGuiService::createWidgetsForParameters(
