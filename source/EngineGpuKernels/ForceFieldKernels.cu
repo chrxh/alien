@@ -93,13 +93,16 @@ namespace
             return centerDirection * cudaSimulationParameters.layerLinearForceFieldStrength.layerValues[index];
         }
         case ForceField_PerlinNoise: {
-            float scale = 0.05f;
-            float sx = pos.x * scale;
-            float sy = pos.y * scale;
-            float baseValue = perlinNoise(sx, sy);
-            float rightValue = perlinNoise(sx + scale, sy);
-            float downValue = perlinNoise(sx, sy + scale);
-            float strength = cudaSimulationParameters.layerPerlinNoiseForceFieldStrength.layerValues[index];
+            auto layerPos = cudaSimulationParameters.layerPosition.layerValues[index];
+            float2 relPos{pos.x - layerPos.x, pos.y - layerPos.y};
+            map.correctDirection(relPos);
+            auto scale = 0.05f;
+            auto sx = relPos.x * scale;
+            auto sy = relPos.y * scale;
+            auto baseValue = perlinNoise(sx, sy);
+            auto rightValue = perlinNoise(sx + scale, sy);
+            auto downValue = perlinNoise(sx, sy + scale);
+            auto strength = cudaSimulationParameters.layerPerlinNoiseForceFieldStrength.layerValues[index];
             return float2{rightValue - baseValue, downValue - baseValue} * strength;
         }
         default:
