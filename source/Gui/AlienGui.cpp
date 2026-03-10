@@ -1881,9 +1881,9 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         ImGui::BeginDisabled();
     }
 
-    //small mode
+    // Evaluate tiny mode
     float originalGrabMinSize = 0;
-    if (parameters._small) {
+    if (parameters._tiny) {
         ImGui::SetWindowFontScale(0.8f);
         ImGuiStyle& style = ImGui::GetStyle();
         originalGrabMinSize = style.GrabMinSize;
@@ -2077,8 +2077,8 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         ImGui::EndDisabled();
     }
 
-    //restore small mode
-    if (parameters._small) {
+    // Restore for tiny mode
+    if (parameters._tiny) {
         ImGui::GetStyle().GrabMinSize = originalGrabMinSize;
         ImGui::SetWindowFontScale(1.0f);
     }
@@ -2154,7 +2154,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
                             SliderFloat(
                                 SliderFloatParameters()
                                     .format(parameters._format)
-                                    .small(true)
+                                    .tiny(true)
                                     .textWidth(0)
                                     .min(parameters._min)
                                     .max(parameters._max)
@@ -2163,7 +2163,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
                         }
                         if constexpr (std::is_same<T, int>()) {
                             SliderInt(
-                                SliderIntParameters().small(true).textWidth(0).min(parameters._min).max(parameters._max).logarithmic(parameters._logarithmic),
+                                SliderIntParameters().tiny(true).textWidth(0).min(parameters._min).max(parameters._max).logarithmic(parameters._logarithmic),
                                 &value[row - 1][col - 1]);
                         }
                         if constexpr (std::is_same<T, bool>()) {
