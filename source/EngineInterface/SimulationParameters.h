@@ -41,26 +41,26 @@ struct SimulationParameters
     LayerParameter<RealVector2D> layerPosition;
     LayerParameter<RealVector2D> layerVelocity;
     LayerParameter<LayerShapeType> layerShape = {{LayerShapeType_Circular}};
-    LayerParameter<float> layerCoreRadius = {{100.0f}};                 // for LayerShapeType_Circular
-    LayerParameter<RealVector2D> layerCoreRect = {{{100.0f, 100.0f}}};  // for LayerShapeType_Rectangular
+    LayerParameter<float> layerCoreRadius = {{100.0f}};                 
+    LayerParameter<RealVector2D> layerCoreRect = {{{100.0f, 100.0f}}};  
     LayerParameter<float> layerFadeoutRadius = {{100.0f}};
     SourceParameter<SourceShapeType> sourceShapeType = {{SourceShapeType_Circular}};
-    SourceParameter<float> sourceCircularRadius = {{1.0f}};                    // for SourceShapeType_Circular
-    SourceParameter<RealVector2D> sourceRectangularRect = {{{30.0f, 60.0f}}};  // for SourceShapeType_Rectangular
+    SourceParameter<float> sourceCircularRadius = {{1.0f}};                    
+    SourceParameter<RealVector2D> sourceRectangularRect = {{{30.0f, 60.0f}}};  
     SourceParameter<RealVector2D> sourcePosition;
     SourceParameter<RealVector2D> sourceVelocity;
 
     // Force field
     EnableableLayerParameter<ForceField> layerForceFieldType = {.layerValues = {{ForceField_None, false}}};
-    LayerParameter<Orientation> layerRadialForceFieldOrientation = {{Orientation_Clockwise}};  // for ForceField_Radial
-    LayerParameter<float> layerRadialForceFieldStrength = {{0.001f}};                          // for ForceField_Radial
-    LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial
-    LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};                          // for ForceField_Central
+    LayerParameter<Orientation> layerRadialForceFieldOrientation = {{Orientation_Clockwise}};  
+    LayerParameter<float> layerRadialForceFieldStrength = {{0.001f}};                          
+    LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};                          
+    LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};                          
     LayerParameter<float> layerLinearForceFieldAngle = {{0}};
     LayerParameter<float> layerLinearForceFieldStrength = {{0.0001f}};
-    LayerParameter<float> layerPerlinNoiseForceFieldStrength = {{0.001f}};      // for ForceField_PerlinNoise
-    LayerParameter<float> layerPerlinNoiseForceFieldSpatialSize = {{20.0f}};    // for ForceField_PerlinNoise
-    LayerParameter<float> layerPerlinNoiseForceFieldTemporalSize = {{1000.0f}};  // for ForceField_PerlinNoise
+    LayerParameter<float> layerPerlinNoiseForceFieldStrength = {{0.001f}};      
+    LayerParameter<float> layerPerlinNoiseForceFieldSpatialSize = {{20.0f}};    
+    LayerParameter<float> layerPerlinNoiseForceFieldTemporalSize = {{1000.0f}}; 
 
     // Physics: Motion
     BaseParameter<float> timestepSize = {1.0f};
