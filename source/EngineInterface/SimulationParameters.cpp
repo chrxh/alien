@@ -269,14 +269,16 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .member(&SimulationParameters::layerPerlinNoiseForceFieldSpatialSize)
                                                       .min(0.1f)
                                                       .max(1000.0f)
-                                                      .format("%.1f")),
+                                                      .logarithmic(true)
+                                                      .format("%.0f")),
                                           ParameterSpec()
                                               .name("Temporal structure size")
                                               .reference(
                                                   FloatSpec()
                                                       .member(&SimulationParameters::layerPerlinNoiseForceFieldTemporalSize)
                                                       .min(1.0f)
-                                                      .max(100000.0f)
+                                                      .max(1000000.0f)
+                                                      .logarithmic(true)
                                                       .format("%.0f")),
                                       }}})),
                 }),
