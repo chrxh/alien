@@ -370,21 +370,31 @@ void DescEditService::flattenTopology(Desc& description, IntVector2D const& worl
 
 void DescEditService::reconnectObjects(Desc& description, float maxDistance) const
 {
-    std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
+    std::unordered_map<int, std::unordered_map<int, std::vector<int>>> objectIndicesBySlot;
 
     int index = 0;
     for (auto& object : description._objects) {
         object._connections.clear();
-        cellIndicesBySlot[toInt(object._pos.x)][toInt(object._pos.y)].emplace_back(toInt(index));
+        objectIndicesBySlot[toInt(object._pos.x)][toInt(object._pos.y)].emplace_back(toInt(index));
         ++index;
     }
 
     auto cache = description.createCache();
-    auto existsCrossingConnection = [&](RealVector2D const& pos1, RealVector2D const& pos2) {
-        for (auto const& object : description._objects) {
-            for (auto const& connection : object._connections) {
-                auto const& connectedObject = description.getObjectRef(connection._objectId, cache);
-                if (Math::isCrossing(pos1, pos2, object._pos, connectedObject._pos)) {
+    auto existsCrossingConnection = [&](ObjectDesc const& object, ObjectDesc const& nearbyObject) {
+        for (auto const& connection : object._connections) {
+            auto const& connectedObject = description.getObjectRef(connection._objectId, cache);
+            for (auto const& otherConnection : connectedObject._connections) {
+                auto const& otherConnectedObject = description.getObjectRef(otherConnection._objectId, cache);
+                if (Math::isCrossing(object._pos, nearbyObject._pos, connectedObject._pos, otherConnectedObject._pos)) {
+                    return true;
+                }
+            }
+        }
+        for (auto const& connection : nearbyObject._connections) {
+            auto const& connectedObject = description.getObjectRef(connection._objectId, cache);
+            for (auto const& otherConnection : connectedObject._connections) {
+                auto const& otherConnectedObject = description.getObjectRef(otherConnection._objectId, cache);
+                if (Math::isCrossing(object._pos, nearbyObject._pos, connectedObject._pos, otherConnectedObject._pos)) {
                     return true;
                 }
             }
@@ -393,12 +403,13 @@ void DescEditService::reconnectObjects(Desc& description, float maxDistance) con
     };
 
     for (auto& object : description._objects) {
-        auto nearbyCellIndices = getObjectIndicesWithinRadius(description, cellIndicesBySlot, object._pos, maxDistance);
-        for (auto const& nearbyCellIndex : nearbyCellIndices) {
-            auto const& nearbyCell = description._objects.at(nearbyCellIndex);
-            if (object._id != nearbyCell._id && object._connections.size() < MAX_OBJECT_CONNECTIONS && nearbyCell._connections.size() < MAX_OBJECT_CONNECTIONS
-                && !object.isConnectedTo(nearbyCell._id) && !existsCrossingConnection(object._pos, nearbyCell._pos)) {
-                description.addConnection(object._id, nearbyCell._id, cache);
+        auto nearbyObjectIndices = getObjectIndicesWithinRadius(description, objectIndicesBySlot, object._pos, maxDistance);
+        for (auto const& nearbyObjectIndex : nearbyObjectIndices) {
+            auto const& nearbyObject = description._objects.at(nearbyObjectIndex);
+            if (object._id != nearbyObject._id && object._connections.size() < MAX_OBJECT_CONNECTIONS
+                && nearbyObject._connections.size() < MAX_OBJECT_CONNECTIONS && !object.isConnectedTo(nearbyObject._id)
+                && !existsCrossingConnection(object, nearbyObject)) {
+                description.addConnection(object._id, nearbyObject._id, cache);
             }
         }
     }
