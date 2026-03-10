@@ -115,6 +115,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Show radiation center")
                         .reference(BoolSpec().member(&SimulationParameters::sourceShowRadiationCenter))
                         .description("This option draws a red cross in the center of the radiation source."),
+                    ParameterSpec()
+                        .name("Bloom")
+                        .reference(FloatSpec().member(&SimulationParameters::bloom).min(0.0f).max(1.0f))
+                        .description("Controls the bloom effect intensity. At 0, no bloom is applied. At 1, maximum bloom is applied."),
                 }),
             ParameterGroupSpec()
                 .name("Location")
