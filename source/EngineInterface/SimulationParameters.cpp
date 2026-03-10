@@ -133,7 +133,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        .member(&SimulationParameters::layerVelocity)
                                        .min(RealVector2D{-4.0f, -4.0f})
                                        .max(RealVector2D{4.0f, 4.0f})
-                                       .format("%.2f")),
+                                       .format("%.3f")),
                     ParameterSpec()
                         .name("Position (x,y)")
                         .reference(Float2Spec()
@@ -148,7 +148,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        .member(&SimulationParameters::sourceVelocity)
                                        .min(RealVector2D{-4.0f, -4.0f})
                                        .max(RealVector2D{4.0f, 4.0f})
-                                       .format("%.2f")),
+                                       .format("%.3f")),
                 }),
             ParameterGroupSpec().name("Shape").parameters({
                 ParameterSpec().name("Shape").reference(
@@ -214,7 +214,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .member(&SimulationParameters::layerRadialForceFieldStrength)
                                                       .min(0.0f)
                                                       .max(0.5f)
-                                                      .format("%.5f")
+                                                      .format("%.6f")
                                                       .logarithmic(true)),
                                           ParameterSpec()
                                               .name("Drift angle")
@@ -235,7 +235,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .logarithmic(true)
-                                                      .format("%.5f")),
+                                                      .format("%.6f")),
                                       }},
                                      {"Linear",
                                       {
@@ -249,7 +249,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .logarithmic(true)
-                                                      .format("%.5f")),
+                                                      .format("%.6f")),
                                       }}})),
                 }),
             ParameterGroupSpec()
