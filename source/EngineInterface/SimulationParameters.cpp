@@ -253,7 +253,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                       }}})),
                 }),
             ParameterGroupSpec()
-                .name("Numerics")
+                .name("Physics: Motion")
                 .parameters({
                     ParameterSpec()
                         .name("Time step size")
@@ -261,10 +261,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description(
                             "The time duration calculated in a single simulation step. Smaller values increase the accuracy of the simulation while larger "
                             "values can lead to numerical instabilities."),
-                }),
-            ParameterGroupSpec()
-                .name("Physics: Motion")
-                .parameters({
                     ParameterSpec()
                         .name("Smoothing length")
                         .reference(FloatSpec().member(&SimulationParameters::smoothingLength).min(0.0f).max(3.0f))
@@ -308,10 +304,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Minimum distance")
                         .reference(FloatSpec().member(&SimulationParameters::minObjectDistance).min(0.0f).max(1.0f))
                         .description("Minimum distance between two cells."),
-                }),
-            ParameterGroupSpec()
-                .name("Physics: Binding")
-                .parameters({
                     ParameterSpec()
                         .name("Maximum distance")
                         .reference(FloatSpec().member(&SimulationParameters::maxBindingDistance).min(0.0f).max(5.0f))
@@ -357,7 +349,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(FloatSpec().member(&SimulationParameters::radiationType2_strength).min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
                         .description("Indicates how energetic the emitted particles of high energy cells are."),
                     ParameterSpec()
-                        .name("Radiation type II: Energy threshold")
+                        .name("Radiation type II: Threshold")
                         .reference(
                             FloatSpec()
                                 .member(&SimulationParameters::radiationType2_energyThreshold)

@@ -61,10 +61,8 @@ struct SimulationParameters
     LayerParameter<float> layerLinearForceFieldAngle = {{0}};
     LayerParameter<float> layerLinearForceFieldStrength = {{0.0001f}};
 
-    // Numerics
-    BaseParameter<float> timestepSize = {1.0f};
-
     // Physics: Motion
+    BaseParameter<float> timestepSize = {1.0f};
     BaseParameter<float> smoothingLength = {0.8f};    // for MotionType_Fluid
     BaseParameter<float> viscosityStrength = {0.1f};  // for MotionType_Fluid
     BaseParameter<float> pressureStrength = {0.1f};   // for MotionType_Fluid
@@ -76,12 +74,10 @@ struct SimulationParameters
     BaseParameter<float> maxVelocity = {2.0f};
     BaseLayerParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
     BaseParameter<float> minObjectDistance = {0.3f};
-    static float constexpr maxAcceleration = 0.4f;
-    static float constexpr maxForceDecayProbability = 0.2f;
-
-    // Physics: Binding
     BaseParameter<ColorVector<float>> maxBindingDistance = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
     BaseLayerParameter<float> objectFusionVelocity = {.baseValue = 0.1f};
+    static float constexpr maxAcceleration = 0.4f;
+    static float constexpr maxForceDecayProbability = 0.2f;
 
     // Radiation
     PinBaseParameter relativeStrengthBasePin = {false};

@@ -344,7 +344,7 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
     }
 
     if (height == 0) {
-        width = ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2;
+        height = scaleInverse(ImGui::GetTextLineHeight() + ImGui::GetStyle().FramePadding.y * 2);
     }
 
     float h, s, v;
@@ -2117,7 +2117,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
             _basicSilderExpanded.insert(toggleButtonId);
         }
     }
-    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
+    auto textWidth = scale(parameters._textWidth);
 
     ImGui::SameLine();
 
@@ -2144,17 +2144,21 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
                 for (int col = 0; col < MAX_COLORS + 1; ++col) {
                     ImGui::PushID(col);
                     ImGui::TableNextColumn();
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                    auto width = scaleInverse(ImGui::GetContentRegionAvail().x);
+                    if (col < MAX_COLORS) {
+                        width += 3.0f;
+                    }
                     if (row == 0 && col > 0) {
-                        ColorField(Const::IndividualObjectColors[col - 1], -1);
+                        ColorField(Const::IndividualObjectColors[col - 1], width);
                     } else if (row > 0 && col == 0) {
-                        ColorField(Const::IndividualObjectColors[row - 1], -1);
+                        ColorField(Const::IndividualObjectColors[row - 1], width);
                     } else if (row > 0 && col > 0) {
                         if constexpr (std::is_same<T, float>()) {
                             SliderFloat(
                                 SliderFloatParameters()
                                     .format(parameters._format)
                                     .tiny(true)
+                                    .width(width)
                                     .textWidth(0)
                                     .min(parameters._min)
                                     .max(parameters._max)
