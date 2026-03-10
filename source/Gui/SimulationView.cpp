@@ -270,7 +270,7 @@ void SimulationView::setupRenderPipeline()
             }),
         },
 
-        // Render block: Render cells in different sequences
+        // Render block: Render objects in different sequences
         RenderBlock{
             RenderSequence().steps({
                 _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
@@ -296,7 +296,7 @@ void SimulationView::setupRenderPipeline()
             }),
         },
 
-        // Render block: Merge energy, blur cells and cells
+        // Render block: Merge fluid, connections and objects sequence
         RenderBlock{
             RenderSequence().steps({
                 _PostProcessingRenderStep::create(StepParameters()
