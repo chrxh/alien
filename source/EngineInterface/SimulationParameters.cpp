@@ -88,17 +88,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        }))
                         .description(coloringTooltip),
                     ParameterSpec()
-                        .name("Cell radius")
-                        .reference(FloatSpec().member(&SimulationParameters::objectRadius).min(0.0f).max(0.5f))
-                        .description("Specifies the radius of the drawn cells in unit length."),
-                    ParameterSpec()
-                        .name("Zoom level for neural activity")
-                        .reference(FloatSpec().member(&SimulationParameters::zoomLevelForNeuronVisualization).min(0.0f).max(32.f).infinity(true))
-                        .description("The zoom level from which the neuronal activities become visible."),
-                    ParameterSpec()
-                        .name("Attack visualization")
-                        .reference(BoolSpec().member(&SimulationParameters::attackVisualization))
-                        .description("If activated, successful attacks of attacker cells are visualized."),
+                        .name("Bloom")
+                        .reference(FloatSpec().member(&SimulationParameters::bloom).min(0.0f).max(1.0f))
+                        .description("Controls the bloom effect intensity. At 0, no bloom is applied. At 1, maximum bloom is applied."),
                     ParameterSpec()
                         .name("Borderless rendering")
                         .reference(BoolSpec().member(&SimulationParameters::borderlessRendering))
@@ -115,10 +107,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Show radiation center")
                         .reference(BoolSpec().member(&SimulationParameters::sourceShowRadiationCenter))
                         .description("This option draws a red cross in the center of the radiation source."),
-                    ParameterSpec()
-                        .name("Bloom")
-                        .reference(FloatSpec().member(&SimulationParameters::bloom).min(0.0f).max(1.0f))
-                        .description("Controls the bloom effect intensity. At 0, no bloom is applied. At 1, maximum bloom is applied."),
                 }),
             ParameterGroupSpec()
                 .name("Location")

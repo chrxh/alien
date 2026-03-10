@@ -601,9 +601,6 @@ AttackEventRenderStep _AttackEventRenderStep::create(StepParameters const& param
 
 void _AttackEventRenderStep::execute(ExecutionParameters parameters)
 {
-    if (!parameters._simulationParameters->attackVisualization.value) {
-        return;
-    }
     if (!_previousTargetSelection.has_value()) {
         parameters._clearBackground = true;
     }
@@ -632,9 +629,6 @@ DetonationEventRenderStep _DetonationEventRenderStep::create(StepParameters cons
 
 void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
 {
-    if (!parameters._simulationParameters->attackVisualization.value) {
-        return;
-    }
     if (!_previousTargetSelection.has_value()) {
         parameters._clearBackground = true;
     }
