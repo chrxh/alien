@@ -87,7 +87,7 @@ void SimulationKernelsService::launchTimestepKernels(
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, numBlocks, config.fluidBoundaryKernelThreads, data);
 
     if (config.hasLayers) {
-        STREAM_KERNEL_CALL(cudaApplyForceFieldSettings, _stream, numBlocks, data);
+        STREAM_KERNEL_CALL(cudaApplyForceFields, _stream, numBlocks, data);
     }
 
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);

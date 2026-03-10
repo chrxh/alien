@@ -45,7 +45,7 @@ namespace
 
 }
 
-__global__ void cudaApplyForceFieldSettings(SimulationData data)
+__global__ void cudaApplyForceFields(SimulationData data)
 {
     float2 accelerations[MAX_LAYERS];
 
