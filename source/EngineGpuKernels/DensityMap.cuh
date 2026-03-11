@@ -50,12 +50,14 @@ public:
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto slotSizeAsFlot = toFloat(_slotSize);
             if (restrictToColor == 255) {
-                // No color restriction - return total free cell count
-                auto totalCount = (_freeCellDensityMap[index] >> 56) & 0xff;
+                auto packed = _freeCellDensityMap[index];
+                uint64_t totalCount = 0;
+                for (int i = 0; i < MAX_COLORS; ++i) {
+                    totalCount += (packed >> (i * 6)) & 0x3f;
+                }
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
-                // Color restriction - return count for specific color
-                auto colorCount = (_freeCellDensityMap[index] >> (restrictToColor * 8)) & 0xff;
+                auto colorCount = (_freeCellDensityMap[index] >> (restrictToColor * 6)) & 0x3f;
                 return toFloat(colorCount) / (slotSizeAsFlot * slotSizeAsFlot);
             }
         }
@@ -84,8 +86,7 @@ public:
         auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto color = calcMod(object->color, MAX_COLORS);
-            // Increment both the color-specific count and the total count
-            alienAtomicAdd64(&_freeCellDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
+            alienAtomicAdd64(&_freeCellDensityMap[index], static_cast<uint64_t>(1ull << (color * 6)));
         }
     }
 
