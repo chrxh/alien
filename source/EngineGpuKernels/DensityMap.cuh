@@ -44,19 +44,24 @@ public:
         return 0.0f;
     }
 
-    __device__ __inline__ float getFreeCellDensity(float2 const& pos, uint8_t restrictToColor) const
+    __device__ __inline__ float getFreeCellDensity(float2 const& pos, uint16_t restrictToColors) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto slotSizeAsFlot = toFloat(_slotSize);
-            if (restrictToColor == 255) {
+            if (restrictToColors == 0) {
                 // No color restriction - return total free cell count
                 auto totalCount = (_freeCellDensityMap[index] >> 56) & 0xff;
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
-                // Color restriction - return count for specific color
-                auto colorCount = (_freeCellDensityMap[index] >> (restrictToColor * 8)) & 0xff;
-                return toFloat(colorCount) / (slotSizeAsFlot * slotSizeAsFlot);
+                // Sum counts for all selected colors in the bitset
+                int totalCount = 0;
+                for (int c = 0; c < 7; ++c) {
+                    if (restrictToColors & (1 << c)) {
+                        totalCount += (_freeCellDensityMap[index] >> (c * 8)) & 0xff;
+                    }
+                }
+                return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             }
         }
         return 0.0f;

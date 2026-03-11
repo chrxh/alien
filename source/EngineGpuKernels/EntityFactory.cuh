@@ -166,11 +166,11 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                     node.cellTypeData.sensor.modeData.detectFreeCell.minDensity = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                    node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                    node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                     node.cellTypeData.sensor.modeData.detectCreature.minNumCells = nodeTO.cellTypeData.sensor.modeData.detectCreature.minNumCells;
                     node.cellTypeData.sensor.modeData.detectCreature.maxNumCells = nodeTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                    node.cellTypeData.sensor.modeData.detectCreature.restrictToColor = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                    node.cellTypeData.sensor.modeData.detectCreature.restrictToColors = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                     node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                 }
                 break;

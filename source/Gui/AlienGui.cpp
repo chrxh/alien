@@ -898,6 +898,65 @@ bool AlienGui::MultiCheckboxes(MultiCheckboxesParameters const& parameters, bool
     return result;
 }
 
+bool AlienGui::MultiColorCheckboxes(MultiColorCheckboxesParameters const& parameters, uint16_t& colorBitset)
+{
+    ImGui::PushID(parameters._name.c_str());
+    auto padding = ImGui::GetStyle().FramePadding.x;
+    auto checkboxWidth = scale(14.0f) + ImGui::GetStyle().ItemInnerSpacing.x;
+    auto colorFieldWidth = scale(8.0f);
+    auto itemSpacing = scale(2.0f);
+    auto totalCheckboxesWidth = static_cast<float>(MAX_COLORS) * (checkboxWidth + colorFieldWidth + itemSpacing);
+    auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - totalCheckboxesWidth;
+
+    drawHatchedRectangle(width);
+
+    ImGui::Dummy(ImVec2(width - padding, 0));
+    ImGui::SameLine();
+
+    auto result = false;
+    for (int c = 0; c < MAX_COLORS; ++c) {
+        bool checked = (colorBitset & (1 << c)) != 0;
+
+        float h, s, v;
+        AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[c], h, s, v);
+        ImGui::PushStyleColor(ImGuiCol_CheckMark, (ImVec4)ImColor::HSV(h, s, v));
+
+        std::string label = "###c" + std::to_string(c);
+        if (ImGui::Checkbox(label.c_str(), &checked)) {
+            if (checked) {
+                colorBitset |= static_cast<uint16_t>(1 << c);
+            } else {
+                colorBitset &= static_cast<uint16_t>(~(1 << c));
+            }
+            result = true;
+        }
+        ImGui::PopStyleColor();
+
+        ImGui::SameLine();
+        float h2, s2, v2;
+        AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[c], h2, s2, v2);
+        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h2, s2, v2));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h2, s2, v2));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h2, s2, v2));
+        ImGui::Button(("##cf" + std::to_string(c)).c_str(), ImVec2(colorFieldWidth, ImGui::GetFrameHeight()));
+        ImGui::PopStyleColor(3);
+
+        if (c < MAX_COLORS - 1) {
+            ImGui::SameLine();
+            MoveTickLeft();
+        }
+    }
+
+    ImGui::SameLine();
+    AlienGui::Text(TextParameters().text(parameters._name.c_str()));
+    if (parameters._tooltip) {
+        AlienGui::HelpMarker(*parameters._tooltip);
+    }
+
+    ImGui::PopID();
+    return result;
+}
+
 bool AlienGui::SelectableButton(SelectableButtonParameters const& parameters, bool& value)
 {
     auto buttonColor = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Button]);

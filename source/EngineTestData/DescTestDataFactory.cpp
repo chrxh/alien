@@ -282,7 +282,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             if (detectFreeCell._minDensity != nodeDetectFreeCell._minDensity) {
                 return false;
             }
-            if (detectFreeCell._restrictToColor != nodeDetectFreeCell._restrictToColor) {
+            if (detectFreeCell._restrictToColors != nodeDetectFreeCell._restrictToColors) {
                 return false;
             }
         } break;
@@ -295,7 +295,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             if (detectCreature._maxNumCells != nodeDetectCreature._maxNumCells) {
                 return false;
             }
-            if (detectCreature._restrictToColor != nodeDetectCreature._restrictToColor) {
+            if (detectCreature._restrictToColors != nodeDetectCreature._restrictToColors) {
                 return false;
             }
             if (detectCreature._restrictToLineage != nodeDetectCreature._restrictToLineage) {
@@ -663,10 +663,10 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
             sensorModeDesc = DetectStructureDesc();
             break;
         case SensorMode_DetectFreeCell:
-            sensorModeDesc = DetectFreeCellDesc().minDensity(0.25f).restrictToColor(2);
+            sensorModeDesc = DetectFreeCellDesc().minDensity(0.25f).restrictToColors(1 << 2);
             break;
         case SensorMode_DetectCreature:
-            sensorModeDesc = DetectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_RelatedLineage);
+            sensorModeDesc = DetectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColors(1 << 3).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             sensorModeDesc = SensorModeDesc();
@@ -832,11 +832,11 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
             sensorModeDesc = DetectStructureGenomeDesc();
             break;
         case SensorMode_DetectFreeCell:
-            sensorModeDesc = DetectFreeCellGenomeDesc().minDensity(0.20f).restrictToColor(6);
+            sensorModeDesc = DetectFreeCellGenomeDesc().minDensity(0.20f).restrictToColors(1 << 6);
             break;
         case SensorMode_DetectCreature:
             sensorModeDesc =
-                DetectCreatureGenomeDesc().minNumCells(3).maxNumCells(15).restrictToColor(4).restrictToLineage(LineageRestriction_UnrelatedLineage);
+                DetectCreatureGenomeDesc().minNumCells(3).maxNumCells(15).restrictToColors(1 << 4).restrictToLineage(LineageRestriction_UnrelatedLineage);
             break;
         default:
             sensorModeDesc = SensorModeGenomeDesc();

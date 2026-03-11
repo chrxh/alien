@@ -1121,7 +1121,7 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f).restrictToColor(1)))),
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f).restrictToColors(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
@@ -1255,7 +1255,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColor(1)))),
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColors(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
@@ -1288,7 +1288,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColor(1)))),
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColors(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
@@ -1303,6 +1303,38 @@ TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
     auto actualSensor = actualData.getObjectRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectCreature_restrictToMultipleColors)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .color(0)
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColors((1 << 1) | (1 << 2))))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+
+    // Create a large creature with color 2 (which is in the allowed set)
+    std::vector<ObjectDesc> targetCells;
+    for (int j = 0; j < 10; ++j) {
+        for (int i = 0; i < 10; ++i) {
+            targetCells.emplace_back(ObjectDesc().id(10 + i + j * 10).pos({95.0f + i, 80.0f + j}).color(2));
+        }
+    }
+    data.addCreature(targetCells, CreatureDesc().id(1));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getObjectRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests, detectCreature_minNumCells_found)

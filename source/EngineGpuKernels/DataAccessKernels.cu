@@ -104,13 +104,13 @@ namespace
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                             nodeTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity = node.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                            nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor =
-                                node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                            nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors =
+                                node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                             nodeTO.cellTypeData.sensor.modeData.detectCreature.minNumCells = node.cellTypeData.sensor.modeData.detectCreature.minNumCells;
                             nodeTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells = node.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                            nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor =
-                                node.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                            nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors =
+                                node.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                             nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage =
                                 node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                         }
@@ -382,11 +382,11 @@ namespace
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                     cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity = cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                    cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                    cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                     cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells = cell.cellTypeData.sensor.modeData.detectCreature.minNumCells;
                     cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells = cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                    cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor = cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                    cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors = cell.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                     cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                 }
                 cellTO.cellTypeData.sensor.lastMatchAvailable = cell.cellTypeData.sensor.lastMatchAvailable;

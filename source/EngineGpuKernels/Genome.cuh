@@ -40,14 +40,14 @@ struct DetectStructureGenome
 struct DetectFreeCellGenome
 {
     float minDensity;
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint16_t restrictToColors;  // 0 = no restriction, bit N = allow color N
 };
 
 struct DetectCreatureGenome
 {
-    uint32_t minNumCells;     // 0 = no restriction
-    uint32_t maxNumCells;     // 0 = no restriction
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint32_t minNumCells;      // 0 = no restriction
+    uint32_t maxNumCells;      // 0 = no restriction
+    uint16_t restrictToColors;  // 0 = no restriction, bit N = allow color N
     LineageRestriction restrictToLineage;
 };
 

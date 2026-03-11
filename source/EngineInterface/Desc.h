@@ -93,7 +93,7 @@ struct DetectFreeCellDesc
     auto operator<=>(DetectFreeCellDesc const&) const = default;
 
     MEMBER(DetectFreeCellDesc, float, minDensity, 0.05f);
-    MEMBER(DetectFreeCellDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectFreeCellDesc, uint16_t, restrictToColors, 0);  // 0 = no restriction, bit N = allow color N
 };
 
 struct DetectCreatureDesc
@@ -102,7 +102,7 @@ struct DetectCreatureDesc
 
     MEMBER(DetectCreatureDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(DetectCreatureDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectCreatureDesc, uint16_t, restrictToColors, 0);  // 0 = no restriction, bit N = allow color N
     MEMBER(DetectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
