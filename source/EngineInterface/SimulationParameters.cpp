@@ -88,9 +88,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        }))
                         .description(coloringTooltip),
                     ParameterSpec()
-                        .name("Bloom")
-                        .reference(FloatSpec().member(&SimulationParameters::bloom).min(0.0f).max(1.0f))
-                        .description("Controls the bloom effect intensity. At 0, no bloom is applied. At 1, maximum bloom is applied."),
+                        .name("Glow")
+                        .reference(FloatSpec().member(&SimulationParameters::glow).min(0.0f).max(1.0f))
+                        .description("Controls the bloom effect intensity. At 0, no glow is applied. At 1, maximum glow is applied."),
                     ParameterSpec()
                         .name("Borderless rendering")
                         .reference(BoolSpec().member(&SimulationParameters::borderlessRendering))

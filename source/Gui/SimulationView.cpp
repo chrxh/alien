@@ -357,7 +357,7 @@ void SimulationView::setupRenderPipeline()
         RenderBlock{
             RenderSequence().steps({
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeAdditive).uniformFunc([](SimulationParameters const& parameters) {
-                    float bloom = parameters.bloom.value;
+                    float bloom = parameters.glow.value;
                     return UniformValueMap{
                         {"colorFactor1", bloom},
                         {"colorFactor2", 1.5f - bloom},
