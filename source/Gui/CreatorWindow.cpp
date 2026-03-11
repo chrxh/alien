@@ -112,10 +112,10 @@ void CreatorWindow::processIntern()
         }
         if (_mode == CreationMode_CreateDisc) {
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
+                AlienGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
                 _outerRadius);
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
+                AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
                 _innerRadius);
         }
         if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc) {
@@ -299,7 +299,7 @@ void CreatorWindow::createDisc()
 
     Desc description;
     auto constexpr SmallValue = 0.01f;
-    for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _objectDistance) {
+    for (float radius = _innerRadius; radius <= _outerRadius + SmallValue; radius += _objectDistance) {
         float angleInc = [&] {
             if (radius > SmallValue) {
                 auto result = asinf(_objectDistance / (2 * radius)) * 2 * toFloat(Const::RadToDeg);
