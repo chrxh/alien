@@ -34,6 +34,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
+        clean: false
     
     - name: Unshallow vcpkg submodule
       run: |
