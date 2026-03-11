@@ -329,7 +329,7 @@ void CreatorWindow::validateAndCorrect()
     _rectVerticalObjects = std::max(1, _rectVerticalObjects);
     _layers = std::max(1, _layers);
     _outerRadius = std::max(_innerRadius, _outerRadius);
-    _innerRadius = std::max(1.0f, _innerRadius);
+    _innerRadius = std::max(0.0f, _innerRadius);
 }
 
 RealVector2D CreatorWindow::getRandomPos() const
