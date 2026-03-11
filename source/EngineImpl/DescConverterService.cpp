@@ -1184,7 +1184,7 @@ void DescConverterService::convertGenomeToTO(
                 communicatorTO.mode = communicatorDesc.getMode();
                 if (communicatorTO.mode == CommunicatorMode_Sender) {
                     auto const& senderDesc = std::get<SenderGenomeDesc>(communicatorDesc._mode);
-                    communicatorTO.modeData.sender.range = senderDesc._range;
+                    communicatorTO.modeData.sender.range = static_cast<uint8_t>(senderDesc._range);
                     communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
                 } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                     auto const& receiverDesc = std::get<ReceiverGenomeDesc>(communicatorDesc._mode);
@@ -1496,7 +1496,7 @@ void DescConverterService::convertObjectToTO(
             communicatorTO.mode = communicatorDesc.getMode();
             if (communicatorTO.mode == CommunicatorMode_Sender) {
                 auto const& senderDesc = std::get<SenderDesc>(communicatorDesc._mode);
-                communicatorTO.modeData.sender.range = senderDesc._range;
+                communicatorTO.modeData.sender.range = static_cast<uint8_t>(senderDesc._range);
                 communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 auto const& receiverDesc = std::get<ReceiverDesc>(communicatorDesc._mode);

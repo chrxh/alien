@@ -400,7 +400,7 @@ struct SenderDesc
 {
     auto operator<=>(SenderDesc const&) const = default;
 
-    MEMBER(SenderDesc, float, range, 15.0f);
+    MEMBER(SenderDesc, int, range, 15);
     MEMBER(SenderDesc, int, maxTimesSent, 4);
 };
 

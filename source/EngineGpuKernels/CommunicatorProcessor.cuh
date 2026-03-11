@@ -54,7 +54,7 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 
 __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    __shared__ float range;
+    __shared__ int range;
     __shared__ int maxTimesSent;
     __shared__ int currentNumTimesSent;
     __shared__ float2 senderPos;
@@ -74,7 +74,6 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     }
 
     auto const newNumTimesSent = currentNumTimesSent + 1;
-    int rangeInt = static_cast<int>(ceilf(range));
 
     // Matching lambda to check if a cell is a valid receiver
     auto isMatch = [&object](Object* otherObject) {
@@ -115,13 +114,13 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     };
 
     // Calculate the total number of scan positions in the [-range, range] x [-range, range] region
-    int diameter = 2 * rangeInt + 1;
+    int diameter = 2 * range + 1;
     int totalPositions = diameter * diameter;
 
     // Each thread scans different positions in parallel
     for (int idx = threadIdx.x; idx < totalPositions; idx += blockDim.x) {
-        int dx = (idx % diameter) - rangeInt;
-        int dy = (idx / diameter) - rangeInt;
+        int dx = (idx % diameter) - range;
+        int dy = (idx / diameter) - range;
 
         // Check if within circular range
         float distSquared = static_cast<float>(dx * dx + dy * dy);

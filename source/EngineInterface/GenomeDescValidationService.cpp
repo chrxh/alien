@@ -224,7 +224,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 auto communicatorMode = communicator.getMode();
                 if (communicatorMode == CommunicatorMode_Sender) {
                     auto& sender = std::get<SenderGenomeDesc>(communicator._mode);
-                    sender._range = std::clamp(sender._range, 0.0f, 15.0f);
+                    sender._range = std::clamp(sender._range, 0, 20);
                     sender._maxTimesSent = std::max(sender._maxTimesSent, 0);
                 } else if (communicatorMode == CommunicatorMode_Receiver) {
                     auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);

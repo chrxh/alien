@@ -347,7 +347,7 @@ struct MemoryTO
 
 struct SenderTO
 {
-    float range;
+    uint8_t range;
     int maxTimesSent;
 };
 

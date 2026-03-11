@@ -86,7 +86,6 @@ struct Constructor
     uint8_t currentBranch;
 
     // Temp data
-    bool isReady;
     Creature* offspring;  // Must be reset if separated construction is finished
 };
 
@@ -378,7 +377,7 @@ struct Memory
 
 struct Sender
 {
-    float range;
+    uint8_t range;
     int maxTimesSent;
 };
 
