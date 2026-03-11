@@ -12,7 +12,8 @@ public:
     {
         _densityMapSize = {worldSize.x / slotSize, worldSize.y / slotSize};
         CudaMemoryManager::getInstance().acquireMemory<float>(_densityMapSize.x * _densityMapSize.y, _energyParticleDensityMap);
-        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _freeCellDensityMap);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _freeCellDensityMap1);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _freeCellDensityMap2);
         CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _structureCellDensityMap);
         _slotSize = slotSize;
     }
@@ -20,7 +21,8 @@ public:
     __host__ __inline__ void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_energyParticleDensityMap);
-        CudaMemoryManager::getInstance().freeMemory(_freeCellDensityMap);
+        CudaMemoryManager::getInstance().freeMemory(_freeCellDensityMap1);
+        CudaMemoryManager::getInstance().freeMemory(_freeCellDensityMap2);
         CudaMemoryManager::getInstance().freeMemory(_structureCellDensityMap);
     }
 
@@ -29,7 +31,8 @@ public:
         auto const partition = calcSystemThreadPartition(_densityMapSize.x * _densityMapSize.y);
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             _energyParticleDensityMap[index] = 0.0f;
-            _freeCellDensityMap[index] = 0;
+            _freeCellDensityMap1[index] = 0;
+            _freeCellDensityMap2[index] = 0;
             _structureCellDensityMap[index] = 0;
         }
     }
@@ -50,15 +53,24 @@ public:
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto slotSizeAsFlot = toFloat(_slotSize);
             if (restrictToColor == 255) {
-                auto packed = _freeCellDensityMap[index];
                 uint64_t totalCount = 0;
-                for (int i = 0; i < MAX_COLORS; ++i) {
-                    totalCount += (packed >> (i * 6)) & 0x3f;
+                auto packed1 = _freeCellDensityMap1[index];
+                for (int i = 0; i < 8; ++i) {
+                    totalCount += (packed1 >> (i * 8)) & 0xff;
+                }
+                auto packed2 = _freeCellDensityMap2[index];
+                for (int i = 0; i < MAX_COLORS - 8; ++i) {
+                    totalCount += (packed2 >> (i * 8)) & 0xff;
                 }
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
-                auto colorCount = (_freeCellDensityMap[index] >> (restrictToColor * 6)) & 0x3f;
-                return toFloat(colorCount) / (slotSizeAsFlot * slotSizeAsFlot);
+                if (restrictToColor < 8) {
+                    auto colorCount = (_freeCellDensityMap1[index] >> (restrictToColor * 8)) & 0xff;
+                    return toFloat(colorCount) / (slotSizeAsFlot * slotSizeAsFlot);
+                } else {
+                    auto colorCount = (_freeCellDensityMap2[index] >> ((restrictToColor - 8) * 8)) & 0xff;
+                    return toFloat(colorCount) / (slotSizeAsFlot * slotSizeAsFlot);
+                }
             }
         }
         return 0.0f;
@@ -86,7 +98,11 @@ public:
         auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto color = calcMod(object->color, MAX_COLORS);
-            alienAtomicAdd64(&_freeCellDensityMap[index], static_cast<uint64_t>(1ull << (color * 6)));
+            if (color < 8) {
+                alienAtomicAdd64(&_freeCellDensityMap1[index], static_cast<uint64_t>(1ull << (color * 8)));
+            } else {
+                alienAtomicAdd64(&_freeCellDensityMap2[index], static_cast<uint64_t>(1ull << ((color - 8) * 8)));
+            }
         }
     }
 
@@ -102,6 +118,7 @@ private:
     int _slotSize;
     int2 _densityMapSize;
     float* _energyParticleDensityMap;
-    uint64_t* _freeCellDensityMap;
+    uint64_t* _freeCellDensityMap1;
+    uint64_t* _freeCellDensityMap2;
     uint32_t* _structureCellDensityMap;
 };
