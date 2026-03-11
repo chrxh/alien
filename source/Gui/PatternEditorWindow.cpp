@@ -366,7 +366,7 @@ void PatternEditorWindow::onSetBarrier(bool value)
 bool PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
 {
     ImGui::PushID(id.c_str());
-    auto result = AlienGui::ColorField(cellColor);
+    auto result = AlienGui::ColorField(cellColor, 20.0f);
     ImGui::PopID();
     return result;
 }
