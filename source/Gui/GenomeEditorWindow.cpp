@@ -254,7 +254,9 @@ void GenomeEditorWindow::onSaveGenome()
 
 void GenomeEditorWindow::onCloneGenome()
 {
-    openTab(std::nullopt, getCurrentGenome(), false);
+    auto currentGenome = getCurrentGenome();
+    currentGenome._id = NumberGenerator::get().createEntityId();
+    openTab(std::nullopt, currentGenome, false);
 }
 
 void GenomeEditorWindow::onCopyGenome()

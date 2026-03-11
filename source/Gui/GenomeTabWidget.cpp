@@ -109,7 +109,9 @@ GenomeDesc const& _GenomeTabWidget::getGenomeDesc() const
 
 void _GenomeTabWidget::setGenomeDesc(GenomeDesc const& genome)
 {
+    auto id = _editData->genome._id; 
     _editData->genome = genome;
+    _editData->genome._id = id;
 }
 
 bool _GenomeTabWidget::hasCreaturesGenomeBeChanged() const
