@@ -269,7 +269,7 @@ struct MemoryGenome
 
 struct SenderGenome
 {
-    float range;
+    uint8_t range;
     int maxTimesSent;
 };
 

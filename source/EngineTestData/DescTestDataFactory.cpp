@@ -786,7 +786,7 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
         CommunicatorModeDesc communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderDesc().range(150.0f).maxTimesSent(6);
+            communicatorModeDesc = SenderDesc().range(150).maxTimesSent(6);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverDesc().restrictToColor(2).restrictToLineage(LineageRestriction_UnrelatedLineage);
@@ -950,7 +950,7 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
         CommunicatorModeGenomeDesc communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderGenomeDesc().range(200.0f).maxTimesSent(8);
+            communicatorModeDesc = SenderGenomeDesc().range(200).maxTimesSent(8);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverGenomeDesc().restrictToColor(5).restrictToLineage(LineageRestriction_RelatedLineage);

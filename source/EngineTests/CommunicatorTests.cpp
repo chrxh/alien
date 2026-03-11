@@ -27,7 +27,7 @@ public:
 
 protected:
     // Helper to create a sender creature with 2 cells (sender + helper for signal)
-    Desc createSenderCreature(uint64_t creatureId, RealVector2D pos, float range = 50.0f, int maxTimesSent = 4, int color = 0)
+    Desc createSenderCreature(uint64_t creatureId, RealVector2D pos, int range = 50, int maxTimesSent = 4, int color = 0)
     {
         auto data = Desc().addCreature(
             {
@@ -130,7 +130,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
             ObjectDesc()
                 .id(1)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+                .type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
             ObjectDesc().id(2).pos({110.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc()))),
         },
         CreatureDesc().id(1));
@@ -174,7 +174,7 @@ TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
     // Create sender in creature 1 with signal that has numTimesSent = 2 (equal to maxTimesSent)
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(2)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(2)))),
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
@@ -236,7 +236,7 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
     // Create sender without active signal
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
             // No signalAndState set, so signal is not active
             ObjectDesc().id(101).pos({101.0f, 100.0f}),
         },
@@ -261,7 +261,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     // Create first sender with signal = 1.0
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
@@ -273,7 +273,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     // Create second sender with signal = -1.0
     data.addCreature(
         {
-            ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f)))),
+            ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc()
                 .id(201)
                 .pos({101.0f, 120.0f})
@@ -300,7 +300,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
     // Create first sender with numTimesSent = 3
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(10)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(10)))),
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
@@ -312,7 +312,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
     // Create second sender with numTimesSent = 1 (higher priority)
     data.addCreature(
         {
-            ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(10)))),
+            ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(10)))),
             ObjectDesc()
                 .id(201)
                 .pos({101.0f, 120.0f})
@@ -360,7 +360,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
@@ -429,7 +429,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50.0f).maxTimesSent(4)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
