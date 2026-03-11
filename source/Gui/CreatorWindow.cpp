@@ -293,7 +293,7 @@ void CreatorWindow::createHexagon()
 
 void CreatorWindow::createDisc()
 {
-    if (_innerRadius > _outerRadius || _innerRadius < 0 || _outerRadius <= 0) {
+    if (_innerRadius > _outerRadius || _innerRadius < 0 || _outerRadius < 0) {
         return;
     }
 
@@ -328,8 +328,8 @@ void CreatorWindow::validateAndCorrect()
     _rectHorizontalObjects = std::max(1, _rectHorizontalObjects);
     _rectVerticalObjects = std::max(1, _rectVerticalObjects);
     _layers = std::max(1, _layers);
-    _outerRadius = std::max(_innerRadius, _outerRadius);
     _innerRadius = std::max(0.0f, _innerRadius);
+    _outerRadius = std::max(_innerRadius, _outerRadius);
 }
 
 RealVector2D CreatorWindow::getRandomPos() const
