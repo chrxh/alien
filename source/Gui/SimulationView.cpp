@@ -172,8 +172,12 @@ void SimulationView::setupRenderPipeline()
     auto backgroundUniformFunc = [this](SimulationParameters const& parameters) {
         return UniformValueMap{
             {"background", parameters.backgroundColor.baseValue},
-            {"gridLines", parameters.gridLines.value},
             {"borderlessRendering", parameters.borderlessRendering.value},
+        };
+    };
+    auto gridLinesUniformFunc = [](SimulationParameters const& parameters) {
+        return UniformValueMap{
+            {"gridLines", parameters.gridLines.value},
         };
     };
     auto moduloUniformFunc = [](SimulationParameters const& parameters) {
@@ -372,6 +376,7 @@ void SimulationView::setupRenderPipeline()
             RenderSequence().steps({
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(backgroundUniformFunc)),
                 _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
+                _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::GridLines).uniformFunc(gridLinesUniformFunc)),
                 _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
             }),

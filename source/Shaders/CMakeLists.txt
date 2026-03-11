@@ -23,6 +23,8 @@ add_library(Shaders INTERFACE
     FluidParticleVS.h
     FresnelFS.h
     FresnelVS.h
+    GridLinesFS.h
+    GridLinesVS.h
     LineFS.h
     LineGS.h
     LineVS.h
