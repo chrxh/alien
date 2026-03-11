@@ -108,10 +108,10 @@ void CreatorWindow::processIntern()
         }
         if (_mode == CreationMode_CreateDisc) {
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
+                AlienGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
                 _outerRadius);
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
+                AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.0f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
                 _innerRadius);
         }
         if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc) {
@@ -301,13 +301,13 @@ void CreatorWindow::createHexagon()
 
 void CreatorWindow::createDisc()
 {
-    if (_innerRadius > _outerRadius || _innerRadius < 0 || _outerRadius <= 0) {
+    if (_innerRadius > _outerRadius || _innerRadius < 0 || _outerRadius < 0) {
         return;
     }
 
     Desc description;
     auto constexpr SmallValue = 0.01f;
-    for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _objectDistance) {
+    for (float radius = _innerRadius; radius <= _outerRadius + SmallValue; radius += _objectDistance) {
         float angleInc = [&] {
             if (radius > SmallValue) {
                 auto result = asinf(_objectDistance / (2 * radius)) * 2 * toFloat(Const::RadToDeg);
@@ -343,8 +343,8 @@ void CreatorWindow::validateAndCorrect()
     _rectHorizontalObjects = std::max(1, _rectHorizontalObjects);
     _rectVerticalObjects = std::max(1, _rectVerticalObjects);
     _layers = std::max(1, _layers);
+    _innerRadius = std::max(0.0f, _innerRadius);
     _outerRadius = std::max(_innerRadius, _outerRadius);
-    _innerRadius = std::max(1.0f, _innerRadius);
 }
 
 RealVector2D CreatorWindow::getRandomPos() const
