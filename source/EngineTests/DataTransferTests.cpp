@@ -236,6 +236,30 @@ TEST_F(DataTransferTests, changeGenome_successful)
     EXPECT_EQ(2, gene._nodes.size());
 }
 
+TEST_F(DataTransferTests, changeGenome_generatesNewGenomeId)
+{
+    auto const CreatureId = 1;
+
+    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(CreatureId), GenomeDesc());
+
+    _simulationFacade->setSimulationData(data);
+
+    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto originalGenomeId = newGenome._id;
+    auto result = _simulationFacade->changeCreature(CreatureId, newGenome);
+    ASSERT_TRUE(result);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData._creatures.front();
+    EXPECT_NE(originalGenomeId, creature._genomeId);
+
+    ASSERT_EQ(1, actualData._genomes.size());
+    EXPECT_NE(originalGenomeId, actualData._genomes.front()._id);
+    EXPECT_EQ(creature._genomeId, actualData._genomes.front()._id);
+}
+
 TEST_F(DataTransferTests, changeGenome_failed)
 {
     auto constexpr CreatureId = 1;
