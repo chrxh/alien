@@ -264,10 +264,12 @@ TOs DescConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDesc
     std::vector<NodeTO> nodeTOs;
     std::vector<uint8_t> heap;
 
-    auto wrapper = CreatureDesc().id(creatureId).genomeId(genome._id);
+    auto clonedGenome = genome;
+    clonedGenome._id = NumberGenerator::get().createEntityId();
+    auto wrapper = CreatureDesc().id(creatureId).genomeId(clonedGenome._id);
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
-    convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
+    convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, clonedGenome, genomeTOIndexById);
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
     convertCreatureToTO(creatureTOs, wrapper, genomeTOIndexById, creatureTOIndexById);

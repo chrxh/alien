@@ -109,9 +109,7 @@ GenomeDesc const& _GenomeTabWidget::getGenomeDesc() const
 
 void _GenomeTabWidget::setGenomeDesc(GenomeDesc const& genome)
 {
-    auto id = _editData->genome._id; 
     _editData->genome = genome;
-    _editData->genome._id = id;
 }
 
 bool _GenomeTabWidget::hasCreaturesGenomeBeChanged() const
@@ -203,6 +201,7 @@ void _GenomeTabWidget::processEditors()
 
     if (std::holds_alternative<CreatureData>(_specificEditData)) {
         auto& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
+        simulatedCreatureData.origGenome._id = _editData->genome._id;   // Do not compare ids
         simulatedCreatureData.changesMade = simulatedCreatureData.origGenome != _editData->genome;
     }
 }
