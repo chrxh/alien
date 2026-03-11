@@ -24,6 +24,8 @@
 #include "FluidParticleVS.h"
 #include "FresnelFS.h"
 #include "FresnelVS.h"
+#include "GridLinesFS.h"
+#include "GridLinesVS.h"
 #include "LineFS.h"
 #include "LineGS.h"
 #include "LineVS.h"

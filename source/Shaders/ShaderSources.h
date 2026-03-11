@@ -24,6 +24,7 @@ namespace ShaderSources
     inline ShaderSource const DownSampler{Shaders::DownSamplerVS, Shaders::DownSamplerFS};
     inline ShaderSource const FluidParticle{Shaders::FluidParticleVS, Shaders::FluidParticleFS};
     inline ShaderSource const Fresnel{Shaders::FresnelVS, Shaders::FresnelFS};
+    inline ShaderSource const GridLines{Shaders::GridLinesVS, Shaders::GridLinesFS};
     inline ShaderSource const Line{Shaders::LineVS, Shaders::LineFS, Shaders::LineGS};
     inline ShaderSource const Location{Shaders::LocationVS, Shaders::LocationFS, Shaders::LocationGS};
     inline ShaderSource const MergeAdditive{Shaders::MergeAdditiveVS, Shaders::MergeAdditiveFS};
