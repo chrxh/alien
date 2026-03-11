@@ -84,11 +84,7 @@ void CreatorWindow::processIntern()
                 &pencilWidth);
             EditorModel::get().setPencilWidth(pencilWidth);
             AlienGui::Switcher(
-                AlienGui::SwitcherParameters()
-                    .name("State")
-                    .textWidth(RightColumnWidth)
-                    .values({"Solid", "Fluid"})
-                    .tooltip(Const::CreatorDrawingTypeTooltip),
+                AlienGui::SwitcherParameters().name("State").textWidth(RightColumnWidth).values({"Solid", "Fluid"}).tooltip(Const::CreatorDrawingTypeTooltip),
                 _drawingType);
         }
         AlienGui::InputFloat(
@@ -132,8 +128,7 @@ void CreatorWindow::processIntern()
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
         }
         if (_mode != CreationMode_CreateParticle) {
-            AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Fixed").textWidth(RightColumnWidth).tooltip(Const::CellFixedTooltip), _fixed);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Fixed").textWidth(RightColumnWidth).tooltip(Const::CellFixedTooltip), _fixed);
         }
     }
     ImGui::EndChild();
@@ -178,9 +173,6 @@ void CreatorWindow::onDrawing()
 {
     auto mousePos = ImGui::GetMousePos();
     auto pos = Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
-    if (!_drawingDescription.isEmpty()) {
-        _SimulationFacade::get()->removeSelectedObjects(false);
-    }
 
     auto createAlignedCircle = [&](auto pos) {
         if (EditorModel::get().getPencilWidth() > 1 + NEAR_ZERO) {
@@ -188,15 +180,17 @@ void CreatorWindow::onDrawing()
             pos.y = toFloat(toInt(pos.y));
         }
         return DescEditService::get().createUnconnectedCircle(DescEditService::CreateUnconnectedCircleParameters()
-                                                                         .center(pos)
-                                                                         .radius(EditorModel::get().getPencilWidth())
-                                                                         .usableEnergy(_energy)
-                                                                         .stiffness(_stiffness)
-                                                                         .sticky(_makeSticky)
-                                                                         .cellDistance(1.0f)
-                                                                         .color(EditorModel::get().getDefaultColorCode())
-                                                                         .fixed(_fixed));
+                                                                  .center(pos)
+                                                                  .radius(EditorModel::get().getPencilWidth())
+                                                                  .usableEnergy(_energy)
+                                                                  .stiffness(_stiffness)
+                                                                  .sticky(_makeSticky)
+                                                                  .cellDistance(1.0f)
+                                                                  .color(EditorModel::get().getDefaultColorCode())
+                                                                  .fixed(_fixed));
     };
+
+    auto prevObjectCount = _drawingDescription._objects.size();
 
     if (_drawingDescription.isEmpty()) {
         DescEditService::get().addIfSpaceAvailable(
@@ -209,19 +203,27 @@ void CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescEditService::get().addIfSpaceAvailable(
-                    _drawingDescription, _drawingOccupancy, toAdd, 0.5f, _SimulationFacade::get()->getWorldSize());
+                DescEditService::get().addIfSpaceAvailable(_drawingDescription, _drawingOccupancy, toAdd, 0.5f, _SimulationFacade::get()->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
     }
-    if (_drawingType == DrawingType_Solid) {
-        DescEditService::get().reconnectObjects(_drawingDescription, 1.5f);
-    }
-    _SimulationFacade::get()->addAndSelectSimulationData(Desc(_drawingDescription));
 
-    if (_drawingType == DrawingType_Solid) {
-        _SimulationFacade::get()->reconnectSelectedObjects();
+    auto newObjectCount = _drawingDescription._objects.size();
+    if (newObjectCount > prevObjectCount) {
+        Desc newObjects;
+        for (auto i = prevObjectCount; i < newObjectCount; ++i) {
+            newObjects._objects.emplace_back(_drawingDescription._objects[i]);
+        }
+
+        if (_drawingType == DrawingType_Solid) {
+            DescEditService::get().reconnectObjects(newObjects, 1.5f);
+        }
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(newObjects));
+
+        if (_drawingType == DrawingType_Solid) {
+            _SimulationFacade::get()->reconnectSelectedObjects();
+        }
     }
     EditorModel::get().update();
 }
@@ -238,7 +240,13 @@ CreatorWindow::CreatorWindow()
 
 void CreatorWindow::createObject()
 {
-    auto object = ObjectDesc().pos(getRandomPos()).stiffness(_stiffness).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).sticky(_makeSticky).type(StructureDesc());
+    auto object = ObjectDesc()
+                      .pos(getRandomPos())
+                      .stiffness(_stiffness)
+                      .color(EditorModel::get().getDefaultColorCode())
+                      .fixed(_fixed)
+                      .sticky(_makeSticky)
+                      .type(StructureDesc());
     Desc description;
     description._objects.emplace_back(object);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
@@ -259,16 +267,16 @@ void CreatorWindow::createRectangle()
     }
 
     auto description = DescEditService::get().createRect(DescEditService::CreateRectParameters()
-                                                                    .objectType(StructureDesc())
-                                                                    .width(_rectHorizontalObjects)
-                                                                    .height(_rectVerticalObjects)
-                                                                    .cellDistance(_objectDistance)
-                                                                    .usableEnergy(_energy)
-                                                                    .stiffness(_stiffness)
-                                                                    .sticky(_makeSticky)
-                                                                    .color(EditorModel::get().getDefaultColorCode())
-                                                                    .center(getRandomPos())
-                                                                    .fixed(_fixed));
+                                                             .objectType(StructureDesc())
+                                                             .width(_rectHorizontalObjects)
+                                                             .height(_rectVerticalObjects)
+                                                             .cellDistance(_objectDistance)
+                                                             .usableEnergy(_energy)
+                                                             .stiffness(_stiffness)
+                                                             .sticky(_makeSticky)
+                                                             .color(EditorModel::get().getDefaultColorCode())
+                                                             .center(getRandomPos())
+                                                             .fixed(_fixed));
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
@@ -279,15 +287,15 @@ void CreatorWindow::createHexagon()
         return;
     }
     Desc description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
-                                                                          .objectType(StructureDesc())
-                                                                          .layers(_layers)
-                                                                          .cellDistance(_objectDistance)
-                                                                          .usableEnergy(_energy)
-                                                                          .stiffness(_stiffness)
-                                                                          .sticky(_makeSticky)
-                                                                          .color(EditorModel::get().getDefaultColorCode())
-                                                                          .center(getRandomPos())
-                                                                          .fixed(_fixed));
+                                                            .objectType(StructureDesc())
+                                                            .layers(_layers)
+                                                            .cellDistance(_objectDistance)
+                                                            .usableEnergy(_energy)
+                                                            .stiffness(_stiffness)
+                                                            .sticky(_makeSticky)
+                                                            .color(EditorModel::get().getDefaultColorCode())
+                                                            .center(getRandomPos())
+                                                            .fixed(_fixed));
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
@@ -311,7 +319,14 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            description._objects.emplace_back(ObjectDesc().id(NumberGenerator::get().createEntityId()).stiffness(_stiffness).sticky(_makeSticky).pos(relPos).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).type(StructureDesc()));
+            description._objects.emplace_back(ObjectDesc()
+                                                  .id(NumberGenerator::get().createEntityId())
+                                                  .stiffness(_stiffness)
+                                                  .sticky(_makeSticky)
+                                                  .pos(relPos)
+                                                  .color(EditorModel::get().getDefaultColorCode())
+                                                  .fixed(_fixed)
+                                                  .type(StructureDesc()));
         }
     }
 
