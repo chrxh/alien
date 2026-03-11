@@ -435,11 +435,11 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                 cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity = cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                 cell->cellTypeData.sensor.modeData.detectCreature.minNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells;
                 cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                cell->cellTypeData.sensor.modeData.detectCreature.restrictToColor = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                cell->cellTypeData.sensor.modeData.detectCreature.restrictToColors = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                 cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
             }
             cell->cellTypeData.sensor.lastMatchAvailable = cellTO.cellTypeData.sensor.lastMatchAvailable;
@@ -780,11 +780,11 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         } else if (nodeSensor.mode == SensorMode_DetectStructure) {
         } else if (nodeSensor.mode == SensorMode_DetectFreeCell) {
             sensor.modeData.detectFreeCell.minDensity = nodeSensor.modeData.detectFreeCell.minDensity;
-            sensor.modeData.detectFreeCell.restrictToColor = nodeSensor.modeData.detectFreeCell.restrictToColor;
+            sensor.modeData.detectFreeCell.restrictToColors = nodeSensor.modeData.detectFreeCell.restrictToColors;
         } else if (nodeSensor.mode == SensorMode_DetectCreature) {
             sensor.modeData.detectCreature.minNumCells = nodeSensor.modeData.detectCreature.minNumCells;
             sensor.modeData.detectCreature.maxNumCells = nodeSensor.modeData.detectCreature.maxNumCells;
-            sensor.modeData.detectCreature.restrictToColor = nodeSensor.modeData.detectCreature.restrictToColor;
+            sensor.modeData.detectCreature.restrictToColors = nodeSensor.modeData.detectCreature.restrictToColors;
             sensor.modeData.detectCreature.restrictToLineage = nodeSensor.modeData.detectCreature.restrictToLineage;
         }
         sensor.lastMatchAvailable = false;

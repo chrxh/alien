@@ -220,7 +220,7 @@ namespace
     auto constexpr Id_SensorModeGenome_DetectEnergy_MinDensity = 0;
 
     auto constexpr Id_SensorModeGenome_DetectFreeCell_MinDensity = 0;
-    auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColor = 1;  // Legacy: single color as optional<int>
+    auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColor = 1;   // Legacy: single color as optional<int>
     auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColors = 2;  // New: color bitset as uint16_t
 
     auto constexpr Id_SensorModeGenome_DetectCreature_MinNumCells = 0;
@@ -997,7 +997,7 @@ namespace
     auto constexpr Id_SensorMode_DetectEnergy_MinDensity = 0;
 
     auto constexpr Id_SensorMode_DetectFreeCell_MinDensity = 0;
-    auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;  // Legacy: single color as optional<int>
+    auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;   // Legacy: single color as optional<int>
     auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColors = 2;  // New: color bitset as uint16_t
 
     auto constexpr Id_SensorMode_SensorLastMatch_CreatureId = 0;

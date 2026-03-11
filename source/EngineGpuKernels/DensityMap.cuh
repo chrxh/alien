@@ -55,6 +55,8 @@ public:
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
                 // Sum counts for all selected colors in the bitset
+                // Note: density map packs 7 color counts (8 bits each) + total count in a uint64_t,
+                // so only colors 0-6 have individual slots
                 int totalCount = 0;
                 for (int c = 0; c < 7; ++c) {
                     if (restrictToColors & (1 << c)) {

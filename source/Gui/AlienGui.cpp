@@ -919,7 +919,8 @@ bool AlienGui::MultiColorCheckboxes(MultiColorCheckboxesParameters const& parame
 
         float h, s, v;
         AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[c], h, s, v);
-        ImGui::PushStyleColor(ImGuiCol_CheckMark, (ImVec4)ImColor::HSV(h, s, v));
+        auto colorHSV = (ImVec4)ImColor::HSV(h, s, v);
+        ImGui::PushStyleColor(ImGuiCol_CheckMark, colorHSV);
 
         std::string label = "###c" + std::to_string(c);
         if (ImGui::Checkbox(label.c_str(), &checked)) {
@@ -933,11 +934,9 @@ bool AlienGui::MultiColorCheckboxes(MultiColorCheckboxesParameters const& parame
         ImGui::PopStyleColor();
 
         ImGui::SameLine();
-        float h2, s2, v2;
-        AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[c], h2, s2, v2);
-        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h2, s2, v2));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h2, s2, v2));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h2, s2, v2));
+        ImGui::PushStyleColor(ImGuiCol_Button, colorHSV);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHSV);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorHSV);
         ImGui::Button(("##cf" + std::to_string(c)).c_str(), ImVec2(colorFieldWidth, ImGui::GetFrameHeight()));
         ImGui::PopStyleColor(3);
 

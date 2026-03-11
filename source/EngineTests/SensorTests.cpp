@@ -1121,7 +1121,8 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f).restrictToColors(1 << 1)))),
+                .type(
+                    CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f).restrictToColors(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
