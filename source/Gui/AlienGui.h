@@ -291,6 +291,15 @@ public:
     };
     static bool MultiCheckboxes(MultiCheckboxesParameters const& parameters, bool& value1, bool& value2, bool& value3, bool& value4);
 
+    struct ColorCheckboxesParameters
+    {
+        MEMBER(ColorCheckboxesParameters, std::string, name, "");
+        MEMBER(ColorCheckboxesParameters, float, textWidth, 100);
+        MEMBER(ColorCheckboxesParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER(ColorCheckboxesParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool ColorCheckboxes(ColorCheckboxesParameters const& parameters, int& value);
+
     struct ToggleButtonParameters
     {
         MEMBER(ToggleButtonParameters, std::string, name, "");

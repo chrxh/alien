@@ -76,7 +76,7 @@ struct DetectFreeCellGenomeDesc
     auto operator<=>(DetectFreeCellGenomeDesc const&) const = default;
 
     MEMBER(DetectFreeCellGenomeDesc, float, minDensity, 0.5f);
-    MEMBER(DetectFreeCellGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectFreeCellGenomeDesc, int, restrictToColor, 0x3FF);
 };
 
 struct DetectCreatureGenomeDesc
@@ -85,7 +85,7 @@ struct DetectCreatureGenomeDesc
 
     MEMBER(DetectCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(DetectCreatureGenomeDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectCreatureGenomeDesc, int, restrictToColor, 0x3FF);
     MEMBER(DetectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 

@@ -84,11 +84,7 @@ struct std::hash<SensorGenomeDesc>
         } else if (desc.getMode() == SensorMode_DetectFreeCell) {
             auto const& mode = std::get<DetectFreeCellGenomeDesc>(desc._mode);
             hash_combine(seed, mode._minDensity);
-            if (mode._restrictToColor) {
-                hash_combine(seed, *mode._restrictToColor);
-            } else {
-                hash_combine(seed, -1);
-            }
+            hash_combine(seed, mode._restrictToColor);
         } else if (desc.getMode() == SensorMode_DetectCreature) {
             auto const& mode = std::get<DetectCreatureGenomeDesc>(desc._mode);
             if (mode._minNumCells) {
@@ -101,11 +97,7 @@ struct std::hash<SensorGenomeDesc>
             } else {
                 hash_combine(seed, -1);
             }
-            if (mode._restrictToColor) {
-                hash_combine(seed, *mode._restrictToColor);
-            } else {
-                hash_combine(seed, -1);
-            }
+            hash_combine(seed, mode._restrictToColor);
             hash_combine(seed, static_cast<int>(mode._restrictToLineage));
         }
         return seed;

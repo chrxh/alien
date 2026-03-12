@@ -1121,7 +1121,8 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f).restrictToColor(1)))),
+                .type(
+                    CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f).restrictToColor(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
@@ -1255,7 +1256,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColor(1)))),
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColor(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
@@ -1288,7 +1289,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColor(1)))),
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColor(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
