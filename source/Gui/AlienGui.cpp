@@ -898,6 +898,59 @@ bool AlienGui::MultiCheckboxes(MultiCheckboxesParameters const& parameters, bool
     return result;
 }
 
+bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int& value)
+{
+    ImGui::PushID(parameters._name.c_str());
+    auto padding = ImGui::GetStyle().FramePadding.x;
+    auto checkboxWidth = scale(MAX_COLORS * 19.0f + 26.0f);
+    auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - checkboxWidth;
+
+    drawHatchedRectangle(width);
+
+    ImGui::Dummy(ImVec2(width - padding, 0));
+    ImGui::SameLine();
+
+    auto result = false;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        bool checked = (value >> i) & 1;
+
+        float h, s, v;
+        AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[i], h, s, v);
+        ImGui::PushStyleColor(ImGuiCol_CheckMark, (ImVec4)ImColor::HSV(h, s, v));
+        if (ImGui::Checkbox(("###" + std::to_string(i)).c_str(), &checked)) {
+            if (checked) {
+                value |= (1 << i);
+            } else {
+                value &= ~(1 << i);
+            }
+            result = true;
+        }
+        ImGui::PopStyleColor();
+        if (i < MAX_COLORS - 1) {
+            ImGui::SameLine();
+            MoveTickLeft();
+        }
+    }
+
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
+        if (RevertButton(parameters._name)) {
+            value = *parameters._defaultValue;
+            result = true;
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::SameLine();
+    AlienGui::Text(TextParameters().text(parameters._name.c_str()));
+    if (parameters._tooltip) {
+        AlienGui::HelpMarker(*parameters._tooltip);
+    }
+
+    ImGui::PopID();
+    return result;
+}
+
 bool AlienGui::SelectableButton(SelectableButtonParameters const& parameters, bool& value)
 {
     auto buttonColor = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Button]);

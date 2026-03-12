@@ -373,9 +373,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                 DetectFreeCellDesc detectFreeCell;
                 detectFreeCell._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                detectFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
-                    ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
-                    : std::nullopt;
+                detectFreeCell._restrictToColor = static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor);
                 sensor._mode = detectFreeCell;
             } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                 DetectCreatureDesc detectCreature;
@@ -385,9 +383,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
                 detectCreature._maxNumCells = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells > 0
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells))
                     : std::nullopt;
-                detectCreature._restrictToColor = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor != 255
-                    ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor))
-                    : std::nullopt;
+                detectCreature._restrictToColor = static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor);
                 detectCreature._restrictToLineage = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                 sensor._mode = detectCreature;
             }
@@ -664,9 +660,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
             DetectFreeCellGenomeDesc detectFreeCell;
             detectFreeCell._minDensity = nodeTO->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-            detectFreeCell._restrictToColor = nodeTO->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
-                : std::nullopt;
+            detectFreeCell._restrictToColor = static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor);
             sensorDesc._mode = detectFreeCell;
         } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
             DetectCreatureGenomeDesc detectCreature;
@@ -676,9 +670,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
             detectCreature._maxNumCells = nodeTO->cellTypeData.sensor.modeData.detectCreature.maxNumCells > 0
                 ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectCreature.maxNumCells))
                 : std::nullopt;
-            detectCreature._restrictToColor = nodeTO->cellTypeData.sensor.modeData.detectCreature.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectCreature.restrictToColor))
-                : std::nullopt;
+            detectCreature._restrictToColor = static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectCreature.restrictToColor);
             detectCreature._restrictToLineage = nodeTO->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
             sensorDesc._mode = detectCreature;
         }
@@ -1038,13 +1030,13 @@ void DescConverterService::convertGenomeToTO(
                     auto const& detectFreeCellDesc = std::get<DetectFreeCellGenomeDesc>(sensorDesc._mode);
                     auto& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
                     detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
-                    detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
+                    detectFreeCellTO.restrictToColor = static_cast<uint16_t>(detectFreeCellDesc._restrictToColor);
                 } else if (sensorTO.mode == SensorMode_DetectCreature) {
                     auto const& detectCreatureDesc = std::get<DetectCreatureGenomeDesc>(sensorDesc._mode);
                     auto& detectCreatureTO = sensorTO.modeData.detectCreature;
                     detectCreatureTO.minNumCells = static_cast<uint32_t>(detectCreatureDesc._minNumCells.value_or(0));
                     detectCreatureTO.maxNumCells = static_cast<uint32_t>(detectCreatureDesc._maxNumCells.value_or(0));
-                    detectCreatureTO.restrictToColor = static_cast<uint8_t>(detectCreatureDesc._restrictToColor.value_or(255));
+                    detectCreatureTO.restrictToColor = static_cast<uint16_t>(detectCreatureDesc._restrictToColor);
                     detectCreatureTO.restrictToLineage = detectCreatureDesc._restrictToLineage;
                 }
             } break;
@@ -1334,13 +1326,13 @@ void DescConverterService::convertObjectToTO(
                 auto const& detectFreeCellDesc = std::get<DetectFreeCellDesc>(sensorDesc._mode);
                 DetectFreeCellTO& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
                 detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
-                detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
+                detectFreeCellTO.restrictToColor = static_cast<uint16_t>(detectFreeCellDesc._restrictToColor);
             } else if (sensorTO.mode == SensorMode_DetectCreature) {
                 auto const& detectCreatureDesc = std::get<DetectCreatureDesc>(sensorDesc._mode);
                 DetectCreatureTO& detectCreatureTO = sensorTO.modeData.detectCreature;
                 detectCreatureTO.minNumCells = static_cast<uint32_t>(detectCreatureDesc._minNumCells.value_or(0));
                 detectCreatureTO.maxNumCells = static_cast<uint32_t>(detectCreatureDesc._maxNumCells.value_or(0));
-                detectCreatureTO.restrictToColor = static_cast<uint8_t>(detectCreatureDesc._restrictToColor.value_or(255));
+                detectCreatureTO.restrictToColor = static_cast<uint16_t>(detectCreatureDesc._restrictToColor);
                 detectCreatureTO.restrictToLineage = detectCreatureDesc._restrictToLineage;
             }
             sensorTO.lastMatchAvailable = sensorDesc._lastMatch.has_value();

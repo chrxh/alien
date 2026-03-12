@@ -81,10 +81,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 } else if (mode == SensorMode_DetectFreeCell) {
                     auto& detectFreeCell = std::get<DetectFreeCellGenomeDesc>(sensor._mode);
                     detectFreeCell._minDensity = std::clamp(detectFreeCell._minDensity, 0.0f, 1.0f);
-                    if (detectFreeCell._restrictToColor.has_value()) {
-                        auto& value = detectFreeCell._restrictToColor.value();
-                        value = std::clamp(value, 0, MAX_COLORS - 1);
-                    }
+                    detectFreeCell._restrictToColor &= (1 << MAX_COLORS) - 1;
                 } else if (mode == SensorMode_DetectCreature) {
                     auto& detectCreature = std::get<DetectCreatureGenomeDesc>(sensor._mode);
                     if (detectCreature._minNumCells.has_value()) {
@@ -95,10 +92,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                         auto& value = detectCreature._maxNumCells.value();
                         value = std::max(value, 0);
                     }
-                    if (detectCreature._restrictToColor.has_value()) {
-                        auto& value = detectCreature._restrictToColor.value();
-                        value = std::clamp(value, 0, MAX_COLORS - 1);
-                    }
+                    detectCreature._restrictToColor &= (1 << MAX_COLORS) - 1;
                     detectCreature._restrictToLineage = std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 

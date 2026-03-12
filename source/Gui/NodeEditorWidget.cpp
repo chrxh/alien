@@ -210,14 +210,14 @@ void _NodeEditorWidget::processNodeAttributes()
             auto nodeIndex = _editData->getSelectedNodeIndex();
             auto isInnerNode = nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1;
             //if (!isInnerNode) {
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters()
-                        .name("Angle")
-                        .textWidth(rightColumnWidth)
-                        .readOnly(isInnerNode)
-                        .infoLabel(gene._shape != ConstructorShape_Custom && isInnerNode ? std::make_optional(std::string("Deduced")) : std::nullopt)
-                        .format("%.1f"),
-                    node._referenceAngle);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters()
+                    .name("Angle")
+                    .textWidth(rightColumnWidth)
+                    .readOnly(isInnerNode)
+                    .infoLabel(gene._shape != ConstructorShape_Custom && isInnerNode ? std::make_optional(std::string("Deduced")) : std::nullopt)
+                    .format("%.1f"),
+                node._referenceAngle);
             //}
 
             // Previous nodes connections
@@ -332,8 +332,9 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(rightColumnWidth),
                         detectFreeCell._minDensity);
-                    AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), detectFreeCell._restrictToColor);
+                    AlienGui::ColorCheckboxes(
+                        AlienGui::ColorCheckboxesParameters().name("Restrict to color").textWidth(rightColumnWidth).defaultValue(0x3FF),
+                        detectFreeCell._restrictToColor);
                     AlienGui::EndIndent();
                 } else if (mode == SensorMode_DetectCreature) {
                     AlienGui::BeginIndent();
@@ -342,8 +343,9 @@ void _NodeEditorWidget::processNodeAttributes()
                         AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), detectCreature._minNumCells);
                     AlienGui::InputOptionalInt(
                         AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), detectCreature._maxNumCells);
-                    AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), detectCreature._restrictToColor);
+                    AlienGui::ColorCheckboxes(
+                        AlienGui::ColorCheckboxesParameters().name("Restrict to color").textWidth(rightColumnWidth).defaultValue(0x3FF),
+                        detectCreature._restrictToColor);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
                         detectCreature._restrictToLineage);
@@ -556,7 +558,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 auto& detonator = std::get<DetonatorGenomeDesc>(node._cellType);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth), detonator._countdown);
             } else if (nodeType == CellType_Digestor) {
-                
+
                 auto& digestor = std::get<DigestorGenomeDesc>(node._cellType);
                 AlienGui::SliderFloat(
                     AlienGui::SliderFloatParameters().name("Energy conductivity").max(1.0f).format("%.2f").textWidth(rightColumnWidth),

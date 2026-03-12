@@ -47,22 +47,26 @@ public:
         return 0.0f;
     }
 
-    __device__ __inline__ float getFreeCellDensity(float2 const& pos, uint8_t restrictToColor) const
+    __device__ __inline__ float getFreeCellDensity(float2 const& pos, uint16_t restrictToColor) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto slotSizeAsFlot = toFloat(_slotSize);
-            if (restrictToColor == 255) {
+            if (restrictToColor == 0x3FF) {
                 auto totalCount = (_freeCellDensityMap2[index] >> 16) & 0xff;
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
-                if (restrictToColor < 8) {
-                    auto colorCount = (_freeCellDensityMap1[index] >> (restrictToColor * 8)) & 0xff;
-                    return toFloat(colorCount) / (slotSizeAsFlot * slotSizeAsFlot);
-                } else {
-                    auto colorCount = (_freeCellDensityMap2[index] >> ((restrictToColor - 8) * 8)) & 0xff;
-                    return toFloat(colorCount) / (slotSizeAsFlot * slotSizeAsFlot);
+                int totalColorCount = 0;
+                for (int color = 0; color < MAX_COLORS; ++color) {
+                    if ((restrictToColor >> color) & 1) {
+                        if (color < 8) {
+                            totalColorCount += (_freeCellDensityMap1[index] >> (color * 8)) & 0xff;
+                        } else {
+                            totalColorCount += (_freeCellDensityMap2[index] >> ((color - 8) * 8)) & 0xff;
+                        }
+                    }
                 }
+                return toFloat(totalColorCount) / (slotSizeAsFlot * slotSizeAsFlot);
             }
         }
         return 0.0f;

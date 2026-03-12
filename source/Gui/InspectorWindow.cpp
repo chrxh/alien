@@ -664,15 +664,23 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                     .textWidth(CellTypeTextWidth)
                     .tooltip(Const::GenomeSensorMinDensityTooltip),
                 detectFreeCell._minDensity);
-            AlienGui::ComboOptionalColor(
-                AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+            AlienGui::ColorCheckboxes(
+                AlienGui::ColorCheckboxesParameters()
+                    .name("Restrict to color")
+                    .textWidth(CellTypeTextWidth)
+                    .defaultValue(0x3FF)
+                    .tooltip(Const::GenomeSensorScanColorTooltip),
                 detectFreeCell._restrictToColor);
         } else if (mode == SensorMode_DetectCreature) {
             auto& detectCreature = std::get<DetectCreatureDesc>(sensor._mode);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(CellTypeTextWidth), detectCreature._minNumCells);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(CellTypeTextWidth), detectCreature._maxNumCells);
-            AlienGui::ComboOptionalColor(
-                AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+            AlienGui::ColorCheckboxes(
+                AlienGui::ColorCheckboxesParameters()
+                    .name("Restrict to color")
+                    .textWidth(CellTypeTextWidth)
+                    .defaultValue(0x3FF)
+                    .tooltip(Const::GenomeSensorScanColorTooltip),
                 detectCreature._restrictToColor);
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Related lineage", "Unrelated lineage"}).textWidth(CellTypeTextWidth),
