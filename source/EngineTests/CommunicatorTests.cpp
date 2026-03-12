@@ -49,7 +49,7 @@ protected:
     Desc createReceiverCreature(
         uint64_t creatureId,
         RealVector2D pos,
-        std::optional<int> restrictToColors = std::nullopt,
+        int restrictToColors = 0x3FF,
         LineageRestriction restrictToLineage = LineageRestriction_No,
         int color = 0)
     {
@@ -201,7 +201,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 2);
 
     // Create receiver that only accepts color 2
-    data.add(createReceiverCreature(2, {110.0f, 100.0f}, 2), false);
+    data.add(createReceiverCreature(2, {110.0f, 100.0f}, 1 << 2), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -219,7 +219,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_mismatchingColor)
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 3);
 
     // Create receiver that only accepts color 2
-    data.add(createReceiverCreature(2, {110.0f, 100.0f}, 2), false);
+    data.add(createReceiverCreature(2, {110.0f, 100.0f}, 1 << 2), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);

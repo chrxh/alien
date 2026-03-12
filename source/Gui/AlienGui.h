@@ -295,7 +295,6 @@ public:
     {
         MEMBER(ColorCheckboxesParameters, std::string, name, "");
         MEMBER(ColorCheckboxesParameters, float, textWidth, 100);
-        MEMBER(ColorCheckboxesParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER(ColorCheckboxesParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ColorCheckboxes(ColorCheckboxesParameters const& parameters, int& value);

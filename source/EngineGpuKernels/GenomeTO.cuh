@@ -107,7 +107,7 @@ struct GeneratorGenomeTO
 
 struct AttackFreeCellGenomeTO
 {
-    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
 };
 
 struct AttackCreatureGenomeTO
@@ -194,14 +194,14 @@ struct ReconnectStructureGenomeTO
 
 struct ReconnectFreeCellGenomeTO
 {
-    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
 };
 
 struct ReconnectCreatureGenomeTO
 {
     uint32_t minNumCells;     // 0 = no restriction
     uint32_t maxNumCells;     // 0 = no restriction
-    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -280,7 +280,7 @@ struct SenderGenomeTO
 
 struct ReceiverGenomeTO
 {
-    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
     LineageRestriction restrictToLineage;
 };
 

@@ -420,9 +420,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             AttackerDesc attacker;
             if (objectTO.typeData.cell.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
                 AttackFreeCellDesc attackFreeCell;
-                attackFreeCell._restrictToColors = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors != 255
-                    ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors))
-                    : std::nullopt;
+                attackFreeCell._restrictToColors = static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors);
                 attacker._mode = attackFreeCell;
             } else if (objectTO.typeData.cell.cellTypeData.attacker.mode == AttackerMode_Creature) {
                 AttackCreatureDesc attackCreature;
@@ -504,9 +502,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
                 reconnector._mode = reconnectStructure;
             } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
                 ReconnectFreeCellDesc reconnectFreeCell;
-                reconnectFreeCell._restrictToColors = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors != 255
-                    ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors))
-                    : std::nullopt;
+                reconnectFreeCell._restrictToColors = static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors);
                 reconnector._mode = reconnectFreeCell;
             } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
                 ReconnectCreatureDesc reconnectCreature;
@@ -516,9 +512,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
                 reconnectCreature._maxNumCells = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells > 0
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells))
                     : std::nullopt;
-                reconnectCreature._restrictToColors = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors != 255
-                    ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors))
-                    : std::nullopt;
+                reconnectCreature._restrictToColors = static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors);
                 reconnectCreature._restrictToLineage = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
                 reconnector._mode = reconnectCreature;
             }
@@ -575,9 +569,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
                 communicator._mode = sender;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 ReceiverDesc receiver;
-                receiver._restrictToColors = communicatorTO.modeData.receiver.restrictToColors != 255
-                    ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColors))
-                    : std::nullopt;
+                receiver._restrictToColors = static_cast<int>(communicatorTO.modeData.receiver.restrictToColors);
                 receiver._restrictToLineage = communicatorTO.modeData.receiver.restrictToLineage;
                 communicator._mode = receiver;
             }
@@ -699,9 +691,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         AttackerGenomeDesc attackerDesc;
         if (nodeTO->cellTypeData.attacker.mode == AttackerMode_FreeCell) {
             AttackFreeCellGenomeDesc attackFreeCell;
-            attackFreeCell._restrictToColors = nodeTO->cellTypeData.attacker.modeData.attackFreeCell.restrictToColors != 255
-                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.modeData.attackFreeCell.restrictToColors))
-                : std::nullopt;
+            attackFreeCell._restrictToColors = static_cast<int>(nodeTO->cellTypeData.attacker.modeData.attackFreeCell.restrictToColors);
             attackerDesc._mode = attackFreeCell;
         } else if (nodeTO->cellTypeData.attacker.mode == AttackerMode_Creature) {
             AttackCreatureGenomeDesc attackCreature;
@@ -766,9 +756,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
             reconnectorDesc._mode = reconnectStructure;
         } else if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
             ReconnectFreeCellGenomeDesc reconnectFreeCell;
-            reconnectFreeCell._restrictToColors = nodeTO->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors != 255
-                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors))
-                : std::nullopt;
+            reconnectFreeCell._restrictToColors = static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors);
             reconnectorDesc._mode = reconnectFreeCell;
         } else if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
             ReconnectCreatureGenomeDesc reconnectCreature;
@@ -778,9 +766,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
             reconnectCreature._maxNumCells = nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells > 0
                 ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells))
                 : std::nullopt;
-            reconnectCreature._restrictToColors = nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors != 255
-                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors))
-                : std::nullopt;
+            reconnectCreature._restrictToColors = static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors);
             reconnectCreature._restrictToLineage = nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
             reconnectorDesc._mode = reconnectCreature;
         }
@@ -832,9 +818,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
             communicatorDesc._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverGenomeDesc receiver;
-            receiver._restrictToColors = communicatorTO.modeData.receiver.restrictToColors != 255
-                ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColors))
-                : std::nullopt;
+            receiver._restrictToColors = static_cast<int>(communicatorTO.modeData.receiver.restrictToColors);
             receiver._restrictToLineage = communicatorTO.modeData.receiver.restrictToLineage;
             communicatorDesc._mode = receiver;
         }
@@ -1064,7 +1048,7 @@ void DescConverterService::convertGenomeToTO(
                 if (attackerTO.mode == AttackerMode_FreeCell) {
                     auto const& attackFreeCellDesc = std::get<AttackFreeCellGenomeDesc>(attackerDesc._mode);
                     auto& attackFreeCellTO = attackerTO.modeData.attackFreeCell;
-                    attackFreeCellTO.restrictToColors = static_cast<uint8_t>(attackFreeCellDesc._restrictToColors.value_or(255));
+                    attackFreeCellTO.restrictToColors = static_cast<uint16_t>(attackFreeCellDesc._restrictToColors);
                 }
             } break;
             case CellType_Injector: {
@@ -1125,13 +1109,13 @@ void DescConverterService::convertGenomeToTO(
                 } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
                     auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellGenomeDesc>(reconnectorDesc._mode);
                     auto& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
-                    reconnectFreeCellTO.restrictToColors = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColors.value_or(255));
+                    reconnectFreeCellTO.restrictToColors = static_cast<uint16_t>(reconnectFreeCellDesc._restrictToColors);
                 } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
                     auto const& reconnectCreatureDesc = std::get<ReconnectCreatureGenomeDesc>(reconnectorDesc._mode);
                     auto& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
                     reconnectCreatureTO.minNumCells = static_cast<uint32_t>(reconnectCreatureDesc._minNumCells.value_or(0));
                     reconnectCreatureTO.maxNumCells = static_cast<uint32_t>(reconnectCreatureDesc._maxNumCells.value_or(0));
-                    reconnectCreatureTO.restrictToColors = static_cast<uint8_t>(reconnectCreatureDesc._restrictToColors.value_or(255));
+                    reconnectCreatureTO.restrictToColors = static_cast<uint16_t>(reconnectCreatureDesc._restrictToColors);
                     reconnectCreatureTO.restrictToLineage = reconnectCreatureDesc._restrictToLineage;
                 }
             } break;
@@ -1180,7 +1164,7 @@ void DescConverterService::convertGenomeToTO(
                     communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
                 } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                     auto const& receiverDesc = std::get<ReceiverGenomeDesc>(communicatorDesc._mode);
-                    communicatorTO.modeData.receiver.restrictToColors = static_cast<uint8_t>(receiverDesc._restrictToColors.value_or(255));
+                    communicatorTO.modeData.receiver.restrictToColors = static_cast<uint16_t>(receiverDesc._restrictToColors);
                     communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
                 }
             } break;
@@ -1365,7 +1349,7 @@ void DescConverterService::convertObjectToTO(
             attackerTO.mode = attackerDesc.getMode();
             if (attackerTO.mode == AttackerMode_FreeCell) {
                 auto const& attackFreeCellDesc = std::get<AttackFreeCellDesc>(attackerDesc._mode);
-                attackerTO.modeData.attackFreeCell.restrictToColors = static_cast<uint8_t>(attackFreeCellDesc._restrictToColors.value_or(255));
+                attackerTO.modeData.attackFreeCell.restrictToColors = static_cast<uint16_t>(attackFreeCellDesc._restrictToColors);
             }
         } break;
         case CellType_Injector: {
@@ -1432,13 +1416,13 @@ void DescConverterService::convertObjectToTO(
             } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
                 auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellDesc>(reconnectorDesc._mode);
                 ReconnectFreeCellTO& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
-                reconnectFreeCellTO.restrictToColors = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColors.value_or(255));
+                reconnectFreeCellTO.restrictToColors = static_cast<uint16_t>(reconnectFreeCellDesc._restrictToColors);
             } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
                 auto const& reconnectCreatureDesc = std::get<ReconnectCreatureDesc>(reconnectorDesc._mode);
                 ReconnectCreatureTO& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
                 reconnectCreatureTO.minNumCells = static_cast<uint32_t>(reconnectCreatureDesc._minNumCells.value_or(0));
                 reconnectCreatureTO.maxNumCells = static_cast<uint32_t>(reconnectCreatureDesc._maxNumCells.value_or(0));
-                reconnectCreatureTO.restrictToColors = static_cast<uint8_t>(reconnectCreatureDesc._restrictToColors.value_or(255));
+                reconnectCreatureTO.restrictToColors = static_cast<uint16_t>(reconnectCreatureDesc._restrictToColors);
                 reconnectCreatureTO.restrictToLineage = reconnectCreatureDesc._restrictToLineage;
             }
         } break;
@@ -1492,7 +1476,7 @@ void DescConverterService::convertObjectToTO(
                 communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 auto const& receiverDesc = std::get<ReceiverDesc>(communicatorDesc._mode);
-                communicatorTO.modeData.receiver.restrictToColors = static_cast<uint8_t>(receiverDesc._restrictToColors.value_or(255));
+                communicatorTO.modeData.receiver.restrictToColors = static_cast<uint16_t>(receiverDesc._restrictToColors);
                 communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
             }
         } break;

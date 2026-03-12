@@ -736,11 +736,11 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
             reconnectorModeDesc = ReconnectStructureDesc();
             break;
         case ReconnectorMode_FreeCell:
-            reconnectorModeDesc = ReconnectFreeCellDesc().restrictToColors(2);
+            reconnectorModeDesc = ReconnectFreeCellDesc().restrictToColors(1 << 2);
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =
-                ReconnectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColors(3).restrictToLineage(LineageRestriction_RelatedLineage);
+                ReconnectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColors(1 << 3).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeDesc();
@@ -789,7 +789,7 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
             communicatorModeDesc = SenderDesc().range(150).maxTimesSent(6);
             break;
         case CommunicatorMode_Receiver:
-            communicatorModeDesc = ReceiverDesc().restrictToColors(2).restrictToLineage(LineageRestriction_UnrelatedLineage);
+            communicatorModeDesc = ReceiverDesc().restrictToColors(1 << 2).restrictToLineage(LineageRestriction_UnrelatedLineage);
             break;
         default:
             communicatorModeDesc = CommunicatorModeDesc();
@@ -898,11 +898,11 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
             reconnectorModeDesc = ReconnectStructureGenomeDesc();
             break;
         case ReconnectorMode_FreeCell:
-            reconnectorModeDesc = ReconnectFreeCellGenomeDesc().restrictToColors(6);
+            reconnectorModeDesc = ReconnectFreeCellGenomeDesc().restrictToColors(1 << 6);
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =
-                ReconnectCreatureGenomeDesc().minNumCells(5).maxNumCells(20).restrictToColors(4).restrictToLineage(LineageRestriction_RelatedLineage);
+                ReconnectCreatureGenomeDesc().minNumCells(5).maxNumCells(20).restrictToColors(1 << 4).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeGenomeDesc();
@@ -953,7 +953,7 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
             communicatorModeDesc = SenderGenomeDesc().range(200).maxTimesSent(8);
             break;
         case CommunicatorMode_Receiver:
-            communicatorModeDesc = ReceiverGenomeDesc().restrictToColors(5).restrictToLineage(LineageRestriction_RelatedLineage);
+            communicatorModeDesc = ReceiverGenomeDesc().restrictToColors(1 << 5).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             communicatorModeDesc = CommunicatorModeGenomeDesc();

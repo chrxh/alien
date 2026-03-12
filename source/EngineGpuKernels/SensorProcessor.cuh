@@ -380,7 +380,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                 if (otherObject->type == ObjectType_Cell && !cell->isSameCreature(&otherObject->typeData.cell)) {
                     bool matches = true;
 
-                    if (restrictToColors != 0x3FF && !((restrictToColors >> otherObject->color) & 1)) {
+                    if (!((restrictToColors >> otherObject->color) & 1)) {
                         matches = false;
                     }
                     if (matches && minNumCells > 0 && otherObject->typeData.cell.creature->numObjects < minNumCells) {

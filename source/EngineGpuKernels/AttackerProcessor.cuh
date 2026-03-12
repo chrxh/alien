@@ -116,7 +116,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                 // Filter by color restriction
                 auto const& restrictToColors = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColors;
-                if (restrictToColors != 255 && otherObject->color != restrictToColors) {
+                if (!((restrictToColors >> otherObject->color) & 1)) {
                     return;
                 }
 
