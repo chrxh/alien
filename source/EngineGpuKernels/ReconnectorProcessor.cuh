@@ -73,7 +73,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
                 // Filter by color restriction
                 auto const& restrictToColors = reconnector.modeData.reconnectFreeCell.restrictToColors;
-                if (restrictToColors != 0x3FF && !((restrictToColors >> otherObject->color) & 1)) {
+                if (!((restrictToColors >> otherObject->color) & 1)) {
                     return;
                 }
             } else if (reconnectorMode == ReconnectorMode_Creature) {
@@ -88,7 +88,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
                 // Filter by color restriction
                 auto const& restrictToColors = reconnector.modeData.reconnectCreature.restrictToColors;
-                if (restrictToColors != 0x3FF && !((restrictToColors >> otherObject->color) & 1)) {
+                if (!((restrictToColors >> otherObject->color) & 1)) {
                     return;
                 }
 

@@ -93,7 +93,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         auto const& receiver = otherObject->typeData.cell.cellTypeData.communicator.modeData.receiver;
 
         // Check color restriction
-        if (receiver.restrictToColors != 0x3FF && !((receiver.restrictToColors >> object->color) & 1)) {
+        if (!((receiver.restrictToColors >> object->color) & 1)) {
             return false;
         }
 
