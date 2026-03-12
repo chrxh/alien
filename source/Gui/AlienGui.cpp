@@ -902,7 +902,8 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
 {
     ImGui::PushID(parameters._name.c_str());
     auto padding = ImGui::GetStyle().FramePadding.x;
-    auto checkboxWidth = scale(MAX_COLORS * 19.0f + 26.0f);
+    auto colorsPerRow = MAX_COLORS / 2;
+    auto checkboxWidth = scale(colorsPerRow * 19.0f + 26.0f);
     auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - checkboxWidth;
 
     drawHatchedRectangle(width);
@@ -912,6 +913,10 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
 
     auto result = false;
     for (int i = 0; i < MAX_COLORS; ++i) {
+        if (i == colorsPerRow) {
+            ImGui::Dummy(ImVec2(width - padding, 0));
+            ImGui::SameLine();
+        }
         bool checked = (value >> i) & 1;
 
         float h, s, v;
@@ -926,7 +931,7 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
             result = true;
         }
         ImGui::PopStyleColor();
-        if (i < MAX_COLORS - 1) {
+        if (i < MAX_COLORS - 1 && i != colorsPerRow - 1) {
             ImGui::SameLine();
             MoveTickLeft();
         }
