@@ -622,7 +622,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColors(1))).neuralNetwork(nn)),
+                .type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColors(1 << 1))).neuralNetwork(nn)),
         },
         CreatureDesc().id(1));
 
@@ -654,7 +654,7 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_mismatchingColor)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColors(1))).neuralNetwork(nn)),
+                .type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColors(1 << 1))).neuralNetwork(nn)),
         },
         CreatureDesc().id(1));
 

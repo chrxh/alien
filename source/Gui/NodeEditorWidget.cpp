@@ -412,8 +412,9 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
 
                     auto& attackFreeCell = std::get<AttackFreeCellGenomeDesc>(attacker._mode);
-                    AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackFreeCell._restrictToColors);
+                    AlienGui::ColorCheckboxes(
+                        AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(rightColumnWidth).defaultValue(0x3FF),
+                        attackFreeCell._restrictToColors);
 
                     AlienGui::EndIndent();
                 }
@@ -536,16 +537,18 @@ void _NodeEditorWidget::processNodeAttributes()
                 } else if (mode == ReconnectorMode_FreeCell) {
                     AlienGui::BeginIndent();
                     auto& freeCell = std::get<ReconnectFreeCellGenomeDesc>(reconnector._mode);
-                    AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), freeCell._restrictToColors);
+                    AlienGui::ColorCheckboxes(
+                        AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(rightColumnWidth).defaultValue(0x3FF),
+                        freeCell._restrictToColors);
                     AlienGui::EndIndent();
                 } else if (mode == ReconnectorMode_Creature) {
                     AlienGui::BeginIndent();
                     auto& creature = std::get<ReconnectCreatureGenomeDesc>(reconnector._mode);
                     AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), creature._minNumCells);
                     AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), creature._maxNumCells);
-                    AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), creature._restrictToColors);
+                    AlienGui::ColorCheckboxes(
+                        AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(rightColumnWidth).defaultValue(0x3FF),
+                        creature._restrictToColors);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
                         creature._restrictToLineage);
@@ -644,8 +647,9 @@ void _NodeEditorWidget::processNodeAttributes()
                 } else if (mode == CommunicatorMode_Receiver) {
                     AlienGui::BeginIndent();
                     auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);
-                    AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), receiver._restrictToColors);
+                    AlienGui::ColorCheckboxes(
+                        AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(rightColumnWidth).defaultValue(0x3FF),
+                        receiver._restrictToColors);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
                         receiver._restrictToLineage);

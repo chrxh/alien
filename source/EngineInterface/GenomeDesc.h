@@ -136,7 +136,7 @@ struct AttackFreeCellGenomeDesc
 {
     auto operator<=>(AttackFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(AttackFreeCellGenomeDesc, std::optional<int>, restrictToColors, std::nullopt);
+    MEMBER(AttackFreeCellGenomeDesc, int, restrictToColors, 0x3FF);
 };
 
 struct AttackCreatureGenomeDesc
@@ -236,7 +236,7 @@ struct ReconnectFreeCellGenomeDesc
 {
     auto operator<=>(ReconnectFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(ReconnectFreeCellGenomeDesc, std::optional<int>, restrictToColors, std::nullopt);
+    MEMBER(ReconnectFreeCellGenomeDesc, int, restrictToColors, 0x3FF);
 };
 
 struct ReconnectCreatureGenomeDesc
@@ -245,7 +245,7 @@ struct ReconnectCreatureGenomeDesc
 
     MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, restrictToColors, std::nullopt);
+    MEMBER(ReconnectCreatureGenomeDesc, int, restrictToColors, 0x3FF);
     MEMBER(ReconnectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -343,7 +343,7 @@ struct ReceiverGenomeDesc
 {
     auto operator<=>(ReceiverGenomeDesc const&) const = default;
 
-    MEMBER(ReceiverGenomeDesc, std::optional<int>, restrictToColors, std::nullopt);
+    MEMBER(ReceiverGenomeDesc, int, restrictToColors, 0x3FF);
     MEMBER(ReceiverGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 

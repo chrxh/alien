@@ -154,11 +154,7 @@ struct std::hash<AttackFreeCellGenomeDesc>
     std::size_t operator()(AttackFreeCellGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        if (desc._restrictToColors) {
-            hash_combine(seed, *desc._restrictToColors);
-        } else {
-            hash_combine(seed, -1);
-        }
+        hash_combine(seed, desc._restrictToColors);
         return seed;
     }
 };
@@ -296,11 +292,7 @@ struct std::hash<ReconnectFreeCellGenomeDesc>
     std::size_t operator()(ReconnectFreeCellGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        if (desc._restrictToColors) {
-            hash_combine(seed, *desc._restrictToColors);
-        } else {
-            hash_combine(seed, -1);
-        }
+        hash_combine(seed, desc._restrictToColors);
         return seed;
     }
 };
@@ -321,11 +313,7 @@ struct std::hash<ReconnectCreatureGenomeDesc>
         } else {
             hash_combine(seed, -1);
         }
-        if (desc._restrictToColors) {
-            hash_combine(seed, *desc._restrictToColors);
-        } else {
-            hash_combine(seed, -1);
-        }
+        hash_combine(seed, desc._restrictToColors);
         hash_combine(seed, static_cast<int>(desc._restrictToLineage));
         return seed;
     }
@@ -457,11 +445,7 @@ struct std::hash<ReceiverGenomeDesc>
     std::size_t operator()(ReceiverGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        if (desc._restrictToColors) {
-            hash_combine(seed, *desc._restrictToColors);
-        } else {
-            hash_combine(seed, -1);
-        }
+        hash_combine(seed, desc._restrictToColors);
         hash_combine(seed, static_cast<int>(desc._restrictToLineage));
         return seed;
     }
