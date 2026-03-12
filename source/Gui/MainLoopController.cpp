@@ -57,9 +57,9 @@
 #include "UploadSimulationDialog.h"
 #include "Viewport.h"
 
-#include <GLFW/glfw3.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <PersisterInterface/PersisterFacade.h>
+#include <GLFW/glfw3.h>
 
 namespace
 {
@@ -227,6 +227,9 @@ void MainLoopController::processOperatingMode()
     popGlobalStyle();
 
     FpsController::get().processForceFps(WindowController::get().getFps());
+
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    WindowController::get().updateWindowTitle(parameters.projectName.value);
 
     if (glfwWindowShouldClose(WindowController::get().getWindowData().window)) {
         scheduleClosing();
