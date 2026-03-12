@@ -40,14 +40,14 @@ struct DetectStructureGenomeTO
 struct DetectFreeCellGenomeTO
 {
     float minDensity;
-    uint16_t restrictToColor;  // bitset: bit i set = color i allowed, 0x3FF = all colors
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
 };
 
 struct DetectCreatureGenomeTO
 {
     uint32_t minNumCells;      // 0 = no restriction
     uint32_t maxNumCells;      // 0 = no restriction
-    uint16_t restrictToColor;  // bitset: bit i set = color i allowed, 0x3FF = all colors
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -107,14 +107,14 @@ struct GeneratorGenomeTO
 
 struct AttackFreeCellGenomeTO
 {
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
 };
 
 struct AttackCreatureGenomeTO
 {
     uint32_t minNumCells;     // 0 = no restriction
     uint32_t maxNumCells;     // 0 = no restriction
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
 
@@ -194,14 +194,14 @@ struct ReconnectStructureGenomeTO
 
 struct ReconnectFreeCellGenomeTO
 {
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
 };
 
 struct ReconnectCreatureGenomeTO
 {
     uint32_t minNumCells;     // 0 = no restriction
     uint32_t maxNumCells;     // 0 = no restriction
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
 
@@ -280,7 +280,7 @@ struct SenderGenomeTO
 
 struct ReceiverGenomeTO
 {
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
 

@@ -588,8 +588,8 @@ void _InspectorWindow::processAttackerContent(AttackerDesc& attacker)
 
         if (mode == AttackerMode_FreeCell) {
             auto& attackFreeCell = std::get<AttackFreeCellDesc>(attacker._mode);
-            if (attackFreeCell._restrictToColor.has_value()) {
-                ImGui::Text("Restrict to color: %d", *attackFreeCell._restrictToColor);
+            if (attackFreeCell._restrictToColors.has_value()) {
+                ImGui::Text("Restrict to color: %d", *attackFreeCell._restrictToColors);
             }
         }
         ImGui::TreePop();
@@ -670,7 +670,7 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                     .textWidth(CellTypeTextWidth)
                     .defaultValue(0x3FF)
                     .tooltip(Const::GenomeSensorScanColorTooltip),
-                detectFreeCell._restrictToColor);
+                detectFreeCell._restrictToColors);
         } else if (mode == SensorMode_DetectCreature) {
             auto& detectCreature = std::get<DetectCreatureDesc>(sensor._mode);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(CellTypeTextWidth), detectCreature._minNumCells);
@@ -681,7 +681,7 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                     .textWidth(CellTypeTextWidth)
                     .defaultValue(0x3FF)
                     .tooltip(Const::GenomeSensorScanColorTooltip),
-                detectCreature._restrictToColor);
+                detectCreature._restrictToColors);
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Related lineage", "Unrelated lineage"}).textWidth(CellTypeTextWidth),
                 detectCreature._restrictToLineage);
@@ -708,14 +708,14 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
             auto& freeCell = std::get<ReconnectFreeCellDesc>(reconnector._mode);
             AlienGui::ComboOptionalColor(
                 AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
-                freeCell._restrictToColor);
+                freeCell._restrictToColors);
         } else if (mode == ReconnectorMode_Creature) {
             auto& creature = std::get<ReconnectCreatureDesc>(reconnector._mode);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min creature cells").textWidth(CellTypeTextWidth), creature._minNumCells);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(CellTypeTextWidth), creature._maxNumCells);
             AlienGui::ComboOptionalColor(
                 AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
-                creature._restrictToColor);
+                creature._restrictToColors);
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Related lineage", "Unrelated lineage"}).textWidth(CellTypeTextWidth),
                 creature._restrictToLineage);

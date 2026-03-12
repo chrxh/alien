@@ -81,7 +81,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 } else if (mode == SensorMode_DetectFreeCell) {
                     auto& detectFreeCell = std::get<DetectFreeCellGenomeDesc>(sensor._mode);
                     detectFreeCell._minDensity = std::clamp(detectFreeCell._minDensity, 0.0f, 1.0f);
-                    detectFreeCell._restrictToColor &= (1 << MAX_COLORS) - 1;
+                    detectFreeCell._restrictToColors &= (1 << MAX_COLORS) - 1;
                 } else if (mode == SensorMode_DetectCreature) {
                     auto& detectCreature = std::get<DetectCreatureGenomeDesc>(sensor._mode);
                     if (detectCreature._minNumCells.has_value()) {
@@ -92,7 +92,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                         auto& value = detectCreature._maxNumCells.value();
                         value = std::max(value, 0);
                     }
-                    detectCreature._restrictToColor &= (1 << MAX_COLORS) - 1;
+                    detectCreature._restrictToColors &= (1 << MAX_COLORS) - 1;
                     detectCreature._restrictToLineage = std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
@@ -117,8 +117,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 auto attackerMode = attacker.getMode();
                 if (attackerMode == AttackerMode_FreeCell) {
                     auto& freeCell = std::get<AttackFreeCellGenomeDesc>(attacker._mode);
-                    if (freeCell._restrictToColor.has_value()) {
-                        auto& value = freeCell._restrictToColor.value();
+                    if (freeCell._restrictToColors.has_value()) {
+                        auto& value = freeCell._restrictToColors.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
                 }
@@ -167,8 +167,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 auto reconnectorMode = reconnector.getMode();
                 if (reconnectorMode == ReconnectorMode_FreeCell) {
                     auto& freeCell = std::get<ReconnectFreeCellGenomeDesc>(reconnector._mode);
-                    if (freeCell._restrictToColor.has_value()) {
-                        auto& value = freeCell._restrictToColor.value();
+                    if (freeCell._restrictToColors.has_value()) {
+                        auto& value = freeCell._restrictToColors.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
                 } else if (reconnectorMode == ReconnectorMode_Creature) {
@@ -181,8 +181,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                         auto& value = creature._maxNumCells.value();
                         value = std::max(value, 0);
                     }
-                    if (creature._restrictToColor.has_value()) {
-                        auto& value = creature._restrictToColor.value();
+                    if (creature._restrictToColors.has_value()) {
+                        auto& value = creature._restrictToColors.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
                     creature._restrictToLineage = std::clamp(creature._restrictToLineage, 0, LineageRestriction_Count - 1);
@@ -222,8 +222,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                     sender._maxTimesSent = std::max(sender._maxTimesSent, 0);
                 } else if (communicatorMode == CommunicatorMode_Receiver) {
                     auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);
-                    if (receiver._restrictToColor.has_value()) {
-                        auto& value = receiver._restrictToColor.value();
+                    if (receiver._restrictToColors.has_value()) {
+                        auto& value = receiver._restrictToColors.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
                     receiver._restrictToLineage = std::clamp(receiver._restrictToLineage, 0, LineageRestriction_Count - 1);

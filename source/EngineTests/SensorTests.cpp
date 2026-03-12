@@ -1113,7 +1113,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectFreeCell_restrictToColor)
+TEST_F(SensorTests, detectFreeCell_restrictToColors)
 {
     auto data = Desc().addCreature(
         {
@@ -1122,7 +1122,7 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
                 .pos({100.0f, 100.0f})
                 .color(0)
                 .type(
-                    CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f).restrictToColor(1 << 1)))),
+                    CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f).restrictToColors(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
@@ -1248,7 +1248,7 @@ TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
 }
 
 
-TEST_F(SensorTests, detectCreature_restrictToColor_found)
+TEST_F(SensorTests, detectCreature_restrictToColors_found)
 {
     auto data = Desc().addCreature(
         {
@@ -1256,7 +1256,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColor(1 << 1)))),
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColors(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));
@@ -1281,7 +1281,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
+TEST_F(SensorTests, detectCreature_restrictToColors_notFound)
 {
     auto data = Desc().addCreature(
         {
@@ -1289,7 +1289,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .color(0)
-                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColor(1 << 1)))),
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToColors(1 << 1)))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).color(0),
         },
         CreatureDesc().id(0));

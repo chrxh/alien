@@ -47,18 +47,18 @@ public:
         return 0.0f;
     }
 
-    __device__ __inline__ float getFreeCellDensity(float2 const& pos, uint16_t restrictToColor) const
+    __device__ __inline__ float getFreeCellDensity(float2 const& pos, uint16_t restrictToColors) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto slotSizeAsFlot = toFloat(_slotSize);
-            if (restrictToColor == 0x3FF) {
+            if (restrictToColors == 0x3FF) {
                 auto totalCount = (_freeCellDensityMap2[index] >> 16) & 0xff;
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
                 int matchedColorCount = 0;
                 for (int color = 0; color < MAX_COLORS; ++color) {
-                    if ((restrictToColor >> color) & 1) {
+                    if ((restrictToColors >> color) & 1) {
                         if (color < 8) {
                             matchedColorCount += (_freeCellDensityMap1[index] >> (color * 8)) & 0xff;
                         } else {

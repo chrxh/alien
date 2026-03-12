@@ -282,7 +282,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             if (detectFreeCell._minDensity != nodeDetectFreeCell._minDensity) {
                 return false;
             }
-            if (detectFreeCell._restrictToColor != nodeDetectFreeCell._restrictToColor) {
+            if (detectFreeCell._restrictToColors != nodeDetectFreeCell._restrictToColors) {
                 return false;
             }
         } break;
@@ -295,7 +295,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             if (detectCreature._maxNumCells != nodeDetectCreature._maxNumCells) {
                 return false;
             }
-            if (detectCreature._restrictToColor != nodeDetectCreature._restrictToColor) {
+            if (detectCreature._restrictToColors != nodeDetectCreature._restrictToColors) {
                 return false;
             }
             if (detectCreature._restrictToLineage != nodeDetectCreature._restrictToLineage) {
@@ -360,7 +360,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
         case AttackerMode_FreeCell: {
             auto const& freeCellMode = std::get<AttackFreeCellDesc>(attacker._mode);
             auto const& nodeFreeCellMode = std::get<AttackFreeCellGenomeDesc>(nodeAttacker._mode);
-            if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
+            if (freeCellMode._restrictToColors != nodeFreeCellMode._restrictToColors) {
                 return false;
             }
         } break;
@@ -470,7 +470,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
         case ReconnectorMode_FreeCell: {
             auto const& freeCellMode = std::get<ReconnectFreeCellDesc>(reconnector._mode);
             auto const& nodeFreeCellMode = std::get<ReconnectFreeCellGenomeDesc>(nodeReconnector._mode);
-            if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
+            if (freeCellMode._restrictToColors != nodeFreeCellMode._restrictToColors) {
                 return false;
             }
         } break;
@@ -483,7 +483,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             if (creatureMode._maxNumCells != nodeCreatureMode._maxNumCells) {
                 return false;
             }
-            if (creatureMode._restrictToColor != nodeCreatureMode._restrictToColor) {
+            if (creatureMode._restrictToColors != nodeCreatureMode._restrictToColors) {
                 return false;
             }
             if (creatureMode._restrictToLineage != nodeCreatureMode._restrictToLineage) {
@@ -591,7 +591,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
         case CommunicatorMode_Receiver: {
             auto const& receiver = std::get<ReceiverDesc>(communicator._mode);
             auto const& nodeReceiver = std::get<ReceiverGenomeDesc>(nodeCommunicator._mode);
-            if (receiver._restrictToColor != nodeReceiver._restrictToColor) {
+            if (receiver._restrictToColors != nodeReceiver._restrictToColors) {
                 return false;
             }
             if (receiver._restrictToLineage != nodeReceiver._restrictToLineage) {
@@ -663,10 +663,10 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
             sensorModeDesc = DetectStructureDesc();
             break;
         case SensorMode_DetectFreeCell:
-            sensorModeDesc = DetectFreeCellDesc().minDensity(0.25f).restrictToColor(1 << 2);
+            sensorModeDesc = DetectFreeCellDesc().minDensity(0.25f).restrictToColors(1 << 2);
             break;
         case SensorMode_DetectCreature:
-            sensorModeDesc = DetectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(1 << 3).restrictToLineage(LineageRestriction_RelatedLineage);
+            sensorModeDesc = DetectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColors(1 << 3).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             sensorModeDesc = SensorModeDesc();
@@ -736,11 +736,11 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
             reconnectorModeDesc = ReconnectStructureDesc();
             break;
         case ReconnectorMode_FreeCell:
-            reconnectorModeDesc = ReconnectFreeCellDesc().restrictToColor(2);
+            reconnectorModeDesc = ReconnectFreeCellDesc().restrictToColors(2);
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =
-                ReconnectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_RelatedLineage);
+                ReconnectCreatureDesc().minNumCells(5).maxNumCells(20).restrictToColors(3).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeDesc();
@@ -789,7 +789,7 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
             communicatorModeDesc = SenderDesc().range(150).maxTimesSent(6);
             break;
         case CommunicatorMode_Receiver:
-            communicatorModeDesc = ReceiverDesc().restrictToColor(2).restrictToLineage(LineageRestriction_UnrelatedLineage);
+            communicatorModeDesc = ReceiverDesc().restrictToColors(2).restrictToLineage(LineageRestriction_UnrelatedLineage);
             break;
         default:
             communicatorModeDesc = CommunicatorModeDesc();
@@ -832,11 +832,11 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
             sensorModeDesc = DetectStructureGenomeDesc();
             break;
         case SensorMode_DetectFreeCell:
-            sensorModeDesc = DetectFreeCellGenomeDesc().minDensity(0.20f).restrictToColor(1 << 6);
+            sensorModeDesc = DetectFreeCellGenomeDesc().minDensity(0.20f).restrictToColors(1 << 6);
             break;
         case SensorMode_DetectCreature:
             sensorModeDesc =
-                DetectCreatureGenomeDesc().minNumCells(3).maxNumCells(15).restrictToColor(1 << 4).restrictToLineage(LineageRestriction_UnrelatedLineage);
+                DetectCreatureGenomeDesc().minNumCells(3).maxNumCells(15).restrictToColors(1 << 4).restrictToLineage(LineageRestriction_UnrelatedLineage);
             break;
         default:
             sensorModeDesc = SensorModeGenomeDesc();
@@ -898,11 +898,11 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
             reconnectorModeDesc = ReconnectStructureGenomeDesc();
             break;
         case ReconnectorMode_FreeCell:
-            reconnectorModeDesc = ReconnectFreeCellGenomeDesc().restrictToColor(6);
+            reconnectorModeDesc = ReconnectFreeCellGenomeDesc().restrictToColors(6);
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =
-                ReconnectCreatureGenomeDesc().minNumCells(5).maxNumCells(20).restrictToColor(4).restrictToLineage(LineageRestriction_RelatedLineage);
+                ReconnectCreatureGenomeDesc().minNumCells(5).maxNumCells(20).restrictToColors(4).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeGenomeDesc();
@@ -953,7 +953,7 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
             communicatorModeDesc = SenderGenomeDesc().range(200).maxTimesSent(8);
             break;
         case CommunicatorMode_Receiver:
-            communicatorModeDesc = ReceiverGenomeDesc().restrictToColor(5).restrictToLineage(LineageRestriction_RelatedLineage);
+            communicatorModeDesc = ReceiverGenomeDesc().restrictToColors(5).restrictToLineage(LineageRestriction_RelatedLineage);
             break;
         default:
             communicatorModeDesc = CommunicatorModeGenomeDesc();

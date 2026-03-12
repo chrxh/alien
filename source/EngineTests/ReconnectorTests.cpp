@@ -179,7 +179,7 @@ TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
 
 TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDesc().restrictToColor(1));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDesc().restrictToColors(1));
 
     // Add free cell with matching color
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).color(1).type(FreeCellDesc()));
@@ -194,7 +194,7 @@ TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
 
 TEST_F(ReconnectorTests, freeCellMode_colorRestriction_failed)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDesc().restrictToColor(1));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDesc().restrictToColors(1));
 
     // Add free cell with non-matching color
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).color(0).type(FreeCellDesc()));
@@ -275,7 +275,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreFreeCells)
 
 TEST_F(ReconnectorTests, creatureMode_colorRestriction_success)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectCreatureDesc().restrictToColor(1));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectCreatureDesc().restrictToColors(1));
 
     // Add creature with matching color
     data.addCreature({
@@ -294,7 +294,7 @@ TEST_F(ReconnectorTests, creatureMode_colorRestriction_success)
 
 TEST_F(ReconnectorTests, creatureMode_colorRestriction_failed)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectCreatureDesc().restrictToColor(1));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectCreatureDesc().restrictToColors(1));
 
     // Add creature with non-matching color
     data.addCreature({

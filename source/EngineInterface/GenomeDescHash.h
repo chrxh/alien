@@ -84,7 +84,7 @@ struct std::hash<SensorGenomeDesc>
         } else if (desc.getMode() == SensorMode_DetectFreeCell) {
             auto const& mode = std::get<DetectFreeCellGenomeDesc>(desc._mode);
             hash_combine(seed, mode._minDensity);
-            hash_combine(seed, mode._restrictToColor);
+            hash_combine(seed, mode._restrictToColors);
         } else if (desc.getMode() == SensorMode_DetectCreature) {
             auto const& mode = std::get<DetectCreatureGenomeDesc>(desc._mode);
             if (mode._minNumCells) {
@@ -97,7 +97,7 @@ struct std::hash<SensorGenomeDesc>
             } else {
                 hash_combine(seed, -1);
             }
-            hash_combine(seed, mode._restrictToColor);
+            hash_combine(seed, mode._restrictToColors);
             hash_combine(seed, static_cast<int>(mode._restrictToLineage));
         }
         return seed;
@@ -154,8 +154,8 @@ struct std::hash<AttackFreeCellGenomeDesc>
     std::size_t operator()(AttackFreeCellGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        if (desc._restrictToColor) {
-            hash_combine(seed, *desc._restrictToColor);
+        if (desc._restrictToColors) {
+            hash_combine(seed, *desc._restrictToColors);
         } else {
             hash_combine(seed, -1);
         }
@@ -296,8 +296,8 @@ struct std::hash<ReconnectFreeCellGenomeDesc>
     std::size_t operator()(ReconnectFreeCellGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        if (desc._restrictToColor) {
-            hash_combine(seed, *desc._restrictToColor);
+        if (desc._restrictToColors) {
+            hash_combine(seed, *desc._restrictToColors);
         } else {
             hash_combine(seed, -1);
         }
@@ -321,8 +321,8 @@ struct std::hash<ReconnectCreatureGenomeDesc>
         } else {
             hash_combine(seed, -1);
         }
-        if (desc._restrictToColor) {
-            hash_combine(seed, *desc._restrictToColor);
+        if (desc._restrictToColors) {
+            hash_combine(seed, *desc._restrictToColors);
         } else {
             hash_combine(seed, -1);
         }
@@ -457,8 +457,8 @@ struct std::hash<ReceiverGenomeDesc>
     std::size_t operator()(ReceiverGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        if (desc._restrictToColor) {
-            hash_combine(seed, *desc._restrictToColor);
+        if (desc._restrictToColors) {
+            hash_combine(seed, *desc._restrictToColors);
         } else {
             hash_combine(seed, -1);
         }

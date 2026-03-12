@@ -104,13 +104,13 @@ namespace
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                             nodeTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity = node.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                            nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor =
-                                node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                            nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors =
+                                node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                             nodeTO.cellTypeData.sensor.modeData.detectCreature.minNumCells = node.cellTypeData.sensor.modeData.detectCreature.minNumCells;
                             nodeTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells = node.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                            nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor =
-                                node.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                            nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors =
+                                node.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                             nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage =
                                 node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                         }
@@ -129,8 +129,8 @@ namespace
                     case CellType_Attacker:
                         nodeTO.cellTypeData.attacker.mode = node.cellTypeData.attacker.mode;
                         if (node.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-                            nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor =
-                                node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+                            nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors =
+                                node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors;
                         }
                         break;
                     case CellType_Injector:
@@ -178,15 +178,15 @@ namespace
                         nodeTO.cellTypeData.reconnector.mode = node.cellTypeData.reconnector.mode;
                         if (node.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
                         } else if (node.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-                            nodeTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor =
-                                node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
+                            nodeTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors =
+                                node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors;
                         } else if (node.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
                             nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells =
                                 node.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
                             nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells =
                                 node.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
-                            nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor =
-                                node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
+                            nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors =
+                                node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors;
                             nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage =
                                 node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
                         }
@@ -227,8 +227,8 @@ namespace
                             nodeTO.cellTypeData.communicator.modeData.sender.range = node.cellTypeData.communicator.modeData.sender.range;
                             nodeTO.cellTypeData.communicator.modeData.sender.maxTimesSent = node.cellTypeData.communicator.modeData.sender.maxTimesSent;
                         } else if (node.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                            nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColor =
-                                node.cellTypeData.communicator.modeData.receiver.restrictToColor;
+                            nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColors =
+                                node.cellTypeData.communicator.modeData.receiver.restrictToColors;
                             nodeTO.cellTypeData.communicator.modeData.receiver.restrictToLineage =
                                 node.cellTypeData.communicator.modeData.receiver.restrictToLineage;
                         }
@@ -382,11 +382,11 @@ namespace
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                     cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity = cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                    cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                    cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                     cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells = cell.cellTypeData.sensor.modeData.detectCreature.minNumCells;
                     cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells = cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                    cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor = cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                    cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors = cell.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                     cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                 }
                 cellTO.cellTypeData.sensor.lastMatchAvailable = cell.cellTypeData.sensor.lastMatchAvailable;
@@ -410,7 +410,7 @@ namespace
             case CellType_Attacker: {
                 cellTO.cellTypeData.attacker.mode = cell.cellTypeData.attacker.mode;
                 if (cell.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-                    cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+                    cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors = cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors;
                 }
             } break;
             case CellType_Injector: {
@@ -460,15 +460,15 @@ namespace
                 cellTO.cellTypeData.reconnector.mode = cell.cellTypeData.reconnector.mode;
                 if (cell.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
                 } else if (cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-                    cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor =
-                        cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
+                    cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors =
+                        cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors;
                 } else if (cell.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
                     cellTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells =
                         cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
                     cellTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells =
                         cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
-                    cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor =
-                        cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
+                    cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors =
+                        cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors;
                     cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage =
                         cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
                 }
@@ -515,7 +515,7 @@ namespace
                     cellTO.cellTypeData.communicator.modeData.sender.range = cell.cellTypeData.communicator.modeData.sender.range;
                     cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent = cell.cellTypeData.communicator.modeData.sender.maxTimesSent;
                 } else if (cell.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                    cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor = cell.cellTypeData.communicator.modeData.receiver.restrictToColor;
+                    cellTO.cellTypeData.communicator.modeData.receiver.restrictToColors = cell.cellTypeData.communicator.modeData.receiver.restrictToColors;
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = cell.cellTypeData.communicator.modeData.receiver.restrictToLineage;
                 }
             } break;

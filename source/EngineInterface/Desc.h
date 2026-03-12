@@ -93,7 +93,7 @@ struct DetectFreeCellDesc
     auto operator<=>(DetectFreeCellDesc const&) const = default;
 
     MEMBER(DetectFreeCellDesc, float, minDensity, 0.05f);
-    MEMBER(DetectFreeCellDesc, int, restrictToColor, 0x3FF);
+    MEMBER(DetectFreeCellDesc, int, restrictToColors, 0x3FF);
 };
 
 struct DetectCreatureDesc
@@ -102,7 +102,7 @@ struct DetectCreatureDesc
 
     MEMBER(DetectCreatureDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(DetectCreatureDesc, int, restrictToColor, 0x3FF);
+    MEMBER(DetectCreatureDesc, int, restrictToColors, 0x3FF);
     MEMBER(DetectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -167,7 +167,7 @@ struct AttackFreeCellDesc
 {
     auto operator<=>(AttackFreeCellDesc const&) const = default;
 
-    MEMBER(AttackFreeCellDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackFreeCellDesc, std::optional<int>, restrictToColors, std::nullopt);
 };
 
 struct AttackCreatureDesc
@@ -296,7 +296,7 @@ struct ReconnectFreeCellDesc
 {
     auto operator<=>(ReconnectFreeCellDesc const&) const = default;
 
-    MEMBER(ReconnectFreeCellDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectFreeCellDesc, std::optional<int>, restrictToColors, std::nullopt);
 };
 
 struct ReconnectCreatureDesc
@@ -305,7 +305,7 @@ struct ReconnectCreatureDesc
 
     MEMBER(ReconnectCreatureDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(ReconnectCreatureDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectCreatureDesc, std::optional<int>, restrictToColors, std::nullopt);
     MEMBER(ReconnectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -408,7 +408,7 @@ struct ReceiverDesc
 {
     auto operator<=>(ReceiverDesc const&) const = default;
 
-    MEMBER(ReceiverDesc, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReceiverDesc, std::optional<int>, restrictToColors, std::nullopt);
     MEMBER(ReceiverDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 

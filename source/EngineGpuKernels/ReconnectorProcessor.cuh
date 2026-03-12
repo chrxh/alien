@@ -72,8 +72,8 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 }
 
                 // Filter by color restriction
-                auto const& restrictToColor = reconnector.modeData.reconnectFreeCell.restrictToColor;
-                if (restrictToColor != 255 && otherObject->color != restrictToColor) {
+                auto const& restrictToColors = reconnector.modeData.reconnectFreeCell.restrictToColors;
+                if (restrictToColors != 255 && otherObject->color != restrictToColors) {
                     return;
                 }
             } else if (reconnectorMode == ReconnectorMode_Creature) {
@@ -87,8 +87,8 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 }
 
                 // Filter by color restriction
-                auto const& restrictToColor = reconnector.modeData.reconnectCreature.restrictToColor;
-                if (restrictToColor != 255 && otherObject->color != restrictToColor) {
+                auto const& restrictToColors = reconnector.modeData.reconnectCreature.restrictToColors;
+                if (restrictToColors != 255 && otherObject->color != restrictToColors) {
                     return;
                 }
 

@@ -49,7 +49,7 @@ protected:
     Desc createReceiverCreature(
         uint64_t creatureId,
         RealVector2D pos,
-        std::optional<int> restrictToColor = std::nullopt,
+        std::optional<int> restrictToColors = std::nullopt,
         LineageRestriction restrictToLineage = LineageRestriction_No,
         int color = 0)
     {
@@ -59,7 +59,7 @@ protected:
                     .id(creatureId * 100)
                     .pos(pos)
                     .color(color)
-                    .type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToColor(restrictToColor).restrictToLineage(restrictToLineage)))),
+                    .type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToColors(restrictToColors).restrictToLineage(restrictToLineage)))),
                 ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
             },
             CreatureDesc().id(creatureId));

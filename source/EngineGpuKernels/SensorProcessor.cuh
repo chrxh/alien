@@ -361,8 +361,8 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
         }
     } else if (mode == SensorMode_DetectFreeCell) {
         auto const& minDensity = cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-        auto const& restrictToColor = cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
-        auto density = densityMap.getFreeCellDensity(scanPos, restrictToColor);
+        auto const& restrictToColors = cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
+        auto density = densityMap.getFreeCellDensity(scanPos, restrictToColors);
         if (density >= minDensity) {
             return pack(distance, absAngle, density);
         }
@@ -371,7 +371,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
 
             auto const& minNumCells = cell->cellTypeData.sensor.modeData.detectCreature.minNumCells;
             auto const& maxNumCells = cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-            auto const& restrictToColor = cell->cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+            auto const& restrictToColors = cell->cellTypeData.sensor.modeData.detectCreature.restrictToColors;
             auto const& restrictToLineage = cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
 
             auto otherObject = data.objectMap.getFirst(scanPos);
@@ -380,7 +380,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                 if (otherObject->type == ObjectType_Cell && !cell->isSameCreature(&otherObject->typeData.cell)) {
                     bool matches = true;
 
-                    if (restrictToColor != 0x3FF && !((restrictToColor >> otherObject->color) & 1)) {
+                    if (restrictToColors != 0x3FF && !((restrictToColors >> otherObject->color) & 1)) {
                         matches = false;
                     }
                     if (matches && minNumCells > 0 && otherObject->typeData.cell.creature->numObjects < minNumCells) {

@@ -334,7 +334,7 @@ void _NodeEditorWidget::processNodeAttributes()
                         detectFreeCell._minDensity);
                     AlienGui::ColorCheckboxes(
                         AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(rightColumnWidth).defaultValue(0x3FF),
-                        detectFreeCell._restrictToColor);
+                        detectFreeCell._restrictToColors);
                     AlienGui::EndIndent();
                 } else if (mode == SensorMode_DetectCreature) {
                     AlienGui::BeginIndent();
@@ -345,7 +345,7 @@ void _NodeEditorWidget::processNodeAttributes()
                         AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), detectCreature._maxNumCells);
                     AlienGui::ColorCheckboxes(
                         AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(rightColumnWidth).defaultValue(0x3FF),
-                        detectCreature._restrictToColor);
+                        detectCreature._restrictToColors);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
                         detectCreature._restrictToLineage);
@@ -413,7 +413,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     auto& attackFreeCell = std::get<AttackFreeCellGenomeDesc>(attacker._mode);
                     AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackFreeCell._restrictToColor);
+                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackFreeCell._restrictToColors);
 
                     AlienGui::EndIndent();
                 }
@@ -537,7 +537,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
                     auto& freeCell = std::get<ReconnectFreeCellGenomeDesc>(reconnector._mode);
                     AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), freeCell._restrictToColor);
+                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), freeCell._restrictToColors);
                     AlienGui::EndIndent();
                 } else if (mode == ReconnectorMode_Creature) {
                     AlienGui::BeginIndent();
@@ -545,7 +545,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), creature._minNumCells);
                     AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), creature._maxNumCells);
                     AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), creature._restrictToColor);
+                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), creature._restrictToColors);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
                         creature._restrictToLineage);
@@ -645,7 +645,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
                     auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);
                     AlienGui::ComboOptionalColor(
-                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), receiver._restrictToColor);
+                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), receiver._restrictToColors);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
                         receiver._restrictToLineage);

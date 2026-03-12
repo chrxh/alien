@@ -166,11 +166,11 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                     node.cellTypeData.sensor.modeData.detectFreeCell.minDensity = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                    node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                    node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                     node.cellTypeData.sensor.modeData.detectCreature.minNumCells = nodeTO.cellTypeData.sensor.modeData.detectCreature.minNumCells;
                     node.cellTypeData.sensor.modeData.detectCreature.maxNumCells = nodeTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                    node.cellTypeData.sensor.modeData.detectCreature.restrictToColor = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                    node.cellTypeData.sensor.modeData.detectCreature.restrictToColors = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                     node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
                 }
                 break;
@@ -190,7 +190,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             case CellType_Attacker:
                 node.cellTypeData.attacker.mode = nodeTO.cellTypeData.attacker.mode;
                 if (nodeTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-                    node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+                    node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors = nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors;
                 }
                 break;
             case CellType_Injector:
@@ -234,15 +234,15 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.reconnector.mode = nodeTO.cellTypeData.reconnector.mode;
                 if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
                 } else if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-                    node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor =
-                        nodeTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
+                    node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors =
+                        nodeTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors;
                 } else if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
                     node.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells =
                         nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
                     node.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells =
                         nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
-                    node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor =
-                        nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
+                    node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors =
+                        nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors;
                     node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage =
                         nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
                 }
@@ -284,7 +284,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                     node.cellTypeData.communicator.modeData.sender.range = nodeTO.cellTypeData.communicator.modeData.sender.range;
                     node.cellTypeData.communicator.modeData.sender.maxTimesSent = nodeTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
                 } else if (nodeTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                    node.cellTypeData.communicator.modeData.receiver.restrictToColor = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
+                    node.cellTypeData.communicator.modeData.receiver.restrictToColors = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColors;
                     node.cellTypeData.communicator.modeData.receiver.restrictToLineage = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
                 }
                 break;
@@ -435,11 +435,11 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                 cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity = cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-                cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                 cell->cellTypeData.sensor.modeData.detectCreature.minNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells;
                 cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
-                cell->cellTypeData.sensor.modeData.detectCreature.restrictToColor = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                cell->cellTypeData.sensor.modeData.detectCreature.restrictToColors = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                 cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
             }
             cell->cellTypeData.sensor.lastMatchAvailable = cellTO.cellTypeData.sensor.lastMatchAvailable;
@@ -463,7 +463,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         case CellType_Attacker: {
             cell->cellTypeData.attacker.mode = cellTO.cellTypeData.attacker.mode;
             if (cellTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-                cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+                cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColors = cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors;
             }
         } break;
         case CellType_Injector: {
@@ -512,13 +512,13 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->cellTypeData.reconnector.mode = cellTO.cellTypeData.reconnector.mode;
             if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
             } else if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-                cell->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor =
-                    cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
+                cell->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors =
+                    cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors;
             } else if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
                 cell->cellTypeData.reconnector.modeData.reconnectCreature.minNumCells = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
                 cell->cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
-                cell->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor =
-                    cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
+                cell->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors =
+                    cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors;
                 cell->cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage =
                     cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
             }
@@ -563,7 +563,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                 cell->cellTypeData.communicator.modeData.sender.range = cellTO.cellTypeData.communicator.modeData.sender.range;
                 cell->cellTypeData.communicator.modeData.sender.maxTimesSent = cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
             } else if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                cell->cellTypeData.communicator.modeData.receiver.restrictToColor = cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
+                cell->cellTypeData.communicator.modeData.receiver.restrictToColors = cellTO.cellTypeData.communicator.modeData.receiver.restrictToColors;
                 cell->cellTypeData.communicator.modeData.receiver.restrictToLineage = cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
             }
         } break;
@@ -779,11 +779,11 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         } else if (nodeSensor.mode == SensorMode_DetectStructure) {
         } else if (nodeSensor.mode == SensorMode_DetectFreeCell) {
             sensor.modeData.detectFreeCell.minDensity = nodeSensor.modeData.detectFreeCell.minDensity;
-            sensor.modeData.detectFreeCell.restrictToColor = nodeSensor.modeData.detectFreeCell.restrictToColor;
+            sensor.modeData.detectFreeCell.restrictToColors = nodeSensor.modeData.detectFreeCell.restrictToColors;
         } else if (nodeSensor.mode == SensorMode_DetectCreature) {
             sensor.modeData.detectCreature.minNumCells = nodeSensor.modeData.detectCreature.minNumCells;
             sensor.modeData.detectCreature.maxNumCells = nodeSensor.modeData.detectCreature.maxNumCells;
-            sensor.modeData.detectCreature.restrictToColor = nodeSensor.modeData.detectCreature.restrictToColor;
+            sensor.modeData.detectCreature.restrictToColors = nodeSensor.modeData.detectCreature.restrictToColors;
             sensor.modeData.detectCreature.restrictToLineage = nodeSensor.modeData.detectCreature.restrictToLineage;
         }
         sensor.lastMatchAvailable = false;
@@ -811,7 +811,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         auto& attacker = cell.cellTypeData.attacker;
         attacker.mode = nodeAttacker.mode;
         if (nodeAttacker.mode == AttackerMode_FreeCell) {
-            attacker.modeData.attackFreeCell.restrictToColor = nodeAttacker.modeData.attackFreeCell.restrictToColor;
+            attacker.modeData.attackFreeCell.restrictToColors = nodeAttacker.modeData.attackFreeCell.restrictToColors;
         }
     } break;
     case CellType_Injector: {
@@ -876,11 +876,11 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         reconnector.mode = nodeReconnector.mode;
         if (nodeReconnector.mode == ReconnectorMode_Structure) {
         } else if (nodeReconnector.mode == ReconnectorMode_FreeCell) {
-            reconnector.modeData.reconnectFreeCell.restrictToColor = nodeReconnector.modeData.reconnectFreeCell.restrictToColor;
+            reconnector.modeData.reconnectFreeCell.restrictToColors = nodeReconnector.modeData.reconnectFreeCell.restrictToColors;
         } else if (nodeReconnector.mode == ReconnectorMode_Creature) {
             reconnector.modeData.reconnectCreature.minNumCells = nodeReconnector.modeData.reconnectCreature.minNumCells;
             reconnector.modeData.reconnectCreature.maxNumCells = nodeReconnector.modeData.reconnectCreature.maxNumCells;
-            reconnector.modeData.reconnectCreature.restrictToColor = nodeReconnector.modeData.reconnectCreature.restrictToColor;
+            reconnector.modeData.reconnectCreature.restrictToColors = nodeReconnector.modeData.reconnectCreature.restrictToColors;
             reconnector.modeData.reconnectCreature.restrictToLineage = nodeReconnector.modeData.reconnectCreature.restrictToLineage;
         }
     } break;
@@ -934,7 +934,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             communicator.modeData.sender.range = nodeCommunicator.modeData.sender.range;
             communicator.modeData.sender.maxTimesSent = nodeCommunicator.modeData.sender.maxTimesSent;
         } else if (nodeCommunicator.mode == CommunicatorMode_Receiver) {
-            communicator.modeData.receiver.restrictToColor = nodeCommunicator.modeData.receiver.restrictToColor;
+            communicator.modeData.receiver.restrictToColors = nodeCommunicator.modeData.receiver.restrictToColors;
             communicator.modeData.receiver.restrictToLineage = nodeCommunicator.modeData.receiver.restrictToLineage;
         }
     } break;
