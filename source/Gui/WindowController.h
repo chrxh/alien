@@ -32,6 +32,8 @@ public:
     std::string getMode();
     void setMode(std::string const& mode);
 
+    void updateWindowTitle(std::string const& projectName);
+
     int getFps();
     void setFps(int value);
 
@@ -55,4 +57,5 @@ private:
     int _fps = 33;
 
     std::string _mode;
+    std::string _lastProjectName;
 };
