@@ -56,17 +56,17 @@ public:
                 auto totalCount = (_freeCellDensityMap2[index] >> 16) & 0xff;
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
-                int totalColorCount = 0;
+                int matchedColorCount = 0;
                 for (int color = 0; color < MAX_COLORS; ++color) {
                     if ((restrictToColor >> color) & 1) {
                         if (color < 8) {
-                            totalColorCount += (_freeCellDensityMap1[index] >> (color * 8)) & 0xff;
+                            matchedColorCount += (_freeCellDensityMap1[index] >> (color * 8)) & 0xff;
                         } else {
-                            totalColorCount += (_freeCellDensityMap2[index] >> ((color - 8) * 8)) & 0xff;
+                            matchedColorCount += (_freeCellDensityMap2[index] >> ((color - 8) * 8)) & 0xff;
                         }
                     }
                 }
-                return toFloat(totalColorCount) / (slotSizeAsFlot * slotSizeAsFlot);
+                return toFloat(matchedColorCount) / (slotSizeAsFlot * slotSizeAsFlot);
             }
         }
         return 0.0f;
