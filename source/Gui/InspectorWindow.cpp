@@ -591,8 +591,7 @@ void _InspectorWindow::processAttackerContent(AttackerDesc& attacker)
             AlienGui::ColorCheckboxes(
                 AlienGui::ColorCheckboxesParameters()
                     .name("Restrict to colors")
-                    .textWidth(CellTypeTextWidth)
-                    .defaultValue(0x3FF),
+                    .textWidth(CellTypeTextWidth),
                 attackFreeCell._restrictToColors);
         }
         ImGui::TreePop();
@@ -671,7 +670,6 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                 AlienGui::ColorCheckboxesParameters()
                     .name("Restrict to color")
                     .textWidth(CellTypeTextWidth)
-                    .defaultValue(0x3FF)
                     .tooltip(Const::GenomeSensorScanColorTooltip),
                 detectFreeCell._restrictToColors);
         } else if (mode == SensorMode_DetectCreature) {
@@ -682,7 +680,6 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                 AlienGui::ColorCheckboxesParameters()
                     .name("Restrict to color")
                     .textWidth(CellTypeTextWidth)
-                    .defaultValue(0x3FF)
                     .tooltip(Const::GenomeSensorScanColorTooltip),
                 detectCreature._restrictToColors);
             AlienGui::Combo(
@@ -713,7 +710,6 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
                 AlienGui::ColorCheckboxesParameters()
                     .name("Restrict to colors")
                     .textWidth(CellTypeTextWidth)
-                    .defaultValue(0x3FF)
                     .tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
                 freeCell._restrictToColors);
         } else if (mode == ReconnectorMode_Creature) {
@@ -724,7 +720,6 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
                 AlienGui::ColorCheckboxesParameters()
                     .name("Restrict to colors")
                     .textWidth(CellTypeTextWidth)
-                    .defaultValue(0x3FF)
                     .tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
                 creature._restrictToColors);
             AlienGui::Combo(
