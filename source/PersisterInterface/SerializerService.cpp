@@ -220,14 +220,12 @@ namespace
     auto constexpr Id_SensorModeGenome_DetectEnergy_MinDensity = 0;
 
     auto constexpr Id_SensorModeGenome_DetectFreeCell_MinDensity = 0;
-    auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColor = 1;  // Legacy: std::optional<int>
-    auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColorBitset = 2;
+    auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColor = 1;
 
     auto constexpr Id_SensorModeGenome_DetectCreature_MinNumCells = 0;
     auto constexpr Id_SensorModeGenome_DetectCreature_MaxNumCells = 1;
-    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToColor = 2;  // Legacy: std::optional<int>
+    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToColor = 2;
     auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToLineage = 3;
-    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToColorBitset = 4;
 
     auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio = 4;
@@ -377,22 +375,7 @@ namespace cereal
         DetectFreeCellGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
-        if (task == SerializationTask::Load) {
-            auto findResult = auxiliaries.find(Id_SensorModeGenome_DetectFreeCell_RestrictToColorBitset);
-            if (findResult != auxiliaries.end()) {
-                data._restrictToColor = std::get<int>(findResult->second);
-            } else {
-                auto legacyResult = auxiliaries.find(Id_SensorModeGenome_DetectFreeCell_RestrictToColor);
-                if (legacyResult != auxiliaries.end()) {
-                    auto legacyValue = std::get<std::optional<int>>(legacyResult->second);
-                    data._restrictToColor = legacyValue.has_value() ? (1 << *legacyValue) : 0x3FF;
-                } else {
-                    data._restrictToColor = defaultObject._restrictToColor;
-                }
-            }
-        } else {
-            loadSave(task, auxiliaries, Id_SensorModeGenome_DetectFreeCell_RestrictToColorBitset, data._restrictToColor, defaultObject._restrictToColor);
-        }
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectFreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetectFreeCellGenomeDesc)
@@ -404,22 +387,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        if (task == SerializationTask::Load) {
-            auto findResult = auxiliaries.find(Id_SensorModeGenome_DetectCreature_RestrictToColorBitset);
-            if (findResult != auxiliaries.end()) {
-                data._restrictToColor = std::get<int>(findResult->second);
-            } else {
-                auto legacyResult = auxiliaries.find(Id_SensorModeGenome_DetectCreature_RestrictToColor);
-                if (legacyResult != auxiliaries.end()) {
-                    auto legacyValue = std::get<std::optional<int>>(legacyResult->second);
-                    data._restrictToColor = legacyValue.has_value() ? (1 << *legacyValue) : 0x3FF;
-                } else {
-                    data._restrictToColor = defaultObject._restrictToColor;
-                }
-            }
-        } else {
-            loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_RestrictToColorBitset, data._restrictToColor, defaultObject._restrictToColor);
-        }
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
     }
@@ -1013,17 +981,15 @@ namespace
     auto constexpr Id_SensorMode_DetectEnergy_MinDensity = 0;
 
     auto constexpr Id_SensorMode_DetectFreeCell_MinDensity = 0;
-    auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;  // Legacy: std::optional<int>
-    auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColorBitset = 2;
+    auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;
 
     auto constexpr Id_SensorMode_SensorLastMatch_CreatureId = 0;
     auto constexpr Id_SensorMode_SensorLastMatch_Pos = 1;
 
     auto constexpr Id_SensorMode_DetectCreature_MinNumCells = 0;
     auto constexpr Id_SensorMode_DetectCreature_MaxNumCells = 1;
-    auto constexpr Id_SensorMode_DetectCreature_RestrictToColor = 2;  // Legacy: std::optional<int>
+    auto constexpr Id_SensorMode_DetectCreature_RestrictToColor = 2;
     auto constexpr Id_SensorMode_DetectCreature_RestrictToLineage = 3;
-    auto constexpr Id_SensorMode_DetectCreature_RestrictToColorBitset = 4;
 
     auto constexpr Id_Depot_storageLimit = 1;
     auto constexpr Id_Depot_StoredUsableEnergy = 2;
@@ -1207,22 +1173,7 @@ namespace cereal
         DetectFreeCellDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
-        if (task == SerializationTask::Load) {
-            auto findResult = auxiliaries.find(Id_SensorMode_DetectFreeCell_RestrictToColorBitset);
-            if (findResult != auxiliaries.end()) {
-                data._restrictToColor = std::get<int>(findResult->second);
-            } else {
-                auto legacyResult = auxiliaries.find(Id_SensorMode_DetectFreeCell_RestrictToColor);
-                if (legacyResult != auxiliaries.end()) {
-                    auto legacyValue = std::get<std::optional<int>>(legacyResult->second);
-                    data._restrictToColor = legacyValue.has_value() ? (1 << *legacyValue) : 0x3FF;
-                } else {
-                    data._restrictToColor = defaultObject._restrictToColor;
-                }
-            }
-        } else {
-            loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_RestrictToColorBitset, data._restrictToColor, defaultObject._restrictToColor);
-        }
+        loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetectFreeCellDesc)
@@ -1234,22 +1185,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        if (task == SerializationTask::Load) {
-            auto findResult = auxiliaries.find(Id_SensorMode_DetectCreature_RestrictToColorBitset);
-            if (findResult != auxiliaries.end()) {
-                data._restrictToColor = std::get<int>(findResult->second);
-            } else {
-                auto legacyResult = auxiliaries.find(Id_SensorMode_DetectCreature_RestrictToColor);
-                if (legacyResult != auxiliaries.end()) {
-                    auto legacyValue = std::get<std::optional<int>>(legacyResult->second);
-                    data._restrictToColor = legacyValue.has_value() ? (1 << *legacyValue) : 0x3FF;
-                } else {
-                    data._restrictToColor = defaultObject._restrictToColor;
-                }
-            }
-        } else {
-            loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToColorBitset, data._restrictToColor, defaultObject._restrictToColor);
-        }
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
     }
