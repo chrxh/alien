@@ -333,7 +333,7 @@ void _NodeEditorWidget::processNodeAttributes()
                         AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(rightColumnWidth),
                         detectFreeCell._minDensity);
                     AlienGui::ColorCheckboxes(
-                        AlienGui::ColorCheckboxesParameters().name("Restrict to color").textWidth(rightColumnWidth).defaultValue(0x3FF),
+                        AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(rightColumnWidth).defaultValue(0x3FF),
                         detectFreeCell._restrictToColor);
                     AlienGui::EndIndent();
                 } else if (mode == SensorMode_DetectCreature) {
@@ -344,7 +344,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::InputOptionalInt(
                         AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), detectCreature._maxNumCells);
                     AlienGui::ColorCheckboxes(
-                        AlienGui::ColorCheckboxesParameters().name("Restrict to color").textWidth(rightColumnWidth).defaultValue(0x3FF),
+                        AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(rightColumnWidth).defaultValue(0x3FF),
                         detectCreature._restrictToColor);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),

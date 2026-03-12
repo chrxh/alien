@@ -903,7 +903,7 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
     ImGui::PushID(parameters._name.c_str());
     auto padding = ImGui::GetStyle().FramePadding.x;
     auto colorsPerRow = MAX_COLORS / 2;
-    auto checkboxWidth = scale(colorsPerRow * 19.0f);
+    auto checkboxWidth = colorsPerRow * scale(26.0f);
     auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - checkboxWidth;
 
     auto result = false;
@@ -935,15 +935,6 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
         }
     }
 
-    ImGui::SameLine();
-    if (parameters._defaultValue) {
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (RevertButton(parameters._name)) {
-            value = *parameters._defaultValue;
-            result = true;
-        }
-        ImGui::EndDisabled();
-    }
     ImGui::SameLine();
     AlienGui::Text(TextParameters().text(parameters._name.c_str()));
     if (parameters._tooltip) {
