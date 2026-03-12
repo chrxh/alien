@@ -33,7 +33,8 @@ protected:
         RealVector2D const& targetPos,
         uint64_t targetCreatureId = 2,
         float attackerRawEnergy = 0.0f,
-        int attackerColor = 0)
+        int attackerColor = 0,
+        int sensorRestrictToColors = 0x3FF)
     {
         // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
         NeuralNetDesc nn;
@@ -55,7 +56,8 @@ protected:
                     .id(2)
                     .pos({attackerPos.x + 1.0f, attackerPos.y})
                     .color(attackerColor)
-                    .type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
+                    .type(CellDesc().cellType(
+                        SensorDesc().autoTrigger(false).mode(DetectCreatureDesc().restrictToColors(sensorRestrictToColors)).lastMatch(lastMatch))),
             },
             CreatureDesc().id(1));
         data.addConnection(1, 2);
@@ -575,6 +577,44 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
     // Both targets should be attacked because both creatureIds match sensor lastMatches
     EXPECT_TRUE(actualTarget1.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
     EXPECT_TRUE(actualTarget2.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+}
+
+TEST_F(AttackerTests, sensorTargeting_matchingCreatureId_matchingColor)
+{
+    // Create attacker with sensor targeting creature 2, restricted to color 1
+    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0, 1 << 1);
+
+    // Add target creature with matching creatureId and matching color
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    // Target should be attacked because creatureId matches and color passes restriction
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+}
+
+TEST_F(AttackerTests, sensorTargeting_matchingCreatureId_mismatchingColor)
+{
+    // Create attacker with sensor targeting creature 2, restricted to color 1
+    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0, 1 << 1);
+
+    // Add target creature with matching creatureId but non-matching color (color 0)
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 0), false);
+
+    auto origTarget = data.getObjectRef(100);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    // Target should NOT be attacked because color does not pass sensor restriction
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 /**

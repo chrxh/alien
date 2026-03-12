@@ -4,12 +4,12 @@
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/SimulationParameters.h>
 
-#include "ObjectConnectionProcessor.cuh"
 #include "ConstantMemory.cuh"
-#include "Entities.cuh"
-#include "ParameterCalculator.cuh"
 #include "EnergyProcessor.cuh"
+#include "Entities.cuh"
 #include "NeuronProcessor.cuh"
+#include "ObjectConnectionProcessor.cuh"
+#include "ParameterCalculator.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -23,7 +23,8 @@ private:
 
     __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static bool isTargetCreatureId(uint64_t const* targetCreatureIds, int numTargets, uint64_t creatureId);
+    __inline__ __device__ static bool
+    isTargetCreatureId(uint64_t const* targetCreatureIds, uint16_t const* targetRestrictToColors, int numTargets, uint64_t creatureId, int color);
 
     static constexpr int MaxSensorTargets = 8;
 };
@@ -58,162 +59,173 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         auto const& attackerMode = cell->cellTypeData.attacker.mode;
 
-        // For AttackCreature mode: collect creatureIds from sensor lastMatches in vicinity
+        // For AttackCreature mode: collect creatureIds and color restrictions from sensor lastMatches in vicinity
         uint64_t targetCreatureIds[MaxSensorTargets];
+        uint16_t targetRestrictToColors[MaxSensorTargets];
         int numTargetCreatureIds = 0;
         if (attackerMode == AttackerMode_Creature) {
             auto creatureId = cell->creature->id;
-            data.objectMap.executeForEach(
-                object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached, [&](auto const& nearObject) {
-                    if (nearObject->type != ObjectType_Cell) {
+            data.objectMap.executeForEach(object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached, [&](auto const& nearObject) {
+                if (nearObject->type != ObjectType_Cell) {
+                    return;
+                }
+                auto const& nearCell = &nearObject->typeData.cell;
+                // Only consider sensor cells from the same creature
+                if (nearCell->creature->id != creatureId) {
+                    return;
+                }
+                if (nearCell->cellType != CellType_Sensor) {
+                    return;
+                }
+                // Check if sensor has a valid lastMatch
+                if (!nearCell->cellTypeData.sensor.lastMatchAvailable) {
+                    return;
+                }
+                auto matchCreatureId = nearCell->cellTypeData.sensor.lastMatch.creatureId;
+
+                // Get the color restriction from the sensor's DetectCreature mode
+                uint16_t restrictToColors = 0x3FF;
+                if (nearCell->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+                    restrictToColors = nearCell->cellTypeData.sensor.modeData.detectCreature.restrictToColors;
+                }
+
+                // If creatureId already in list, merge color restrictions
+                for (int i = 0; i < numTargetCreatureIds; ++i) {
+                    if (targetCreatureIds[i] == matchCreatureId) {
+                        targetRestrictToColors[i] |= restrictToColors;
                         return;
                     }
-                    auto const& nearCell = &nearObject->typeData.cell;
-                    // Only consider sensor cells from the same creature
-                    if (nearCell->creature->id != creatureId) {
-                        return;
-                    }
-                    if (nearCell->cellType != CellType_Sensor) {
-                        return;
-                    }
-                    // Check if sensor has a valid lastMatch
-                    if (!nearCell->cellTypeData.sensor.lastMatchAvailable) {
-                        return;
-                    }
-                    // Add creatureId if not already in the list and we have room
-                    auto matchCreatureId = nearCell->cellTypeData.sensor.lastMatch.creatureId;
-                    for (int i = 0; i < numTargetCreatureIds; ++i) {
-                        if (targetCreatureIds[i] == matchCreatureId) {
-                            return;  // Already in list
-                        }
-                    }
-                    if (numTargetCreatureIds < MaxSensorTargets) {
-                        targetCreatureIds[numTargetCreatureIds++] = matchCreatureId;
-                    }
-                });
+                }
+                if (numTargetCreatureIds < MaxSensorTargets) {
+                    targetCreatureIds[numTargetCreatureIds] = matchCreatureId;
+                    targetRestrictToColors[numTargetCreatureIds] = restrictToColors;
+                    ++numTargetCreatureIds;
+                }
+            });
         }
 
         auto sumEnergyToTransfer = 0.0f;
-        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
-            if (otherObject->type == ObjectType_Structure) {
-                return;
-            }
-            if (otherObject->fixed) {
-                return;
-            }
-
-            // Only attack other cells which are in a visible cone with respect to the attack cell
-            if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
-                return;
-            }
-
-            // Attack Free Cell
-            if (attackerMode == AttackerMode_FreeCell) {
-                if (otherObject->type != ObjectType_FreeCell) {
+        data.objectMap.executeForEach(
+            object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
+                if (otherObject->type == ObjectType_Structure) {
                     return;
                 }
-                auto const& otherFreeCell = &otherObject->typeData.freeCell;
-
-                // Filter by color restriction
-                auto const& restrictToColors = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColors;
-                if (!((restrictToColors >> otherObject->color) & 1)) {
+                if (otherObject->fixed) {
                     return;
                 }
 
-                // Only attack cells with energy above base value
-                auto energyToTransfer =
-                    atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
-
-                if (energyToTransfer < 0) {
+                // Only attack other cells which are in a visible cone with respect to the attack cell
+                if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
                     return;
                 }
 
-                // Evaluate food chain color matrix
-                auto color = calcMod(object->color, MAX_COLORS);
-                auto otherColor = calcMod(otherObject->color, MAX_COLORS);
-                energyToTransfer *=
-                    ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
+                // Attack Free Cell
+                if (attackerMode == AttackerMode_FreeCell) {
+                    if (otherObject->type != ObjectType_FreeCell) {
+                        return;
+                    }
+                    auto const& otherFreeCell = &otherObject->typeData.freeCell;
 
-                if (energyToTransfer > NEAR_ZERO) {
-                    otherFreeCell->event = CellEvent_Attacked;
-                    otherFreeCell->eventCounter = 10;
-                    otherFreeCell->eventPos = object->pos;
-
-                    // Absorb energy from attacked cell
-                    auto origEnergy = atomicAdd(&otherFreeCell->energy, -energyToTransfer);
-                    if (origEnergy > energyToTransfer) {
-                        sumEnergyToTransfer += energyToTransfer;
+                    // Filter by color restriction
+                    auto const& restrictToColors = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColors;
+                    if (!((restrictToColors >> otherObject->color) & 1)) {
+                        return;
                     }
 
-                    // Revert
-                    else {
-                        atomicAdd(&otherFreeCell->energy, energyToTransfer);
+                    // Only attack cells with energy above base value
+                    auto energyToTransfer =
+                        atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
+
+                    if (energyToTransfer < 0) {
+                        return;
+                    }
+
+                    // Evaluate food chain color matrix
+                    auto color = calcMod(object->color, MAX_COLORS);
+                    auto otherColor = calcMod(otherObject->color, MAX_COLORS);
+                    energyToTransfer *=
+                        ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
+
+                    if (energyToTransfer > NEAR_ZERO) {
+                        otherFreeCell->event = CellEvent_Attacked;
+                        otherFreeCell->eventCounter = 10;
+                        otherFreeCell->eventPos = object->pos;
+
+                        // Absorb energy from attacked cell
+                        auto origEnergy = atomicAdd(&otherFreeCell->energy, -energyToTransfer);
+                        if (origEnergy > energyToTransfer) {
+                            sumEnergyToTransfer += energyToTransfer;
+                        }
+
+                        // Revert
+                        else {
+                            atomicAdd(&otherFreeCell->energy, energyToTransfer);
+                        }
                     }
                 }
-            }
 
-            // Attack Cell
-            else if (attackerMode == AttackerMode_Creature) {
-                if (otherObject->type != ObjectType_Cell) {
-                    return;
-                }
-                auto const& otherCell = &otherObject->typeData.cell;
-                if (cell->isSameCreature(otherCell)) {
-                    return;
-                }
-                // Do not attack offspring
-                if (otherCell->creature->ancestorId == cell->creature->id) {
-                    return;
-                }
-
-                // Check if target creature is in the list of sensor-detected targets
-                auto otherCreatureId = otherCell->creature->id;
-                if (!isTargetCreatureId(targetCreatureIds, numTargetCreatureIds, otherCreatureId)) {
-                    return;
-                }
-
-                // Calculate energy gain
-                auto energyToTransfer =
-                    atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
-
-                auto color = calcMod(object->color, MAX_COLORS);
-                auto otherColor = calcMod(otherObject->color, MAX_COLORS);
-
-                // Evaluate defender strength
-                auto numDefenderCells = countDefenderCells(statistics, otherObject);
-                auto defendStrength =
-                    numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength.value[color] + 1.0f, numDefenderCells);
-                energyToTransfer /= defendStrength;
-
-                // Evaluate food chain color matrix
-                energyToTransfer *=
-                    ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
-
-                // Evaluate lineage
-                if (cell->creature->genome->isRelatedLineage(otherCell->creature->genome)) {
-                    energyToTransfer *= (1.0f - cudaSimulationParameters.attackerRelatedLineageProtection.value[object->color]);
-                }
-
-                if (energyToTransfer > NEAR_ZERO) {
-
-                    // Notify attacked cell
-                    atomicAdd(&otherCell->signal.channels[Channels::AttackerNotify], 1.0f);
-                    otherCell->event = CellEvent_Attacked;
-                    otherCell->eventCounter = 10;
-                    otherCell->eventPos = object->pos;
-
-                    // Absorb energy from attacked cell
-                    auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
-                    if (origEnergy > energyToTransfer) {
-                        sumEnergyToTransfer += energyToTransfer;
+                // Attack Cell
+                else if (attackerMode == AttackerMode_Creature) {
+                    if (otherObject->type != ObjectType_Cell) {
+                        return;
                     }
-                    // Revert
-                    else {
-                        atomicAdd(&otherCell->usableEnergy, energyToTransfer);
+                    auto const& otherCell = &otherObject->typeData.cell;
+                    if (cell->isSameCreature(otherCell)) {
+                        return;
+                    }
+                    // Do not attack offspring
+                    if (otherCell->creature->ancestorId == cell->creature->id) {
+                        return;
+                    }
+
+                    // Check if target creature is in the list of sensor-detected targets (including color restriction)
+                    auto otherCreatureId = otherCell->creature->id;
+                    if (!isTargetCreatureId(targetCreatureIds, targetRestrictToColors, numTargetCreatureIds, otherCreatureId, otherObject->color)) {
+                        return;
+                    }
+
+                    // Calculate energy gain
+                    auto energyToTransfer =
+                        atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
+
+                    auto color = calcMod(object->color, MAX_COLORS);
+                    auto otherColor = calcMod(otherObject->color, MAX_COLORS);
+
+                    // Evaluate defender strength
+                    auto numDefenderCells = countDefenderCells(statistics, otherObject);
+                    auto defendStrength =
+                        numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength.value[color] + 1.0f, numDefenderCells);
+                    energyToTransfer /= defendStrength;
+
+                    // Evaluate food chain color matrix
+                    energyToTransfer *=
+                        ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, object->pos, color, otherColor);
+
+                    // Evaluate lineage
+                    if (cell->creature->genome->isRelatedLineage(otherCell->creature->genome)) {
+                        energyToTransfer *= (1.0f - cudaSimulationParameters.attackerRelatedLineageProtection.value[object->color]);
+                    }
+
+                    if (energyToTransfer > NEAR_ZERO) {
+
+                        // Notify attacked cell
+                        atomicAdd(&otherCell->signal.channels[Channels::AttackerNotify], 1.0f);
+                        otherCell->event = CellEvent_Attacked;
+                        otherCell->eventCounter = 10;
+                        otherCell->eventPos = object->pos;
+
+                        // Absorb energy from attacked cell
+                        auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
+                        if (origEnergy > energyToTransfer) {
+                            sumEnergyToTransfer += energyToTransfer;
+                        }
+                        // Revert
+                        else {
+                            atomicAdd(&otherCell->usableEnergy, energyToTransfer);
+                        }
                     }
                 }
-            }
-        });
+            });
 
         // Energy gain
         if (sumEnergyToTransfer > NEAR_ZERO) {
@@ -244,8 +256,9 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
         auto connectedObject = object->connections[i].object;
         if (connectedObject->type != ObjectType_Cell) {
             continue;
-        }   
-        if (connectedObject->typeData.cell.cellType == CellType_Defender && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
+        }
+        if (connectedObject->typeData.cell.cellType == CellType_Defender
+            && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
             statistics.incNumDefenderActivities(connectedObject->color);
             ++result;
         }
@@ -253,12 +266,13 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
     return result;
 }
 
-__inline__ __device__ bool AttackerProcessor::isTargetCreatureId(uint64_t const* targetCreatureIds, int numTargets, uint64_t creatureId)
+__inline__ __device__ bool
+AttackerProcessor::isTargetCreatureId(uint64_t const* targetCreatureIds, uint16_t const* targetRestrictToColors, int numTargets, uint64_t creatureId, int color)
 {
     // The sensor stores only the lower 16 bits of the creatureId (creatureIdPart)
     auto creatureIdPart = creatureId & 0xffff;
     for (int i = 0; i < numTargets; ++i) {
-        if (targetCreatureIds[i] == creatureIdPart) {
+        if (targetCreatureIds[i] == creatureIdPart && ((targetRestrictToColors[i] >> color) & 1)) {
             return true;
         }
     }
