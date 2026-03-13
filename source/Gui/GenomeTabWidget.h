@@ -22,7 +22,7 @@ public:
 
     void setGenomeDesc(GenomeDesc const& genome);
 
-    bool hasGenomeBeChanged() const;
+    bool hasGenomeChanged() const;
 
     bool isEmpty() const;
     void resetOriginal();

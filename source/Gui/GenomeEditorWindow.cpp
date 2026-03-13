@@ -123,7 +123,12 @@ void GenomeEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeBeChanged();
+    auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeChanged();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA).tooltip("Create save point").disabled(!hasGenomeChanged))) {
+        onSavepointGenome();
+    }
+
+    ImGui::SameLine();
     if (AlienGui::ToolbarButton(
             AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on creature").disabled(!hasGenomeChanged))) {
         _tabs.at(_selectedTabIndex)->revertChanges();
@@ -236,6 +241,7 @@ void GenomeEditorWindow::onOpenGenome()
 void GenomeEditorWindow::onSaveGenome()
 {
     auto const& selectedTab = _tabs.at(_selectedTabIndex);
+    selectedTab->resetOriginal();
     auto genome = selectedTab->getGenomeDesc();
     FileTransferController::get().onSaveGenomeDialog(genome);
 }
@@ -252,7 +258,15 @@ void GenomeEditorWindow::onCopyGenome()
 
 void GenomeEditorWindow::onPasteGenome()
 {
-    _tabs.at(_selectedTabIndex)->setGenomeDesc(_copiedGenome.value());
+    auto const& selectedTab = _tabs.at(_selectedTabIndex);
+    selectedTab->setGenomeDesc(_copiedGenome.value());
+    selectedTab->resetOriginal();
+}
+
+void GenomeEditorWindow::onSavepointGenome()
+{
+    auto const& selectedTab = _tabs.at(_selectedTabIndex);
+    selectedTab->resetOriginal();
 }
 
 void GenomeEditorWindow::onInjectGenome()

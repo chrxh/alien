@@ -82,10 +82,9 @@ GenomeDesc const& _GenomeTabWidget::getGenomeDesc() const
 void _GenomeTabWidget::setGenomeDesc(GenomeDesc const& genome)
 {
     _editData->genome = genome;
-    resetOriginal();
 }
 
-bool _GenomeTabWidget::hasGenomeBeChanged() const
+bool _GenomeTabWidget::hasGenomeChanged() const
 {
     return _editData->changesMade;
 }

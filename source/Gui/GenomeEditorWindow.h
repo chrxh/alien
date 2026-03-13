@@ -32,6 +32,7 @@ private:
     void onCloneGenome();
     void onCopyGenome();
     void onPasteGenome();
+    void onSavepointGenome();
     void onInjectGenome();
     void onCreateSeed(bool provideEnergy);
     void onScheduleAddTab(GenomeDesc const& genome);
