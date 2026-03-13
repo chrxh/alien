@@ -103,14 +103,14 @@ struct DetectStructure
 struct DetectFreeCell
 {
     float minDensity;
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct DetectCreature
 {
     uint32_t minNumCells;      // 0 = no restriction
     uint32_t maxNumCells;      // 0 = no restriction
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -174,7 +174,7 @@ struct Generator
 
 struct AttackFreeCell
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct AttackCreature
@@ -292,14 +292,14 @@ struct ReconnectStructure
 
 struct ReconnectFreeCell
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct ReconnectCreature
 {
     uint32_t minNumCells;     // 0 = no restriction
     uint32_t maxNumCells;     // 0 = no restriction
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 
@@ -383,7 +383,7 @@ struct Sender
 
 struct Receiver
 {
-    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3FF = all colors
+    uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
 

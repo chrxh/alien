@@ -49,7 +49,7 @@ protected:
     Desc createReceiverCreature(
         uint64_t creatureId,
         RealVector2D pos,
-        int restrictToColors = 0x3FF,
+        int restrictToColors = 0x3ff,
         LineageRestriction restrictToLineage = LineageRestriction_No,
         int color = 0)
     {

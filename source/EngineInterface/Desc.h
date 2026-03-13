@@ -93,7 +93,7 @@ struct DetectFreeCellDesc
     auto operator<=>(DetectFreeCellDesc const&) const = default;
 
     MEMBER(DetectFreeCellDesc, float, minDensity, 0.05f);
-    MEMBER(DetectFreeCellDesc, int, restrictToColors, 0x3FF);
+    MEMBER(DetectFreeCellDesc, int, restrictToColors, 0x3ff);
 };
 
 struct DetectCreatureDesc
@@ -102,7 +102,7 @@ struct DetectCreatureDesc
 
     MEMBER(DetectCreatureDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(DetectCreatureDesc, int, restrictToColors, 0x3FF);
+    MEMBER(DetectCreatureDesc, int, restrictToColors, 0x3ff);
     MEMBER(DetectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -167,7 +167,7 @@ struct AttackFreeCellDesc
 {
     auto operator<=>(AttackFreeCellDesc const&) const = default;
 
-    MEMBER(AttackFreeCellDesc, int, restrictToColors, 0x3FF);
+    MEMBER(AttackFreeCellDesc, int, restrictToColors, 0x3ff);
 };
 
 struct AttackCreatureDesc
@@ -296,7 +296,7 @@ struct ReconnectFreeCellDesc
 {
     auto operator<=>(ReconnectFreeCellDesc const&) const = default;
 
-    MEMBER(ReconnectFreeCellDesc, int, restrictToColors, 0x3FF);
+    MEMBER(ReconnectFreeCellDesc, int, restrictToColors, 0x3ff);
 };
 
 struct ReconnectCreatureDesc
@@ -305,7 +305,7 @@ struct ReconnectCreatureDesc
 
     MEMBER(ReconnectCreatureDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(ReconnectCreatureDesc, int, restrictToColors, 0x3FF);
+    MEMBER(ReconnectCreatureDesc, int, restrictToColors, 0x3ff);
     MEMBER(ReconnectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -408,7 +408,7 @@ struct ReceiverDesc
 {
     auto operator<=>(ReceiverDesc const&) const = default;
 
-    MEMBER(ReceiverDesc, int, restrictToColors, 0x3FF);
+    MEMBER(ReceiverDesc, int, restrictToColors, 0x3ff);
     MEMBER(ReceiverDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 

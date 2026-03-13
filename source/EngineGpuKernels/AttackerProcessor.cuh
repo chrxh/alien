@@ -84,7 +84,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 auto matchCreatureId = nearCell->cellTypeData.sensor.lastMatch.creatureIdPart;
 
                 // Get the color restriction from the sensor's DetectCreature mode
-                uint16_t restrictToColors = 0x3FF;
+                uint16_t restrictToColors = 0x3ff;
                 if (nearCell->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
                     restrictToColors = nearCell->cellTypeData.sensor.modeData.detectCreature.restrictToColors;
                 }

@@ -52,7 +52,7 @@ public:
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             auto slotSizeAsFlot = toFloat(_slotSize);
-            if (restrictToColors == 0x3FF) {
+            if (restrictToColors == 0x3ff) {
                 auto totalCount = (_freeCellDensityMap2[index] >> 16) & 0xff;
                 return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
