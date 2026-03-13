@@ -40,7 +40,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     SensorLastMatchDesc lastMatch;
-    lastMatch._creatureId = 2;
+    lastMatch._creatureIdPart = 2;
     lastMatch._pos = {100.0f, 103.0f};
 
     auto data = Desc().addCreature(
@@ -83,7 +83,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     nn._biases[Channels::CellTypeActivation] = 1.0f;
 
     SensorLastMatchDesc lastMatch;
-    lastMatch._creatureId = 2;
+    lastMatch._creatureIdPart = 2;
     lastMatch._pos = {100.0f, 103.0f};
 
     auto data = Desc()

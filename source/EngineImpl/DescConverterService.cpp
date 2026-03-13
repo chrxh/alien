@@ -389,7 +389,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             }
             if (objectTO.typeData.cell.cellTypeData.sensor.lastMatchAvailable) {
                 SensorLastMatchDesc lastMatchDesc;
-                lastMatchDesc._creatureId = objectTO.typeData.cell.cellTypeData.sensor.lastMatch.creatureId;
+                lastMatchDesc._creatureIdPart = objectTO.typeData.cell.cellTypeData.sensor.lastMatch.creatureIdPart;
                 lastMatchDesc._pos =
                     RealVector2D{objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos.x, objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos.y};
                 sensor._lastMatch = lastMatchDesc;
@@ -1321,7 +1321,7 @@ void DescConverterService::convertObjectToTO(
             }
             sensorTO.lastMatchAvailable = sensorDesc._lastMatch.has_value();
             if (sensorDesc._lastMatch.has_value()) {
-                sensorTO.lastMatch.creatureId = sensorDesc._lastMatch->_creatureId;
+                sensorTO.lastMatch.creatureIdPart = sensorDesc._lastMatch->_creatureIdPart;
                 sensorTO.lastMatch.pos = {sensorDesc._lastMatch->_pos.x, sensorDesc._lastMatch->_pos.y};
             }
         } break;

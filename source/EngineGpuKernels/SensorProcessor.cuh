@@ -235,7 +235,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             // No relocation for structures
             if (object->typeData.cell.cellTypeData.sensor.mode != SensorMode_DetectStructure) {
                 object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = true;
-                object->typeData.cell.cellTypeData.sensor.lastMatch.creatureId = creatureIdPart;
+                object->typeData.cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;
                 object->typeData.cell.cellTypeData.sensor.lastMatch.pos = matchPos;
             }
         } else {
@@ -326,7 +326,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             statistics.incNumSensorMatches(object->color);
 
             object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = true;
-            object->typeData.cell.cellTypeData.sensor.lastMatch.creatureId = creatureIdPart;
+            object->typeData.cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;
             object->typeData.cell.cellTypeData.sensor.lastMatch.pos = targetPos;
         } else {
             object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = false;
@@ -415,7 +415,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             auto& sensor = cell->cellTypeData.sensor;
             auto otherObject = data.objectMap.getFirst(scanPos);
             while (otherObject != nullptr) {
-                if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureId) {
+                if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureIdPart) {
                     uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
                     float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numObjects);
                     return pack(distance, absAngle, density, creatureIdPart);

@@ -76,7 +76,7 @@ struct DetectFreeCellGenomeDesc
     auto operator<=>(DetectFreeCellGenomeDesc const&) const = default;
 
     MEMBER(DetectFreeCellGenomeDesc, float, minDensity, 0.5f);
-    MEMBER(DetectFreeCellGenomeDesc, int, restrictToColors, 0x3FF);
+    MEMBER(DetectFreeCellGenomeDesc, int, restrictToColors, 0x3ff);
 };
 
 struct DetectCreatureGenomeDesc
@@ -85,7 +85,7 @@ struct DetectCreatureGenomeDesc
 
     MEMBER(DetectCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(DetectCreatureGenomeDesc, int, restrictToColors, 0x3FF);
+    MEMBER(DetectCreatureGenomeDesc, int, restrictToColors, 0x3ff);
     MEMBER(DetectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -136,7 +136,7 @@ struct AttackFreeCellGenomeDesc
 {
     auto operator<=>(AttackFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(AttackFreeCellGenomeDesc, int, restrictToColors, 0x3FF);
+    MEMBER(AttackFreeCellGenomeDesc, int, restrictToColors, 0x3ff);
 };
 
 struct AttackCreatureGenomeDesc
@@ -236,7 +236,7 @@ struct ReconnectFreeCellGenomeDesc
 {
     auto operator<=>(ReconnectFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(ReconnectFreeCellGenomeDesc, int, restrictToColors, 0x3FF);
+    MEMBER(ReconnectFreeCellGenomeDesc, int, restrictToColors, 0x3ff);
 };
 
 struct ReconnectCreatureGenomeDesc
@@ -245,7 +245,7 @@ struct ReconnectCreatureGenomeDesc
 
     MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(ReconnectCreatureGenomeDesc, int, restrictToColors, 0x3FF);
+    MEMBER(ReconnectCreatureGenomeDesc, int, restrictToColors, 0x3ff);
     MEMBER(ReconnectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -343,7 +343,7 @@ struct ReceiverGenomeDesc
 {
     auto operator<=>(ReceiverGenomeDesc const&) const = default;
 
-    MEMBER(ReceiverGenomeDesc, int, restrictToColors, 0x3FF);
+    MEMBER(ReceiverGenomeDesc, int, restrictToColors, 0x3ff);
     MEMBER(ReceiverGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
