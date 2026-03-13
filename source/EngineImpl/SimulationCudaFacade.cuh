@@ -50,7 +50,6 @@ public:
     TOs getSelectedSimulationData(bool includeClusters);
     TOs getInspectedSimulationData(std::vector<uint64_t> entityIds);
     TOs getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
-    TOs getGenomeOfCreature(uint64_t creatureId, bool& found);
     void addAndSelectSimulationData(TOs const& to);
     void setSimulationData(TOs const& to);
     void removeSelectedObjects(bool includeClusters);
@@ -60,7 +59,7 @@ public:
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
     void changeInspectedSimulationData(TOs const& changeTO);
-    bool changeCreature(TOs const& to);  // to only contains 1 genome
+    void injectGenomeToSelectedCreatures(TOs const& to);  // to only contains 1 genome
 
     void applyForce(ApplyForceData const& applyData);
     void switchSelection(PointSelectionData const& switchData);

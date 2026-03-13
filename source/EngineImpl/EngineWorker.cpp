@@ -201,35 +201,13 @@ void EngineWorker::changeParticle(EnergyDesc const& changedParticle)
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
 
-bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDesc const& genome)
+void EngineWorker::injectGenomeToSelectedCreatures(GenomeDesc const& genome)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = DescConverterService::get().convertDescriptionToTO(creatureId, genome);
+    auto dataTO = DescConverterService::get().convertDescriptionToTO(genome);
 
-    return _simulationCudaFacade->changeCreature(dataTO);
-}
-
-std::optional<GenomeDesc> EngineWorker::getGenomeOfCreature(uint64_t creatureId)
-{
-    EngineWorkerGuard access(this);
-
-    // Get the genome data using the dedicated kernel
-    bool found = false;
-    auto dataTO = _simulationCudaFacade->getGenomeOfCreature(creatureId, found);
-
-    if (!found) {
-        return std::nullopt;
-    }
-
-    auto description = DescConverterService::get().convertTOtoDescription(dataTO);
-
-    // The genome should be the only one in the result
-    if (description._genomes.empty()) {
-        return std::nullopt;
-    }
-
-    return description._genomes.front();
+    _simulationCudaFacade->injectGenomeToSelectedCreatures(dataTO);
 }
 
 void EngineWorker::calcTimesteps(uint64_t timesteps)

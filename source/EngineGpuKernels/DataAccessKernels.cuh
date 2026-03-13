@@ -16,7 +16,6 @@
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data);
 __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeClusters, SimulationData data);
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data);
-__global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, SimulationData data);
 
 __global__ void cudaGetSelectedEnergyData(SimulationData data, TOs access);
 __global__ void cudaGetInspectedEnergyData(InspectedEntityIds ids, SimulationData data, TOs access);
@@ -29,8 +28,6 @@ __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, T
 __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TOs to);
 __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TOs to);
 __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TOs to);
-
-__global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TOs to, bool* found);
 
 __global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TOs to);
 __global__ void cudaGetSelectedObjectDataWithoutConnections(SimulationData data, bool includeClusters, TOs to);

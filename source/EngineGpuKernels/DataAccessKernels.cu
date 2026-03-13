@@ -611,22 +611,6 @@ __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityI
     }
 }
 
-__global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, SimulationData data)
-{
-    auto const& objects = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
-            continue;
-        }
-        if (object->typeData.cell.creature->id == creatureId) {
-            object->typeData.cell.creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
-        }
-    }
-}
-
 __global__ void cudaGetSelectedObjectDataWithoutConnections(SimulationData data, bool includeClusters, TOs to)
 {
     auto const& objects = data.entities.objects;
@@ -895,24 +879,6 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
             continue;
         }
         createCreatureTO(object, to);
-    }
-}
-
-__global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TOs to, bool* found)
-{
-    auto const& objects = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = objects.at(index);
-        if (object->type != ObjectType_Cell) {
-            continue;
-        }
-        if (object->typeData.cell.creature->id == creatureId) {
-            createGenomeTO(object->typeData.cell.creature->genome, to);
-            *found = true;
-            return;
-        }
     }
 }
 

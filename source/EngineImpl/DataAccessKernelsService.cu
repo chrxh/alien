@@ -77,18 +77,6 @@ void DataAccessKernelsService::getOverlayData(CudaSettings const& gpuSettings, S
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, to);
 }
 
-bool DataAccessKernelsService::getGenomeOfCreature(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t creatureId, TOs const& to)
-{
-    KERNEL_CALL_1_1(cudaClearDataTO, to);
-    KERNEL_CALL(cudaPrepareCreatureGenomeForConversionToTO, creatureId, data);
-    cudaDeviceSynchronize();
-    setValueToDevice(_foundResult, false);
-    KERNEL_CALL(cudaGetGenomeOfCreature, creatureId, data, to, _foundResult);
-    cudaDeviceSynchronize();
-
-    return copyToHost(_foundResult);
-}
-
 ArraySizesForGpuEntities DataAccessKernelsService::estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TOs const& to)
 {
     setValueToDevice(_arraySizesGPU, ArraySizesForGpuEntities{});

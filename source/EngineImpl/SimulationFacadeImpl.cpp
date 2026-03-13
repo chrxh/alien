@@ -151,14 +151,9 @@ void _SimulationFacadeImpl::changeParticle(EnergyDesc const& changedParticle)
     _worker.changeParticle(changedParticle);
 }
 
-bool _SimulationFacadeImpl::changeCreature(uint64_t creatureId, GenomeDesc const& genome)
+void _SimulationFacadeImpl::injectGenomeToSelectedCreatures(GenomeDesc const& genome)
 {
-    return _worker.changeCreature(creatureId, genome);
-}
-
-std::optional<GenomeDesc> _SimulationFacadeImpl::getGenomeOfCreature(uint64_t creatureId)
-{
-    return _worker.getGenomeOfCreature(creatureId);
+    _worker.injectGenomeToSelectedCreatures(genome);
 }
 
 void _SimulationFacadeImpl::calcTimesteps(uint64_t timesteps)

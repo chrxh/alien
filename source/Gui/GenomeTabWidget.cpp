@@ -18,21 +18,9 @@
 #include "PreviewWidget.h"
 #include "StyleRepository.h"
 
-GenomeTabWidget _GenomeTabWidget::createDraftTab(GenomeWindowEditData const& genomeEditData, GenomeDesc const& creature, GenomeTabLayoutData const& layoutData)
+GenomeTabWidget _GenomeTabWidget::create(GenomeWindowEditData const& genomeEditData, GenomeDesc const& genome, GenomeTabLayoutData const& layoutData)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, creature, DraftData(), layoutData));
-}
-
-GenomeTabWidget _GenomeTabWidget::createCreatureTab(
-    GenomeWindowEditData const& genomeEditData,
-    uint64_t creatureId,
-    GenomeDesc const& genome,
-    GenomeTabLayoutData const& layoutData)
-{
-    auto validatedGenome = genome;
-    GenomeDescValidationService::get().validateAndCorrect(validatedGenome);
-    return GenomeTabWidget(
-        new _GenomeTabWidget(genomeEditData, validatedGenome, CreatureData{.creatureId = creatureId, .origGenome = validatedGenome}, layoutData));
+    return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, genome, layoutData));
 }
 
 void _GenomeTabWidget::process()
@@ -59,18 +47,6 @@ void _GenomeTabWidget::process()
     ImGui::EndChild();
 
     GenomeDescValidationService::get().validateAndCorrect(_editData->genome);
-
-    updateSpecificEditDataFromSimulation();
-}
-
-void _GenomeTabWidget::onGenomeIntoCreatureInjected()
-{
-    std::get<CreatureData>(_specificEditData).origGenome = _editData->genome;
-}
-
-bool _GenomeTabWidget::isDraft() const
-{
-    return std::holds_alternative<DraftData>(_specificEditData);
 }
 
 int _GenomeTabWidget::getTabId() const
@@ -80,16 +56,12 @@ int _GenomeTabWidget::getTabId() const
 
 std::string _GenomeTabWidget::getName() const
 {
-    if (isDraft()) {
-        return _editData->genome._name;
-    } else {
-        auto const& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
-        auto result = ICON_FA_PAW " " + _editData->genome._name + ": " + StringHelper::formatInHex(simulatedCreatureData.creatureId);
-        if (simulatedCreatureData.changesMade) {
-            result = "* " + result;
-        }
-        return result;
+    std::string result;
+    if (_editData->changesMade) {
+        result = "* ";
     }
+    result += _editData->genome._name;
+    return result;
 }
 
 GenomeTabEditData const& _GenomeTabWidget::getEditData() const
@@ -112,19 +84,9 @@ void _GenomeTabWidget::setGenomeDesc(GenomeDesc const& genome)
     _editData->genome = genome;
 }
 
-bool _GenomeTabWidget::hasCreaturesGenomeBeChanged() const
+bool _GenomeTabWidget::hasGenomeChanged() const
 {
-    if (!std::holds_alternative<CreatureData>(_specificEditData)) {
-        return false;
-    }
-    auto const& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
-    return simulatedCreatureData.changesMade;
-}
-
-uint64_t _GenomeTabWidget::getCreatureId()
-{
-    auto const& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
-    return simulatedCreatureData.creatureId;
+    return _editData->changesMade;
 }
 
 bool _GenomeTabWidget::isEmpty() const
@@ -132,34 +94,34 @@ bool _GenomeTabWidget::isEmpty() const
     return _editData->genome == GenomeDesc();
 }
 
-void _GenomeTabWidget::convertToDraftTab()
-{
-    _specificEditData = DraftData{};
-}
-
 void _GenomeTabWidget::resetOriginal()
 {
-    auto& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
-    simulatedCreatureData.origGenome = _editData->genome;
-    simulatedCreatureData.changesMade = false;
+    _editData->origGenome = _editData->genome;
+    _editData->changesMade = false;
 }
 
-void _GenomeTabWidget::resetChanges()
+void _GenomeTabWidget::revertChanges()
 {
-    auto& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
-    _editData->genome = simulatedCreatureData.origGenome;
-    simulatedCreatureData.changesMade = false;
+    _editData->genome = _editData->origGenome;
+    _editData->changesMade = false;
 }
 
 _GenomeTabWidget::_GenomeTabWidget(
     GenomeWindowEditData const& genomeEditData,
     GenomeDesc const& genome,
-    SpecificEditData const& specificEditData,
     GenomeTabLayoutData const& layoutData)
 {
     static int _sequence = 0;
 
     _editData = std::make_shared<_GenomeTabEditData>(++_sequence, genome);
+    _editData->id = ++_sequence;
+
+    auto validatedGenome = genome;
+    GenomeDescValidationService::get().validateAndCorrect(validatedGenome);
+
+    _editData->genome = validatedGenome;
+    _editData->origGenome = validatedGenome;
+
     if (!genome._genes.empty()) {
         _editData->selectedGeneIndex = 0;
         if (!genome._genes.front()._nodes.empty()) {
@@ -176,7 +138,6 @@ _GenomeTabWidget::_GenomeTabWidget(
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
     _simulatedPreviewWidget = _PreviewWidget::create(genomeEditData, _editData);
-    _specificEditData = specificEditData;
 }
 
 void _GenomeTabWidget::processEditors()
@@ -199,11 +160,7 @@ void _GenomeTabWidget::processEditors()
     ImGui::SameLine();
     _nodeEditorWidget->process();
 
-    if (std::holds_alternative<CreatureData>(_specificEditData)) {
-        auto& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
-        simulatedCreatureData.origGenome._id = _editData->genome._id;   // Do not compare ids
-        simulatedCreatureData.changesMade = simulatedCreatureData.origGenome != _editData->genome;
-    }
+    _editData->changesMade = !_editData->origGenome.equalWithoutId(_editData->genome);
 }
 
 void _GenomeTabWidget::processPreview()
@@ -274,25 +231,4 @@ void _GenomeTabWidget::doLayout()
     }
 
     *_origLayoutData = *_layoutData;
-}
-
-void _GenomeTabWidget::updateSpecificEditDataFromSimulation()
-{
-    // Update only every 5 frames to reduce performance impact
-    static int counter = 0;
-    if (++counter % 5 != 0) {
-        return;
-    }
-    counter = 0;
-
-    if (std::holds_alternative<CreatureData>(_specificEditData)) {
-        auto& creatureData = std::get<CreatureData>(_specificEditData);
-        auto actualGenome = _SimulationFacade::get()->getGenomeOfCreature(creatureData.creatureId);
-        if (actualGenome.has_value()) {
-            GenomeDescValidationService::get().validateAndCorrect(*actualGenome);
-            creatureData.origGenome = *actualGenome;
-        } else {
-            convertToDraftTab();
-        }
-    }
 }

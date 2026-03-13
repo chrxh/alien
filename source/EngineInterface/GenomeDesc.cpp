@@ -38,6 +38,15 @@ GenomeDesc GenomeDesc::id(uint64_t id)
     return *this;
 }
 
+bool GenomeDesc::equalWithoutId(GenomeDesc const& other) const
+{
+    auto compareClone = *this;
+    auto compareCloneOther = other;
+    compareClone._id = 0;
+    compareCloneOther._id = 0;
+    return compareClone == compareCloneOther;
+}
+
 SensorMode SensorGenomeDesc::getMode() const
 {
     if (std::holds_alternative<TelemetryGenomeDesc>(_mode)) {

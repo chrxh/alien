@@ -20,8 +20,6 @@ void EditKernelsService::init()
     memoryManager.acquireMemory(1, _cudaNumEntities);
     memoryManager.acquireMemory(1, _cudaMinCellPosYAndIndex);
     memoryManager.acquireMemory(1, _genomePtr);
-    memoryManager.acquireMemory(1, _creaturePtr);
-    memoryManager.acquireMemory(1, _result);
 }
 
 void EditKernelsService::shutdown()
@@ -36,8 +34,6 @@ void EditKernelsService::shutdown()
     memoryManager.freeMemory(_cudaNumEntities);
     memoryManager.freeMemory(_cudaMinCellPosYAndIndex);
     memoryManager.freeMemory(_genomePtr);
-    memoryManager.freeMemory(_creaturePtr);
-    memoryManager.freeMemory(_result);
 }
 
 void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, ShallowUpdateSelectionData const& updateData)
@@ -209,14 +205,11 @@ void EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, S
     GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(gpuSettings, data);
 }
 
-bool EditKernelsService::changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to)
+void EditKernelsService::injectGenomeToSelectedCreatures(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to)
 {
-    setValueToDevice(_result, false);
-    KERNEL_CALL_1_1(cudaAddGenomeAndCreature, data, to, _genomePtr, _creaturePtr);
-    KERNEL_CALL(cudaChangeCellToCreature, data, _creaturePtr, _result);
+    KERNEL_CALL_1_1(cudaCreateGenomeFromTO, data, to, _genomePtr);
+    KERNEL_CALL(cudaInjectGenomeToSelectedCreatures, data, _genomePtr);
     cudaDeviceSynchronize();
-
-    return copyToHost(_result);
 }
 
 void EditKernelsService::colorSelectedCells(CudaSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters)
