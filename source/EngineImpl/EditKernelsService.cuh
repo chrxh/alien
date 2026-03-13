@@ -25,7 +25,7 @@ public:
     void setBarrier(CudaSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters);
     void reconnect(CudaSettings const& gpuSettings, SimulationData const& data);
     void changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& changeTO);
-    bool changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to);  // to only contains 1 genome
+    void injectGenomeToSelectedCreatures(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to);  // to only contains 1 genome
     void colorSelectedCells(CudaSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters);
     void setDetached(CudaSettings const& gpuSettings, SimulationData const& data, bool value);
 
@@ -48,6 +48,4 @@ private:
     int* _cudaNumEntities = nullptr;
     unsigned long long int* _cudaMinCellPosYAndIndex = nullptr;
     Genome** _genomePtr = nullptr;
-    Creature** _creaturePtr = nullptr;
-    bool* _result = nullptr;
 };

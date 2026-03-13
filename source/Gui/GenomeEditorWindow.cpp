@@ -71,9 +71,7 @@ void GenomeEditorWindow::initIntern()
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
 }
 
-void GenomeEditorWindow::shutdownIntern()
-{
-}
+void GenomeEditorWindow::shutdownIntern() {}
 
 void GenomeEditorWindow::processIntern()
 {
@@ -146,9 +144,8 @@ void GenomeEditorWindow::processToolbar()
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_SYRINGE)
-                                    .tooltip("Inject the current genome to the selected creatures in the simulation"))) {
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_SYRINGE).tooltip("Inject the current genome to the selected creatures in the simulation"))) {
         onInjectGenome();
     }
 
@@ -245,7 +242,7 @@ void GenomeEditorWindow::onSaveGenome()
 
 void GenomeEditorWindow::onCloneGenome()
 {
-    openTab(getCurrentGenome(),true, false);
+    openTab(getCurrentGenome(), true, false);
 }
 
 void GenomeEditorWindow::onCopyGenome()
@@ -269,17 +266,8 @@ void GenomeEditorWindow::onSavepointGenome()
 void GenomeEditorWindow::onInjectGenome()
 {
     auto const& tab = _tabs.at(_selectedTabIndex);
-
-    tab->resetOriginal();
-
-    //auto success = _SimulationFacade::get()->changeCreature(tab->getCreatureId(), tab->getGenomeDesc());
-    //tab->onGenomeIntoCreaturesInjected();
-    //if (success) {
-    //    printOverlayMessage("Genome injected");
-    //} else {
-    //    GenericMessageDialog::get().information("Error", "The genome could not be injected since the creature no longer exists.");
-    //    tab->convertToDraftTab();
-    //}
+    _SimulationFacade::get()->injectGenomeToSelectedCreatures(tab->getGenomeDesc());
+    printOverlayMessage("Genome injected");
 }
 
 void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
@@ -297,7 +285,8 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
              .pos(pos)
              .stiffness(1.0f)
              .color(EditorModel::get().getDefaultColorCode())
-             .type(CellDesc().constructor(ConstructorDesc().provideEnergy(provideEnergy ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly).geneIndex(0)))},
+             .type(
+                 CellDesc().constructor(ConstructorDesc().provideEnergy(provideEnergy ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly).geneIndex(0)))},
         CreatureDesc(),
         genome);
 

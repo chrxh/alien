@@ -307,19 +307,17 @@ void _SimulationCudaFacade::changeInspectedSimulationData(TOs const& changeTO)
     resizeArraysIfNecessary();
 }
 
-bool _SimulationCudaFacade::changeCreature(TOs const& to)
+void _SimulationCudaFacade::injectGenomeToSelectedCreatures(TOs const& to)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    auto result = EditKernelsService::get().changeCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
+    EditKernelsService::get().injectGenomeToSelectedCreatures(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
     syncAndCheck();
 
     updateStatistics();
 
     resizeArraysIfNecessary();
-
-    return result;
 }
 
 void _SimulationCudaFacade::applyForce(ApplyForceData const& applyData)

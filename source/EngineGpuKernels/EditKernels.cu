@@ -49,15 +49,14 @@ __global__ void cudaChangeParticle(SimulationData data, TOs changeTO)
     }
 }
 
-__global__ void cudaAddGenomeAndCreature(SimulationData data, TOs to, Genome** newGenome, Creature** newCreature)
+__global__ void cudaCreateGenomeFromTO(SimulationData data, TOs to, Genome** newGenome)
 {
     EntityFactory factory;
     factory.init(&data);
     *newGenome = factory.createGenomeFromTO(to, 0);
-    *newCreature = factory.createCreatureFromTO(to, 0);
 }
 
-__global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCreature, bool* result)
+__global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome** newGenome)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
@@ -65,10 +64,10 @@ __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCrea
         if (object->type != ObjectType_Cell) {
             continue;
         }
-        if (object->typeData.cell.creature->id == (*newCreature)->id) {
-            object->typeData.cell.creature = *newCreature;
-            *result = true;
+        if (object->selected != 1) {
+            continue;
         }
+        object->typeData.cell.creature->genome = *newGenome;
     }
 }
 

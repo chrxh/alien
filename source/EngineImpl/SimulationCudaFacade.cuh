@@ -59,7 +59,7 @@ public:
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
     void changeInspectedSimulationData(TOs const& changeTO);
-    bool changeCreature(TOs const& to);  // to only contains 1 genome
+    void injectGenomeToSelectedCreatures(TOs const& to);  // to only contains 1 genome
 
     void applyForce(ApplyForceData const& applyData);
     void switchSelection(PointSelectionData const& switchData);
