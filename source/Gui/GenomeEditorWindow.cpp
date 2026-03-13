@@ -26,19 +26,20 @@
 #include "GenomeWindowEditData.h"
 #include "OverlayController.h"
 
-void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDesc const& genome, bool openEditorIfClosed)
+void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, bool openEditorIfClosed)
 {
     if (openEditorIfClosed) {
         setOn(false);
         delayedExecution([this] { setOn(true); });
     }
-    if (_tabs.size() == 1 && _tabs.front()->isEmpty() && _tabs.front()->isDraft()) {
+    if (_tabs.size() == 1 && _tabs.front()->isEmpty()) {
         _tabs.clear();
     }
     std::optional<int> tabIndex;
-    if (creatureId.has_value()) {
+    if (!forceNewTab) {
         for (auto const& [index, tab] : _tabs | boost::adaptors::indexed(0)) {
-            if (!tab->isDraft() && tab->getCreatureId() == creatureId) {
+            auto tabGenome = tab->getGenomeDesc();
+            if (genome.equalWithoutId(tabGenome)) {
                 tabIndex = toInt(index);
             }
         }
@@ -47,11 +48,7 @@ void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, Geno
         _tabIndexToSelect = *tabIndex;
         _tabs.at(*tabIndex)->resetOriginal();
     } else {
-        if (creatureId.has_value()) {
-            onScheduleAddCreatureTab(creatureId.value(), genome);
-        } else {
-            onScheduleAddDraftTab(genome);
-        }
+        onScheduleAddTab(genome);
     }
 }
 
@@ -71,7 +68,7 @@ void GenomeEditorWindow::initIntern()
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
     // Initialize the first tab with a draft creature
-    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_genomeEditData, getDefaultGenome()));
+    _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
 }
 
 void GenomeEditorWindow::shutdownIntern()
@@ -126,10 +123,10 @@ void GenomeEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    auto hasCreaturesGenomeChanged = _tabs.at(_selectedTabIndex)->hasCreaturesGenomeBeChanged();
+    auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeBeChanged();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on creature").disabled(!hasCreaturesGenomeChanged))) {
-        _tabs.at(_selectedTabIndex)->resetChanges();
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on creature").disabled(!hasGenomeChanged))) {
+        _tabs.at(_selectedTabIndex)->revertChanges();
     }
 
     ImGui::SameLine();
@@ -146,8 +143,7 @@ void GenomeEditorWindow::processToolbar()
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                     .text(ICON_FA_SYRINGE)
-                                    .tooltip("Inject the current genome to the creature in the simulation")
-                                    .disabled(!hasCreaturesGenomeChanged))) {
+                                    .tooltip("Inject the current genome to the selected creatures in the simulation"))) {
         onInjectGenome();
     }
 
@@ -176,7 +172,7 @@ void GenomeEditorWindow::processTabWidget()
                 "##CreatureTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-                onScheduleAddDraftTab(getDefaultGenome());
+                onScheduleAddTab(getDefaultGenome());
             }
             AlienGui::Tooltip("New creature");
 
@@ -230,19 +226,11 @@ void GenomeEditorWindow::processTabWidget()
         }
     }
     ImGui::EndChild();
-
-    auto newSessionId = _SimulationFacade::get()->getSessionId();
-    if (_lastSessionId.has_value() && _lastSessionId.value() != newSessionId) {
-        for (auto const& tab : _tabs) {
-            tab->convertToDraftTab();
-        }
-    }
-    _lastSessionId = newSessionId;
 }
 
 void GenomeEditorWindow::onOpenGenome()
 {
-    FileTransferController::get().onOpenGenomeDialog([this](GenomeDesc const& genome) { openTab(std::nullopt, genome, false); });
+    FileTransferController::get().onOpenGenomeDialog([this](GenomeDesc const& genome) { openTab(genome, true, false); });
 }
 
 void GenomeEditorWindow::onSaveGenome()
@@ -254,7 +242,7 @@ void GenomeEditorWindow::onSaveGenome()
 
 void GenomeEditorWindow::onCloneGenome()
 {
-    openTab(std::nullopt, getCurrentGenome(), false);
+    openTab(getCurrentGenome(),true, false);
 }
 
 void GenomeEditorWindow::onCopyGenome()
@@ -270,14 +258,17 @@ void GenomeEditorWindow::onPasteGenome()
 void GenomeEditorWindow::onInjectGenome()
 {
     auto const& tab = _tabs.at(_selectedTabIndex);
-    auto success = _SimulationFacade::get()->changeCreature(tab->getCreatureId(), tab->getGenomeDesc());
-    tab->onGenomeIntoCreatureInjected();
-    if (success) {
-        printOverlayMessage("Genome injected");
-    } else {
-        GenericMessageDialog::get().information("Error", "The genome could not be injected since the creature no longer exists.");
-        tab->convertToDraftTab();
-    }
+
+    tab->resetOriginal();
+
+    //auto success = _SimulationFacade::get()->changeCreature(tab->getCreatureId(), tab->getGenomeDesc());
+    //tab->onGenomeIntoCreaturesInjected();
+    //if (success) {
+    //    printOverlayMessage("Genome injected");
+    //} else {
+    //    GenericMessageDialog::get().information("Error", "The genome could not be injected since the creature no longer exists.");
+    //    tab->convertToDraftTab();
+    //}
 }
 
 void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
@@ -305,36 +296,20 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
     printOverlayMessage("Seed created");
 }
 
-void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDesc const& genome)
+void GenomeEditorWindow::onScheduleAddTab(GenomeDesc const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createCreatureTab(_genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
-}
-
-void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDesc const& genome)
-{
-    auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createDraftTab(_genomeEditData, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::create(_genomeEditData, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)
 {
-    if (creatureTab->isDraft()) {
-
-        // Use default colors
-        auto const& style = ImGui::GetStyle();
-        ImGui::PushStyleColor(ImGuiCol_Tab, style.Colors[ImGuiCol_Tab]);
-        ImGui::PushStyleColor(ImGuiCol_TabActive, style.Colors[ImGuiCol_TabActive]);
-        ImGui::PushStyleColor(ImGuiCol_TabHovered, style.Colors[ImGuiCol_TabHovered]);
-    } else {
-        // Use creature ID to create a unique color
-        auto creatureId = creatureTab->getTabId();
-        auto h = 0.0f + toFloat(creatureId % 20) / 20.0f * 1.0f;
-        auto s = 0.4f + toFloat(creatureId % 10) / 10.0f * 0.6f;
-        ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.4f).Value);
-        ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.6f).Value);
-        ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.7f).Value);
-    }
+    auto tabId = creatureTab->getTabId();
+    auto h = 0.0f + toFloat(tabId % 20) / 20.0f * 1.0f;
+    auto s = 0.4f + toFloat(tabId % 10) / 10.0f * 0.6f;
+    ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.4f).Value);
+    ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.6f).Value);
+    ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.7f).Value);
 }
 
 GenomeDesc GenomeEditorWindow::getDefaultGenome()

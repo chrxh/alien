@@ -13,7 +13,7 @@ class GenomeEditorWindow : public AlienWindow
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
 
 public:
-    void openTab(std::optional<uint64_t> const& creatureId, GenomeDesc const& genome, bool openEditorIfClosed = true);
+    void openTab(GenomeDesc const& genome, bool forceNewTab = false, bool openEditorIfClosed = true);
     GenomeDesc getCurrentGenome() const;
 
 private:
@@ -34,8 +34,7 @@ private:
     void onPasteGenome();
     void onInjectGenome();
     void onCreateSeed(bool provideEnergy);
-    void onScheduleAddCreatureTab(uint64_t creatureId, GenomeDesc const& genome);
-    void onScheduleAddDraftTab(GenomeDesc const& genome);
+    void onScheduleAddTab(GenomeDesc const& genome);
 
     void pushStyleColorForTab(GenomeTabWidget const& creatureTab);
 
@@ -45,7 +44,6 @@ private:
     std::vector<GenomeTabWidget> _tabs;
     int _selectedTabIndex = 0;
     int _sequenceNumberForCreatedGenomes = 0;
-    std::optional<int> _lastSessionId;
     std::optional<GenomeDesc> _copiedGenome;
 
     // Actions

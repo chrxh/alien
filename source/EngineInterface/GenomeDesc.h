@@ -427,6 +427,7 @@ struct GenomeDesc
 {
     GenomeDesc();
     auto operator<=>(GenomeDesc const&) const = default;
+    bool equalWithoutId(GenomeDesc const& other) const;
 
     uint64_t _id = 0;
     GenomeDesc id(uint64_t id);

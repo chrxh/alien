@@ -70,7 +70,6 @@ public:
     void changeCell(ExtendedObjectDesc const& changedCell);
     void changeParticle(EnergyDesc const& changedParticle);
     bool changeCreature(uint64_t creatureId, GenomeDesc const& genome);
-    std::optional<GenomeDesc> getGenomeOfCreature(uint64_t creatureId);
 
     void calcTimesteps(uint64_t timesteps);
     void applyCataclysm(int power);
