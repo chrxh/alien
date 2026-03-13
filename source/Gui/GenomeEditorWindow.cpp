@@ -144,10 +144,11 @@ void GenomeEditorWindow::processToolbar()
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
+    auto creaturesSelected = EditorModel::get().getSelectionShallowData().numCreatures > 0;
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                     .text(ICON_FA_SYRINGE)
-                                    .tooltip("Inject the current genome to the creature in the simulation")
-                                    .disabled(!hasCreaturesGenomeChanged))) {
+                                    .tooltip("Inject the current genome to the selected creatures in the simulation")
+                                    .disabled(!creaturesSelected))) {
         onInjectGenome();
     }
 
