@@ -46,9 +46,7 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes)
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
-        data.objects(
-            {_descTestDataFactory->createNonDefaultObjectDesc(objectParameter),
-             _descTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
+        data.objects({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter), _descTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
     }
 
     _simulationFacade->setSimulationData(data);
@@ -66,9 +64,7 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes_preview)
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
         data.addCreature({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter)}, CreatureDesc(), GenomeDesc());
     } else {
-        data.objects(
-            {_descTestDataFactory->createNonDefaultObjectDesc(objectParameter),
-             _descTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
+        data.objects({_descTestDataFactory->createNonDefaultObjectDesc(objectParameter), _descTestDataFactory->createNonDefaultObjectDesc(objectParameter)});
     }
 
     _simulationFacade->setPreviewData(data);
@@ -125,7 +121,10 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
     auto hexagon = DescEditService::get().createHex(DescEditService::CreateHexParameters().center({100.0f, 100.0f}).objectType(CellDesc()));
 
 
-    auto data = Desc().addCreature(hexagon._objects, CreatureDesc(), GenomeDesc().genes({
+    auto data = Desc().addCreature(
+        hexagon._objects,
+        CreatureDesc(),
+        GenomeDesc().genes({
             GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
             GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
         }));
@@ -138,9 +137,8 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 
 TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
-    auto data = Desc()
-                    .objects({ObjectDesc().id(0).type(StructureDesc()), ObjectDesc().id(1).type(FreeCellDesc())})
-                    .energies({EnergyDesc().id(2), EnergyDesc().id(3)});
+    auto data =
+        Desc().objects({ObjectDesc().id(0).type(StructureDesc()), ObjectDesc().id(1).type(FreeCellDesc())}).energies({EnergyDesc().id(2), EnergyDesc().id(3)});
     data.addCreature({ObjectDesc().id(5)}, CreatureDesc().id(4), GenomeDesc());
     data.addCreature({ObjectDesc().id(6)}, CreatureDesc().id(5), GenomeDesc());
 
@@ -150,9 +148,13 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> expectedCellIds;
-    for (auto const& object : data._objects) { expectedCellIds.insert(object._id); }
+    for (auto const& object : data._objects) {
+        expectedCellIds.insert(object._id);
+    }
     std::unordered_set<uint64_t> actualCellIds;
-    for (auto const& object : actualData._objects) { actualCellIds.insert(object._id); }
+    for (auto const& object : actualData._objects) {
+        actualCellIds.insert(object._id);
+    }
     EXPECT_EQ(expectedCellIds, actualCellIds);
 
     std::unordered_set<uint64_t> expectedCreatureIds;
@@ -178,9 +180,8 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 
 TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
-    auto data = Desc()
-                    .objects({ObjectDesc().id(0).type(FreeCellDesc()), ObjectDesc().id(1).type(FreeCellDesc())})
-                    .energies({EnergyDesc().id(2), EnergyDesc().id(3)});
+    auto data =
+        Desc().objects({ObjectDesc().id(0).type(FreeCellDesc()), ObjectDesc().id(1).type(FreeCellDesc())}).energies({EnergyDesc().id(2), EnergyDesc().id(3)});
     data.addCreature({ObjectDesc().id(5)}, CreatureDesc().id(4), GenomeDesc());
     data.addCreature({ObjectDesc().id(6)}, CreatureDesc().id(5), GenomeDesc());
 
@@ -190,7 +191,9 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> actualCellIds;
-    for (auto const& object : actualData._objects) { actualCellIds.insert(object._id); }
+    for (auto const& object : actualData._objects) {
+        actualCellIds.insert(object._id);
+    }
     EXPECT_EQ(2 * 4, actualCellIds.size());
 
     std::unordered_set<uint64_t> actualCreatureIds;
@@ -206,72 +209,88 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
     EXPECT_EQ(2 * 2, actualParticleIds.size());
 }
 
-TEST_F(DataTransferTests, changeGenome_successful)
+TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_singleCreature)
 {
-    auto const CreatureId = 1;
+    auto constexpr CreatureId = 1;
 
-    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(CreatureId), GenomeDesc());
+    auto data = Desc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
 
+    _simulationFacade->setSelection({99, 99}, {101, 101});
+
     auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
-    auto result = _simulationFacade->changeCreature(CreatureId, newGenome);
-    ASSERT_TRUE(result);
+    _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
-    ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
     EXPECT_EQ(CreatureId, creature._id);
 
-    // Find the genome for this creature
     auto genomeIt = std::find_if(actualData._genomes.begin(), actualData._genomes.end(), [&creature](auto const& g) { return g._id == creature._genomeId; });
     ASSERT_NE(genomeIt, actualData._genomes.end());
     ASSERT_EQ(1, genomeIt->_genes.size());
-
-    auto gene = genomeIt->_genes.front();
-    EXPECT_EQ(2, gene._nodes.size());
+    EXPECT_EQ(2, genomeIt->_genes.front()._nodes.size());
 }
 
-TEST_F(DataTransferTests, changeGenome_generatesNewGenomeId)
+TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_noSelection)
 {
-    auto const CreatureId = 1;
+    auto constexpr CreatureId = 1;
 
-    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(CreatureId), GenomeDesc());
+    auto originalGenome = GenomeDesc();
+    auto data = Desc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), originalGenome);
 
     _simulationFacade->setSimulationData(data);
 
+    _simulationFacade->removeSelection();
+
     auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
-    auto originalGenomeId = newGenome._id;
-    auto result = _simulationFacade->changeCreature(CreatureId, newGenome);
-    ASSERT_TRUE(result);
+    _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData._creatures.front();
-    EXPECT_NE(originalGenomeId, creature._genomeId);
-
     ASSERT_EQ(1, actualData._genomes.size());
-    EXPECT_NE(originalGenomeId, actualData._genomes.front()._id);
-    EXPECT_EQ(creature._genomeId, actualData._genomes.front()._id);
+    EXPECT_EQ(0, actualData._genomes.front()._genes.size());
 }
 
-TEST_F(DataTransferTests, changeGenome_failed)
+TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_multipleCreatures_onlySelectedAffected)
 {
-    auto constexpr CreatureId = 1;
-    auto constexpr WrongCreatureId = 2;
+    auto constexpr CreatureId1 = 1;
+    auto constexpr CreatureId2 = 2;
 
-    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(CreatureId), GenomeDesc());
+    auto originalGenome1 = GenomeDesc();
+    auto originalGenome2 = GenomeDesc();
+
+    auto data = Desc()
+                    .addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId1), originalGenome1)
+                    .addCreature({ObjectDesc().pos({200, 200})}, CreatureDesc().id(CreatureId2), originalGenome2);
 
     _simulationFacade->setSimulationData(data);
 
+    _simulationFacade->setSelection({99, 99}, {101, 101});
+
     auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
-    auto result = _simulationFacade->changeCreature(WrongCreatureId, newGenome);
-    ASSERT_FALSE(result);
+    _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(2, actualData._creatures.size());
+
+    for (auto const& creature : actualData._creatures) {
+        auto genomeIt =
+            std::find_if(actualData._genomes.begin(), actualData._genomes.end(), [&creature](auto const& g) { return g._id == creature._genomeId; });
+        ASSERT_NE(genomeIt, actualData._genomes.end());
+
+        if (creature._id == CreatureId1) {
+            ASSERT_EQ(1, genomeIt->_genes.size());
+            EXPECT_EQ(2, genomeIt->_genes.front()._nodes.size());
+        } else {
+            EXPECT_EQ(0, genomeIt->_genes.size());
+        }
+    }
 }
 
 TEST_F(DataTransferTests, getInspectedSimulationData)

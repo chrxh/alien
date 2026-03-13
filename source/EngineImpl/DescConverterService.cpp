@@ -256,25 +256,20 @@ TOs DescConverterService::convertDescriptionToTO(EnergyDesc const& particle) con
     return provideDataTO({}, {}, {}, {}, {}, particleTOs, heap);
 }
 
-TOs DescConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const
+TOs DescConverterService::convertDescriptionToTO(GenomeDesc const& genome) const
 {
     std::vector<GenomeTO> genomeTOs;
-    std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
     std::vector<NodeTO> nodeTOs;
     std::vector<uint8_t> heap;
 
     auto clonedGenome = genome;
     clonedGenome._id = NumberGenerator::get().createEntityId();
-    auto wrapper = CreatureDesc().id(creatureId).genomeId(clonedGenome._id);
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
     convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, clonedGenome, genomeTOIndexById);
 
-    std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    convertCreatureToTO(creatureTOs, wrapper, genomeTOIndexById, creatureTOIndexById);
-
-    return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, {}, {}, heap);
+    return provideDataTO({}, genomeTOs, geneTOs, nodeTOs, {}, {}, heap);
 }
 
 DescConverterService::DescConverterService()
@@ -502,7 +497,8 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
                 reconnector._mode = reconnectStructure;
             } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
                 ReconnectFreeCellDesc reconnectFreeCell;
-                reconnectFreeCell._restrictToColors = static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors);
+                reconnectFreeCell._restrictToColors =
+                    static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors);
                 reconnector._mode = reconnectFreeCell;
             } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
                 ReconnectCreatureDesc reconnectCreature;
@@ -512,7 +508,8 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
                 reconnectCreature._maxNumCells = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells > 0
                     ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells))
                     : std::nullopt;
-                reconnectCreature._restrictToColors = static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors);
+                reconnectCreature._restrictToColors =
+                    static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors);
                 reconnectCreature._restrictToLineage = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
                 reconnector._mode = reconnectCreature;
             }
