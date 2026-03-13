@@ -983,7 +983,7 @@ namespace
     auto constexpr Id_SensorMode_DetectFreeCell_MinDensity = 0;
     auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;
 
-    auto constexpr Id_SensorMode_SensorLastMatch_CreatureId = 0;
+    auto constexpr Id_SensorMode_SensorLastMatch_CreatureIdPart = 0;
     auto constexpr Id_SensorMode_SensorLastMatch_Pos = 1;
 
     auto constexpr Id_SensorMode_DetectCreature_MinNumCells = 0;
@@ -1196,7 +1196,7 @@ namespace cereal
     {
         SensorLastMatchDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_CreatureId, data._creatureIdPart, defaultObject._creatureIdPart);
+        loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_CreatureIdPart, data._creatureIdPart, defaultObject._creatureIdPart);
         loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_Pos, data._pos, defaultObject._pos);
         processLoadSaveMap(task, ar, auxiliaries);
     }
