@@ -22,7 +22,7 @@ public:
     TOs convertDescriptionToTO(Desc const& description) const;
     TOs convertDescriptionToTO(ExtendedObjectDesc const& extendedObject) const;
     TOs convertDescriptionToTO(EnergyDesc const& particle) const;
-    TOs convertDescriptionToTO(uint64_t creatureId, GenomeDesc const& genome) const;
+    TOs convertDescriptionToTO(GenomeDesc const& genome) const;
 
 private:
     DescConverterService();

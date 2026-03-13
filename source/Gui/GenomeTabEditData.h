@@ -9,6 +9,9 @@ struct _GenomeTabEditData
 {
     int id = 0;
     GenomeDesc genome;
+    GenomeDesc origGenome;
+    bool changesMade = false;  // true means diff between genome and origGenome
+
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
     bool run = true;

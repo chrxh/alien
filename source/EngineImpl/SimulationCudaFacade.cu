@@ -222,18 +222,6 @@ TOs _SimulationCudaFacade::getOverlayData(int2 const& rectUpperLeft, int2 const&
     return to;
 }
 
-TOs _SimulationCudaFacade::getGenomeOfCreature(uint64_t creatureId, bool& found)
-{
-    auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    found = DataAccessKernelsService::get().getGenomeOfCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), creatureId, cudaTO);
-    syncAndCheck();
-
-    auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
-    copyDataTOtoHost(to, cudaTO);
-
-    return to;
-}
-
 void _SimulationCudaFacade::addAndSelectSimulationData(TOs const& to)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
@@ -319,19 +307,17 @@ void _SimulationCudaFacade::changeInspectedSimulationData(TOs const& changeTO)
     resizeArraysIfNecessary();
 }
 
-bool _SimulationCudaFacade::changeCreature(TOs const& to)
+void _SimulationCudaFacade::injectGenomeToSelectedCreatures(TOs const& to)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    auto result = EditKernelsService::get().changeCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
+    EditKernelsService::get().injectGenomeToSelectedCreatures(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
     syncAndCheck();
 
     updateStatistics();
 
     resizeArraysIfNecessary();
-
-    return result;
 }
 
 void _SimulationCudaFacade::applyForce(ApplyForceData const& applyData)

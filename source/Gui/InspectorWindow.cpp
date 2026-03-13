@@ -140,7 +140,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
             if (ImGui::TreeNodeEx("Properties###general", TreeNodeFlags)) {
                 if (extendedCell.creature.has_value() && extendedCell.genome.has_value()) {
                     if (AlienGui::Button("Edit genome")) {
-                        GenomeEditorWindow::get().openTab(extendedCell.creature->_id, genome.value());
+                        GenomeEditorWindow::get().openTab(genome.value(), false);
                     }
                 }
 

@@ -25,7 +25,6 @@ public:
     void getSelectedData(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TOs const& to);
     void getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TOs const& to);
     void getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TOs const& to);
-    bool getGenomeOfCreature(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t creatureId, TOs const& to);
 
     ArraySizesForGpuEntities estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TOs const& to);
     void addData(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to, bool selectData);

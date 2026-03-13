@@ -9,21 +9,10 @@
 class _GenomeTabWidget
 {
 public:
-    static GenomeTabWidget createDraftTab(
-        GenomeWindowEditData const& genomeEditData,
-        GenomeDesc const& creature,
-        GenomeTabLayoutData const& layoutData = nullptr);
-    static GenomeTabWidget createCreatureTab(
-        GenomeWindowEditData const& genomeEditData,
-        uint64_t creatureId,
-        GenomeDesc const& genome,
-        GenomeTabLayoutData const& layoutData = nullptr);
+    static GenomeTabWidget create(GenomeWindowEditData const& genomeEditData, GenomeDesc const& genome, GenomeTabLayoutData const& layoutData = nullptr);
 
     void process();
 
-    void onGenomeIntoCreatureInjected();
-
-    bool isDraft() const;
     int getTabId() const;
     std::string getName() const;
 
@@ -33,37 +22,22 @@ public:
 
     void setGenomeDesc(GenomeDesc const& genome);
 
-    bool hasCreaturesGenomeBeChanged() const;
-    uint64_t getCreatureId();
+    bool hasGenomeChanged() const;
 
     bool isEmpty() const;
-    void convertToDraftTab();
     void resetOriginal();
-    void resetChanges();
+    void revertChanges();
 
 private:
-    struct DraftData
-    {};
-    struct CreatureData
-    {
-        uint64_t creatureId = 0;
-        GenomeDesc origGenome;
-        bool changesMade = false;  // true = origCreature has been changed
-    };
-    using SpecificEditData = std::variant<DraftData, CreatureData>;
-
     _GenomeTabWidget(
         GenomeWindowEditData const& genomeEditData,
         GenomeDesc const& genome,
-        SpecificEditData const& specificEditData,
         GenomeTabLayoutData const& layoutData = nullptr);
 
     void processEditors();
     void processPreview();
 
     void doLayout();
-
-    void updateSpecificEditDataFromSimulation();
 
     // Widgets
     GenomeEditorWidget _genomeEditorWidget;
@@ -73,7 +47,6 @@ private:
 
     // Creature data
     GenomeTabEditData _editData;
-    SpecificEditData _specificEditData;
 
     // Layout data
     GenomeTabLayoutData _origLayoutData;

@@ -48,8 +48,7 @@ public:
     void setDetached(bool value) override;
     void changeCell(ExtendedObjectDesc const& changedCell) override;
     void changeParticle(EnergyDesc const& changedParticle) override;
-    bool changeCreature(uint64_t creatureId, GenomeDesc const& genome) override;
-    std::optional<GenomeDesc> getGenomeOfCreature(uint64_t creatureId) override;
+    void injectGenomeToSelectedCreatures(GenomeDesc const& genome) override;
 
     void calcTimesteps(uint64_t timesteps) override;
     void runSimulation() override;
