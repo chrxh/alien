@@ -67,7 +67,7 @@ void GenomeEditorWindow::initIntern()
 
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
-    // Initialize the first tab with a draft creature
+    // Initialize the first tab with default genome
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
 }
 
@@ -130,7 +130,7 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on creature").disabled(!hasGenomeChanged))) {
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on genome").disabled(!hasGenomeChanged))) {
         _tabs.at(_selectedTabIndex)->revertChanges();
     }
 
@@ -174,19 +174,19 @@ void GenomeEditorWindow::processTabWidget()
     if (ImGui::BeginChild("TabWidget", ImVec2(0, 0), 0, 0)) {
 
         if (ImGui::BeginTabBar(
-                "##CreatureTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
+                "##GenomeTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 onScheduleAddTab(getDefaultGenome());
             }
-            AlienGui::Tooltip("New creature");
+            AlienGui::Tooltip("New genome");
 
             std::optional<int> tabIndexToSelect = _tabIndexToSelect;
             std::optional<int> tabToDelete;
             _tabIndexToSelect.reset();
 
             // Process tabs
-            for (auto const& [index, creatureTab] : _tabs | boost::adaptors::indexed(0)) {
+            for (auto const& [index, genomeTab] : _tabs | boost::adaptors::indexed(0)) {
 
                 bool open = true;
                 bool* openPtr = nullptr;
@@ -195,15 +195,12 @@ void GenomeEditorWindow::processTabWidget()
                 }
                 int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
 
-                pushStyleColorForTab(creatureTab);
-                ImGui::PushStyleColor(ImGuiCol_Button, Const::TreeNodeHighColor.Value);
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::TreeNodeHighHoveredColor.Value);
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::TreeNodeHighActiveColor.Value);
-                auto tabResult = ImGui::BeginTabItem((creatureTab->getName() + "###" + std::to_string(creatureTab->getTabId())).c_str(), openPtr, flags);
+                pushStyleColorForTab(genomeTab);
+                auto tabResult = ImGui::BeginTabItem((genomeTab->getName() + "###" + std::to_string(genomeTab->getTabId())).c_str(), openPtr, flags);
                 ImGui::PopStyleColor(3);
                 if (tabResult) {
                     _selectedTabIndex = toInt(index);
-                    creatureTab->process();
+                    genomeTab->process();
                     ImGui::EndTabItem();
                 }
                 ImGui::PopStyleColor(3);
@@ -316,14 +313,17 @@ void GenomeEditorWindow::onScheduleAddTab(GenomeDesc const& genome)
     _tabToAdd = _GenomeTabWidget::create(_genomeEditData, genome, currentTab->getLayoutData()->clone());
 }
 
-void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)
+void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& genomeTab)
 {
-    auto tabId = creatureTab->getTabId();
+    auto tabId = genomeTab->getTabId();
     auto h = 0.0f + toFloat(tabId % 20) / 20.0f * 1.0f;
     auto s = 0.4f + toFloat(tabId % 10) / 10.0f * 0.6f;
     ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.4f).Value);
-    ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.6f).Value);
-    ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.7f).Value);
+    ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.7f).Value);
+    ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.8f).Value);
+    ImGui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(h, s, 0.8f).Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(h, s, 1.0f).Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(h, s, 0.9f).Value);
 }
 
 GenomeDesc GenomeEditorWindow::getDefaultGenome()

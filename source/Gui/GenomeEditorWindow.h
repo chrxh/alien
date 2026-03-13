@@ -37,7 +37,7 @@ private:
     void onCreateSeed(bool provideEnergy);
     void onScheduleAddTab(GenomeDesc const& genome);
 
-    void pushStyleColorForTab(GenomeTabWidget const& creatureTab);
+    void pushStyleColorForTab(GenomeTabWidget const& genomeTab);
 
     GenomeDesc getDefaultGenome();
 
