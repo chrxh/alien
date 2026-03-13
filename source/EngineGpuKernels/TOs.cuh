@@ -100,7 +100,7 @@ union SensorModeTO
 
 struct SensorLastMatchTO
 {
-    uint64_t creatureId;
+    uint16_t creatureIdPart;
     float2 pos;
 };
 

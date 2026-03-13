@@ -677,7 +677,7 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
             .mode(sensorModeDesc)
             .minRange(10)
             .maxRange(50)
-            .lastMatch(SensorLastMatchDesc().creatureId(42).pos({10.5f, 20.3f}));
+            .lastMatch(SensorLastMatchDesc().creatureIdPart(42).pos({10.5f, 20.3f}));
     }
     case CellType_Generator: {
         GeneratorModeDesc generatorModeDesc;

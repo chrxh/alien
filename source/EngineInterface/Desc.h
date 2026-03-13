@@ -112,7 +112,7 @@ struct SensorLastMatchDesc
 {
     auto operator<=>(SensorLastMatchDesc const&) const = default;
 
-    MEMBER(SensorLastMatchDesc, uint64_t, creatureId, 0);
+    MEMBER(SensorLastMatchDesc, uint16_t, creatureIdPart, 0);
     MEMBER(SensorLastMatchDesc, RealVector2D, pos, RealVector2D());
 };
 

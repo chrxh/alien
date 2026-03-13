@@ -42,7 +42,7 @@ protected:
 
         // Create a sensor with lastMatch pointing to the target creature
         SensorLastMatchDesc lastMatch;
-        lastMatch._creatureId = targetCreatureId & 0xffff;  // Sensor stores only lower 16 bits
+        lastMatch._creatureIdPart = targetCreatureId & 0xffff;  // Sensor stores only lower 16 bits
         lastMatch._pos = targetPos;
 
         auto data = Desc().addCreature(
@@ -225,7 +225,7 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
 
     // Create a sensor with lastMatch pointing to creature 1 (same creature)
     SensorLastMatchDesc lastMatch;
-    lastMatch._creatureId = 1;  // Same creature id
+    lastMatch._creatureIdPart = 1;  // Same creature id
     lastMatch._pos = {100.0f, 103.0f};
 
     // Create a single creature with attacker, sensor, and potential targets
@@ -344,7 +344,7 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
 
     // Create a sensor with lastMatch pointing to creature 2
     SensorLastMatchDesc lastMatch;
-    lastMatch._creatureId = 2;
+    lastMatch._creatureIdPart = 2;
     lastMatch._pos = {100.0f, 97.0f};
 
     // Create attacker with connections that block the attack ray
@@ -385,11 +385,11 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
 
     // Create attacker creature with sensor targeting creatures 2 and 3
     SensorLastMatchDesc lastMatch1;
-    lastMatch1._creatureId = 2;
+    lastMatch1._creatureIdPart = 2;
     lastMatch1._pos = {100.0f, 97.0f};
 
     SensorLastMatchDesc lastMatch2;
-    lastMatch2._creatureId = 3;
+    lastMatch2._creatureIdPart = 3;
     lastMatch2._pos = {99.0f, 98.5f};
 
     auto data = Desc().addCreature(
@@ -434,7 +434,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
 
     // Create a sensor with lastMatch pointing to creature 2
     SensorLastMatchDesc lastMatch;
-    lastMatch._creatureId = 2;
+    lastMatch._creatureIdPart = 2;
     lastMatch._pos = {100.0f, 103.0f};
 
     // Create attacker with connections that do NOT block the attack ray
@@ -542,11 +542,11 @@ TEST_F(AttackerTests, sensorTargeting_multipleTargets)
 
     // Create a sensor with lastMatch pointing to creature 2 and another to creature 3
     SensorLastMatchDesc lastMatch1;
-    lastMatch1._creatureId = 2;
+    lastMatch1._creatureIdPart = 2;
     lastMatch1._pos = {100.0f, 103.0f};
 
     SensorLastMatchDesc lastMatch2;
-    lastMatch2._creatureId = 4;
+    lastMatch2._creatureIdPart = 4;
     lastMatch2._pos = {100.0f, 97.0f};
 
     auto data = Desc().addCreature(

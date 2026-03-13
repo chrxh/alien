@@ -24,7 +24,7 @@ private:
     __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static bool
-    isTargetCreatureId(uint64_t const* targetCreatureIds, uint16_t const* targetRestrictToColors, int numTargets, uint64_t creatureId, int color);
+    isContainedInSensorMatches(uint64_t const* sensorTargetCreatureIds, uint16_t const* sensorRestrictToColors, int numSensorTargets, uint64_t creatureId, int color);
 
     static constexpr int MaxSensorTargets = 8;
 };
@@ -60,9 +60,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         auto const& attackerMode = cell->cellTypeData.attacker.mode;
 
         // For AttackCreature mode: collect creatureIds and color restrictions from sensor lastMatches in vicinity
-        uint64_t targetCreatureIds[MaxSensorTargets];
-        uint16_t targetRestrictToColors[MaxSensorTargets];
-        int numTargetCreatureIds = 0;
+        uint64_t sensorTargetCreatureIds[MaxSensorTargets];
+        uint16_t sensorRestrictToColors[MaxSensorTargets];
+        int numSensorTargets = 0;
         if (attackerMode == AttackerMode_Creature) {
             auto creatureId = cell->creature->id;
             data.objectMap.executeForEach(object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached, [&](auto const& nearObject) {
@@ -81,7 +81,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 if (!nearCell->cellTypeData.sensor.lastMatchAvailable) {
                     return;
                 }
-                auto matchCreatureId = nearCell->cellTypeData.sensor.lastMatch.creatureId;
+                auto matchCreatureId = nearCell->cellTypeData.sensor.lastMatch.creatureIdPart;
 
                 // Get the color restriction from the sensor's DetectCreature mode
                 uint16_t restrictToColors = 0x3FF;
@@ -90,16 +90,16 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
 
                 // If creatureId already in list, merge color restrictions
-                for (int i = 0; i < numTargetCreatureIds; ++i) {
-                    if (targetCreatureIds[i] == matchCreatureId) {
-                        targetRestrictToColors[i] |= restrictToColors;
+                for (int i = 0; i < numSensorTargets; ++i) {
+                    if (sensorTargetCreatureIds[i] == matchCreatureId) {
+                        sensorRestrictToColors[i] |= restrictToColors;
                         return;
                     }
                 }
-                if (numTargetCreatureIds < MaxSensorTargets) {
-                    targetCreatureIds[numTargetCreatureIds] = matchCreatureId;
-                    targetRestrictToColors[numTargetCreatureIds] = restrictToColors;
-                    ++numTargetCreatureIds;
+                if (numSensorTargets < MaxSensorTargets) {
+                    sensorTargetCreatureIds[numSensorTargets] = matchCreatureId;
+                    sensorRestrictToColors[numSensorTargets] = restrictToColors;
+                    ++numSensorTargets;
                 }
             });
         }
@@ -132,7 +132,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                         return;
                     }
 
-                    // Only attack cells with energy above base value
+                    // Calc base energy for attacking
                     auto energyToTransfer =
                         atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
 
@@ -180,7 +180,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                     // Check if target creature is in the list of sensor-detected targets (including color restriction)
                     auto otherCreatureId = otherCell->creature->id;
-                    if (!isTargetCreatureId(targetCreatureIds, targetRestrictToColors, numTargetCreatureIds, otherCreatureId, otherObject->color)) {
+                    if (!isContainedInSensorMatches(sensorTargetCreatureIds, sensorRestrictToColors, numSensorTargets, otherCreatureId, otherObject->color)) {
                         return;
                     }
 
@@ -267,12 +267,12 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
 }
 
 __inline__ __device__ bool
-AttackerProcessor::isTargetCreatureId(uint64_t const* targetCreatureIds, uint16_t const* targetRestrictToColors, int numTargets, uint64_t creatureId, int color)
+AttackerProcessor::isContainedInSensorMatches(uint64_t const* sensorTargetCreatureIds, uint16_t const* sensorRestrictToColors, int numSensorTargets, uint64_t creatureId, int color)
 {
     // The sensor stores only the lower 16 bits of the creatureId (creatureIdPart)
     auto creatureIdPart = creatureId & 0xffff;
-    for (int i = 0; i < numTargets; ++i) {
-        if (targetCreatureIds[i] == creatureIdPart && ((targetRestrictToColors[i] >> color) & 1)) {
+    for (int i = 0; i < numSensorTargets; ++i) {
+        if (sensorTargetCreatureIds[i] == creatureIdPart && ((sensorRestrictToColors[i] >> color) & 1)) {
             return true;
         }
     }

@@ -1196,7 +1196,7 @@ namespace cereal
     {
         SensorLastMatchDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_CreatureId, data._creatureId, defaultObject._creatureId);
+        loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_CreatureId, data._creatureIdPart, defaultObject._creatureIdPart);
         loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_Pos, data._pos, defaultObject._pos);
         processLoadSaveMap(task, ar, auxiliaries);
     }

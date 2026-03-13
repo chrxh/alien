@@ -443,7 +443,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                 cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
             }
             cell->cellTypeData.sensor.lastMatchAvailable = cellTO.cellTypeData.sensor.lastMatchAvailable;
-            cell->cellTypeData.sensor.lastMatch.creatureId = cellTO.cellTypeData.sensor.lastMatch.creatureId;
+            cell->cellTypeData.sensor.lastMatch.creatureIdPart = cellTO.cellTypeData.sensor.lastMatch.creatureIdPart;
             cell->cellTypeData.sensor.lastMatch.pos = cellTO.cellTypeData.sensor.lastMatch.pos;
         } break;
         case CellType_Generator: {
