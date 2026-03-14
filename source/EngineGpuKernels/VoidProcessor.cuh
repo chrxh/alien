@@ -50,19 +50,25 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
 {
     auto totalEnergy = object->typeData.cell.usableEnergy + object->typeData.cell.rawEnergy + object->typeData.cell.reservedEnergy;
 
-    if (object->numConnections > 0) {
-        auto energyPerNeighbor = totalEnergy / object->numConnections;
+    int cellNeighborCount = 0;
+    for (int i = 0; i < object->numConnections; ++i) {
+        if (object->connections[i].object->type == ObjectType_Cell) {
+            ++cellNeighborCount;
+        }
+    }
+
+    if (cellNeighborCount > 0) {
+        auto energyPerNeighbor = totalEnergy / cellNeighborCount;
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
             if (connectedObject->type == ObjectType_Cell) {
                 atomicAdd(&connectedObject->typeData.cell.usableEnergy, energyPerNeighbor);
             }
         }
+        object->typeData.cell.usableEnergy = 0;
+        object->typeData.cell.rawEnergy = 0;
+        object->typeData.cell.reservedEnergy = 0;
     }
-
-    object->typeData.cell.usableEnergy = 0;
-    object->typeData.cell.rawEnergy = 0;
-    object->typeData.cell.reservedEnergy = 0;
 
     ObjectConnectionProcessor::scheduleDeleteObject(data, objectIndex);
 }
