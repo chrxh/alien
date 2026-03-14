@@ -517,7 +517,6 @@ void DescEditService::randomizeCountdowns(Desc& description, int minValue, int m
     }
 
     // Step 2: Iterate over cells and apply stored countdown values (including cells without creatureId)
-    auto nonCreatureCountdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
     for (auto& object : description._objects) {
         if (object.getObjectType() != ObjectType_Cell) {
             continue;
