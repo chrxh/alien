@@ -435,9 +435,9 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
 {
     // Create a texture atlas containing all cell type strings and object type strings
     // We'll arrange them in a vertical strip, one per row
-    // Rows 0-13: Cell types (Base, Depot, Constructor, etc.)
-    // Row 14: "Structure" (for ObjectType_Structure)
-    // Row 15: "Free Cell" (for ObjectType_FreeCell)
+    // Rows 0-12: Cell types (Base, Depot, Sensor, etc.)
+    // Row 13: "Structure" (for ObjectType_Structure)
+    // Row 14: "Free Cell" (for ObjectType_FreeCell)
     auto font = StyleRepository::get().getDefaultFont();
     float fontSize = 16.0f;  // Base font size for rendering
 
