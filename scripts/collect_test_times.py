@@ -29,7 +29,7 @@ def run_tests(engine_tests_path):
         print(f"Running: {' '.join(cmd)}")
         print("This may take several minutes...\n")
 
-        result = subprocess.run(cmd, capture_output=False, timeout=600)
+        result = subprocess.run(cmd, capture_output=False, timeout=900)
 
         with open(json_output_path, "r") as f:
             return json.load(f), result.returncode
@@ -46,7 +46,8 @@ def collect_test_times(data):
         for test in suite.get("testsuite", []):
             test_name = test["name"]
             full_name = f"{suite_name}.{test_name}"
-            time_sec = float(test.get("time", "0s").rstrip("s"))
+            time_str = test.get("time", "0")
+            time_sec = float(time_str.rstrip("s")) if time_str.endswith("s") else float(time_str)
             status = test.get("result", "UNKNOWN")
             tests.append((full_name, time_sec, status))
     return tests
@@ -56,7 +57,11 @@ def print_sorted_table(tests):
     """Print a markdown table of tests sorted by execution time (descending)."""
     tests_sorted = sorted(tests, key=lambda x: x[1], reverse=True)
 
-    max_name_len = max(len(t[0]) for t in tests_sorted) if tests_sorted else 20
+    if not tests_sorted:
+        print("\nNo test results found.")
+        return
+
+    max_name_len = max(len(t[0]) for t in tests_sorted)
     max_name_len = max(max_name_len, len("Test Name"))
 
     print(f"\n{'='*80}")
