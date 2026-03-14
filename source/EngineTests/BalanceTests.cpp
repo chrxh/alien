@@ -151,7 +151,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(15000);
+    _simulationFacade->calcTimesteps(20000);
     auto actualData = _simulationFacade->getSimulationData();
 
     // Create a map of genomeId to lineageId
