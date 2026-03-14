@@ -89,17 +89,7 @@ struct SimulationParameters
     BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
     BaseParameter<ColorVector<float>> radiationType2_strength = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
     BaseParameter<ColorVector<float>> radiationType2_energyThreshold = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
-    BaseParameter<ColorVector<float>> particleSplitEnergy = {
-        {Infinity<float>::value,
-         Infinity<float>::value,
-         Infinity<float>::value,
-         Infinity<float>::value,
-         Infinity<float>::value,
-         Infinity<float>::value,
-         Infinity<float>::value,
-         Infinity<float>::value,
-         Infinity<float>::value,
-         Infinity<float>::value}};
+    BaseParameter<ColorVector<float>> particleSplitEnergy = {{50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
     BaseParameter<bool> particleTransformationAllowed = {false};
     EnableableSourceParameter<float> sourceRadiationAngle = {{{.value = 0.0f, .enabled = false}}};
     static float constexpr radiationProbability = 0.03f;
