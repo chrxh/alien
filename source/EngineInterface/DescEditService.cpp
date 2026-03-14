@@ -774,8 +774,3 @@ std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(Desc const& 
     }
     return result;
 }
-
-std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getCreatureRepresentatives(Desc const& description) const
-{
-    return {};
-}

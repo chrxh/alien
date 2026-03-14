@@ -19,7 +19,6 @@
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
 #include "SelectionWindow.h"
-#include <EngineInterface/SimulationFacade.h>
 #include "StyleRepository.h"
 #include "Viewport.h"
 
@@ -84,11 +83,26 @@ void EditorController::onInspectSelectedObjects()
 void EditorController::onInspectSelectedGenomes()
 {
     Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(true);
-    auto constructors = DescEditService::get().getCreatureRepresentatives(selectedData);
-    if (constructors.size() > 1) {
-        constructors = {constructors.front()};
+
+    std::vector<GenomeDesc> uniqueGenomes;
+    for (auto const& genome : selectedData._genomes) {
+        auto genomeWithoutId = genome;
+        genomeWithoutId._id = 0;
+        bool alreadyCollected = false;
+        for (auto const& existing : uniqueGenomes) {
+            if (existing == genomeWithoutId) {
+                alreadyCollected = true;
+                break;
+            }
+        }
+        if (!alreadyCollected) {
+            uniqueGenomes.emplace_back(genomeWithoutId);
+        }
     }
-    onInspectObjects(constructors, true);
+
+    for (auto const& genome : uniqueGenomes) {
+        GenomeEditorWindow::get().openTab(genome);
+    }
 }
 
 bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> const& entities, bool selectGenomeTab)
