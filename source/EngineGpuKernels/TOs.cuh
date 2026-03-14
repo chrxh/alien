@@ -40,6 +40,9 @@ struct NeuralNetTO
 struct BaseTO
 {};
 
+struct VoidTO
+{};
+
 struct DepotTO
 {
     float storageLimit;
@@ -386,6 +389,7 @@ union CellTypeDataTO
     DigestorTO digestor;
     MemoryTO memory;
     CommunicatorTO communicator;
+    VoidTO voidCell;
 };
 
 struct SignalTO

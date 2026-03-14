@@ -20,6 +20,9 @@ struct NeuralNetGenome
 struct BaseGenome
 {};
 
+struct VoidGenome
+{};
+
 struct DepotGenome
 {
     float storageLimit;
@@ -307,6 +310,7 @@ union CellTypeDataGenome
     DigestorGenome digestor;
     MemoryGenome memory;
     CommunicatorGenome communicator;
+    VoidGenome voidCell;
 };
 
 struct Node

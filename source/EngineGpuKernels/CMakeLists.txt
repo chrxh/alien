@@ -82,6 +82,7 @@ add_library(EngineGpuKernels
     TOProvider.cu
     TOProvider.cuh
     Util.cuh
+    VoidProcessor.cuh
     )
 
 target_link_libraries(EngineGpuKernels Base)

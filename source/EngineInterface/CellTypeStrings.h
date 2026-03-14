@@ -25,7 +25,8 @@ namespace Const
         "Detonator"s,
         "Digestor"s,
         "Memory"s,
-        "Communicator"s};
+        "Communicator"s,
+        "Void"s};
 
     std::map<CellType, std::string> const CellTypeToStringMap = {
         {CellType_Base, "Base"},
@@ -41,6 +42,7 @@ namespace Const
         {CellType_Digestor, "Digestor"},
         {CellType_Memory, "Memory"},
         {CellType_Communicator, "Communicator"},
+        {CellType_Void, "Void"},
     };
 
     std::map<ObjectType, std::string> const ObjectTypeToStringMap = {

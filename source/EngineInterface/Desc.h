@@ -425,6 +425,11 @@ struct CommunicatorDesc
     CommunicatorMode getMode() const;
 };
 
+struct VoidDesc
+{
+    auto operator<=>(VoidDesc const&) const = default;
+};
+
 using CellTypeDesc = std::variant<
     BaseDesc,
     DepotDesc,
@@ -438,7 +443,8 @@ using CellTypeDesc = std::variant<
     DetonatorDesc,
     DigestorDesc,
     MemoryDesc,
-    CommunicatorDesc>;
+    CommunicatorDesc,
+    VoidDesc>;
 
 struct SignalDesc
 {

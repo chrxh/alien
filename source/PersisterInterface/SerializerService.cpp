@@ -735,7 +735,13 @@ namespace cereal
     }
     SPLIT_SERIALIZATION(CommunicatorGenomeDesc)
 
-    // Dummy struct for backward compatibility with old files that have SignalRestrictionGenomeDesc
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, VoidGenomeDesc& data)
+    {
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(VoidGenomeDesc)
     struct SignalRestrictionGenomeDescLegacy
     {
         uint8_t _mode = 0;
@@ -1564,6 +1570,14 @@ namespace cereal
         ar(data._mode);
     }
     SPLIT_SERIALIZATION(CommunicatorDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, VoidDesc& data)
+    {
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(VoidDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, StructureDesc& data)

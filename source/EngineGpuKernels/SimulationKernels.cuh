@@ -31,6 +31,7 @@ __global__ void cudaNextTimestep_cellType_detonator(SimulationData data, Simulat
 __global__ void cudaNextTimestep_cellType_digestor(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_memory(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_communicator(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_void(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data);
 __global__ void cudaNextTimestep_physics_applyFriction(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_substep1(SimulationData data);

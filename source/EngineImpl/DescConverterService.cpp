@@ -578,6 +578,9 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             }
             cellDesc._cellType = communicator;
         } break;
+        case CellType_Void: {
+            cellDesc._cellType = VoidDesc();
+        } break;
         }
 
         // Handle optional constructor field
@@ -828,6 +831,9 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
             communicatorDesc._mode = receiver;
         }
         nodeDesc._cellType = communicatorDesc;
+    } break;
+    case CellType_Void: {
+        nodeDesc._cellType = VoidGenomeDesc();
     } break;
     }
 
@@ -1174,6 +1180,8 @@ void DescConverterService::convertGenomeToTO(
                     communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
                 }
             } break;
+            case CellType_Void: {
+            } break;
             }
 
             // Handle optional constructor field
@@ -1489,6 +1497,8 @@ void DescConverterService::convertObjectToTO(
                 communicatorTO.modeData.receiver.restrictToColors = static_cast<uint16_t>(receiverDesc._restrictToColors);
                 communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
             }
+        } break;
+        case CellType_Void: {
         } break;
         }
 
