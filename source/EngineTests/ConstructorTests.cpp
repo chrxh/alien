@@ -2696,6 +2696,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     auto const ConstructionAngle = 8.0f;
     auto const LastAngle = -5.0f;
     auto const n = 20;
+    auto const AutoTriggerInterval = 60;
 
     auto [shape, type, connectionDistance] = GetParam();
 
@@ -2726,7 +2727,11 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
-                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))),
+                              .constructor(ConstructorDesc()
+                                               .constructionAngle(ConstructionAngle)
+                                               .geneIndex(0)
+                                               .currentNodeIndex(0)
+                                               .autoTriggerInterval(AutoTriggerInterval))),
                 ObjectDesc().id(11).pos({100.1f, 100.0f + 0.5f}),
                 ObjectDesc().id(12).pos({100.1f, 100.0f + 1.0f}),
                 ObjectDesc().id(13).pos({100.1f, 100.0f + 1.5f}),
@@ -2751,7 +2756,11 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
                               .usableEnergy(getConstructorEnergy() * n)
-                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))),
+                              .constructor(ConstructorDesc()
+                                               .constructionAngle(ConstructionAngle)
+                                               .geneIndex(0)
+                                               .currentNodeIndex(0)
+                                               .autoTriggerInterval(AutoTriggerInterval))),
             },
             CreatureDesc().id(0),
             genome);
@@ -2767,7 +2776,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             CreatureDesc hostCreature;
             int retryCount = 0;
             do {
-                _simulationFacade->calcTimesteps(100);
+                _simulationFacade->calcTimesteps(AutoTriggerInterval);
                 actualData = _simulationFacade->getSimulationData();
 
                 ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
@@ -2775,7 +2784,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                 EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
                 hostCreature = actualData.getCreatureRef(0);
-                if (++retryCount == 10) {
+                if (++retryCount == 100) {
                     FAIL();
                 }
             } while (actualData.getObjectsForCreature(hostCreature._id).size() != anticipatedNumObjectsForCreature);

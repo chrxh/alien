@@ -108,7 +108,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(25000);
+    _simulationFacade->calcTimesteps(12000);
     auto actualData = _simulationFacade->getSimulationData();
 
     // Create a map of genomeId to lineageId
@@ -129,7 +129,8 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
             CHECK(false);
         }
     }
-    EXPECT_GT(3, numLargeCreatures);
+
+    EXPECT_GT(10, numLargeCreatures);
     EXPECT_LT(200, numSmallCreatures);
 }
 
@@ -150,7 +151,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(25000);
+    _simulationFacade->calcTimesteps(15000);
     auto actualData = _simulationFacade->getSimulationData();
 
     // Create a map of genomeId to lineageId

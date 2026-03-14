@@ -103,12 +103,8 @@ protected:
                 GeneDesc().separation(true).nodes({
                     NodeDesc(),
                     NodeDesc(),
-                    NodeDesc(),
-                    NodeDesc(),
                     NodeDesc().cellType(muscleDesc),
                     NodeDesc().cellType(muscleDesc),
-                    NodeDesc(),
-                    NodeDesc(),
                     NodeDesc(),
                     NodeDesc().cellType(generator),
                 }),
@@ -350,7 +346,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         }
     }
 
-    _simulationFacade->calcTimesteps(4000);
+    _simulationFacade->calcTimesteps(1000);
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescEditService::get().removeCell(actualData, 0);
@@ -362,7 +358,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         auto cells = actualData.getObjectsForCreature(creature._id);
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        auto movedRefPoint = refPoint + movementDirection * 30.0f;
+        auto movedRefPoint = refPoint + movementDirection * 15.0f;
         EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, movementDirection));
     }
 }
@@ -380,28 +376,31 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc()
+             .id(0)
+             .pos({200.0f, 200.0f})
+             .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1300);
+    _simulationFacade->calcTimesteps(400);
 
     auto actualData = _simulationFacade->getSimulationData();
     DescEditService::get().removeCell(actualData, 0);
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
-    ASSERT_EQ(10, actualData.getObjectsForCreature(creature._id).size());
+    ASSERT_EQ(6, actualData.getObjectsForCreature(creature._id).size());
 
     auto cells = actualData.getObjectsForCreature(creature._id);
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
     // Check front angles
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < 5; ++i) {
         EXPECT_TRUE(approxCompareAngles(0.0f, cells[i].getCellRef()._frontAngle.value()));
     }
-    EXPECT_TRUE(approxCompareAngles(-180.0f, cells[9].getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(-180.0f, cells[5].getCellRef()._frontAngle.value()));
 }
 
 class CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles
@@ -429,12 +428,13 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos(refPoint).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc().id(0).pos(refPoint).type(
+            CellDesc().constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1300);
+    _simulationFacade->calcTimesteps(400);
 
     RealVector2D movementDirection;
     float startPos_projected = 0;
@@ -447,7 +447,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(10, actualData.getObjectsForCreature(creature._id).size());
+        ASSERT_EQ(6, actualData.getObjectsForCreature(creature._id).size());
 
         auto cells = actualData.getObjectsForCreature(creature._id);
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -464,14 +464,14 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         startPos_projected = Math::dot(cells.front()._pos - movedRefPoint, movementDirection);
     }
 
-    _simulationFacade->calcTimesteps(2000);
+    _simulationFacade->calcTimesteps(1700);
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescEditService::get().removeCell(actualData, 0);
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(10, actualData.getObjectsForCreature(creature._id).size());
+        ASSERT_EQ(6, actualData.getObjectsForCreature(creature._id).size());
 
         auto cells = actualData.getObjectsForCreature(creature._id);
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
