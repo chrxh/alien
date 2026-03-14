@@ -383,7 +383,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                         // Repulsion force on fluid from solid boundary.
                         // Factor 2/rho_f mirrors the symmetric SPH pressure factor (1/rho_f + 1/rho_f)
                         // and is proportional to solid mass so that a heavier boundary repels more strongly.
-                        auto F_on_fluid = posDelta / (-adaptedDistance) * (2.0f / max(NEAR_ZERO, object->density)) * kernel_d_val * solidMass;
+                        auto F_on_fluid = posDelta / (-adaptedDistance) * (2.0f / max(NEAR_ZERO, object->density)) * kernel_d_val * solidMass * 0.3f;
                         localF_boundary += F_on_fluid;
 
                         // Counter-force on solid: equal and opposite (Newton's 3rd law).
