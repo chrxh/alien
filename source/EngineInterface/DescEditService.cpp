@@ -470,7 +470,7 @@ void DescEditService::randomizeEnergies(Desc& description, float minEnergy, floa
     }
 
     // Step 3: Calculate connected components for free cells and structure objects, assign random energy per component
-    auto components = calcConnectedComponents(description);
+    auto components = calcConnectedComponentsForNonCells(description);
     for (auto const& component : components) {
         auto energy = NumberGenerator::get().getRandomFloat(toFloat(minEnergy), toFloat(maxEnergy));
         for (auto index : component) {
@@ -785,21 +785,21 @@ std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(Desc const& 
     return result;
 }
 
-std::vector<std::vector<size_t>> DescEditService::calcConnectedComponents(Desc const& description) const
+std::vector<std::vector<size_t>> DescEditService::calcConnectedComponentsForNonCells(Desc const& description) const
 {
     std::unordered_map<uint64_t, size_t> idToIndex;
-    std::unordered_set<size_t> nonCellIndices;
+    std::unordered_set<size_t> nonCellsIndices;
     for (size_t i = 0; i < description._objects.size(); ++i) {
         auto const& object = description._objects[i];
         idToIndex[object._id] = i;
         if (object.getObjectType() != ObjectType_Cell) {
-            nonCellIndices.insert(i);
+            nonCellsIndices.insert(i);
         }
     }
 
     std::vector<std::vector<size_t>> components;
     std::unordered_set<size_t> visited;
-    for (auto index : nonCellIndices) {
+    for (auto index : nonCellsIndices) {
         if (visited.count(index)) {
             continue;
         }
@@ -816,7 +816,7 @@ std::vector<std::vector<size_t>> DescEditService::calcConnectedComponents(Desc c
 
             for (auto const& connection : description._objects[current]._connections) {
                 auto it = idToIndex.find(connection._objectId);
-                if (it != idToIndex.end() && nonCellIndices.count(it->second) && !visited.count(it->second)) {
+                if (it != idToIndex.end() && nonCellsIndices.count(it->second) && !visited.count(it->second)) {
                     visited.insert(it->second);
                     bfsQueue.push(it->second);
                 }
