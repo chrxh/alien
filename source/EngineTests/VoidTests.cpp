@@ -87,14 +87,15 @@ TEST_F(VoidTests, destroyWhenReady_transferEnergyToNeighbors)
 
 TEST_F(VoidTests, destroyWhenReady_neighborsNotDetaching)
 {
-    auto data = Desc()
-                    .addCreature({
-                        ObjectDesc().id(1).pos({10.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).cellType(BaseDesc())),
-                        ObjectDesc().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).usableEnergy(200.0f).cellType(VoidDesc())),
-                        ObjectDesc().id(3).pos({12.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).cellType(BaseDesc())),
-                    })
-                    .addConnection(1, 2)
-                    .addConnection(2, 3);
+    auto data =
+        Desc()
+            .addCreature({
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).cellType(BaseDesc())),
+                ObjectDesc().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).usableEnergy(200.0f).cellType(VoidDesc())),
+                ObjectDesc().id(3).pos({12.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).cellType(BaseDesc())),
+            })
+            .addConnection(1, 2)
+            .addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);

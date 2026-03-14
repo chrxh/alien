@@ -2,9 +2,9 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 
-#include "ObjectConnectionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "Entities.cuh"
+#include "ObjectConnectionProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -14,7 +14,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, int objectIndex);
 };
 
 /************************************************************************/
@@ -23,19 +23,31 @@ private:
 
 __device__ __inline__ void VoidProcessor::process(SimulationData& data, SimulationStatistics& result)
 {
-    auto& operations = data.cellTypeOperations[CellType_Void];
-    auto partition = calcSystemThreadPartition(operations.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, result, operations.at(i).object);
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (!object) {
+            continue;
+        }
+        if (object->type != ObjectType_Cell) {
+            continue;
+        }
+        if (object->typeData.cell.cellType != CellType_Void) {
+            continue;
+        }
+        if (object->typeData.cell.cellState != CellState_Ready) {
+            continue;
+        }
+        if (object->typeData.cell.activationTime != 0) {
+            continue;
+        }
+        processCell(data, result, object, index);
     }
 }
 
-__device__ __inline__ void VoidProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
+__device__ __inline__ void VoidProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, int objectIndex)
 {
-    if (object->typeData.cell.cellState != CellState_Ready) {
-        return;
-    }
-
     auto totalEnergy = object->typeData.cell.usableEnergy + object->typeData.cell.rawEnergy + object->typeData.cell.reservedEnergy;
 
     if (object->numConnections > 0) {
@@ -52,6 +64,5 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
     object->typeData.cell.rawEnergy = 0;
     object->typeData.cell.reservedEnergy = 0;
 
-    auto objectIndex = static_cast<uint64_t>(object - data.entities.objects.getArray());
     ObjectConnectionProcessor::scheduleDeleteObject(data, objectIndex);
 }
