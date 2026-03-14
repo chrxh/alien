@@ -21,7 +21,7 @@ struct SimulationParameters
     int sourceOrderNumbers[MAX_SOURCES] = {};
 
     // General
-    BaseParameter<Char64> projectName = {"<unnamed>"};
+    BaseParameter<Char64> projectName = {"<unnamed simulation>"};
     LayerParameter<Char64> layerName = {{"<unnamed>"}};
     SourceParameter<Char64> sourceName = {{"<unnamed>"}};
     LayerParameter<float> layerOpacity = {{1.0f}};

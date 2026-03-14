@@ -24,7 +24,7 @@ private:
     void onNewSimulation();
 
     bool _adoptSimulationParameters = true;
-    Char64 _projectName = "<unnamed>";
+    Char64 _projectName = "<unnamed simulation>";
     int _width = 0;
     int _height = 0;
 };
