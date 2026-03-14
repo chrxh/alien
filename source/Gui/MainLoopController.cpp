@@ -481,7 +481,7 @@ void MainLoopController::processMenubar()
         [&] { EditorController::get().onInspectSelectedObjects(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
-            .name("Inspect principal genome")
+            .name("Inspect genomes")
             .keyAlt(true)
             .key(ImGuiKey_F)
             .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isGenomeInspectionPossible()),

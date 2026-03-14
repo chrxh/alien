@@ -261,7 +261,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Gene index
                 std::vector<std::string> genes;
                 for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
-                    auto text = "No. " + std::to_string(index + 1);
+                    auto text = std::to_string(index + 1) + ": " + gene._name;
                     if (index == 0) {
                         text += " (root)";
                     }

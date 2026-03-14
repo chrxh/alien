@@ -112,7 +112,7 @@ void PatternEditorWindow::processIntern()
         EditorController::get().onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Inspect principal genome");
+    AlienGui::Tooltip("Inspect genomes");
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
@@ -301,7 +301,7 @@ bool PatternEditorWindow::isObjectInspectionPossible() const
 
 bool PatternEditorWindow::isGenomeInspectionPossible() const
 {
-    return !EditorModel::get().isSelectionEmpty();
+    return EditorModel::get().getSelectionShallowData().numCreatures > 0;
 }
 
 bool PatternEditorWindow::isCopyingPossible() const
