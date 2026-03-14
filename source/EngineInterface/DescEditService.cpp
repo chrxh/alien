@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <unordered_map>
+#include <unordered_set>
+#include <queue>
 
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
@@ -457,19 +459,28 @@ void DescEditService::randomizeEnergies(Desc& description, float minEnergy, floa
         creatureEnergies[creature._id] = NumberGenerator::get().getRandomFloat(toFloat(minEnergy), toFloat(maxEnergy));
     }
 
-    // Step 2: Iterate over cells and apply stored energy values (including cells without creatureId)
-    auto const nonCreatureEnergy = NumberGenerator::get().getRandomFloat(toFloat(minEnergy), toFloat(maxEnergy));
+    // Step 2: Apply stored energy values for cells
     for (auto& object : description._objects) {
-        auto type = object.getObjectType();
-        if (type == ObjectType_Cell) {
+        if (object.getObjectType() == ObjectType_Cell) {
             auto it = creatureEnergies.find(object.getCellRef()._creatureId);
             if (it != creatureEnergies.end()) {
                 object.getCellRef()._usableEnergy = it->second;
             }
-        } else if (type == ObjectType_FreeCell) {
-            object.getFreeCellRef()._energy = nonCreatureEnergy;
-        } else if (type == ObjectType_Structure) {
-            object.getStructureRef()._energy = nonCreatureEnergy;
+        }
+    }
+
+    // Step 3: Calculate connected components for free cells and structure objects, assign random energy per component
+    auto components = calcConnectedComponents(description);
+    for (auto const& component : components) {
+        auto energy = NumberGenerator::get().getRandomFloat(toFloat(minEnergy), toFloat(maxEnergy));
+        for (auto index : component) {
+            auto& object = description._objects[index];
+            auto type = object.getObjectType();
+            if (type == ObjectType_FreeCell) {
+                object.getFreeCellRef()._energy = energy;
+            } else if (type == ObjectType_Structure) {
+                object.getStructureRef()._energy = energy;
+            }
         }
     }
 }
@@ -773,4 +784,46 @@ std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(Desc const& 
         result.emplace_back(extObject);
     }
     return result;
+}
+
+std::vector<std::vector<size_t>> DescEditService::calcConnectedComponents(Desc const& description) const
+{
+    std::unordered_map<uint64_t, size_t> idToIndex;
+    std::unordered_set<size_t> nonCellIndices;
+    for (size_t i = 0; i < description._objects.size(); ++i) {
+        auto const& object = description._objects[i];
+        idToIndex[object._id] = i;
+        if (object.getObjectType() != ObjectType_Cell) {
+            nonCellIndices.insert(i);
+        }
+    }
+
+    std::vector<std::vector<size_t>> components;
+    std::unordered_set<size_t> visited;
+    for (auto index : nonCellIndices) {
+        if (visited.count(index)) {
+            continue;
+        }
+
+        std::vector<size_t> component;
+        std::queue<size_t> bfsQueue;
+        bfsQueue.push(index);
+        visited.insert(index);
+
+        while (!bfsQueue.empty()) {
+            auto current = bfsQueue.front();
+            bfsQueue.pop();
+            component.push_back(current);
+
+            for (auto const& connection : description._objects[current]._connections) {
+                auto it = idToIndex.find(connection._objectId);
+                if (it != idToIndex.end() && nonCellIndices.count(it->second) && !visited.count(it->second)) {
+                    visited.insert(it->second);
+                    bfsQueue.push(it->second);
+                }
+            }
+        }
+        components.push_back(std::move(component));
+    }
+    return components;
 }
