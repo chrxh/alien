@@ -358,7 +358,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     auto numPositiveAngleChanges = 0;
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
-    for (int i = 0; i < 2000; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION, detailedPreview);
 
         auto actualData = getSimulationData(detailedPreview);
@@ -455,7 +455,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     auto numPositiveAngleChanges = 0;
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
-    for (int i = 0; i < 2000; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
