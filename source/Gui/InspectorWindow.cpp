@@ -345,7 +345,7 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
 
 void _InspectorWindow::processCellTypePropertiesTab(ObjectDesc& object)
 {
-    if (object.getObjectType() == ObjectType_Structure || object.getObjectType() == ObjectType_Fluid || object.getObjectType() == ObjectType_FreeCell) {
+    if (object.getObjectType() != ObjectType_Cell) {
         return;
     }
 

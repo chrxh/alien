@@ -186,7 +186,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                     }
                 }
             }
-            if (object->type == ObjectType_FreeCell || object->type == ObjectType_Structure || object->type == ObjectType_Fluid) {
+            if (object->type != ObjectType_Cell) {
                 cellState = origCellState;
             }
         }
