@@ -543,8 +543,8 @@ void DescEditService::randomizeLineageIds(Desc& description) const
 void DescEditService::randomizeGlow(Desc& description, float minGlow, float maxGlow) const
 {
     for (auto& object : description._objects) {
-        if (object.getObjectType() == ObjectType_Structure) {
-            object.getStructureRef()._glow = NumberGenerator::get().getRandomFloat(minGlow, maxGlow);
+        if (object.getObjectType() == ObjectType_Fluid) {
+            object.getFluidRef()._glow = NumberGenerator::get().getRandomFloat(minGlow, maxGlow);
         }
     }
 }

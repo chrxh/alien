@@ -454,7 +454,6 @@ struct StructureDesc
     auto operator<=>(StructureDesc const&) const = default;
 
     MEMBER(StructureDesc, float, energy, 100.0f);
-    MEMBER(StructureDesc, float, glow, 0);
 };
 
 struct FluidDesc
@@ -462,6 +461,7 @@ struct FluidDesc
     auto operator<=>(FluidDesc const&) const = default;
 
     MEMBER(FluidDesc, float, energy, 100.0f);
+    MEMBER(FluidDesc, float, glow, 0);
 };
 
 struct FreeCellDesc

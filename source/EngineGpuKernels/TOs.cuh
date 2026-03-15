@@ -395,12 +395,12 @@ struct SignalTO
 struct StructureTO
 {
     float energy;
-    float glow;
 };
 
 struct FluidTO
 {
     float energy;
+    float glow;
 };
 
 struct FreeCellTO

@@ -872,9 +872,9 @@ namespace
     auto constexpr Id_Creature_HaveMutationsApplied = 7;
 
     auto constexpr Id_Structure_Energy = 0;
-    auto constexpr Id_Structure_Glow = 1;
 
     auto constexpr Id_Fluid_Energy = 0;
+    auto constexpr Id_Fluid_Glow = 1;
 
     auto constexpr Id_FreeCell_Energy = 0;
     auto constexpr Id_FreeCell_Age = 1;
@@ -1565,7 +1565,6 @@ namespace cereal
         StructureDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Structure_Energy, data._energy, defaultObject._energy);
-        loadSave(task, auxiliaries, Id_Structure_Glow, data._glow, defaultObject._glow);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(StructureDesc)
@@ -1576,6 +1575,7 @@ namespace cereal
         FluidDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Fluid_Energy, data._energy, defaultObject._energy);
+        loadSave(task, auxiliaries, Id_Fluid_Glow, data._glow, defaultObject._glow);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(FluidDesc)

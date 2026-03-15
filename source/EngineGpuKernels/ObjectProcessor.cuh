@@ -136,7 +136,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
     for (int objectIndex = blockPartition.startIndex; objectIndex <= blockPartition.endIndex; ++objectIndex) {
         auto& object = objects.at(objectIndex);
         auto smoothingLength = smoothingLength_base;
-        auto isObjectFluid = object->isFluid();
+        auto isObjectFluid = object->type == ObjectType_Fluid;
         if (isObjectFluid) {
             smoothingLength *= 2.0f;  // Use larger smoothing length for fluids
         }
@@ -183,7 +183,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 if (!otherObject) {
                     break;
                 }
-                if ((isObjectFluid && otherObject->isFluid()) || (!isObjectFluid && !otherObject->isFluid())) {
+                if ((isObjectFluid && otherObject->type == ObjectType_Fluid) || (!isObjectFluid && otherObject->type != ObjectType_Fluid)) {
                     auto posDelta = object->pos - otherObject->pos;
 
                     data.objectMap.correctDirection(posDelta);
@@ -349,7 +349,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
 
         if (block.thread_rank() == 0) {
             F_boundary = {0, 0};
-            if (object->isFluid()) {
+            if (object->type == ObjectType_Fluid) {
                 int radiusInt = ceilf(smoothingLength * 2);
                 scanLength = radiusInt * 2 + 1;
                 cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
@@ -369,7 +369,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                 if (!otherObject) {
                     break;
                 }
-                if (!otherObject->isFluid() && otherObject != object && object->detached + otherObject->detached != 1) {
+                if (otherObject->type != ObjectType_Fluid && otherObject != object && object->detached + otherObject->detached != 1) {
 
                     auto posDelta = object->pos - otherObject->pos;
                     data.objectMap.correctDirection(posDelta);
