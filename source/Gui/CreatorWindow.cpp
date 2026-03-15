@@ -40,6 +40,12 @@ namespace
 
 void CreatorWindow::initIntern() {}
 
+namespace
+{
+    std::map<ObjectType, int> objectTypeToMaterial = {{ObjectType_Structure, 0}, {ObjectType_Fluid, 1}, {ObjectType_FreeCell, 2}};
+    std::map<ObjectType, int> materialToObjectType = {{0, ObjectType_Structure}, {1, ObjectType_Fluid}, {2, ObjectType_FreeCell}};
+}
+
 void CreatorWindow::processIntern()
 {
     AlienGui::SelectableToolbarButton(ICON_FA_SUN, _mode, CreationMode_CreateParticle, CreationMode_CreateParticle);
@@ -83,12 +89,21 @@ void CreatorWindow::processIntern()
                     .tooltip(Const::CreatorPencilRadiusTooltip),
                 &pencilWidth);
             EditorModel::get().setPencilWidth(pencilWidth);
+            int material = objectTypeToMaterial.at(_objectType);
             AlienGui::Switcher(
-                AlienGui::SwitcherParameters().name("State").textWidth(RightColumnWidth).values({"Solid", "Fluid"}).tooltip(Const::CreatorDrawingTypeTooltip),
-                _drawingType);
+                AlienGui::SwitcherParameters()
+                    .name("Material")
+                    .textWidth(RightColumnWidth)
+                    .values({"Solid", "Fluid", "Free cells"})
+                    .tooltip(Const::CreatorDrawingTypeTooltip),
+                material);
+            _objectType = materialToObjectType.at(material);
         }
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
+        if (_objectType == ObjectType_Fluid) {
+            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
+        }
         if (_mode != CreationMode_CreateParticle) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
@@ -174,6 +189,7 @@ void CreatorWindow::onDrawing()
     auto mousePos = ImGui::GetMousePos();
     auto pos = Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
 
+    auto objectTypeDesc = getObjectTypeDesc();
     auto createAlignedCircle = [&](auto pos) {
         if (EditorModel::get().getPencilWidth() > 1 + NEAR_ZERO) {
             pos.x = toFloat(toInt(pos.x));
@@ -182,7 +198,7 @@ void CreatorWindow::onDrawing()
         return DescEditService::get().createUnconnectedCircle(DescEditService::CreateUnconnectedCircleParameters()
                                                                   .center(pos)
                                                                   .radius(EditorModel::get().getPencilWidth())
-                                                                  .usableEnergy(_energy)
+                                                                  .type(objectTypeDesc)
                                                                   .stiffness(_stiffness)
                                                                   .sticky(_makeSticky)
                                                                   .cellDistance(1.0f)
@@ -216,12 +232,12 @@ void CreatorWindow::onDrawing()
             newObjects._objects.emplace_back(_drawingDescription._objects[i]);
         }
 
-        if (_drawingType == DrawingType_Solid) {
+        if (_objectType != ObjectType_Fluid) {
             DescEditService::get().reconnectObjects(newObjects, 1.5f);
         }
         _SimulationFacade::get()->addAndSelectSimulationData(std::move(newObjects));
 
-        if (_drawingType == DrawingType_Solid) {
+        if (_objectType != ObjectType_Fluid) {
             _SimulationFacade::get()->reconnectSelectedObjects();
         }
     }
@@ -246,7 +262,7 @@ void CreatorWindow::createObject()
                       .color(EditorModel::get().getDefaultColorCode())
                       .fixed(_fixed)
                       .sticky(_makeSticky)
-                      .type(StructureDesc());
+                      .type(getObjectTypeDesc());
     Desc description;
     description._objects.emplace_back(object);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
@@ -267,11 +283,10 @@ void CreatorWindow::createRectangle()
     }
 
     auto description = DescEditService::get().createRect(DescEditService::CreateRectParameters()
-                                                             .objectType(StructureDesc())
+                                                             .objectType(getObjectTypeDesc())
                                                              .width(_rectHorizontalObjects)
                                                              .height(_rectVerticalObjects)
                                                              .cellDistance(_objectDistance)
-                                                             .usableEnergy(_energy)
                                                              .stiffness(_stiffness)
                                                              .sticky(_makeSticky)
                                                              .color(EditorModel::get().getDefaultColorCode())
@@ -287,10 +302,9 @@ void CreatorWindow::createHexagon()
         return;
     }
     Desc description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
-                                                            .objectType(StructureDesc())
+                                                            .objectType(getObjectTypeDesc())
                                                             .layers(_layers)
                                                             .cellDistance(_objectDistance)
-                                                            .usableEnergy(_energy)
                                                             .stiffness(_stiffness)
                                                             .sticky(_makeSticky)
                                                             .color(EditorModel::get().getDefaultColorCode())
@@ -326,7 +340,7 @@ void CreatorWindow::createDisc()
                                                   .pos(relPos)
                                                   .color(EditorModel::get().getDefaultColorCode())
                                                   .fixed(_fixed)
-                                                  .type(StructureDesc()));
+                                                  .type(getObjectTypeDesc()));
         }
     }
 
@@ -345,6 +359,20 @@ void CreatorWindow::validateAndCorrect()
     _layers = std::max(1, _layers);
     _innerRadius = std::max(0.0f, _innerRadius);
     _outerRadius = std::max(_innerRadius, _outerRadius);
+}
+
+ObjectTypeDesc CreatorWindow::getObjectTypeDesc() const
+{
+    switch (_objectType) {
+    case ObjectType_Structure:
+        return StructureDesc().energy(_energy);
+    case ObjectType_Fluid:
+        return FluidDesc().energy(_energy).glow(_glow);
+    case ObjectType_FreeCell:
+        return FreeCellDesc().energy(_energy);
+    default:
+        CHECK(false);
+    }
 }
 
 RealVector2D CreatorWindow::getRandomPos() const

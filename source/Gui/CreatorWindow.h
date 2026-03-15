@@ -19,14 +19,6 @@ enum CreationMode_
     CreationMode_Drawing
 };
 
-using DrawingType = int;
-enum DrawingType_
-{
-    DrawingType_Solid,
-    DrawingType_Fluid,
-    DrawingType_Count
-};
-
 class CreatorWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatorWindow);
@@ -50,12 +42,15 @@ private:
 
     void validateAndCorrect();
 
+    ObjectTypeDesc getObjectTypeDesc() const;
+
     RealVector2D getRandomPos() const;
 
     float _energy = 100.0f;
     float _stiffness = 1.0f;
     bool _fixed = false;
     float _objectDistance = 1.0f;
+    float _glow = 0.0f;
     bool _makeSticky = false;
 
     //rectangle
@@ -70,7 +65,7 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
-    DrawingType _drawingType = DrawingType_Solid;
+    ObjectType _objectType = ObjectType_Structure;
     Desc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;

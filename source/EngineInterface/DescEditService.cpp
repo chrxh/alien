@@ -72,7 +72,6 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
 Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const
 {
     Desc result;
-
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result._objects.emplace_back(ObjectDesc()
                                          .pos(parameters._center)
@@ -80,7 +79,7 @@ Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters 
                                          .color(parameters._color)
                                          .fixed(parameters._fixed)
                                          .sticky(parameters._sticky)
-                                         .type(StructureDesc()));
+                                         .type(parameters._type));
         return result;
     }
 
@@ -103,7 +102,7 @@ Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters 
                                              .color(parameters._color)
                                              .fixed(parameters._fixed)
                                              .sticky(parameters._sticky)
-                                             .type(StructureDesc()));
+                                             .type(parameters._type));
         }
     }
     return result;
