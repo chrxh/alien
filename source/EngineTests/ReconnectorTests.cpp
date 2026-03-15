@@ -69,7 +69,7 @@ TEST_F(ReconnectorTests, structureMode_connectToStructure)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
 
-    // Add two connected structure cells within range (need connections so they are not fluid particles)
+    // Add two connected structure cells within range
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
     data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
     data.addConnection(10, 11);
@@ -105,8 +105,8 @@ TEST_F(ReconnectorTests, structureMode_ignoreFluidParticle)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
 
-    // Add structure cell with no connections (fluid particle) within range
-    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
+    // Add fluid particle within range
+    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(FluidDesc()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
@@ -114,7 +114,7 @@ TEST_F(ReconnectorTests, structureMode_ignoreFluidParticle)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
 
-    // Should not connect to fluid particle (structure with no connections)
+    // Should not connect to fluid particle
     EXPECT_FALSE(actualData.hasConnection(1, 10));
     EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
@@ -124,7 +124,7 @@ TEST_F(ReconnectorTests, structureMode_outOfRange)
     auto range = _parameters.reconnectorRadius.value[0];
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
 
-    // Add two connected structure cells outside range (need connections so they are not fluid particles)
+    // Add two connected structure cells outside range
     data._objects.emplace_back(ObjectDesc().id(10).pos({100.0f - range - 0.1f, 100.0f}).type(StructureDesc()));
     data._objects.emplace_back(ObjectDesc().id(11).pos({100.0f - range - 1.1f, 100.0f}).type(StructureDesc()));
     data.addConnection(10, 11);
@@ -597,7 +597,7 @@ TEST_F(ReconnectorTests, noTrigger_noAction)
     });
     data.addConnection(1, 2);
 
-    // Add two connected structure cells within range (need connections so they are not fluid particles)
+    // Add two connected structure cells within range
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
     data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
     data.addConnection(10, 11);
@@ -615,7 +615,7 @@ TEST_F(ReconnectorTests, connectsToClosest)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
 
-    // Add two connected structure cells, one closer than the other (need connections so they are not fluid particles)
+    // Add two connected structure cells, one closer than the other
     data._objects.emplace_back(ObjectDesc().id(10).pos({98.0f, 100.0f}).type(StructureDesc()));
     data._objects.emplace_back(ObjectDesc().id(11).pos({99.0f, 100.0f}).type(StructureDesc()));
     data.addConnection(10, 11);
@@ -634,7 +634,7 @@ TEST_F(ReconnectorTests, skipAlreadyConnected)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
 
-    // Add two connected structure cells within range and already connected to reconnector (need connections so they are not fluid particles)
+    // Add two connected structure cells within range and already connected to reconnector
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
     data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
     data.addConnection(10, 11);

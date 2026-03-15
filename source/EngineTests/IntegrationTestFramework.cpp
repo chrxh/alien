@@ -76,6 +76,8 @@ double IntegrationTestFramework::getEnergy(Desc const& data) const
             result += object.getFreeCellRef()._energy;
         } else if (object.getObjectType() == ObjectType_Structure) {
             result += object.getStructureRef()._energy;
+        } else if (object.getObjectType() == ObjectType_Fluid) {
+            result += object.getFluidRef()._energy;
         }
     }
     for (auto const& energyParticle : data._energies) {

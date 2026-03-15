@@ -25,8 +25,9 @@ uniform float radius;
 
 // Object type constants (matching ObjectType_ enum)
 const int ObjectType_Structure = 0;
-const int ObjectType_FreeCell = 1;
-const int ObjectType_Cell = 2;
+const int ObjectType_Fluid = 1;
+const int ObjectType_FreeCell = 2;
+const int ObjectType_Cell = 3;
 
 // Number of cell types (matching CellType_Count)
 const int CellType_Count = 13;
@@ -39,14 +40,17 @@ void main()
     // Determine texture row based on object type:
     // - ObjectType_Cell: use cell type (rows 0-12)
     // - ObjectType_Structure: row 13 ("Structure")
-    // - ObjectType_FreeCell: row 14 ("Free Cell")
+    // - ObjectType_Fluid: row 14 ("Fluid")
+    // - ObjectType_FreeCell: row 15 ("Free Cell")
     int textureRow;
     if (objectType == ObjectType_Cell) {
         textureRow = cellType;
     } else if (objectType == ObjectType_Structure) {
         textureRow = CellType_Count;  // Row 13
+    } else if (objectType == ObjectType_Fluid) {
+        textureRow = CellType_Count + 1;  // Row 14
     } else {
-        textureRow = CellType_Count + 1;  // Row 14 (ObjectType_FreeCell)
+        textureRow = CellType_Count + 2;  // Row 15 (ObjectType_FreeCell)
     }
     
     gColor = vColor[0];
@@ -65,7 +69,7 @@ void main()
     center.y = center.y - (radius * 0.25) / viewportSize.y;
     
     // Calculate texture coordinates for this row
-    // Texture atlas has 15 rows (13 cell types + 2 object types), each row is 20 pixels of texture height
+    // Texture atlas has 16 rows (13 cell types + 3 object types), each row is 20 pixels of texture height
     float texRowHeight = 20.0 / 512.0;
     float texMinY = float(textureRow) * texRowHeight;
     float texMaxY = float(textureRow + 1) * texRowHeight - 1.0 / 512.0;

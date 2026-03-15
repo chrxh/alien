@@ -466,6 +466,11 @@ struct Structure
     uint32_t numCellsInCluster;
 };
 
+struct Fluid
+{
+    float energy;
+};
+
 struct FreeCell
 {
     float energy;
@@ -528,6 +533,7 @@ struct Cell
 union ObjectTypeData
 {
     Structure structure;
+    Fluid fluid;
     FreeCell freeCell;
     Cell cell;
 };
@@ -602,12 +608,14 @@ struct Object
             return typeData.freeCell.energy;
         } else if (type == ObjectType_Structure) {
             return typeData.structure.energy;
+        } else if (type == ObjectType_Fluid) {
+            return typeData.fluid.energy;
         } else {
             return 0;
         }
     }
 
-    __device__ __inline__ bool isFluid() const { return type == ObjectType_Structure && numConnections == 0; }
+    __device__ __inline__ bool isFluid() const { return type == ObjectType_Fluid; }
 
     __device__ __inline__ float getMassForSPH() const
     {

@@ -213,6 +213,8 @@ ObjectType ObjectDesc::getObjectType() const
 {
     if (std::holds_alternative<StructureDesc>(_type)) {
         return ObjectType_Structure;
+    } else if (std::holds_alternative<FluidDesc>(_type)) {
+        return ObjectType_Fluid;
     } else if (std::holds_alternative<FreeCellDesc>(_type)) {
         return ObjectType_FreeCell;
     } else if (std::holds_alternative<CellDesc>(_type)) {
@@ -229,6 +231,16 @@ StructureDesc& ObjectDesc::getStructureRef()
 StructureDesc const& ObjectDesc::getStructureRef() const
 {
     return std::get<StructureDesc>(_type);
+}
+
+FluidDesc& ObjectDesc::getFluidRef()
+{
+    return std::get<FluidDesc>(_type);
+}
+
+FluidDesc const& ObjectDesc::getFluidRef() const
+{
+    return std::get<FluidDesc>(_type);
 }
 
 FreeCellDesc& ObjectDesc::getFreeCellRef()

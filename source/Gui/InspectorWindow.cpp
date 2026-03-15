@@ -121,6 +121,9 @@ void _InspectorWindow::processObject(ExtendedObjectDesc& extendedObject)
         if (object.getObjectType() == ObjectType_Structure) {
             processStructureTab(object);
         }
+        if (object.getObjectType() == ObjectType_Fluid) {
+            processFluidTab(object);
+        }
         validateAndCorrect(object);
 
         ImGui::EndTabBar();
@@ -342,7 +345,7 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
 
 void _InspectorWindow::processCellTypePropertiesTab(ObjectDesc& object)
 {
-    if (object.getObjectType() == ObjectType_Structure || object.getObjectType() == ObjectType_FreeCell) {
+    if (object.getObjectType() == ObjectType_Structure || object.getObjectType() == ObjectType_Fluid || object.getObjectType() == ObjectType_FreeCell) {
         return;
     }
 
@@ -755,6 +758,18 @@ void _InspectorWindow::processStructureTab(ObjectDesc& object)
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto& structure = object.getStructureRef();
             AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(BaseTabTextWidth), &structure._glow);
+        }
+        ImGui::EndChild();
+        ImGui::EndTabItem();
+    }
+}
+
+void _InspectorWindow::processFluidTab(ObjectDesc& object)
+{
+    if (ImGui::BeginTabItem("Fluid", nullptr, ImGuiTabItemFlags_None)) {
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            auto& fluid = object.getFluidRef();
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(BaseTabTextWidth), fluid._energy);
         }
         ImGui::EndChild();
         ImGui::EndTabItem();

@@ -874,6 +874,8 @@ namespace
     auto constexpr Id_Structure_Energy = 0;
     auto constexpr Id_Structure_Glow = 1;
 
+    auto constexpr Id_Fluid_Energy = 0;
+
     auto constexpr Id_FreeCell_Energy = 0;
     auto constexpr Id_FreeCell_Age = 1;
 
@@ -1567,6 +1569,16 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(StructureDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, FluidDesc& data)
+    {
+        FluidDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Fluid_Energy, data._energy, defaultObject._energy);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(FluidDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, FreeCellDesc& data)
