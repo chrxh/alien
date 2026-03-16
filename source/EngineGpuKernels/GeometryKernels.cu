@@ -167,7 +167,7 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
 
         auto idx = alienAtomicAdd64(numObjects, uint64_t(1));
         if (objectData != nullptr) {
-            int isIsolated = (object->numConnections == 0) ? 1 : 0;
+            int isIsolatedOrTail = (object->numConnections <= 1) ? 1 : 0;
 
             auto const& pos = object->pos;
 
@@ -221,8 +221,8 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
                 signalChanges = toFloat(object->typeData.cell.signalChanges) / 255.0f;
             }
 
-            // Pack cellType (bits 0-7), objectType (bits 8-15), and isIsolated (bit 16) into state field
-            objectData[idx].state = cellType | (object->type << 8) | (isIsolated << 16);
+            // Pack cellType (bits 0-7), objectType (bits 8-15), and isIsolatedOrTail (bit 16) into state field
+            objectData[idx].state = cellType | (object->type << 8) | (isIsolatedOrTail << 16);
             objectData[idx].signalChanges = signalChanges;
 
             object->tempValue.as_uint64 = idx;

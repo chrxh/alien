@@ -30,14 +30,15 @@ void main()
     // Cells are rendered in front of lines (apply negative bias to bring forward)
     gl_Position = vec4(ndc, aPos.z, 1.0);
 
-    bool isIsolated = ((state >> 16) & 0x1) == 1;
-    if (!isIsolated && zoom < 10.0) {
+    bool isIsolatedOrTail = ((state >> 16) & 0x1) == 1;
+    if (!isIsolatedOrTail && zoom < 10.0) {
         // Discard cells that have connections when zoomed out to avoid Moire patterns
         gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
     }
+    float sizeFactor = isIsolatedOrTail ? max(1.0, min(2.5, zoom * 2)): 1.0;
     
     vColor = mix(aColor, vec3(1.0), signalChanges * 0.2);
-    gl_PointSize = radius * (0.4 + signalChanges * 0.2);
+    gl_PointSize = radius * (0.4 + signalChanges * 0.2) * sizeFactor;
 }
 )";
 }
