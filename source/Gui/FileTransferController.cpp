@@ -112,17 +112,17 @@ void FileTransferController::onOpenGenomeDialog(std::function<void(GenomeDesc co
         });
 }
 
-void FileTransferController::onSaveGenomeDialog(GenomeDesc const& genome, std::function<void()> const& saveFunc)
+void FileTransferController::onSaveGenomeDialog(GenomeDesc const& genome, std::function<void()> const& afterSaveFunc)
 {
     GenericFileDialog::get().showSaveFileDialog(
-        "Save genome", "Genome (*.genome){.genome},.*", _referencePath, [&, genome = genome, saveFunc = saveFunc](std::filesystem::path const& path) {
+        "Save genome", "Genome (*.genome){.genome},.*", _referencePath, [&, genome = genome, afterSaveFunc = afterSaveFunc](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _referencePath = firstFilenameCopy.remove_filename().string();
             if (!SerializerService::get().serializeGenomeToFile(firstFilename.string(), genome)) {
                 GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
-            } else if (saveFunc) {
-                saveFunc();
+            } else if (afterSaveFunc) {
+                afterSaveFunc();
             }
         });
 }
