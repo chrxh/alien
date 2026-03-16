@@ -45,7 +45,7 @@ void main()
         // Discard cells that have connections when zoomed out to avoid Moire patterns
         gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
     }
-    float sizeFactor = isIsolatedOrTail ? max(1.0, min(2.5, zoom * 2)): 1.0;
+    float sizeFactor = isIsolatedOrTail ? max(1.0, min(2.0, zoom * 2)): 1.0;
     
     vColor = mix(aColor, vec3(1.0), signalChanges * 0.2);
     gl_PointSize = radius * (0.4 + signalChanges * 0.2) * sizeFactor;
