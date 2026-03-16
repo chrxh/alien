@@ -218,11 +218,11 @@ void GenomeEditorWindow::processTabWidget()
                 }
             }
 
-            // Add tab
-            if (_tabToAdd.has_value()) {
-                _tabs.emplace_back(_tabToAdd.value());
-                _tabToAdd.reset();
+            // Add tabs
+            for (auto& tab : _tabsToAdd) {
+                _tabs.emplace_back(std::move(tab));
             }
+            _tabsToAdd.clear();
 
             ImGui::EndTabBar();
         }
@@ -302,7 +302,7 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
 void GenomeEditorWindow::onScheduleAddTab(GenomeDesc const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::create(_genomeEditData, genome, currentTab->getLayoutData()->clone());
+    _tabsToAdd.emplace_back(_GenomeTabWidget::create(_genomeEditData, genome, currentTab->getLayoutData()->clone()));
 }
 
 void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& genomeTab)

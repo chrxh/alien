@@ -48,6 +48,6 @@ private:
     std::optional<GenomeDesc> _copiedGenome;
 
     // Actions
-    std::optional<GenomeTabWidget> _tabToAdd;
+    std::vector<GenomeTabWidget> _tabsToAdd;
     std::optional<int> _tabIndexToSelect;
 };
