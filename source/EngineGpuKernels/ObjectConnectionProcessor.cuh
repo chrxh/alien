@@ -69,6 +69,9 @@ private:
 /************************************************************************/
 __inline__ __device__ void ObjectConnectionProcessor::scheduleAddConnectionPair(SimulationData& data, Object* object1, Object* object2)
 {
+    if (object1->type == ObjectType_Fluid || object2->type == ObjectType_Fluid) {
+        return;
+    }
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::AddConnectionPair;
     operation.data.addConnection.object = object1;
