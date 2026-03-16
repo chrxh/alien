@@ -102,12 +102,12 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     }
 }
 
-CellRenderStep _ObjectRenderStep::create(StepParameters const& parameters)
+CellRenderStep _NonFluidObjectRenderStep::create(StepParameters const& parameters)
 {
-    return CellRenderStep(new _ObjectRenderStep(parameters));
+    return CellRenderStep(new _NonFluidObjectRenderStep(parameters));
 }
 
-void _ObjectRenderStep::execute(ExecutionParameters parameters)
+void _NonFluidObjectRenderStep::execute(ExecutionParameters parameters)
 {
     if (!_previousTargetSelection.has_value()) {
         parameters._clearBackground = true;
@@ -131,7 +131,7 @@ void _ObjectRenderStep::execute(ExecutionParameters parameters)
     glDisable(GL_BLEND);
 }
 
-_ObjectRenderStep::_ObjectRenderStep(StepParameters const& parameters)
+_NonFluidObjectRenderStep::_NonFluidObjectRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
 

@@ -17,7 +17,7 @@ namespace ShaderSources
     inline ShaderSource const Background{Shaders::BackgroundVS, Shaders::BackgroundFS};
     inline ShaderSource const BlurHorizontal{Shaders::BlurHorizontalVS, Shaders::BlurHorizontalFS};
     inline ShaderSource const BlurVertical{Shaders::BlurVerticalVS, Shaders::BlurVerticalFS};
-    inline ShaderSource const Object{Shaders::ObjectVS, Shaders::ObjectFS};
+    inline ShaderSource const NonFluidObject{Shaders::NonFluidObjectVS, Shaders::NonFluidObjectFS};
     inline ShaderSource const CellTypeOverlay{Shaders::CellTypeOverlayVS, Shaders::CellTypeOverlayFS, Shaders::CellTypeOverlayGS};
     inline ShaderSource const DetonationEvent{Shaders::DetonationEventVS, Shaders::DetonationEventFS, Shaders::DetonationEventGS};
     inline ShaderSource const DeNoise{Shaders::DeNoiseVS, Shaders::DeNoiseFS};

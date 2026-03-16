@@ -97,7 +97,7 @@ public:
     std::vector<unsigned int> const& getInputTextures() const { return _inputTextures; }
 };
 
-class _ObjectRenderStep : public _RenderStep
+class _NonFluidObjectRenderStep : public _RenderStep
 {
 public:
     static CellRenderStep create(StepParameters const& parameters);
@@ -106,7 +106,7 @@ protected:
     void execute(ExecutionParameters parameters) override;
 
 private:
-    _ObjectRenderStep(StepParameters const& parameters);
+    _NonFluidObjectRenderStep(StepParameters const& parameters);
 };
 
 class _LineRenderStep : public _RenderStep

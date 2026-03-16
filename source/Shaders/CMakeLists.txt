@@ -41,8 +41,8 @@ add_library(Shaders INTERFACE
     MetaballsVS.h
     ModuloCopyFS.h
     ModuloCopyVS.h
-    ObjectFS.h
-    ObjectVS.h
+    NonFluidObjectFS.h
+    NonFluidObjectVS.h
     SelectedConnectionFS.h
     SelectedConnectionGS.h
     SelectedConnectionVS.h

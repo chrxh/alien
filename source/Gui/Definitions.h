@@ -156,8 +156,8 @@ using RenderPipeline = std::shared_ptr<_RenderPipeline>;
 class _RenderStep;
 using RenderStep = std::shared_ptr<_RenderStep>;
 
-class _ObjectRenderStep;
-using CellRenderStep = std::shared_ptr<_ObjectRenderStep>;
+class _NonFluidObjectRenderStep;
+using CellRenderStep = std::shared_ptr<_NonFluidObjectRenderStep>;
 
 class _LineRenderStep;
 using LineRenderStep = std::shared_ptr<_LineRenderStep>;

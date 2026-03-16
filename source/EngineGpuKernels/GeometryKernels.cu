@@ -160,11 +160,6 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
 
-        // Fluid particles are rendered separately
-        if (object->type == ObjectType_Fluid) {
-            continue;
-        }
-
         auto idx = alienAtomicAdd64(numObjects, uint64_t(1));
         if (objectData != nullptr) {
             int isIsolatedOrTail = (object->numConnections <= 1) ? 1 : 0;
@@ -183,6 +178,8 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
                 cellType = object->typeData.cell.cellType;
             } else if (object->type == ObjectType_FreeCell) {
                 luminance = object->typeData.freeCell.energy / 300.0f;
+            } else if (object->type == ObjectType_Fluid) {
+                luminance = object->typeData.fluid.energy / 300.0f;
             } else {
                 // Structure - use energy for luminance if available
                 luminance = object->typeData.structure.energy / 300.0f;
