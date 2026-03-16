@@ -431,22 +431,11 @@ void DescEditService::reconnectObjects(Desc& description, float maxDistance) con
 
 void DescEditService::randomizeCellColors(Desc& description, std::vector<int> const& colorCodes) const
 {
-    // Step 1: Create random color value for each creature
-    std::unordered_map<uint64_t, float> cellColorsByCreatureId;
-    for (auto const& creature : description._creatures) {
-        cellColorsByCreatureId[creature._id] = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-    }
-
-    // Step 2: Iterate over cells and apply stored color values (including cells without creatureId)
-    auto nonCreatureColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-    for (auto& object : description._objects) {
-        if (object.getObjectType() == ObjectType_Cell) {
-            auto it = cellColorsByCreatureId.find(object.getCellRef()._creatureId);
-            if (it != cellColorsByCreatureId.end()) {
-                object._color = it->second;
-            }
-        } else {
-            object._color = nonCreatureColor;
+    auto clusters = calcClusters(description);
+    for (auto const& cluster : clusters) {
+        auto color = colorCodes.at(NumberGenerator::get().getRandomInt(toInt(colorCodes.size())));
+        for (auto index : cluster) {
+            description._objects.at(index)._color = color;
         }
     }
 }
@@ -465,30 +454,15 @@ void DescEditService::randomizeGenomeColors(Desc& description, std::vector<int> 
 
 void DescEditService::randomizeEnergies(Desc& description, float minEnergy, float maxEnergy) const
 {
-    // Step 1: Create random energy value for each creature
-    std::unordered_map<uint64_t, float> creatureEnergies;
-    for (auto const& creature : description._creatures) {
-        creatureEnergies[creature._id] = NumberGenerator::get().getRandomFloat(toFloat(minEnergy), toFloat(maxEnergy));
-    }
-
-    // Step 2: Apply stored energy values for cells
-    for (auto& object : description._objects) {
-        if (object.getObjectType() == ObjectType_Cell) {
-            auto it = creatureEnergies.find(object.getCellRef()._creatureId);
-            if (it != creatureEnergies.end()) {
-                object.getCellRef()._usableEnergy = it->second;
-            }
-        }
-    }
-
-    // Step 3: Calculate connected components for free cells and structure objects, assign random energy per component
-    auto components = calcConnectedComponentsForNonCells(description);
-    for (auto const& component : components) {
+    auto clusters = calcClusters(description);
+    for (auto const& cluster : clusters) {
         auto energy = NumberGenerator::get().getRandomFloat(toFloat(minEnergy), toFloat(maxEnergy));
-        for (auto index : component) {
-            auto& object = description._objects[index];
+        for (auto index : cluster) {
+            auto& object = description._objects.at(index);
             auto type = object.getObjectType();
-            if (type == ObjectType_FreeCell) {
+            if (type == ObjectType_Cell) {
+                object.getCellRef()._usableEnergy = energy;
+            } else if (type == ObjectType_FreeCell) {
                 object.getFreeCellRef()._energy = energy;
             } else if (type == ObjectType_Structure) {
                 object.getStructureRef()._energy = energy;
@@ -501,44 +475,33 @@ void DescEditService::randomizeEnergies(Desc& description, float minEnergy, floa
 
 void DescEditService::randomizeAges(Desc& description, int minAge, int maxAge) const
 {
-    // Step 1: Create random age value for each creature
-    std::unordered_map<uint64_t, int> creatureAges;
-    for (auto const& creature : description._creatures) {
-        creatureAges[creature._id] = static_cast<int>(NumberGenerator::get().getRandomFloat(toFloat(minAge), toFloat(maxAge)));
-    }
-
-    // Step 2: Iterate over cells and apply stored age values (including cells without creatureId)
-    auto nonCreatureAge = static_cast<int>(NumberGenerator::get().getRandomFloat(toFloat(minAge), toFloat(maxAge)));
-    for (auto& object : description._objects) {
-        auto type = object.getObjectType();
-        if (type == ObjectType_Cell) {
-            auto it = creatureAges.find(object.getCellRef()._creatureId);
-            if (it != creatureAges.end()) {
-                object.getCellRef()._age = it->second;
+    auto clusters = calcClusters(description);
+    for (auto const& cluster : clusters) {
+        auto age = static_cast<int>(NumberGenerator::get().getRandomFloat(toFloat(minAge), toFloat(maxAge)));
+        for (auto index : cluster) {
+            auto& object = description._objects.at(index);
+            auto type = object.getObjectType();
+            if (type == ObjectType_Cell) {
+                object.getCellRef()._age = age;
+            } else if (type == ObjectType_FreeCell) {
+                object.getFreeCellRef()._age = age;
             }
-        } else if (type == ObjectType_FreeCell) {
-            object.getFreeCellRef()._age = nonCreatureAge;
         }
     }
 }
 
 void DescEditService::randomizeCountdowns(Desc& description, int minValue, int maxValue) const
 {
-    // Step 1: Create random countdown value for each creature
-    std::unordered_map<uint64_t, int> creatureCountdowns;
-    for (auto const& creature : description._creatures) {
-        creatureCountdowns[creature._id] = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
-    }
-
-    // Step 2: Iterate over cells and apply stored countdown values (including cells without creatureId)
-    for (auto& object : description._objects) {
-        if (object.getObjectType() != ObjectType_Cell) {
-            continue;
-        }
-        if (object.getCellRef().getCellType() == CellType_Detonator) {
-            auto it = creatureCountdowns.find(object.getCellRef()._creatureId);
-            if (it != creatureCountdowns.end()) {
-                std::get<DetonatorDesc>(object.getCellRef()._cellType)._countdown = it->second;
+    auto clusters = calcClusters(description);
+    for (auto const& cluster : clusters) {
+        auto countdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
+        for (auto index : cluster) {
+            auto& object = description._objects.at(index);
+            if (object.getObjectType() != ObjectType_Cell) {
+                continue;
+            }
+            if (object.getCellRef().getCellType() == CellType_Detonator) {
+                std::get<DetonatorDesc>(object.getCellRef()._cellType)._countdown = countdown;
             }
         }
     }
@@ -554,9 +517,14 @@ void DescEditService::randomizeLineageIds(Desc& description) const
 
 void DescEditService::randomizeGlow(Desc& description, float minGlow, float maxGlow) const
 {
-    for (auto& object : description._objects) {
-        if (object.getObjectType() == ObjectType_Fluid) {
-            object.getFluidRef()._glow = NumberGenerator::get().getRandomFloat(minGlow, maxGlow);
+    auto clusters = calcClusters(description);
+    for (auto const& cluster : clusters) {
+        auto glow = NumberGenerator::get().getRandomFloat(minGlow, maxGlow);
+        for (auto index : cluster) {
+            auto& object = description._objects.at(index);
+            if (object.getObjectType() == ObjectType_Fluid) {
+                object.getFluidRef()._glow = glow;
+            }
         }
     }
 }
@@ -799,21 +767,35 @@ std::vector<ExtendedObjectOrEnergyDesc> DescEditService::getObjects(Desc const& 
     return result;
 }
 
-std::vector<std::vector<size_t>> DescEditService::calcConnectedComponentsForNonCells(Desc const& description) const
+std::vector<std::vector<size_t>> DescEditService::calcClusters(Desc const& description) const
 {
-    std::unordered_map<uint64_t, size_t> idToIndex;
-    std::unordered_set<size_t> nonCellsIndices;
+    std::vector<std::vector<size_t>> clusters;
+
+    // Step 1: Group cells by creatureId
+    std::unordered_map<uint64_t, std::vector<size_t>> cellsByCreatureId;
     for (size_t i = 0; i < description._objects.size(); ++i) {
-        auto const& object = description._objects[i];
+        auto const& object = description._objects.at(i);
+        if (object.getObjectType() == ObjectType_Cell) {
+            cellsByCreatureId[object.getCellRef()._creatureId].push_back(i);
+        }
+    }
+    for (auto& [_, indices] : cellsByCreatureId) {
+        clusters.push_back(std::move(indices));
+    }
+
+    // Step 2: For non-cell objects, find path-connected components via BFS
+    std::unordered_map<uint64_t, size_t> idToIndex;
+    std::unordered_set<size_t> nonCellIndices;
+    for (size_t i = 0; i < description._objects.size(); ++i) {
+        auto const& object = description._objects.at(i);
         idToIndex[object._id] = i;
         if (object.getObjectType() != ObjectType_Cell) {
-            nonCellsIndices.insert(i);
+            nonCellIndices.insert(i);
         }
     }
 
-    std::vector<std::vector<size_t>> components;
     std::unordered_set<size_t> visited;
-    for (auto index : nonCellsIndices) {
+    for (auto index : nonCellIndices) {
         if (visited.count(index)) {
             continue;
         }
@@ -828,15 +810,16 @@ std::vector<std::vector<size_t>> DescEditService::calcConnectedComponentsForNonC
             bfsQueue.pop();
             component.push_back(current);
 
-            for (auto const& connection : description._objects[current]._connections) {
+            for (auto const& connection : description._objects.at(current)._connections) {
                 auto it = idToIndex.find(connection._objectId);
-                if (it != idToIndex.end() && nonCellsIndices.count(it->second) && !visited.count(it->second)) {
+                if (it != idToIndex.end() && nonCellIndices.count(it->second) && !visited.count(it->second)) {
                     visited.insert(it->second);
                     bfsQueue.push(it->second);
                 }
             }
         }
-        components.push_back(std::move(component));
+        clusters.push_back(std::move(component));
     }
-    return components;
+
+    return clusters;
 }

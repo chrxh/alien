@@ -153,6 +153,7 @@ Python automation tools are available in `scripts/CLI-Tools/`:
 - **Indentation**: 4 spaces, no tabs
 - **Braces**: Allman style (opening brace on new line)
 - **Comments**: Avoid unnecessary comments - code should be self-documenting
+- **Vector access**: Always use `.at()` instead of `[]` for `std::vector` element access to enable bounds checking
 
 ### Naming Conventions
 - **Classes**: PascalCase (`SimulationFacade`)
