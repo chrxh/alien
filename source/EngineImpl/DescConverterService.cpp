@@ -594,6 +594,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
                 : std::nullopt;
             constructor._currentNodeIndex = objectTO.typeData.cell.constructor.currentNodeIndex;
             constructor._currentConcatenation = objectTO.typeData.cell.constructor.currentConcatenation;
+            constructor._currentOffspring = objectTO.typeData.cell.constructor.currentOffspring;
             constructor._currentBranch = objectTO.typeData.cell.constructor.currentBranch;
             cellDesc._constructor = constructor;
         }
@@ -1500,6 +1501,7 @@ void DescConverterService::convertObjectToTO(
             constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
             constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
             constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);
+            constructorTO.currentOffspring = static_cast<uint16_t>(constructorDesc._currentOffspring);
             constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
         }
 

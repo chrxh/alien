@@ -688,9 +688,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
                             "Otherwise, no energy will be transferred."),
                     ParameterSpec()
-                        .name("Inflow only for non-replicators")
-                        .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForNonSelfReplicators))
-                        .description("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
+                        .name("Inflow only for first offspring")
+                        .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForFirstOffspring))
+                        .description("If activated, external energy can only be transferred to constructor cells that have not yet produced any offspring. "
                                      "This option can be used to foster the evolution of additional body parts."),
                     ParameterSpec()
                         .name("Backflow")
