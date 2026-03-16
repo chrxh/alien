@@ -375,6 +375,7 @@ namespace
             } break;
             case CellType_Sensor: {
                 cellTO.cellTypeData.sensor.autoTrigger = cell.cellTypeData.sensor.autoTrigger;
+                cellTO.cellTypeData.sensor.tagForAttackers = cell.cellTypeData.sensor.tagForAttackers;
                 cellTO.cellTypeData.sensor.minRange = cell.cellTypeData.sensor.minRange;
                 cellTO.cellTypeData.sensor.maxRange = cell.cellTypeData.sensor.maxRange;
                 cellTO.cellTypeData.sensor.mode = cell.cellTypeData.sensor.mode;

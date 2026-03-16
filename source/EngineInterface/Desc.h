@@ -122,6 +122,7 @@ struct SensorDesc
     auto operator<=>(SensorDesc const&) const = default;
 
     MEMBER(SensorDesc, bool, autoTrigger, true);
+    MEMBER(SensorDesc, bool, tagForAttackers, true);
     MEMBER(SensorDesc, SensorModeDesc, mode, DetectCreatureDesc());
     MEMBER(SensorDesc, int, minRange, 0);
     MEMBER(SensorDesc, int, maxRange, 255);

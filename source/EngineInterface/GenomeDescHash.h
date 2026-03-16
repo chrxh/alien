@@ -71,6 +71,7 @@ struct std::hash<SensorGenomeDesc>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._autoTrigger);
+        hash_combine(seed, desc._tagForAttackers);
         hash_combine(seed, desc._minRange);
         hash_combine(seed, desc._maxRange);
         hash_combine(seed, desc.getMode());

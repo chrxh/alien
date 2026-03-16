@@ -97,6 +97,7 @@ struct SensorGenomeDesc
     auto operator<=>(SensorGenomeDesc const&) const = default;
 
     MEMBER(SensorGenomeDesc, bool, autoTrigger, true);
+    MEMBER(SensorGenomeDesc, bool, tagForAttackers, true);
     MEMBER(SensorGenomeDesc, SensorModeGenomeDesc, mode, DetectCreatureGenomeDesc());
     MEMBER(SensorGenomeDesc, int, minRange, 0);
     MEMBER(SensorGenomeDesc, int, maxRange, 255);

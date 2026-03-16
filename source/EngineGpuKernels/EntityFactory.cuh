@@ -157,6 +157,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 break;
             case CellType_Sensor:
                 node.cellTypeData.sensor.autoTrigger = nodeTO.cellTypeData.sensor.autoTrigger;
+                node.cellTypeData.sensor.tagForAttackers = nodeTO.cellTypeData.sensor.tagForAttackers;
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
                 node.cellTypeData.sensor.maxRange = nodeTO.cellTypeData.sensor.maxRange;
                 node.cellTypeData.sensor.mode = nodeTO.cellTypeData.sensor.mode;
@@ -428,6 +429,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         } break;
         case CellType_Sensor: {
             cell->cellTypeData.sensor.autoTrigger = cellTO.cellTypeData.sensor.autoTrigger;
+            cell->cellTypeData.sensor.tagForAttackers = cellTO.cellTypeData.sensor.tagForAttackers;
             cell->cellTypeData.sensor.minRange = cellTO.cellTypeData.sensor.minRange;
             cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;
             cell->cellTypeData.sensor.mode = cellTO.cellTypeData.sensor.mode;
@@ -773,6 +775,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         auto const& nodeSensor = node->cellTypeData.sensor;
         auto& sensor = cell.cellTypeData.sensor;
         sensor.autoTrigger = nodeSensor.autoTrigger;
+        sensor.tagForAttackers = nodeSensor.tagForAttackers;
         sensor.minRange = nodeSensor.minRange;
         sensor.maxRange = nodeSensor.maxRange;
         sensor.mode = nodeSensor.mode;

@@ -357,6 +357,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         case CellType_Sensor: {
             SensorDesc sensor;
             sensor._autoTrigger = objectTO.typeData.cell.cellTypeData.sensor.autoTrigger;
+            sensor._tagForAttackers = objectTO.typeData.cell.cellTypeData.sensor.tagForAttackers;
             sensor._minRange = objectTO.typeData.cell.cellTypeData.sensor.minRange;
             sensor._maxRange = objectTO.typeData.cell.cellTypeData.sensor.maxRange;
 
@@ -639,6 +640,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
     case CellType_Sensor: {
         SensorGenomeDesc sensorDesc;
         sensorDesc._autoTrigger = nodeTO->cellTypeData.sensor.autoTrigger;
+        sensorDesc._tagForAttackers = nodeTO->cellTypeData.sensor.tagForAttackers;
         sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
         sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
 
@@ -1001,6 +1003,7 @@ void DescConverterService::convertGenomeToTO(
                 auto const& sensorDesc = std::get<SensorGenomeDesc>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
                 sensorTO.autoTrigger = sensorDesc._autoTrigger;
+                sensorTO.tagForAttackers = sensorDesc._tagForAttackers;
                 sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
                 sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
                 sensorTO.mode = sensorDesc.getMode();
@@ -1300,6 +1303,7 @@ void DescConverterService::convertObjectToTO(
             auto const& sensorDesc = std::get<SensorDesc>(cellDesc._cellType);
             SensorTO& sensorTO = objectTO.typeData.cell.cellTypeData.sensor;
             sensorTO.autoTrigger = sensorDesc._autoTrigger;
+            sensorTO.tagForAttackers = sensorDesc._tagForAttackers;
             sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
             sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
             sensorTO.mode = sensorDesc.getMode();

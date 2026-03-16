@@ -133,6 +133,7 @@ struct SensorLastMatch
 struct Sensor
 {
     bool autoTrigger;
+    bool tagForAttackers;
     SensorMode mode;
     SensorModeData modeData;
     uint16_t minRange;
