@@ -148,14 +148,11 @@ void CreatorWindow::processIntern()
     }
     ImGui::EndChild();
 
-    AlienGui::Separator();
     auto& simInteractionController = SimulationInteractionController::get();
     if (_mode == CreationMode_Drawing) {
-        auto text = simInteractionController.isDrawMode() ? "End drawing" : "Start drawing";
-        if (AlienGui::Button(text)) {
-            simInteractionController.setDrawMode(!simInteractionController.isDrawMode());
-        }
+        simInteractionController.setDrawMode(true);
     } else {
+        AlienGui::Separator();
         simInteractionController.setDrawMode(false);
         if (AlienGui::Button("Build")) {
             if (_mode == CreationMode_CreateObject) {
