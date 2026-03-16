@@ -743,6 +743,149 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
     EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
+/**
+ * Test: tagForAttackers = true (default)
+ * The attacker should use the sensor's lastMatch when tagForAttackers is true
+ */
+TEST_F(AttackerTests, sensorTargeting_tagForAttackers_true)
+{
+    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
+    NeuralNetDesc nn;
+    nn._biases[Channels::CellTypeActivation] = 1.0f;
+
+    // Create a sensor with lastMatch pointing to creature 2, tagForAttackers = true (explicit)
+    SensorLastMatchDesc lastMatch;
+    lastMatch._creatureIdPart = 2;
+    lastMatch._pos = {100.0f, 103.0f};
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+            ObjectDesc()
+                .id(2)
+                .pos({101.0f, 100.0f})
+                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch))),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+
+    // Add target creature with matching creatureId
+    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    // Target should be attacked because tagForAttackers is true
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+}
+
+/**
+ * Test: tagForAttackers = false
+ * The attacker should NOT use the sensor's lastMatch when tagForAttackers is false
+ */
+TEST_F(AttackerTests, sensorTargeting_tagForAttackers_false)
+{
+    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
+    NeuralNetDesc nn;
+    nn._biases[Channels::CellTypeActivation] = 1.0f;
+
+    // Create a sensor with lastMatch pointing to creature 2, but tagForAttackers = false
+    SensorLastMatchDesc lastMatch;
+    lastMatch._creatureIdPart = 2;
+    lastMatch._pos = {100.0f, 103.0f};
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+            ObjectDesc()
+                .id(2)
+                .pos({101.0f, 100.0f})
+                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch))),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+
+    // Add target creature with matching creatureId
+    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
+
+    auto origTarget = data.getObjectRef(100);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget = actualData.getObjectRef(100);
+
+    // Target should NOT be attacked because tagForAttackers is false
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
+}
+
+/**
+ * Test: Multiple sensors, only one tagged for attackers
+ * When one sensor has tagForAttackers = true and another has tagForAttackers = false,
+ * only the tagged sensor's lastMatch should be used by the attacker
+ */
+TEST_F(AttackerTests, sensorTargeting_tagForAttackers_mixedSensors)
+{
+    // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
+    NeuralNetDesc nn;
+    nn._biases[Channels::CellTypeActivation] = 1.0f;
+
+    // Sensor 1: tagForAttackers = false, lastMatch points to creature 2
+    SensorLastMatchDesc lastMatch1;
+    lastMatch1._creatureIdPart = 2;
+    lastMatch1._pos = {100.0f, 103.0f};
+
+    // Sensor 2: tagForAttackers = true, lastMatch points to creature 4
+    SensorLastMatchDesc lastMatch2;
+    lastMatch2._creatureIdPart = 4;
+    lastMatch2._pos = {100.0f, 97.0f};
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
+            ObjectDesc()
+                .id(2)
+                .pos({101.0f, 100.0f})
+                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch1))),
+            ObjectDesc()
+                .id(3)
+                .pos({99.0f, 100.0f})
+                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch2))),
+        },
+        CreatureDesc().id(1));
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+
+    // Add creature 2 (should NOT be attacked - its sensor is not tagged)
+    data.add(createTargetCreature({100.0f, 103.0f}, 2), false);
+
+    // Add creature 4 (should be attacked - its sensor IS tagged)
+    data.addCreature(
+        {
+            ObjectDesc().id(200).pos({100.0f, 97.0f}).type(CellDesc().usableEnergy(100.0f)),
+        },
+        CreatureDesc().id(4));
+
+    auto origTarget1 = data.getObjectRef(100);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualTarget1 = actualData.getObjectRef(100);
+    auto actualTarget2 = actualData.getObjectRef(200);
+
+    // Creature 2 should NOT be attacked (sensor for creature 2 has tagForAttackers = false)
+    EXPECT_TRUE(approxCompare(origTarget1.getCellRef()._usableEnergy, actualTarget1.getCellRef()._usableEnergy));
+
+    // Creature 4 should be attacked (sensor for creature 4 has tagForAttackers = true)
+    EXPECT_TRUE(actualTarget2.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+}
+
 TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
 {
     // Create a neural net with a bias on Channels::CellTypeActivation to trigger the attacker
