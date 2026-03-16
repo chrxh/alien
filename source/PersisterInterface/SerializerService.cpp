@@ -903,6 +903,7 @@ namespace
     auto constexpr Id_Object_Color = 5;
     auto constexpr Id_Object_Fixed = 6;
     auto constexpr Id_Object_Sticky = 17;
+    auto constexpr Id_Object_ObjectType = 18;
 
     auto constexpr Id_Signal_Channels = 0;
     auto constexpr Id_Signal_NumTimesSent = 1;
@@ -1630,9 +1631,65 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Object_Color, data._color, defaultObject._color);
         loadSave(task, auxiliaries, Id_Object_Fixed, data._fixed, defaultObject._fixed);
         loadSave(task, auxiliaries, Id_Object_Sticky, data._sticky, defaultObject._sticky);
+
+        // Store the object type index for new format detection
+        if (task == SerializationTask::Save) {
+            int objectTypeIndex = static_cast<int>(data._type.index());
+            loadSave(task, auxiliaries, Id_Object_ObjectType, objectTypeIndex, -1);
+        }
+
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._connections, data._type);
+        if (task == SerializationTask::Save) {
+            ar(data._connections, data._type);
+        } else {
+            ar(data._connections);
+
+            auto findResult = auxiliaries.find(Id_Object_ObjectType);
+            if (findResult != auxiliaries.end()) {
+                // New format: use cereal's default variant deserialization
+                ar(data._type);
+            } else {
+                // Old format: variant was std::variant<StructureDesc, FreeCellDesc, CellDesc>
+                // New format: variant is std::variant<StructureDesc, FluidDesc, FreeCellDesc, CellDesc>
+                // Read the old variant index and remap
+                std::int32_t oldIndex;
+                ar(oldIndex);
+
+                switch (oldIndex) {
+                case 0: {
+                    // Old StructureDesc (map had IDs 0=energy, 1=glow, same as new FluidDesc)
+                    FluidDesc fluidDesc;
+                    ar(fluidDesc);
+
+                    if (data._connections.empty()) {
+                        data._type = fluidDesc;
+                    } else {
+                        StructureDesc structDesc;
+                        structDesc._energy = fluidDesc._energy;
+                        data._type = structDesc;
+                    }
+                    break;
+                }
+                case 1: {
+                    // Old FreeCellDesc (index shifted from 1 to 2)
+                    FreeCellDesc desc;
+                    ar(desc);
+                    data._type = desc;
+                    break;
+                }
+                case 2: {
+                    // Old CellDesc (index shifted from 2 to 3)
+                    CellDesc desc;
+                    ar(desc);
+                    data._type = desc;
+                    break;
+                }
+                default:
+                    CHECK(false);
+                }
+            }
+        }
     }
     SPLIT_SERIALIZATION(ObjectDesc)
 
