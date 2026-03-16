@@ -417,9 +417,15 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _cellTypeTextureAtlas);
 
-    // Draw overlay points (geometry shader will convert to textured quads)
+    // Draw overlay points for non-fluid objects (geometry shader will convert to textured quads)
+    _shader->setInt("fluidMode", 0);
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().objects));
+
+    // Draw overlay points for fluid particles
+    _shader->setInt("fluidMode", 1);
+    glBindVertexArray(parameters._geometryBuffers->getVaoForFluidParticles());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().fluidParticles));
 
     // Disable blending
     glDisable(GL_BLEND);

@@ -21,13 +21,21 @@ uniform vec2 rectLowerRight;
 uniform float zoom;
 uniform float radius;
 uniform vec2 viewportSize;
+uniform int fluidMode;
+
+const int ObjectType_Fluid = 1;
 
 void main()
 {
     vColor = aColor;
-    // Unpack cellType (bits 0-7) and objectType (bits 8-15)
-    vCellType = aState & 0xFF;
-    vObjectType = (aState >> 8) & 0xFF;
+    if (fluidMode == 1) {
+        vCellType = 0;
+        vObjectType = ObjectType_Fluid;
+    } else {
+        // Unpack cellType (bits 0-7) and objectType (bits 8-15)
+        vCellType = aState & 0xFF;
+        vObjectType = (aState >> 8) & 0xFF;
+    }
     vWorldPos = aPos.xy;
     
     // Transform world position to normalized device coordinates
