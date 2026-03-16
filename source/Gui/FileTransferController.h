@@ -19,7 +19,7 @@ public:
     void onSaveSimulationDialog();
 
     void onOpenGenomeDialog(std::function<void(GenomeDesc const&)> const& openFunc);
-    void onSaveGenomeDialog(GenomeDesc const& genome);
+    void onSaveGenomeDialog(GenomeDesc const& genome, std::function<void()> const& saveFunc = nullptr);
 
 private:
     void init() override;
