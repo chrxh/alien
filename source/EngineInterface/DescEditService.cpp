@@ -779,7 +779,7 @@ std::vector<std::vector<size_t>> DescEditService::calcClusters(Desc const& descr
             cellsByCreatureId[object.getCellRef()._creatureId].push_back(i);
         }
     }
-    for (auto& [creatureId, indices] : cellsByCreatureId) {
+    for (auto& [_, indices] : cellsByCreatureId) {
         clusters.push_back(std::move(indices));
     }
 
