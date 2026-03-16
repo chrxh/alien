@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    std::string_view const ObjectFS = R"(
+    std::string_view const NonFluidObjectFS = R"(
 #version 330 core
 out vec4 FragColor;
 

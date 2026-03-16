@@ -294,7 +294,7 @@ void SimulationView::setupRenderPipeline()
                 //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::SubsurfaceScatter)),
             }),
             RenderSequence().steps({
-                _ObjectRenderStep::create(StepParameters().shader(ShaderSources::Object)),
+                _NonFluidObjectRenderStep::create(StepParameters().shader(ShaderSources::NonFluidObject)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
                 _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
             }),
