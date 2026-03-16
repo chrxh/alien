@@ -68,7 +68,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
-        if (object->fixed || object->type == ObjectType_Structure) {
+        if (object->fixed || object->type == ObjectType_Structure || object->type == ObjectType_Fluid) {
             continue;
         }
         uint32_t* age = nullptr;
@@ -186,7 +186,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                     }
                 }
             }
-            if (object->type == ObjectType_FreeCell || object->type == ObjectType_Structure) {
+            if (object->type != ObjectType_Cell) {
                 cellState = origCellState;
             }
         }

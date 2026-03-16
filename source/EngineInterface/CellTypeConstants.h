@@ -19,6 +19,7 @@ using ObjectType = int;
 enum ObjectType_
 {
     ObjectType_Structure,
+    ObjectType_Fluid,
     ObjectType_FreeCell,
     ObjectType_Cell,
     ObjectType_Count,
@@ -62,6 +63,7 @@ namespace Const
 
     std::vector<std::string> const ObjectTypeStrings = {
         "Structure",
+        "Fluid",
         "Free Cell",
         "Cell"};
 }

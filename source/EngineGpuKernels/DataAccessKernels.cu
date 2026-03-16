@@ -313,7 +313,9 @@ namespace
 
         if (object->type == ObjectType_Structure) {
             objectTO.typeData.structure.energy = object->typeData.structure.energy;
-            objectTO.typeData.structure.glow = object->typeData.structure.glow;
+        } else if (object->type == ObjectType_Fluid) {
+            objectTO.typeData.fluid.energy = object->typeData.fluid.energy;
+            objectTO.typeData.fluid.glow = object->typeData.fluid.glow;
         } else if (object->type == ObjectType_FreeCell) {
             objectTO.typeData.freeCell.energy = object->typeData.freeCell.energy;
             objectTO.typeData.freeCell.age = object->typeData.freeCell.age;

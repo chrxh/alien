@@ -454,7 +454,6 @@ struct Creature
 struct Structure
 {
     float energy;
-    float glow;
 
     // Cluster data
     uint32_t clusterIndex;
@@ -464,6 +463,12 @@ struct Structure
     float clusterAngularMomentum;
     float clusterAngularMass;
     uint32_t numCellsInCluster;
+};
+
+struct Fluid
+{
+    float energy;
+    float glow;
 };
 
 struct FreeCell
@@ -528,6 +533,7 @@ struct Cell
 union ObjectTypeData
 {
     Structure structure;
+    Fluid fluid;
     FreeCell freeCell;
     Cell cell;
 };
@@ -602,16 +608,16 @@ struct Object
             return typeData.freeCell.energy;
         } else if (type == ObjectType_Structure) {
             return typeData.structure.energy;
+        } else if (type == ObjectType_Fluid) {
+            return typeData.fluid.energy;
         } else {
             return 0;
         }
     }
 
-    __device__ __inline__ bool isFluid() const { return type == ObjectType_Structure && numConnections == 0; }
-
     __device__ __inline__ float getMassForSPH() const
     {
-        if (isFluid()) {
+        if (type == ObjectType_Fluid) {
             return 0.1f;
         } else {
             return 1.0f;

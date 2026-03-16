@@ -306,12 +306,17 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
     result._sticky = objectTO.sticky;
     result._color = objectTO.color;
 
-    // Handle object type: Structure, FreeCell, or Cell
+    // Handle object type: Structure, Fluid, FreeCell, or Cell
     if (objectTO.type == ObjectType_Structure) {
         StructureDesc structureDesc;
         structureDesc._energy = objectTO.typeData.structure.energy;
-        structureDesc._glow = objectTO.typeData.structure.glow;
         result._type = structureDesc;
+
+    } else if (objectTO.type == ObjectType_Fluid) {
+        FluidDesc fluidDesc;
+        fluidDesc._energy = objectTO.typeData.fluid.energy;
+        fluidDesc._glow = objectTO.typeData.fluid.glow;
+        result._type = fluidDesc;
 
     } else if (objectTO.type == ObjectType_FreeCell) {
         FreeCellDesc freeCellDesc;
@@ -1237,11 +1242,14 @@ void DescConverterService::convertObjectToTO(
     // Set object type
     objectTO.type = objectDesc.getObjectType();
 
-    // Handle Structure and FreeCell object types
+    // Handle Structure, Fluid, and FreeCell object types
     if (objectTO.type == ObjectType_Structure) {
         StructureDesc const& structureDesc = objectDesc.getStructureRef();
         objectTO.typeData.structure.energy = structureDesc._energy;
-        objectTO.typeData.structure.glow = structureDesc._glow;
+    } else if (objectTO.type == ObjectType_Fluid) {
+        FluidDesc const& fluidDesc = objectDesc.getFluidRef();
+        objectTO.typeData.fluid.energy = fluidDesc._energy;
+        objectTO.typeData.fluid.glow = fluidDesc._glow;
     } else if (objectTO.type == ObjectType_FreeCell) {
         FreeCellDesc const& freeCellDesc = objectDesc.getFreeCellRef();
         objectTO.typeData.freeCell.energy = freeCellDesc._energy;

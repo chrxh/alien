@@ -29,6 +29,8 @@ public:
     {
         if (objectType == ObjectType_Structure) {
             return StructureDesc();
+        } else if (objectType == ObjectType_Fluid) {
+            return FluidDesc();
         } else if (objectType == ObjectType_FreeCell) {
             return FreeCellDesc();
         } else {

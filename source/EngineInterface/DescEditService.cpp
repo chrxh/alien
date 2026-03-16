@@ -72,7 +72,6 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
 Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const
 {
     Desc result;
-
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result._objects.emplace_back(ObjectDesc()
                                          .pos(parameters._center)
@@ -80,7 +79,7 @@ Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters 
                                          .color(parameters._color)
                                          .fixed(parameters._fixed)
                                          .sticky(parameters._sticky)
-                                         .type(StructureDesc()));
+                                         .type(parameters._type));
         return result;
     }
 
@@ -103,7 +102,7 @@ Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters 
                                              .color(parameters._color)
                                              .fixed(parameters._fixed)
                                              .sticky(parameters._sticky)
-                                             .type(StructureDesc()));
+                                             .type(parameters._type));
         }
     }
     return result;
@@ -480,6 +479,8 @@ void DescEditService::randomizeEnergies(Desc& description, float minEnergy, floa
                 object.getFreeCellRef()._energy = energy;
             } else if (type == ObjectType_Structure) {
                 object.getStructureRef()._energy = energy;
+            } else if (type == ObjectType_Fluid) {
+                object.getFluidRef()._energy = energy;
             }
         }
     }
@@ -541,8 +542,8 @@ void DescEditService::randomizeLineageIds(Desc& description) const
 void DescEditService::randomizeGlow(Desc& description, float minGlow, float maxGlow) const
 {
     for (auto& object : description._objects) {
-        if (object.getObjectType() == ObjectType_Structure) {
-            object.getStructureRef()._glow = NumberGenerator::get().getRandomFloat(minGlow, maxGlow);
+        if (object.getObjectType() == ObjectType_Fluid) {
+            object.getFluidRef()._glow = NumberGenerator::get().getRandomFloat(minGlow, maxGlow);
         }
     }
 }

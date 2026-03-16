@@ -61,8 +61,8 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             }
 
             if (reconnectorMode == ReconnectorMode_Structure) {
-                // Connect to structure cells only (skip fluid particles)
-                if (otherObject->type != ObjectType_Structure || otherObject->isFluid()) {
+                // Connect to structure cells only
+                if (otherObject->type != ObjectType_Structure) {
                     return;
                 }
             } else if (reconnectorMode == ReconnectorMode_FreeCell) {

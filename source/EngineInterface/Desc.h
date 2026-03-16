@@ -454,7 +454,14 @@ struct StructureDesc
     auto operator<=>(StructureDesc const&) const = default;
 
     MEMBER(StructureDesc, float, energy, 100.0f);
-    MEMBER(StructureDesc, float, glow, 0);
+};
+
+struct FluidDesc
+{
+    auto operator<=>(FluidDesc const&) const = default;
+
+    MEMBER(FluidDesc, float, energy, 100.0f);
+    MEMBER(FluidDesc, float, glow, 0);
 };
 
 struct FreeCellDesc
@@ -506,7 +513,7 @@ struct CellDesc
     CellType getCellType() const;
 };
 
-using ObjectTypeDesc = std::variant<StructureDesc, FreeCellDesc, CellDesc>;
+using ObjectTypeDesc = std::variant<StructureDesc, FluidDesc, FreeCellDesc, CellDesc>;
 
 struct ObjectDesc
 {
@@ -528,6 +535,8 @@ struct ObjectDesc
 
     StructureDesc& getStructureRef();
     StructureDesc const& getStructureRef() const;
+    FluidDesc& getFluidRef();
+    FluidDesc const& getFluidRef() const;
     FreeCellDesc& getFreeCellRef();
     FreeCellDesc const& getFreeCellRef() const;
     CellDesc& getCellRef();

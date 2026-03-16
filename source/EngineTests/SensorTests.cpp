@@ -953,7 +953,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     auto actualSensor = actualData.getObjectRef(1);
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
-    // Add structure cells between sensor and target to block the ray (need connections so they are not fluid particles)
+    // Add structure cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 30; ++i) {
         actualData._objects.emplace_back(ObjectDesc().id(50 + i).pos({85.0f + i, 70.0f}).type(StructureDesc()));
@@ -1040,9 +1040,9 @@ TEST_F(SensorTests, detectStructure_ignoreFluidParticles)
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    // Add structure cells with no connections (fluid particles) - should be ignored
+    // Add fluid particles - should be ignored
     for (int i = 0; i < 20; ++i) {
-        data._objects.emplace_back(ObjectDesc().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(StructureDesc()));
+        data._objects.emplace_back(ObjectDesc().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(FluidDesc()));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1051,7 +1051,7 @@ TEST_F(SensorTests, detectStructure_ignoreFluidParticles)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    // Should not find anything because only fluid particles (structure with no connections) are present
+    // Should not find anything because only fluid particles are present
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
@@ -1068,9 +1068,9 @@ TEST_F(SensorTests, rayNotBlockedByFluidParticles)
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    // Add fluid particles (structure with no connections) between sensor and target - should not block ray
+    // Add fluid particles between sensor and target - should not block ray
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 50.0f}).type(StructureDesc()));
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 50.0f}).type(FluidDesc()));
     }
 
     // Add free cell target behind the fluid particles

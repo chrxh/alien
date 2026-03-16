@@ -160,8 +160,8 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
 
-        // Isolated structures (no connections) are rendered as fluid particles instead
-        if (object->type == ObjectType_Structure && object->numConnections == 0) {
+        // Fluid particles are rendered separately
+        if (object->type == ObjectType_Fluid) {
             continue;
         }
 
@@ -350,16 +350,16 @@ __global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleV
         }
     }
 
-    // Process isolated structure objects (no connections) - render them like energy particles
+    // Process fluid objects - render them like energy particles
     {
         auto const& objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
         for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
             auto const& object = data.entities.objects.at(index);
-            if (object->type != ObjectType_Structure || object->numConnections != 0) {
+            if (object->type != ObjectType_Fluid) {
                 continue;
             }
 
-            float intensity = (object->typeData.structure.energy + 5.0f) / 200.0f;
+            float intensity = (object->typeData.fluid.energy + 5.0f) / 200.0f;
             if (object->selected) {
                 intensity *= 2.5f;
             }
@@ -373,7 +373,7 @@ __global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleV
                 fluidParticleData[idx].color[0] = intensity * toFloat((color >> 16) & 0xff) / 255;
                 fluidParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;
                 fluidParticleData[idx].color[2] = intensity * toFloat(color & 0xff) / 255;
-                fluidParticleData[idx].glow = object->typeData.structure.glow;
+                fluidParticleData[idx].glow = object->typeData.fluid.glow;
             }
         }
     }

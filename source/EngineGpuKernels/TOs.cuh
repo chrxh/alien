@@ -395,6 +395,11 @@ struct SignalTO
 struct StructureTO
 {
     float energy;
+};
+
+struct FluidTO
+{
+    float energy;
     float glow;
 };
 
@@ -442,6 +447,7 @@ struct CellTO
 union ObjectTypeDataTO
 {
     StructureTO structure;
+    FluidTO fluid;
     FreeCellTO freeCell;
     CellTO cell;
 };

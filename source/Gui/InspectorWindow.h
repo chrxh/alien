@@ -43,6 +43,7 @@ private:
     void processDetonatorContent(DetonatorDesc& detonator);
 
     void processStructureTab(ObjectDesc& object);
+    void processFluidTab(ObjectDesc& object);
 
     void processParticle(EnergyDesc particle);
 
