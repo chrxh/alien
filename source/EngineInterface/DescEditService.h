@@ -121,7 +121,7 @@ public:
     void removeCellIf(Desc& collection, std::function<bool(ObjectDesc const&)> const& predicate) const;
 
 private:
-    std::vector<std::vector<size_t>> calcConnectedComponentsForNonCells(Desc const& description) const;
+    std::vector<std::vector<size_t>> calcClusters(Desc const& description) const;
 
     bool isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance) const;
 };
