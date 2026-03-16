@@ -433,9 +433,9 @@ void DescEditService::randomizeCellColors(Desc& description, std::vector<int> co
 {
     auto clusters = calcClusters(description);
     for (auto const& cluster : clusters) {
-        auto color = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
+        auto color = colorCodes.at(NumberGenerator::get().getRandomInt(toInt(colorCodes.size())));
         for (auto index : cluster) {
-            description._objects[index]._color = color;
+            description._objects.at(index)._color = color;
         }
     }
 }
@@ -458,7 +458,7 @@ void DescEditService::randomizeEnergies(Desc& description, float minEnergy, floa
     for (auto const& cluster : clusters) {
         auto energy = NumberGenerator::get().getRandomFloat(toFloat(minEnergy), toFloat(maxEnergy));
         for (auto index : cluster) {
-            auto& object = description._objects[index];
+            auto& object = description._objects.at(index);
             auto type = object.getObjectType();
             if (type == ObjectType_Cell) {
                 object.getCellRef()._usableEnergy = energy;
@@ -479,7 +479,7 @@ void DescEditService::randomizeAges(Desc& description, int minAge, int maxAge) c
     for (auto const& cluster : clusters) {
         auto age = static_cast<int>(NumberGenerator::get().getRandomFloat(toFloat(minAge), toFloat(maxAge)));
         for (auto index : cluster) {
-            auto& object = description._objects[index];
+            auto& object = description._objects.at(index);
             auto type = object.getObjectType();
             if (type == ObjectType_Cell) {
                 object.getCellRef()._age = age;
@@ -496,7 +496,7 @@ void DescEditService::randomizeCountdowns(Desc& description, int minValue, int m
     for (auto const& cluster : clusters) {
         auto countdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
         for (auto index : cluster) {
-            auto& object = description._objects[index];
+            auto& object = description._objects.at(index);
             if (object.getObjectType() != ObjectType_Cell) {
                 continue;
             }
@@ -521,7 +521,7 @@ void DescEditService::randomizeGlow(Desc& description, float minGlow, float maxG
     for (auto const& cluster : clusters) {
         auto glow = NumberGenerator::get().getRandomFloat(minGlow, maxGlow);
         for (auto index : cluster) {
-            auto& object = description._objects[index];
+            auto& object = description._objects.at(index);
             if (object.getObjectType() == ObjectType_Fluid) {
                 object.getFluidRef()._glow = glow;
             }
@@ -774,7 +774,7 @@ std::vector<std::vector<size_t>> DescEditService::calcClusters(Desc const& descr
     // Step 1: Group cells by creatureId
     std::unordered_map<uint64_t, std::vector<size_t>> cellsByCreatureId;
     for (size_t i = 0; i < description._objects.size(); ++i) {
-        auto const& object = description._objects[i];
+        auto const& object = description._objects.at(i);
         if (object.getObjectType() == ObjectType_Cell) {
             cellsByCreatureId[object.getCellRef()._creatureId].push_back(i);
         }
@@ -787,7 +787,7 @@ std::vector<std::vector<size_t>> DescEditService::calcClusters(Desc const& descr
     std::unordered_map<uint64_t, size_t> idToIndex;
     std::unordered_set<size_t> nonCellIndices;
     for (size_t i = 0; i < description._objects.size(); ++i) {
-        auto const& object = description._objects[i];
+        auto const& object = description._objects.at(i);
         idToIndex[object._id] = i;
         if (object.getObjectType() != ObjectType_Cell) {
             nonCellIndices.insert(i);
@@ -810,7 +810,7 @@ std::vector<std::vector<size_t>> DescEditService::calcClusters(Desc const& descr
             bfsQueue.pop();
             component.push_back(current);
 
-            for (auto const& connection : description._objects[current]._connections) {
+            for (auto const& connection : description._objects.at(current)._connections) {
                 auto it = idToIndex.find(connection._objectId);
                 if (it != idToIndex.end() && nonCellIndices.count(it->second) && !visited.count(it->second)) {
                     visited.insert(it->second);
