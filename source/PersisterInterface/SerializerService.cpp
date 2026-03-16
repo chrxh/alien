@@ -1632,7 +1632,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Object_Fixed, data._fixed, defaultObject._fixed);
         loadSave(task, auxiliaries, Id_Object_Sticky, data._sticky, defaultObject._sticky);
 
-        // Store the object type index for new format detection
+        // Store the object type index for new format detection (only used during save, default value unused)
         if (task == SerializationTask::Save) {
             int objectTypeIndex = static_cast<int>(data._type.index());
             loadSave(task, auxiliaries, Id_Object_ObjectType, objectTypeIndex, -1);
@@ -1653,12 +1653,13 @@ namespace cereal
                 // Old format: variant was std::variant<StructureDesc, FreeCellDesc, CellDesc>
                 // New format: variant is std::variant<StructureDesc, FluidDesc, FreeCellDesc, CellDesc>
                 // Read the old variant index and remap
-                std::int32_t oldIndex;
-                ar(oldIndex);
+                std::int32_t legacyObjectTypeIndex;
+                ar(legacyObjectTypeIndex);
 
-                switch (oldIndex) {
+                switch (legacyObjectTypeIndex) {
                 case 0: {
                     // Old StructureDesc (map had IDs 0=energy, 1=glow, same as new FluidDesc)
+                    // Connectionless objects become FluidDesc (preserving glow); connected objects remain StructureDesc (glow discarded)
                     FluidDesc fluidDesc;
                     ar(fluidDesc);
 
