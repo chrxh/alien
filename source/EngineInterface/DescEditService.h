@@ -16,6 +16,7 @@ public:
         MEMBER(CreateRectParameters, int, height, 10);
         MEMBER(CreateRectParameters, ObjectTypeDesc, objectType, StructureDesc());
         MEMBER(CreateRectParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateRectParameters, bool, connectObjects, true);
         MEMBER(CreateRectParameters, float, stiffness, 1.0f);
         MEMBER(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateRectParameters, bool, sticky, false);
@@ -29,6 +30,7 @@ public:
         MEMBER(CreateHexParameters, int, layers, 10);
         MEMBER(CreateHexParameters, ObjectTypeDesc, objectType, StructureDesc());
         MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateHexParameters, bool, connectObjects, true);
         MEMBER(CreateHexParameters, float, stiffness, 1.0f);
         MEMBER(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateHexParameters, bool, sticky, false);
@@ -37,18 +39,19 @@ public:
     };
     Desc createHex(CreateHexParameters const& parameters) const;
 
-    struct CreateUnconnectedCircleParameters
+    struct CreateCircleParameters
     {
-        MEMBER(CreateUnconnectedCircleParameters, ObjectTypeDesc, type, StructureDesc());
-        MEMBER(CreateUnconnectedCircleParameters, float, radius, 3.0f);
-        MEMBER(CreateUnconnectedCircleParameters, float, cellDistance, 1.0f);
-        MEMBER(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
-        MEMBER(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER(CreateUnconnectedCircleParameters, int, color, 0);
-        MEMBER(CreateUnconnectedCircleParameters, bool, fixed, false);
-        MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
+        MEMBER(CreateCircleParameters, ObjectTypeDesc, type, StructureDesc());
+        MEMBER(CreateCircleParameters, float, radius, 3.0f);
+        MEMBER(CreateCircleParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateCircleParameters, bool, connectObjects, true);
+        MEMBER(CreateCircleParameters, float, stiffness, 1.0f);
+        MEMBER(CreateCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER(CreateCircleParameters, int, color, 0);
+        MEMBER(CreateCircleParameters, bool, fixed, false);
+        MEMBER(CreateCircleParameters, bool, sticky, false);
     };
-    Desc createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;
+    Desc createCircle(CreateCircleParameters const& parameters) const;
 
     void duplicate(Desc& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
 

@@ -89,16 +89,16 @@ void CreatorWindow::processIntern()
                     .tooltip(Const::CreatorPencilRadiusTooltip),
                 &pencilWidth);
             EditorModel::get().setPencilWidth(pencilWidth);
-            int material = objectTypeToMaterial.at(_objectType);
-            AlienGui::Switcher(
-                AlienGui::SwitcherParameters()
-                    .name("Material")
-                    .textWidth(RightColumnWidth)
-                    .values({"Solid", "Fluid", "Free cells"})
-                    .tooltip(Const::CreatorDrawingTypeTooltip),
-                material);
-            _objectType = materialToObjectType.at(material);
         }
+        int material = objectTypeToMaterial.at(_objectType);
+        AlienGui::Switcher(
+            AlienGui::SwitcherParameters()
+                .name("Material")
+                .textWidth(RightColumnWidth)
+                .values({"Solid", "Fluid", "Free cells"})
+                .tooltip(Const::CreatorDrawingTypeTooltip),
+            material);
+        _objectType = materialToObjectType.at(material);
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
         if (_objectType == ObjectType_Fluid) {
@@ -148,14 +148,11 @@ void CreatorWindow::processIntern()
     }
     ImGui::EndChild();
 
-    AlienGui::Separator();
     auto& simInteractionController = SimulationInteractionController::get();
     if (_mode == CreationMode_Drawing) {
-        auto text = simInteractionController.isDrawMode() ? "End drawing" : "Start drawing";
-        if (AlienGui::Button(text)) {
-            simInteractionController.setDrawMode(!simInteractionController.isDrawMode());
-        }
+        simInteractionController.setDrawMode(true);
     } else {
+        AlienGui::Separator();
         simInteractionController.setDrawMode(false);
         if (AlienGui::Button("Build")) {
             if (_mode == CreationMode_CreateObject) {
@@ -195,7 +192,7 @@ void CreatorWindow::onDrawing()
             pos.x = toFloat(toInt(pos.x));
             pos.y = toFloat(toInt(pos.y));
         }
-        return DescEditService::get().createUnconnectedCircle(DescEditService::CreateUnconnectedCircleParameters()
+        return DescEditService::get().createCircle(DescEditService::CreateCircleParameters()
                                                                   .center(pos)
                                                                   .radius(EditorModel::get().getPencilWidth())
                                                                   .type(objectTypeDesc)
@@ -203,7 +200,8 @@ void CreatorWindow::onDrawing()
                                                                   .sticky(_makeSticky)
                                                                   .cellDistance(1.0f)
                                                                   .color(EditorModel::get().getDefaultColorCode())
-                                                                  .fixed(_fixed));
+                                                                  .fixed(_fixed)
+                                                                  .connectObjects(false));
     };
 
     auto prevObjectCount = _drawingDescription._objects.size();
@@ -311,6 +309,7 @@ void CreatorWindow::createHexagon()
                                                             .center(getRandomPos())
                                                             .fixed(_fixed));
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
+    DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
 }
 
 void CreatorWindow::createDisc()
