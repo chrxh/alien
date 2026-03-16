@@ -149,6 +149,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 if (!constructionData.isSeparation) {
                     ++constructor.currentBranch;
                 } else {
+                    ++constructor.currentOffspring;
                     if (constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
                         constructor.provideEnergy = ProvideEnergy_CellOnly;
                     }
@@ -799,8 +800,8 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     if (cudaSimulationParameters.externalEnergyControlToggle.value && hostObject->typeData.cell.usableEnergy < requiredEnergy + normalCellEnergy
         && cudaSimulationParameters.externalEnergyInflowFactor.value[hostObject->color] > 0) {
         auto externalEnergyPortion = [&] {
-            if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
-                return !constructionData.isSeparation && !ConstructorHelper::isFinished(hostObject->typeData.cell.constructor, *constructionData.creature->genome)
+            if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value) {
+                return hostObject->typeData.cell.constructor.currentOffspring == 0
                     ? requiredEnergy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostObject->color]
                     : 0.0f;
             } else {
@@ -826,8 +827,10 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         if (!cudaSimulationParameters.externalEnergyControlToggle.value) {
             return 0.0f;
         }
-        if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
-            return !constructionData.isSeparation ? cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostObject->color] : 0.0f;
+        if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value) {
+            return hostObject->typeData.cell.constructor.currentOffspring == 0
+                ? cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostObject->color]
+                : 0.0f;
         } else {
             return cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostObject->color];
         }

@@ -3597,3 +3597,113 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_preventZeroAngles)
     EXPECT_TRUE(approxCompare(300.0f, actualData.getConnectionRef(3, 2)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(60.0f, actualData.getConnectionRef(3, constructedCell._id)._angleFromPrevious));
 }
+
+TEST_F(ConstructorTests, currentOffspring_initiallyZero)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentBranch(0))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto hostObject = actualData.getObjectRef(0);
+    auto hostConstructor = hostObject.getCellRef()._constructor.value();
+    EXPECT_EQ(0, hostConstructor._currentOffspring);
+}
+
+TEST_F(ConstructorTests, currentOffspring_incrementedAfterSeparation)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+    ASSERT_EQ(2, actualData._creatures.size());
+
+    auto hostObject = actualData.getObjectRef(0);
+    auto hostConstructor = hostObject.getCellRef()._constructor.value();
+    EXPECT_EQ(1, hostConstructor._currentOffspring);
+}
+
+TEST_F(ConstructorTests, currentOffspring_notIncrementedWithoutSeparation)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().separation(false).numBranches(1).nodes({NodeDesc(), NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto hostObject = actualData.getObjectRef(0);
+    auto hostConstructor = hostObject.getCellRef()._constructor.value();
+    EXPECT_EQ(0, hostConstructor._currentOffspring);
+}
+
+TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffspring)
+{
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = Infinity<float>::value;
+    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = true;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto normalEnergy = _parameters.normalCellEnergy.value[0];
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(0))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // Construction should succeed because currentOffspring == 0 allows energy inflow
+    ASSERT_EQ(2, actualData._creatures.size());
+}
+
+TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspring)
+{
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = Infinity<float>::value;
+    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = true;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto normalEnergy = _parameters.normalCellEnergy.value[0];
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(1))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // Construction should fail because currentOffspring > 0 blocks energy inflow and cell has insufficient energy
+    ASSERT_EQ(1, actualData._creatures.size());
+}

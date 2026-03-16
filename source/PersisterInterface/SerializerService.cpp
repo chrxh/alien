@@ -929,6 +929,7 @@ namespace
     auto constexpr Id_Constructor_CurrentBranch = 6;
     auto constexpr Id_Constructor_ConstructionAngle = 7;
     auto constexpr Id_Constructor_ProvideEnergy = 8;
+    auto constexpr Id_Constructor_CurrentOffspring = 9;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -1136,6 +1137,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
         loadSave(task, auxiliaries, Id_Constructor_CurrentNodeIndex, data._currentNodeIndex, defaultObject._currentNodeIndex);
         loadSave(task, auxiliaries, Id_Constructor_CurrentConcatenation, data._currentConcatenation, defaultObject._currentConcatenation);
+        loadSave(task, auxiliaries, Id_Constructor_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
         loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
         loadSave(task, auxiliaries, Id_Constructor_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
         processLoadSaveMap(task, ar, auxiliaries);

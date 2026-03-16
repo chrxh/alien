@@ -212,7 +212,7 @@ struct SimulationParameters
     BaseParameter<float> externalEnergy = {0.0f};
     BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseParameter<ColorVector<float>> externalEnergyConditionalInflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseParameter<bool> externalEnergyInflowOnlyForNonSelfReplicators = {false};
+    BaseParameter<bool> externalEnergyInflowOnlyForFirstOffspring = {false};
     BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
 

@@ -582,6 +582,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.lastConstructedCellId = cellTO.constructor.lastConstructedCellId;
             cell->constructor.currentNodeIndex = cellTO.constructor.currentNodeIndex;
             cell->constructor.currentConcatenation = cellTO.constructor.currentConcatenation;
+            cell->constructor.currentOffspring = cellTO.constructor.currentOffspring;
             cell->constructor.currentBranch = cellTO.constructor.currentBranch;
             cell->constructor.offspring = nullptr;
         }
@@ -955,6 +956,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
         constructor.currentNodeIndex = 0;
         constructor.currentConcatenation = 0;
+        constructor.currentOffspring = 0;
         constructor.currentBranch = 0;
         constructor.offspring = nullptr;
     }

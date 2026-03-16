@@ -87,6 +87,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                                        .provideEnergy(ProvideEnergy_CellAndGene)
                                        .currentNodeIndex(2)
                                        .currentConcatenation(1)
+                                       .currentOffspring(3)
                                        .currentBranch(0))
                       .event(CellEvent_Attacking)
                       .eventCounter(3)
