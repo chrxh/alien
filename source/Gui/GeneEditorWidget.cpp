@@ -103,7 +103,7 @@ void _GeneEditorWidget::processHeaderData()
             //    AlienGui::Combo(
             //        AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(rightColumnWidth),
             //        gene._angleAlignment);
-            //} 
+            //}
             //AlienGui::EndIndent();
 
             // Connection distance
@@ -127,7 +127,7 @@ void _GeneEditorWidget::processHeaderData()
                 AlienGui::Switcher(
                     AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth), numBranches);
                 gene._numBranches = numBranches + 1;  // Convert back to 1-based (index 0 -> 1 branch, index 1 -> 2 branches, etc.)
-            }/* else {
+            } /* else {
                 std::string text = "-";
                 AlienGui::InputText(AlienGui::InputTextParameters().name("Number of branches").textWidth(rightColumnWidth).readOnly(true), text);
             }*/
@@ -213,7 +213,15 @@ void _GeneEditorWidget::processNodeList()
                     // Column 2: Construction
                     ImGui::TableNextColumn();
                     {
-                        auto text = node._constructor.has_value() ? "Gene " + std::to_string(node._constructor->_geneIndex + 1) : std::string();
+                        std::string text;
+                        if (node._constructor.has_value()) {
+                            auto geneIndex = node._constructor->_geneIndex;
+                            text = "Gene " + std::to_string(geneIndex + 1);
+                            auto const& genes = _editData->genome._genes;
+                            if (geneIndex >= 0 && geneIndex < static_cast<int>(genes.size()) && !genes.at(geneIndex)._name.empty()) {
+                                text += ": " + genes.at(geneIndex)._name;
+                            }
+                        }
                         AlienGui::Text(text);
                     }
 
