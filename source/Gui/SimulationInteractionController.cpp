@@ -370,7 +370,7 @@ void SimulationInteractionController::drawCursor()
 
     // editing cursors
     if (_modes.editMode) {
-        if (!_modes.drawMode || _SimulationFacade::get()->isSimulationRunning()) {
+        if (!_modes.drawMode) {
             auto cursorSize = scale(CursorRadius);
 
             // shadow

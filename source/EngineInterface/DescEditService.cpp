@@ -30,7 +30,9 @@ Desc DescEditService::createRect(CreateRectParameters const& parameters) const
                                              .type(parameters._objectType));
         }
     }
-    reconnectObjects(result, parameters._cellDistance * 1.1f);
+    if (parameters._connectObjects) {
+        reconnectObjects(result, parameters._cellDistance * 1.1f);
+    }
     setCenter(result, parameters._center);
     return result;
 }
@@ -63,13 +65,15 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
         }
     }
 
-    reconnectObjects(result, parameters._cellDistance * 1.5f);
+    if (parameters._connectObjects) {
+        reconnectObjects(result, parameters._cellDistance * 1.5f);
+    }
     setCenter(result, parameters._center);
 
     return result;
 }
 
-Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const
+Desc DescEditService::createCircle(CreateCircleParameters const& parameters) const
 {
     Desc result;
     if (parameters._radius <= 1 + NEAR_ZERO) {
@@ -104,6 +108,9 @@ Desc DescEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters 
                                              .sticky(parameters._sticky)
                                              .type(parameters._type));
         }
+    }
+    if (parameters._connectObjects) {
+        reconnectObjects(result, parameters._cellDistance * 1.5f);
     }
     return result;
 }
@@ -404,9 +411,15 @@ void DescEditService::reconnectObjects(Desc& description, float maxDistance) con
     };
 
     for (auto& object : description._objects) {
+        if (object.getObjectType() == ObjectType_Fluid) {
+            continue;
+        }
         auto nearbyObjectIndices = getObjectIndicesWithinRadius(description, objectIndicesBySlot, object._pos, maxDistance);
         for (auto const& nearbyObjectIndex : nearbyObjectIndices) {
             auto const& nearbyObject = description._objects.at(nearbyObjectIndex);
+            if (nearbyObject.getObjectType() == ObjectType_Fluid) {
+                continue;
+            }
             if (object._id != nearbyObject._id && object._connections.size() < MAX_OBJECT_CONNECTIONS
                 && nearbyObject._connections.size() < MAX_OBJECT_CONNECTIONS && !object.isConnectedTo(nearbyObject._id)
                 && !existsCrossingConnection(object, nearbyObject)) {
