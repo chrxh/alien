@@ -238,9 +238,8 @@ void GenomeEditorWindow::onOpenGenome()
 void GenomeEditorWindow::onSaveGenome()
 {
     auto const& selectedTab = _tabs.at(_selectedTabIndex);
-    //selectedTab->resetOriginal();
     auto genome = selectedTab->getGenomeDesc();
-    FileTransferController::get().onSaveGenomeDialog(genome);
+    FileTransferController::get().onSaveGenomeDialog(genome, [selectedTab]() { selectedTab->resetOriginal(); });
 }
 
 void GenomeEditorWindow::onCloneGenome()
