@@ -67,8 +67,7 @@ __global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome*
         if (object->selected != 1) {
             continue;
         }
-        auto oldGenome = reinterpret_cast<Genome*>(
-            atomicExch(reinterpret_cast<unsigned long long*>(&object->typeData.cell.creature->genome), reinterpret_cast<unsigned long long>(*newGenome)));
+        auto oldGenome = alienAtomicExch(&object->typeData.cell.creature->genome, *newGenome);
         if (oldGenome != *newGenome) {
             atomicAdd(counter, 1);
         }
