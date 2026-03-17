@@ -63,6 +63,7 @@ union SensorModeGenome
 struct SensorGenome
 {
     bool autoTrigger;
+    bool tagForAttackers;
     SensorMode mode;
     SensorModeGenome modeData;
     uint16_t minRange;

@@ -81,6 +81,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 if (!nearCell->cellTypeData.sensor.lastMatchAvailable) {
                     return;
                 }
+                // Only use lastMatch if sensor is tagged for attackers
+                if (!nearCell->cellTypeData.sensor.tagForAttackers) {
+                    return;
+                }
                 auto matchCreatureId = nearCell->cellTypeData.sensor.lastMatch.creatureIdPart;
 
                 // Get the color restriction from the sensor's DetectCreature mode

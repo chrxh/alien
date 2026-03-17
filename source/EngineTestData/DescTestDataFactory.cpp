@@ -678,6 +678,7 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
         }
         return SensorDesc()
             .autoTrigger(false)
+            .tagForAttackers(false)
             .mode(sensorModeDesc)
             .minRange(10)
             .maxRange(50)
@@ -846,7 +847,7 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
             sensorModeDesc = SensorModeGenomeDesc();
             break;
         }
-        return SensorGenomeDesc().autoTrigger(false).mode(sensorModeDesc).minRange(5).maxRange(30);
+        return SensorGenomeDesc().autoTrigger(false).tagForAttackers(false).mode(sensorModeDesc).minRange(5).maxRange(30);
     }
     case CellType_Generator: {
         GeneratorModeGenomeDesc generatorModeDesc;

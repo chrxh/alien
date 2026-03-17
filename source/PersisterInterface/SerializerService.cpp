@@ -216,6 +216,7 @@ namespace
     auto constexpr Id_SensorGenome_AutoTrigger = 0;
     auto constexpr Id_SensorGenome_MinRange = 1;
     auto constexpr Id_SensorGenome_MaxRange = 2;
+    auto constexpr Id_SensorGenome_TagForAttackers = 3;
 
     auto constexpr Id_SensorModeGenome_DetectEnergy_MinDensity = 0;
 
@@ -399,6 +400,7 @@ namespace cereal
         SensorGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorGenome_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
+        loadSave(task, auxiliaries, Id_SensorGenome_TagForAttackers, data._tagForAttackers, defaultObject._tagForAttackers);
         loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -980,6 +982,7 @@ namespace
     auto constexpr Id_Sensor_MinRange = 0;
     auto constexpr Id_Sensor_MaxRange = 1;
     auto constexpr Id_Sensor_AutoTrigger = 2;
+    auto constexpr Id_Sensor_TagForAttackers = 3;
 
     auto constexpr Id_SensorMode_DetectEnergy_MinDensity = 0;
 
@@ -1212,6 +1215,7 @@ namespace cereal
         SensorDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Sensor_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
+        loadSave(task, auxiliaries, Id_Sensor_TagForAttackers, data._tagForAttackers, defaultObject._tagForAttackers);
         loadSave(task, auxiliaries, Id_Sensor_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);

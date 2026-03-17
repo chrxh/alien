@@ -308,6 +308,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Auto activation interval
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Auto trigger").textWidth(rightColumnWidth), sensor._autoTrigger);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Tag for attackers").textWidth(rightColumnWidth), sensor._tagForAttackers);
 
                 // Mode selection
                 auto mode = sensor.getMode();
