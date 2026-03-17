@@ -95,6 +95,7 @@ namespace
                         break;
                     case CellType_Sensor:
                         nodeTO.cellTypeData.sensor.autoTrigger = node.cellTypeData.sensor.autoTrigger;
+                        nodeTO.cellTypeData.sensor.tagForAttackers = node.cellTypeData.sensor.tagForAttackers;
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
                         nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
                         nodeTO.cellTypeData.sensor.mode = node.cellTypeData.sensor.mode;
