@@ -322,6 +322,10 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
             NodeDesc().cellType(DefenderGenomeDesc()),
             NodeDesc().cellType(ReconnectorGenomeDesc()),
             NodeDesc().cellType(DetonatorGenomeDesc()),
+            NodeDesc().cellType(DigestorGenomeDesc()),
+            NodeDesc().cellType(MemoryGenomeDesc()),
+            NodeDesc().cellType(CommunicatorGenomeDesc()),
+            NodeDesc().cellType(VoidGenomeDesc()),
         }),
     });
 
@@ -331,7 +335,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
     auto const& subGenome = subGenomes.at(0).genome;
     auto const& gene0 = subGenome._genes.at(0);
     for (auto const& [index, node] : gene0._nodes | boost::adaptors::indexed(0)) {
-        EXPECT_EQ(CellType_Base, node.getCellType());
+        EXPECT_EQ(index != 14 ? CellType_Base : CellType_Void, node.getCellType());
         if (index == 0) {
             EXPECT_TRUE(node._constructor.has_value());
         }

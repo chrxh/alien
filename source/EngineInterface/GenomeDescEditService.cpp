@@ -326,7 +326,9 @@ namespace
                 node._color = PreviewColor;
                 if (!detailSimulation) {
                     node._neuralNetwork = NeuralNetGenomeDesc();
-                    node._cellType = BaseGenomeDesc();
+                    if (node.getCellType() != CellType_Void) {
+                        node._cellType = BaseGenomeDesc();
+                    }
                 }
                 if (node._constructor.has_value()) {
                     auto& constructor = node._constructor.value();
