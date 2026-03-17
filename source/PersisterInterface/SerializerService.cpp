@@ -193,10 +193,6 @@ namespace
     auto constexpr Id_Node_Color = 1;
     auto constexpr Id_Node_NumAdditionalConnections = 2;
 
-    auto constexpr Id_SignalRestrictionGenome_Mode = 0;  // Replaces Active (0=inactive, 1=active, 2=conditional)
-    auto constexpr Id_SignalRestrictionGenome_BaseAngle = 1;
-    auto constexpr Id_SignalRestrictionGenome_OpeneningAngle = 2;
-
     auto constexpr Id_NeuralNetGenome_Weights = 0;
     auto constexpr Id_NeuralNetGenome_Biases = 1;
     auto constexpr Id_NeuralNetGenome_ActivationFunctions = 2;
@@ -742,37 +738,6 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(VoidGenomeDesc)
-    struct SignalRestrictionGenomeDescLegacy
-    {
-        uint8_t _mode = 0;
-        float _baseAngle = 0.0f;
-        float _openingAngle = 0.0f;
-    };
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDescLegacy& data)
-    {
-        SignalRestrictionGenomeDescLegacy defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-
-        // For backward compatibility, read any mode format but discard
-        if (task == SerializationTask::Load) {
-            auto findResult = auxiliaries.find(Id_SignalRestrictionGenome_Mode);
-            if (findResult != auxiliaries.end()) {
-                auto& variantData = findResult->second;
-                if (std::holds_alternative<bool>(variantData)) {
-                    data._mode = std::get<bool>(variantData) ? 1 : 0;
-                } else if (std::holds_alternative<uint8_t>(variantData)) {
-                    data._mode = std::get<uint8_t>(variantData);
-                }
-            }
-        }
-
-        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
-        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
-        processLoadSaveMap(task, ar, auxiliaries);
-    }
-    SPLIT_SERIALIZATION(SignalRestrictionGenomeDescLegacy)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NodeDesc& data)
@@ -784,9 +749,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        // For backward compatibility, read the legacy signal restriction and discard
-        SignalRestrictionGenomeDescLegacy legacySignalRestriction;
-        ar(data._neuralNetwork, data._cellType, data._constructor, legacySignalRestriction);
+        ar(data._neuralNetwork, data._cellType, data._constructor);
     }
     SPLIT_SERIALIZATION(NodeDesc)
 
@@ -914,10 +877,6 @@ namespace
 
     auto constexpr Id_Signal_Channels = 0;
     auto constexpr Id_Signal_NumTimesSent = 1;
-
-    auto constexpr Id_SignalRestriction_Mode = 0;  // Replaces Active (0=inactive, 1=active, 2=conditional)
-    auto constexpr Id_SignalRestriction_BaseAngle = 1;
-    auto constexpr Id_SignalRestriction_OpeningAngle = 2;
 
     auto constexpr Id_Connection_ObjectId = 0;
     auto constexpr Id_Connection_Distance = 1;
@@ -1068,39 +1027,6 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDesc)
-
-    // Dummy struct for backward compatibility with old files that have SignalRestrictionDesc
-    struct SignalRestrictionDescLegacy
-    {
-        uint8_t _mode = 0;
-        float _baseAngle = 0.0f;
-        float _openingAngle = 0.0f;
-    };
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionDescLegacy& data)
-    {
-        SignalRestrictionDescLegacy defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-
-        // For backward compatibility, read any mode format but discard
-        if (task == SerializationTask::Load) {
-            auto findResult = auxiliaries.find(Id_SignalRestriction_Mode);
-            if (findResult != auxiliaries.end()) {
-                auto& variantData = findResult->second;
-                if (std::holds_alternative<bool>(variantData)) {
-                    data._mode = std::get<bool>(variantData) ? 1 : 0;
-                } else if (std::holds_alternative<uint8_t>(variantData)) {
-                    data._mode = std::get<uint8_t>(variantData);
-                }
-            }
-        }
-
-        loadSave(task, auxiliaries, Id_SignalRestriction_BaseAngle, data._baseAngle, defaultObject._baseAngle);
-        loadSave(task, auxiliaries, Id_SignalRestriction_OpeningAngle, data._openingAngle, defaultObject._openingAngle);
-        processLoadSaveMap(task, ar, auxiliaries);
-    }
-    SPLIT_SERIALIZATION(SignalRestrictionDescLegacy)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetDesc& data)
