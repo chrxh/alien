@@ -375,7 +375,7 @@ void SimulationKernelsService::calcTimestepForPreview(
     }
 
     // Garbage collection cannot be part of the graph due to dynamic behavior
-    GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.cudaSettings, data);
+    GarbageCollectorKernelsService::get().cleanupAfterTimestepForPreview(settings.cudaSettings, data);
 }
 
 void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
