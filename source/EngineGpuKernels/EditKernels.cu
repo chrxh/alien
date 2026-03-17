@@ -56,7 +56,7 @@ __global__ void cudaCreateGenomeFromTO(SimulationData data, TOs to, Genome** new
     *newGenome = factory.createGenomeFromTO(to, 0);
 }
 
-__global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome** newGenome)
+__global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome** newGenome, int* counter)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
@@ -67,7 +67,11 @@ __global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome*
         if (object->selected != 1) {
             continue;
         }
-        object->typeData.cell.creature->genome = *newGenome;
+        auto oldGenome = reinterpret_cast<Genome*>(
+            atomicExch(reinterpret_cast<unsigned long long*>(&object->typeData.cell.creature->genome), reinterpret_cast<unsigned long long>(*newGenome)));
+        if (oldGenome != *newGenome) {
+            atomicAdd(counter, 1);
+        }
     }
 }
 
@@ -254,7 +258,8 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
     }
 }
 
-__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refObjectIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters)
+__global__ void
+cudaCalcAccumulatedCenterAndVel(SimulationData data, int refObjectIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters)
 {
     {
         float2 refPos = refObjectIndex != -1 ? data.entities.objects.at(refObjectIndex)->pos : float2{0, 0};

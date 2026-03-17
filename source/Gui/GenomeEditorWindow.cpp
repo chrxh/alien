@@ -127,8 +127,7 @@ void GenomeEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on genome").disabled(!hasGenomeChanged))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on genome").disabled(!hasGenomeChanged))) {
         _tabs.at(_selectedTabIndex)->revertChanges();
     }
 
@@ -268,8 +267,8 @@ void GenomeEditorWindow::onSavepointGenome()
 void GenomeEditorWindow::onInjectGenome()
 {
     auto const& tab = _tabs.at(_selectedTabIndex);
-    _SimulationFacade::get()->injectGenomeToSelectedCreatures(tab->getGenomeDesc());
-    printOverlayMessage("Genome injected");
+    auto numCreatures = _SimulationFacade::get()->injectGenomeToSelectedCreatures(tab->getGenomeDesc());
+    printOverlayMessage("Genome injected to " + std::to_string(numCreatures) + " creature(s)");
 }
 
 void GenomeEditorWindow::onCreateSeed(bool provideEnergy)

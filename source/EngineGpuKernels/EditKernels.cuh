@@ -8,21 +8,21 @@
 #include "sm_60_atomic_functions.h"
 
 #include "Base.cuh"
-#include "ObjectConnectionProcessor.cuh"
-#include "ObjectProcessor.cuh"
+#include "EntityFactory.cuh"
 #include "GarbageCollectorKernels.cuh"
 #include "Map.cuh"
-#include "EntityFactory.cuh"
+#include "ObjectConnectionProcessor.cuh"
+#include "ObjectProcessor.cuh"
 #include "SelectionResult.cuh"
 #include "SimulationData.cuh"
 #include "TOs.cuh"
 
 __global__ void cudaColorSelectedObjects(SimulationData data, unsigned char color, bool includeClusters);
-__global__ void cudaChangeObject(SimulationData data, TOs changeTO);      // changeTO contains only 1 cell
+__global__ void cudaChangeObject(SimulationData data, TOs changeTO);    // changeTO contains only 1 cell
 __global__ void cudaChangeParticle(SimulationData data, TOs changeTO);  // changeTO contains only 1 particle
 
 __global__ void cudaCreateGenomeFromTO(SimulationData data, TOs to, Genome** newGenome);
-__global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome** newGenome);
+__global__ void cudaInjectGenomeToSelectedCreatures(SimulationData data, Genome** newGenome, int* counter);
 
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveSelectedObjectConnections(SimulationData data, bool includeClusters);
