@@ -450,7 +450,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             continue;
         }
 
-        if (object->type == ObjectType_Cell && object->typeData.cell.cellState != CellState_Dying) {
+        if (object->type == ObjectType_Cell) {
             auto minCellEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 
             if (object->typeData.cell.cellState == CellState_Dying || object->typeData.cell.cellState == CellState_Detaching) {
