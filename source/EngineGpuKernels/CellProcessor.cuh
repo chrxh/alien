@@ -473,7 +473,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
             if (cellDestruction) {
                 auto orig = atomicExch(&object->typeData.cell.cellState, CellState_Dying);
-                if (orig != CellState_Dying) {
+                if (orig != CellState_Dying && object->typeData.cell.cellType != CellType_Void) {
                     for (int i = 0; i < object->numConnections; ++i) {
                         auto const& connectedObject = object->connections[i].object;
                         auto origConnected = atomicExch(&connectedObject->typeData.cell.cellState, CellState_Detaching);
