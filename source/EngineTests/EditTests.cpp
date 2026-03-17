@@ -169,27 +169,6 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_noSelection)
 
 TEST_F(EditTests, injectGenomeToSelectedCreatures_singleCreature)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).pos({50, 50})}, CreatureDesc(), GenomeDesc());
-    _simulationFacade->setSimulationData(data);
-
-    _simulationFacade->setSelection({49, 49}, {51, 51});
-
-    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
-    auto result = _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
-
-    EXPECT_EQ(1, result);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto genomeIt =
-        std::find_if(actualData._genomes.begin(), actualData._genomes.end(), [&](auto const& g) { return g._id == actualData._creatures.front()._genomeId; });
-    ASSERT_NE(genomeIt, actualData._genomes.end());
-    ASSERT_EQ(1, genomeIt->_genes.size());
-    EXPECT_EQ(2, genomeIt->_genes.front()._nodes.size());
-}
-
-TEST_F(EditTests, injectGenomeToSelectedCreatures_multiCellCreature)
-{
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({50, 50}),
