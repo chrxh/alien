@@ -266,9 +266,10 @@ void GenomeEditorWindow::onSavepointGenome()
 
 void GenomeEditorWindow::onInjectGenome()
 {
-    auto const& tab = _tabs.at(_selectedTabIndex);
-    auto numCreatures = _SimulationFacade::get()->injectGenomeToSelectedCreatures(tab->getGenomeDesc());
+    auto const& selectedTab = _tabs.at(_selectedTabIndex);
+    auto numCreatures = _SimulationFacade::get()->injectGenomeToSelectedCreatures(selectedTab->getGenomeDesc());
     printOverlayMessage("Genome injected to " + std::to_string(numCreatures) + " creature(s)");
+    selectedTab->resetOriginal();
 }
 
 void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
