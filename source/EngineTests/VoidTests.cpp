@@ -69,9 +69,9 @@ TEST_F(VoidTests, destroyWhenReady_neighborsNotDetaching)
     auto data =
         Desc()
             .addCreature({
-                ObjectDesc().id(1).pos({10.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
-                ObjectDesc().id(2).pos({10.5f, 10.866f}).fixed(true).type(CellDesc().cellState(CellState_Ready).usableEnergy(200.0f).cellType(VoidDesc())),
-                ObjectDesc().id(3).pos({11.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
+                ObjectDesc().id(2).pos({10.5f, 10.866f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(200.0f).cellType(VoidDesc())),
+                ObjectDesc().id(3).pos({11.0f, 10.0f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
             })
             .addConnection(1, 2)
             .addConnection(2, 3)
@@ -101,9 +101,9 @@ TEST_F(VoidTests, destroyWhenReady_preview)
     auto data =
         Desc()
             .addCreature({
-                ObjectDesc().id(1).pos({10.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
-                ObjectDesc().id(2).pos({10.5f, 10.866f}).fixed(true).type(CellDesc().cellState(CellState_Ready).usableEnergy(200.0f).cellType(VoidDesc())),
-                ObjectDesc().id(3).pos({11.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
+                ObjectDesc().id(2).pos({10.5f, 10.866f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(200.0f).cellType(VoidDesc())),
+                ObjectDesc().id(3).pos({11.0f, 10.0f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
             })
             .addConnection(1, 2)
             .addConnection(2, 3)
@@ -111,6 +111,31 @@ TEST_F(VoidTests, destroyWhenReady_preview)
 
     _simulationFacade->setPreviewData(data);
     _simulationFacade->calcTimestepsForPreview(TIMESTEPS_PER_CELL_FUNCTION, true);
+
+    auto actualData = _simulationFacade->getPreviewData();
+    EXPECT_EQ(2, actualData._objects.size());
+    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(3).getCellRef()._cellState);
+
+    auto totalEnergy = getEnergy(actualData);
+    EXPECT_TRUE(approxCompare(getEnergy(data), totalEnergy));
+}
+
+TEST_F(VoidTests, destroyWhenReady_nonDetailPreview)
+{
+    auto data =
+        Desc()
+            .addCreature({
+                ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
+                ObjectDesc().id(2).pos({10.5f, 10.866f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(200.0f).cellType(VoidDesc())),
+                ObjectDesc().id(3).pos({11.0f, 10.0f}).type(CellDesc().cellState(CellState_Ready).usableEnergy(100.0f).cellType(BaseDesc())),
+            })
+            .addConnection(1, 2)
+            .addConnection(2, 3)
+            .addConnection(1, 3);
+
+    _simulationFacade->setPreviewData(data);
+    _simulationFacade->calcTimestepsForPreview(TIMESTEPS_PER_CELL_FUNCTION, false);
 
     auto actualData = _simulationFacade->getPreviewData();
     EXPECT_EQ(2, actualData._objects.size());
