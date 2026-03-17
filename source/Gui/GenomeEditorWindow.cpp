@@ -268,7 +268,7 @@ void GenomeEditorWindow::onInjectGenome()
 {
     auto const& selectedTab = _tabs.at(_selectedTabIndex);
     auto numCreatures = _SimulationFacade::get()->injectGenomeToSelectedCreatures(selectedTab->getGenomeDesc());
-    printOverlayMessage("Genome injected to " + std::to_string(numCreatures) + " creature(s)");
+    printOverlayMessage("Genome injected to " + std::to_string(numCreatures) + (numCreatures == 1 ? " creature" : " creatures"));
     selectedTab->resetOriginal();
 }
 
