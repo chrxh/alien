@@ -58,7 +58,7 @@ public:
     virtual void setDetached(bool value) = 0;
     virtual void changeCell(ExtendedObjectDesc const& changedCell) = 0;
     virtual void changeParticle(EnergyDesc const& changedParticle) = 0;
-    virtual void injectGenomeToSelectedCreatures(GenomeDesc const& genome) = 0;
+    virtual int injectGenomeToSelectedCreatures(GenomeDesc const& genome) = 0;
     virtual void switchSelection(RealVector2D const& pos, float radius) = 0;
     virtual void swapSelection(RealVector2D const& pos, float radius) = 0;
     virtual SelectionShallowData getSelectionShallowData() = 0;

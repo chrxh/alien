@@ -103,6 +103,8 @@ void EditorController::onInspectSelectedGenomes()
     for (auto const& genome : uniqueGenomes) {
         GenomeEditorWindow::get().openTab(genome);
     }
+
+    printOverlayMessage(std::to_string(uniqueGenomes.size()) + (uniqueGenomes.size() == 1 ? " genome" : " genomes") + " inspected");
 }
 
 bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> const& entities, bool selectGenomeTab)
