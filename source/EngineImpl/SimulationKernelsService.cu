@@ -271,7 +271,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
 
-        GarbageCollectorKernelsService::launchCleanupForPreviewInGraph(_stream, numBlocks, data);
+        GarbageCollectorKernelsService::get().launchCleanupForPreviewInGraph(_stream, numBlocks, data);
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
     } else {
@@ -317,7 +317,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
 
-        GarbageCollectorKernelsService::launchCleanupForPreviewInGraph(_stream, numBlocks, data);
+        GarbageCollectorKernelsService::get().launchCleanupForPreviewInGraph(_stream, numBlocks, data);
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
     }
