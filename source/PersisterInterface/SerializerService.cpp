@@ -192,6 +192,11 @@ namespace
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
     auto constexpr Id_Node_NumAdditionalConnections = 2;
+    auto constexpr Id_Node_NewFormat = 3;
+
+    auto constexpr Id_SignalRestrictionGenome_Mode = 0;  // Replaces Active (0=inactive, 1=active, 2=conditional)
+    auto constexpr Id_SignalRestrictionGenome_BaseAngle = 1;
+    auto constexpr Id_SignalRestrictionGenome_OpeneningAngle = 2;
 
     auto constexpr Id_NeuralNetGenome_Weights = 0;
     auto constexpr Id_NeuralNetGenome_Biases = 1;
@@ -731,6 +736,39 @@ namespace cereal
     }
     SPLIT_SERIALIZATION(CommunicatorGenomeDesc)
 
+    // Dummy struct for backward compatibility with old files that have SignalRestrictionGenomeDesc
+    struct SignalRestrictionGenomeDescLegacy
+    {
+        uint8_t _mode = 0;
+        float _baseAngle = 0.0f;
+        float _openingAngle = 0.0f;
+    };
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDescLegacy& data)
+    {
+        SignalRestrictionGenomeDescLegacy defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+
+        // For backward compatibility, read any mode format but discard
+        if (task == SerializationTask::Load) {
+            auto findResult = auxiliaries.find(Id_SignalRestrictionGenome_Mode);
+            if (findResult != auxiliaries.end()) {
+                auto& variantData = findResult->second;
+                if (std::holds_alternative<bool>(variantData)) {
+                    data._mode = std::get<bool>(variantData) ? 1 : 0;
+                } else if (std::holds_alternative<uint8_t>(variantData)) {
+                    data._mode = std::get<uint8_t>(variantData);
+                }
+            }
+        }
+
+        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
+        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalRestrictionGenomeDescLegacy)
+
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, VoidGenomeDesc& data)
     {
@@ -747,9 +785,23 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
         loadSave(task, auxiliaries, Id_Node_Color, data._color, defaultObject._color);
         loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
+
+        bool hasLegacySignalRestriction = false;
+        if (task == SerializationTask::Load) {
+            hasLegacySignalRestriction = auxiliaries.find(Id_Node_NewFormat) == auxiliaries.end();
+        } else {
+            auxiliaries.emplace(Id_Node_NewFormat, true);
+        }
+
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._neuralNetwork, data._cellType, data._constructor);
+        if (hasLegacySignalRestriction) {
+            // For backward compatibility, read the legacy signal restriction and discard
+            SignalRestrictionGenomeDescLegacy legacySignalRestriction;
+            ar(data._neuralNetwork, data._cellType, data._constructor, legacySignalRestriction);
+        } else {
+            ar(data._neuralNetwork, data._cellType, data._constructor);
+        }
     }
     SPLIT_SERIALIZATION(NodeDesc)
 
