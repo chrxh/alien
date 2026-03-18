@@ -43,4 +43,5 @@ struct StructuralOperation
 struct CellTypeOperation
 {
     Object* object;
+    int objectIndex;
 };

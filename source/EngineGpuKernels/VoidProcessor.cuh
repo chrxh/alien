@@ -14,7 +14,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, int objectIndex);
 };
 
 /************************************************************************/
@@ -26,11 +26,11 @@ __device__ __inline__ void VoidProcessor::process(SimulationData& data, Simulati
     auto& operations = data.cellTypeOperations[CellType_Void];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, result, operations.at(i).object);
+        processCell(data, result, operations.at(i).object, operations.at(i).objectIndex);
     }
 }
 
-__device__ __inline__ void VoidProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
+__device__ __inline__ void VoidProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, int objectIndex)
 {
     auto totalEnergy = object->typeData.cell.usableEnergy + object->typeData.cell.rawEnergy + object->typeData.cell.reservedEnergy;
 
@@ -56,11 +56,5 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
 
     object->typeData.cell.cellState = CellState_Dying;
 
-    auto& objects = data.entities.objects;
-    for (int i = 0; i < objects.getNumEntries(); ++i) {
-        if (objects.at(i) == object) {
-            ObjectConnectionProcessor::scheduleDeleteObject(data, i);
-            break;
-        }
-    }
+    ObjectConnectionProcessor::scheduleDeleteObject(data, objectIndex);
 }

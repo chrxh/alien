@@ -49,9 +49,9 @@ __inline__ __device__ void CellProcessor::collectCellTypeOperations(SimulationDa
 
         if (object->type == ObjectType_Cell && object->typeData.cell.cellType != CellType_Base) {
             if (object->typeData.cell.cellType == CellType_Detonator && object->typeData.cell.cellTypeData.detonator.state == DetonatorState_Activated) {
-                data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object});
+                data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object, index});
             } else if (isCellReady(data, object)) {
-                data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object});
+                data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object, index});
             }
         }
     }
