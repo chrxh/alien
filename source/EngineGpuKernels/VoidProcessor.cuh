@@ -54,7 +54,5 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
         object->typeData.cell.reservedEnergy = 0;
     }
 
-    object->typeData.cell.cellState = CellState_Dying;
-
     ObjectConnectionProcessor::scheduleDeleteObject(data, objectIndex);
 }

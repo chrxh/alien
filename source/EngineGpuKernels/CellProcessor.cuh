@@ -450,7 +450,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             continue;
         }
 
-        if (object->type == ObjectType_Cell) {
+        if (object->type == ObjectType_Cell && object->typeData.cell.cellType != CellType_Void) {
             auto minCellEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 
             if (object->typeData.cell.cellState == CellState_Dying || object->typeData.cell.cellState == CellState_Detaching) {
@@ -460,27 +460,25 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 }
             }
 
-            if (object->typeData.cell.cellState != CellState_Dying) {
-                bool cellDestruction = false;
-                if (object->typeData.cell.usableEnergy < minCellEnergy) {
-                    cellDestruction = true;
-                }
+            bool cellDestruction = false;
+            if (object->typeData.cell.usableEnergy < minCellEnergy) {
+                cellDestruction = true;
+            }
 
-                // Cell age radiation
-                auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[object->color];
-                if (cellMaxAge > 0 && object->typeData.cell.age > cellMaxAge) {
-                    cellDestruction = true;
-                }
+            // Cell age radiation
+            auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[object->color];
+            if (cellMaxAge > 0 && object->typeData.cell.age > cellMaxAge) {
+                cellDestruction = true;
+            }
 
-                if (cellDestruction) {
-                    auto orig = atomicExch(&object->typeData.cell.cellState, CellState_Dying);
-                    if (orig != CellState_Dying) {
-                        for (int i = 0; i < object->numConnections; ++i) {
-                            auto const& connectedObject = object->connections[i].object;
-                            auto origConnected = atomicExch(&connectedObject->typeData.cell.cellState, CellState_Detaching);
-                            if (origConnected == CellState_Dying) {
-                                atomicExch(&connectedObject->typeData.cell.cellState, CellState_Dying);
-                            }
+            if (cellDestruction) {
+                auto orig = atomicExch(&object->typeData.cell.cellState, CellState_Dying);
+                if (orig != CellState_Dying) {
+                    for (int i = 0; i < object->numConnections; ++i) {
+                        auto const& connectedObject = object->connections[i].object;
+                        auto origConnected = atomicExch(&connectedObject->typeData.cell.cellState, CellState_Detaching);
+                        if (origConnected == CellState_Dying) {
+                            atomicExch(&connectedObject->typeData.cell.cellState, CellState_Dying);
                         }
                     }
                 }
