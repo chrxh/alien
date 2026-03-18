@@ -122,11 +122,10 @@ void SimulationKernelsService::launchTimestepKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_digestor, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_memory, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_communicator, _stream, numBlocks, 64, data, statistics);
+        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
 
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_applyMutations, _stream, numBlocks, NEURONS_PER_CELL, data, statistics);
     }
-
-    STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
 
     if (considerInnerFriction) {
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
@@ -260,9 +259,8 @@ void SimulationKernelsService::launchPreviewKernels(
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
+            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
         }
-
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
 
         if (considerInnerFriction) {
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
@@ -311,9 +309,8 @@ void SimulationKernelsService::launchPreviewKernels(
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
+            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
         }
-
-        STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
 
         if (considerInnerFriction) {
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
