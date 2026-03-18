@@ -18,6 +18,7 @@
 #include "SensorProcessor.cuh"
 #include "SimulationKernels.cuh"
 #include "MutationProcessor.cuh"
+#include "VoidProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data)
 {
@@ -190,6 +191,11 @@ __global__ void cudaNextTimestep_cellType_memory(SimulationData data, Simulation
 __global__ void cudaNextTimestep_cellType_communicator(SimulationData data, SimulationStatistics statistics)
 {
     CommunicatorProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellType_void(SimulationData data, SimulationStatistics statistics)
+{
+    VoidProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)

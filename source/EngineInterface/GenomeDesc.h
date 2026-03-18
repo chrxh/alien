@@ -359,6 +359,11 @@ struct CommunicatorGenomeDesc
     CommunicatorMode getMode() const;
 };
 
+struct VoidGenomeDesc
+{
+    auto operator<=>(VoidGenomeDesc const&) const = default;
+};
+
 using CellTypeGenomeDesc = std::variant<
     BaseGenomeDesc,
     DepotGenomeDesc,
@@ -372,7 +377,8 @@ using CellTypeGenomeDesc = std::variant<
     DetonatorGenomeDesc,
     DigestorGenomeDesc,
     MemoryGenomeDesc,
-    CommunicatorGenomeDesc>;
+    CommunicatorGenomeDesc,
+    VoidGenomeDesc>;
 
 struct NodeDesc
 {
