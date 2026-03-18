@@ -271,11 +271,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
 
-        STREAM_KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, _stream, data);
-        STREAM_KERNEL_CALL(cudaCleanupPointerArray<Energy*>, _stream, numBlocks, data.entities.energies, data.tempEntities.energies);
-        STREAM_KERNEL_CALL(cudaCleanupPointerArray<Object*>, _stream, numBlocks, data.entities.objects, data.tempEntities.objects);
-        STREAM_KERNEL_CALL_1_1(cudaSwapPointerArrays, _stream, data);
-        STREAM_KERNEL_CALL(cudaCleanupMaps, _stream, numBlocks, data);
+        GarbageCollectorKernelsService::launchCleanupForPreviewInGraph(_stream, numBlocks, data);
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
     } else {
@@ -321,11 +317,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
 
-        STREAM_KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, _stream, data);
-        STREAM_KERNEL_CALL(cudaCleanupPointerArray<Energy*>, _stream, numBlocks, data.entities.energies, data.tempEntities.energies);
-        STREAM_KERNEL_CALL(cudaCleanupPointerArray<Object*>, _stream, numBlocks, data.entities.objects, data.tempEntities.objects);
-        STREAM_KERNEL_CALL_1_1(cudaSwapPointerArrays, _stream, data);
-        STREAM_KERNEL_CALL(cudaCleanupMaps, _stream, numBlocks, data);
+        GarbageCollectorKernelsService::launchCleanupForPreviewInGraph(_stream, numBlocks, data);
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
     }

@@ -43,6 +43,15 @@ void GarbageCollectorKernelsService::cleanupAfterTimestepForPreview(CudaSettings
     KERNEL_CALL(cudaCleanupMaps, data);
 }
 
+void GarbageCollectorKernelsService::launchCleanupForPreviewInGraph(cudaStream_t stream, int numBlocks, SimulationData const& data)
+{
+    STREAM_KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, stream, data);
+    STREAM_KERNEL_CALL(cudaCleanupPointerArray<Energy*>, stream, numBlocks, data.entities.energies, data.tempEntities.energies);
+    STREAM_KERNEL_CALL(cudaCleanupPointerArray<Object*>, stream, numBlocks, data.entities.objects, data.tempEntities.objects);
+    STREAM_KERNEL_CALL_1_1(cudaSwapPointerArrays, stream, data);
+    STREAM_KERNEL_CALL(cudaCleanupMaps, stream, numBlocks, data);
+}
+
 void GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);

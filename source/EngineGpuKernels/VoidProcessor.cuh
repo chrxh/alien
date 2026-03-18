@@ -4,7 +4,6 @@
 
 #include "ConstantMemory.cuh"
 #include "Entities.cuh"
-#include "ObjectConnectionProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -14,7 +13,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, int objectIndex);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -26,11 +25,11 @@ __device__ __inline__ void VoidProcessor::process(SimulationData& data, Simulati
     auto& operations = data.cellTypeOperations[CellType_Void];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, result, operations.at(i).object, operations.at(i).objectIndex);
+        processCell(data, result, operations.at(i).object);
     }
 }
 
-__device__ __inline__ void VoidProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, int objectIndex)
+__device__ __inline__ void VoidProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto totalEnergy = object->typeData.cell.usableEnergy + object->typeData.cell.rawEnergy + object->typeData.cell.reservedEnergy;
 
@@ -54,5 +53,5 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
         object->typeData.cell.reservedEnergy = 0;
     }
 
-    ObjectConnectionProcessor::scheduleDeleteObject(data, objectIndex);
+    object->typeData.cell.cellState = CellState_Dying;
 }

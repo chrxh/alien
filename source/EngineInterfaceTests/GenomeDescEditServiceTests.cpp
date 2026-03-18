@@ -9,6 +9,7 @@
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/GenomeDescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
+#include <EngineTestData/DescTestDataFactory.h>
 
 class GenomeDescEditServiceTests : public ::testing::Test
 {
@@ -16,10 +17,7 @@ public:
     virtual ~GenomeDescEditServiceTests() = default;
 
 protected:
-    int getRefGeneIndex(GeneDesc const& gene, int nodeIndex) const
-    {
-        return gene._nodes.at(nodeIndex)._constructor.value()._geneIndex;
-    };
+    int getRefGeneIndex(GeneDesc const& gene, int nodeIndex) const { return gene._nodes.at(nodeIndex)._constructor.value()._geneIndex; };
 
     GenomeDesc createGenome_complexCycles() const
     {
@@ -307,27 +305,22 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_invalidGeneReferen
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstructor)
 {
-    auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc()
-                .constructor(ConstructorGenomeDesc())
-                .neuralNetwork(NeuralNetGenomeDesc().weight(2, 3, 0.4f)),
-            NodeDesc().cellType(DepotGenomeDesc()),
-            NodeDesc().cellType(BaseGenomeDesc()),
-            NodeDesc().cellType(SensorGenomeDesc()),
-            NodeDesc().cellType(GeneratorGenomeDesc()),
-            NodeDesc().cellType(AttackerGenomeDesc()),
-            NodeDesc().cellType(InjectorGenomeDesc()),
-            NodeDesc().cellType(MuscleGenomeDesc()),
-            NodeDesc().cellType(DefenderGenomeDesc()),
-            NodeDesc().cellType(ReconnectorGenomeDesc()),
-            NodeDesc().cellType(DetonatorGenomeDesc()),
-            NodeDesc().cellType(DigestorGenomeDesc()),
-            NodeDesc().cellType(MemoryGenomeDesc()),
-            NodeDesc().cellType(CommunicatorGenomeDesc()),
-            NodeDesc().cellType(VoidGenomeDesc()),
-        }),
-    });
+    auto const& factory = DescTestDataFactory::get();
+    auto allParams = factory.getAllNodeParameters();
+
+    std::vector<NodeDesc> nodes;
+    nodes.emplace_back(NodeDesc().constructor(ConstructorGenomeDesc()).neuralNetwork(NeuralNetGenomeDesc().weight(2, 3, 0.4f)));
+
+    std::set<CellType> addedTypes;
+    addedTypes.insert(CellType_Base);  // first node is Base
+    for (auto const& param : allParams) {
+        if (addedTypes.find(param.cellTypeGenome) == addedTypes.end()) {
+            addedTypes.insert(param.cellTypeGenome);
+            nodes.emplace_back(factory.createNonDefaultNodeDesc(param));
+        }
+    }
+
+    auto genome = GenomeDesc().genes({GeneDesc().separation(false).nodes(nodes)});
 
     auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
 
@@ -335,11 +328,11 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
     auto const& subGenome = subGenomes.at(0).genome;
     auto const& gene0 = subGenome._genes.at(0);
     for (auto const& [index, node] : gene0._nodes | boost::adaptors::indexed(0)) {
-        EXPECT_EQ(index != 14 ? CellType_Base : CellType_Void, node.getCellType());
+        auto expectedType = nodes.at(index).getCellType() == CellType_Void ? CellType_Void : CellType_Base;
+        EXPECT_EQ(expectedType, node.getCellType());
         if (index == 0) {
             EXPECT_TRUE(node._constructor.has_value());
         }
-        // Cell types remain their original types in preview mode
     }
     EXPECT_EQ(NeuralNetGenomeDesc(), gene0._nodes.front()._neuralNetwork);
 }

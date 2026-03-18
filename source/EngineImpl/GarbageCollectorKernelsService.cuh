@@ -23,6 +23,8 @@ public:
     void copyArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);
     void swapArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);
 
+    static void launchCleanupForPreviewInGraph(cudaStream_t stream, int numBlocks, SimulationData const& data);
+
 private:
     GarbageCollectorKernelsService() = default;
 
