@@ -437,6 +437,7 @@ union TempValue
 {
     uint64_t as_uint64;
     uint32_float as_uint32_float;
+    float2 as_float2;
 };
 
 struct Creature
@@ -567,6 +568,7 @@ struct Object
     // Internal algorithm data
     int locked;  // 0 = unlocked, 1 = locked
     TempValue tempValue;
+    TempValue tempValue2;
 
     float density;
     Object* nextObject;               // Linked list for finding all overlapping cells
