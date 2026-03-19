@@ -29,8 +29,6 @@ public:
     __inline__ __device__ static void decay(SimulationData& data);
 
 private:
-    static auto constexpr FrontAngleId_NoUpdate = VALUE_NOT_SET_FLOAT;
-
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, int connectionIndex1, int connectionIndex2);
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, Object* connectedObject1, Object* connectedObject2);
 };
@@ -230,7 +228,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                     if (!object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                         continue;
                     }
-                    if (otherObject->typeData.cell.frontAngleId == object->typeData.cell.creature->frontAngleId) {
+                    if (otherObject->typeData.cell.frontAngleId > object->typeData.cell.frontAngleId) {
                         auto frontAngle_otherObject_object = Math::getNormalizedAngle(
                             -getInitialAngelSpan(otherObject, object, otherObject->connections[0].object) - otherObject->typeData.cell.frontAngle, -180.0f);
 
@@ -239,12 +237,13 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                             Math::getNormalizedAngle(frontAngle_object_otherObject + getInitialAngelSpan(object, 0, i), -180.0f);
 
                         object->tempValue.as_uint32_float.floatPart = frontAngle_object_connection0;
+                        object->tempValue.as_uint32_float.uint32Part = otherObject->typeData.cell.frontAngleId;
                         update = true;
                         break;
                     }
                 }
                 if (!update) {
-                    object->tempValue.as_uint32_float.floatPart = FrontAngleId_NoUpdate;
+                    object->tempValue.as_uint32_float.uint32Part = object->typeData.cell.frontAngleId;
                 }
             }
         }
@@ -266,11 +265,15 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
                 object->typeData.cell.frontAngleId = object->typeData.cell.creature->frontAngleId;
                 object->typeData.cell.frontAngle = object->typeData.cell.creature->genome->frontAngle;
             } else {
-                if (object->tempValue.as_uint32_float.floatPart != FrontAngleId_NoUpdate) {
-                    object->typeData.cell.frontAngleId = object->typeData.cell.creature->frontAngleId;
-                    object->typeData.cell.frontAngle = object->tempValue.as_uint32_float.floatPart;
+                auto const& newFrontAngleId = object->tempValue.as_uint32_float.uint32Part;
+                auto const& newFrontAngle = object->tempValue.as_uint32_float.floatPart;
+
+                if (newFrontAngleId > object->typeData.cell.frontAngleId) {
+                    object->typeData.cell.frontAngleId = newFrontAngleId;
+                    object->typeData.cell.frontAngle = newFrontAngle;
                 }
-                object->tempValue.as_uint32_float.floatPart = 0;
+
+                object->tempValue.as_uint64 = 0;
             }
         }
     }
