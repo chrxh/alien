@@ -439,6 +439,7 @@ struct CellTO
     ConstructorTO constructor;  // Optional constructor data
     SignalTO signal;
     uint32_t activationTime;
+    uint8_t lastUpdate;
 
     // Process data
     uint32_t frontAngleId;

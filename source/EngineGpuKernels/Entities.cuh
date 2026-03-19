@@ -512,6 +512,7 @@ struct Cell
     Constructor constructor;    // Optional constructor data
     Signal signal;
     uint32_t activationTime;
+    uint8_t lastUpdate;
 
     // Process data
     Signal futureSignal;

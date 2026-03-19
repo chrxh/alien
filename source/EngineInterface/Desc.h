@@ -508,6 +508,7 @@ struct CellDesc
     MEMBER(CellDesc, SignalDesc, signal, SignalDesc());
     CellDesc& signal(std::vector<float> const& value);
     MEMBER(CellDesc, int, activationTime, 0);
+    MEMBER(CellDesc, int, lastUpdate, 0);
 
     // Process data
     MEMBER(CellDesc, int, frontAngleId, 0);
