@@ -27,7 +27,7 @@ __global__ void cudaCleanupCellsStep1(Array<Object*> objects, Heap newHeap)
             auto newObject = &newObjects[newObjectIndex];
             *newObject = *object;
 
-            object->tempValue.as_uint64 = reinterpret_cast<uint8_t*>(newObject) - newHeapStart;  // Save index of new cell in old cell
+            object->tempValue1.as_uint64 = reinterpret_cast<uint8_t*>(newObject) - newHeapStart;  // Save index of new cell in old cell
             object = newObject;
 
             ++newObjectIndex;
@@ -44,7 +44,7 @@ __global__ void cudaCleanupCellsStep2(Array<Object*> cellPointers, Heap newHeap)
             auto& object = cellPointers.at(index);
             for (int i = 0; i < object->numConnections; ++i) {
                 auto& connectedObject = object->connections[i].object;
-                connectedObject = reinterpret_cast<Object*>(newHeapStart + connectedObject->tempValue.as_uint64);
+                connectedObject = reinterpret_cast<Object*>(newHeapStart + connectedObject->tempValue1.as_uint64);
             }
             if (object->type == ObjectType_Cell) {
                 if (object->typeData.cell.constructorAvailable) {

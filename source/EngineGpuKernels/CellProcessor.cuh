@@ -188,7 +188,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 cellState = origCellState;
             }
         }
-        object->tempValue.as_uint32_float.uint32Part = cellState;
+        object->tempValue1.as_uint32_float.uint32Part = cellState;
     }
 }
 
@@ -202,8 +202,8 @@ __inline__ __device__ void CellProcessor::cellStateTransition_applyNextState(Sim
         if (object->type != ObjectType_Cell) {
             continue;
         }
-        object->typeData.cell.cellState = object->tempValue.as_uint32_float.uint32Part;
-        object->tempValue.as_uint32_float.uint32Part = 0;
+        object->typeData.cell.cellState = object->tempValue1.as_uint32_float.uint32Part;
+        object->tempValue1.as_uint32_float.uint32Part = 0;
     }
 }
 

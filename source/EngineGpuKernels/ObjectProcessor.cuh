@@ -63,7 +63,7 @@ __inline__ __device__ void ObjectProcessor::init(SimulationData& data)
 
         object->shared1 = {0, 0};
         object->nextObject = nullptr;
-        object->tempValue.as_uint64 = 0;
+        object->tempValue1.as_uint64 = 0;
     }
 }
 
