@@ -34,7 +34,8 @@ PUBLIC
     SensorTests.cpp
     SimulationControlTests.cpp
     StatisticsTests.cpp
-    Testsuite.cpp)
+    Testsuite.cpp
+    VoidTests.cpp)
 
 target_link_libraries(EngineTests Base)
 target_link_libraries(EngineTests EngineGpuKernels)

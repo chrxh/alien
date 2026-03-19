@@ -41,6 +41,7 @@ std::vector<DescTestDataFactory::ObjectParameter> DescTestDataFactory::getAllObj
         ObjectParameter{ObjectType_Cell, CellType_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
         ObjectParameter{ObjectType_Cell, CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Sender}},
         ObjectParameter{ObjectType_Cell, CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Receiver}},
+        ObjectParameter{ObjectType_Cell, CellType_Void},
     };
 }
 
@@ -136,6 +137,7 @@ std::vector<DescTestDataFactory::NodeParameter> DescTestDataFactory::getAllNodeP
         NodeParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
         NodeParameter{CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Sender}},
         NodeParameter{CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Receiver}},
+        NodeParameter{CellType_Void},
     };
 }
 
@@ -604,6 +606,11 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
         } break;
         }
     } break;
+    case CellType_Void: {
+        if (nodeType != CellType_Void) {
+            return false;
+        }
+    } break;
     default:
         return false;
     }
@@ -801,6 +808,8 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
         }
         return CommunicatorDesc().mode(communicatorModeDesc);
     }
+    case CellType_Void:
+        return VoidDesc();
     default:
         return CellTypeDesc();
     }
@@ -965,6 +974,8 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
         }
         return CommunicatorGenomeDesc().mode(communicatorModeDesc);
     }
+    case CellType_Void:
+        return VoidGenomeDesc();
     default:
         return CellTypeGenomeDesc();
     }

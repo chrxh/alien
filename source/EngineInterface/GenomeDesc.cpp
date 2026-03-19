@@ -170,6 +170,8 @@ CellType NodeDesc::getCellType() const
         return CellType_Memory;
     } else if (std::holds_alternative<CommunicatorGenomeDesc>(_cellType)) {
         return CellType_Communicator;
+    } else if (std::holds_alternative<VoidGenomeDesc>(_cellType)) {
+        return CellType_Void;
     }
     CHECK(false);
 }

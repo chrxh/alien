@@ -289,6 +289,8 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                     node.cellTypeData.communicator.modeData.receiver.restrictToLineage = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
                 }
                 break;
+            case CellType_Void:
+                break;
             }
 
             // Handle optional constructor field
@@ -570,6 +572,8 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
                 cell->cellTypeData.communicator.modeData.receiver.restrictToColors = cellTO.cellTypeData.communicator.modeData.receiver.restrictToColors;
                 cell->cellTypeData.communicator.modeData.receiver.restrictToLineage = cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
             }
+        } break;
+        case CellType_Void: {
         } break;
         }
 
@@ -943,6 +947,9 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
             communicator.modeData.receiver.restrictToColors = nodeCommunicator.modeData.receiver.restrictToColors;
             communicator.modeData.receiver.restrictToLineage = nodeCommunicator.modeData.receiver.restrictToLineage;
         }
+    } break;
+    case CellType_Void: {
+        cell.cellType = CellType_Void;
     } break;
     }
 

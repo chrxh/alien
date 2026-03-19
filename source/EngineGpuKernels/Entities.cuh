@@ -62,6 +62,9 @@ struct __align__(16) NeuralNet
 struct Base
 {};
 
+struct VoidCell
+{};
+
 struct Depot
 {
     float storageLimit;
@@ -416,6 +419,7 @@ union CellTypeData
     Digestor digestor;
     Memory memory;
     Communicator communicator;
+    VoidCell voidCell;
 };
 
 struct __align__(16) Signal

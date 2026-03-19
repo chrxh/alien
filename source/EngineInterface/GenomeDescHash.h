@@ -465,6 +465,12 @@ struct std::hash<CommunicatorGenomeDesc>
 };
 
 template <>
+struct std::hash<VoidGenomeDesc>
+{
+    std::size_t operator()(VoidGenomeDesc const& desc) const { return 0; }
+};
+
+template <>
 struct std::hash<CellTypeGenomeDesc>
 {
     std::size_t operator()(CellTypeGenomeDesc const& desc) const
@@ -482,7 +488,8 @@ struct std::hash<CellTypeGenomeDesc>
             DetonatorGenomeDesc,
             DigestorGenomeDesc,
             MemoryGenomeDesc,
-            CommunicatorGenomeDesc>{}(desc);
+            CommunicatorGenomeDesc,
+            VoidGenomeDesc>{}(desc);
     }
 };
 

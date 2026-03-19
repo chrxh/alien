@@ -82,6 +82,8 @@ namespace
             return MemoryGenomeDesc();
         case CellType_Communicator:
             return CommunicatorGenomeDesc();
+        case CellType_Void:
+            return VoidGenomeDesc();
         default:
             CHECK(false);
         }

@@ -30,7 +30,7 @@ const int ObjectType_FreeCell = 2;
 const int ObjectType_Cell = 3;
 
 // Number of cell types (matching CellType_Count)
-const int CellType_Count = 13;
+const int CellType_Count = 14;
 
 void main()
 {

@@ -41,6 +41,7 @@ enum CellType_
     CellType_Digestor,
     CellType_Memory,
     CellType_Communicator,
+    CellType_Void,
     CellType_Count,
 };
 
@@ -59,7 +60,8 @@ namespace Const
         "Detonator",
         "Digestor",
         "Memory",
-        "Communicator"};
+        "Communicator",
+        "Void"};
 
     std::vector<std::string> const ObjectTypeStrings = {
         "Structure",

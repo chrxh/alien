@@ -20,6 +20,9 @@ struct NeuralNetGenomeTO
 struct BaseGenomeTO
 {};
 
+struct VoidGenomeTO
+{};
+
 struct DepotGenomeTO
 {
     float storageLimit;
@@ -312,6 +315,7 @@ union CellTypeDataGenomeTO
     DigestorGenomeTO digestor;
     MemoryGenomeTO memory;
     CommunicatorGenomeTO communicator;
+    VoidGenomeTO voidCell;
 };
 
 struct NodeTO
