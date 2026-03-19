@@ -1074,7 +1074,7 @@ TEST_F(SensorTests, rayNotBlockedByFluidParticles)
     }
 
     // Add free cell target behind the fluid particles (large cluster for reliable detection)
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < 12; ++i) {
         data._objects.emplace_back(ObjectDesc().id(200 + i).pos({90.0f + i, 30.0f}).type(FreeCellDesc()));
     }
 
