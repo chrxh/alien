@@ -112,8 +112,8 @@ struct DetectFreeCell
 
 struct DetectCreature
 {
-    uint32_t minNumCells;      // 0 = no restriction
-    uint32_t maxNumCells;      // 0 = no restriction
+    uint32_t minNumCells;       // 0 = no restriction
+    uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
@@ -302,8 +302,8 @@ struct ReconnectFreeCell
 
 struct ReconnectCreature
 {
-    uint32_t minNumCells;     // 0 = no restriction
-    uint32_t maxNumCells;     // 0 = no restriction
+    uint32_t minNumCells;       // 0 = no restriction
+    uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
@@ -574,8 +574,6 @@ struct Object
     float density;
     Object* nextObject;               // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
-    float2 shared1;                   // Variable with different meanings depending on context
-    float2 shared2;
 
     __device__ __inline__ float& getRefDistance(Object* connectedObject)
     {
