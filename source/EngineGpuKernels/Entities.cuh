@@ -514,6 +514,7 @@ struct Cell
     Signal signal;
     uint32_t activationTime;
     uint8_t lastUpdate;
+    static auto constexpr UpdateInterval = 100;
 
     // Process data
     Signal futureSignal;
