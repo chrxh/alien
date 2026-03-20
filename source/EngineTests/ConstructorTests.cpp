@@ -2715,36 +2715,37 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     if (type == ConstructionType::Normal) {
         data = Desc().addCreature(
             {
-                ObjectDesc().id(0).pos({100.0f, 100.0f - 5.0f}),
-                ObjectDesc().id(1).pos({100.0f, 100.0f - 4.5f}),
-                ObjectDesc().id(2).pos({100.0f, 100.0f - 4.0f}),
-                ObjectDesc().id(3).pos({100.0f, 100.0f - 3.5f}),
-                ObjectDesc().id(4).pos({100.0f, 100.0f - 3.0f}),
-                ObjectDesc().id(5).pos({100.0f, 100.0f - 2.5f}),
-                ObjectDesc().id(6).pos({100.0f, 100.0f - 2.0f}),
-                ObjectDesc().id(7).pos({100.0f, 100.0f - 1.5f}),
-                ObjectDesc().id(8).pos({100.0f, 100.0f - 1.0f}),
-                ObjectDesc().id(9).pos({100.0f, 100.0f - 0.5f}),
+                ObjectDesc().id(0).pos({100.0f, 100.0f - 5.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(1).pos({100.0f, 100.0f - 4.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(2).pos({100.0f, 100.0f - 4.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(3).pos({100.0f, 100.0f - 3.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(4).pos({100.0f, 100.0f - 3.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(5).pos({100.0f, 100.0f - 2.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(6).pos({100.0f, 100.0f - 2.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(7).pos({100.0f, 100.0f - 1.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(8).pos({100.0f, 100.0f - 1.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(9).pos({100.0f, 100.0f - 0.5f}).type(CellDesc().headCell(true)),
                 ObjectDesc()
                     .id(10)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
+                              .headCell(true)
                               .usableEnergy(getConstructorEnergy() * n)
                               .constructor(ConstructorDesc()
                                                .constructionAngle(ConstructionAngle)
                                                .geneIndex(0)
                                                .currentNodeIndex(0)
                                                .autoTriggerInterval(AutoTriggerInterval))),
-                ObjectDesc().id(11).pos({100.1f, 100.0f + 0.5f}),
-                ObjectDesc().id(12).pos({100.1f, 100.0f + 1.0f}),
-                ObjectDesc().id(13).pos({100.1f, 100.0f + 1.5f}),
-                ObjectDesc().id(14).pos({100.1f, 100.0f + 2.0f}),
-                ObjectDesc().id(15).pos({100.1f, 100.0f + 2.5f}),
-                ObjectDesc().id(16).pos({100.1f, 100.0f + 3.0f}),
-                ObjectDesc().id(17).pos({100.1f, 100.0f + 3.5f}),
-                ObjectDesc().id(18).pos({100.1f, 100.0f + 4.0f}),
-                ObjectDesc().id(19).pos({100.1f, 100.0f + 4.5f}),
-                ObjectDesc().id(20).pos({100.1f, 100.0f + 5.0f}),
+                ObjectDesc().id(11).pos({100.1f, 100.0f + 0.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(12).pos({100.1f, 100.0f + 1.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(13).pos({100.1f, 100.0f + 1.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(14).pos({100.1f, 100.0f + 2.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(15).pos({100.1f, 100.0f + 2.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(16).pos({100.1f, 100.0f + 3.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(17).pos({100.1f, 100.0f + 3.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(18).pos({100.1f, 100.0f + 4.0f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(19).pos({100.1f, 100.0f + 4.5f}).type(CellDesc().headCell(true)),
+                ObjectDesc().id(20).pos({100.1f, 100.0f + 5.0f}).type(CellDesc().headCell(true)),
             },
             CreatureDesc().id(0),
             genome);
@@ -2758,6 +2759,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                     .id(10)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
+                              .headCell(true)
                               .usableEnergy(getConstructorEnergy() * n)
                               .constructor(ConstructorDesc()
                                                .constructionAngle(ConstructionAngle)
@@ -3388,7 +3390,7 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
     std::vector<ObjectDesc> largeCreatureCells;
     for (int i = 0; i < 50; ++i) {
         largeCreatureCells.emplace_back(
-            ObjectDesc().id(i).pos({toFloat(i), 0.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(30))));
+            ObjectDesc().id(i).pos({toFloat(i), 0.0f}).type(CellDesc().headCell(true).constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(30))));
     }
     Desc largeCreatureData;
     largeCreatureData.addCreature(largeCreatureCells, CreatureDesc(), genome);

@@ -79,9 +79,9 @@ TEST_P(PhysicsTests_TwoAngles, angularForces)
     auto pos3 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle2) * 1.5f;
     auto pos3ref = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle1 + refAngle) * 1.5f;
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos(pos1),
-        ObjectDesc().id(2).pos(pos2),
-        ObjectDesc().id(3).pos(pos3),
+        ObjectDesc().id(1).pos(pos1).type(CellDesc().headCell(true)),
+        ObjectDesc().id(2).pos(pos2).type(CellDesc().headCell(true)),
+        ObjectDesc().id(3).pos(pos3).type(CellDesc().headCell(true)),
     });
     data.addConnection(2, 1);
     data.addConnection(2, 3, pos3ref);
@@ -109,9 +109,9 @@ TEST_F(PhysicsTests, noGhostRotations)
     auto pos3 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle2);
     auto pos3ref = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle1 + RefAngle);
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos(pos1),
-        ObjectDesc().id(2).pos(pos2),
-        ObjectDesc().id(3).pos(pos3),
+        ObjectDesc().id(1).pos(pos1).type(CellDesc().headCell(true)),
+        ObjectDesc().id(2).pos(pos2).type(CellDesc().headCell(true)),
+        ObjectDesc().id(3).pos(pos3).type(CellDesc().headCell(true)),
     });
     data.addConnection(2, 1);
     data.addConnection(2, 3, pos3ref);
@@ -142,12 +142,12 @@ TEST_F(PhysicsTests, noGhostMovements)
 
     auto data = Desc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({34.97, 11.14}),
+                        ObjectDesc().id(1).pos({34.97, 11.14}).type(CellDesc().headCell(true)),
                     })
                     .addCreature({
-                        ObjectDesc().id(2).pos({33.95, 11.14}),
-                        ObjectDesc().id(3).pos({34.01, 12.16}),
-                        ObjectDesc().id(4).pos({34.88, 12.66}),
+                        ObjectDesc().id(2).pos({33.95, 11.14}).type(CellDesc().headCell(true)),
+                        ObjectDesc().id(3).pos({34.01, 12.16}).type(CellDesc().headCell(true)),
+                        ObjectDesc().id(4).pos({34.88, 12.66}).type(CellDesc().headCell(true)),
                     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);

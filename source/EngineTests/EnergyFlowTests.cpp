@@ -29,7 +29,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
 {
     std::vector<ObjectDesc> objects;
     for (int i = 0; i < 20; ++i) {
-        auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
+        auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f}).type(CellDesc().headCell(true));
         objects.emplace_back(object);
     }
     objects.at(0).getCellRef()._usableEnergy = 1000.0f;
@@ -59,7 +59,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
 
     std::vector<ObjectDesc> cells;
     for (int i = 0; i < 20; ++i) {
-        auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
+        auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f}).type(CellDesc().headCell(true));
         if (i == 19) {
             object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(0);
         }
@@ -105,7 +105,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 20; ++i) {
             auto id = i + j * 20 + 1;
-            auto object = ObjectDesc().id(id).pos({100.0f + toFloat(i), 100.0f});
+            auto object = ObjectDesc().id(id).pos({100.0f + toFloat(i), 100.0f}).type(CellDesc().headCell(true));
             if (id == constructorId1 || id == constructorId2) {
                 object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(0);
             }
@@ -150,7 +150,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
 
     std::vector<ObjectDesc> cells;
     for (int i = 0; i < 20; ++i) {
-        auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
+        auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f}).type(CellDesc().headCell(true));
         if (i == 19) {
             object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).currentBranch(1);
         }
@@ -178,10 +178,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
 TEST_F(EnergyFlowTests, usableEnergyFlowsBranches)
 {
     auto data = Desc().addCreature({
-        ObjectDesc().id(0).pos({100.0f, 99.0f}).type(CellDesc().usableEnergy(100.0f)),
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(240.0f)),
-        ObjectDesc().id(2).pos({100.0f, 101.0f}).type(CellDesc().usableEnergy(100.0f)),
-        ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().usableEnergy(100.0f)),
+        ObjectDesc().id(0).pos({100.0f, 99.0f}).type(CellDesc().headCell(true).usableEnergy(100.0f)),
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(240.0f)),
+        ObjectDesc().id(2).pos({100.0f, 101.0f}).type(CellDesc().headCell(true).usableEnergy(100.0f)),
+        ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(100.0f)),
     });
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -218,14 +218,15 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
-             .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
         CreatureDesc(),
         genome);
     data.addCreature(
         {ObjectDesc()
              .id(2)
              .pos({100.0f + 1.0f, 100.0f})
-             .type(CellDesc().cellState(CellState_Constructing).constructor(ConstructorDesc().currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
+             .type(
+                 CellDesc().headCell(true).cellState(CellState_Constructing).constructor(ConstructorDesc().currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
         CreatureDesc(),
         genome);
     data.addConnection(1, 2);
@@ -254,14 +255,14 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
-             .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
         CreatureDesc(),
         genome);
     data.addCreature(
         {ObjectDesc()
              .id(2)
              .pos({101.0f, 100.0f})
-             .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
         CreatureDesc(),
         genome);
     data.addConnection(1, 2);
@@ -319,8 +320,8 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEqualizeLowEnergyCells)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.8f)),   // Below normal
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.55f)),  // Much lower
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 0.8f)),   // Below normal
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 0.55f)),  // Much lower
     });
     data.addConnection(1, 2);
 
@@ -347,10 +348,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsFromHighToLowEnergyInChain)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 2)),      // High
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy)),          // Normal
-        ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.55f)),  // Low
-        ObjectDesc().id(4).pos({103.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy)),          // Normal
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 2)),      // High
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy)),          // Normal
+        ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 0.55f)),  // Low
+        ObjectDesc().id(4).pos({103.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy)),          // Normal
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -376,10 +377,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsMultipleLowEnergyCells)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 10)),     // Very high energy
-        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.55f)),  // Low
-        ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.6f)),   // Low
-        ObjectDesc().id(4).pos({103.0f, 100.0f}).type(CellDesc().usableEnergy(normalCellEnergy * 0.7f)),   // Low
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 10)),     // Very high energy
+        ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 0.55f)),  // Low
+        ObjectDesc().id(3).pos({102.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 0.6f)),   // Low
+        ObjectDesc().id(4).pos({103.0f, 100.0f}).type(CellDesc().headCell(true).usableEnergy(normalCellEnergy * 0.7f)),   // Low
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -528,9 +529,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_exceedRawEnergyThreshold)
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})
-            .type(CellDesc()
-                      .cellType(DigestorDesc().rawEnergyConductivity(0.7f))
-                      .rawEnergy(SimulationParameters::maxRawEnergyThresholdForConduction * 2)),
+            .type(CellDesc().cellType(DigestorDesc().rawEnergyConductivity(0.7f)).rawEnergy(SimulationParameters::maxRawEnergyThresholdForConduction * 2)),
         ObjectDesc()
             .id(2)
             .pos({101.0f, 100.0f})

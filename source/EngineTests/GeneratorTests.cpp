@@ -54,8 +54,8 @@ TEST_P(GeneratorTests_SquareSignal, squareSignal_outputAtVariousTimesteps)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).type(
-                CellDesc().cellType(GeneratorDesc().valueOffset(0.1f).timeOffset(params.timeOffset).mode(SquareSignalDesc().amplitude(2.0f).period(300)))),
+            ObjectDesc().id(1).type(CellDesc().headCell(true).cellType(
+                GeneratorDesc().valueOffset(0.1f).timeOffset(params.timeOffset).mode(SquareSignalDesc().amplitude(2.0f).period(300)))),
         },
         CreatureDesc().id(0));
 
@@ -107,8 +107,8 @@ TEST_P(GeneratorTests_SawtoothSignal, sawtoothSignal_outputAtVariousTimesteps)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).type(
-                CellDesc().cellType(GeneratorDesc().valueOffset(0.2f).timeOffset(params.timeOffset).mode(SawtoothSignalDesc().amplitude(2.0f).period(300)))),
+            ObjectDesc().id(1).type(CellDesc().headCell(true).cellType(
+                GeneratorDesc().valueOffset(0.2f).timeOffset(params.timeOffset).mode(SawtoothSignalDesc().amplitude(2.0f).period(300)))),
         },
         CreatureDesc().id(0));
 
