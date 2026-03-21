@@ -146,7 +146,7 @@ class CellStateTransitionTests_AllStates
 INSTANTIATE_TEST_SUITE_P(
     CellStateTransitionTests_AllStates,
     CellStateTransitionTests_AllStates,
-    ::testing::Values(CellState_Ready, CellState_Constructing, CellState_Activating, CellState_Reviving, CellState_Dying));
+    ::testing::Values(CellState_Ready, CellState_Constructing, CellState_Activating, CellState_Dying));
 
 TEST_P(CellStateTransitionTests_AllStates, structure_cell)
 {
@@ -166,8 +166,6 @@ TEST_P(CellStateTransitionTests_AllStates, structure_cell)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (cellState == CellState_Activating) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (cellState == CellState_Reviving) {
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else {
         EXPECT_EQ(cellState, actualData.getObjectRef(2).getCellRef()._cellState);

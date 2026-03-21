@@ -178,9 +178,9 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
             object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
         }
 
+        auto update = false;
         if (object->typeData.cell.frontAngleId != object->typeData.cell.creature->frontAngleId) {
             if (!object->typeData.cell.headCell) {
-                auto update = false;
                 for (int i = 0, j = object->numConnections; i < j; ++i) {
                     auto const& otherObject = object->connections[i].object;
                     if (otherObject->type != ObjectType_Cell) {
@@ -196,17 +196,16 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         auto frontAngle_object_otherObject = Math::getNormalizedAngle(180.0f - frontAngle_otherObject_object, -180.0f);
                         auto frontAngle_object_connection0 =
                             Math::getNormalizedAngle(frontAngle_object_otherObject + getInitialAngelSpan(object, 0, i), -180.0f);
-
                         object->tempValue2.as_uint32_float.uint32Part = otherObject->typeData.cell.frontAngleId;
                         object->tempValue2.as_uint32_float.floatPart = frontAngle_object_connection0;
-                        update = true;
+                        update = true; 
                         break;
                     }
                 }
-                if (!update) {
-                    object->tempValue2.as_uint32_float.uint32Part = object->typeData.cell.frontAngleId;
-                }
             }
+        }
+        if (!update) {
+            object->tempValue2.as_uint32_float.uint32Part = object->typeData.cell.frontAngleId;
         }
     }
 }
@@ -231,22 +230,23 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
         if (!object->typeData.cell.headCell) {
             ++object->typeData.cell.lastUpdate;
         }
-        if (object->typeData.cell.frontAngleId != creature->frontAngleId) {
-            if (object->typeData.cell.headCell) {
+
+        if (object->typeData.cell.headCell) {
+            if (*data.timestep % Cell::UpdateInterval == 1) {
                 object->typeData.cell.frontAngleId = creature->frontAngleId;
                 object->typeData.cell.frontAngle = creature->genome->frontAngle;
-            } else {
-                auto const& newFrontAngleId = object->tempValue2.as_uint32_float.uint32Part;
-                auto const& newFrontAngle = object->tempValue2.as_uint32_float.floatPart;
-
-                if (newFrontAngleId > object->typeData.cell.frontAngleId) {
-                    object->typeData.cell.frontAngleId = newFrontAngleId;
-                    object->typeData.cell.frontAngle = newFrontAngle;
-                    object->typeData.cell.lastUpdate = 0;
-                }
-
-                object->tempValue2.as_uint64 = 0;
             }
+        } else {
+            auto const& newFrontAngleId = object->tempValue2.as_uint32_float.uint32Part;
+            auto const& newFrontAngle = object->tempValue2.as_uint32_float.floatPart;
+
+            if (newFrontAngleId > object->typeData.cell.frontAngleId) {
+                object->typeData.cell.frontAngleId = newFrontAngleId;
+                object->typeData.cell.frontAngle = newFrontAngle;
+                object->typeData.cell.lastUpdate = 0;
+            }
+
+            object->tempValue2.as_uint64 = 0;
         }
     }
 }
