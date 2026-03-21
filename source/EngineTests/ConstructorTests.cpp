@@ -2699,16 +2699,16 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     if (type == ConstructionType::Normal) {
         data = Desc().addCreature(
             {
-                ObjectDesc().id(0).pos({100.0f, 100.0f - 5.0f}).type(CellDesc()),
-                ObjectDesc().id(1).pos({100.0f, 100.0f - 4.5f}).type(CellDesc()),
-                ObjectDesc().id(2).pos({100.0f, 100.0f - 4.0f}).type(CellDesc()),
-                ObjectDesc().id(3).pos({100.0f, 100.0f - 3.5f}).type(CellDesc()),
-                ObjectDesc().id(4).pos({100.0f, 100.0f - 3.0f}).type(CellDesc()),
-                ObjectDesc().id(5).pos({100.0f, 100.0f - 2.5f}).type(CellDesc()),
-                ObjectDesc().id(6).pos({100.0f, 100.0f - 2.0f}).type(CellDesc()),
-                ObjectDesc().id(7).pos({100.0f, 100.0f - 1.5f}).type(CellDesc()),
-                ObjectDesc().id(8).pos({100.0f, 100.0f - 1.0f}).type(CellDesc()),
-                ObjectDesc().id(9).pos({100.0f, 100.0f - 0.5f}).type(CellDesc()),
+                ObjectDesc().id(0).pos({100.0f, 100.0f - 5.0f}),
+                ObjectDesc().id(1).pos({100.0f, 100.0f - 4.5f}),
+                ObjectDesc().id(2).pos({100.0f, 100.0f - 4.0f}),
+                ObjectDesc().id(3).pos({100.0f, 100.0f - 3.5f}),
+                ObjectDesc().id(4).pos({100.0f, 100.0f - 3.0f}),
+                ObjectDesc().id(5).pos({100.0f, 100.0f - 2.5f}),
+                ObjectDesc().id(6).pos({100.0f, 100.0f - 2.0f}),
+                ObjectDesc().id(7).pos({100.0f, 100.0f - 1.5f}),
+                ObjectDesc().id(8).pos({100.0f, 100.0f - 1.0f}),
+                ObjectDesc().id(9).pos({100.0f, 100.0f - 0.5f}),
                 ObjectDesc()
                     .id(10)
                     .pos({100.0f, 100.0f})
@@ -2720,16 +2720,16 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                                                .geneIndex(0)
                                                .currentNodeIndex(0)
                                                .autoTriggerInterval(AutoTriggerInterval))),
-                ObjectDesc().id(11).pos({100.1f, 100.0f + 0.5f}).type(CellDesc()),
-                ObjectDesc().id(12).pos({100.1f, 100.0f + 1.0f}).type(CellDesc()),
-                ObjectDesc().id(13).pos({100.1f, 100.0f + 1.5f}).type(CellDesc()),
-                ObjectDesc().id(14).pos({100.1f, 100.0f + 2.0f}).type(CellDesc()),
-                ObjectDesc().id(15).pos({100.1f, 100.0f + 2.5f}).type(CellDesc()),
-                ObjectDesc().id(16).pos({100.1f, 100.0f + 3.0f}).type(CellDesc()),
-                ObjectDesc().id(17).pos({100.1f, 100.0f + 3.5f}).type(CellDesc()),
-                ObjectDesc().id(18).pos({100.1f, 100.0f + 4.0f}).type(CellDesc()),
-                ObjectDesc().id(19).pos({100.1f, 100.0f + 4.5f}).type(CellDesc()),
-                ObjectDesc().id(20).pos({100.1f, 100.0f + 5.0f}).type(CellDesc()),
+                ObjectDesc().id(11).pos({100.1f, 100.0f + 0.5f}),
+                ObjectDesc().id(12).pos({100.1f, 100.0f + 1.0f}),
+                ObjectDesc().id(13).pos({100.1f, 100.0f + 1.5f}),
+                ObjectDesc().id(14).pos({100.1f, 100.0f + 2.0f}),
+                ObjectDesc().id(15).pos({100.1f, 100.0f + 2.5f}),
+                ObjectDesc().id(16).pos({100.1f, 100.0f + 3.0f}),
+                ObjectDesc().id(17).pos({100.1f, 100.0f + 3.5f}),
+                ObjectDesc().id(18).pos({100.1f, 100.0f + 4.0f}),
+                ObjectDesc().id(19).pos({100.1f, 100.0f + 4.5f}),
+                ObjectDesc().id(20).pos({100.1f, 100.0f + 5.0f}),
             },
             CreatureDesc().id(0),
             genome);

@@ -152,7 +152,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDesc()),
             ObjectDesc()
                 .id(2)
                 .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
@@ -161,8 +161,8 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
                           .headCell(true)
                           .cellType(MuscleDesc().mode(AutoBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
                           .neuralNetwork(nn)),
-            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),
         GenomeDesc().frontAngle(side == Side::Left ? -90.0f : 90.0f));
@@ -238,9 +238,9 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc()),
+            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc()),
             ObjectDesc()
                 .id(4)
                 .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
@@ -336,7 +336,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDesc()),
             ObjectDesc()
                 .id(2)
                 .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
@@ -345,8 +345,8 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
                           .headCell(true)
                           .cellType(MuscleDesc().mode(ManualBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
                           .neuralNetwork(nn)),
-            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),
         GenomeDesc().frontAngle(side == Side::Left ? -90.0f : 90.0f));
@@ -435,9 +435,9 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc()),
+            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc()),
             ObjectDesc()
                 .id(4)
                 .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
@@ -555,7 +555,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(1).pos({side == Side::Left ? 10.0f : 13.0f, 10.0f}).type(CellDesc()),
             ObjectDesc()
                 .id(2)
                 .pos({side == Side::Left ? 11.0f : 12.0f, 10.0f})
@@ -564,8 +564,8 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
                           .headCell(true)
                           .cellType(MuscleDesc().mode(AngleBendingDesc().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
                           .neuralNetwork(nn)),
-            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(3).pos({side == Side::Left ? 12.0f : 11.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(4).pos({side == Side::Left ? 13.0f : 10.0f, 10.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),
         GenomeDesc().frontAngle(side == Side::Left ? -90.0f : 90.0f));
@@ -617,9 +617,9 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().headCell(true)),
-            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc()),
+            ObjectDesc().id(3).pos({10.0f, 12.0f}).type(CellDesc()),
             ObjectDesc()
                 .id(4)
                 .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
@@ -687,10 +687,9 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
                 .pos({11.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(180.0f)
-                          .headCell(true)
                           .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
                           .neuralNetwork(nn)),
-            ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f).headCell(true)),
+            ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f)),
         },
         CreatureDesc().id(0),
         GenomeDesc().frontAngle(180.0f));
@@ -763,7 +762,6 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
                 .pos({11.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(180.0f)
-                          .headCell(true)
                           .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
                           .neuralNetwork(nn)),
         },
@@ -840,10 +838,9 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
                 .pos({11.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(180.0f)
-                          .headCell(true)
                           .cellType(MuscleDesc().mode(ManualCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
                           .neuralNetwork(nn)),
-            ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f).headCell(true)),
+            ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f)),
         },
         CreatureDesc().id(0),
         GenomeDesc().frontAngle(180.0f));
@@ -901,7 +898,6 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
                 .pos({11.0f, 10.0f})
                 .type(CellDesc()
                           .frontAngle(180.0f)
-                          .headCell(true)
                           .cellType(MuscleDesc().mode(ManualCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
                           .neuralNetwork(nn)),
         },
@@ -974,7 +970,10 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({10.0f, 10.0f}),
-            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().frontAngle(0.0f).cellType(MuscleDesc().mode(DirectMovementDesc())).neuralNetwork(nn)),
+            ObjectDesc()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .type(CellDesc().frontAngle(0.0f).headCell(true).cellType(MuscleDesc().mode(DirectMovementDesc())).neuralNetwork(nn)),
             ObjectDesc().id(3).pos({12.0f, 10.0f}),
         },
         CreatureDesc().id(0));

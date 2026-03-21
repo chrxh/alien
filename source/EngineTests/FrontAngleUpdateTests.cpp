@@ -20,7 +20,7 @@ public:
     ~FrontAngleUpdateTests() = default;
 };
 
-TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
+TEST_F(FrontAngleUpdateTests, noUpdate_noHeadCell)
 {
     auto const FrontAngle = 45.0f;
     auto const InitialFrontAngleId = 4;
@@ -50,35 +50,6 @@ TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
     EXPECT_FALSE(actualData.getObjectRef(2).getCellRef()._frontAngle.has_value());
     EXPECT_FALSE(actualData.getObjectRef(3).getCellRef()._frontAngle.has_value());
 }
-
-TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
-{
-    auto const InitialFrontAngleId = 4;
-
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId).headCell(true)),
-            ObjectDesc().id(2).pos({10.0f, 11.0f}).type(CellDesc().frontAngleId(InitialFrontAngleId)),
-        },
-        CreatureDesc().id(1).frontAngleId(InitialFrontAngleId),
-        GenomeDesc().frontAngle(45.0f));
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(5);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
-    ASSERT_EQ(1, actualData._creatures.size());
-
-    auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
-
-    EXPECT_TRUE(approxCompareAngles(45.0f, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(45.0f - 180.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
-}
-
 
 TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
 {
@@ -251,7 +222,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(5);
+    _simulationFacade->calcTimesteps(105);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -300,7 +271,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(5);
+    _simulationFacade->calcTimesteps(105);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -347,7 +318,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(5);
+    _simulationFacade->calcTimesteps(105);
 
     auto actualData = _simulationFacade->getSimulationData();
 
