@@ -975,7 +975,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    EXPECT_EQ(InitialFrontAngleId + 1, hostCreature._frontAngleId);
+    EXPECT_EQ(InitialFrontAngleId + 2, hostCreature._frontAngleId);
     ASSERT_EQ(5, actualData.getObjectsForCreature(hostCreature._id).size());
 
     auto hostObject = actualData.getObjectRef(1);
