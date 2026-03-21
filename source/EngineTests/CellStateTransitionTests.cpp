@@ -99,7 +99,7 @@ TEST_F(CellStateTransitionTests, noDyingForFixedCells)
 
 TEST_F(CellStateTransitionTests, cellDiesWhenLastUpdateExceedsInterval)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(111))});
+    auto data = Desc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(202))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -119,7 +119,7 @@ TEST_F(CellStateTransitionTests, cellStaysAliveWhenLastUpdateBelowInterval)
 
 TEST_F(CellStateTransitionTests, fixedCellDoesNotDieFromLastUpdate)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).fixed(true).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(200))});
+    auto data = Desc().addCreature({ObjectDesc().id(1).fixed(true).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(202))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
