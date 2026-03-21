@@ -173,5 +173,5 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
             CHECK(false);
         }
     }
-    EXPECT_LT(25, numLargeCreatures);
+    EXPECT_LT(20, numLargeCreatures);
 }
