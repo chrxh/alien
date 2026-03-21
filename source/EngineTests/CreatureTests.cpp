@@ -128,7 +128,10 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, Direction::Forward);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc()
+             .id(0)
+             .pos({200.0f, 200.0f})
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -208,7 +211,10 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
 
     auto genome = createGenomeForCreatureWithOneLegAndSpikes(muscleMode, Direction::Forward);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({200.0f, 200.0f}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc()
+             .id(0)
+             .pos({200.0f, 200.0f})
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -282,7 +288,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
 
     // Check angles for second cell leg
     ASSERT_EQ(4, leg.at(1)._connections.size());
-    EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(0))));    // initial angle connection is stored in connected muscle
+    EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(0))));  // initial angle connection is stored in connected muscle
     EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(0)._angleFromPrevious));
     EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(1)._angleFromPrevious));
 
@@ -318,7 +324,8 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, direction);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos(refPoint).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+        {ObjectDesc().id(0).pos(refPoint).type(
+            CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -328,7 +335,9 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
     RealVector2D movementDirection;
     {
         auto actualData = _simulationFacade->getSimulationData();
-        for (auto& object : actualData._objects) { object._vel = {0, 0}; }
+        for (auto& object : actualData._objects) {
+            object._vel = {0, 0};
+        }
         _simulationFacade->setSimulationData(actualData);
 
         DescEditService::get().removeCell(actualData, 0);
@@ -379,7 +388,7 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
         {ObjectDesc()
              .id(0)
              .pos({200.0f, 200.0f})
-             .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -429,7 +438,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Desc().addCreature(
         {ObjectDesc().id(0).pos(refPoint).type(
-            CellDesc().constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
+            CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -440,7 +449,9 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     float startPos_projected = 0;
     {
         auto actualData = _simulationFacade->getSimulationData();
-        for (auto& object : actualData._objects) { object._vel = {0, 0}; }
+        for (auto& object : actualData._objects) {
+            object._vel = {0, 0};
+        }
         _simulationFacade->setSimulationData(actualData);
 
         DescEditService::get().removeCell(actualData, 0);

@@ -764,6 +764,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         cell.neuralNetwork->connectionWeights[i] = node->neuralNetwork.connectionWeights[i];
     }
     cell.activationTime = 0;
+    cell.lastUpdate = 0;
     cell.event = CellEvent_No;
 
     switch (node->cellType) {
