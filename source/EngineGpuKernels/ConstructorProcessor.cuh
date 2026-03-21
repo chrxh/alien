@@ -872,7 +872,6 @@ __inline__ __device__ void ConstructorProcessor::activateNewObjectOnLastNode(Obj
 {
     if (constructionData.isLastNode) {
         newObject->typeData.cell.cellState = CellState_Activating;
-        alienAtomicAdd32(&newObject->typeData.cell.creature->frontAngleId, static_cast<uint32_t>(1));
     }
 }
 
