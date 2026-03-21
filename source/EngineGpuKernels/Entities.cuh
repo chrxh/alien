@@ -452,7 +452,7 @@ struct Creature
     MutationState mutationState;
 
     // Process data
-    uint32_t frontAngleId;
+    uint32_t headUpdateId;
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
@@ -518,7 +518,7 @@ struct Cell
 
     // Process data
     Signal futureSignal;
-    uint32_t frontAngleId;
+    uint32_t headUpdateId;
     bool headCell;
 
     // Additional rendering data

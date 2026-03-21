@@ -483,12 +483,12 @@ INSTANTIATE_TEST_SUITE_P(ConstructorTests_AllNodeTypes, ConstructorTests_AllNode
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0)
 {
     auto nodeParameter = GetParam();
-    auto constexpr FrontAngleId = 5;
+    auto constexpr HeadUpdateId = 5;
 
     auto randomNode = _descTestDataFactory->createNonDefaultNodeDesc(nodeParameter);
 
     auto data = Desc().addCreature(
-        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()).frontAngleId(FrontAngleId))},
+        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()).headUpdateId(HeadUpdateId))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
             GeneDesc().separation(true).nodes({randomNode}),
@@ -515,7 +515,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
-    EXPECT_EQ(FrontAngleId, newObject.getCellRef()._frontAngleId);
+    EXPECT_EQ(HeadUpdateId, newObject.getCellRef()._headUpdateId);
     EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
     EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));

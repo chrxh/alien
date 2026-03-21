@@ -318,7 +318,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creature->generation = creatureTO.generation;
     creature->numObjects = creatureTO.numObjects;
     creature->mutationState = creatureTO.mutationState;
-    creature->frontAngleId = creatureTO.frontAngleId;
+    creature->headUpdateId = creatureTO.headUpdateId;
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     creature->genome = &_data->entities.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
@@ -393,7 +393,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->nodeIndex = cellTO.nodeIndex;
         cell->parentNodeIndex = cellTO.parentNodeIndex;
         cell->geneIndex = cellTO.geneIndex;
-        cell->frontAngleId = cellTO.frontAngleId;
+        cell->headUpdateId = cellTO.headUpdateId;
         cell->headCell = cellTO.headCell;
         cell->event = cellTO.event;
         cell->eventCounter = cellTO.eventCounter;
@@ -742,7 +742,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.nodeIndex = nodeIndex;
     cell.parentNodeIndex = parentNodeIndex;
     cell.geneIndex = geneIndex;
-    cell.frontAngleId = 0;
+    cell.headUpdateId = 0;
     cell.headCell = false;
     for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         cell.signal.channels[i] = 0.0f;

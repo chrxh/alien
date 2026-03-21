@@ -838,7 +838,7 @@ namespace
     auto constexpr Id_Creature_AncestorId = 1;
     auto constexpr Id_Creature_Generation = 2;
     auto constexpr Id_Creature_NumCells = 4;
-    auto constexpr Id_Creature_FrontAngleId = 5;
+    auto constexpr Id_Creature_HeadUpdateId = 5;
     auto constexpr Id_Creature_GenomeId = 6;
     auto constexpr Id_Creature_HaveMutationsApplied = 7;
 
@@ -860,7 +860,7 @@ namespace
     auto constexpr Id_Cell_ParentNodeIndex = 7;
     auto constexpr Id_Cell_GeneIndex = 8;
     auto constexpr Id_Cell_AngleToFront = 10;
-    auto constexpr Id_Cell_FrontAngleId = 11;
+    auto constexpr Id_Cell_HeadUpdateId = 11;
     auto constexpr Id_Cell_IsFrontAngleRefCell = 12;
     auto constexpr Id_Cell_CreatureId = 13;
     auto constexpr Id_Cell_Event = 14;
@@ -1553,7 +1553,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
+        loadSave(task, auxiliaries, Id_Cell_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
         loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
         loadSave(task, auxiliaries, Id_Cell_Event, data._event, defaultObject._event);
@@ -1593,7 +1593,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Creature_NumCells, data._numObjects, defaultObject._numObjects);
-        loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
+        loadSave(task, auxiliaries, Id_Creature_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
         loadSave(task, auxiliaries, Id_Creature_HaveMutationsApplied, data._mutationState, defaultObject._mutationState);
 

@@ -76,7 +76,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                       .cellState(false)
                       .geneIndex(42)
                       .nodeIndex(13)
-                      .frontAngleId(13)
+                      .headUpdateId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
                       .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).numTimesSent(42))
@@ -189,7 +189,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                       });
 
     auto creature =
-        CreatureDesc().ancestorId(1001).generation(7).numObjects(25).frontAngleId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
+        CreatureDesc().ancestorId(1001).generation(7).numObjects(25).headUpdateId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
 
     return {creature, genome};
 }
