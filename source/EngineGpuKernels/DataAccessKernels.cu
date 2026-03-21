@@ -275,7 +275,7 @@ namespace
             creatureTO.generation = creature->generation;
             creatureTO.numObjects = creature->numObjects;
             creatureTO.mutationState = creature->mutationState;
-            creatureTO.frontAngleId = creature->frontAngleId;
+            creatureTO.headUpdateId = creature->headUpdateId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
             alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, creatureTOIndex);
@@ -310,7 +310,7 @@ namespace
             objectTO.connections[i].angleFromPrevious = object->connections[i].angleFromPrevious;
         }
 
-        object->tempValue.as_uint64 = objectTOIndex;
+        object->tempValue1.as_uint64 = objectTOIndex;
 
         if (object->type == ObjectType_Structure) {
             objectTO.typeData.structure.energy = object->typeData.structure.energy;
@@ -340,7 +340,7 @@ namespace
             cellTO.nodeIndex = cell.nodeIndex;
             cellTO.parentNodeIndex = cell.parentNodeIndex;
             cellTO.geneIndex = cell.geneIndex;
-            cellTO.frontAngleId = cell.frontAngleId;
+            cellTO.headUpdateId = cell.headUpdateId;
             cellTO.headCell = cell.headCell;
             cellTO.event = cell.event;
             cellTO.eventCounter = cell.eventCounter;
@@ -626,7 +626,7 @@ __global__ void cudaGetSelectedObjectDataWithoutConnections(SimulationData data,
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         if ((includeClusters && object->selected == 0) || (!includeClusters && object->selected != 1)) {
-            object->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
+            object->tempValue1.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
         createObjectTO(object, to, heap);
@@ -670,7 +670,7 @@ __global__ void cudaGetInspectedObjectDataWithoutConnections(InspectedEntityIds 
             }
         }
         if (!found) {
-            object->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
+            object->tempValue1.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
 
@@ -901,7 +901,7 @@ __global__ void cudaGetObjectDataWithoutConnections(int2 rectUpperLeft, int2 rec
         auto pos = object->pos;
         data.objectMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            object->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
+            object->tempValue1.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
 
@@ -918,7 +918,7 @@ __global__ void cudaResolveConnections(SimulationData data, TOs to)
 
         for (int i = 0; i < objectTO.numConnections; ++i) {
             auto const objectIndex = objectTO.connections[i].objectIndex;
-            objectTO.connections[i].objectIndex = data.entities.heap.atType<Object>(objectIndex).tempValue.as_uint64;
+            objectTO.connections[i].objectIndex = data.entities.heap.atType<Object>(objectIndex).tempValue1.as_uint64;
         }
     }
 }

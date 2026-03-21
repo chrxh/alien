@@ -109,7 +109,7 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
     genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f))
         .neuronMutation2(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1000; ++i) {
@@ -130,7 +130,7 @@ TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
     genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).weightSigma(1.0f))
         .neuronMutation2(NeuronMutationDesc().probability(0.0f).weightSigma(0.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -175,7 +175,7 @@ TEST_F(MutationTests, neuronWeightMutation_zeroProbabilityNoChange)
     genome.neuronMutation1(NeuronMutationDesc().probability(0.0f).weightSigma(1.0f).biasSigma(1.0f))
         .neuronMutation2(NeuronMutationDesc().probability(0.0f).weightSigma(1.0f).biasSigma(1.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -206,7 +206,7 @@ TEST_F(MutationTests, neuronBiasMutation_biasesActuallyChange)
     genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).weightSigma(0.0f).biasSigma(1.0f))
         .neuronMutation2(NeuronMutationDesc().probability(0.0f).weightSigma(0.0f).biasSigma(0.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -251,7 +251,7 @@ TEST_F(MutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
     genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).weightSigma(0.0f).biasSigma(0.0f))
         .neuronMutation2(NeuronMutationDesc().probability(1.0f).weightSigma(0.0f).biasSigma(0.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -279,7 +279,7 @@ TEST_F(MutationTests, neuronBiasMutation_keepOtherAttributesUnchanged)
     genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).biasSigma(1.0f))
         .neuronMutation2(NeuronMutationDesc().probability(1.0f).biasSigma(1.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1000; ++i) {
@@ -300,7 +300,7 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_activationFunctionsActual
     genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).activationFunctionProbability(1.0f))
         .neuronMutation2(NeuronMutationDesc().probability(0.0f).activationFunctionProbability(0.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -345,7 +345,7 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_zeroProbabilityNoChange)
     genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).activationFunctionProbability(0.0f))
         .neuronMutation2(NeuronMutationDesc().probability(1.0f).activationFunctionProbability(0.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -373,7 +373,7 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_keepOtherAttributesUnchan
     genome.neuronMutation1(NeuronMutationDesc().probability(1.0f).activationFunctionProbability(1.0f))
         .neuronMutation2(NeuronMutationDesc().probability(1.0f).activationFunctionProbability(1.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1000; ++i) {
@@ -394,7 +394,7 @@ TEST_F(MutationTests, connectionWeightMutation_weightsActuallyChange)
     genome.connectionMutationRate1(ConnectionMutationDesc().probability(1.0f).sigma(1.0f))
         .connectionMutationRate2(ConnectionMutationDesc().probability(0.0f).sigma(0.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -439,7 +439,7 @@ TEST_F(MutationTests, connectionWeightMutation_zeroProbabilityNoChange)
     genome.connectionMutationRate1(ConnectionMutationDesc().probability(0.0f).sigma(1.0f))
         .connectionMutationRate2(ConnectionMutationDesc().probability(0.0f).sigma(1.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -467,7 +467,7 @@ TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
     genome.connectionMutationRate1(ConnectionMutationDesc().probability(1.0f).sigma(1.0f))
         .connectionMutationRate2(ConnectionMutationDesc().probability(1.0f).sigma(1.0f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1000; ++i) {
@@ -487,7 +487,7 @@ TEST_F(MutationTests, lineageMutation_lineageIdActuallyChanges)
     auto genome = createTestGenome();
     genome.lineageId(42).lineageMutationProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -507,7 +507,7 @@ TEST_F(MutationTests, lineageMutation_zeroProbabilityNoChange)
     auto genome = createTestGenome();
     genome.lineageId(42).lineageMutationProbability(0.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -527,7 +527,7 @@ TEST_F(MutationTests, lineageMutation_keepOtherAttributesUnchanged)
     auto genome = createTestGenome();
     genome.lineageId(42).lineageMutationProbability(1.0f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -553,7 +553,7 @@ TEST_F(MutationTests, metaMutation_neuronRatesActuallyChange)
     genome.neuronMutation1(NeuronMutationDesc().probability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f))
         .neuronMutation2(NeuronMutationDesc().probability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.metaMutationNeuronsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -590,7 +590,7 @@ TEST_F(MutationTests, metaMutation_neuronRatesZeroSigmaNoChange)
     genome.neuronMutation1(NeuronMutationDesc().probability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f))
         .neuronMutation2(NeuronMutationDesc().probability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.metaMutationNeuronsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -621,7 +621,7 @@ TEST_F(MutationTests, metaMutation_connectionRatesActuallyChange)
     genome.connectionMutationRate1(ConnectionMutationDesc().probability(0.5f).sigma(0.5f))
         .connectionMutationRate2(ConnectionMutationDesc().probability(0.5f).sigma(0.5f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.metaMutationConnectionsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -651,7 +651,7 @@ TEST_F(MutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
     genome.connectionMutationRate1(ConnectionMutationDesc().probability(0.5f).sigma(0.5f))
         .connectionMutationRate2(ConnectionMutationDesc().probability(0.5f).sigma(0.5f));
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.metaMutationConnectionsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -677,7 +677,7 @@ TEST_F(MutationTests, metaMutation_lineageProbabilityActuallyChanges)
     auto genome = createTestGenome();
     genome.lineageMutationProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.metaMutationLineagesSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -700,7 +700,7 @@ TEST_F(MutationTests, metaMutation_lineageProbabilityZeroSigmaNoChange)
     auto genome = createTestGenome();
     genome.lineageMutationProbability(0.5f);
 
-    auto data = Desc().addCreature({ObjectDesc().id(1).type(CellDesc())}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _parameters.metaMutationLineagesSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);

@@ -15,7 +15,7 @@ PUBLIC
     DigestorTests.cpp
     EnergyFlowTests.cpp
     EnergyParticleTests.cpp
-    FrontAngleUpdateTests.cpp
+    HeadUpdateTests.cpp
     GarbageCollectorTests.cpp
     GeneratorTests.cpp
     GeometryTests.cpp

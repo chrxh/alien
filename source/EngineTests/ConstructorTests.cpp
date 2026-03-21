@@ -483,12 +483,12 @@ INSTANTIATE_TEST_SUITE_P(ConstructorTests_AllNodeTypes, ConstructorTests_AllNode
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0)
 {
     auto nodeParameter = GetParam();
-    auto constexpr FrontAngleId = 5;
+    auto constexpr HeadUpdateId = 5;
 
     auto randomNode = _descTestDataFactory->createNonDefaultNodeDesc(nodeParameter);
 
     auto data = Desc().addCreature(
-        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()).frontAngleId(FrontAngleId))},
+        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()).headUpdateId(HeadUpdateId))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
             GeneDesc().separation(true).nodes({randomNode}),
@@ -515,7 +515,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
-    EXPECT_EQ(FrontAngleId, newObject.getCellRef()._frontAngleId);
+    EXPECT_EQ(HeadUpdateId, newObject.getCellRef()._headUpdateId);
     EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
     EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
@@ -845,11 +845,9 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
 TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 {
-    auto const InitialFrontAngleId = 4;
-
     auto data = Desc().addCreature(
         {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0)))},
-        CreatureDesc().id(0).frontAngleId(InitialFrontAngleId),
+        CreatureDesc().id(0),
         GenomeDesc().genes({
             GeneDesc().separation(false).numBranches(1).numConcatenations(1).nodes({NodeDesc(), NodeDesc()}),
         }));
@@ -864,7 +862,6 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    EXPECT_EQ(InitialFrontAngleId, creature._frontAngleId);
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
 
     auto hostObject = actualData.getObjectRef(0);
@@ -886,14 +883,12 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
 {
-    auto const InitialFrontAngleId = 4;
-
     auto data = Desc().addCreature(
         {ObjectDesc()
              .id(0)
              .pos({100.0f, 100.0f})
              .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentConcatenation(0)))},
-        CreatureDesc().id(0).frontAngleId(InitialFrontAngleId),
+        CreatureDesc().id(0),
         GenomeDesc().genes({
             GeneDesc().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDesc()}),
         }));
@@ -908,7 +903,6 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    EXPECT_EQ(InitialFrontAngleId + 1, hostCreature._frontAngleId);
     ASSERT_EQ(2, actualData.getObjectsForCreature(hostCreature._id).size());
 
     auto hostObject = actualData.getObjectRef(0);
@@ -941,7 +935,6 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2__branch_0_1__resetBendingMuscle)
 {
     auto muscleModeType = GetParam();
-    auto const InitialFrontAngleId = 4;
 
     auto muscleMode = [&muscleModeType] -> MuscleModeDesc {
         if (muscleModeType == MuscleMode_AutoBending)
@@ -964,7 +957,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
             ObjectDesc().id(2).pos({100.0f, 102.0f}),
             ObjectDesc().id(3).pos({100.0f + getOffspringDistance(), 101.0f}).type(CellDesc().cellType(MuscleDesc().mode(muscleMode))),
         },
-        CreatureDesc().id(0).frontAngleId(InitialFrontAngleId),
+        CreatureDesc().id(0),
         GenomeDesc().genes({
             GeneDesc().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDesc().cellType(MuscleGenomeDesc())}),
         }));
@@ -981,7 +974,6 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    EXPECT_EQ(InitialFrontAngleId + 1, hostCreature._frontAngleId);
     ASSERT_EQ(5, actualData.getObjectsForCreature(hostCreature._id).size());
 
     auto hostObject = actualData.getObjectRef(1);
@@ -1012,8 +1004,6 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
 
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
 {
-    auto const InitialFrontAngleId = 4;
-
     auto genome = GenomeDesc().genes({
         GeneDesc().separation(false).numBranches(2).nodes({NodeDesc()}),
     });
@@ -1024,7 +1014,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentBranch(0))),
         },
-        CreatureDesc().id(0).frontAngleId(InitialFrontAngleId),
+        CreatureDesc().id(0),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -1037,7 +1027,6 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    EXPECT_EQ(InitialFrontAngleId + 1, hostCreature._frontAngleId);
     ASSERT_EQ(2, actualData.getObjectsForCreature(hostCreature._id).size());
 
     auto hostObject = actualData.getObjectRef(0);
@@ -1351,8 +1340,6 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
 
 TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
 {
-    auto const InitialFrontAngleId = 4;
-
     Desc data;
     data.addCreature(
         {
@@ -1369,7 +1356,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
         {
             ObjectDesc().id(1).pos({99.0f, 100.0f}).type(CellDesc().cellState(CellState_Constructing)),
         },
-        CreatureDesc().id(1).frontAngleId(InitialFrontAngleId),
+        CreatureDesc().id(1),
         GenomeDesc().genes({
             GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
         }));
@@ -1388,7 +1375,6 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
     ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
 
     auto newCreature = actualData.getCreatureRef(1);
-    EXPECT_EQ(InitialFrontAngleId + 1, newCreature._frontAngleId);
     ASSERT_EQ(2, actualData.getObjectsForCreature(newCreature._id).size());
 
     auto hostObject = actualData.getObjectRef(0);
@@ -1454,7 +1440,6 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
 TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
 {
     auto const MiddleAngle = 5.0f;
-    auto const InitialFrontAngleId = 4;
 
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc(), NodeDesc().referenceAngle(MiddleAngle)}).separation(false).numBranches(1),
@@ -1469,7 +1454,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
             ObjectDesc().id(2).pos({100.0f, 101.0f}),
             ObjectDesc().id(3).pos(RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(-45.0f) * 1.0f).type(CellDesc().cellState(CellState_Constructing)),
         },
-        CreatureDesc().id(0).frontAngleId(InitialFrontAngleId),
+        CreatureDesc().id(0),
         genome);
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -1486,7 +1471,6 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, actualData.getObjectsForCreature(creature._id).size());
-    EXPECT_EQ(InitialFrontAngleId + 1, creature._frontAngleId);
 
     auto hostObject = actualData.getObjectRef(1);
     auto prevCell = actualData.getObjectRef(3);
@@ -2729,6 +2713,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                     .id(10)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
+                              .headCell(true)
                               .usableEnergy(getConstructorEnergy() * n)
                               .constructor(ConstructorDesc()
                                                .constructionAngle(ConstructionAngle)
@@ -2758,6 +2743,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                     .id(10)
                     .pos({100.0f, 100.0f})
                     .type(CellDesc()
+                              .headCell(true)
                               .usableEnergy(getConstructorEnergy() * n)
                               .constructor(ConstructorDesc()
                                                .constructionAngle(ConstructionAngle)
@@ -3388,7 +3374,7 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
     std::vector<ObjectDesc> largeCreatureCells;
     for (int i = 0; i < 50; ++i) {
         largeCreatureCells.emplace_back(
-            ObjectDesc().id(i).pos({toFloat(i), 0.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(30))));
+            ObjectDesc().id(i).pos({toFloat(i), 0.0f}).type(CellDesc().headCell(true).constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(30))));
     }
     Desc largeCreatureData;
     largeCreatureData.addCreature(largeCreatureCells, CreatureDesc(), genome);

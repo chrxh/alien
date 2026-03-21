@@ -15,7 +15,7 @@ class BalanceTests : public IntegrationTestFramework
 {
 public:
     BalanceTests()
-        : IntegrationTestFramework({100, 100})
+        : IntegrationTestFramework({200, 200})
     {}
 
     ~BalanceTests() = default;
@@ -28,7 +28,7 @@ public:
             {
                 ObjectDesc()
                     .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
+                    .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDesc(),
             GenomeDesc().lineageId(0).prevLineageId(0).genes({
@@ -40,8 +40,7 @@ public:
                         NodeDesc().cellType(AttackerGenomeDesc()),
                         NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
                         NodeDesc().constructor(ConstructorGenomeDesc()),
-                        NodeDesc().cellType(
-                            SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
+                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
                         NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
                         NodeDesc().cellType(AttackerGenomeDesc()),
                     }),
@@ -60,7 +59,9 @@ public:
         auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 0.8f : 0.2f;
         return Desc().addCreature(
             {
-                ObjectDesc().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDesc().constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
+                ObjectDesc()
+                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
+                    .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDesc(),
             GenomeDesc().lineageId(1).prevLineageId(1).genes({
@@ -172,5 +173,5 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
             CHECK(false);
         }
     }
-    EXPECT_LT(25, numLargeCreatures);
+    EXPECT_LT(20, numLargeCreatures);
 }

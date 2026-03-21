@@ -434,16 +434,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                             "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
                             " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
-                    ParameterSpec()
-                        .name("Cell death consequences")
-                        .reference(AlternativeSpec()
-                                       .member(&SimulationParameters::cellDeathConsequences)
-                                       .alternatives({{"None", {}}, {"Entire creature dies", {}}, {"Detached creature parts die", {}}}))
-                        .description("Here one can define what happens to the organism when one of its cells is in the 'Dying' state.\n\n" ICON_FA_CHEVRON_RIGHT
-                                     " None: Only the cell dies.\n\n" ICON_FA_CHEVRON_RIGHT
-                                     " Entire creature dies: All the cells of the organism will also die.\n\n" ICON_FA_CHEVRON_RIGHT
-                                     " Detached creature parts die: Only the parts of the organism that are no longer connected to a "
-                                     "constructor cell for self-replication die."),
                 }),
             ParameterGroupSpec()
                 .name("Cell construction")

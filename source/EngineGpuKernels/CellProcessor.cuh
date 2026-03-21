@@ -19,8 +19,8 @@ public:
     __inline__ __device__ static void aging(SimulationData& data);
     __inline__ __device__ static void cellStateTransition_calcFutureState(SimulationData& data);
     __inline__ __device__ static void cellStateTransition_applyNextState(SimulationData& data);
-    __inline__ __device__ static void frontAngleUpdate_calcFutureValue(SimulationData& data);
-    __inline__ __device__ static void frontAngleUpdate_applyFutureValue(SimulationData& data);
+    __inline__ __device__ static void headUpdate_calcFutureValue(SimulationData& data);
+    __inline__ __device__ static void headUpdate_applyFutureValue(SimulationData& data);
 
     __inline__ __device__ static void updateCellEvents(SimulationData& data);
 
@@ -29,8 +29,6 @@ public:
     __inline__ __device__ static void decay(SimulationData& data);
 
 private:
-    static auto constexpr FrontAngleId_NoUpdate = VALUE_NOT_SET_FLOAT;
-
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, int connectionIndex1, int connectionIndex2);
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, Object* connectedObject1, Object* connectedObject2);
 };
@@ -117,37 +115,9 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
             continue;
         }
 
-        bool isSameCreatureNeighborDetaching = false;
-        bool isOtherCreatureNeighborDetaching = false;
-        bool isSameCreatureNeighborReviving = false;
         bool isNeighborActivating = false;
         if (object->numConnections > 0) {
             isNeighborActivating = object->connections[0].object->typeData.cell.cellState == CellState_Activating;
-        }
-        //int activatingObjectConnection = -1;
-        for (int i = 0; i < object->numConnections; ++i) {
-            auto const& connectedObject = object->connections[i].object;
-            if (connectedObject->type != ObjectType_Cell) {
-                continue;
-            }
-            if (object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
-                auto connectedObjectState = connectedObject->typeData.cell.cellState;
-                if (connectedObjectState == CellState_Detaching) {
-                    isSameCreatureNeighborDetaching = true;
-                } else if (connectedObjectState == CellState_Reviving) {
-                    isSameCreatureNeighborReviving = true;
-                }
-                // else if (connectedObjectState == CellState_Activating) {
-                //    if (connectedObject->connections[0].object == object) {
-                //        //isNeighborActivating = true;
-                //        //activatingObjectConnection = i;
-                //    }
-                //}
-            } else {
-                if (connectedObject->typeData.cell.cellState == CellState_Detaching) {
-                    isOtherCreatureNeighborDetaching = true;
-                }
-            }
         }
 
         auto origCellState = object->typeData.cell.cellState;
@@ -161,36 +131,19 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 if (cudaSimulationParameters.cellAgeLimiterToggle.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
                     atomicExch(&object->typeData.cell.age, 0);
                 }
-            } else if (origCellState == CellState_Reviving) {
-                cellState = CellState_Ready;
             } else if (origCellState == CellState_Constructing) {
                 if (isNeighborActivating) {
                     cellState = CellState_Activating;
-                }
-                if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsequences_None) {
-                    cellState = CellState_Detaching;
-                }
-            } else if (origCellState == CellState_Detaching) {
-                if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsequences_DetachedPartsDie) {
-                    cellState = CellState_Reviving;
-                }
-                if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsequences_None) {
-                    cellState = CellState_Ready;
-                }
-            } else if (origCellState == CellState_Ready) {
-                if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsequences_None) {
-                    if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsequences_DetachedPartsDie && object->typeData.cell.headCell) {
-                        cellState = CellState_Reviving;
-                    } else {
-                        cellState = CellState_Detaching;
-                    }
                 }
             }
             if (object->type != ObjectType_Cell) {
                 cellState = origCellState;
             }
+            if (object->typeData.cell.lastUpdate > 2 * Cell::UpdateInterval + 1) {
+                cellState = CellState_Dying;
+            }
         }
-        object->tempValue.as_uint32_float.uint32Part = cellState;
+        object->tempValue1.as_uint32_float.uint32Part = cellState;
     }
 }
 
@@ -204,12 +157,12 @@ __inline__ __device__ void CellProcessor::cellStateTransition_applyNextState(Sim
         if (object->type != ObjectType_Cell) {
             continue;
         }
-        object->typeData.cell.cellState = object->tempValue.as_uint32_float.uint32Part;
-        object->tempValue.as_uint32_float.uint32Part = 0;
+        object->typeData.cell.cellState = object->tempValue1.as_uint32_float.uint32Part;
+        object->tempValue1.as_uint32_float.uint32Part = 0;
     }
 }
 
-__inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(SimulationData& data)
+__inline__ __device__ void CellProcessor::headUpdate_calcFutureValue(SimulationData& data)
 {
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -219,9 +172,13 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
         if (object->type != ObjectType_Cell) {
             continue;
         }
-        if (object->typeData.cell.frontAngleId != object->typeData.cell.creature->frontAngleId) {
+        if (*data.timestep % Cell::UpdateInterval == 0) {
+            object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
+        }
+
+        auto update = false;
+        if (object->typeData.cell.headUpdateId != object->typeData.cell.creature->headUpdateId) {
             if (!object->typeData.cell.headCell) {
-                auto update = false;
                 for (int i = 0, j = object->numConnections; i < j; ++i) {
                     auto const& otherObject = object->connections[i].object;
                     if (otherObject->type != ObjectType_Cell) {
@@ -230,28 +187,28 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                     if (!object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                         continue;
                     }
-                    if (otherObject->typeData.cell.frontAngleId == object->typeData.cell.creature->frontAngleId) {
+                    if (otherObject->typeData.cell.headUpdateId > object->typeData.cell.headUpdateId) {
                         auto frontAngle_otherObject_object = Math::getNormalizedAngle(
                             -getInitialAngelSpan(otherObject, object, otherObject->connections[0].object) - otherObject->typeData.cell.frontAngle, -180.0f);
 
                         auto frontAngle_object_otherObject = Math::getNormalizedAngle(180.0f - frontAngle_otherObject_object, -180.0f);
                         auto frontAngle_object_connection0 =
                             Math::getNormalizedAngle(frontAngle_object_otherObject + getInitialAngelSpan(object, 0, i), -180.0f);
-
-                        object->tempValue.as_uint32_float.floatPart = frontAngle_object_connection0;
-                        update = true;
+                        object->tempValue2.as_uint32_float.uint32Part = otherObject->typeData.cell.headUpdateId;
+                        object->tempValue2.as_uint32_float.floatPart = frontAngle_object_connection0;
+                        update = true; 
                         break;
                     }
                 }
-                if (!update) {
-                    object->tempValue.as_uint32_float.floatPart = FrontAngleId_NoUpdate;
-                }
             }
+        }
+        if (!update) {
+            object->tempValue2.as_uint32_float.uint32Part = object->typeData.cell.headUpdateId;
         }
     }
 }
 
-__inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(SimulationData& data)
+__inline__ __device__ void CellProcessor::headUpdate_applyFutureValue(SimulationData& data)
 {
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -261,17 +218,33 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
         if (object->type != ObjectType_Cell) {
             continue;
         }
-        if (object->typeData.cell.frontAngleId != object->typeData.cell.creature->frontAngleId) {
-            if (object->typeData.cell.headCell) {
-                object->typeData.cell.frontAngleId = object->typeData.cell.creature->frontAngleId;
-                object->typeData.cell.frontAngle = object->typeData.cell.creature->genome->frontAngle;
-            } else {
-                if (object->tempValue.as_uint32_float.floatPart != FrontAngleId_NoUpdate) {
-                    object->typeData.cell.frontAngleId = object->typeData.cell.creature->frontAngleId;
-                    object->typeData.cell.frontAngle = object->tempValue.as_uint32_float.floatPart;
-                }
-                object->tempValue.as_uint32_float.floatPart = 0;
+        auto const& creature = object->typeData.cell.creature;
+        if (*data.timestep % Cell::UpdateInterval == 0) {
+            if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
+                ++creature->headUpdateId;
             }
+        }
+
+        if (!object->typeData.cell.headCell) {
+            ++object->typeData.cell.lastUpdate;
+        }
+
+        if (object->typeData.cell.headCell) {
+            if (*data.timestep % Cell::UpdateInterval == 1) {
+                object->typeData.cell.headUpdateId = creature->headUpdateId;
+                object->typeData.cell.frontAngle = creature->genome->frontAngle;
+            }
+        } else {
+            auto const& newHeadUpdateId = object->tempValue2.as_uint32_float.uint32Part;
+            auto const& newFrontAngle = object->tempValue2.as_uint32_float.floatPart;
+
+            if (newHeadUpdateId > object->typeData.cell.headUpdateId) {
+                object->typeData.cell.headUpdateId = newHeadUpdateId;
+                object->typeData.cell.frontAngle = newFrontAngle;
+                object->typeData.cell.lastUpdate = 0;
+            }
+
+            object->tempValue2.as_uint64 = 0;
         }
     }
 }
@@ -321,8 +294,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
             auto cellNormalEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
 
             auto needsEnergy = [](Object* obj) {
-                return (obj->typeData.cell.cellState == CellState_Ready || obj->typeData.cell.cellState == CellState_Detaching
-                        || obj->typeData.cell.cellState == CellState_Reviving)
+                return (obj->typeData.cell.cellState == CellState_Ready)
                     && obj->typeData.cell.constructorAvailable && obj->typeData.cell.creature
                     && !ConstructorHelper::isFinished(obj->typeData.cell.constructor, *obj->typeData.cell.creature->genome);
             };
@@ -363,10 +335,8 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
         // Flow of raw energy
         {
-            if ((object->typeData.cell.cellState == CellState_Ready || object->typeData.cell.cellState == CellState_Detaching
-                 || object->typeData.cell.cellState == CellState_Reviving)
-                && (connectedObject->typeData.cell.cellState == CellState_Ready || connectedObject->typeData.cell.cellState == CellState_Detaching
-                    || connectedObject->typeData.cell.cellState == CellState_Reviving)
+            if (object->typeData.cell.cellState == CellState_Ready
+                && connectedObject->typeData.cell.cellState == CellState_Ready
                 && connectedObject->typeData.cell.rawEnergy < SimulationParameters::maxRawEnergyThresholdForConduction) {
 
                 auto flow = 0.0f;
@@ -451,14 +421,12 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         if (object->type == ObjectType_Cell) {
-            if (object->typeData.cell.cellType == CellType_Void) {
-                if (object->typeData.cell.cellState == CellState_Dying) {
-                    ObjectConnectionProcessor::scheduleDeleteObject(data, index);
-                }
+            if (object->typeData.cell.cellState == CellState_InstantDying) {
+                ObjectConnectionProcessor::scheduleDeleteObject(data, index);
             } else {
                 auto minCellEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 
-                if (object->typeData.cell.cellState == CellState_Dying || object->typeData.cell.cellState == CellState_Detaching) {
+                if (object->typeData.cell.cellState == CellState_Dying) {
                     auto cellDeathProbability =
                         ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, object->pos, object->color);
                     if (data.primaryNumberGen.random() <= cellDeathProbability) {
@@ -478,16 +446,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 }
 
                 if (cellDestruction) {
-                    auto orig = atomicExch(&object->typeData.cell.cellState, CellState_Dying);
-                    if (orig != CellState_Dying) {
-                        for (int i = 0; i < object->numConnections; ++i) {
-                            auto const& connectedObject = object->connections[i].object;
-                            auto origConnected = atomicExch(&connectedObject->typeData.cell.cellState, CellState_Detaching);
-                            if (origConnected == CellState_Dying) {
-                                atomicExch(&connectedObject->typeData.cell.cellState, CellState_Dying);
-                            }
-                        }
-                    }
+                    atomicExch(&object->typeData.cell.cellState, CellState_Dying);
                 }
             }
         }

@@ -70,6 +70,13 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes_preview)
     _simulationFacade->setPreviewData(data);
     auto actualData = _simulationFacade->getPreviewData();
 
+    // Preview mode resets lastUpdate to 0
+    for (auto& object : data._objects) {
+        if (object.getObjectType() == ObjectType_Cell) {
+            object.getCellRef()._lastUpdate = 0;
+        }
+    }
+
     EXPECT_TRUE(compare(data, actualData));
 }
 

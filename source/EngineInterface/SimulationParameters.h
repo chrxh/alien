@@ -112,7 +112,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> normalCellEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
     BaseLayerParameter<ColorVector<float>> cellDeathProbability = {
         .baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
-    BaseParameter<CellDeathConsequences> cellDeathConsequences = {CellDeathConsequences_DetachedPartsDie};
 
     // Cell constructor
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f}};

@@ -112,8 +112,8 @@ struct DetectFreeCell
 
 struct DetectCreature
 {
-    uint32_t minNumCells;      // 0 = no restriction
-    uint32_t maxNumCells;      // 0 = no restriction
+    uint32_t minNumCells;       // 0 = no restriction
+    uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
@@ -302,8 +302,8 @@ struct ReconnectFreeCell
 
 struct ReconnectCreature
 {
-    uint32_t minNumCells;     // 0 = no restriction
-    uint32_t maxNumCells;     // 0 = no restriction
+    uint32_t minNumCells;       // 0 = no restriction
+    uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
@@ -437,6 +437,7 @@ union TempValue
 {
     uint64_t as_uint64;
     uint32_float as_uint32_float;
+    float2 as_float2;
 };
 
 struct Creature
@@ -451,7 +452,7 @@ struct Creature
     MutationState mutationState;
 
     // Process data
-    uint32_t frontAngleId;
+    uint32_t headUpdateId;
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
@@ -513,10 +514,11 @@ struct Cell
     Signal signal;
     uint32_t activationTime;
     uint8_t lastUpdate;
+    static auto constexpr UpdateInterval = CELL_UPDATE_INTERVAL;
 
     // Process data
     Signal futureSignal;
-    uint32_t frontAngleId;
+    uint32_t headUpdateId;
     bool headCell;
 
     // Additional rendering data
@@ -566,13 +568,12 @@ struct Object
 
     // Internal algorithm data
     int locked;  // 0 = unlocked, 1 = locked
-    TempValue tempValue;
+    TempValue tempValue1;
+    TempValue tempValue2;
 
     float density;
     Object* nextObject;               // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
-    float2 shared1;                   // Variable with different meanings depending on context
-    float2 shared2;
 
     __device__ __inline__ float& getRefDistance(Object* connectedObject)
     {
@@ -580,7 +581,7 @@ struct Object
         return connections[index].distance;
 
         CUDA_CHECK(false);
-        return tempValue.as_uint32_float.floatPart;  // Return some dummy in order to prevent compile error
+        return tempValue1.as_uint32_float.floatPart;  // Return some dummy in order to prevent compile error
     }
 
     __device__ __inline__ int getConnectionIndex(Object* connectedObject)

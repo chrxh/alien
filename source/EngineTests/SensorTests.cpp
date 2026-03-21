@@ -169,7 +169,7 @@ TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -192,7 +192,7 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -221,7 +221,7 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(90.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -280,7 +280,7 @@ TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -314,7 +314,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())).minRange(40))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -339,7 +339,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())).minRange(120))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -364,7 +364,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())).maxRange(120))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -389,7 +389,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())).maxRange(30))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -416,7 +416,7 @@ TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
 
             // Create a connection that crosses the ray path
-            ObjectDesc().id(2).pos({99.0f, 99.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({99.0f, 99.0f}),
             ObjectDesc().id(3).pos({101.0f, 99.0f}),
         },
         CreatureDesc().id(0));
@@ -987,7 +987,7 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectEnergyDesc().minDensity(5.0f)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1010,14 +1010,14 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectStructureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
     // Add many non-structure cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
-        data.addCreature({ObjectDesc().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).type(CellDesc())});
+        data.addCreature({ObjectDesc().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)})});
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1035,7 +1035,7 @@ TEST_F(SensorTests, detectStructure_ignoreFluidParticles)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectStructureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1098,7 +1098,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.5f)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1158,7 +1158,7 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectFreeCellDesc().minDensity(0.05f)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1210,7 +1210,7 @@ TEST_P(SensorTests_AllAngles, detectCreature_nearRangeScan)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(SensorMode_DetectCreature)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1314,7 +1314,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().minNumCells(2)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1339,7 +1339,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().minNumCells(105)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1363,7 +1363,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_found)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().maxNumCells(200)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1388,7 +1388,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().maxNumCells(99)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1413,7 +1413,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_found)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
                     SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
         GenomeDesc().lineageId(42));
@@ -1443,7 +1443,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage2_found)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
                     SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
         GenomeDesc().lineageId(41).prevLineageId(42));
@@ -1474,7 +1474,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_notFound)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
                     SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_RelatedLineage)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
         GenomeDesc().lineageId(42));
@@ -1503,7 +1503,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_found)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
                     SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_UnrelatedLineage)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
         GenomeDesc().lineageId(42));
@@ -1533,7 +1533,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().frontAngle(0.0f).cellType(
                     SensorDesc().autoTrigger(true).mode(DetectCreatureDesc().restrictToLineage(LineageRestriction_UnrelatedLineage)))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
         GenomeDesc().lineageId(42));
@@ -1558,7 +1558,7 @@ TEST_F(SensorTests, detectCreature_ignoreStructureObjects)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1584,7 +1584,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1610,7 +1610,7 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
             ObjectDesc().id(3).pos({102.0f, 50.0f}),
             ObjectDesc().id(4).pos({103.0f, 50.0f}),
             ObjectDesc().id(5).pos({104.0f, 50.0f}),
@@ -1648,7 +1648,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_30cells)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1680,7 +1680,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_60cells)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
@@ -1712,7 +1712,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_120cells)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
-            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc()),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);

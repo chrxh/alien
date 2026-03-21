@@ -222,7 +222,7 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             objectData[idx].state = cellType | (object->type << 8) | (isIsolatedOrTail << 16);
             objectData[idx].signalChanges = signalChanges;
 
-            object->tempValue.as_uint64 = idx;
+            object->tempValue1.as_uint64 = idx;
         }
     }
 }
@@ -235,7 +235,7 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
         auto const& object = data.entities.objects.at(index);
 
         // Cell index is just the array index (stored in tempValue)
-        uint64_t objectIndex = object->tempValue.as_uint64;
+        uint64_t objectIndex = object->tempValue1.as_uint64;
 
         // Add line indices for each connection
         for (int i = 0; i < object->numConnections; ++i) {
@@ -246,7 +246,7 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
                 if (Math::length(object->pos - connectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]) {
                     uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
                     if (lineIndices != nullptr) {
-                        uint64_t connectedIndex = connectedObject->tempValue.as_uint64;
+                        uint64_t connectedIndex = connectedObject->tempValue1.as_uint64;
                         lineIndices[lineIndex] = static_cast<unsigned int>(objectIndex);
                         lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
                     }
@@ -265,8 +265,8 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         if (Math::length(object->pos - connectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
             && Math::length(object->pos - prevConnectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
             && Math::length(connectedObject->pos - prevConnectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedObject->color]) {
-            uint64_t connectedIndex1 = connectedObject->tempValue.as_uint64;
-            uint64_t connectedIndex2 = prevConnectedObject->tempValue.as_uint64;
+            uint64_t connectedIndex1 = connectedObject->tempValue1.as_uint64;
+            uint64_t connectedIndex2 = prevConnectedObject->tempValue1.as_uint64;
             uint64_t triangleIndex = alienAtomicAdd64(numTriangleIndices, uint64_t(3));
             if (triangleIndices != nullptr) {
                 triangleIndices[triangleIndex] = static_cast<unsigned int>(objectIndex);
@@ -298,7 +298,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             // Triangle?
             if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
                 if (object->id < connectedObject->id && object->id < prevConnectedObject->id) {
-                    addTriangle(object, object->tempValue.as_uint64, prevConnectedObject, connectedObject);
+                    addTriangle(object, object->tempValue1.as_uint64, prevConnectedObject, connectedObject);
                 }
             }
 
@@ -308,8 +308,8 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
                 && connectedObject != prevConnectedObject) {
                 if (object->id < connectedObject->id && object->id < prevConnectedObject->id && object->id < fourthCellCandidate2->id) {
-                    addTriangle(object, object->tempValue.as_uint64, connectedObject, fourthCellCandidate1);
-                    addTriangle(object, object->tempValue.as_uint64, fourthCellCandidate1, prevConnectedObject);
+                    addTriangle(object, object->tempValue1.as_uint64, connectedObject, fourthCellCandidate1);
+                    addTriangle(object, object->tempValue1.as_uint64, fourthCellCandidate1, prevConnectedObject);
                 }
             }
         }

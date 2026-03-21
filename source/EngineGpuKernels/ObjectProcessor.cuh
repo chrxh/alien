@@ -61,9 +61,8 @@ __inline__ __device__ void ObjectProcessor::init(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
 
-        object->shared1 = {0, 0};
         object->nextObject = nullptr;
-        object->tempValue.as_uint64 = 0;
+        object->tempValue1.as_uint64 = 0;
     }
 }
 
@@ -318,14 +317,14 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 if (dot_vr_r < 0) {
                     auto truncated_r_squared = max(0.05f, Math::lengthSquared(r));
                     auto truncated_distance = max(0.05f, closestFixedCellDistance);
-                    object->shared1 += (vr - r * 2 * dot_vr_r / truncated_r_squared + closestFixedCell->vel - object->vel) / truncated_distance;
+                    object->tempValue1.as_float2 += (vr - r * 2 * dot_vr_r / truncated_r_squared + closestFixedCell->vel - object->vel) / truncated_distance;
                 }
             }
 
             object->pos += cellPosDelta;
-            object->shared1 +=
+            object->tempValue1.as_float2 +=
                 F_pressure * cudaSimulationParameters.pressureStrength.value * density + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
-            object->shared2.x = density;
+            object->tempValue2.as_float2.x = density;
         }
         block.sync();
     }
@@ -389,8 +388,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                         // Counter-force on solid: equal and opposite (Newton's 3rd law).
                         // pressureStrength is applied here directly since this force bypasses the
                         // block-local F_boundary accumulation path (which gets pressureStrength at the end).
-                        atomicAdd(&otherObject->shared1.x, -F_on_fluid.x * cudaSimulationParameters.pressureStrength.value);
-                        atomicAdd(&otherObject->shared1.y, -F_on_fluid.y * cudaSimulationParameters.pressureStrength.value);
+                        atomicAdd(&otherObject->tempValue1.as_float2.x, -F_on_fluid.x * cudaSimulationParameters.pressureStrength.value);
+                        atomicAdd(&otherObject->tempValue1.as_float2.y, -F_on_fluid.y * cudaSimulationParameters.pressureStrength.value);
                     }
                 }
                 otherObject = otherObject->nextObject;
@@ -407,7 +406,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
         block.sync();
 
         if (block.thread_rank() == 0) {
-            object->shared1 += F_boundary * cudaSimulationParameters.pressureStrength.value;
+            object->tempValue1.as_float2 += F_boundary * cudaSimulationParameters.pressureStrength.value;
         }
         block.sync();
     }
@@ -420,12 +419,13 @@ __inline__ __device__ void ObjectProcessor::checkForces(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        object->density = object->shared2.x;
+        object->density = object->tempValue2.as_float2.x;
         if (object->fixed) {
             continue;
         }
 
-        if (Math::length(object->shared1) > ParameterCalculator::calcParameter(cudaSimulationParameters.maxForce, data, object->pos, object->color)) {
+        if (Math::length(object->tempValue1.as_float2)
+            > ParameterCalculator::calcParameter(cudaSimulationParameters.maxForce, data, object->pos, object->color)) {
             if (data.primaryNumberGen.random() < cudaSimulationParameters.maxForceDecayProbability) {
                 ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
             }
@@ -443,7 +443,7 @@ __inline__ __device__ void ObjectProcessor::applyForces(SimulationData& data)
         if (object->fixed) {
             continue;
         }
-        auto acceleration = object->shared1 / max(0.05f, object->density) * 0.5f;
+        auto acceleration = object->tempValue1.as_float2 / max(0.05f, object->density) * 0.5f;
         if (Math::length(acceleration) > cudaSimulationParameters.maxAcceleration) {
             acceleration = Math::getNormalized(acceleration) * cudaSimulationParameters.maxAcceleration;
         }
@@ -451,7 +451,7 @@ __inline__ __device__ void ObjectProcessor::applyForces(SimulationData& data)
         if (Math::length(object->vel) > cudaSimulationParameters.maxVelocity.value) {
             object->vel = Math::getNormalized(object->vel) * cudaSimulationParameters.maxVelocity.value;
         }
-        object->shared1 = {0, 0};
+        object->tempValue1.as_float2 = {0, 0};
     }
 }
 
@@ -509,18 +509,18 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                 auto force1 = r2 * strength2;
 
                 if (!connectedObject->fixed && !lastConnectedObject->fixed) {
-                    atomicAdd(&connectedObject->shared1.x, force1.x);
-                    atomicAdd(&connectedObject->shared1.y, force1.y);
-                    atomicAdd(&lastConnectedObject->shared1.x, force2.x);
-                    atomicAdd(&lastConnectedObject->shared1.y, force2.y);
+                    atomicAdd(&connectedObject->tempValue1.as_float2.x, force1.x);
+                    atomicAdd(&connectedObject->tempValue1.as_float2.y, force1.y);
+                    atomicAdd(&lastConnectedObject->tempValue1.as_float2.x, force2.x);
+                    atomicAdd(&lastConnectedObject->tempValue1.as_float2.y, force2.y);
                 }
                 force -= force1 + force2;
             }
 
             prevDisplacement = displacement;
         }
-        atomicAdd(&object->shared1.x, force.x);
-        atomicAdd(&object->shared1.y, force.y);
+        atomicAdd(&object->tempValue1.as_float2.x, force.x);
+        atomicAdd(&object->tempValue1.as_float2.y, force.y);
     }
 }
 
@@ -548,10 +548,6 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
         }
         if (scheduleForDestruction) {
             ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
-            for (int i = 0; i < object->numConnections; ++i) {
-                auto connectedObject = object->connections[i].object;
-                connectedObject->typeData.cell.cellState = CellState_Detaching;
-            }
         }
     }
 }
@@ -568,10 +564,10 @@ __inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData&
             data.objectMap.correctPosition(object->pos);
         } else {
             object->pos += object->vel * cudaSimulationParameters.timestepSize.value
-                + object->shared1 * cudaSimulationParameters.timestepSize.value * cudaSimulationParameters.timestepSize.value / 2;
+                + object->tempValue1.as_float2 * cudaSimulationParameters.timestepSize.value * cudaSimulationParameters.timestepSize.value / 2;
             data.objectMap.correctPosition(object->pos);
-            object->shared2 = object->shared1;  //forces
-            object->shared1 = {0, 0};
+            object->tempValue2.as_float2 = object->tempValue1.as_float2;  // save forces from first step for averaging
+            object->tempValue1.as_float2 = {0, 0};
         }
     }
 }
@@ -586,7 +582,7 @@ __inline__ __device__ void ObjectProcessor::verletVelocityUpdate(SimulationData&
         if (object->fixed) {
             continue;
         }
-        auto acceleration = (object->shared1 + object->shared2) / 2;
+        auto acceleration = (object->tempValue1.as_float2 + object->tempValue2.as_float2) / 2;
         object->vel += acceleration * cudaSimulationParameters.timestepSize.value;
     }
 }

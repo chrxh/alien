@@ -9,6 +9,7 @@
 #include <EngineInterface/GenomeDescEditService.h>
 
 #include "AlienGui.h"
+#include "GenericMessageDialog.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
 #include "StyleRepository.h"
@@ -338,6 +339,12 @@ void _GeneEditorWidget::onMoveNodeUpward()
 {
     auto indexToMove = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
+
+    if (indexToMove == 1 && gene._nodes.at(indexToMove).getCellType() == CellType_Void) {
+        showMessage("Error", "The first node cannot be void.");
+        return;
+    }
+
     GenomeDescEditService::get().swapNodes(gene, indexToMove - 1);
 
     // Adapt gene selection
