@@ -89,7 +89,7 @@ TEST_F(CellStateTransitionTests, underConstruction_activating)
 
 TEST_F(CellStateTransitionTests, noDyingForFixedCells)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).fixed(true).pos({10.0f, 10.0f}).type(CellDesc())});
+    auto data = Desc().addCreature({ObjectDesc().id(1).fixed(true).pos({10.0f, 10.0f})});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

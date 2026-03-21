@@ -140,12 +140,12 @@ TEST_F(NeuronTests, forkSignal)
     // Set numTimesSent on the source signal
     auto data = Desc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({1, 2}).type(CellDesc()),
+                        ObjectDesc().id(1).pos({1, 2}),
                         ObjectDesc().id(2).pos({2, 2}).type(CellDesc().signal(SignalDesc().channels(signal).numTimesSent(4))),
-                        ObjectDesc().id(3).pos({3, 2}).type(CellDesc()),
-                        ObjectDesc().id(4).pos({2, 3}).type(CellDesc()),
+                        ObjectDesc().id(3).pos({3, 2}),
+                        ObjectDesc().id(4).pos({2, 3}),
                         ObjectDesc().id(5).pos({2, 1}).type(CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),
-                        ObjectDesc().id(6).pos({2, 0}).type(CellDesc()),
+                        ObjectDesc().id(6).pos({2, 0}),
                     })
                     .addConnection(2, 1)
                     .addConnection(2, 3)
@@ -192,7 +192,7 @@ TEST_F(NeuronTests, mergeSignal)
                 ObjectDesc().id(5).pos({2, 1}).type(CellDesc()
                                                         .signal(SignalDesc().channels(signal2).numTimesSent(4))
                                                         .neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),  // Gets input from cell 6
-                ObjectDesc().id(6).pos({2, 0}).type(CellDesc()),                                                                     // Gets input from cell 5
+                ObjectDesc().id(6).pos({2, 0}),                                                                     // Gets input from cell 5
             })
             .addConnection(2, 1)
             .addConnection(2, 3)
