@@ -421,10 +421,8 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         if (object->type == ObjectType_Cell) {
-            if (object->typeData.cell.cellType == CellType_Void) {
-                if (object->typeData.cell.cellState == CellState_Dying) {
-                    ObjectConnectionProcessor::scheduleDeleteObject(data, index);
-                }
+            if (object->typeData.cell.cellState == CellState_InstantDying) {
+                ObjectConnectionProcessor::scheduleDeleteObject(data, index);
             } else {
                 auto minCellEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 
