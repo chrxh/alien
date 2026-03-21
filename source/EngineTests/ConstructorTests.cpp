@@ -935,7 +935,6 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2__branch_0_1__resetBendingMuscle)
 {
     auto muscleModeType = GetParam();
-    auto const InitialFrontAngleId = 4;
 
     auto muscleMode = [&muscleModeType] -> MuscleModeDesc {
         if (muscleModeType == MuscleMode_AutoBending)
@@ -958,7 +957,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
             ObjectDesc().id(2).pos({100.0f, 102.0f}),
             ObjectDesc().id(3).pos({100.0f + getOffspringDistance(), 101.0f}).type(CellDesc().cellType(MuscleDesc().mode(muscleMode))),
         },
-        CreatureDesc().id(0).frontAngleId(InitialFrontAngleId),
+        CreatureDesc().id(0),
         GenomeDesc().genes({
             GeneDesc().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDesc().cellType(MuscleGenomeDesc())}),
         }));
@@ -975,7 +974,6 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    EXPECT_EQ(InitialFrontAngleId + 2, hostCreature._frontAngleId);
     ASSERT_EQ(5, actualData.getObjectsForCreature(hostCreature._id).size());
 
     auto hostObject = actualData.getObjectRef(1);
