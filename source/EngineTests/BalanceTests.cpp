@@ -15,7 +15,7 @@ class BalanceTests : public IntegrationTestFramework
 {
 public:
     BalanceTests()
-        : IntegrationTestFramework({100, 100})
+        : IntegrationTestFramework({200, 200})
     {}
 
     ~BalanceTests() = default;
