@@ -511,7 +511,7 @@ struct CellDesc
     MEMBER(CellDesc, int, lastUpdate, 0);
 
     // Process data
-    MEMBER(CellDesc, int, frontAngleId, 0);
+    MEMBER(CellDesc, int, headUpdateId, 0);
     MEMBER(CellDesc, bool, headCell, false);
 
     // Additional rendering data
@@ -582,7 +582,7 @@ struct CreatureDesc
     MEMBER(CreatureDesc, MutationState, mutationState, MutationState_NotMutated);
 
     // Process data
-    MEMBER(CreatureDesc, int, frontAngleId, 0);
+    MEMBER(CreatureDesc, int, headUpdateId, 0);
 };
 
 struct _DescCache

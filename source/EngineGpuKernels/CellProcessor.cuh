@@ -19,8 +19,8 @@ public:
     __inline__ __device__ static void aging(SimulationData& data);
     __inline__ __device__ static void cellStateTransition_calcFutureState(SimulationData& data);
     __inline__ __device__ static void cellStateTransition_applyNextState(SimulationData& data);
-    __inline__ __device__ static void frontAngleUpdate_calcFutureValue(SimulationData& data);
-    __inline__ __device__ static void frontAngleUpdate_applyFutureValue(SimulationData& data);
+    __inline__ __device__ static void headUpdate_calcFutureValue(SimulationData& data);
+    __inline__ __device__ static void headUpdate_applyFutureValue(SimulationData& data);
 
     __inline__ __device__ static void updateCellEvents(SimulationData& data);
 
@@ -164,7 +164,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_applyNextState(Sim
     }
 }
 
-__inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(SimulationData& data)
+__inline__ __device__ void CellProcessor::headUpdate_calcFutureValue(SimulationData& data)
 {
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -179,7 +179,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
         }
 
         auto update = false;
-        if (object->typeData.cell.frontAngleId != object->typeData.cell.creature->frontAngleId) {
+        if (object->typeData.cell.headUpdateId != object->typeData.cell.creature->headUpdateId) {
             if (!object->typeData.cell.headCell) {
                 for (int i = 0, j = object->numConnections; i < j; ++i) {
                     auto const& otherObject = object->connections[i].object;
@@ -189,14 +189,14 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                     if (!object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                         continue;
                     }
-                    if (otherObject->typeData.cell.frontAngleId > object->typeData.cell.frontAngleId) {
+                    if (otherObject->typeData.cell.headUpdateId > object->typeData.cell.headUpdateId) {
                         auto frontAngle_otherObject_object = Math::getNormalizedAngle(
                             -getInitialAngelSpan(otherObject, object, otherObject->connections[0].object) - otherObject->typeData.cell.frontAngle, -180.0f);
 
                         auto frontAngle_object_otherObject = Math::getNormalizedAngle(180.0f - frontAngle_otherObject_object, -180.0f);
                         auto frontAngle_object_connection0 =
                             Math::getNormalizedAngle(frontAngle_object_otherObject + getInitialAngelSpan(object, 0, i), -180.0f);
-                        object->tempValue2.as_uint32_float.uint32Part = otherObject->typeData.cell.frontAngleId;
+                        object->tempValue2.as_uint32_float.uint32Part = otherObject->typeData.cell.headUpdateId;
                         object->tempValue2.as_uint32_float.floatPart = frontAngle_object_connection0;
                         update = true; 
                         break;
@@ -205,12 +205,12 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
             }
         }
         if (!update) {
-            object->tempValue2.as_uint32_float.uint32Part = object->typeData.cell.frontAngleId;
+            object->tempValue2.as_uint32_float.uint32Part = object->typeData.cell.headUpdateId;
         }
     }
 }
 
-__inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(SimulationData& data)
+__inline__ __device__ void CellProcessor::headUpdate_applyFutureValue(SimulationData& data)
 {
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -223,7 +223,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
         auto const& creature = object->typeData.cell.creature;
         if (*data.timestep % Cell::UpdateInterval == 0) {
             if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
-                ++creature->frontAngleId;
+                ++creature->headUpdateId;
             }
         }
 
@@ -233,15 +233,15 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
 
         if (object->typeData.cell.headCell) {
             if (*data.timestep % Cell::UpdateInterval == 1) {
-                object->typeData.cell.frontAngleId = creature->frontAngleId;
+                object->typeData.cell.headUpdateId = creature->headUpdateId;
                 object->typeData.cell.frontAngle = creature->genome->frontAngle;
             }
         } else {
-            auto const& newFrontAngleId = object->tempValue2.as_uint32_float.uint32Part;
+            auto const& newHeadUpdateId = object->tempValue2.as_uint32_float.uint32Part;
             auto const& newFrontAngle = object->tempValue2.as_uint32_float.floatPart;
 
-            if (newFrontAngleId > object->typeData.cell.frontAngleId) {
-                object->typeData.cell.frontAngleId = newFrontAngleId;
+            if (newHeadUpdateId > object->typeData.cell.headUpdateId) {
+                object->typeData.cell.headUpdateId = newHeadUpdateId;
                 object->typeData.cell.frontAngle = newFrontAngle;
                 object->typeData.cell.lastUpdate = 0;
             }

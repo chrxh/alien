@@ -275,7 +275,7 @@ namespace
             creatureTO.generation = creature->generation;
             creatureTO.numObjects = creature->numObjects;
             creatureTO.mutationState = creature->mutationState;
-            creatureTO.frontAngleId = creature->frontAngleId;
+            creatureTO.headUpdateId = creature->headUpdateId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
             alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, creatureTOIndex);
@@ -340,7 +340,7 @@ namespace
             cellTO.nodeIndex = cell.nodeIndex;
             cellTO.parentNodeIndex = cell.parentNodeIndex;
             cellTO.geneIndex = cell.geneIndex;
-            cellTO.frontAngleId = cell.frontAngleId;
+            cellTO.headUpdateId = cell.headUpdateId;
             cellTO.headCell = cell.headCell;
             cellTO.event = cell.event;
             cellTO.eventCounter = cell.eventCounter;

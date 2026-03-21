@@ -337,7 +337,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         cellDesc._nodeIndex = objectTO.typeData.cell.nodeIndex;
         cellDesc._parentNodeIndex = objectTO.typeData.cell.parentNodeIndex;
         cellDesc._geneIndex = objectTO.typeData.cell.geneIndex;
-        cellDesc._frontAngleId = objectTO.typeData.cell.frontAngleId;
+        cellDesc._headUpdateId = objectTO.typeData.cell.headUpdateId;
         cellDesc._headCell = objectTO.typeData.cell.headCell;
         cellDesc._event = objectTO.typeData.cell.event;
         cellDesc._eventCounter = objectTO.typeData.cell.eventCounter;
@@ -916,7 +916,7 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
     result._generation = creatureTO.generation;
     result._numObjects = creatureTO.numObjects;
     result._mutationState = creatureTO.mutationState;
-    result._frontAngleId = creatureTO.frontAngleId;
+    result._headUpdateId = creatureTO.headUpdateId;
 
     return result;
 }
@@ -1214,7 +1214,7 @@ void DescConverterService::convertCreatureToTO(
     creatureTO.id = creatureDesc._id;
     creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
     creatureTO.generation = creatureDesc._generation;
-    creatureTO.frontAngleId = creatureDesc._frontAngleId;
+    creatureTO.headUpdateId = creatureDesc._headUpdateId;
     creatureTO.numObjects = creatureDesc._numObjects;
     creatureTO.mutationState = creatureDesc._mutationState;
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
@@ -1283,7 +1283,7 @@ void DescConverterService::convertObjectToTO(
         objectTO.typeData.cell.parentNodeIndex = cellDesc._parentNodeIndex;
         objectTO.typeData.cell.geneIndex = cellDesc._geneIndex;
         objectTO.typeData.cell.frontAngle = cellDesc._frontAngle.value_or(VALUE_NOT_SET_FLOAT);
-        objectTO.typeData.cell.frontAngleId = cellDesc._frontAngleId;
+        objectTO.typeData.cell.headUpdateId = cellDesc._headUpdateId;
         objectTO.typeData.cell.headCell = cellDesc._headCell;
         objectTO.typeData.cell.age = cellDesc._age;
         objectTO.typeData.cell.activationTime = cellDesc._activationTime;
