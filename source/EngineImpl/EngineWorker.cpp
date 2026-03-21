@@ -412,6 +412,12 @@ void EngineWorker::setPreviewData(Desc const& description)
 
     auto dataTO = DescConverterService::get().convertDescriptionToTO(description);
 
+    for (uint64_t i = 0; i < *dataTO.numObjects; ++i) {
+        if (dataTO.objects[i].type == ObjectType_Cell) {
+            dataTO.objects[i].typeData.cell.lastUpdate = 0;
+        }
+    }
+
     _simulationCudaFacade->newPreview(dataTO);
 }
 
