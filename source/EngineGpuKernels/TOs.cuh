@@ -442,7 +442,7 @@ struct CellTO
     uint8_t lastUpdate;
 
     // Process data
-    uint32_t frontAngleId;
+    uint32_t headUpdateId;
     bool headCell;
 
     // Additional rendering data
@@ -490,7 +490,7 @@ struct CreatureTO
     MutationState mutationState;
 
     // Process data
-    uint32_t frontAngleId;
+    uint32_t headUpdateId;
 
     // Temporary data
     uint64_t creatureIndexOnGpu;

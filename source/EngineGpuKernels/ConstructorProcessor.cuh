@@ -748,7 +748,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         hostObject->vel,
         constructionData.neededUsableEnergy,
         constructionData.neededReservedEnergy);
-    result->typeData.cell.frontAngleId = hostObject->typeData.cell.frontAngleId;
+    result->typeData.cell.headUpdateId = hostObject->typeData.cell.headUpdateId;
 
     constructor.lastConstructedCellId = result->id;
 
