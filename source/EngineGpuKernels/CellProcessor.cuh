@@ -131,8 +131,6 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 if (cudaSimulationParameters.cellAgeLimiterToggle.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
                     atomicExch(&object->typeData.cell.age, 0);
                 }
-            } else if (origCellState == CellState_Reviving) {
-                cellState = CellState_Ready;
             } else if (origCellState == CellState_Constructing) {
                 if (isNeighborActivating) {
                     cellState = CellState_Activating;
@@ -296,8 +294,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
             auto cellNormalEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
 
             auto needsEnergy = [](Object* obj) {
-                return (obj->typeData.cell.cellState == CellState_Ready || obj->typeData.cell.cellState == CellState_Detaching
-                        || obj->typeData.cell.cellState == CellState_Reviving)
+                return (obj->typeData.cell.cellState == CellState_Ready)
                     && obj->typeData.cell.constructorAvailable && obj->typeData.cell.creature
                     && !ConstructorHelper::isFinished(obj->typeData.cell.constructor, *obj->typeData.cell.creature->genome);
             };
@@ -338,10 +335,8 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
         // Flow of raw energy
         {
-            if ((object->typeData.cell.cellState == CellState_Ready || object->typeData.cell.cellState == CellState_Detaching
-                 || object->typeData.cell.cellState == CellState_Reviving)
-                && (connectedObject->typeData.cell.cellState == CellState_Ready || connectedObject->typeData.cell.cellState == CellState_Detaching
-                    || connectedObject->typeData.cell.cellState == CellState_Reviving)
+            if (object->typeData.cell.cellState == CellState_Ready
+                && connectedObject->typeData.cell.cellState == CellState_Ready
                 && connectedObject->typeData.cell.rawEnergy < SimulationParameters::maxRawEnergyThresholdForConduction) {
 
                 auto flow = 0.0f;
@@ -433,7 +428,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             } else {
                 auto minCellEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 
-                if (object->typeData.cell.cellState == CellState_Dying || object->typeData.cell.cellState == CellState_Detaching) {
+                if (object->typeData.cell.cellState == CellState_Dying) {
                     auto cellDeathProbability =
                         ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, object->pos, object->color);
                     if (data.primaryNumberGen.random() <= cellDeathProbability) {
@@ -453,16 +448,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 }
 
                 if (cellDestruction) {
-                    auto orig = atomicExch(&object->typeData.cell.cellState, CellState_Dying);
-                    if (orig != CellState_Dying) {
-                        for (int i = 0; i < object->numConnections; ++i) {
-                            auto const& connectedObject = object->connections[i].object;
-                            auto origConnected = atomicExch(&connectedObject->typeData.cell.cellState, CellState_Detaching);
-                            if (origConnected == CellState_Dying) {
-                                atomicExch(&connectedObject->typeData.cell.cellState, CellState_Dying);
-                            }
-                        }
-                    }
+                    atomicExch(&object->typeData.cell.cellState, CellState_Dying);
                 }
             }
         }

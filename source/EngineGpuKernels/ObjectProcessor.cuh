@@ -548,10 +548,6 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
         }
         if (scheduleForDestruction) {
             ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
-            for (int i = 0; i < object->numConnections; ++i) {
-                auto connectedObject = object->connections[i].object;
-                connectedObject->typeData.cell.cellState = CellState_Detaching;
-            }
         }
     }
 }

@@ -78,8 +78,6 @@ enum CellState_
     CellState_Ready,
     CellState_Constructing,
     CellState_Activating,
-    CellState_Detaching,
-    CellState_Reviving,
     CellState_Dying,
     CellState_Count,
 };

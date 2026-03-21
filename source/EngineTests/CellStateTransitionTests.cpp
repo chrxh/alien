@@ -191,8 +191,6 @@ TEST_P(CellStateTransitionTests_AllStates, freeCell_cell)
 
     if (cellState == CellState_Activating) {
         EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
-    } else if (cellState == CellState_Reviving) {
-        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else {
         EXPECT_EQ(cellState, actualData.getObjectRef(2).getCellRef()._cellState);
     }
