@@ -5,6 +5,7 @@
 #include <boost/range/adaptors.hpp>
 
 #include "AlienGui.h"
+#include "GenericMessageDialog.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
 #include "LoginDialog.h"
@@ -241,7 +242,11 @@ void _NodeEditorWidget::processNodeAttributes()
             // Type
             auto nodeType = node.getCellType();
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeStrings).textWidth(rightColumnWidth), nodeType)) {
-                node._cellType = createCellTypeGenomeDesc(nodeType);
+                if (nodeIndex.value() == 0 && nodeType == CellType_Void) {
+                    showMessage("Error", "The first node cannot be void.");
+                } else {
+                    node._cellType = createCellTypeGenomeDesc(nodeType);
+                }
             }
 
             bool hasConstructor = node._constructor.has_value();
