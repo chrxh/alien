@@ -286,7 +286,7 @@ Desc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome,
                                    .color(PreviewColor)
                                    .stiffness(1.0f)
                                    .pos(pos)
-                                   .type(CellDesc().creatureId(creature._id).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))));
+                                   .type(CellDesc().headCell(true).creatureId(creature._id).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))));
     return result;
 }
 
