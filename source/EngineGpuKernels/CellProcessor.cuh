@@ -139,7 +139,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
             if (object->type != ObjectType_Cell) {
                 cellState = origCellState;
             }
-            if (object->typeData.cell.lastUpdate > Cell::UpdateInterval + 10) {
+            if (object->typeData.cell.lastUpdate > 2 * Cell::UpdateInterval + 1) {
                 cellState = CellState_Dying;
             }
         }
