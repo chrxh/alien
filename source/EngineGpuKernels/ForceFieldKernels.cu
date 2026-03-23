@@ -116,7 +116,9 @@ namespace
             auto rightValue = rightValue0 + tFrac * (rightValue1 - rightValue0);
             auto downValue = downValue0 + tFrac * (downValue1 - downValue0);
             auto strength = cudaSimulationParameters.layerPerlinNoiseForceFieldStrength.layerValues[index];
-            return float2{rightValue - baseValue, downValue - baseValue} * strength;
+            auto force = float2{rightValue - baseValue, downValue - baseValue} * strength;
+            Math::rotateQuarterClockwise(force);
+            return force;
         }
         default:
             return {0, 0};
