@@ -137,7 +137,14 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteObject(Simul
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::DelObject;
     operation.data.delObject.objectIndex = objectIndex;
-    data.structuralOperations.tryAddEntry(operation);
+    if (data.structuralOperations.tryAddEntry(operation) != -1) {
+        auto object = data.entities.objects.at(objectIndex);
+        if (object->type == ObjectType_Cell) {
+            if (object->typeData.cell.creature->numObjects > 0) {
+                --object->typeData.cell.creature->numObjects;
+            }
+        }
+    }
 }
 
 __inline__ __device__ void ObjectConnectionProcessor::processAddOperations(SimulationData& data)
