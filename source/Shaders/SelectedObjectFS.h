@@ -32,7 +32,8 @@ void main()
         discard;
     }
 
-    FragColor = vec4(1.0, 1.0, 1.0, dist > middleRadius ? AlphaForFadeout : AlphaForCircle);
+    float zoomFadeout = min(1.0, zoom / 8);
+    FragColor = vec4(1.0, 1.0, 1.0, dist > middleRadius ? AlphaForFadeout * zoomFadeout : AlphaForCircle * zoomFadeout);
 }
 )";
 }

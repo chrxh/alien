@@ -187,11 +187,11 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
 
             auto white = luminance / 10.0f;
             if (object->selected == 1) {
-                luminance = (luminance + 0.1f) * 1.7f;
-                white = 0.5f;
+                luminance = (luminance + 0.05f) * 1.15f;
+                white = 0.1f;
             }
             if (object->selected == 2) {
-                luminance = luminance * 1.3f;
+                luminance = luminance * 1.15f;
             }
             luminance = min(3.0f, luminance);
             white = min(2.0f, white);
@@ -331,7 +331,7 @@ __global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleV
 
             float intensity = (energy->energy) / 350.0f + 0.10f;
             if (energy->selected) {
-                intensity *= 2.5f;
+                intensity *= 5.0f;
             }
 
             auto idx = alienAtomicAdd64(numFluidParticles, uint64_t(1));
