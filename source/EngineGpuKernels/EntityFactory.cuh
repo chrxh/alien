@@ -164,7 +164,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 if (nodeTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                     node.cellTypeData.sensor.modeData.detectEnergy.minDensity = nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
-                } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+                } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                     node.cellTypeData.sensor.modeData.detectFreeCell.minDensity = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
                     node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
@@ -233,7 +233,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 break;
             case CellType_Reconnector:
                 node.cellTypeData.reconnector.mode = nodeTO.cellTypeData.reconnector.mode;
-                if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+                if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_Solid) {
                 } else if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
                     node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors =
                         nodeTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors;
@@ -366,8 +366,8 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
     object->sticky = objectTO.sticky;
     object->type = objectTO.type;
 
-    if (objectTO.type == ObjectType_Structure) {
-        object->typeData.structure.energy = objectTO.typeData.structure.energy;
+    if (objectTO.type == ObjectType_Solid) {
+        object->typeData.solid.energy = objectTO.typeData.solid.energy;
     } else if (objectTO.type == ObjectType_Fluid) {
         object->typeData.fluid.energy = objectTO.typeData.fluid.energy;
         object->typeData.fluid.glow = objectTO.typeData.fluid.glow;
@@ -439,7 +439,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                 cell->cellTypeData.sensor.modeData.detectEnergy.minDensity = cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
-            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                 cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity = cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
                 cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
@@ -517,7 +517,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         } break;
         case CellType_Reconnector: {
             cell->cellTypeData.reconnector.mode = cellTO.cellTypeData.reconnector.mode;
-            if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+            if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_Solid) {
             } else if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
                 cell->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors =
                     cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors;
@@ -788,7 +788,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         if (nodeSensor.mode == SensorMode_Telemetry) {
         } else if (nodeSensor.mode == SensorMode_DetectEnergy) {
             sensor.modeData.detectEnergy.minDensity = nodeSensor.modeData.detectEnergy.minDensity;
-        } else if (nodeSensor.mode == SensorMode_DetectStructure) {
+        } else if (nodeSensor.mode == SensorMode_DetectSolid) {
         } else if (nodeSensor.mode == SensorMode_DetectFreeCell) {
             sensor.modeData.detectFreeCell.minDensity = nodeSensor.modeData.detectFreeCell.minDensity;
             sensor.modeData.detectFreeCell.restrictToColors = nodeSensor.modeData.detectFreeCell.restrictToColors;
@@ -886,7 +886,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         auto const& nodeReconnector = node->cellTypeData.reconnector;
         auto& reconnector = cell.cellTypeData.reconnector;
         reconnector.mode = nodeReconnector.mode;
-        if (nodeReconnector.mode == ReconnectorMode_Structure) {
+        if (nodeReconnector.mode == ReconnectorMode_Solid) {
         } else if (nodeReconnector.mode == ReconnectorMode_FreeCell) {
             reconnector.modeData.reconnectFreeCell.restrictToColors = nodeReconnector.modeData.reconnectFreeCell.restrictToColors;
         } else if (nodeReconnector.mode == ReconnectorMode_Creature) {

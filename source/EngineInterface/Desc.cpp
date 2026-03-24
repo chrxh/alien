@@ -62,8 +62,8 @@ SensorMode SensorDesc::getMode() const
         return SensorMode_Telemetry;
     } else if (std::holds_alternative<DetectEnergyDesc>(_mode)) {
         return SensorMode_DetectEnergy;
-    } else if (std::holds_alternative<DetectStructureDesc>(_mode)) {
-        return SensorMode_DetectStructure;
+    } else if (std::holds_alternative<DetectSolidDesc>(_mode)) {
+        return SensorMode_DetectSolid;
     } else if (std::holds_alternative<DetectFreeCellDesc>(_mode)) {
         return SensorMode_DetectFreeCell;
     } else if (std::holds_alternative<DetectCreatureDesc>(_mode)) {
@@ -92,8 +92,8 @@ MuscleMode MuscleDesc::getMode() const
 
 ReconnectorMode ReconnectorDesc::getMode() const
 {
-    if (std::holds_alternative<ReconnectStructureDesc>(_mode)) {
-        return ReconnectorMode_Structure;
+    if (std::holds_alternative<ReconnectSolidDesc>(_mode)) {
+        return ReconnectorMode_Solid;
     } else if (std::holds_alternative<ReconnectFreeCellDesc>(_mode)) {
         return ReconnectorMode_FreeCell;
     } else if (std::holds_alternative<ReconnectCreatureDesc>(_mode)) {
@@ -213,8 +213,8 @@ ObjectDesc ObjectDesc::id(uint64_t id)
 
 ObjectType ObjectDesc::getObjectType() const
 {
-    if (std::holds_alternative<StructureDesc>(_type)) {
-        return ObjectType_Structure;
+    if (std::holds_alternative<SolidDesc>(_type)) {
+        return ObjectType_Solid;
     } else if (std::holds_alternative<FluidDesc>(_type)) {
         return ObjectType_Fluid;
     } else if (std::holds_alternative<FreeCellDesc>(_type)) {
@@ -225,14 +225,14 @@ ObjectType ObjectDesc::getObjectType() const
     CHECK(false);
 }
 
-StructureDesc& ObjectDesc::getStructureRef()
+SolidDesc& ObjectDesc::getSolidRef()
 {
-    return std::get<StructureDesc>(_type);
+    return std::get<SolidDesc>(_type);
 }
 
-StructureDesc const& ObjectDesc::getStructureRef() const
+SolidDesc const& ObjectDesc::getSolidRef() const
 {
-    return std::get<StructureDesc>(_type);
+    return std::get<SolidDesc>(_type);
 }
 
 FluidDesc& ObjectDesc::getFluidRef()

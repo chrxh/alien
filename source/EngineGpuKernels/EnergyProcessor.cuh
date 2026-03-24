@@ -103,7 +103,7 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
             }
         } else {
             if (auto object = data.objectMap.getFirst(particle->pos + particle->vel)) {
-                if (object->type == ObjectType_Structure || object->type == ObjectType_Fluid) {
+                if (object->type == ObjectType_Solid || object->type == ObjectType_Fluid) {
                     continue;
                 }
                 if (object->fixed) {

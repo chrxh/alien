@@ -306,11 +306,11 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
     result._sticky = objectTO.sticky;
     result._color = objectTO.color;
 
-    // Handle object type: Structure, Fluid, FreeCell, or Cell
-    if (objectTO.type == ObjectType_Structure) {
-        StructureDesc structureDesc;
-        structureDesc._energy = objectTO.typeData.structure.energy;
-        result._type = structureDesc;
+    // Handle object type: Solid, Fluid, FreeCell, or Cell
+    if (objectTO.type == ObjectType_Solid) {
+        SolidDesc solidDesc;
+        solidDesc._energy = objectTO.typeData.solid.energy;
+        result._type = solidDesc;
 
     } else if (objectTO.type == ObjectType_Fluid) {
         FluidDesc fluidDesc;
@@ -369,9 +369,9 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
                 DetectEnergyDesc detectEnergy;
                 detectEnergy._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 sensor._mode = detectEnergy;
-            } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
-                DetectStructureDesc detectStructure;
-                sensor._mode = detectStructure;
+            } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
+                DetectSolidDesc detectSolid;
+                sensor._mode = detectSolid;
             } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                 DetectFreeCellDesc detectFreeCell;
                 detectFreeCell._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
@@ -499,9 +499,9 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         } break;
         case CellType_Reconnector: {
             ReconnectorDesc reconnector;
-            if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
-                ReconnectStructureDesc reconnectStructure;
-                reconnector._mode = reconnectStructure;
+            if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Solid) {
+                ReconnectSolidDesc reconnectSolid;
+                reconnector._mode = reconnectSolid;
             } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
                 ReconnectFreeCellDesc reconnectFreeCell;
                 reconnectFreeCell._restrictToColors =
@@ -655,9 +655,9 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
             DetectEnergyGenomeDesc detectEnergy;
             detectEnergy._minDensity = nodeTO->cellTypeData.sensor.modeData.detectEnergy.minDensity;
             sensorDesc._mode = detectEnergy;
-        } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectStructure) {
-            DetectStructureGenomeDesc detectStructure;
-            sensorDesc._mode = detectStructure;
+        } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectSolid) {
+            DetectSolidGenomeDesc detectSolid;
+            sensorDesc._mode = detectSolid;
         } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
             DetectFreeCellGenomeDesc detectFreeCell;
             detectFreeCell._minDensity = nodeTO->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
@@ -760,9 +760,9 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
     } break;
     case CellType_Reconnector: {
         ReconnectorGenomeDesc reconnectorDesc;
-        if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
-            ReconnectStructureGenomeDesc reconnectStructure;
-            reconnectorDesc._mode = reconnectStructure;
+        if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_Solid) {
+            ReconnectSolidGenomeDesc reconnectSolid;
+            reconnectorDesc._mode = reconnectSolid;
         } else if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
             ReconnectFreeCellGenomeDesc reconnectFreeCell;
             reconnectFreeCell._restrictToColors = static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors);
@@ -1022,7 +1022,7 @@ void DescConverterService::convertGenomeToTO(
                     auto const& detectEnergyDesc = std::get<DetectEnergyGenomeDesc>(sensorDesc._mode);
                     auto& detectEnergyTO = sensorTO.modeData.detectEnergy;
                     detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
-                } else if (sensorTO.mode == SensorMode_DetectStructure) {
+                } else if (sensorTO.mode == SensorMode_DetectSolid) {
                 } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
                     auto const& detectFreeCellDesc = std::get<DetectFreeCellGenomeDesc>(sensorDesc._mode);
                     auto& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
@@ -1117,7 +1117,7 @@ void DescConverterService::convertGenomeToTO(
                 auto const& reconnectorDesc = std::get<ReconnectorGenomeDesc>(nodeDesc._cellType);
                 auto& reconnectorTO = nodeTO.cellTypeData.reconnector;
                 reconnectorTO.mode = reconnectorDesc.getMode();
-                if (reconnectorTO.mode == ReconnectorMode_Structure) {
+                if (reconnectorTO.mode == ReconnectorMode_Solid) {
                     // No data to copy
                 } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
                     auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellGenomeDesc>(reconnectorDesc._mode);
@@ -1255,10 +1255,10 @@ void DescConverterService::convertObjectToTO(
     // Set object type
     objectTO.type = objectDesc.getObjectType();
 
-    // Handle Structure, Fluid, and FreeCell object types
-    if (objectTO.type == ObjectType_Structure) {
-        StructureDesc const& structureDesc = objectDesc.getStructureRef();
-        objectTO.typeData.structure.energy = structureDesc._energy;
+    // Handle Solid, Fluid, and FreeCell object types
+    if (objectTO.type == ObjectType_Solid) {
+        SolidDesc const& solidDesc = objectDesc.getSolidRef();
+        objectTO.typeData.solid.energy = solidDesc._energy;
     } else if (objectTO.type == ObjectType_Fluid) {
         FluidDesc const& fluidDesc = objectDesc.getFluidRef();
         objectTO.typeData.fluid.energy = fluidDesc._energy;
@@ -1325,7 +1325,7 @@ void DescConverterService::convertObjectToTO(
                 auto const& detectEnergyDesc = std::get<DetectEnergyDesc>(sensorDesc._mode);
                 DetectEnergyTO& detectEnergyTO = sensorTO.modeData.detectEnergy;
                 detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
-            } else if (sensorTO.mode == SensorMode_DetectStructure) {
+            } else if (sensorTO.mode == SensorMode_DetectSolid) {
             } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
                 auto const& detectFreeCellDesc = std::get<DetectFreeCellDesc>(sensorDesc._mode);
                 DetectFreeCellTO& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
@@ -1431,7 +1431,7 @@ void DescConverterService::convertObjectToTO(
             auto const& reconnectorDesc = std::get<ReconnectorDesc>(cellDesc._cellType);
             ReconnectorTO& reconnectorTO = objectTO.typeData.cell.cellTypeData.reconnector;
             reconnectorTO.mode = reconnectorDesc.getMode();
-            if (reconnectorTO.mode == ReconnectorMode_Structure) {
+            if (reconnectorTO.mode == ReconnectorMode_Solid) {
                 // No data to copy
             } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
                 auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellDesc>(reconnectorDesc._mode);

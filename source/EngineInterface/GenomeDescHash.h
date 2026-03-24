@@ -80,7 +80,7 @@ struct std::hash<SensorGenomeDesc>
         if (desc.getMode() == SensorMode_DetectEnergy) {
             auto const& mode = std::get<DetectEnergyGenomeDesc>(desc._mode);
             hash_combine(seed, mode._minDensity);
-        } else if (desc.getMode() == SensorMode_DetectStructure) {
+        } else if (desc.getMode() == SensorMode_DetectSolid) {
             // No additional data
         } else if (desc.getMode() == SensorMode_DetectFreeCell) {
             auto const& mode = std::get<DetectFreeCellGenomeDesc>(desc._mode);
@@ -282,9 +282,9 @@ struct std::hash<DefenderGenomeDesc>
 };
 
 template <>
-struct std::hash<ReconnectStructureGenomeDesc>
+struct std::hash<ReconnectSolidGenomeDesc>
 {
-    std::size_t operator()(ReconnectStructureGenomeDesc const& desc) const { return 0; }
+    std::size_t operator()(ReconnectSolidGenomeDesc const& desc) const { return 0; }
 };
 
 template <>
@@ -325,7 +325,7 @@ struct std::hash<ReconnectorModeGenomeDesc>
 {
     std::size_t operator()(ReconnectorModeGenomeDesc const& desc) const
     {
-        return variant_hasher<ReconnectStructureGenomeDesc, ReconnectFreeCellGenomeDesc, ReconnectCreatureGenomeDesc>{}(desc);
+        return variant_hasher<ReconnectSolidGenomeDesc, ReconnectFreeCellGenomeDesc, ReconnectCreatureGenomeDesc>{}(desc);
     }
 };
 

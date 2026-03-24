@@ -100,8 +100,8 @@ TEST_F(EditTests, getSelectionShallowData_selectMixed)
 {
     auto data = Desc()
                     .addObjects({
-                        ObjectDesc().id(1).pos({50, 50}).type(StructureDesc()),
-                        ObjectDesc().id(2).pos({51, 50}).type(StructureDesc()),
+                        ObjectDesc().id(1).pos({50, 50}).type(SolidDesc()),
+                        ObjectDesc().id(2).pos({51, 50}).type(SolidDesc()),
                     })
                     .energies({
                         EnergyDesc().id(3).pos({52, 50}).energy(10.0f),

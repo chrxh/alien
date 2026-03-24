@@ -53,8 +53,8 @@ SensorMode SensorGenomeDesc::getMode() const
         return SensorMode_Telemetry;
     } else if (std::holds_alternative<DetectEnergyGenomeDesc>(_mode)) {
         return SensorMode_DetectEnergy;
-    } else if (std::holds_alternative<DetectStructureGenomeDesc>(_mode)) {
-        return SensorMode_DetectStructure;
+    } else if (std::holds_alternative<DetectSolidGenomeDesc>(_mode)) {
+        return SensorMode_DetectSolid;
     } else if (std::holds_alternative<DetectFreeCellGenomeDesc>(_mode)) {
         return SensorMode_DetectFreeCell;
     } else if (std::holds_alternative<DetectCreatureGenomeDesc>(_mode)) {
@@ -83,8 +83,8 @@ MuscleMode MuscleGenomeDesc::getMode() const
 
 ReconnectorMode ReconnectorGenomeDesc::getMode() const
 {
-    if (std::holds_alternative<ReconnectStructureGenomeDesc>(_mode)) {
-        return ReconnectorMode_Structure;
+    if (std::holds_alternative<ReconnectSolidGenomeDesc>(_mode)) {
+        return ReconnectorMode_Solid;
     } else if (std::holds_alternative<ReconnectFreeCellGenomeDesc>(_mode)) {
         return ReconnectorMode_FreeCell;
     } else if (std::holds_alternative<ReconnectCreatureGenomeDesc>(_mode)) {

@@ -84,9 +84,9 @@ struct DetectEnergyDesc
     MEMBER(DetectEnergyDesc, float, minDensity, 0.05f);
 };
 
-struct DetectStructureDesc
+struct DetectSolidDesc
 {
-    auto operator<=>(DetectStructureDesc const&) const = default;
+    auto operator<=>(DetectSolidDesc const&) const = default;
 };
 
 struct DetectFreeCellDesc
@@ -107,7 +107,7 @@ struct DetectCreatureDesc
     MEMBER(DetectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeDesc = std::variant<TelemetryDesc, DetectEnergyDesc, DetectStructureDesc, DetectFreeCellDesc, DetectCreatureDesc>;
+using SensorModeDesc = std::variant<TelemetryDesc, DetectEnergyDesc, DetectSolidDesc, DetectFreeCellDesc, DetectCreatureDesc>;
 
 struct SensorLastMatchDesc
 {
@@ -289,9 +289,9 @@ struct DefenderDesc
     MEMBER(DefenderDesc, DefenderMode, mode, DefenderMode_DefendAgainstAttacker);
 };
 
-struct ReconnectStructureDesc
+struct ReconnectSolidDesc
 {
-    auto operator<=>(ReconnectStructureDesc const&) const = default;
+    auto operator<=>(ReconnectSolidDesc const&) const = default;
 };
 
 struct ReconnectFreeCellDesc
@@ -311,7 +311,7 @@ struct ReconnectCreatureDesc
     MEMBER(ReconnectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using ReconnectorModeDesc = std::variant<ReconnectStructureDesc, ReconnectFreeCellDesc, ReconnectCreatureDesc>;
+using ReconnectorModeDesc = std::variant<ReconnectSolidDesc, ReconnectFreeCellDesc, ReconnectCreatureDesc>;
 
 struct ReconnectorDesc
 {
@@ -457,11 +457,11 @@ struct SignalDesc
     MEMBER(SignalDesc, int, numTimesSent, 0);
 };
 
-struct StructureDesc
+struct SolidDesc
 {
-    auto operator<=>(StructureDesc const&) const = default;
+    auto operator<=>(SolidDesc const&) const = default;
 
-    MEMBER(StructureDesc, float, energy, 100.0f);
+    MEMBER(SolidDesc, float, energy, 100.0f);
 };
 
 struct FluidDesc
@@ -522,7 +522,7 @@ struct CellDesc
     CellType getCellType() const;
 };
 
-using ObjectTypeDesc = std::variant<StructureDesc, FluidDesc, FreeCellDesc, CellDesc>;
+using ObjectTypeDesc = std::variant<SolidDesc, FluidDesc, FreeCellDesc, CellDesc>;
 
 struct ObjectDesc
 {
@@ -542,8 +542,8 @@ struct ObjectDesc
 
     ObjectType getObjectType() const;
 
-    StructureDesc& getStructureRef();
-    StructureDesc const& getStructureRef() const;
+    SolidDesc& getSolidRef();
+    SolidDesc const& getSolidRef() const;
     FluidDesc& getFluidRef();
     FluidDesc const& getFluidRef() const;
     FreeCellDesc& getFreeCellRef();

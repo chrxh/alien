@@ -464,8 +464,8 @@ void DescEditService::randomizeEnergies(Desc& description, float minEnergy, floa
                 object.getCellRef()._usableEnergy = energy;
             } else if (type == ObjectType_FreeCell) {
                 object.getFreeCellRef()._energy = energy;
-            } else if (type == ObjectType_Structure) {
-                object.getStructureRef()._energy = energy;
+            } else if (type == ObjectType_Solid) {
+                object.getSolidRef()._energy = energy;
             } else if (type == ObjectType_Fluid) {
                 object.getFluidRef()._energy = energy;
             }

@@ -9,14 +9,14 @@
 std::vector<DescTestDataFactory::ObjectParameter> DescTestDataFactory::getAllObjectParameters() const
 {
     return {
-        ObjectParameter{ObjectType_Structure},
+        ObjectParameter{ObjectType_Solid},
         ObjectParameter{ObjectType_Fluid},
         ObjectParameter{ObjectType_FreeCell},
         ObjectParameter{ObjectType_Cell, CellType_Base},
         ObjectParameter{ObjectType_Cell, CellType_Depot},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
-        ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
+        ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectSolid}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
         ObjectParameter{ObjectType_Cell, CellType_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
         ObjectParameter{ObjectType_Cell, CellType_Generator, GeneratorModeWrapper{GeneratorMode_SquareSignal}},
@@ -30,7 +30,7 @@ std::vector<DescTestDataFactory::ObjectParameter> DescTestDataFactory::getAllObj
         ObjectParameter{ObjectType_Cell, CellType_Muscle, MuscleModeWrapper{MuscleMode_ManualCrawling}},
         ObjectParameter{ObjectType_Cell, CellType_Muscle, MuscleModeWrapper{MuscleMode_DirectMovement}},
         ObjectParameter{ObjectType_Cell, CellType_Defender},
-        ObjectParameter{ObjectType_Cell, CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Structure}},
+        ObjectParameter{ObjectType_Cell, CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Solid}},
         ObjectParameter{ObjectType_Cell, CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_FreeCell}},
         ObjectParameter{ObjectType_Cell, CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         ObjectParameter{ObjectType_Cell, CellType_Detonator},
@@ -48,8 +48,8 @@ std::vector<DescTestDataFactory::ObjectParameter> DescTestDataFactory::getAllObj
 ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objectParameter) const
 {
     switch (objectParameter.objectType) {
-    case ObjectType_Structure:
-        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(StructureDesc().energy(42.0f));
+    case ObjectType_Solid:
+        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(SolidDesc().energy(42.0f));
     case ObjectType_Fluid:
         return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FluidDesc().energy(42.0f).glow(1.0f));
     case ObjectType_FreeCell:
@@ -113,7 +113,7 @@ std::vector<DescTestDataFactory::NodeParameter> DescTestDataFactory::getAllNodeP
         NodeParameter{CellType_Depot},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
-        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
+        NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectSolid}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
         NodeParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
         NodeParameter{CellType_Generator, GeneratorModeWrapper{GeneratorMode_SquareSignal}},
@@ -127,7 +127,7 @@ std::vector<DescTestDataFactory::NodeParameter> DescTestDataFactory::getAllNodeP
         NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_ManualCrawling}},
         NodeParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_DirectMovement}},
         NodeParameter{CellType_Defender},
-        NodeParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Structure}},
+        NodeParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Solid}},
         NodeParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_FreeCell}},
         NodeParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         NodeParameter{CellType_Detonator},
@@ -280,7 +280,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
                 return false;
             }
         } break;
-        case SensorMode_DetectStructure: {
+        case SensorMode_DetectSolid: {
             // No fields to compare
         } break;
         case SensorMode_DetectFreeCell: {
@@ -471,7 +471,7 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             return false;
         }
         switch (reconnector.getMode()) {
-        case ReconnectorMode_Structure: {
+        case ReconnectorMode_Solid: {
             // No fields to compare
         } break;
         case ReconnectorMode_FreeCell: {
@@ -653,7 +653,7 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
     auto generatorMode = std::holds_alternative<GeneratorModeWrapper>(objectParameter.mode) ? std::get<GeneratorModeWrapper>(objectParameter.mode).value
                                                                                             : GeneratorMode_SquareSignal;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value
-                                                                                                : ReconnectorMode_Structure;
+                                                                                                : ReconnectorMode_Solid;
     auto memoryMode =
         std::holds_alternative<MemoryModeWrapper>(objectParameter.mode) ? std::get<MemoryModeWrapper>(objectParameter.mode).value : MemoryMode_SignalDelay;
 
@@ -671,8 +671,8 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
         case SensorMode_DetectEnergy:
             sensorModeDesc = DetectEnergyDesc().minDensity(0.3f);
             break;
-        case SensorMode_DetectStructure:
-            sensorModeDesc = DetectStructureDesc();
+        case SensorMode_DetectSolid:
+            sensorModeDesc = DetectSolidDesc();
             break;
         case SensorMode_DetectFreeCell:
             sensorModeDesc = DetectFreeCellDesc().minDensity(0.25f).restrictToColors(1 << 2);
@@ -745,8 +745,8 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
     case CellType_Reconnector: {
         ReconnectorModeDesc reconnectorModeDesc;
         switch (reconnectorMode) {
-        case ReconnectorMode_Structure:
-            reconnectorModeDesc = ReconnectStructureDesc();
+        case ReconnectorMode_Solid:
+            reconnectorModeDesc = ReconnectSolidDesc();
             break;
         case ReconnectorMode_FreeCell:
             reconnectorModeDesc = ReconnectFreeCellDesc().restrictToColors(1 << 2);
@@ -826,7 +826,7 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
     auto generatorMode = std::holds_alternative<GeneratorModeWrapper>(objectParameter.mode) ? std::get<GeneratorModeWrapper>(objectParameter.mode).value
                                                                                             : GeneratorMode_SquareSignal;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(objectParameter.mode) ? std::get<ReconnectorModeWrapper>(objectParameter.mode).value
-                                                                                                : ReconnectorMode_Structure;
+                                                                                                : ReconnectorMode_Solid;
     auto memoryMode =
         std::holds_alternative<MemoryModeWrapper>(objectParameter.mode) ? std::get<MemoryModeWrapper>(objectParameter.mode).value : MemoryMode_SignalDelay;
     switch (type) {
@@ -843,8 +843,8 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
         case SensorMode_DetectEnergy:
             sensorModeDesc = DetectEnergyGenomeDesc().minDensity(0.25f);
             break;
-        case SensorMode_DetectStructure:
-            sensorModeDesc = DetectStructureGenomeDesc();
+        case SensorMode_DetectSolid:
+            sensorModeDesc = DetectSolidGenomeDesc();
             break;
         case SensorMode_DetectFreeCell:
             sensorModeDesc = DetectFreeCellGenomeDesc().minDensity(0.20f).restrictToColors(1 << 6);
@@ -909,8 +909,8 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
     case CellType_Reconnector: {
         ReconnectorModeGenomeDesc reconnectorModeDesc;
         switch (reconnectorMode) {
-        case ReconnectorMode_Structure:
-            reconnectorModeDesc = ReconnectStructureGenomeDesc();
+        case ReconnectorMode_Solid:
+            reconnectorModeDesc = ReconnectSolidGenomeDesc();
             break;
         case ReconnectorMode_FreeCell:
             reconnectorModeDesc = ReconnectFreeCellGenomeDesc().restrictToColors(1 << 6);

@@ -62,16 +62,16 @@ protected:
 };
 
 //*******************************************
-//* Structure mode tests
+//* Solid mode tests
 //*******************************************
 
 TEST_F(ReconnectorTests, structureMode_connectToStructure)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
-    // Add two connected structure cells within range
-    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
-    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
+    // Add two connected solid cells within range
+    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(SolidDesc()));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -86,9 +86,9 @@ TEST_F(ReconnectorTests, structureMode_connectToStructure)
 
 TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
-    // Add free cell (non-structure) within range
+    // Add free cell (non-solid) within range
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(FreeCellDesc()));
 
     _simulationFacade->setSimulationData(data);
@@ -103,7 +103,7 @@ TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
 
 TEST_F(ReconnectorTests, structureMode_ignoreFluidParticle)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
     // Add fluid particle within range
     data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(FluidDesc()));
@@ -122,11 +122,11 @@ TEST_F(ReconnectorTests, structureMode_ignoreFluidParticle)
 TEST_F(ReconnectorTests, structureMode_outOfRange)
 {
     auto range = _parameters.reconnectorRadius.value[0];
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
-    // Add two connected structure cells outside range
-    data._objects.emplace_back(ObjectDesc().id(10).pos({100.0f - range - 0.1f, 100.0f}).type(StructureDesc()));
-    data._objects.emplace_back(ObjectDesc().id(11).pos({100.0f - range - 1.1f, 100.0f}).type(StructureDesc()));
+    // Add two connected solid cells outside range
+    data._objects.emplace_back(ObjectDesc().id(10).pos({100.0f - range - 0.1f, 100.0f}).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(11).pos({100.0f - range - 1.1f, 100.0f}).type(SolidDesc()));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -164,8 +164,8 @@ TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDesc());
 
-    // Add structure cell (non-free) within range
-    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
+    // Add solid cell (non-free) within range
+    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(SolidDesc()));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for generator to trigger
@@ -493,9 +493,9 @@ TEST_F(ReconnectorTests, removeConnections_removeStructureConnection)
 {
     auto data = createReconnectorWithNegativeSignal({100.0f, 100.0f}, ReconnectCreatureDesc());
 
-    // Add two connected structure cells; the first is connected to the reconnector
-    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
-    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
+    // Add two connected solid cells; the first is connected to the reconnector
+    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(SolidDesc()));
     data.addConnection(10, 11);
     data.addConnection(1, 10);
 
@@ -505,7 +505,7 @@ TEST_F(ReconnectorTests, removeConnections_removeStructureConnection)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnector = actualData.getObjectRef(1);
 
-    // Connection to structure cell should be removed
+    // Connection to solid cell should be removed
     EXPECT_FALSE(actualData.hasConnection(1, 10));
     // Connection to own creature should remain
     EXPECT_TRUE(actualData.hasConnection(1, 2));
@@ -589,7 +589,7 @@ TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
 TEST_F(ReconnectorTests, noTrigger_noAction)
 {
     // Create reconnector without active signal (no generator)
-    auto reconnectorCell = ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectStructureDesc())));
+    auto reconnectorCell = ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectSolidDesc())));
 
     auto data = Desc().addCreature({
         reconnectorCell,
@@ -597,9 +597,9 @@ TEST_F(ReconnectorTests, noTrigger_noAction)
     });
     data.addConnection(1, 2);
 
-    // Add two connected structure cells within range
-    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
-    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
+    // Add two connected solid cells within range
+    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(SolidDesc()));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -613,11 +613,11 @@ TEST_F(ReconnectorTests, noTrigger_noAction)
 
 TEST_F(ReconnectorTests, connectsToClosest)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
-    // Add two connected structure cells, one closer than the other
-    data._objects.emplace_back(ObjectDesc().id(10).pos({98.0f, 100.0f}).type(StructureDesc()));
-    data._objects.emplace_back(ObjectDesc().id(11).pos({99.0f, 100.0f}).type(StructureDesc()));
+    // Add two connected solid cells, one closer than the other
+    data._objects.emplace_back(ObjectDesc().id(10).pos({98.0f, 100.0f}).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(11).pos({99.0f, 100.0f}).type(SolidDesc()));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -632,11 +632,11 @@ TEST_F(ReconnectorTests, connectsToClosest)
 
 TEST_F(ReconnectorTests, skipAlreadyConnected)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
-    // Add two connected structure cells within range and already connected to reconnector
-    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
-    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
+    // Add two connected solid cells within range and already connected to reconnector
+    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(SolidDesc()));
     data.addConnection(10, 11);
     data.addConnection(1, 10);
 
@@ -654,9 +654,9 @@ TEST_F(ReconnectorTests, skipAlreadyConnected)
 
 TEST_F(ReconnectorTests, energyConservation)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectStructureDesc());
-    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(StructureDesc()));
-    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(StructureDesc()));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
+    data._objects.emplace_back(ObjectDesc().id(10).pos({99.0f, 100.0f}).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(11).pos({98.0f, 100.0f}).type(SolidDesc()));
     data.addConnection(10, 11);
 
     auto originalEnergy = getEnergy(data);
@@ -677,7 +677,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
 
     // Create attacker with connections that block the attack ray
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectStructureDesc()))),
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(ReconnectorDesc().mode(ReconnectSolidDesc()))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         // Create a connection that crosses the ray path to target at (100, 99)
         ObjectDesc().id(3).pos({99.0f, 99.0f}),
@@ -689,8 +689,8 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     data.addConnection(1, 4);
 
     // Add target creature below (ray to target is blocked by connection 3-4)
-    data._objects.emplace_back(ObjectDesc().id(10).pos({100.0f, 100.0f - (range - 1.0f)}).type(StructureDesc()));
-    data._objects.emplace_back(ObjectDesc().id(12).pos({100.0f, 100.0f - range}).type(StructureDesc()));
+    data._objects.emplace_back(ObjectDesc().id(10).pos({100.0f, 100.0f - (range - 1.0f)}).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(12).pos({100.0f, 100.0f - range}).type(SolidDesc()));
     data.addConnection(10, 12);
 
     _simulationFacade->setSimulationData(data);

@@ -23,8 +23,8 @@ protected:
     {
         if (mode == SensorMode_DetectEnergy) {
             return DetectEnergyDesc().minDensity(0.05f);
-        } else if (mode == SensorMode_DetectStructure) {
-            return DetectStructureDesc();
+        } else if (mode == SensorMode_DetectSolid) {
+            return DetectSolidDesc();
         } else if (mode == SensorMode_DetectFreeCell) {
             return DetectFreeCellDesc().minDensity(0.05f);
         } else if (mode == SensorMode_DetectCreature) {
@@ -66,11 +66,11 @@ protected:
             for (int i = 0; i < count; ++i) {
                 data._objects.emplace_back(ObjectDesc().pos({startPos.x + i, startPos.y}).type(FreeCellDesc()));
             }
-        } else if (mode == SensorMode_DetectStructure) {
+        } else if (mode == SensorMode_DetectSolid) {
             auto baseId = _nextStructureId;
             _nextStructureId += count;
             for (int i = 0; i < count; ++i) {
-                data._objects.emplace_back(ObjectDesc().id(baseId + i).pos({startPos.x + i, startPos.y}).type(StructureDesc()));
+                data._objects.emplace_back(ObjectDesc().id(baseId + i).pos({startPos.x + i, startPos.y}).type(SolidDesc()));
             }
             for (int i = 0; i < count - 1; ++i) {
                 data.addConnection(baseId + i, baseId + i + 1);
@@ -94,7 +94,7 @@ class SensorTests_AllDetectionModes
 INSTANTIATE_TEST_SUITE_P(
     SensorTests_AllDetectionModes,
     SensorTests_AllDetectionModes,
-    ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectStructure, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
+    ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectSolid, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
 
 TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
 {
@@ -488,15 +488,15 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    // Add structure cells between sensor and target (to block the ray)
+    // Add solid cells between sensor and target (to block the ray)
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 50.0f}).type(StructureDesc()));
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 50.0f}).type(SolidDesc()));
     }
     for (int i = 0; i < 9; ++i) {
         data.addConnection(50 + i, 50 + i + 1);
     }
 
-    // Add target behind the structure cells
+    // Add target behind the solid cells
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
@@ -504,7 +504,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
 
-    // Should not find target because ray is blocked by structure cells
+    // Should not find target because ray is blocked by solid cells
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
@@ -521,15 +521,15 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    // Add structure cells behind sensor and target
+    // Add solid cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 5.0f}).type(StructureDesc()));
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 5.0f}).type(SolidDesc()));
     }
     for (int i = 0; i < 9; ++i) {
         data.addConnection(50 + i, 50 + i + 1);
     }
 
-    // Add target behind the structure cells
+    // Add target behind the solid cells
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
@@ -555,9 +555,9 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
                         CreatureDesc().id(0))
                     .addConnection(1, 2);
 
-    // Add structure cells behind sensor and target
+    // Add solid cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 150.0f}).type(StructureDesc()));
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.0f + i, 150.0f}).type(SolidDesc()));
     }
     for (int i = 0; i < 9; ++i) {
         data.addConnection(50 + i, 50 + i + 1);
@@ -953,17 +953,17 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     auto actualSensor = actualData.getObjectRef(1);
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
-    // Add structure cells between sensor and target to block the ray
+    // Add solid cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 30; ++i) {
-        actualData._objects.emplace_back(ObjectDesc().id(50 + i).pos({85.0f + i, 70.0f}).type(StructureDesc()));
+        actualData._objects.emplace_back(ObjectDesc().id(50 + i).pos({85.0f + i, 70.0f}).type(SolidDesc()));
     }
     for (int i = 0; i < 29; ++i) {
         actualData.addConnection(50 + i, 50 + i + 1);
     }
     _simulationFacade->setSimulationData(actualData);
 
-    // Second scan - target is now blocked by structure cells
+    // Second scan - target is now blocked by solid cells
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);  // Wait for next trigger
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
@@ -1003,19 +1003,19 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
 }
 
 /**
- * Tests for SensorMode_DetectStructure (mode-specific tests)
+ * Tests for SensorMode_DetectSolid (mode-specific tests)
  */
-TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
+TEST_F(SensorTests, detectSolid_ignoreDifferentCellTypes)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectStructureDesc()))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    // Add many non-structure cells (should be ignored)
+    // Add many non-solid cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
         data.addCreature({ObjectDesc().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)})});
     }
@@ -1026,15 +1026,15 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    // Should not find anything because only non-structure cells are present
+    // Should not find anything because only non-solid cells are present
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectStructure_ignoreFluidParticles)
+TEST_F(SensorTests, detectSolid_ignoreFluidParticles)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectStructureDesc()))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectSolidDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0));
@@ -1563,10 +1563,10 @@ TEST_F(SensorTests, detectCreature_ignoreStructureObjects)
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    // Add structure cells (should be ignored)
+    // Add solid cells (should be ignored)
     for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
-            data._objects.emplace_back(ObjectDesc().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(StructureDesc()));
+            data._objects.emplace_back(ObjectDesc().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(SolidDesc()));
         }
     }
 

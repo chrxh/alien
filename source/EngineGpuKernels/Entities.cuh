@@ -101,7 +101,7 @@ struct DetectEnergy
     float minDensity;
 };
 
-struct DetectStructure
+struct DetectSolid
 {};
 
 struct DetectFreeCell
@@ -122,7 +122,7 @@ union SensorModeData
 {
     Telemetry telemetry;
     DetectEnergy detectEnergy;
-    DetectStructure detectStructure;
+    DetectSolid detectSolid;
     DetectFreeCell detectFreeCell;
     DetectCreature detectCreature;
 };
@@ -292,7 +292,7 @@ struct Defender
     DefenderMode mode;
 };
 
-struct ReconnectStructure
+struct ReconnectSolid
 {};
 
 struct ReconnectFreeCell
@@ -310,7 +310,7 @@ struct ReconnectCreature
 
 union ReconnectorModeData
 {
-    ReconnectStructure reconnectStructure;
+    ReconnectSolid reconnectSolid;
     ReconnectFreeCell reconnectFreeCell;
     ReconnectCreature reconnectCreature;
 };
@@ -458,7 +458,7 @@ struct Creature
     uint64_t creatureIndex;  // May be invalid
 };
 
-struct Structure
+struct Solid
 {
     float energy;
 
@@ -506,7 +506,7 @@ struct Cell
     uint16_t geneIndex;
 
     // Cell type data
-    NeuralNet* neuralNetwork;  // Not used for structure and base cells
+    NeuralNet* neuralNetwork;  // Not used for solid and base cells
     CellType cellType;
     CellTypeData cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
@@ -541,7 +541,7 @@ struct Cell
 
 union ObjectTypeData
 {
-    Structure structure;
+    Solid solid;
     Fluid fluid;
     FreeCell freeCell;
     Cell cell;
@@ -614,8 +614,8 @@ struct Object
             return typeData.cell.getEnergy();
         } else if (type == ObjectType_FreeCell) {
             return typeData.freeCell.energy;
-        } else if (type == ObjectType_Structure) {
-            return typeData.structure.energy;
+        } else if (type == ObjectType_Solid) {
+            return typeData.solid.energy;
         } else if (type == ObjectType_Fluid) {
             return typeData.fluid.energy;
         } else {

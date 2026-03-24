@@ -60,9 +60,9 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 return;
             }
 
-            if (reconnectorMode == ReconnectorMode_Structure) {
-                // Connect to structure cells only
-                if (otherObject->type != ObjectType_Structure) {
+            if (reconnectorMode == ReconnectorMode_Solid) {
+                // Connect to solid cells only
+                if (otherObject->type != ObjectType_Solid) {
                     return;
                 }
             } else if (reconnectorMode == ReconnectorMode_FreeCell) {

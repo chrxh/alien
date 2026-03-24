@@ -46,7 +46,7 @@ namespace Const
     };
 
     std::map<ObjectType, std::string> const ObjectTypeToStringMap = {
-        {ObjectType_Structure, "Structure"},
+        {ObjectType_Solid, "Solid"},
         {ObjectType_Fluid, "Fluid"},
         {ObjectType_FreeCell, "Free Cell"},
         {ObjectType_Cell, "Cell"},

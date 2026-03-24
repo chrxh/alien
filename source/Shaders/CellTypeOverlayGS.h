@@ -24,7 +24,7 @@ uniform float zoom;
 uniform float radius;
 
 // Object type constants (matching ObjectType_ enum)
-const int ObjectType_Structure = 0;
+const int ObjectType_Solid = 0;
 const int ObjectType_Fluid = 1;
 const int ObjectType_FreeCell = 2;
 const int ObjectType_Cell = 3;
@@ -39,13 +39,13 @@ void main()
     
     // Determine texture row based on object type:
     // - ObjectType_Cell: use cell type (rows 0-12)
-    // - ObjectType_Structure: row 13 ("Structure")
+    // - ObjectType_Solid: row 13 ("Solid")
     // - ObjectType_Fluid: row 14 ("Fluid")
     // - ObjectType_FreeCell: row 15 ("Free Cell")
     int textureRow;
     if (objectType == ObjectType_Cell) {
         textureRow = cellType;
-    } else if (objectType == ObjectType_Structure) {
+    } else if (objectType == ObjectType_Solid) {
         textureRow = CellType_Count;  // Row 13
     } else if (objectType == ObjectType_Fluid) {
         textureRow = CellType_Count + 1;  // Row 14

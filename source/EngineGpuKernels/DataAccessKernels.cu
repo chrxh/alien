@@ -102,7 +102,7 @@ namespace
                         if (nodeTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                             nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = node.cellTypeData.sensor.modeData.detectEnergy.minDensity;
-                        } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+                        } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                             nodeTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity = node.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
                             nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors =
@@ -177,7 +177,7 @@ namespace
                         break;
                     case CellType_Reconnector:
                         nodeTO.cellTypeData.reconnector.mode = node.cellTypeData.reconnector.mode;
-                        if (node.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+                        if (node.cellTypeData.reconnector.mode == ReconnectorMode_Solid) {
                         } else if (node.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
                             nodeTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors =
                                 node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors;
@@ -312,8 +312,8 @@ namespace
 
         object->tempValue1.as_uint64 = objectTOIndex;
 
-        if (object->type == ObjectType_Structure) {
-            objectTO.typeData.structure.energy = object->typeData.structure.energy;
+        if (object->type == ObjectType_Solid) {
+            objectTO.typeData.solid.energy = object->typeData.solid.energy;
         } else if (object->type == ObjectType_Fluid) {
             objectTO.typeData.fluid.energy = object->typeData.fluid.energy;
             objectTO.typeData.fluid.glow = object->typeData.fluid.glow;
@@ -384,7 +384,7 @@ namespace
                 if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                     cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
-                } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+                } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectSolid) {
                 } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
                     cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity = cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
                     cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors = cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors;
@@ -463,7 +463,7 @@ namespace
             } break;
             case CellType_Reconnector: {
                 cellTO.cellTypeData.reconnector.mode = cell.cellTypeData.reconnector.mode;
-                if (cell.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+                if (cell.cellTypeData.reconnector.mode == ReconnectorMode_Solid) {
                 } else if (cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
                     cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors =
                         cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors;

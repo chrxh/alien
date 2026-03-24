@@ -54,11 +54,11 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
 {
     Desc data;
     data._objects.emplace_back(
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(StructureDesc()));
+        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(SolidDesc()));
 
     _simulationFacade->setSimulationData(data);
 
-    // Run simulation for many timesteps - structure cells should not lose energy to radiation
+    // Run simulation for many timesteps - solid cells should not lose energy to radiation
     _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -66,10 +66,10 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
     // Verify no particles were created (no radiation emitted)
     EXPECT_EQ(0, actualData._energies.size());
 
-    // Verify the structure cell is still present
+    // Verify the solid cell is still present
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_EQ(ObjectType_Structure, object.getObjectType());
+    EXPECT_EQ(ObjectType_Solid, object.getObjectType());
 }
 
 TEST_F(RadiationTests, baseCells_shouldRadiate)

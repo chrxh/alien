@@ -87,7 +87,7 @@ void MassOperationsDialog::processIntern()
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienGui::Text("Randomize lineage ids");
 
-    AlienGui::Group(AlienGui::GroupParameters().text("Structure"));
+    AlienGui::Group(AlienGui::GroupParameters().text("Solid"));
     ImGui::Checkbox("##glow", &_randomizeGlow);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     posX = ImGui::GetCursorPos().x;
