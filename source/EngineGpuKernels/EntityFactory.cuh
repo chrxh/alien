@@ -316,7 +316,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creature->id = creatureTO.id;
     creature->ancestorId = creatureTO.ancestorId;
     creature->generation = creatureTO.generation;
-    creature->numObjects = creatureTO.numObjects;
+    creature->numCells = creatureTO.numCells;
     creature->mutationState = creatureTO.mutationState;
     creature->headUpdateId = creatureTO.headUpdateId;
 

@@ -273,7 +273,7 @@ namespace
             creatureTO.id = creature->id;
             creatureTO.ancestorId = creature->ancestorId;
             creatureTO.generation = creature->generation;
-            creatureTO.numObjects = creature->numObjects;
+            creatureTO.numCells = creature->numCells;
             creatureTO.mutationState = creature->mutationState;
             creatureTO.headUpdateId = creature->headUpdateId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;

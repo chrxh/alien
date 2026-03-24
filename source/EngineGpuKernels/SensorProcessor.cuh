@@ -383,10 +383,10 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                     if (!((restrictToColors >> otherObject->color) & 1)) {
                         matches = false;
                     }
-                    if (matches && minNumCells > 0 && otherObject->typeData.cell.creature->numObjects < minNumCells) {
+                    if (matches && minNumCells > 0 && otherObject->typeData.cell.creature->numCells < minNumCells) {
                         matches = false;
                     }
-                    if (matches && maxNumCells > 0 && otherObject->typeData.cell.creature->numObjects > maxNumCells) {
+                    if (matches && maxNumCells > 0 && otherObject->typeData.cell.creature->numCells > maxNumCells) {
                         matches = false;
                     }
                     if (matches && restrictToLineage != LineageRestriction_No) {
@@ -403,7 +403,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
 
                     if (matches) {
                         uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xFFFF);
-                        float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numObjects);
+                        float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
                         return pack(distance, absAngle, density, creatureIdPart);
                     }
                 }
@@ -417,7 +417,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             while (otherObject != nullptr) {
                 if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureIdPart) {
                     uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
-                    float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numObjects);
+                    float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
                     return pack(distance, absAngle, density, creatureIdPart);
                 }
                 otherObject = otherObject->nextObject;

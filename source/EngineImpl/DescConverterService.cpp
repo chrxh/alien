@@ -914,7 +914,7 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
     NumberGenerator::get().adaptMaxEntityId(creatureTO.id);
     result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
     result._generation = creatureTO.generation;
-    result._numObjects = creatureTO.numObjects;
+    result._numCells = creatureTO.numCells;
     result._mutationState = creatureTO.mutationState;
     result._headUpdateId = creatureTO.headUpdateId;
 
@@ -1215,7 +1215,7 @@ void DescConverterService::convertCreatureToTO(
     creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
     creatureTO.generation = creatureDesc._generation;
     creatureTO.headUpdateId = creatureDesc._headUpdateId;
-    creatureTO.numObjects = creatureDesc._numObjects;
+    creatureTO.numCells = creatureDesc._numCells;
     creatureTO.mutationState = creatureDesc._mutationState;
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
 }

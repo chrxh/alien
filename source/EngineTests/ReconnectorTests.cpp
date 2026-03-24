@@ -321,7 +321,7 @@ TEST_F(ReconnectorTests, creatureMode_minNumCells_success)
             ObjectDesc().id(10).pos({99.0f, 100.0f}),
             ObjectDesc().id(11).pos({98.0f, 100.0f}),
         },
-        CreatureDesc().numObjects(3));
+        CreatureDesc().numCells(3));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -342,7 +342,7 @@ TEST_F(ReconnectorTests, creatureMode_minNumCells_failed)
             ObjectDesc().id(10).pos({99.0f, 100.0f}),
             ObjectDesc().id(11).pos({98.0f, 100.0f}),
         },
-        CreatureDesc().numObjects(3));
+        CreatureDesc().numCells(3));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -363,7 +363,7 @@ TEST_F(ReconnectorTests, creatureMode_maxNumCells_success)
             ObjectDesc().id(10).pos({99.0f, 100.0f}),
             ObjectDesc().id(11).pos({98.0f, 100.0f}),
         },
-        CreatureDesc().numObjects(5));
+        CreatureDesc().numCells(5));
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
