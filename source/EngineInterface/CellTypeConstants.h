@@ -18,7 +18,7 @@ namespace Channels
 using ObjectType = int;
 enum ObjectType_
 {
-    ObjectType_Structure,
+    ObjectType_Solid,
     ObjectType_Fluid,
     ObjectType_FreeCell,
     ObjectType_Cell,
@@ -64,7 +64,7 @@ namespace Const
         "Void"};
 
     std::vector<std::string> const ObjectTypeStrings = {
-        "Structure",
+        "Solid",
         "Fluid",
         "Free Cell",
         "Cell"};
@@ -237,7 +237,7 @@ enum SensorMode_
 {
     SensorMode_Telemetry,
     SensorMode_DetectEnergy,
-    SensorMode_DetectStructure,
+    SensorMode_DetectSolid,
     SensorMode_DetectFreeCell,
     SensorMode_DetectCreature,
     SensorMode_Count,
@@ -245,7 +245,7 @@ enum SensorMode_
 
 namespace Const
 {
-    std::vector<std::string> const SensorModeStrings = {"Telemetry", "Detect energy", "Detect structure", "Detect free cell", "Detect creature"};
+    std::vector<std::string> const SensorModeStrings = {"Telemetry", "Detect energy", "Detect solid", "Detect free cell", "Detect creature"};
 }
 
 //********************
@@ -350,7 +350,7 @@ enum DetonatorState_
 using ReconnectorMode = int;
 enum ReconnectorMode_
 {
-    ReconnectorMode_Structure,
+    ReconnectorMode_Solid,
     ReconnectorMode_FreeCell,
     ReconnectorMode_Creature,
     ReconnectorMode_Count,
@@ -358,7 +358,7 @@ enum ReconnectorMode_
 
 namespace Const
 {
-    std::vector<std::string> const ReconnectorModeStrings = {"Structure", "Free cell", "Creature"};
+    std::vector<std::string> const ReconnectorModeStrings = {"Solid", "Free cell", "Creature"};
 }
 
 namespace Channels

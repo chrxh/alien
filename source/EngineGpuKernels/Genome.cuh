@@ -37,7 +37,7 @@ struct DetectEnergyGenome
     float minDensity;
 };
 
-struct DetectStructureGenome
+struct DetectSolidGenome
 {};
 
 struct DetectFreeCellGenome
@@ -58,7 +58,7 @@ union SensorModeGenome
 {
     TelemetryGenome telemetry;
     DetectEnergyGenome detectEnergy;
-    DetectStructureGenome detectStructure;
+    DetectSolidGenome detectSolid;
     DetectFreeCellGenome detectFreeCell;
     DetectCreatureGenome detectCreature;
 };
@@ -188,7 +188,7 @@ struct DefenderGenome
     DefenderMode mode;
 };
 
-struct ReconnectStructureGenome
+struct ReconnectSolidGenome
 {};
 
 struct ReconnectFreeCellGenome
@@ -206,7 +206,7 @@ struct ReconnectCreatureGenome
 
 union ReconnectorModeGenome
 {
-    ReconnectStructureGenome reconnectStructure;
+    ReconnectSolidGenome reconnectSolid;
     ReconnectFreeCellGenome reconnectFreeCell;
     ReconnectCreatureGenome reconnectCreature;
 };

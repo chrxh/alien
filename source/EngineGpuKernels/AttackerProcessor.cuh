@@ -111,7 +111,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         auto sumEnergyToTransfer = 0.0f;
         data.objectMap.executeForEach(
             object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
-                if (otherObject->type == ObjectType_Structure || otherObject->type == ObjectType_Fluid) {
+                if (otherObject->type == ObjectType_Solid || otherObject->type == ObjectType_Fluid) {
                     return;
                 }
                 if (otherObject->fixed) {

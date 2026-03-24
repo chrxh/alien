@@ -118,7 +118,7 @@ void _InspectorWindow::processObject(ExtendedObjectDesc& extendedObject)
                 processCellGenomeTab(std::get<InjectorDesc>(object.getCellRef()._cellType));
             }
         }
-        if (object.getObjectType() == ObjectType_Structure) {
+        if (object.getObjectType() == ObjectType_Solid) {
             processStructureTab(object);
         }
         if (object.getObjectType() == ObjectType_Fluid) {
@@ -657,7 +657,7 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                     .textWidth(CellTypeTextWidth)
                     .tooltip(Const::GenomeSensorMinDensityTooltip),
                 detectEnergy._minDensity);
-        } else if (mode == SensorMode_DetectStructure) {
+        } else if (mode == SensorMode_DetectSolid) {
             // No parameters
         } else if (mode == SensorMode_DetectFreeCell) {
             auto& detectFreeCell = std::get<DetectFreeCellDesc>(sensor._mode);
@@ -754,7 +754,7 @@ void _InspectorWindow::processDetonatorContent(DetonatorDesc& detonator)
 
 void _InspectorWindow::processStructureTab(ObjectDesc& object)
 {
-    if (ImGui::BeginTabItem("Structure", nullptr, ImGuiTabItemFlags_None)) {
+    if (ImGui::BeginTabItem("Solid", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         }
         ImGui::EndChild();

@@ -206,7 +206,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                         }
                     }
 
-                    // Block ray if it encounters structure cells
+                    // Block ray if it encounters solid cells
                     if (densityMap.getStructureDensity(scanPos) > 0) {
                         break;
                     }
@@ -233,7 +233,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             data.objectMap.correctPosition(matchPos);
 
             // No relocation for structures
-            if (object->typeData.cell.cellTypeData.sensor.mode != SensorMode_DetectStructure) {
+            if (object->typeData.cell.cellTypeData.sensor.mode != SensorMode_DetectSolid) {
                 object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = true;
                 object->typeData.cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;
                 object->typeData.cell.cellTypeData.sensor.lastMatch.pos = matchPos;
@@ -291,7 +291,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
         }
         __syncthreads();
 
-        // Check if ray from sensor to match pos is blocked by structure
+        // Check if ray from sensor to match pos is blocked by solid
         if (distance >= ScanStep) {
             auto const partition = calcSystemThreadPartition(toInt(distance) / ScanStep);
             auto const& densityMap = data.preprocessedSimulationData.densityMap;
@@ -355,7 +355,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
         if (density >= minDensity) {
             return pack(distance, absAngle, density);
         }
-    } else if (mode == SensorMode_DetectStructure) {
+    } else if (mode == SensorMode_DetectSolid) {
         if (densityMap.getStructureDensity(scanPos) > 0) {
             return pack(distance, absAngle, 1.0f);
         }
@@ -376,7 +376,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
 
             auto otherObject = data.objectMap.getFirst(scanPos);
             while (otherObject != nullptr) {
-                // Check if this cell is part of a creature (not structure or free object)
+                // Check if this cell is part of a creature (not solid or free object)
                 if (otherObject->type == ObjectType_Cell && !cell->isSameCreature(&otherObject->typeData.cell)) {
                     bool matches = true;
 

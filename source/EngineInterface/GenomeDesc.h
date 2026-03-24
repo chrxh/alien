@@ -66,9 +66,9 @@ struct DetectEnergyGenomeDesc
     MEMBER(DetectEnergyGenomeDesc, float, minDensity, 1.0f);
 };
 
-struct DetectStructureGenomeDesc
+struct DetectSolidGenomeDesc
 {
-    auto operator<=>(DetectStructureGenomeDesc const&) const = default;
+    auto operator<=>(DetectSolidGenomeDesc const&) const = default;
 };
 
 struct DetectFreeCellGenomeDesc
@@ -90,7 +90,7 @@ struct DetectCreatureGenomeDesc
 };
 
 using SensorModeGenomeDesc =
-    std::variant<TelemetryGenomeDesc, DetectEnergyGenomeDesc, DetectStructureGenomeDesc, DetectFreeCellGenomeDesc, DetectCreatureGenomeDesc>;
+    std::variant<TelemetryGenomeDesc, DetectEnergyGenomeDesc, DetectSolidGenomeDesc, DetectFreeCellGenomeDesc, DetectCreatureGenomeDesc>;
 
 struct SensorGenomeDesc
 {
@@ -228,9 +228,9 @@ struct DefenderGenomeDesc
     MEMBER(DefenderGenomeDesc, DefenderMode, mode, DefenderMode_DefendAgainstAttacker);
 };
 
-struct ReconnectStructureGenomeDesc
+struct ReconnectSolidGenomeDesc
 {
-    auto operator<=>(ReconnectStructureGenomeDesc const&) const = default;
+    auto operator<=>(ReconnectSolidGenomeDesc const&) const = default;
 };
 
 struct ReconnectFreeCellGenomeDesc
@@ -250,7 +250,7 @@ struct ReconnectCreatureGenomeDesc
     MEMBER(ReconnectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using ReconnectorModeGenomeDesc = std::variant<ReconnectStructureGenomeDesc, ReconnectFreeCellGenomeDesc, ReconnectCreatureGenomeDesc>;
+using ReconnectorModeGenomeDesc = std::variant<ReconnectSolidGenomeDesc, ReconnectFreeCellGenomeDesc, ReconnectCreatureGenomeDesc>;
 
 struct ReconnectorGenomeDesc
 {

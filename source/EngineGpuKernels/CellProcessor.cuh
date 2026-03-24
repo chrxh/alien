@@ -66,7 +66,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
-        if (object->fixed || object->type == ObjectType_Structure || object->type == ObjectType_Fluid) {
+        if (object->fixed || object->type == ObjectType_Solid || object->type == ObjectType_Fluid) {
             continue;
         }
         uint32_t* age = nullptr;

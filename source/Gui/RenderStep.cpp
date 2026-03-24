@@ -436,19 +436,19 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     // Create a texture atlas containing all cell type strings and object type strings
     // We'll arrange them in a vertical strip, one per row
     // Rows 0-12: Cell types (Base, Depot, Sensor, etc.)
-    // Row 13: "Structure" (for ObjectType_Structure)
+    // Row 13: "Solid" (for ObjectType_Solid)
     // Row 14: "Fluid" (for ObjectType_Fluid)
     // Row 15: "Free Cell" (for ObjectType_FreeCell)
     auto font = StyleRepository::get().getDefaultFont();
     float fontSize = 16.0f;  // Base font size for rendering
 
-    // Build combined list of labels: cell types + object types (Structure, Fluid, Free Cell)
+    // Build combined list of labels: cell types + object types (Solid, Fluid, Free Cell)
     std::vector<std::string> allLabels;
     for (auto const& cellTypeStr : Const::CellTypeStrings) {
         allLabels.push_back(cellTypeStr);
     }
-    // Add object type labels (only Structure, Fluid, and Free Cell, as Cell uses cell type names)
-    allLabels.push_back(Const::ObjectTypeStrings[ObjectType_Structure]);
+    // Add object type labels (only Solid, Fluid, and Free Cell, as Cell uses cell type names)
+    allLabels.push_back(Const::ObjectTypeStrings[ObjectType_Solid]);
     allLabels.push_back(Const::ObjectTypeStrings[ObjectType_Fluid]);
     allLabels.push_back(Const::ObjectTypeStrings[ObjectType_FreeCell]);
 

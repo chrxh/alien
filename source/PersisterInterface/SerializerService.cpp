@@ -359,12 +359,12 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectEnergyGenomeDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, DetectStructureGenomeDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, DetectSolidGenomeDesc& data)
     {
         auto auxiliaries = getLoadSaveMap(task, ar);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(DetectStructureGenomeDesc)
+    SPLIT_SERIALIZATION(DetectSolidGenomeDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectFreeCellGenomeDesc& data)
@@ -572,13 +572,13 @@ namespace cereal
     SPLIT_SERIALIZATION(DefenderGenomeDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ReconnectStructureGenomeDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectSolidGenomeDesc& data)
     {
-        ReconnectStructureGenomeDesc defaultObject;
+        ReconnectSolidGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ReconnectStructureGenomeDesc)
+    SPLIT_SERIALIZATION(ReconnectSolidGenomeDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellGenomeDesc& data)
@@ -1100,12 +1100,12 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectEnergyDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, DetectStructureDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, DetectSolidDesc& data)
     {
         auto auxiliaries = getLoadSaveMap(task, ar);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(DetectStructureDesc)
+    SPLIT_SERIALIZATION(DetectSolidDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectFreeCellDesc& data)
@@ -1334,13 +1334,13 @@ namespace cereal
     SPLIT_SERIALIZATION(DefenderDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ReconnectStructureDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectSolidDesc& data)
     {
-        ReconnectStructureDesc defaultObject;
+        ReconnectSolidDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ReconnectStructureDesc)
+    SPLIT_SERIALIZATION(ReconnectSolidDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellDesc& data)
@@ -1507,14 +1507,14 @@ namespace cereal
     SPLIT_SERIALIZATION(VoidDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, StructureDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, SolidDesc& data)
     {
-        StructureDesc defaultObject;
+        SolidDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Structure_Energy, data._energy, defaultObject._energy);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(StructureDesc)
+    SPLIT_SERIALIZATION(SolidDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, FluidDesc& data)

@@ -76,7 +76,7 @@ struct DetectEnergyTO
     float minDensity;
 };
 
-struct DetectStructureTO
+struct DetectSolidTO
 {};
 
 struct DetectFreeCellTO
@@ -97,7 +97,7 @@ union SensorModeTO
 {
     TelemetryTO telemetry;
     DetectEnergyTO detectEnergy;
-    DetectStructureTO detectStructure;
+    DetectSolidTO detectSolid;
     DetectFreeCellTO detectFreeCell;
     DetectCreatureTO detectCreature;
 };
@@ -262,7 +262,7 @@ struct DefenderTO
     DefenderMode mode;
 };
 
-struct ReconnectStructureTO
+struct ReconnectSolidTO
 {};
 
 struct ReconnectFreeCellTO
@@ -280,7 +280,7 @@ struct ReconnectCreatureTO
 
 union ReconnectorModeTO
 {
-    ReconnectStructureTO reconnectStructure;
+    ReconnectSolidTO reconnectSolid;
     ReconnectFreeCellTO reconnectFreeCell;
     ReconnectCreatureTO reconnectCreature;
 };
@@ -398,7 +398,7 @@ struct SignalTO
     int numTimesSent;
 };
 
-struct StructureTO
+struct SolidTO
 {
     float energy;
 };
@@ -432,7 +432,7 @@ struct CellTO
     uint16_t geneIndex;
 
     // Cell type data
-    uint64_t neuralNetworkDataIndex;  // May be invalid (not used for structure and base cells)
+    uint64_t neuralNetworkDataIndex;
     CellType cellType;
     CellTypeDataTO cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
@@ -453,7 +453,7 @@ struct CellTO
 
 union ObjectTypeDataTO
 {
-    StructureTO structure;
+    SolidTO solid;
     FluidTO fluid;
     FreeCellTO freeCell;
     CellTO cell;

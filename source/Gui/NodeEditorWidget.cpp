@@ -117,8 +117,8 @@ namespace
             return TelemetryGenomeDesc();
         case SensorMode_DetectEnergy:
             return DetectEnergyGenomeDesc();
-        case SensorMode_DetectStructure:
-            return DetectStructureGenomeDesc();
+        case SensorMode_DetectSolid:
+            return DetectSolidGenomeDesc();
         case SensorMode_DetectFreeCell:
             return DetectFreeCellGenomeDesc();
         case SensorMode_DetectCreature:
@@ -155,8 +155,8 @@ namespace
     ReconnectorModeGenomeDesc createReconnectorModeGenomeDesc(ReconnectorMode mode)
     {
         switch (mode) {
-        case ReconnectorMode_Structure:
-            return ReconnectStructureGenomeDesc();
+        case ReconnectorMode_Solid:
+            return ReconnectSolidGenomeDesc();
         case ReconnectorMode_FreeCell:
             return ReconnectFreeCellGenomeDesc();
         case ReconnectorMode_Creature:
@@ -324,7 +324,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 // Mode-specific parameters
-                if (mode == SensorMode_DetectStructure) {
+                if (mode == SensorMode_DetectSolid) {
                     // No parameters
                 } else if (mode == SensorMode_DetectEnergy) {
                     AlienGui::BeginIndent();
@@ -332,7 +332,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(rightColumnWidth), detectEnergy._minDensity);
                     AlienGui::EndIndent();
-                } else if (mode == SensorMode_DetectStructure) {
+                } else if (mode == SensorMode_DetectSolid) {
                     // No parameters
                 } else if (mode == SensorMode_DetectFreeCell) {
                     AlienGui::BeginIndent();
@@ -540,7 +540,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 // Mode-specific parameters
-                if (mode == ReconnectorMode_Structure) {
+                if (mode == ReconnectorMode_Solid) {
                     // No parameters
                 } else if (mode == ReconnectorMode_FreeCell) {
                     AlienGui::BeginIndent();

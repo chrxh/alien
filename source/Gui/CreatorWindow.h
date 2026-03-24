@@ -65,7 +65,7 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
-    ObjectType _objectType = ObjectType_Structure;
+    ObjectType _objectType = ObjectType_Solid;
     Desc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;

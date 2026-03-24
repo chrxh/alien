@@ -42,8 +42,8 @@ void CreatorWindow::initIntern() {}
 
 namespace
 {
-    std::map<ObjectType, int> objectTypeToMaterial = {{ObjectType_Structure, 0}, {ObjectType_Fluid, 1}, {ObjectType_FreeCell, 2}};
-    std::map<ObjectType, int> materialToObjectType = {{0, ObjectType_Structure}, {1, ObjectType_Fluid}, {2, ObjectType_FreeCell}};
+    std::map<ObjectType, int> objectTypeToMaterial = {{ObjectType_Solid, 0}, {ObjectType_Fluid, 1}, {ObjectType_FreeCell, 2}};
+    std::map<ObjectType, int> materialToObjectType = {{0, ObjectType_Solid}, {1, ObjectType_Fluid}, {2, ObjectType_FreeCell}};
 }
 
 void CreatorWindow::processIntern()
@@ -363,8 +363,8 @@ void CreatorWindow::validateAndCorrect()
 ObjectTypeDesc CreatorWindow::getObjectTypeDesc() const
 {
     switch (_objectType) {
-    case ObjectType_Structure:
-        return StructureDesc().energy(_energy);
+    case ObjectType_Solid:
+        return SolidDesc().energy(_energy);
     case ObjectType_Fluid:
         return FluidDesc().energy(_energy).glow(_glow);
     case ObjectType_FreeCell:

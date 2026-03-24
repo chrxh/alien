@@ -181,8 +181,8 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
             } else if (object->type == ObjectType_Fluid) {
                 luminance = object->typeData.fluid.energy / 300.0f;
             } else {
-                // Structure - use energy for luminance if available
-                luminance = object->typeData.structure.energy / 300.0f;
+                // Solid - use energy for luminance if available
+                luminance = object->typeData.solid.energy / 300.0f;
             }
 
             auto white = luminance / 10.0f;

@@ -14,7 +14,7 @@ public:
     {
         MEMBER(CreateRectParameters, int, width, 10);
         MEMBER(CreateRectParameters, int, height, 10);
-        MEMBER(CreateRectParameters, ObjectTypeDesc, objectType, StructureDesc());
+        MEMBER(CreateRectParameters, ObjectTypeDesc, objectType, SolidDesc());
         MEMBER(CreateRectParameters, float, cellDistance, 1.0f);
         MEMBER(CreateRectParameters, bool, connectObjects, true);
         MEMBER(CreateRectParameters, float, stiffness, 1.0f);
@@ -28,7 +28,7 @@ public:
     struct CreateHexParameters
     {
         MEMBER(CreateHexParameters, int, layers, 10);
-        MEMBER(CreateHexParameters, ObjectTypeDesc, objectType, StructureDesc());
+        MEMBER(CreateHexParameters, ObjectTypeDesc, objectType, SolidDesc());
         MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
         MEMBER(CreateHexParameters, bool, connectObjects, true);
         MEMBER(CreateHexParameters, float, stiffness, 1.0f);
@@ -41,7 +41,7 @@ public:
 
     struct CreateCircleParameters
     {
-        MEMBER(CreateCircleParameters, ObjectTypeDesc, type, StructureDesc());
+        MEMBER(CreateCircleParameters, ObjectTypeDesc, type, SolidDesc());
         MEMBER(CreateCircleParameters, float, radius, 3.0f);
         MEMBER(CreateCircleParameters, float, cellDistance, 1.0f);
         MEMBER(CreateCircleParameters, bool, connectObjects, true);

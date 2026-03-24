@@ -45,10 +45,10 @@ TEST_F(DescEditServiceTests, reconnectObjects_noCrossingConnections)
 {
     // Arrange: 4 objects in a square where diagonals would cross
     auto desc = Desc().objects({
-        ObjectDesc().pos({0.0f, 0.0f}).type(StructureDesc()),
-        ObjectDesc().pos({1.0f, 0.0f}).type(StructureDesc()),
-        ObjectDesc().pos({0.0f, 1.0f}).type(StructureDesc()),
-        ObjectDesc().pos({1.0f, 1.0f}).type(StructureDesc()),
+        ObjectDesc().pos({0.0f, 0.0f}).type(SolidDesc()),
+        ObjectDesc().pos({1.0f, 0.0f}).type(SolidDesc()),
+        ObjectDesc().pos({0.0f, 1.0f}).type(SolidDesc()),
+        ObjectDesc().pos({1.0f, 1.0f}).type(SolidDesc()),
     });
 
     // Act: reconnect with distance that includes diagonals (sqrt(2) ~ 1.414)
@@ -62,15 +62,15 @@ TEST_F(DescEditServiceTests, reconnectObjects_noCrossingConnections_largerGrid)
 {
     // Arrange: 3x3 grid of objects
     auto desc = Desc().objects({
-        ObjectDesc().pos({0.0f, 0.0f}).type(StructureDesc()),
-        ObjectDesc().pos({1.0f, 0.0f}).type(StructureDesc()),
-        ObjectDesc().pos({2.0f, 0.0f}).type(StructureDesc()),
-        ObjectDesc().pos({0.0f, 1.0f}).type(StructureDesc()),
-        ObjectDesc().pos({1.0f, 1.0f}).type(StructureDesc()),
-        ObjectDesc().pos({2.0f, 1.0f}).type(StructureDesc()),
-        ObjectDesc().pos({0.0f, 2.0f}).type(StructureDesc()),
-        ObjectDesc().pos({1.0f, 2.0f}).type(StructureDesc()),
-        ObjectDesc().pos({2.0f, 2.0f}).type(StructureDesc()),
+        ObjectDesc().pos({0.0f, 0.0f}).type(SolidDesc()),
+        ObjectDesc().pos({1.0f, 0.0f}).type(SolidDesc()),
+        ObjectDesc().pos({2.0f, 0.0f}).type(SolidDesc()),
+        ObjectDesc().pos({0.0f, 1.0f}).type(SolidDesc()),
+        ObjectDesc().pos({1.0f, 1.0f}).type(SolidDesc()),
+        ObjectDesc().pos({2.0f, 1.0f}).type(SolidDesc()),
+        ObjectDesc().pos({0.0f, 2.0f}).type(SolidDesc()),
+        ObjectDesc().pos({1.0f, 2.0f}).type(SolidDesc()),
+        ObjectDesc().pos({2.0f, 2.0f}).type(SolidDesc()),
     });
 
     // Act: reconnect with distance that includes diagonals
@@ -84,10 +84,10 @@ TEST_F(DescEditServiceTests, reconnectObjects_adjacentConnectionsStillCreated)
 {
     // Arrange: 4 objects in a square
     auto desc = Desc().objects({
-        ObjectDesc().pos({0.0f, 0.0f}).type(StructureDesc()),
-        ObjectDesc().pos({1.0f, 0.0f}).type(StructureDesc()),
-        ObjectDesc().pos({0.0f, 1.0f}).type(StructureDesc()),
-        ObjectDesc().pos({1.0f, 1.0f}).type(StructureDesc()),
+        ObjectDesc().pos({0.0f, 0.0f}).type(SolidDesc()),
+        ObjectDesc().pos({1.0f, 0.0f}).type(SolidDesc()),
+        ObjectDesc().pos({0.0f, 1.0f}).type(SolidDesc()),
+        ObjectDesc().pos({1.0f, 1.0f}).type(SolidDesc()),
     });
 
     // Act: reconnect with distance that only includes adjacent (not diagonals)

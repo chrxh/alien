@@ -26,8 +26,8 @@ public:
 
     ObjectTypeDesc getObjectTypeDesc(ObjectType objectType)
     {
-        if (objectType == ObjectType_Structure) {
-            return StructureDesc();
+        if (objectType == ObjectType_Solid) {
+            return SolidDesc();
         } else if (objectType == ObjectType_Fluid) {
             return FluidDesc();
         } else if (objectType == ObjectType_FreeCell) {
@@ -154,7 +154,7 @@ TEST_P(CellStateTransitionTests_AllStates, structure_cell)
 
     auto data = Desc()
                     .addObjects({
-                        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(StructureDesc()),
+                        ObjectDesc().id(1).pos({10.0f, 10.0f}).type(SolidDesc()),
                     })
                     .addCreature({
                         ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().cellState(cellState)),

@@ -39,8 +39,8 @@ TEST_F(ObjectConnectionTests, decay)
 TEST_F(ObjectConnectionTests, addFirstConnection)
 {
     auto data = Desc().objects({
-        ObjectDesc().id(1).pos({0, 0}).type(StructureDesc()),
-        ObjectDesc().id(2).pos({1, 0}).type(StructureDesc()),
+        ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -64,9 +64,9 @@ TEST_F(ObjectConnectionTests, addFirstConnection)
 TEST_F(ObjectConnectionTests, addSecondConnection)
 {
     auto data = Desc().objects({
-        ObjectDesc().id(1).pos({0, 0}).type(StructureDesc()),
-        ObjectDesc().id(2).pos({1, 0}).type(StructureDesc()),
-        ObjectDesc().id(3).pos({0, 1}).type(StructureDesc()),
+        ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
+        ObjectDesc().id(3).pos({0, 1}).type(SolidDesc()),
     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
@@ -90,10 +90,10 @@ TEST_F(ObjectConnectionTests, addSecondConnection)
 TEST_F(ObjectConnectionTests, addThirdConnection1)
 {
     auto data = Desc().objects({
-        ObjectDesc().id(1).pos({0, 0}).type(StructureDesc()),
-        ObjectDesc().id(2).pos({1, 0}).type(StructureDesc()),
-        ObjectDesc().id(3).pos({0, 1}).type(StructureDesc()),
-        ObjectDesc().id(4).pos({0, -1}).type(StructureDesc()),
+        ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
+        ObjectDesc().id(3).pos({0, 1}).type(SolidDesc()),
+        ObjectDesc().id(4).pos({0, -1}).type(SolidDesc()),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -123,10 +123,10 @@ TEST_F(ObjectConnectionTests, addThirdConnection1)
 TEST_F(ObjectConnectionTests, addThirdConnection2)
 {
     auto data = Desc().objects({
-        ObjectDesc().id(1).pos({0, 0}).type(StructureDesc()),
-        ObjectDesc().id(2).pos({1, 0}).type(StructureDesc()),
-        ObjectDesc().id(3).pos({-1, 0}).type(StructureDesc()),
-        ObjectDesc().id(4).pos({0, 1}).type(StructureDesc()),
+        ObjectDesc().id(1).pos({0, 0}).type(SolidDesc()),
+        ObjectDesc().id(2).pos({1, 0}).type(SolidDesc()),
+        ObjectDesc().id(3).pos({-1, 0}).type(SolidDesc()),
+        ObjectDesc().id(4).pos({0, 1}).type(SolidDesc()),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);

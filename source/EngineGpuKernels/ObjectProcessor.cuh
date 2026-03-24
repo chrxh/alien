@@ -85,7 +85,7 @@ __inline__ __device__ void ObjectProcessor::fillDensityMap(SimulationData& data)
         auto object = data.entities.objects.at(index);
         if (object->type == ObjectType_FreeCell) {
             data.preprocessedSimulationData.densityMap.addFreeCell(object);
-        } else if (object->type == ObjectType_Structure) {
+        } else if (object->type == ObjectType_Solid) {
             data.preprocessedSimulationData.densityMap.addStructureObject(object);
         }
     }
@@ -646,7 +646,7 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
         if (object->fixed) {
             continue;
         }
-        if (object->type == ObjectType_Structure || object->type == ObjectType_Fluid) {
+        if (object->type == ObjectType_Solid || object->type == ObjectType_Fluid) {
             continue;
         }
         if (data.primaryNumberGen.random() < cudaSimulationParameters.radiationProbability) {
