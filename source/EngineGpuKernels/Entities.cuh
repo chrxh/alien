@@ -506,7 +506,7 @@ struct Cell
     uint16_t geneIndex;
 
     // Cell type data
-    NeuralNet* neuralNetwork;  // Not used for solid and base cells
+    NeuralNet* neuralNetwork;
     CellType cellType;
     CellTypeData cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data

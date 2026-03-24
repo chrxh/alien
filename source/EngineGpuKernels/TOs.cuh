@@ -432,7 +432,7 @@ struct CellTO
     uint16_t geneIndex;
 
     // Cell type data
-    uint64_t neuralNetworkDataIndex;  // May be invalid (not used for solid and base cells)
+    uint64_t neuralNetworkDataIndex;
     CellType cellType;
     CellTypeDataTO cellTypeData;
     bool constructorAvailable;  // If true, constructor holds valid data
