@@ -71,7 +71,7 @@ namespace
         return nx0 + v * (nx1 - nx0);
     }
 
-    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& index, uint64_t timestep)
+    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, float const& mass, int const& index, uint64_t timestep)
     {
         switch (cudaSimulationParameters.layerForceFieldType.layerValues[index].value) {
         case ForceField_Radial: {
@@ -118,7 +118,7 @@ namespace
             auto strength = cudaSimulationParameters.layerPerlinNoiseForceFieldStrength.layerValues[index];
             auto force = float2{rightValue - baseValue, downValue - baseValue} * strength;
             Math::rotateQuarterClockwise(force);
-            return force;
+            return force / mass;
         }
         default:
             return {0, 0};
@@ -131,11 +131,11 @@ __global__ void cudaApplyForceFields(SimulationData data)
 {
     float2 accelerations[MAX_LAYERS];
 
-    auto calcResultingAcceleration = [&](float2 const& pos) {
+    auto calcResultingAcceleration = [&](float2 const& pos, float const& mass) {
         auto timestep = *data.timestep;
         for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
             if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
-                accelerations[i] = calcAcceleration(data.objectMap, pos, i, timestep);
+                accelerations[i] = calcAcceleration(data.objectMap, pos, mass, i, timestep);
             } else {
                 accelerations[i] = float2{0, 0};
             }
@@ -151,7 +151,7 @@ __global__ void cudaApplyForceFields(SimulationData data)
             if (object->fixed) {
                 continue;
             }
-            object->vel += calcResultingAcceleration(object->pos);
+            object->vel += calcResultingAcceleration(object->pos, object->getMassForSPH());
         }
     }
     {
@@ -159,7 +159,7 @@ __global__ void cudaApplyForceFields(SimulationData data)
         auto partition = calcSystemThreadPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& particle = particles.at(index);
-            particle->vel += calcResultingAcceleration(particle->pos);
+            particle->vel += calcResultingAcceleration(particle->pos, 1.0f);
         }
     }
 }
