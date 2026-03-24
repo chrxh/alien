@@ -137,7 +137,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         if (tryConstructCell(data, statistics, object, constructionData)) {
             object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
-            ++constructionData.creature->numObjects;
+            ++constructionData.creature->numCells;
             if (!constructionData.isLastNode) {
                 ++constructor.currentNodeIndex;
             } else {
@@ -201,7 +201,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     EntityFactory factory;
     factory.init(&data);
     auto result = factory.cloneCreature(object->typeData.cell.creature);
-    result->numObjects = 0;
+    result->numCells = 0;
     return result;
 }
 

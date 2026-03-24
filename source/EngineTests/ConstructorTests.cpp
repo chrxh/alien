@@ -96,7 +96,7 @@ TEST_F(ConstructorTests, emptyGenome)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(1, creature._numObjects);
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -130,7 +130,7 @@ TEST_F(ConstructorTests, emptyGene)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(1, creature._numObjects);
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -164,7 +164,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(1, creature._numObjects);
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -198,7 +198,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(1, creature._numObjects);
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -229,7 +229,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(1, creature._numObjects);
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -266,7 +266,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(2, creature._numObjects);
+    ASSERT_EQ(2, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -303,7 +303,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(3, creature._numObjects);
+    ASSERT_EQ(3, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -340,7 +340,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(2, creature._numObjects);
+    ASSERT_EQ(2, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -374,7 +374,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, actualData.getObjectsForCreature(hostCreature._id).size());
-    ASSERT_EQ(2, hostCreature._numObjects);
+    ASSERT_EQ(2, hostCreature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -422,11 +422,11 @@ TEST_F(ConstructorTests, DISABLED_insufficientSpace)
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
-    ASSERT_EQ(1, hostCreature._numObjects);
+    ASSERT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getCreatureRef(1);
     ASSERT_EQ(1, actualData.getObjectsForCreature(newCreature._id).size());
-    ASSERT_EQ(1, newCreature._numObjects);
+    ASSERT_EQ(1, newCreature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
@@ -505,11 +505,11 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
-    EXPECT_EQ(1, hostCreature._numObjects);
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(newCreature._id).size());
-    EXPECT_EQ(1, newCreature._numObjects);
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostObject = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
@@ -551,11 +551,11 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
-    EXPECT_EQ(1, hostCreature._numObjects);
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(newCreature._id).size());
-    EXPECT_EQ(1, newCreature._numObjects);
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostObject = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
@@ -593,11 +593,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
-    EXPECT_EQ(1, hostCreature._numObjects);
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(newCreature._id).size());
-    EXPECT_EQ(1, newCreature._numObjects);
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostObject = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
@@ -634,11 +634,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
-    EXPECT_EQ(1, hostCreature._numObjects);
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(newCreature._id).size());
-    EXPECT_EQ(1, newCreature._numObjects);
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostObject = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();
@@ -784,7 +784,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, actualData.getObjectsForCreature(hostCreature._id).size());
-    ASSERT_EQ(2, hostCreature._numObjects);
+    ASSERT_EQ(2, hostCreature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
     auto newObject = actualData.getOtherObjectRef(0);
@@ -3206,11 +3206,11 @@ TEST_F(ConstructorTests, constructWithReservedEnergy)
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
-    EXPECT_EQ(1, hostCreature._numObjects);
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(newCreature._id).size());
-    EXPECT_EQ(1, newCreature._numObjects);
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostObject = actualData.getObjectsForCreature(hostCreature._id).front();
     auto newObject = actualData.getObjectsForCreature(newCreature._id).front();

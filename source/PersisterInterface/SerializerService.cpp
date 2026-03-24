@@ -1592,7 +1592,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
-        loadSave(task, auxiliaries, Id_Creature_NumCells, data._numObjects, defaultObject._numObjects);
+        loadSave(task, auxiliaries, Id_Creature_NumCells, data._numCells, defaultObject._numCells);
         loadSave(task, auxiliaries, Id_Creature_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
         loadSave(task, auxiliaries, Id_Creature_HaveMutationsApplied, data._mutationState, defaultObject._mutationState);

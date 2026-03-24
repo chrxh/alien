@@ -492,3 +492,98 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         EXPECT_TRUE(startPos_projected + NEAR_ZERO < endPos_projected);
     }
 }
+
+class CreatureTests_NumCells : public IntegrationTestFramework
+{
+public:
+    CreatureTests_NumCells()
+        : IntegrationTestFramework({1000, 1000})
+    {
+        _parameters.innerFriction.value = 0;
+        _parameters.friction.baseValue = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.cellDeathProbability.baseValue[i] = 1.0f;
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
+
+    ~CreatureTests_NumCells() = default;
+};
+
+TEST_F(CreatureTests_NumCells, numCellsUpdatedWhenOneCellDies)
+{
+    Desc data;
+    data.addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 2)),
+            ObjectDesc().id(3).pos({102.0f, 100.0f}),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc());
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto creature = actualData.getCreatureRef(0);
+    auto actualObjects = actualData.getObjectsForCreature(creature._id);
+
+    EXPECT_EQ(2, toInt(actualObjects.size()));
+    EXPECT_EQ(2, creature._numCells);
+}
+
+TEST_F(CreatureTests_NumCells, numCellsUpdatedWhenMultipleCellsDie)
+{
+    Desc data;
+    data.addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 2)),
+            ObjectDesc().id(3).pos({100.0f, 101.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 1)),
+            ObjectDesc().id(4).pos({99.0f, 100.0f}),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc());
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+    data.addConnection(1, 4);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto creature = actualData.getCreatureRef(0);
+    auto actualObjects = actualData.getObjectsForCreature(creature._id);
+
+    EXPECT_EQ(2, toInt(actualObjects.size()));
+    EXPECT_EQ(2, creature._numCells);
+}
+
+TEST_F(CreatureTests_NumCells, numCellsUnchangedWhenNoCellDies)
+{
+    Desc data;
+    data.addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true)),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+            ObjectDesc().id(3).pos({102.0f, 100.0f}),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc());
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto creature = actualData.getCreatureRef(0);
+    auto actualObjects = actualData.getObjectsForCreature(creature._id);
+
+    EXPECT_EQ(3, toInt(actualObjects.size()));
+    EXPECT_EQ(3, creature._numCells);
+}

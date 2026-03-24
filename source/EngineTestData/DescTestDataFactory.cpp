@@ -189,7 +189,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                       });
 
     auto creature =
-        CreatureDesc().ancestorId(1001).generation(7).numObjects(25).headUpdateId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
+        CreatureDesc().ancestorId(1001).generation(7).numCells(25).headUpdateId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
 
     return {creature, genome};
 }

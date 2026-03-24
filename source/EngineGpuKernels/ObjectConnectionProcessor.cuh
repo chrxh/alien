@@ -140,8 +140,8 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteObject(Simul
     if (data.structuralOperations.tryAddEntry(operation) != -1) {
         auto object = data.entities.objects.at(objectIndex);
         if (object->type == ObjectType_Cell) {
-            if (object->typeData.cell.creature->numObjects > 0) {
-                --object->typeData.cell.creature->numObjects;
+            if (object->typeData.cell.creature->numCells > 0) {
+                --object->typeData.cell.creature->numCells;
             }
         }
     }

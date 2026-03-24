@@ -542,7 +542,7 @@ Desc& Desc::addCreature(std::vector<ObjectDesc> const& objects, CreatureDesc con
     // Add creature with genomeId and numCells set
     auto newCreature = creature;
     newCreature._genomeId = genome._id;
-    newCreature._numObjects = toInt(objects.size());
+    newCreature._numCells = toInt(objects.size());
     _creatures.emplace_back(newCreature);
 
     // Add cells with creatureId set

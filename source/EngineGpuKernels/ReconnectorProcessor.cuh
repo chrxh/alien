@@ -94,13 +94,13 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
                 // Filter by minimum number of cells in creature
                 if (reconnector.modeData.reconnectCreature.minNumCells > 0
-                    && otherObject->typeData.cell.creature->numObjects < reconnector.modeData.reconnectCreature.minNumCells) {
+                    && otherObject->typeData.cell.creature->numCells < reconnector.modeData.reconnectCreature.minNumCells) {
                     return;
                 }
 
                 // Filter by maximum number of cells in creature
                 if (reconnector.modeData.reconnectCreature.maxNumCells > 0
-                    && otherObject->typeData.cell.creature->numObjects > reconnector.modeData.reconnectCreature.maxNumCells) {
+                    && otherObject->typeData.cell.creature->numCells > reconnector.modeData.reconnectCreature.maxNumCells) {
                     return;
                 }
 

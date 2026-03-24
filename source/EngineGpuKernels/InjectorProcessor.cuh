@@ -67,7 +67,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             EntityFactory factory;
             factory.init(&data);
             auto cloneCreature = factory.cloneCreature(object->typeData.cell.creature);
-            cloneCreature->numObjects = 1;
+            cloneCreature->numCells = 1;
             injectedCell->typeData.cell.creature = cloneCreature;
             injectedCell->typeData.cell.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
             injectedCell->typeData.cell.constructor.currentNodeIndex = 0;
