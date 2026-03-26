@@ -58,6 +58,8 @@ class _RectangleGenerator : public _ShapeGenerator
 public:
     ShapeGeneratorResult generateNextConstructionData() override
     {
+        auto edgeLength = (_edgePos % 2 == 0) ? _edgePos / 2 : 0;
+
         ShapeGeneratorResult result;
         if (_edgePos == 0) {
             result.angle = 0.0f;
@@ -65,12 +67,16 @@ public:
         } else if (_edgePos == 1) {
             result.angle = 90.0f;
             result.numAdditionalConnections = 0;
+        } else if (_edgePos % 2 == 1) {
+            bool goingDown = (_edgePos / 2) % 2 == 1;
+            result.angle = goingDown ? -90.0f : 90.0f;
+            result.numAdditionalConnections = 0;
         } else {
-            result.angle = _nodePos == 0 ? 90.0f : 0.0f;
-            result.numAdditionalConnections = _nodePos == 0 ? 0 : 1;
+            bool goingDown = (_edgePos / 2) % 2 == 1;
+            result.angle = _nodePos == 0 ? (goingDown ? 90.0f : -90.0f) : 0.0f;
+            result.numAdditionalConnections = (_edgePos >= 4 && _nodePos < edgeLength - 1) ? 1 : 0;
         }
 
-        auto edgeLength = _edgePos / 2;
         if (++_nodePos > edgeLength) {
             _nodePos = 0;
             ++_edgePos;

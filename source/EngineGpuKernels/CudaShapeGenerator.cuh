@@ -149,7 +149,7 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
 
 __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForRectangle()
 {
-    auto edgeLength = _edgePos / 2;
+    auto edgeLength = (_edgePos % 2 == 0) ? _edgePos / 2 : 0;
 
     ShapeGeneratorResult result;
     if (_edgePos == 0) {
@@ -162,19 +162,39 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
         result.numAdditionalConnections = 0;
         result.requiredNodeId1 = -1;
         result.requiredNodeId2 = -1;
-    } else {
-        result.angle = _nodePos == 0 ? 90.0f : 0.0f;
-        result.numAdditionalConnections = _nodePos == 0 ? 0 : 1;
-        result.requiredNodeId1 = _connectedNodePos1;
+    } else if (_edgePos % 2 == 1) {
+        bool goingDown = (_edgePos / 2) % 2 == 1;
+        result.angle = goingDown ? -90.0f : 90.0f;
+        result.numAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
         result.requiredNodeId2 = -1;
+    } else {
+        bool goingDown = (_edgePos / 2) % 2 == 1;
+        result.angle = _nodePos == 0 ? (goingDown ? 90.0f : -90.0f) : 0.0f;
+
+        if (_edgePos >= 4 && _nodePos < edgeLength - 1) {
+            result.numAdditionalConnections = 1;
+            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId2 = -1;
+        } else {
+            result.numAdditionalConnections = 0;
+            result.requiredNodeId1 = -1;
+            result.requiredNodeId2 = -1;
+        }
     }
 
-    if (_edgePos >= 4 && _nodePos >= 1 && _nodePos < edgeLength) {
-        ++_connectedNodePos1;
+    if (_edgePos % 2 == 0 && _edgePos >= 4 && _nodePos < edgeLength - 1) {
+        --_connectedNodePos1;
     }
+
     if (++_nodePos > edgeLength) {
         _nodePos = 0;
         ++_edgePos;
+
+        if (_edgePos % 2 == 0 && _edgePos >= 4) {
+            auto prevColStart = (_edgePos - 2) * (_edgePos + 4) / 8;
+            _connectedNodePos1 = prevColStart + _edgePos / 2 - 2;
+        }
     }
     return result;
 }
