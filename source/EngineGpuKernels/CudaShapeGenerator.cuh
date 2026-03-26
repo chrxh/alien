@@ -149,60 +149,53 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
 
 __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForRectangle()
 {
+    // Builds a growing square (quadrat): each ring k adds an L-shaped border
+    // extending the (k-1)x(k-1) square to k×k.
+    // Even rings (Type B): right 1, up k-1, left k-1.
+    // Odd rings  (Type A): up 1, right k-1, down k-1.
+    // _edgePos = k-1 (ring counter), _nodePos = position within ring.
+    // _connectedNodePos1 = absolute index of the next cross-connection target.
+    //   Reset to _edgePos^2 - 2 at the start of each ring k >= 3.
+    //   Decremented after each cross-connection except at the "pivot" (p == k-2).
     ShapeGeneratorResult result;
-    if (_nodePos == 0) {
+    result.requiredNodeId2 = -1;
+    auto k = _edgePos + 1;
+    auto p = _nodePos;
+
+    if (_edgePos == 0) {
         result.angle = 0.0f;
         result.numAdditionalConnections = 0;
         result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
-    } else if (_nodePos == 1) {
-        result.angle = 90.0f;
-        result.numAdditionalConnections = 0;
-        result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
-    } else if (_nodePos == 2) {
-        result.angle = 90.0f;
-        result.numAdditionalConnections = 0;
-        result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
-    } else if (_nodePos == 3) {
-        result.angle = -90.0f;
-        result.numAdditionalConnections = 1;
-        result.requiredNodeId1 = 0;
-        result.requiredNodeId2 = -1;
-    } else if (_nodePos == 4) {
-        result.angle = -90.0f;
-        result.numAdditionalConnections = 0;
-        result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
-    } else if (_nodePos == 5) {
-        result.angle = 0.0f;
-        result.numAdditionalConnections = 1;
-        result.requiredNodeId1 = 2;
-        result.requiredNodeId2 = -1;
     } else {
-        auto phase = (_nodePos - 6) / 3 + 1;
-        auto posInPhase = (_nodePos - 6) % 3;
-        auto isOddPhase = (phase % 2) == 1;
-        if (posInPhase == 0) {
-            result.angle = isOddPhase ? -90.0f : 90.0f;
+        auto isTypeB = (k % 2 == 0);
+        if (p == 0 || p == k - 1) {
+            result.angle = isTypeB ? 90.0f : -90.0f;
+        } else if (p == 2 * k - 2) {
+            result.angle = isTypeB ? -90.0f : 90.0f;
+        } else {
+            result.angle = 0.0f;
+        }
+
+        if (p == 0 || p == k - 1) {
             result.numAdditionalConnections = 0;
             result.requiredNodeId1 = -1;
-            result.requiredNodeId2 = -1;
-        } else if (posInPhase == 1) {
-            result.angle = 0.0f;
-            result.numAdditionalConnections = 1;
-            result.requiredNodeId1 = _connectedNodePos1 + 2;
-            result.requiredNodeId2 = -1;
         } else {
-            result.angle = isOddPhase ? 90.0f : -90.0f;
             result.numAdditionalConnections = 1;
-            result.requiredNodeId1 = _connectedNodePos1 + 1;
-            result.requiredNodeId2 = -1;
-            _connectedNodePos1 = _nodePos - 3;
+            result.requiredNodeId1 = _connectedNodePos1;
+            if (p != k - 2) {
+                --_connectedNodePos1;
+            }
         }
     }
-    ++_nodePos;
+
+    if (++_nodePos > 2 * k - 2) {
+        _nodePos = 0;
+        ++_edgePos;
+        if (_edgePos >= 2) {
+            // First cross-connection target for ring k = S_k - 2 = (k-1)^2 - 2 = _edgePos^2 - 2
+            _connectedNodePos1 = _edgePos * _edgePos - 2;
+        }
+    }
     return result;
 }
 

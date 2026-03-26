@@ -56,43 +56,35 @@ private:
 class _RectangleGenerator : public _ShapeGenerator
 {
 public:
+    // Builds a growing square (quadrat): each ring k adds an L-shaped border
+    // extending the (k-1)x(k-1) square to k×k.
+    // Even rings (Type B): go right 1 step, up k-1 steps, left k-1 steps.
+    // Odd rings  (Type A): go up 1 step, right k-1 steps, down k-1 steps.
     ShapeGeneratorResult generateNextConstructionData() override
     {
         ShapeGeneratorResult result;
-        if (_nodePos == 0) {
+        auto k = _edgePos + 1;
+        auto p = _nodePos;
+
+        if (_edgePos == 0) {
             result.angle = 0.0f;
             result.numAdditionalConnections = 0;
-        } else if (_nodePos == 1) {
-            result.angle = 90.0f;
-            result.numAdditionalConnections = 0;
-        } else if (_nodePos == 2) {
-            result.angle = 90.0f;
-            result.numAdditionalConnections = 0;
-        } else if (_nodePos == 3) {
-            result.angle = -90.0f;
-            result.numAdditionalConnections = 1;
-        } else if (_nodePos == 4) {
-            result.angle = -90.0f;
-            result.numAdditionalConnections = 0;
-        } else if (_nodePos == 5) {
-            result.angle = 0.0f;
-            result.numAdditionalConnections = 1;
         } else {
-            auto phase = (_nodePos - 6) / 3 + 1;
-            auto posInPhase = (_nodePos - 6) % 3;
-            auto isOddPhase = (phase % 2) == 1;
-            if (posInPhase == 0) {
-                result.angle = isOddPhase ? -90.0f : 90.0f;
-                result.numAdditionalConnections = 0;
-            } else if (posInPhase == 1) {
-                result.angle = 0.0f;
-                result.numAdditionalConnections = 1;
+            auto isTypeB = (k % 2 == 0);
+            if (p == 0 || p == k - 1) {
+                result.angle = isTypeB ? 90.0f : -90.0f;
+            } else if (p == 2 * k - 2) {
+                result.angle = isTypeB ? -90.0f : 90.0f;
             } else {
-                result.angle = isOddPhase ? 90.0f : -90.0f;
-                result.numAdditionalConnections = 1;
+                result.angle = 0.0f;
             }
+            result.numAdditionalConnections = (p == 0 || p == k - 1) ? 0 : 1;
         }
-        ++_nodePos;
+
+        if (++_nodePos > 2 * k - 2) {
+            _nodePos = 0;
+            ++_edgePos;
+        }
         return result;
     }
 
@@ -102,6 +94,7 @@ public:
 
 private:
     int _nodePos = 0;
+    int _edgePos = 0;
 };
 
 class _HexagonGenerator : public _ShapeGenerator
