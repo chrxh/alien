@@ -59,22 +59,40 @@ public:
     ShapeGeneratorResult generateNextConstructionData() override
     {
         ShapeGeneratorResult result;
-        if (_edgePos == 0) {
+        if (_nodePos == 0) {
             result.angle = 0.0f;
             result.numAdditionalConnections = 0;
-        } else if (_edgePos == 1) {
+        } else if (_nodePos == 1) {
             result.angle = 90.0f;
             result.numAdditionalConnections = 0;
+        } else if (_nodePos == 2) {
+            result.angle = 90.0f;
+            result.numAdditionalConnections = 0;
+        } else if (_nodePos == 3) {
+            result.angle = -90.0f;
+            result.numAdditionalConnections = 1;
+        } else if (_nodePos == 4) {
+            result.angle = -90.0f;
+            result.numAdditionalConnections = 0;
+        } else if (_nodePos == 5) {
+            result.angle = 0.0f;
+            result.numAdditionalConnections = 1;
         } else {
-            result.angle = _nodePos == 0 ? 90.0f : 0.0f;
-            result.numAdditionalConnections = _nodePos == 0 ? 0 : 1;
+            auto phase = (_nodePos - 6) / 3 + 1;
+            auto posInPhase = (_nodePos - 6) % 3;
+            auto isOddPhase = (phase % 2) == 1;
+            if (posInPhase == 0) {
+                result.angle = isOddPhase ? -90.0f : 90.0f;
+                result.numAdditionalConnections = 0;
+            } else if (posInPhase == 1) {
+                result.angle = 0.0f;
+                result.numAdditionalConnections = 1;
+            } else {
+                result.angle = isOddPhase ? 90.0f : -90.0f;
+                result.numAdditionalConnections = 1;
+            }
         }
-
-        auto edgeLength = _edgePos / 2;
-        if (++_nodePos > edgeLength) {
-            _nodePos = 0;
-            ++_edgePos;
-        }
+        ++_nodePos;
         return result;
     }
 
@@ -84,7 +102,6 @@ public:
 
 private:
     int _nodePos = 0;
-    int _edgePos = 0;
 };
 
 class _HexagonGenerator : public _ShapeGenerator

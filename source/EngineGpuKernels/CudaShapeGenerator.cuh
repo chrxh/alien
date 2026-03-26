@@ -149,33 +149,60 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
 
 __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForRectangle()
 {
-    auto edgeLength = _edgePos / 2;
-
     ShapeGeneratorResult result;
-    if (_edgePos == 0) {
+    if (_nodePos == 0) {
         result.angle = 0.0f;
         result.numAdditionalConnections = 0;
         result.requiredNodeId1 = -1;
         result.requiredNodeId2 = -1;
-    } else if (_edgePos == 1) {
+    } else if (_nodePos == 1) {
         result.angle = 90.0f;
         result.numAdditionalConnections = 0;
         result.requiredNodeId1 = -1;
         result.requiredNodeId2 = -1;
-    } else {
-        result.angle = _nodePos == 0 ? 90.0f : 0.0f;
-        result.numAdditionalConnections = _nodePos == 0 ? 0 : 1;
-        result.requiredNodeId1 = _connectedNodePos1;
+    } else if (_nodePos == 2) {
+        result.angle = 90.0f;
+        result.numAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
         result.requiredNodeId2 = -1;
+    } else if (_nodePos == 3) {
+        result.angle = -90.0f;
+        result.numAdditionalConnections = 1;
+        result.requiredNodeId1 = 0;
+        result.requiredNodeId2 = -1;
+    } else if (_nodePos == 4) {
+        result.angle = -90.0f;
+        result.numAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
+        result.requiredNodeId2 = -1;
+    } else if (_nodePos == 5) {
+        result.angle = 0.0f;
+        result.numAdditionalConnections = 1;
+        result.requiredNodeId1 = 2;
+        result.requiredNodeId2 = -1;
+    } else {
+        auto phase = (_nodePos - 6) / 3 + 1;
+        auto posInPhase = (_nodePos - 6) % 3;
+        auto isOddPhase = (phase % 2) == 1;
+        if (posInPhase == 0) {
+            result.angle = isOddPhase ? -90.0f : 90.0f;
+            result.numAdditionalConnections = 0;
+            result.requiredNodeId1 = -1;
+            result.requiredNodeId2 = -1;
+        } else if (posInPhase == 1) {
+            result.angle = 0.0f;
+            result.numAdditionalConnections = 1;
+            result.requiredNodeId1 = _connectedNodePos1 + 2;
+            result.requiredNodeId2 = -1;
+        } else {
+            result.angle = isOddPhase ? 90.0f : -90.0f;
+            result.numAdditionalConnections = 1;
+            result.requiredNodeId1 = _connectedNodePos1 + 1;
+            result.requiredNodeId2 = -1;
+            _connectedNodePos1 = _nodePos - 3;
+        }
     }
-
-    if (_edgePos >= 4 && _nodePos >= 1 && _nodePos < edgeLength) {
-        ++_connectedNodePos1;
-    }
-    if (++_nodePos > edgeLength) {
-        _nodePos = 0;
-        ++_edgePos;
-    }
+    ++_nodePos;
     return result;
 }
 
