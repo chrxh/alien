@@ -149,32 +149,52 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
 
 __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForRectangle()
 {
-    auto edgeLength = _edgePos / 2;
-
+    // Builds a growing square (quadrat): each ring k adds an L-shaped border
+    // extending the (k-1)x(k-1) square to k×k.
+    // Even rings (Type B): right 1, up k-1, left k-1.
+    // Odd rings  (Type A): up 1, right k-1, down k-1.
+    // _edgePos = k-1 (ring counter), _nodePos = position within ring.
+    // _connectedNodePos1 = absolute index of the next cross-connection target.
+    //   Reset to _edgePos^2 - 2 at the start of each ring k >= 3.
+    //   Decremented after each cross-connection except at the "pivot" (p == k-2).
     ShapeGeneratorResult result;
+    result.requiredNodeId2 = -1;
+    auto k = _edgePos + 1;
+    auto p = _nodePos;
+
     if (_edgePos == 0) {
         result.angle = 0.0f;
         result.numAdditionalConnections = 0;
         result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
-    } else if (_edgePos == 1) {
-        result.angle = 90.0f;
-        result.numAdditionalConnections = 0;
-        result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
     } else {
-        result.angle = _nodePos == 0 ? 90.0f : 0.0f;
-        result.numAdditionalConnections = _nodePos == 0 ? 0 : 1;
-        result.requiredNodeId1 = _connectedNodePos1;
-        result.requiredNodeId2 = -1;
+        auto isTypeB = (k % 2 == 0);
+        if (p == 0 || p == k - 1) {
+            result.angle = isTypeB ? 90.0f : -90.0f;
+        } else if (p == 2 * k - 2) {
+            result.angle = isTypeB ? -90.0f : 90.0f;
+        } else {
+            result.angle = 0.0f;
+        }
+
+        if (p == 0 || p == k - 1) {
+            result.numAdditionalConnections = 0;
+            result.requiredNodeId1 = -1;
+        } else {
+            result.numAdditionalConnections = 1;
+            result.requiredNodeId1 = _connectedNodePos1;
+            if (p != k - 2) {
+                --_connectedNodePos1;
+            }
+        }
     }
 
-    if (_edgePos >= 4 && _nodePos >= 1 && _nodePos < edgeLength) {
-        ++_connectedNodePos1;
-    }
-    if (++_nodePos > edgeLength) {
+    if (++_nodePos > 2 * k - 2) {
         _nodePos = 0;
         ++_edgePos;
+        if (_edgePos >= 2) {
+            // First cross-connection target for ring k = S_k - 2 = (k-1)^2 - 2 = _edgePos^2 - 2
+            _connectedNodePos1 = _edgePos * _edgePos - 2;
+        }
     }
     return result;
 }

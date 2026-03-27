@@ -56,22 +56,32 @@ private:
 class _RectangleGenerator : public _ShapeGenerator
 {
 public:
+    // Builds a growing square (quadrat): each ring k adds an L-shaped border
+    // extending the (k-1)x(k-1) square to k×k.
+    // Even rings (Type B): go right 1 step, up k-1 steps, left k-1 steps.
+    // Odd rings  (Type A): go up 1 step, right k-1 steps, down k-1 steps.
     ShapeGeneratorResult generateNextConstructionData() override
     {
         ShapeGeneratorResult result;
+        auto k = _edgePos + 1;
+        auto p = _nodePos;
+
         if (_edgePos == 0) {
             result.angle = 0.0f;
             result.numAdditionalConnections = 0;
-        } else if (_edgePos == 1) {
-            result.angle = 90.0f;
-            result.numAdditionalConnections = 0;
         } else {
-            result.angle = _nodePos == 0 ? 90.0f : 0.0f;
-            result.numAdditionalConnections = _nodePos == 0 ? 0 : 1;
+            auto isTypeB = (k % 2 == 0);
+            if (p == 0 || p == k - 1) {
+                result.angle = isTypeB ? 90.0f : -90.0f;
+            } else if (p == 2 * k - 2) {
+                result.angle = isTypeB ? -90.0f : 90.0f;
+            } else {
+                result.angle = 0.0f;
+            }
+            result.numAdditionalConnections = (p == 0 || p == k - 1) ? 0 : 1;
         }
 
-        auto edgeLength = _edgePos / 2;
-        if (++_nodePos > edgeLength) {
+        if (++_nodePos > 2 * k - 2) {
             _nodePos = 0;
             ++_edgePos;
         }
