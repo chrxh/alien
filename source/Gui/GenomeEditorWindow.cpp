@@ -287,8 +287,8 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
              .pos(pos)
              .stiffness(1.0f)
              .color(EditorModel::get().getDefaultColorCode())
-             .type(
-                 CellDesc().constructor(ConstructorDesc().provideEnergy(provideEnergy ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly).geneIndex(0)))},
+             .type(CellDesc().headCell(true).constructor(
+                 ConstructorDesc().provideEnergy(provideEnergy ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
