@@ -14,20 +14,20 @@ struct ShapeGeneratorResult
 class ShapeGenerator
 {
 public:
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionData(ConstructorShape shape);
-    HOST_DEVICE inline ConstructorAngleAlignment getConstructorAngleAlignment(ConstructorShape shape);
-    HOST_DEVICE inline float getPreferredFrontAngle(ConstructorShape shape);
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionData(ConstructorShape shape);
+    HOST_DEVICE ConstructorAngleAlignment getConstructorAngleAlignment(ConstructorShape shape);
+    HOST_DEVICE float getPreferredFrontAngle(ConstructorShape shape);
 
 private:
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForSegment();
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForTriangle();
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForRectangle();
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForHexagon();
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForLoop();
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForTube();
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForLolli();
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForSmallLolli();
-    HOST_DEVICE inline ShapeGeneratorResult generateNextConstructionDataForZigzag();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForSegment();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForTriangle();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForRectangle();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForHexagon();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForLoop();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForTube();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForLolli();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForSmallLolli();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForZigzag();
 
     int _nodePos = 0;
     int _edgePos = 0;
@@ -39,7 +39,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionData(ConstructorShape shape)
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionData(ConstructorShape shape)
 {
     switch (shape) {
     case ConstructorShape_Segment:
@@ -65,7 +65,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     }
 }
 
-HOST_DEVICE inline ConstructorAngleAlignment ShapeGenerator::getConstructorAngleAlignment(ConstructorShape shape)
+HOST_DEVICE ConstructorAngleAlignment ShapeGenerator::getConstructorAngleAlignment(ConstructorShape shape)
 {
     switch (shape) {
     case ConstructorShape_Custom:
@@ -91,7 +91,7 @@ HOST_DEVICE inline ConstructorAngleAlignment ShapeGenerator::getConstructorAngle
     }
 }
 
-HOST_DEVICE inline float ShapeGenerator::getPreferredFrontAngle(ConstructorShape shape)
+HOST_DEVICE float ShapeGenerator::getPreferredFrontAngle(ConstructorShape shape)
 {
     switch (shape) {
     case ConstructorShape_Segment:
@@ -117,7 +117,7 @@ HOST_DEVICE inline float ShapeGenerator::getPreferredFrontAngle(ConstructorShape
     }
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSegment()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSegment()
 {
     ShapeGeneratorResult result;
     result.angle = 0;
@@ -127,7 +127,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     return result;
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForTriangle()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForTriangle()
 {
     ShapeGeneratorResult result;
     auto edgeLength = _edgePos + 1 > 2 ? _edgePos + 1 : 2;
@@ -173,7 +173,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     return result;
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForRectangle()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForRectangle()
 {
     // Builds a growing square (quadrat): each ring k adds an L-shaped border
     // extending the (k-1)x(k-1) square to k×k.
@@ -225,7 +225,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     return result;
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForHexagon()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForHexagon()
 {
     ShapeGeneratorResult result;
 
@@ -268,7 +268,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     return result;
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForLoop()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForLoop()
 {
     ShapeGeneratorResult result;
 
@@ -309,7 +309,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     return result;
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForTube()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForTube()
 {
     ShapeGeneratorResult result;
     if (_nodePos % 6 == 0) {
@@ -377,7 +377,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     return result;
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForLolli()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForLolli()
 {
     ShapeGeneratorResult result;
     if (_edgePos < 12 || (_edgePos == 12 && _nodePos == 0)) {
@@ -400,7 +400,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     return result;
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSmallLolli()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSmallLolli()
 {
     ShapeGeneratorResult result;
     if (_edgePos < 6) {
@@ -423,7 +423,7 @@ HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstruction
     return result;
 }
 
-HOST_DEVICE inline ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForZigzag()
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForZigzag()
 {
     ShapeGeneratorResult result;
     if (_nodePos % 4 == 0) {

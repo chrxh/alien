@@ -1,11 +1,11 @@
 #pragma once
 
 #include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/ShapeGenerator.h>
 
 #include "CellProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "ConstructorHelper.cuh"
-#include <EngineInterface/ShapeGenerator.h>
 #include "Genome.cuh"
 #include "MuscleProcessor.cuh"
 #include "SimulationStatistics.cuh"
