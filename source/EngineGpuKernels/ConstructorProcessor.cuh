@@ -246,13 +246,6 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
         return lastConstructionCell->typeData.cell.creature;
     }
 
-    // Other branches already constructed => same creature
-    if (lastConstructionCell) {
-        if (lastConstructionCell->typeData.cell.branchIndex > 0) {
-            return object->typeData.cell.creature;
-        }
-    }
-
     // Nothing found => clone creature
     EntityFactory factory;
     factory.init(&data);
