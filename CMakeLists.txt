@@ -34,6 +34,10 @@ if (MSVC)
     
     # Treat warnings as errors
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-WX>)
+
+    # Use standard conforming preprocessor (required by CUDA CCCL headers since CUDA 13.2)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:preprocessor>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=/Zc:preprocessor>)
 else()
     # Treat warnings as errors
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Werror>)
