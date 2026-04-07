@@ -91,9 +91,10 @@ void _GeneEditorWidget::processHeaderData()
                     AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeWithoutCustomStrings).textWidth(rightColumnWidth),
                     shapeWithoutCustom)) {
                 gene._shape = shapeWithoutCustom + 1;
-                if (auto shapeGenerator = ShapeGeneratorFactory::create(gene._shape)) {
+                {
+                    ShapeGenerator shapeGenerator;
                     if (_editData->selectedGeneIndex.value() == 0) {
-                        _editData->genome._frontAngle = shapeGenerator->getPreferredFrontAngle();
+                        _editData->genome._frontAngle = shapeGenerator.getPreferredFrontAngle(gene._shape);
                     }
                 }
             }

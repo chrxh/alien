@@ -2802,9 +2802,9 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
 
     // Check angles except for first and last node
     auto actualData = _simulationFacade->getSimulationData();
-    auto shapeGenerator = ShapeGeneratorFactory::create(shape);
+    ShapeGenerator shapeGenerator;
     for (int i = 0; i < n; ++i) {
-        auto shapeResult = shapeGenerator->generateNextConstructionData();
+        auto shapeResult = shapeGenerator.generateNextConstructionData(shape);
         if (i > 0 && i < n - 1) {
             auto const& object = actualData.getObjectRef(createdCellIds.at(i));
             auto prevCellId = createdCellIds.at(i - 1);

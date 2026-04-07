@@ -34,10 +34,9 @@ struct StatisticsRawData;
 
 class SpaceCalculator;
 
-class _ShapeGenerator;
-using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
+class ShapeGenerator;
 
-class ShapeGeneratorResult;
+struct ShapeGeneratorResult;
 
 class StatisticsHistory;
 
@@ -57,7 +56,7 @@ struct FluidParticleVertexData;
 struct ParametersFilter;
 
 #if defined(__CUDACC__)
-#define HOST_DEVICE __host__ __device__
+#define HOST_DEVICE __host__ __device__ __inline__
 #else
-#define HOST_DEVICE
+#define HOST_DEVICE inline
 #endif

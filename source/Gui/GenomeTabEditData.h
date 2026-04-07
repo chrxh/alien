@@ -57,16 +57,13 @@ struct _GenomeTabEditData
 
     void updateGeometry(ConstructorShape shape)
     {
-        auto shapeGenerator = ShapeGeneratorFactory::create(shape);
-        if (!shapeGenerator) {
-            return;
-        }
+        ShapeGenerator shapeGenerator;
         auto& gene = getSelectedGeneRef();
-        gene._angleAlignment = shapeGenerator->getConstructorAngleAlignment();
+        gene._angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);
         auto numNodes = gene._nodes.size();
         int index = 0;
         for (auto& node : gene._nodes) {
-            auto shapeGenerationResult = shapeGenerator->generateNextConstructionData();
+            auto shapeGenerationResult = shapeGenerator.generateNextConstructionData(shape);
             if (index > 0 && index < numNodes - 1) {
                 node._referenceAngle = shapeGenerationResult.angle;
             }
