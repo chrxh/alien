@@ -504,6 +504,8 @@ struct Cell
     uint16_t nodeIndex;
     uint16_t parentNodeIndex;
     uint16_t geneIndex;
+    uint32_t concatenationIndex;
+    uint8_t branchIndex;
 
     // Cell type data
     NeuralNet* neuralNetwork;
@@ -514,8 +516,6 @@ struct Cell
     Signal signal;
     uint32_t activationTime;
     uint8_t lastUpdate;
-    uint32_t concatenationIndex;
-    uint8_t branchIndex;
 
     // Process data
     Signal futureSignal;

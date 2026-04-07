@@ -500,6 +500,8 @@ struct CellDesc
     MEMBER(CellDesc, int, nodeIndex, 0);
     MEMBER(CellDesc, int, parentNodeIndex, 0);
     MEMBER(CellDesc, int, geneIndex, 0);
+    MEMBER(CellDesc, int, concatenationIndex, 0);
+    MEMBER(CellDesc, int, branchIndex, 0);
 
     // Cell type-specific data
     MEMBER(CellDesc, NeuralNetDesc, neuralNetwork, NeuralNetDesc());
@@ -509,8 +511,6 @@ struct CellDesc
     CellDesc& signal(std::vector<float> const& value);
     MEMBER(CellDesc, int, activationTime, 0);
     MEMBER(CellDesc, int, lastUpdate, 0);
-    MEMBER(CellDesc, int, concatenationIndex, 0);
-    MEMBER(CellDesc, int, branchIndex, 0);
 
     // Process data
     MEMBER(CellDesc, int, headUpdateId, 0);

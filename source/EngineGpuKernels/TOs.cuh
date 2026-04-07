@@ -430,6 +430,8 @@ struct CellTO
     uint16_t nodeIndex;
     uint16_t parentNodeIndex;
     uint16_t geneIndex;
+    uint32_t concatenationIndex;
+    uint8_t branchIndex;
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;
@@ -440,8 +442,6 @@ struct CellTO
     SignalTO signal;
     uint32_t activationTime;
     uint8_t lastUpdate;
-    uint32_t concatenationIndex;
-    uint8_t branchIndex;
 
     // Process data
     uint32_t headUpdateId;

@@ -1554,6 +1554,8 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
         loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
+        loadSave(task, auxiliaries, Id_Cell_ConcatenationIndex, data._concatenationIndex, defaultObject._concatenationIndex);
+        loadSave(task, auxiliaries, Id_Cell_BranchIndex, data._branchIndex, defaultObject._branchIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(task, auxiliaries, Id_Cell_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
         loadSave(task, auxiliaries, Id_Cell_HeadCell, data._headCell, defaultObject._headCell);
@@ -1562,8 +1564,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_EventCounter, data._eventCounter, defaultObject._eventCounter);
         loadSave(task, auxiliaries, Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         loadSave(task, auxiliaries, Id_Cell_LastUpdate, data._lastUpdate, defaultObject._lastUpdate);
-        loadSave(task, auxiliaries, Id_Cell_ConcatenationIndex, data._concatenationIndex, defaultObject._concatenationIndex);
-        loadSave(task, auxiliaries, Id_Cell_BranchIndex, data._branchIndex, defaultObject._branchIndex);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._cellType, data._constructor, data._signal, data._neuralNetwork);
