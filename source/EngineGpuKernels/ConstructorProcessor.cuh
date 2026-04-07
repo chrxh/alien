@@ -5,7 +5,7 @@
 #include "CellProcessor.cuh"
 #include "ObjectConnectionProcessor.cuh"
 #include "ConstructorHelper.cuh"
-#include "CudaShapeGenerator.cuh"
+#include <EngineInterface/ShapeGenerator.h>
 #include "Genome.cuh"
 #include "MuscleProcessor.cuh"
 #include "SimulationStatistics.cuh"
@@ -244,7 +244,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.depotEnergy = result.node->cellType == CellType_Depot ? result.node->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
     result.numAdditionalConnections = result.node->numAdditionalConnections;
 
-    CudaShapeGenerator shapeGenerator;
+    ShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
     if (shape != ConstructorShape_Custom && !ConstructorHelper::isFirstNode(constructor) /*&& !result.isLastNode*/) {
         result.gene->angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);

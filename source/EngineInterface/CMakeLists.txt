@@ -44,7 +44,6 @@ add_library(EngineInterface
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h
-    ShapeGenerator.cpp
     ShapeGenerator.h
     SimulationFacade.cpp
     SimulationFacade.h

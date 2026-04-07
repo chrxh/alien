@@ -16,7 +16,6 @@ add_library(EngineGpuKernels
     CudaGeometryBuffers.cuh
     CudaMemoryManager.cuh
     CudaNumberGenerator.cuh
-    CudaShapeGenerator.cuh
     CudaTOProvider.cu
     CudaTOProvider.cuh
     DataAccessKernels.cu

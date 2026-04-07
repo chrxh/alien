@@ -34,10 +34,9 @@ struct StatisticsRawData;
 
 class SpaceCalculator;
 
-class _ShapeGenerator;
-using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
+class ShapeGenerator;
 
-class ShapeGeneratorResult;
+struct ShapeGeneratorResult;
 
 class StatisticsHistory;
 
