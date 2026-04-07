@@ -2675,7 +2675,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(ConstructionType::Normal, ConstructionType::Seed),
         ::testing::Values(0.5f, 1.0f, 2.0f)));
 
-TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
+TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
 {
     _parameters.friction.baseValue = 0.05f;
     _simulationFacade->setSimulationParameters(_parameters);
