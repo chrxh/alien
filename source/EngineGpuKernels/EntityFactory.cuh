@@ -34,6 +34,8 @@ public:
         int geneIndex,
         int nodeIndex,
         int parentNodeIndex,
+        int concatenationIndex,
+        int branchIndex,
         float2 pos,
         float2 vel,
         float usableEnergy,
@@ -706,6 +708,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     int geneIndex,
     int nodeIndex,
     int parentNodeIndex,
+    int concatenationIndex,
+    int branchIndex,
     float2 pos,
     float2 vel,
     float usableEnergy,
@@ -744,6 +748,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.nodeIndex = nodeIndex;
     cell.parentNodeIndex = parentNodeIndex;
     cell.geneIndex = geneIndex;
+    cell.concatenationIndex = concatenationIndex;
+    cell.branchIndex = branchIndex;
     cell.headUpdateId = 0;
     cell.headCell = false;
     for (int i = 0; i < NEURONS_PER_CELL; ++i) {
