@@ -744,6 +744,8 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         constructor.geneIndex,
         constructor.currentNodeIndex,
         hostObject->typeData.cell.nodeIndex,
+        constructor.currentConcatenation,
+        constructor.currentBranch,
         posOfNewObject,
         hostObject->vel,
         constructionData.neededUsableEnergy,

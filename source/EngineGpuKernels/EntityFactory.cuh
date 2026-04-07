@@ -34,6 +34,8 @@ public:
         int geneIndex,
         int nodeIndex,
         int parentNodeIndex,
+        int concatenationIndex,
+        int branchIndex,
         float2 pos,
         float2 vel,
         float usableEnergy,
@@ -390,6 +392,8 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->frontAngle = cellTO.frontAngle;
         cell->activationTime = cellTO.activationTime;
         cell->lastUpdate = cellTO.lastUpdate;
+        cell->concatenationIndex = cellTO.concatenationIndex;
+        cell->branchIndex = cellTO.branchIndex;
         cell->nodeIndex = cellTO.nodeIndex;
         cell->parentNodeIndex = cellTO.parentNodeIndex;
         cell->geneIndex = cellTO.geneIndex;
@@ -704,6 +708,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     int geneIndex,
     int nodeIndex,
     int parentNodeIndex,
+    int concatenationIndex,
+    int branchIndex,
     float2 pos,
     float2 vel,
     float usableEnergy,
@@ -742,6 +748,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.nodeIndex = nodeIndex;
     cell.parentNodeIndex = parentNodeIndex;
     cell.geneIndex = geneIndex;
+    cell.concatenationIndex = concatenationIndex;
+    cell.branchIndex = branchIndex;
     cell.headUpdateId = 0;
     cell.headCell = false;
     for (int i = 0; i < NEURONS_PER_CELL; ++i) {

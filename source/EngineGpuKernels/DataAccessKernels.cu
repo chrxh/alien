@@ -337,6 +337,8 @@ namespace
             cellTO.signal.numTimesSent = cell.signal.numTimesSent;
             cellTO.activationTime = cell.activationTime;
             cellTO.lastUpdate = cell.lastUpdate;
+            cellTO.concatenationIndex = cell.concatenationIndex;
+            cellTO.branchIndex = cell.branchIndex;
             cellTO.nodeIndex = cell.nodeIndex;
             cellTO.parentNodeIndex = cell.parentNodeIndex;
             cellTO.geneIndex = cell.geneIndex;
