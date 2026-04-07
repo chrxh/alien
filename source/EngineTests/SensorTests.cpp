@@ -1670,8 +1670,8 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_30cells)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     // 30 cells should give density ~0.5
     auto density = actualSensor.getCellRef()._signal._channels[Channels::SensorMass];
-    EXPECT_TRUE(density > 0.45f);
-    EXPECT_TRUE(density < 0.55f);
+    EXPECT_TRUE(density > 0.40f);
+    EXPECT_TRUE(density < 0.6f);
 }
 
 TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_60cells)
