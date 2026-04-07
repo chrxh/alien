@@ -5,7 +5,7 @@
 
 struct ShapeGeneratorResult
 {
-    float angle = 0;
+    float angle = 0.0f;
     int numAdditionalConnections = 0;
     int requiredNodeId1 = -1;
     int requiredNodeId2 = -1;
