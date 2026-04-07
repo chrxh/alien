@@ -28,11 +28,27 @@ private:
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForLolli();
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForSmallLolli();
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForZigzag();
+    __inline__ __device__ int getHexagonRingMoveDir(int ringSize, int ringStep) const;
+    __inline__ __device__ int getHexagonOutgoingDir() const;
+    __inline__ __device__ int getHexagonRingStartIndex(int ringSize) const;
+    __inline__ __device__ bool isHexagonNeighbor(int q1, int r1, int q2, int r2) const;
+    __inline__ __device__ void getHexagonAdditionalConnections(int& numAdditionalConnections, int& requiredNodeId1, int& requiredNodeId2) const;
+    __inline__ __device__ void advanceHexagonState(int outgoingDir);
 
     int _nodePos = 0;
     int _edgePos = 0;
     int _connectedNodePos2 = 0;
     int _connectedNodePos1 = 0;
+    int _hexNodeIndex = 0;
+    int _hexRingSize = 1;
+    int _hexRingPos = 0;
+    int _hexQ = 0;
+    int _hexR = 0;
+    int _hexIncomingDir = 0;
+    int _hexCurrentRingStartQ = 0;
+    int _hexCurrentRingStartR = 0;
+    int _hexPrevRingStartQ = 0;
+    int _hexPrevRingStartR = 0;
 };
 
 /************************************************************************/
@@ -199,46 +215,180 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
     return result;
 }
 
-__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForHexagon()
+__inline__ __device__ int CudaShapeGenerator::getHexagonRingMoveDir(int ringSize, int ringStep) const
 {
-    ShapeGeneratorResult result;
-
-    auto edgeLength = _edgePos / 6 + 1;
-    if (_edgePos % 6 == 1) {
-        --edgeLength;
+    if (ringSize == 2) {
+        int constexpr RING2[6] = {0, 2, 0, 2, 3, 4};  // E, SW, E, SW, W, NW
+        return RING2[ringStep];
     }
 
-    if (_edgePos < 2) {
-        result.angle = 120.0f;
-        result.numAdditionalConnections = 0;
-        result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
-    } else if (_edgePos < 6) {
-        result.angle = 60.0f;
-        result.numAdditionalConnections = 1;
-        result.requiredNodeId1 = 0;
-        result.requiredNodeId2 = -1;
-    } else {
-        result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
+    if (ringSize % 2 == 1) {
+        if (ringStep == 0) {
+            return 2;  // SW
+        }
+        ringStep -= 1;
+        auto const segment2Length = ringSize - 1;
+        if (ringStep < segment2Length) {
+            return 1;  // SE
+        }
+        ringStep -= segment2Length;
+        auto const segment3Length = 2 * ringSize - 1;
+        if (ringStep < segment3Length) {
+            return ringStep % 2 == 0 ? 5 : 1;  // NE, SE, ...
+        }
+        ringStep -= segment3Length;
+        auto const segment4Length = 2 * (ringSize - 2);
+        if (ringStep < segment4Length) {
+            return ringStep % 2 == 0 ? 4 : 0;  // NW, E, ...
+        }
+        return 4;  // NW
+    }
 
-        if (_nodePos < edgeLength - 1) {
-            result.numAdditionalConnections = 2;
-            result.requiredNodeId1 = _connectedNodePos1;
-            result.requiredNodeId2 = _connectedNodePos1 + 1;
-        } else {
-            result.numAdditionalConnections = 1;
-            result.requiredNodeId1 = _connectedNodePos1;
-            result.requiredNodeId2 = -1;
+    if (ringStep == 0) {
+        return 0;  // E
+    }
+    ringStep -= 1;
+    auto const segment2Length = ringSize - 1;
+    if (ringStep < segment2Length) {
+        return 1;  // SE
+    }
+    ringStep -= segment2Length;
+    auto const segment3Length = 2 * ringSize - 3;
+    if (ringStep < segment3Length) {
+        return ringStep % 2 == 0 ? 3 : 1;  // W, SE, ...
+    }
+    ringStep -= segment3Length;
+    if (ringStep < 2) {
+        return ringStep == 0 ? 1 : 3;  // SE, W
+    }
+    ringStep -= 2;
+    auto const segment5Length = 2 * (ringSize - 2);
+    if (ringStep < segment5Length) {
+        return ringStep % 2 == 0 ? 4 : 2;  // NW, SW, ...
+    }
+    return 4;  // NW
+}
+
+__inline__ __device__ int CudaShapeGenerator::getHexagonOutgoingDir() const
+{
+    if (_hexRingSize == 1) {
+        return getHexagonRingMoveDir(2, 0);
+    }
+    auto const nodesInCurrentRing = 6 * (_hexRingSize - 1);
+    if (_hexRingPos + 1 < nodesInCurrentRing) {
+        return getHexagonRingMoveDir(_hexRingSize, _hexRingPos + 1);
+    }
+    return getHexagonRingMoveDir(_hexRingSize + 1, 0);
+}
+
+__inline__ __device__ int CudaShapeGenerator::getHexagonRingStartIndex(int ringSize) const
+{
+    if (ringSize <= 1) {
+        return 0;
+    }
+    return 1 + 3 * (ringSize - 2) * (ringSize - 1);
+}
+
+__inline__ __device__ bool CudaShapeGenerator::isHexagonNeighbor(int q1, int r1, int q2, int r2) const
+{
+    auto const dq = q2 - q1;
+    auto const dr = r2 - r1;
+    auto const ds = -dq - dr;
+    return max(max(abs(dq), abs(dr)), abs(ds)) == 1;
+}
+
+__inline__ __device__ void CudaShapeGenerator::getHexagonAdditionalConnections(int& numAdditionalConnections, int& requiredNodeId1, int& requiredNodeId2) const
+{
+    numAdditionalConnections = 0;
+    requiredNodeId1 = -1;
+    requiredNodeId2 = -1;
+
+    if (_hexNodeIndex == 0 || _hexRingSize == 1) {
+        return;
+    }
+
+    auto const previousNodeId = _hexNodeIndex - 1;
+    auto const previousRingSize = _hexRingSize - 1;
+    auto const previousRingStartIndex = getHexagonRingStartIndex(previousRingSize);
+    auto const previousRingNodeCount = previousRingSize == 1 ? 1 : 6 * (previousRingSize - 1);
+
+    auto previousQ = _hexPrevRingStartQ;
+    auto previousR = _hexPrevRingStartR;
+    for (int pos = 0; pos < previousRingNodeCount; ++pos) {
+        auto const nodeId = previousRingStartIndex + pos;
+        if (nodeId != previousNodeId && isHexagonNeighbor(_hexQ, _hexR, previousQ, previousR)) {
+            if (numAdditionalConnections == 0) {
+                requiredNodeId1 = nodeId;
+            } else if (numAdditionalConnections == 1) {
+                requiredNodeId2 = nodeId;
+            }
+            ++numAdditionalConnections;
+        }
+
+        if (pos + 1 < previousRingNodeCount) {
+            auto const dir = getHexagonRingMoveDir(previousRingSize, pos + 1);
+            int constexpr DIR_Q[6] = {1, 0, -1, -1, 0, 1};
+            int constexpr DIR_R[6] = {0, 1, 1, 0, -1, -1};
+            previousQ += DIR_Q[dir];
+            previousR += DIR_R[dir];
         }
     }
 
-    if (_edgePos >= 6 && _nodePos < edgeLength - 1) {
-        ++_connectedNodePos1;
+    if (numAdditionalConnections > 2) {
+        numAdditionalConnections = 2;
     }
-    if (++_nodePos >= edgeLength) {
-        _nodePos = 0;
-        ++_edgePos;
+}
+
+__inline__ __device__ void CudaShapeGenerator::advanceHexagonState(int outgoingDir)
+{
+    int constexpr DIR_Q[6] = {1, 0, -1, -1, 0, 1};
+    int constexpr DIR_R[6] = {0, 1, 1, 0, -1, -1};
+
+    _hexQ += DIR_Q[outgoingDir];
+    _hexR += DIR_R[outgoingDir];
+    _hexIncomingDir = outgoingDir;
+    ++_hexNodeIndex;
+
+    if (_hexRingSize == 1) {
+        _hexRingSize = 2;
+        _hexRingPos = 0;
+        _hexPrevRingStartQ = 0;
+        _hexPrevRingStartR = 0;
+        _hexCurrentRingStartQ = _hexQ;
+        _hexCurrentRingStartR = _hexR;
+        return;
     }
+
+    auto const nodesInCurrentRing = 6 * (_hexRingSize - 1);
+    if (++_hexRingPos >= nodesInCurrentRing) {
+        _hexRingPos = 0;
+        ++_hexRingSize;
+        _hexPrevRingStartQ = _hexCurrentRingStartQ;
+        _hexPrevRingStartR = _hexCurrentRingStartR;
+        _hexCurrentRingStartQ = _hexQ;
+        _hexCurrentRingStartR = _hexR;
+    }
+}
+
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForHexagon()
+{
+    ShapeGeneratorResult result;
+    auto const outgoingDir = getHexagonOutgoingDir();
+    if (_hexNodeIndex == 0) {
+        result.angle = 120.0f;
+    } else {
+        auto delta = outgoingDir - _hexIncomingDir;
+        while (delta <= -3) {
+            delta += 6;
+        }
+        while (delta > 3) {
+            delta -= 6;
+        }
+        result.angle = static_cast<float>(delta * 60);
+    }
+    getHexagonAdditionalConnections(result.numAdditionalConnections, result.requiredNodeId1, result.requiredNodeId2);
+
+    advanceHexagonState(outgoingDir);
     return result;
 }
 
@@ -355,7 +505,41 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
 {
     ShapeGeneratorResult result;
     if (_edgePos < 12 || (_edgePos == 12 && _nodePos == 0)) {
-        return generateNextConstructionDataForHexagon();
+        auto edgeLength = _edgePos / 6 + 1;
+        if (_edgePos % 6 == 1) {
+            --edgeLength;
+        }
+
+        if (_edgePos < 2) {
+            result.angle = 120.0f;
+            result.numAdditionalConnections = 0;
+            result.requiredNodeId1 = -1;
+            result.requiredNodeId2 = -1;
+        } else if (_edgePos < 6) {
+            result.angle = 60.0f;
+            result.numAdditionalConnections = 1;
+            result.requiredNodeId1 = 0;
+            result.requiredNodeId2 = -1;
+        } else {
+            result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
+            result.numAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
+            if (_nodePos < edgeLength - 1) {
+                result.requiredNodeId1 = _connectedNodePos1;
+                result.requiredNodeId2 = _connectedNodePos1 + 1;
+            } else {
+                result.requiredNodeId1 = _connectedNodePos1;
+                result.requiredNodeId2 = -1;
+            }
+        }
+
+        if (_edgePos >= 6 && _nodePos < edgeLength - 1) {
+            ++_connectedNodePos1;
+        }
+        if (++_nodePos >= edgeLength) {
+            _nodePos = 0;
+            ++_edgePos;
+        }
+        return result;
     }
 
     if (_nodePos == 1) {
@@ -378,7 +562,28 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
 {
     ShapeGeneratorResult result;
     if (_edgePos < 6) {
-        return generateNextConstructionDataForHexagon();
+        auto edgeLength = _edgePos / 6 + 1;
+        if (_edgePos % 6 == 1) {
+            --edgeLength;
+        }
+
+        if (_edgePos < 2) {
+            result.angle = 120.0f;
+            result.numAdditionalConnections = 0;
+            result.requiredNodeId1 = -1;
+            result.requiredNodeId2 = -1;
+        } else {
+            result.angle = 60.0f;
+            result.numAdditionalConnections = 1;
+            result.requiredNodeId1 = _edgePos < 6 ? 0 : _connectedNodePos1;
+            result.requiredNodeId2 = -1;
+        }
+
+        if (++_nodePos >= edgeLength) {
+            _nodePos = 0;
+            ++_edgePos;
+        }
+        return result;
     }
 
     if (_nodePos == 0) {

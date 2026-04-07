@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <array>
+#include <cmath>
+
 #include <Base/Math.h>
 
 #include <EngineInterface/Desc.h>
@@ -2645,6 +2648,43 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
     auto actualConstructedCell = actualData.getOtherObjectRef({1, 2, 3});
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
+}
+
+TEST_F(ConstructorTests, hexagonShapeGenerator_zigzagSequence_sideLength5)
+{
+    static constexpr std::array<int, 6> DirQ = {1, 0, -1, -1, 0, 1};
+    static constexpr std::array<int, 6> DirR = {0, 1, 1, 0, -1, -1};
+
+    auto shapeGenerator = ShapeGeneratorFactory::create(ConstructorShape_Hexagon);
+    std::vector<ShapeGeneratorResult> generated;
+    generated.reserve(61);
+    for (int i = 0; i < 61; ++i) {
+        generated.emplace_back(shapeGenerator->generateNextConstructionData());
+    }
+
+    std::vector<IntVector2D> coords(61);
+    coords.at(0) = {0, 0};
+    coords.at(1) = {1, 0};
+    auto dir = 0;
+    for (int i = 1; i < 60; ++i) {
+        auto const angle = generated.at(i).angle;
+        auto const turn = toInt(std::round(angle / 60.0f));
+        EXPECT_TRUE(approxCompare(static_cast<float>(turn * 60), angle));
+
+        dir = (dir + turn) % 6;
+        if (dir < 0) {
+            dir += 6;
+        }
+        coords.at(i + 1) = {coords.at(i).x + DirQ.at(dir), coords.at(i).y + DirR.at(dir)};
+    }
+
+    std::vector<IntVector2D> expected = {
+        {0, 0},  {1, 0},  {0, 1},  {1, 1},  {0, 2},  {-1, 2}, {-1, 1}, {-2, 2}, {-2, 3}, {-2, 4}, {-1, 3}, {-1, 4}, {0, 3},  {0, 4},  {1, 3},  {1, 2},
+        {2, 2},  {2, 1},  {2, 0},  {3, 0},  {3, 1},  {3, 2},  {3, 3},  {2, 3},  {2, 4},  {1, 4},  {1, 5},  {0, 5},  {0, 6},  {-1, 6}, {-1, 5}, {-2, 6},
+        {-2, 5}, {-3, 6}, {-3, 5}, {-3, 4}, {-3, 3}, {-4, 4}, {-4, 5}, {-4, 6}, {-4, 7}, {-4, 8}, {-3, 7}, {-3, 8}, {-2, 7}, {-2, 8}, {-1, 7}, {-1, 8},
+        {0, 7},  {0, 8},  {1, 7},  {1, 6},  {2, 6},  {2, 5},  {3, 5},  {3, 4},  {4, 4},  {4, 3},  {4, 2},  {4, 1},  {4, 0},
+    };
+    EXPECT_EQ(expected, coords);
 }
 
 enum class ConstructionType
