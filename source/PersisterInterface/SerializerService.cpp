@@ -861,7 +861,7 @@ namespace
     auto constexpr Id_Cell_GeneIndex = 8;
     auto constexpr Id_Cell_AngleToFront = 10;
     auto constexpr Id_Cell_HeadUpdateId = 11;
-    auto constexpr Id_Cell_IsFrontAngleRefCell = 12;
+    auto constexpr Id_Cell_HeadCell = 12;
     auto constexpr Id_Cell_CreatureId = 13;
     auto constexpr Id_Cell_Event = 14;
     auto constexpr Id_Cell_EventCounter = 15;
@@ -1554,7 +1554,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(task, auxiliaries, Id_Cell_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
-        loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
+        loadSave(task, auxiliaries, Id_Cell_HeadCell, data._headCell, defaultObject._headCell);
         loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
         loadSave(task, auxiliaries, Id_Cell_Event, data._event, defaultObject._event);
         loadSave(task, auxiliaries, Id_Cell_EventCounter, data._eventCounter, defaultObject._eventCounter);
