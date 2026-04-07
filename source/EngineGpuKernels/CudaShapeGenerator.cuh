@@ -312,6 +312,9 @@ __inline__ __device__ void CudaShapeGenerator::getHexagonAdditionalConnections(i
     auto const previousRingStartIndex = getHexagonRingStartIndex(previousRingSize);
     auto const previousRingNodeCount = previousRingSize == 1 ? 1 : 6 * (previousRingSize - 1);
 
+    int constexpr DIR_Q[6] = {1, 0, -1, -1, 0, 1};
+    int constexpr DIR_R[6] = {0, 1, 1, 0, -1, -1};
+
     auto previousQ = _hexPrevRingStartQ;
     auto previousR = _hexPrevRingStartR;
     for (int pos = 0; pos < previousRingNodeCount; ++pos) {
@@ -327,10 +330,32 @@ __inline__ __device__ void CudaShapeGenerator::getHexagonAdditionalConnections(i
 
         if (pos + 1 < previousRingNodeCount) {
             auto const dir = getHexagonRingMoveDir(previousRingSize, pos + 1);
-            int constexpr DIR_Q[6] = {1, 0, -1, -1, 0, 1};
-            int constexpr DIR_R[6] = {0, 1, 1, 0, -1, -1};
             previousQ += DIR_Q[dir];
             previousR += DIR_R[dir];
+        }
+    }
+
+    // Search current ring (positions 0 to _hexRingPos-2, skipping immediate predecessor)
+    if (_hexRingPos >= 2) {
+        auto const currentRingStartIndex = getHexagonRingStartIndex(_hexRingSize);
+        auto currentQ = _hexCurrentRingStartQ;
+        auto currentR = _hexCurrentRingStartR;
+        for (int pos = 0; pos <= _hexRingPos - 2; ++pos) {
+            auto const nodeId = currentRingStartIndex + pos;
+            if (nodeId != previousNodeId && isHexagonNeighbor(_hexQ, _hexR, currentQ, currentR)) {
+                if (numAdditionalConnections == 0) {
+                    requiredNodeId1 = nodeId;
+                } else if (numAdditionalConnections == 1) {
+                    requiredNodeId2 = nodeId;
+                }
+                ++numAdditionalConnections;
+            }
+
+            if (pos + 1 <= _hexRingPos - 2) {
+                auto const dir = getHexagonRingMoveDir(_hexRingSize, pos + 1);
+                currentQ += DIR_Q[dir];
+                currentR += DIR_R[dir];
+            }
         }
     }
 

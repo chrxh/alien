@@ -242,6 +242,26 @@ private:
                 previousR += DIR_R.at(dir);
             }
         }
+
+        // Search current ring (positions 0 to _ringPos-2, skipping immediate predecessor)
+        if (_ringPos >= 2) {
+            auto const currentRingStartIndex = getRingStartIndex(_ringSize);
+            auto currentQ = _currentRingStartQ;
+            auto currentR = _currentRingStartR;
+            for (int pos = 0; pos <= _ringPos - 2; ++pos) {
+                auto const nodeId = currentRingStartIndex + pos;
+                if (nodeId != previousNodeId && isNeighbor(_q, _r, currentQ, currentR)) {
+                    ++numAdditionalConnections;
+                }
+
+                if (pos + 1 <= _ringPos - 2) {
+                    auto const dir = getRingMoveDir(_ringSize, pos + 1);
+                    currentQ += DIR_Q.at(dir);
+                    currentR += DIR_R.at(dir);
+                }
+            }
+        }
+
         return numAdditionalConnections;
     }
 
