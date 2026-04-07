@@ -3634,3 +3634,98 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
     // Construction should fail because currentOffspring > 0 blocks energy inflow and cell has insufficient energy
     ASSERT_EQ(1, actualData._creatures.size());
 }
+
+TEST_F(ConstructorTests, generateHexagon_61cells_withSeparation)
+{
+    _parameters.friction.baseValue = 0.05f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto const n = 61;
+    auto const AutoTriggerInterval = 60;
+
+    auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Hexagon);
+    for (int i = 0; i < n; ++i) {
+        gene._nodes.emplace_back(NodeDesc());
+    }
+    auto genome = GenomeDesc().genes({gene});
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(10)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc()
+                          .headCell(true)
+                          .usableEnergy(getConstructorEnergy() * n)
+                          .constructor(ConstructorDesc().geneIndex(0).currentNodeIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+        },
+        CreatureDesc().id(0),
+        genome);
+
+    _simulationFacade->setSimulationData(data);
+
+    // Construct all 61 cells one by one and track their IDs.
+    // With separation=true, the offspring is created as a separate creature from the first construction.
+    std::vector<uint64_t> createdCellIds;
+    for (int i = 0; i < n; ++i) {
+        Desc actualData;
+        int retryCount = 0;
+        int anticipatedOffspringCells = 1 + i;
+        do {
+            _simulationFacade->calcTimesteps(AutoTriggerInterval);
+            actualData = _simulationFacade->getSimulationData();
+
+            ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+            ASSERT_EQ(2, actualData._creatures.size());
+
+            if (++retryCount == 100) {
+                FAIL() << "Failed to construct cell " << i;
+            }
+        } while (actualData.getObjectsForCreature(actualData.getOtherCreatureRef(0)._id).size() != anticipatedOffspringCells);
+
+        std::set<uint64_t> knownCellIds(createdCellIds.begin(), createdCellIds.end());
+        knownCellIds.insert(10);
+        auto newObject = actualData.getOtherObjectRef(knownCellIds);
+        createdCellIds.emplace_back(newObject._id);
+
+        if (i < n - 1) {
+            EXPECT_EQ(CellState_Constructing, newObject.getCellRef()._cellState);
+        }
+    }
+
+    // Check 1: Verify the offspring creature has exactly 61 cells
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(2, actualData._creatures.size());
+
+    auto hostCreature = actualData.getCreatureRef(0);
+    ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
+
+    auto offspringCreature = actualData.getOtherCreatureRef(0);
+    ASSERT_EQ(n, actualData.getObjectsForCreature(offspringCreature._id).size());
+
+    // Check 2: Verify the hexagonal connection topology
+    // 2a: All chain connections must exist (cell[i] to cell[i+1])
+    for (int i = 0; i < n - 1; ++i) {
+        EXPECT_TRUE(actualData.hasConnection(createdCellIds.at(i), createdCellIds.at(i + 1)))
+            << "Missing chain connection between cells " << i << " and " << i + 1;
+    }
+
+    // 2b: Additional connections must match ShapeGenerator expectations
+    auto shapeGenerator = ShapeGeneratorFactory::create(ConstructorShape_Hexagon);
+    for (int i = 0; i < n; ++i) {
+        auto shapeResult = shapeGenerator->generateNextConstructionData();
+        if (i > 0 && i < n - 1) {
+            auto const& object = actualData.getObjectRef(createdCellIds.at(i));
+            int numPrevConnections = 0;
+            for (auto const& connection : object._connections) {
+                for (int j = 0; j < i; ++j) {
+                    if (connection._objectId == createdCellIds.at(j)) {
+                        ++numPrevConnections;
+                        break;
+                    }
+                }
+            }
+            EXPECT_EQ(shapeResult.numAdditionalConnections, numPrevConnections - 1) << "Cell " << i << " has wrong number of additional connections";
+        }
+    }
+}
