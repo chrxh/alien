@@ -773,8 +773,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     }
     cell.activationTime = 0;
     cell.lastUpdate = 0;
-    cell.concatenationIndex = 0;
-    cell.branchIndex = 0;
     cell.event = CellEvent_No;
 
     switch (node->cellType) {
