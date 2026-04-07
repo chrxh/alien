@@ -139,7 +139,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
             if (object->type != ObjectType_Cell) {
                 cellState = origCellState;
             }
-            if (object->typeData.cell.lastUpdate > 2 * Cell::UpdateInterval + 1) {
+            if (object->typeData.cell.lastUpdate >= 2 * CELL_UPDATE_INTERVAL) {
                 cellState = CellState_Dying;
             }
         }
@@ -172,7 +172,7 @@ __inline__ __device__ void CellProcessor::headUpdate_calcFutureValue(SimulationD
         if (object->type != ObjectType_Cell) {
             continue;
         }
-        if (*data.timestep % Cell::UpdateInterval == 0) {
+        if (*data.timestep % CELL_UPDATE_INTERVAL == 0) {
             object->typeData.cell.creature->creatureIndex = VALUE_NOT_SET_UINT64;
         }
 
@@ -196,7 +196,7 @@ __inline__ __device__ void CellProcessor::headUpdate_calcFutureValue(SimulationD
                             Math::getNormalizedAngle(frontAngle_object_otherObject + getInitialAngelSpan(object, 0, i), -180.0f);
                         object->tempValue2.as_uint32_float.uint32Part = otherObject->typeData.cell.headUpdateId;
                         object->tempValue2.as_uint32_float.floatPart = frontAngle_object_connection0;
-                        update = true; 
+                        update = true;
                         break;
                     }
                 }
@@ -219,7 +219,7 @@ __inline__ __device__ void CellProcessor::headUpdate_applyFutureValue(Simulation
             continue;
         }
         auto const& creature = object->typeData.cell.creature;
-        if (*data.timestep % Cell::UpdateInterval == 0) {
+        if (*data.timestep % CELL_UPDATE_INTERVAL == 0) {
             if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
                 ++creature->headUpdateId;
             }
@@ -230,7 +230,7 @@ __inline__ __device__ void CellProcessor::headUpdate_applyFutureValue(Simulation
         }
 
         if (object->typeData.cell.headCell) {
-            if (*data.timestep % Cell::UpdateInterval == 1) {
+            if (*data.timestep % CELL_UPDATE_INTERVAL == 1) {
                 object->typeData.cell.headUpdateId = creature->headUpdateId;
                 object->typeData.cell.frontAngle = creature->genome->frontAngle;
             }
@@ -294,8 +294,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
             auto cellNormalEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
 
             auto needsEnergy = [](Object* obj) {
-                return (obj->typeData.cell.cellState == CellState_Ready)
-                    && obj->typeData.cell.constructorAvailable && obj->typeData.cell.creature
+                return (obj->typeData.cell.cellState == CellState_Ready) && obj->typeData.cell.constructorAvailable && obj->typeData.cell.creature
                     && !ConstructorHelper::isFinished(obj->typeData.cell.constructor, *obj->typeData.cell.creature->genome);
             };
             auto lowEnergy = [&](Object* obj) { return obj->typeData.cell.usableEnergy < cellNormalEnergy; };
@@ -335,8 +334,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
         // Flow of raw energy
         {
-            if (object->typeData.cell.cellState == CellState_Ready
-                && connectedObject->typeData.cell.cellState == CellState_Ready
+            if (object->typeData.cell.cellState == CellState_Ready && connectedObject->typeData.cell.cellState == CellState_Ready
                 && connectedObject->typeData.cell.rawEnergy < SimulationParameters::maxRawEnergyThresholdForConduction) {
 
                 auto flow = 0.0f;

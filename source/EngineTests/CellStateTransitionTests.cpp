@@ -127,6 +127,16 @@ TEST_F(CellStateTransitionTests, fixedCellDoesNotDieFromLastUpdate)
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
 }
 
+TEST_F(CellStateTransitionTests, isolatedConstructingNonHeadCellDies)
+{
+    auto data = Desc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().cellState(CellState_Constructing).headCell(false))});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2 * CELL_UPDATE_INTERVAL + 1);
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(CellState_Dying, actualData.getObjectRef(1).getCellRef()._cellState);
+}
+
 TEST_F(CellStateTransitionTests, headCellDoesNotIncrementLastUpdate)
 {
     auto data = Desc().addCreature({ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().headCell(true).lastUpdate(0))});
