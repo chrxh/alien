@@ -390,6 +390,8 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->frontAngle = cellTO.frontAngle;
         cell->activationTime = cellTO.activationTime;
         cell->lastUpdate = cellTO.lastUpdate;
+        cell->concatenationIndex = cellTO.concatenationIndex;
+        cell->branchIndex = cellTO.branchIndex;
         cell->nodeIndex = cellTO.nodeIndex;
         cell->parentNodeIndex = cellTO.parentNodeIndex;
         cell->geneIndex = cellTO.geneIndex;
@@ -765,6 +767,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     }
     cell.activationTime = 0;
     cell.lastUpdate = 0;
+    cell.concatenationIndex = 0;
+    cell.branchIndex = 0;
     cell.event = CellEvent_No;
 
     switch (node->cellType) {

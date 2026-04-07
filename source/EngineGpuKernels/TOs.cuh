@@ -440,6 +440,8 @@ struct CellTO
     SignalTO signal;
     uint32_t activationTime;
     uint8_t lastUpdate;
+    uint32_t concatenationIndex;
+    uint8_t branchIndex;
 
     // Process data
     uint32_t headUpdateId;

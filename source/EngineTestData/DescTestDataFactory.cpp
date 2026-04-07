@@ -91,6 +91,8 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                                        .currentOffspring(3)
                                        .currentBranch(0))
                       .lastUpdate(7)
+                      .concatenationIndex(3)
+                      .branchIndex(2)
                       .event(CellEvent_Attacking)
                       .eventCounter(3)
                       .eventPos({1.5f, 2.5f})

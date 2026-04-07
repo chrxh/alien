@@ -867,6 +867,8 @@ namespace
     auto constexpr Id_Cell_EventCounter = 15;
     auto constexpr Id_Cell_EventPos = 16;
     auto constexpr Id_Cell_LastUpdate = 18;
+    auto constexpr Id_Cell_ConcatenationIndex = 19;
+    auto constexpr Id_Cell_BranchIndex = 20;
 
     auto constexpr Id_Object_Id = 0;
     auto constexpr Id_Object_Pos = 2;
@@ -1560,6 +1562,8 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_EventCounter, data._eventCounter, defaultObject._eventCounter);
         loadSave(task, auxiliaries, Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         loadSave(task, auxiliaries, Id_Cell_LastUpdate, data._lastUpdate, defaultObject._lastUpdate);
+        loadSave(task, auxiliaries, Id_Cell_ConcatenationIndex, data._concatenationIndex, defaultObject._concatenationIndex);
+        loadSave(task, auxiliaries, Id_Cell_BranchIndex, data._branchIndex, defaultObject._branchIndex);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._cellType, data._constructor, data._signal, data._neuralNetwork);

@@ -343,6 +343,8 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         cellDesc._eventCounter = objectTO.typeData.cell.eventCounter;
         cellDesc._eventPos = {objectTO.typeData.cell.eventPos.x, objectTO.typeData.cell.eventPos.y};
         cellDesc._lastUpdate = objectTO.typeData.cell.lastUpdate;
+        cellDesc._concatenationIndex = objectTO.typeData.cell.concatenationIndex;
+        cellDesc._branchIndex = objectTO.typeData.cell.branchIndex;
 
         switch (objectTO.typeData.cell.cellType) {
         case CellType_Base: {
@@ -1291,6 +1293,8 @@ void DescConverterService::convertObjectToTO(
         objectTO.typeData.cell.eventCounter = cellDesc._eventCounter;
         objectTO.typeData.cell.eventPos = {cellDesc._eventPos.x, cellDesc._eventPos.y};
         objectTO.typeData.cell.lastUpdate = cellDesc._lastUpdate;
+        objectTO.typeData.cell.concatenationIndex = cellDesc._concatenationIndex;
+        objectTO.typeData.cell.branchIndex = cellDesc._branchIndex;
 
         objectTO.typeData.cell.neuralNetworkDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(NeuralNetTO));

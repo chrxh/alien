@@ -509,6 +509,8 @@ struct CellDesc
     CellDesc& signal(std::vector<float> const& value);
     MEMBER(CellDesc, int, activationTime, 0);
     MEMBER(CellDesc, int, lastUpdate, 0);
+    MEMBER(CellDesc, int, concatenationIndex, 0);
+    MEMBER(CellDesc, int, branchIndex, 0);
 
     // Process data
     MEMBER(CellDesc, int, headUpdateId, 0);
