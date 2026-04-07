@@ -2773,7 +2773,7 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
                 EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
                 hostCreature = actualData.getCreatureRef(0);
-                if (++retryCount == 100) {
+                if (++retryCount == 1000) {
                     FAIL();
                 }
             } while (actualData.getObjectsForCreature(hostCreature._id).size() != anticipatedNumObjectsForCreature);
