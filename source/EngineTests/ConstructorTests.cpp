@@ -3664,68 +3664,127 @@ TEST_F(ConstructorTests, generateHexagon_61cells_withSeparation)
 
     _simulationFacade->setSimulationData(data);
 
-    // Construct all 61 cells one by one and track their IDs.
-    // With separation=true, the offspring is created as a separate creature from the first construction.
-    std::vector<uint64_t> createdCellIds;
-    for (int i = 0; i < n; ++i) {
-        Desc actualData;
-        int retryCount = 0;
-        int anticipatedOffspringCells = 1 + i;
-        do {
-            _simulationFacade->calcTimesteps(AutoTriggerInterval);
-            actualData = _simulationFacade->getSimulationData();
+    // Give the constructor time to build the entire hexagon
+    Desc actualData;
+    int retryCount = 0;
+    do {
+        _simulationFacade->calcTimesteps(AutoTriggerInterval * n);
+        actualData = _simulationFacade->getSimulationData();
 
-            ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
-            ASSERT_EQ(2, actualData._creatures.size());
+        ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
 
-            if (++retryCount == 100) {
-                FAIL() << "Failed to construct cell " << i;
-            }
-        } while (actualData.getObjectsForCreature(actualData.getOtherCreatureRef(0)._id).size() != anticipatedOffspringCells);
-
-        std::set<uint64_t> knownCellIds(createdCellIds.begin(), createdCellIds.end());
-        knownCellIds.insert(10);
-        auto newObject = actualData.getOtherObjectRef(knownCellIds);
-        createdCellIds.emplace_back(newObject._id);
-
-        if (i < n - 1) {
-            EXPECT_EQ(CellState_Constructing, newObject.getCellRef()._cellState);
+        if (++retryCount == 100) {
+            FAIL() << "Failed to construct hexagon";
         }
-    }
+    } while (actualData._creatures.size() != 2);
 
     // Check 1: Verify the offspring creature has exactly 61 cells
-    auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(2, actualData._creatures.size());
-
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, actualData.getObjectsForCreature(hostCreature._id).size());
 
     auto offspringCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(n, actualData.getObjectsForCreature(offspringCreature._id).size());
+    auto offspringCells = actualData.getObjectsForCreature(offspringCreature._id);
+    ASSERT_EQ(n, offspringCells.size());
 
     // Check 2: Verify the hexagonal connection topology
-    // 2a: All chain connections must exist (cell[i] to cell[i+1])
-    for (int i = 0; i < n - 1; ++i) {
-        EXPECT_TRUE(actualData.hasConnection(createdCellIds.at(i), createdCellIds.at(i + 1)))
-            << "Missing chain connection between cells " << i << " and " << i + 1;
+    // A hexagon with 5 rings (ring 0 = center, ring 4 = outermost) has:
+    // - 37 inner nodes (rings 0-3) with 6 connections each
+    // - 18 outer edge nodes (non-corner, ring 4) with 4 connections each
+    // - 6 outer corner nodes (ring 4) with 3 connections each
+    int numCorners = 0;
+    int numEdgeNodes = 0;
+    int numInnerNodes = 0;
+    for (auto const& cell : offspringCells) {
+        auto numConnections = static_cast<int>(cell._connections.size());
+        if (numConnections == 3) {
+            ++numCorners;
+        } else if (numConnections == 4) {
+            ++numEdgeNodes;
+        } else if (numConnections == 6) {
+            ++numInnerNodes;
+        } else {
+            FAIL() << "Unexpected connection count " << numConnections << " for cell " << cell._id;
+        }
+    }
+    EXPECT_EQ(6, numCorners);
+    EXPECT_EQ(18, numEdgeNodes);
+    EXPECT_EQ(37, numInnerNodes);
+
+    // Check 3: Verify that each edge has 5 nodes (3 edge nodes + 2 corner endpoints)
+    // An edge node (4 connections) must be connected to exactly 2 other edge/corner nodes on the outer ring.
+    // A corner node (3 connections) must be connected to exactly 2 edge nodes.
+    // Collect outer ring node IDs
+    std::set<uint64_t> outerNodeIds;
+    for (auto const& cell : offspringCells) {
+        if (cell._connections.size() == 3 || cell._connections.size() == 4) {
+            outerNodeIds.insert(cell._id);
+        }
     }
 
-    // 2b: Additional connections must match ShapeGenerator expectations
-    auto shapeGenerator = ShapeGeneratorFactory::create(ConstructorShape_Hexagon);
-    for (int i = 0; i < n; ++i) {
-        auto shapeResult = shapeGenerator->generateNextConstructionData();
-        if (i > 0 && i < n - 1) {
-            auto const& object = actualData.getObjectRef(createdCellIds.at(i));
-            int numPrevConnections = 0;
-            for (auto const& connection : object._connections) {
-                for (int j = 0; j < i; ++j) {
-                    if (connection._objectId == createdCellIds.at(j)) {
-                        ++numPrevConnections;
-                        break;
-                    }
+    // Build adjacency among outer ring nodes
+    std::map<uint64_t, std::vector<uint64_t>> outerAdjacency;
+    for (auto const& cell : offspringCells) {
+        if (outerNodeIds.count(cell._id)) {
+            for (auto const& conn : cell._connections) {
+                if (outerNodeIds.count(conn._objectId)) {
+                    outerAdjacency[cell._id].push_back(conn._objectId);
                 }
             }
-            EXPECT_EQ(shapeResult.numAdditionalConnections, numPrevConnections - 1) << "Cell " << i << " has wrong number of additional connections";
+        }
+    }
+
+    // Each corner (3 connections total) should have exactly 2 outer ring neighbors
+    // Each edge node (4 connections total) should have exactly 2 outer ring neighbors
+    for (auto const& [nodeId, neighbors] : outerAdjacency) {
+        EXPECT_EQ(2, neighbors.size()) << "Outer ring node " << nodeId << " should have exactly 2 outer ring neighbors";
+    }
+
+    // Traverse the outer ring to verify it forms a single cycle of 24 nodes with 6 corners.
+    // Start from a corner node for clean edge counting.
+    uint64_t startCorner = 0;
+    for (auto const& cell : offspringCells) {
+        if (cell._connections.size() == 3) {
+            startCorner = cell._id;
+            break;
+        }
+    }
+
+    {
+        auto currentId = startCorner;
+        uint64_t prevId = 0;
+        int traversedNodes = 0;
+        int cornersSeen = 0;
+        int nodesSinceLastCorner = 0;
+        std::vector<int> edgeLengths;
+
+        do {
+            ++traversedNodes;
+            auto const& cell = actualData.getObjectRef(currentId);
+            bool isCorner = cell._connections.size() == 3;
+            if (isCorner) {
+                ++cornersSeen;
+                if (cornersSeen > 1) {
+                    edgeLengths.push_back(nodesSinceLastCorner + 2);  // +2 for both corner endpoints
+                }
+                nodesSinceLastCorner = 0;
+            } else {
+                ++nodesSinceLastCorner;
+            }
+
+            auto const& neighbors = outerAdjacency.at(currentId);
+            auto nextId = (neighbors[0] != prevId || traversedNodes == 1) ? neighbors[0] : neighbors[1];
+            prevId = currentId;
+            currentId = nextId;
+        } while (currentId != startCorner && traversedNodes < 30);
+
+        // Close the last edge (from last corner back to start corner)
+        edgeLengths.push_back(nodesSinceLastCorner + 2);
+
+        EXPECT_EQ(24, traversedNodes) << "Outer ring should form a cycle of 24 nodes";
+        EXPECT_EQ(6, cornersSeen) << "Outer ring should have 6 corners";
+        ASSERT_EQ(6, edgeLengths.size()) << "Should have 6 edges";
+        for (int i = 0; i < static_cast<int>(edgeLengths.size()); ++i) {
+            EXPECT_EQ(5, edgeLengths[i]) << "Edge " << i << " should have 5 nodes";
         }
     }
 }
