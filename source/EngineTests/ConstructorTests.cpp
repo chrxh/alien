@@ -2757,13 +2757,6 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
     }
     _simulationFacade->setSimulationData(data);
 
-    DeserializedSimulation deserializedData;
-    deserializedData.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
-    deserializedData.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-    deserializedData.auxiliaryData.timestep = _simulationFacade->getCurrentTimestep();
-    deserializedData.mainData = _simulationFacade->getSimulationData();
-    SerializerService::get().serializeSimulationToFiles("d:\\test.sim", deserializedData);
-
     // Construct offspring and record ids of constructed cells
     std::vector<uint64_t> createdCellIds;
     {
