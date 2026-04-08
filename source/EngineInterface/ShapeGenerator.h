@@ -494,25 +494,24 @@ HOST_DEVICE float ShapeGenerator::getHexagonAngle(int n)
     if (n == 0) {
         return 0.0f;
     }
-    --n;
 
-    if (n < 6) {
-        float ring1Angles[6] = {60.0f, 60.0f, 120.0f, -120.0f, 120.0f, -120.0f};
-        return ring1Angles[n];
-    }
-
-    int k = 2;
-    while (3 * k * (k + 1) <= n) {
+    int k = 1;
+    while (1 + 3 * k * (k + 1) <= n) {
         ++k;
     }
 
-    bool odd = (k % 2 == 1);
-    int ringStart = 3 * (k - 1) * k;
-    int local = n - ringStart;
-    int block = local / k;
+    int firstIndex = 1 + 3 * (k - 1) * k;
+    int local = n - firstIndex;
+    int side = local / k;
     int pos = local % k;
+    bool odd = (k % 2 == 1);
 
-    switch (block) {
+    if (k == 1) {
+        float ring1[6] = {60.0f, 60.0f, 120.0f, -120.0f, 120.0f, -120.0f};
+        return ring1[local];
+    }
+
+    switch (side) {
     case 0:
         if (pos == 0) {
             return odd ? 60.0f : -60.0f;
@@ -521,14 +520,14 @@ HOST_DEVICE float ShapeGenerator::getHexagonAngle(int n)
     case 1:
         return (pos % 2 == 0) ? (odd ? 120.0f : -120.0f) : (odd ? -120.0f : 120.0f);
     case 2:
-        if (odd) {
-            if (pos == 0) {
-                return -120.0f;
-            }
-            if (pos == 1) {
-                return 60.0f;
-            }
-            return (pos % 2 == 0) ? 120.0f : -120.0f;
+        if (!odd) {
+            return (pos % 2 == 0) ? -120.0f : 120.0f;
+        }
+        if (pos == k - 2) {
+            return 60.0f;
+        }
+        if (pos == k - 1) {
+            return 120.0f;
         }
         return (pos % 2 == 0) ? -120.0f : 120.0f;
     case 3:
