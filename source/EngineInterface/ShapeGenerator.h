@@ -9,6 +9,7 @@ struct ShapeGeneratorResult
     int numAdditionalConnections = 0;
     int requiredNodeId1 = -1;
     int requiredNodeId2 = -1;
+    int requiredNodeId3 = -1;
 };
 
 class ShapeGenerator
@@ -28,6 +29,12 @@ private:
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForLolli();
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForSmallLolli();
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForZigzag();
+    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForSpiralHexagon();
+
+    HOST_DEVICE float getHexagonAngle(int n);
+    HOST_DEVICE int getHexagonRequiredNodeId1(int n);
+    HOST_DEVICE int getHexagonRequiredNodeId2(int n);
+    HOST_DEVICE int getHexagonRequiredNodeId3(int n);
 
     int _nodePos = 0;
     int _edgePos = 0;
@@ -228,43 +235,25 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
 HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForHexagon()
 {
     ShapeGeneratorResult result;
+    int n = _nodePos;
 
-    auto edgeLength = _edgePos / 6 + 1;
-    if (_edgePos % 6 == 1) {
-        --edgeLength;
+    result.angle = getHexagonAngle(n);
+    result.requiredNodeId1 = getHexagonRequiredNodeId1(n);
+    result.requiredNodeId2 = getHexagonRequiredNodeId2(n);
+    result.requiredNodeId3 = getHexagonRequiredNodeId3(n);
+
+    result.numAdditionalConnections = 0;
+    if (result.requiredNodeId1 != -1) {
+        ++result.numAdditionalConnections;
+    }
+    if (result.requiredNodeId2 != -1) {
+        ++result.numAdditionalConnections;
+    }
+    if (result.requiredNodeId3 != -1) {
+        ++result.numAdditionalConnections;
     }
 
-    if (_edgePos < 2) {
-        result.angle = 120.0f;
-        result.numAdditionalConnections = 0;
-        result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
-    } else if (_edgePos < 6) {
-        result.angle = 60.0f;
-        result.numAdditionalConnections = 1;
-        result.requiredNodeId1 = 0;
-        result.requiredNodeId2 = -1;
-    } else {
-        result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
-
-        if (_nodePos < edgeLength - 1) {
-            result.numAdditionalConnections = 2;
-            result.requiredNodeId1 = _connectedNodePos1;
-            result.requiredNodeId2 = _connectedNodePos1 + 1;
-        } else {
-            result.numAdditionalConnections = 1;
-            result.requiredNodeId1 = _connectedNodePos1;
-            result.requiredNodeId2 = -1;
-        }
-    }
-
-    if (_edgePos >= 6 && _nodePos < edgeLength - 1) {
-        ++_connectedNodePos1;
-    }
-    if (++_nodePos >= edgeLength) {
-        _nodePos = 0;
-        ++_edgePos;
-    }
+    ++_nodePos;
     return result;
 }
 
@@ -381,7 +370,7 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
 {
     ShapeGeneratorResult result;
     if (_edgePos < 12 || (_edgePos == 12 && _nodePos == 0)) {
-        return generateNextConstructionDataForHexagon();
+        return generateNextConstructionDataForSpiralHexagon();
     }
 
     if (_nodePos == 1) {
@@ -404,7 +393,7 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
 {
     ShapeGeneratorResult result;
     if (_edgePos < 6) {
-        return generateNextConstructionDataForHexagon();
+        return generateNextConstructionDataForSpiralHexagon();
     }
 
     if (_nodePos == 0) {
@@ -455,4 +444,339 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     }
     ++_nodePos;
     return result;
+}
+
+HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSpiralHexagon()
+{
+    ShapeGeneratorResult result;
+
+    auto edgeLength = _edgePos / 6 + 1;
+    if (_edgePos % 6 == 1) {
+        --edgeLength;
+    }
+
+    if (_edgePos < 2) {
+        result.angle = 120.0f;
+        result.numAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
+        result.requiredNodeId2 = -1;
+    } else if (_edgePos < 6) {
+        result.angle = 60.0f;
+        result.numAdditionalConnections = 1;
+        result.requiredNodeId1 = 0;
+        result.requiredNodeId2 = -1;
+    } else {
+        result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
+
+        if (_nodePos < edgeLength - 1) {
+            result.numAdditionalConnections = 2;
+            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId2 = _connectedNodePos1 + 1;
+        } else {
+            result.numAdditionalConnections = 1;
+            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId2 = -1;
+        }
+    }
+
+    if (_edgePos >= 6 && _nodePos < edgeLength - 1) {
+        ++_connectedNodePos1;
+    }
+    if (++_nodePos >= edgeLength) {
+        _nodePos = 0;
+        ++_edgePos;
+    }
+    return result;
+}
+
+HOST_DEVICE float ShapeGenerator::getHexagonAngle(int n)
+{
+    if (n == 0) {
+        return 0.0f;
+    }
+    --n;
+
+    if (n < 6) {
+        float ring1Angles[6] = {60.0f, 60.0f, 120.0f, -120.0f, 120.0f, -120.0f};
+        return ring1Angles[n];
+    }
+
+    int k = 2;
+    while (3 * k * (k + 1) <= n) {
+        ++k;
+    }
+
+    bool odd = (k % 2 == 1);
+    int ringStart = 3 * (k - 1) * k;
+    int local = n - ringStart;
+    int block = local / k;
+    int pos = local % k;
+
+    switch (block) {
+    case 0:
+        if (pos == 0) {
+            return odd ? 60.0f : -60.0f;
+        }
+        return 0.0f;
+    case 1:
+        return (pos % 2 == 0) ? (odd ? 120.0f : -120.0f) : (odd ? -120.0f : 120.0f);
+    case 2:
+        if (odd) {
+            if (pos == 0) {
+                return -120.0f;
+            }
+            if (pos == 1) {
+                return 60.0f;
+            }
+            return (pos % 2 == 0) ? 120.0f : -120.0f;
+        }
+        return (pos % 2 == 0) ? -120.0f : 120.0f;
+    case 3:
+        if (odd) {
+            return (pos % 2 == 0) ? -120.0f : 120.0f;
+        }
+        if (pos == 0) {
+            return -120.0f;
+        }
+        if (pos == 1) {
+            return -60.0f;
+        }
+        return (pos % 2 == 0) ? 120.0f : -120.0f;
+    case 4:
+        return (pos % 2 == 0) ? 120.0f : -120.0f;
+    case 5:
+        if (pos < k - 1) {
+            return 0.0f;
+        }
+        return odd ? -120.0f : 120.0f;
+    default:
+        return 0.0f;
+    }
+}
+
+HOST_DEVICE int ShapeGenerator::getHexagonRequiredNodeId1(int n)
+{
+    if (n <= 0) {
+        return -1;
+    }
+
+    int k = 1;
+    while (3 * k * (k + 1) < n) {
+        ++k;
+    }
+
+    int firstIndex = 3 * (k - 1) * k + 1;
+    int local = n - firstIndex;
+    int side = local / k;
+    int pos = local % k;
+
+    if (k == 1) {
+        int ring1[6] = {-1, -1, -1, 2, 3, 4};
+        return ring1[local];
+    }
+
+    int s = 3 * k * (k - 1) + 1;
+    int prevS = 3 * (k - 1) * (k - 2) + 1;
+
+    switch (side) {
+    case 0:
+        if (pos <= 1) {
+            return s - 2;
+        }
+        return s - (pos + 1);
+    case 1:
+        if (pos == 0) {
+            return -1;
+        }
+        return s + k - 2 + pos;
+    case 2:
+        if ((k % 2 == 1) && pos == k - 1) {
+            return -1;
+        }
+        return s + 2 * k - 2 + pos;
+    case 3:
+        if (k == 4 && pos == 2) {
+            return s + 3 * k - 1;
+        }
+        return s + 3 * k - 2 + pos;
+    case 4:
+        if (k == 2) {
+            if (pos == 0) {
+                return 12;
+            }
+            return 14;
+        }
+        return s + 4 * k - 2 + pos;
+    case 5:
+        if (pos == 0) {
+            return s + 5 * k - 2;
+        }
+        return prevS + k - pos;
+    default:
+        return -1;
+    }
+}
+
+HOST_DEVICE int ShapeGenerator::getHexagonRequiredNodeId2(int n)
+{
+    if (n <= 0) {
+        return -1;
+    }
+
+    int k = 1;
+    while (3 * k * (k + 1) < n) {
+        ++k;
+    }
+
+    int firstIndex = 3 * (k - 1) * k + 1;
+    int local = n - firstIndex;
+    int side = local / k;
+    int pos = local % k;
+
+    if (k == 1) {
+        int ring1[6] = {-1, -1, -1, 1, -1, 0};
+        return ring1[local];
+    }
+
+    switch (side) {
+    case 0:
+        if (pos == 0 || pos == k - 1) {
+            return -1;
+        }
+        return 3 * k * k - 3 * k - 2 - (pos - 1);
+    case 1:
+        if (pos % 2 == 0) {
+            return -1;
+        }
+        return 3 * k * k - 4 * k + 1 - (pos - 1);
+    case 2:
+        if (k % 2 == 1) {
+            if (pos == k - 1) {
+                return -1;
+            }
+            if (pos % 2 == 0) {
+                return 3 * k * k - 5 * k + 2 - pos;
+            }
+            return -1;
+        }
+        if (pos % 2 == 1) {
+            return 3 * k * k - 5 * k + 1 - (pos - 1);
+        }
+        return -1;
+    case 3:
+        if (k % 2 == 1) {
+            if (pos == 0) {
+                return 3 * k * k - 2;
+            }
+            if (pos >= 2 && pos % 2 == 0) {
+                return 3 * k * k - 6 * k + 4 - (pos - 2);
+            }
+            return -1;
+        }
+        if (pos >= 2 && pos % 2 == 0) {
+            return 3 * k * k - 6 * k + 3 - (pos - 2);
+        }
+        return -1;
+    case 4:
+        if (k % 2 == 1) {
+            if (pos % 2 == 1) {
+                return 3 * k * k - 7 * k + 5 - (pos - 1);
+            }
+            return -1;
+        }
+        if (pos % 2 == 0) {
+            if (k == 2) {
+                if (pos == 0) {
+                    return 3;
+                }
+                return -1;
+            }
+            return 3 * k * k - 6 * k + 2 - pos;
+        }
+        return -1;
+    case 5: {
+        int prevFirstIndex = 3 * (k - 2) * (k - 1) + 1;
+        return prevFirstIndex + (k - 1 - pos);
+    }
+    default:
+        return -1;
+    }
+}
+
+HOST_DEVICE int ShapeGenerator::getHexagonRequiredNodeId3(int n)
+{
+    if (n <= 0) {
+        return -1;
+    }
+
+    int k = 1;
+    while (3 * k * (k + 1) < n) {
+        ++k;
+    }
+
+    int firstIndex = 3 * (k - 1) * k + 1;
+    int local = n - firstIndex;
+    int side = local / k;
+    int pos = local % k;
+
+    if (k == 1) {
+        int ring1[6] = {-1, -1, -1, 0, -1, -1};
+        return ring1[local];
+    }
+
+    switch (side) {
+    case 0:
+        return -1;
+    case 1:
+        if (pos % 2 == 0) {
+            return -1;
+        }
+        return 3 * k * k - 4 * k - 1 - (pos - 1);
+    case 2:
+        if (k % 2 == 1) {
+            if (pos % 2 == 0 && pos <= k - 3) {
+                if (k == 3) {
+                    return 13;
+                }
+                return 3 * k * k - 5 * k - (pos / 2);
+            }
+            return -1;
+        }
+        if (pos % 2 == 1 && pos <= k - 3) {
+            return 3 * k * k - 5 * k - 1 - ((pos - 1) / 2);
+        }
+        return -1;
+    case 3:
+        if (k % 2 == 1) {
+            if (pos % 2 == 0) {
+                return 3 * k * k - 6 * k + 4 - pos;
+            }
+            return -1;
+        }
+        if (pos == 2) {
+            return 3 * k * k - 6 * k + 2;
+        }
+        return -1;
+    case 4:
+        if (k % 2 == 1) {
+            if (pos % 2 == 1) {
+                return 3 * k * k - 7 * k + 3 - (pos - 1);
+            }
+            return -1;
+        }
+        if (pos % 2 == 0) {
+            if (k == 2) {
+                if (pos == 0) {
+                    return 2;
+                }
+                return -1;
+            }
+            return 3 * k * k - 6 * k - pos;
+        }
+        return -1;
+    case 5:
+        return -1;
+    default:
+        return -1;
+    }
 }

@@ -40,6 +40,7 @@ private:
         int numAdditionalConnections;  // -1 = none
         int requiredNodeId1;           // -1 = none
         int requiredNodeId2;           // -1 = none
+        int requiredNodeId3;           // -1 = none
     };
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
@@ -257,11 +258,13 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
                 result.numAdditionalConnections = generationResult.numAdditionalConnections;
                 result.requiredNodeId1 = generationResult.requiredNodeId1;
                 result.requiredNodeId2 = generationResult.requiredNodeId2;
+                result.requiredNodeId3 = generationResult.requiredNodeId3;
             }
         }
     } else {
         result.requiredNodeId1 = -1;
         result.requiredNodeId2 = -1;
+        result.requiredNodeId3 = -1;
     }
 
     if (result.gene->numNodes == 1) {
@@ -679,7 +682,10 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
                 if (constructionData.numAdditionalConnections >= 1 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId1) {
                     return true;
                 }
-                if (constructionData.numAdditionalConnections == 2 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId2) {
+                if (constructionData.numAdditionalConnections >= 2 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId2) {
+                    return true;
+                }
+                if (constructionData.numAdditionalConnections >= 3 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId3) {
                     return true;
                 }
                 return false;
