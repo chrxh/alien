@@ -477,7 +477,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             auto& connection = newObject->connections[1];
             connection.object = lastObject;
             connection.distance = desiredDistance;
-            connection.angleFromPrevious = 180.0f;
+            connection.angleFromPrevious = 180.0f - constructionData.angle;
         }
 
         // Connection between newObject and hostObject
@@ -485,7 +485,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             auto& connection = newObject->connections[0];
             connection.object = hostObject;
             connection.distance = desiredDistance;
-            connection.angleFromPrevious = 180.0f;
+            connection.angleFromPrevious = 180.0f + constructionData.angle;
         }
         {
             auto index = hostObject->getConnectionIndex(lastObject);
