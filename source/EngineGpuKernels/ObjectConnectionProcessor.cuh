@@ -21,7 +21,10 @@ public:
     __inline__ __device__ static void processDeleteConnectionOperations(SimulationData& data);
 
     // desiredRelAngle is given on object1 with respect to inserted connection and between [0, +360)
-    __inline__ __device__ static bool tryAddConnectionWithRelativeAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredRelAngle = 0);
+    // if desiredRelAngle=0: angle will be automatically determined by current geometry
+    // if desiredDistance=0: distance will be automatically determined by current geometry
+    __inline__ __device__ static bool
+    tryAddConnectionWithRelativeAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance = 0, float desiredRelAngle = 0);
 
     // desiredAbsAngle is given on object1 with respect to connections[0] and between [0, +360)
     __inline__ __device__ static bool tryAddConnectionWithAbsAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle);
@@ -306,7 +309,7 @@ __inline__ __device__ void ObjectConnectionProcessor::lockAndTryAddConnections(S
 
         if (!alreadyConnected && object1->numConnections < MAX_OBJECT_CONNECTIONS && object2->numConnections < MAX_OBJECT_CONNECTIONS) {
 
-            tryAddConnectionWithRelativeAngle(data, object1, object2, 0, 0);
+            tryAddConnectionWithRelativeAngle(data, object1, object2);
         }
 
         lock.releaseLock();
