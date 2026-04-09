@@ -272,7 +272,7 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.requiredNodeId2 = e.r2;
         result.requiredNodeId3 = e.r3;
     } else {
-        // Ring decomposition for angle
+        // Shell decomposition for angle
         int k = 1;
         while (1 + 3 * k * (k + 1) <= n) {
             ++k;
