@@ -381,7 +381,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
 
     if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparation) {
         auto distance = constructionData.gene->connectionDistance;
-        if (!ObjectConnectionProcessor::tryAddConnections(data, hostObject, newObject, anglesForNewConnection.referenceAngle, 0, distance)) {
+        if (!ObjectConnectionProcessor::tryAddConnection(data, hostObject, newObject, anglesForNewConnection.referenceAngle, 0, distance)) {
             ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
         }
     }
@@ -422,14 +422,12 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         return nullptr;
     }
 
-    Object* objectsToConnect[MAX_OBJECT_CONNECTIONS];
+    Object* objectsToConnect[3];
     int numObjectsToConnect;
     getObjectsToConnect(objectsToConnect, numObjectsToConnect, data, hostObject, newObjectPos, constructionData);
 
-    if (constructionData.numAdditionalConnections != -1) {
-        if (numObjectsToConnect < constructionData.numAdditionalConnections) {
-            return nullptr;
-        }
+    if (numObjectsToConnect < constructionData.numAdditionalConnections) {
+        return nullptr;
     }
 
     if (!checkAndReduceHostEnergy(data, hostObject, constructionData)) {
@@ -512,48 +510,32 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         }
     }
 
-    // Get surrounding cells
-    if (numObjectsToConnect > 0 && constructionData.numAdditionalConnections != 0) {
+    // Connect to surrounding cells if possible
+    int numConnectedObjects = 0;
+    for (int i = 0; i < numObjectsToConnect; ++i) {
+        Object* otherObject = objectsToConnect[i];
 
-        // Sort surrounding cells by distance from newObject
-        bubbleSort(objectsToConnect, numObjectsToConnect, [&](auto const& object1, auto const& object2) {
-            auto lastObjectAngle = Math::angleOfVector(data.objectMap.getCorrectedDirection(lastObject->pos - newObject->pos));
-            auto object1Angle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object1->pos - newObject->pos));
-            auto object2Angle = Math::angleOfVector(data.objectMap.getCorrectedDirection(object2->pos - newObject->pos));
-            auto angleDiff1 = Math::getNormalizedAngle(Math::subtractAngle(object1Angle, lastObjectAngle), -180.0f);
-            auto angleDiff2 = Math::getNormalizedAngle(Math::subtractAngle(object2Angle, lastObjectAngle), -180.0f);
-            return abs(angleDiff1) < abs(angleDiff2);
-        });
-
-        // Connect surrounding cells if possible
-        int numConnectedObjects = 0;
-        for (int i = 0; i < numObjectsToConnect; ++i) {
-            Object* otherObject = objectsToConnect[i];
-
-            if (otherObject->tryLock()) {
-                if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
-                    if (ObjectConnectionProcessor::tryAddConnections(
-                            data, newObject, otherObject, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
-                        ++numConnectedObjects;
-                    }
-                }
-                otherObject->releaseLock();
-            }
-            if (constructionData.numAdditionalConnections != -1) {
-                if (numConnectedObjects == constructionData.numAdditionalConnections) {
-                    break;
+        if (otherObject->tryLock()) {
+            if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
+                if (ObjectConnectionProcessor::tryAddConnection(
+                        data, newObject, otherObject, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
+                    ++numConnectedObjects;
                 }
             }
+            otherObject->releaseLock();
+        }
+        if (numConnectedObjects == constructionData.numAdditionalConnections) {
+            break;
         }
     }
 
+        // Adapt angles on other connected cells
     if (adaptReferenceAngles) {
 
         auto n = newObject->numConnections;
         auto lastObjectIndex = newObject->getConnectionIndex(constructionData.lastConstructionObject);
         auto hostObjectIndex = newObject->getConnectionIndex(hostObject);
 
-        // Adapt angles on other connected cells
         for (int i = lastObjectIndex; (i + n) % n != (hostObjectIndex + 1) % n && (i + n) % n != hostObjectIndex; --i) {
             correctAnglesByInnerAngleSum(newObject->getConnectedObject(i), newObject, newObject->getConnectedObject(i - 1));
         }
@@ -562,22 +544,22 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         }
 
         // Adapt angles on new cell
-        float consumedAngle1 = 0;
-        if (n > 2) {
-            for (int i = lastObjectIndex; (i + n) % n != (hostObjectIndex + 1) % n && (i + n) % n != hostObjectIndex; --i) {
-                consumedAngle1 += newObject->connections[(i + n) % n].angleFromPrevious;
-            }
-        }
-        float consumedAngle2 = 0;
-        if (n > 2) {
-            for (int i = lastObjectIndex + 1; i % n != hostObjectIndex; ++i) {
-                consumedAngle2 += newObject->connections[i % n].angleFromPrevious;
-            }
-        }
-        if (angleFromPreviousForNewObject - consumedAngle1 >= 0 && 360.0f - angleFromPreviousForNewObject - consumedAngle2 >= 0) {
-            newObject->connections[(hostObjectIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewObject - consumedAngle1;
-            newObject->connections[hostObjectIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewObject - consumedAngle2;
-        }
+        //float consumedAngle1 = 0;
+        //if (n > 2) {
+        //    for (int i = lastObjectIndex; (i + n) % n != (hostObjectIndex + 1) % n && (i + n) % n != hostObjectIndex; --i) {
+        //        consumedAngle1 += newObject->connections[(i + n) % n].angleFromPrevious;
+        //    }
+        //}
+        //float consumedAngle2 = 0;
+        //if (n > 2) {
+        //    for (int i = lastObjectIndex + 1; i % n != hostObjectIndex; ++i) {
+        //        consumedAngle2 += newObject->connections[i % n].angleFromPrevious;
+        //    }
+        //}
+        //if (angleFromPreviousForNewObject - consumedAngle1 >= 0 && 360.0f - angleFromPreviousForNewObject - consumedAngle2 >= 0) {
+        //    newObject->connections[(hostObjectIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewObject - consumedAngle1;
+        //    newObject->connections[hostObjectIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewObject - consumedAngle2;
+        //}
     }
 
     activateNewObjectOnLastNode(newObject, hostObject, constructionData);
@@ -594,140 +576,35 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
     float2 const& newObjectPos,
     ConstructionData const& constructionData)
 {
-    numResultCells = 0;
-
     if (constructionData.numAdditionalConnections == 0) {
         return;
     }
 
-    Object* nearObjects[MAX_OBJECT_CONNECTIONS * 4];
-    int numNearObjects;
-    data.objectMap.getMatchingObjects(
-        nearObjects,
-        MAX_OBJECT_CONNECTIONS * 4,
-        numNearObjects,
-        newObjectPos,
-        cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color],
-        hostObject->detached,
-        [&](Object* const& otherObject) { return otherObject != hostObject && otherObject != constructionData.lastConstructionObject; });
-
-    Object* otherObjectCandidates[MAX_OBJECT_CONNECTIONS * 2];
-    int numOtherObjectCandidates;
-
-    if (constructionData.requiredNodeId1 == -1) {
-        auto const& lastConstructionCell = constructionData.lastConstructionObject;
-
-        float angleFromPrevious1;
-        float angleFromPrevious2;
-        for (int i = 0; i < lastConstructionCell->numConnections; ++i) {
-            if (lastConstructionCell->connections[i].object == hostObject) {
-                angleFromPrevious1 = lastConstructionCell->connections[i].angleFromPrevious;
-                angleFromPrevious2 = lastConstructionCell->connections[(i + 1) % lastConstructionCell->numConnections].angleFromPrevious;
-                break;
-            }
+    data.objectMap.executeForEach(newObjectPos, SimulationParameters::attackerCreatureSensorRange, hostObject->detached, [&](auto const& otherObject) {
+        if (otherObject->type != ObjectType_Cell) {
+            return;
         }
-        auto n = Math::getNormalized(hostObject->pos - lastConstructionCell->pos);
-        Math::rotateQuarterClockwise(n);
-
-        // assemble surrounding cell candidates
-        data.objectMap.getMatchingObjects(
-            otherObjectCandidates,
-            MAX_OBJECT_CONNECTIONS * 2,
-            numOtherObjectCandidates,
-            newObjectPos,
-            cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color],
-            hostObject->detached,
-            [&](Object* const& otherObject) {
-                if (otherObject->type != ObjectType_Cell) {
-                    return false;
-                }
-                if (otherObject == constructionData.lastConstructionObject || otherObject == hostObject
-                    || (otherObject->typeData.cell.cellState != CellState_Constructing && otherObject->typeData.cell.activationTime == 0) || otherObject->typeData.cell.creature != constructionData.creature
-                    || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
-                    return false;
-                }
-
-                // discard cells that are not on the correct side
-                if (abs(angleFromPrevious1 - angleFromPrevious2) > NEAR_ZERO) {
-                    auto delta = data.objectMap.getCorrectedDirection(otherObject->pos - lastConstructionCell->pos);
-                    if (angleFromPrevious2 < angleFromPrevious1) {
-                        if (Math::dot(delta, n) < 0) {
-                            return false;
-                        }
-                    }
-                    if (angleFromPrevious2 > angleFromPrevious1) {
-                        if (Math::dot(delta, n) > 0) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            });
-    } else {
-        data.objectMap.getMatchingObjects(
-            otherObjectCandidates,
-            MAX_OBJECT_CONNECTIONS * 2,
-            numOtherObjectCandidates,
-            newObjectPos,
-            cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color],
-            hostObject->detached,
-            [&](Object* const& otherObject) {
-                if (otherObject->type != ObjectType_Cell) {
-                    return false;
-                }
-                if (otherObject->typeData.cell.cellState != CellState_Constructing || otherObject->typeData.cell.creature != constructionData.creature
-                    || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
-                    return false;
-                }
-                if (constructionData.numAdditionalConnections >= 1 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId1) {
-                    return true;
-                }
-                if (constructionData.numAdditionalConnections >= 2 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId2) {
-                    return true;
-                }
-                if (constructionData.numAdditionalConnections >= 3 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId3) {
-                    return true;
-                }
-                return false;
-            });
-    }
-
-    // evaluate candidates (locking is needed for the evaluation)
-    for (int i = 0; i < numOtherObjectCandidates; ++i) {
-        Object* otherObject = otherObjectCandidates[i];
-        if (otherObject->tryLock()) {
-            bool crossingLinks = false;
-            for (int j = 0; j < numNearObjects; ++j) {
-                auto nearObject = nearObjects[j];
-                if (otherObject == nearObject) {
-                    continue;
-                }
-                if (nearObject->tryLock()) {
-                    for (int k = 0; k < nearObject->numConnections; ++k) {
-                        if (nearObject->connections[k].object == otherObject) {
-                            continue;
-                        }
-                        if (Math::crossing(newObjectPos, otherObject->pos, nearObject->pos, nearObject->connections[k].object->pos)) {
-                            crossingLinks = true;
-                        }
-                    }
-                    nearObject->releaseLock();
-                } else {
-                    // crossingLinks = true;
-                }
-            }
-            if (!crossingLinks) {
-                auto delta = data.objectMap.getCorrectedDirection(newObjectPos - otherObject->pos);
-                if (ObjectConnectionProcessor::hasAngleSpace(data, otherObject, Math::angleOfVector(delta), constructionData.gene->angleAlignment)) {
-                    result[numResultCells++] = otherObject;
-                }
-            }
-            otherObject->releaseLock();
+        if (otherObject == hostObject || (otherObject->typeData.cell.cellState != CellState_Constructing && otherObject->typeData.cell.activationTime == 0)
+            || otherObject->typeData.cell.creature != constructionData.creature
+            || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
+            return;
         }
-        if (numResultCells == MAX_OBJECT_CONNECTIONS) {
-            break;
+        if (constructionData.numAdditionalConnections >= 1 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId1) {
+            result[0] = otherObject;
+            ++numResultCells;
+            return;
         }
-    }
+        if (constructionData.numAdditionalConnections >= 2 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId2) {
+            result[1] = otherObject;
+            ++numResultCells;
+            return;
+        }
+        if (constructionData.numAdditionalConnections >= 3 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId3) {
+            result[2] = otherObject;
+            ++numResultCells;
+            return;
+        }
+    });
 }
 
 __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(

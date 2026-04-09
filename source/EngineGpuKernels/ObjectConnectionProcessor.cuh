@@ -20,7 +20,11 @@ public:
     __inline__ __device__ static void processDeleteObjectOperations(SimulationData& data);
     __inline__ __device__ static void processDeleteConnectionOperations(SimulationData& data);
 
-    __inline__ __device__ static bool tryAddConnections(
+    // desiredAngle is given on object1 with respect to connections[0] and between [0, +360)
+    __inline__ __device__ static bool
+    tryAddConnectionWithAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAngle);
+
+    __inline__ __device__ static bool tryAddConnection(
         SimulationData& data,
         Object* object1,
         Object* object2,
@@ -60,8 +64,11 @@ private:
         Object* object2,
         float2 const& posDelta,
         float desiredDistance,
-        float desiredAngleOnCell1 = 0,
+        float desiredAngleOnObject1 = 0,
         ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_None);
+
+    // desiredAngle is given on object1 with respect to connections[0] and between [0, +360)
+    __inline__ __device__ static bool tryAddConnectionWithAngleOneWay(Object* object1, Object* object2, float desiredDistance, float desiredAngle);
 };
 
 /************************************************************************/
@@ -223,7 +230,32 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
     }
 }
 
-__inline__ __device__ bool ObjectConnectionProcessor::tryAddConnections(
+__inline__ __device__ bool
+ObjectConnectionProcessor::tryAddConnectionWithAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAngle)
+{
+    auto posDelta = object2->pos - object1->pos;
+    data.objectMap.correctDirection(posDelta);
+
+    ObjectConnection origConnections[MAX_OBJECT_CONNECTIONS];
+    int origNumConnection = object1->numConnections;
+    for (int i = 0; i < origNumConnection; ++i) {
+        origConnections[i] = object1->connections[i];
+    }
+
+    if (!tryAddConnectionWithAngleOneWay(object1, object2, desiredDistance, desiredAngle)) {
+        return false;
+    }
+    if (!tryAddConnectionOneWay(data, object2, object1, posDelta * (-1), desiredDistance)) {
+        object1->numConnections = origNumConnection;
+        for (int i = 0; i < origNumConnection; ++i) {
+            object1->connections[i] = origConnections[i];
+        }
+        return false;
+    }
+    return true;
+}
+
+__inline__ __device__ bool ObjectConnectionProcessor::tryAddConnection(
     SimulationData& data,
     Object* object1,
     Object* object2,
@@ -276,7 +308,7 @@ __inline__ __device__ void ObjectConnectionProcessor::lockAndtryAddConnections(S
 
         if (!alreadyConnected && object1->numConnections < MAX_OBJECT_CONNECTIONS && object2->numConnections < MAX_OBJECT_CONNECTIONS) {
 
-            tryAddConnections(data, object1, object2, 0, 0, 0);
+            tryAddConnection(data, object1, object2, 0, 0, 0);
         }
 
         lock.releaseLock();
@@ -289,7 +321,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     Object* object2,
     float2 const& posDelta,
     float desiredDistance,
-    float desiredAngleOnCell1,
+    float desiredAngleOnObject1,
     ConstructorAngleAlignment angleAlignment)
 {
     if (object1->numConnections == MAX_OBJECT_CONNECTIONS) {
@@ -330,8 +362,8 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
         data.objectMap.correctDirection(connectedObjectDelta);
         auto prevAngle = Math::angleOfVector(connectedObjectDelta);
         auto angleDiff = Math::subtractAngle(newAngle, prevAngle);
-        if (0 != desiredAngleOnCell1) {
-            angleDiff = desiredAngleOnCell1;
+        if (0 != desiredAngleOnObject1) {
+            angleDiff = desiredAngleOnObject1;
         }
         angleDiff = Math::alignAngle(angleDiff, angleAlignment);
         if (angleDiff < 0) {
@@ -375,13 +407,13 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
 
     float angleFromPrevious;
     auto refAngle = object1->connections[index].angleFromPrevious;
-    if (0 == desiredAngleOnCell1) {
+    if (0 == desiredAngleOnObject1) {
         auto angleDiff1 = Math::subtractAngle(newAngle, prevAngle);
         auto angleDiff2 = Math::subtractAngle(nextAngle, prevAngle);
         auto newAngleFraction = angleDiff2 != 0 ? angleDiff1 / angleDiff2 : 0.5f;
         angleFromPrevious = refAngle * newAngleFraction;
     } else {
-        angleFromPrevious = desiredAngleOnCell1;
+        angleFromPrevious = desiredAngleOnObject1;
     }
     angleFromPrevious = min(angleFromPrevious, refAngle);
 
@@ -391,9 +423,6 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     newConnection.angleFromPrevious = angleFromPrevious;
 
     // insert new connection
-    if (index == 0) {
-        index = object1->numConnections;  // connection at index 0 should be an invariant
-    }
     if (index == 0) {
         index = object1->numConnections;  // connection at index 0 should be an invariant
     }
@@ -434,6 +463,42 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     }
 
     return true;
+}
+
+__inline__ __device__ bool
+ObjectConnectionProcessor::tryAddConnectionWithAngleOneWay(Object* object1, Object* object2, float desiredDistance, float desiredAngle)
+{
+    auto const& n = object1->numConnections;
+    CUDA_CHECK(n > 0);
+
+    // Find connection index to insert
+    auto insertIndex = 0;
+    auto summedAngle = 0.0f;
+    for (int i = 1; i <= n; ++i) {
+        auto const& angleFromPrevious = object1->getConnection(i).angleFromPrevious;
+
+        if (desiredAngle >= summedAngle - NEAR_ZERO && desiredAngle < summedAngle + angleFromPrevious) {
+            insertIndex = i;
+            break;
+        }
+        summedAngle += angleFromPrevious;
+    }
+    CUDA_CHECK(insertIndex > 0);
+
+    // Create new connection object
+    ObjectConnection newConnection;
+    newConnection.object = object2;
+    newConnection.distance = desiredDistance;
+    newConnection.angleFromPrevious = desiredAngle - summedAngle;
+
+    // Insert new connection
+    auto refAngle = object1->connections[insertIndex].angleFromPrevious;
+    for (int j = object1->numConnections; j > insertIndex; --j) {
+        object1->connections[j] = object1->connections[j - 1];
+    }
+    object1->connections[insertIndex] = newConnection;
+    object1->connections[(insertIndex + 1) % (object1->numConnections + 1)].angleFromPrevious = refAngle - newConnection.angleFromPrevious;
+    ++object1->numConnections;
 }
 
 __inline__ __device__ void ObjectConnectionProcessor::deleteConnectionOneWay(Object* object1, Object* object2)
