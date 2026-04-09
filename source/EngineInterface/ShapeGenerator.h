@@ -673,7 +673,7 @@ HOST_DEVICE int ShapeGenerator::getHexagonRequiredNodeId2(int n)
             return -1;
         }
         if (pos >= 2 && pos % 2 == 0) {
-            return 3 * k * k - 6 * k + 3 - (pos - 2);
+            return 3 * k * k - 6 * k + 3 - ((pos - 2) / 2);
         }
         return -1;
     case 4:
@@ -690,7 +690,7 @@ HOST_DEVICE int ShapeGenerator::getHexagonRequiredNodeId2(int n)
                 }
                 return -1;
             }
-            return 3 * k * k - 6 * k + 2 - pos;
+            return 3 * k * k - 7 * k + 6 - pos;
         }
         return -1;
     case 5: {
