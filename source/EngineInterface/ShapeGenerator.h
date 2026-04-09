@@ -31,11 +31,6 @@ private:
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForZigzag();
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForSpiralHexagon();
 
-    HOST_DEVICE float getHexagonAngle(int n);
-    HOST_DEVICE int getHexagonRequiredNodeId1(int n);
-    HOST_DEVICE int getHexagonRequiredNodeId2(int n);
-    HOST_DEVICE int getHexagonRequiredNodeId3(int n);
-
     int _nodePos = 0;
     int _edgePos = 0;
     int _connectedNodePos2 = 0;
@@ -237,10 +232,231 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     ShapeGeneratorResult result;
     int n = _nodePos;
 
-    result.angle = getHexagonAngle(n);
-    result.requiredNodeId1 = getHexagonRequiredNodeId1(n);
-    result.requiredNodeId2 = getHexagonRequiredNodeId2(n);
-    result.requiredNodeId3 = getHexagonRequiredNodeId3(n);
+    if (n <= 0) {
+        ++_nodePos;
+        return result;
+    }
+
+    if (n <= 21) {
+        struct BaseEntry
+        {
+            float angle;
+            int r1, r2, r3;
+        };
+        BaseEntry baseTable[21] = {
+            {60.0f, -1, -1, -1},    // 1
+            {60.0f, -1, -1, -1},    // 2
+            {120.0f, -1, -1, -1},   // 3
+            {-120.0f, 2, 1, 0},     // 4
+            {120.0f, 3, -1, -1},    // 5
+            {-120.0f, 4, 0, -1},    // 6
+            {-60.0f, 5, -1, -1},    // 7
+            {0.0f, 5, -1, -1},      // 8
+            {-120.0f, -1, -1, -1},  // 9
+            {120.0f, 8, 5, 3},      // 10
+            {-120.0f, 9, -1, -1},   // 11
+            {120.0f, 10, 3, -1},    // 12
+            {-120.0f, 11, -1, -1},  // 13
+            {-60.0f, 12, -1, -1},   // 14
+            {120.0f, 12, 3, 2},     // 15
+            {-120.0f, 14, -1, -1},  // 16
+            {0.0f, 15, 2, -1},      // 17
+            {120.0f, 2, 1, -1},     // 18
+            {60.0f, 17, -1, -1},    // 19
+            {0.0f, 17, 16, -1},     // 20
+            {0.0f, 16, -1, -1},     // 21
+        };
+        auto const& e = baseTable[n - 1];
+        result.angle = e.angle;
+        result.requiredNodeId1 = e.r1;
+        result.requiredNodeId2 = e.r2;
+        result.requiredNodeId3 = e.r3;
+    } else {
+        // Shell decomposition for angle
+        int k = 1;
+        while (1 + 3 * k * (k + 1) <= n) {
+            ++k;
+        }
+        int firstIndex = 1 + 3 * (k - 1) * k;
+        int local = n - firstIndex;
+        int side = local / k;
+        int pos = local % k;
+        bool odd = (k % 2 == 1);
+
+        switch (side) {
+        case 0:
+            result.angle = (pos == 0) ? (odd ? 60.0f : -60.0f) : 0.0f;
+            break;
+        case 1:
+            result.angle = (pos % 2 == 0) ? (odd ? 120.0f : -120.0f) : (odd ? -120.0f : 120.0f);
+            break;
+        case 2:
+            if (!odd) {
+                result.angle = (pos % 2 == 0) ? -120.0f : 120.0f;
+            } else if (pos == k - 2) {
+                result.angle = 60.0f;
+            } else if (pos == k - 1) {
+                result.angle = 120.0f;
+            } else {
+                result.angle = (pos % 2 == 0) ? -120.0f : 120.0f;
+            }
+            break;
+        case 3:
+            if (odd) {
+                result.angle = (pos % 2 == 0) ? -120.0f : 120.0f;
+            } else if (pos == 0) {
+                result.angle = -120.0f;
+            } else if (pos == 1) {
+                result.angle = -60.0f;
+            } else {
+                result.angle = (pos % 2 == 0) ? 120.0f : -120.0f;
+            }
+            break;
+        case 4:
+            result.angle = (pos % 2 == 0) ? 120.0f : -120.0f;
+            break;
+        case 5:
+            result.angle = (pos < k - 1) ? 0.0f : (odd ? -120.0f : 120.0f);
+            break;
+        default:
+            break;
+        }
+
+        // Shell decomposition for required node IDs
+        auto shellStart = [](int s) { return 3 * s * s - 2 * s + 1; };
+
+        int s = 3;
+        while (shellStart(s + 1) <= n) {
+            ++s;
+        }
+
+        int D = shellStart(s);
+        int Dp = shellStart(s - 1);
+        int t = n - D;
+
+        if (s % 2 == 1) {
+            // ODD SHELL
+            if (1 <= t && t <= 2 * s - 2) {
+                // Segment A: length 2*s - 2
+                int u = t - 1;
+                if (u % 2 == 0) {
+                    int j = u / 2;
+                    int y = Dp + (4 * s - 5) - 2 * j;
+                    if (j < s - 2) {
+                        result.requiredNodeId1 = n - 2;
+                        result.requiredNodeId2 = y;
+                        result.requiredNodeId3 = y - 2;
+                    } else {
+                        result.requiredNodeId1 = n - 2;
+                        result.requiredNodeId2 = y;
+                        result.requiredNodeId3 = y - 1;
+                    }
+                } else {
+                    result.requiredNodeId1 = n - 2;
+                }
+            } else if (2 * s <= t && t <= 4 * s) {
+                // Segment B: length 2*s + 1
+                int u = t - 2 * s;
+                int z0 = D - (4 * s - 3);
+                if (u == 0) {
+                    result.requiredNodeId1 = n - 2;
+                    result.requiredNodeId2 = n - 3;
+                    result.requiredNodeId3 = z0;
+                } else if (u % 2 == 1) {
+                    result.requiredNodeId1 = n - 2;
+                } else {
+                    int j = (u - 1) / 2;
+                    int z = z0 - 2 * j;
+                    if (j < s - 1) {
+                        result.requiredNodeId1 = n - 2;
+                        result.requiredNodeId2 = z;
+                        result.requiredNodeId3 = z - 2;
+                    } else {
+                        result.requiredNodeId1 = n - 2;
+                        result.requiredNodeId2 = z;
+                    }
+                }
+            } else if (4 * s + 1 <= t && t <= 5 * s - 1) {
+                // Segment C1: length s - 1
+                int j = t - (4 * s + 1);
+                result.requiredNodeId1 = Dp - j;
+                result.requiredNodeId2 = Dp - j - 1;
+            } else if (5 * s <= t && t <= 6 * s) {
+                // Segment C2: length s + 1
+                int u = t - 5 * s;
+                int E = D + 5 * s - 2;
+                if (u == 0) {
+                    result.requiredNodeId1 = n - 2;
+                } else if (u == s) {
+                    result.requiredNodeId1 = E - (s - 1);
+                } else {
+                    result.requiredNodeId1 = E - (u - 1);
+                    result.requiredNodeId2 = E - u;
+                }
+            }
+        } else {
+            // EVEN SHELL
+            if (1 <= t && t <= 2 * s) {
+                // Segment A1: length 2*s
+                int u = t - 1;
+                if (u % 2 == 0) {
+                    int j = u / 2;
+                    int y = Dp + (4 * s - 5) - 2 * j;
+                    if (j < s - 1) {
+                        result.requiredNodeId1 = n - 2;
+                        result.requiredNodeId2 = y;
+                        result.requiredNodeId3 = y - 2;
+                    } else {
+                        result.requiredNodeId1 = n - 2;
+                        result.requiredNodeId2 = y;
+                    }
+                } else {
+                    result.requiredNodeId1 = n - 2;
+                }
+            } else if (2 * s + 1 <= t && t <= 4 * s) {
+                // Segment A2: length 2*s
+                int u = t - (2 * s + 1);
+                int z0 = Dp + (2 * s - 3);
+                if (u == 0) {
+                    result.requiredNodeId1 = n - 2;
+                } else if (u == 1) {
+                    result.requiredNodeId1 = n - 3;
+                    result.requiredNodeId2 = z0;
+                    result.requiredNodeId3 = z0 - 1;
+                } else if (u % 2 == 0) {
+                    result.requiredNodeId1 = n - 2;
+                } else {
+                    int j = (u - 1) / 2;
+                    int z = z0 - 2 * (j - 1) - 1;
+                    if (j < s - 1) {
+                        result.requiredNodeId1 = n - 2;
+                        result.requiredNodeId2 = z;
+                        result.requiredNodeId3 = z - 2;
+                    } else {
+                        result.requiredNodeId1 = n - 2;
+                        result.requiredNodeId2 = z;
+                    }
+                }
+            } else if (4 * s + 1 <= t && t <= 5 * s - 1) {
+                // Segment C1: length s - 1
+                int j = t - (4 * s + 1);
+                result.requiredNodeId1 = Dp - j;
+                result.requiredNodeId2 = Dp - j - 1;
+            } else if (5 * s <= t && t <= 6 * s) {
+                // Segment C2: length s + 1
+                int u = t - 5 * s;
+                int E = D + 5 * s - 2;
+                if (u == 0) {
+                    result.requiredNodeId1 = n - 2;
+                } else if (u == s) {
+                    result.requiredNodeId1 = E - (s - 1);
+                } else {
+                    result.requiredNodeId1 = E - (u - 1);
+                    result.requiredNodeId2 = E - u;
+                }
+            }
+        }
+    }
 
     result.numAdditionalConnections = 0;
     if (result.requiredNodeId1 != -1) {
@@ -487,289 +703,4 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         ++_edgePos;
     }
     return result;
-}
-
-HOST_DEVICE float ShapeGenerator::getHexagonAngle(int n)
-{
-    if (n == 0) {
-        return 0.0f;
-    }
-
-    int k = 1;
-    while (1 + 3 * k * (k + 1) <= n) {
-        ++k;
-    }
-
-    int firstIndex = 1 + 3 * (k - 1) * k;
-    int local = n - firstIndex;
-    int side = local / k;
-    int pos = local % k;
-    bool odd = (k % 2 == 1);
-
-    if (k == 1) {
-        float ring1[6] = {60.0f, 60.0f, 120.0f, -120.0f, 120.0f, -120.0f};
-        return ring1[local];
-    }
-
-    switch (side) {
-    case 0:
-        if (pos == 0) {
-            return odd ? 60.0f : -60.0f;
-        }
-        return 0.0f;
-    case 1:
-        return (pos % 2 == 0) ? (odd ? 120.0f : -120.0f) : (odd ? -120.0f : 120.0f);
-    case 2:
-        if (!odd) {
-            return (pos % 2 == 0) ? -120.0f : 120.0f;
-        }
-        if (pos == k - 2) {
-            return 60.0f;
-        }
-        if (pos == k - 1) {
-            return 120.0f;
-        }
-        return (pos % 2 == 0) ? -120.0f : 120.0f;
-    case 3:
-        if (odd) {
-            return (pos % 2 == 0) ? -120.0f : 120.0f;
-        }
-        if (pos == 0) {
-            return -120.0f;
-        }
-        if (pos == 1) {
-            return -60.0f;
-        }
-        return (pos % 2 == 0) ? 120.0f : -120.0f;
-    case 4:
-        return (pos % 2 == 0) ? 120.0f : -120.0f;
-    case 5:
-        if (pos < k - 1) {
-            return 0.0f;
-        }
-        return odd ? -120.0f : 120.0f;
-    default:
-        return 0.0f;
-    }
-}
-
-HOST_DEVICE int ShapeGenerator::getHexagonRequiredNodeId1(int n)
-{
-    if (n <= 0) {
-        return -1;
-    }
-
-    int k = 1;
-    while (3 * k * (k + 1) < n) {
-        ++k;
-    }
-
-    int firstIndex = 3 * (k - 1) * k + 1;
-    int local = n - firstIndex;
-    int side = local / k;
-    int pos = local % k;
-
-    if (k == 1) {
-        int ring1[6] = {-1, -1, -1, 2, 3, 4};
-        return ring1[local];
-    }
-
-    int s = 3 * k * (k - 1) + 1;
-    int prevS = 3 * (k - 1) * (k - 2) + 1;
-
-    switch (side) {
-    case 0:
-        if (pos <= 1) {
-            return s - 2;
-        }
-        return s - (pos + 1);
-    case 1:
-        if (pos == 0) {
-            return -1;
-        }
-        return s + k - 2 + pos;
-    case 2:
-        if ((k % 2 == 1) && pos == k - 1) {
-            return -1;
-        }
-        return s + 2 * k - 2 + pos;
-    case 3:
-        if ((k % 2 == 0) && pos == 2) {
-            return s + 3 * k - 1;
-        }
-        return s + 3 * k - 2 + pos;
-    case 4:
-        if (k == 2) {
-            if (pos == 0) {
-                return 12;
-            }
-            return 14;
-        }
-        return s + 4 * k - 2 + pos;
-    case 5:
-        if (pos == 0) {
-            return s + 5 * k - 2;
-        }
-        return prevS + k - pos;
-    default:
-        return -1;
-    }
-}
-
-HOST_DEVICE int ShapeGenerator::getHexagonRequiredNodeId2(int n)
-{
-    if (n <= 0) {
-        return -1;
-    }
-
-    int k = 1;
-    while (3 * k * (k + 1) < n) {
-        ++k;
-    }
-
-    int firstIndex = 3 * (k - 1) * k + 1;
-    int local = n - firstIndex;
-    int side = local / k;
-    int pos = local % k;
-
-    if (k == 1) {
-        int ring1[6] = {-1, -1, -1, 1, -1, 0};
-        return ring1[local];
-    }
-
-    switch (side) {
-    case 0:
-        if (pos == 0 || pos == k - 1) {
-            return -1;
-        }
-        return 3 * k * k - 3 * k - 2 - (pos - 1);
-    case 1:
-        if (pos % 2 == 0) {
-            return -1;
-        }
-        return 3 * k * k - 4 * k + 1 - (pos - 1);
-    case 2:
-        if (k % 2 == 1) {
-            if (pos == k - 1) {
-                return -1;
-            }
-            if (pos % 2 == 0) {
-                return 3 * k * k - 5 * k + 2 - pos;
-            }
-            return -1;
-        }
-        if (pos % 2 == 1) {
-            return 3 * k * k - 5 * k + 1 - (pos - 1);
-        }
-        return -1;
-    case 3:
-        if (k % 2 == 1) {
-            if (pos == 0) {
-                return 3 * k * k - 2;
-            }
-            if (pos >= 2 && pos % 2 == 0) {
-                return 3 * k * k - 6 * k + 4 - (pos - 2);
-            }
-            return -1;
-        }
-        if (pos >= 2 && pos % 2 == 0) {
-            return 3 * k * k - 6 * k + 3 - ((pos - 2) / 2);
-        }
-        return -1;
-    case 4:
-        if (k % 2 == 1) {
-            if (pos % 2 == 1) {
-                return 3 * k * k - 7 * k + 5 - (pos - 1);
-            }
-            return -1;
-        }
-        if (pos % 2 == 0) {
-            if (k == 2) {
-                if (pos == 0) {
-                    return 3;
-                }
-                return -1;
-            }
-            return 3 * k * k - 7 * k + 6 - pos;
-        }
-        return -1;
-    case 5: {
-        int prevFirstIndex = 3 * (k - 2) * (k - 1) + 1;
-        return prevFirstIndex + (k - 1 - pos);
-    }
-    default:
-        return -1;
-    }
-}
-
-HOST_DEVICE int ShapeGenerator::getHexagonRequiredNodeId3(int n)
-{
-    if (n <= 0) {
-        return -1;
-    }
-
-    int k = 1;
-    while (3 * k * (k + 1) < n) {
-        ++k;
-    }
-
-    int firstIndex = 3 * (k - 1) * k + 1;
-    int local = n - firstIndex;
-    int side = local / k;
-    int pos = local % k;
-
-    if (k == 1) {
-        int ring1[6] = {-1, -1, -1, 0, -1, -1};
-        return ring1[local];
-    }
-
-    switch (side) {
-    case 0:
-        return -1;
-    case 1:
-        if (pos % 2 == 0) {
-            return -1;
-        }
-        return 3 * k * k - 4 * k - 1 - (pos - 1);
-    case 2:
-        if (k % 2 == 1) {
-            if (pos % 2 == 0 && pos <= k - 3) {
-                if (k == 3) {
-                    return 13;
-                }
-                return 3 * k * k - 5 * k - (pos / 2);
-            }
-            return -1;
-        }
-        if (pos % 2 == 1 && pos <= k - 3) {
-            return 3 * k * k - 5 * k - pos;
-        }
-        return -1;
-    case 3:
-        if (k % 2 == 1) {
-            if (pos % 2 == 0) {
-                return 3 * k * k - 6 * k + 4 - pos;
-            }
-            return -1;
-        }
-        if (pos >= 2 && pos % 2 == 0) {
-            return 3 * k * k - 6 * k + 2 - (pos - 2);
-        }
-        return -1;
-    case 4:
-        if (k % 2 == 1) {
-            if (pos % 2 == 1) {
-                return 3 * k * k - 7 * k + 3 - (pos - 1);
-            }
-            return -1;
-        }
-        if (pos % 2 == 0) {
-            return 3 * k * k - 7 * k + 4 - pos;
-        }
-        return -1;
-    case 5:
-        return -1;
-    default:
-        return -1;
-    }
 }
