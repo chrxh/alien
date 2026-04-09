@@ -381,7 +381,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
 
     if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparation) {
         auto distance = constructionData.gene->connectionDistance;
-        if (!ObjectConnectionProcessor::tryAddConnection(data, hostObject, newObject, anglesForNewConnection.referenceAngle, 0, distance)) {
+        if (!ObjectConnectionProcessor::tryAddConnectionWithRelativeAngle(data, hostObject, newObject, distance, anglesForNewConnection.referenceAngle)) {
             ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
         }
     }
@@ -404,7 +404,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 {
     auto const& lastObject = constructionData.lastConstructionObject;
     auto posDelta = data.objectMap.getCorrectedDirection(lastObject->pos - hostObject->pos) / 2;
-    auto angleFromPreviousForNewObject = 180.0f - constructionData.angle;
 
     auto desiredDistance = constructionData.gene->connectionDistance;
     //if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value
@@ -517,8 +516,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         if (otherObject->tryLock()) {
             if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
-                if (ObjectConnectionProcessor::tryAddConnection(
-                        data, newObject, otherObject, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
+                if (ObjectConnectionProcessor::tryAddConnectionWithRelativeAngle(data, newObject, otherObject, desiredDistance, 0)) {
                     ++numConnectedObjects;
                 }
             }
