@@ -37,10 +37,9 @@ private:
         float neededUsableEnergy;
         float neededReservedEnergy;
         float depotEnergy;
-        int numAdditionalConnections;  // -1 = none
-        int requiredNodeId1;           // -1 = none
-        int requiredNodeId2;           // -1 = none
-        int requiredNodeId3;           // -1 = none
+        int numAdditionalConnections;
+        int requiredNodeId[3];      // -1 = none
+        float requiredNodeAngle[3];
     };
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
@@ -256,15 +255,18 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
                     result.angle = generationResult.angle;
                 }
                 result.numAdditionalConnections = generationResult.numAdditionalConnections;
-                result.requiredNodeId1 = generationResult.requiredNodeId1;
-                result.requiredNodeId2 = generationResult.requiredNodeId2;
-                result.requiredNodeId3 = generationResult.requiredNodeId3;
+                result.requiredNodeId[0] = generationResult.requiredNodeId1;
+                result.requiredNodeId[1] = generationResult.requiredNodeId2;
+                result.requiredNodeId[2] = generationResult.requiredNodeId3;
+                result.requiredNodeAngle[0] = 0;
+                result.requiredNodeAngle[1] = 0;
+                result.requiredNodeAngle[2] = 0;
             }
         }
     } else {
-        result.requiredNodeId1 = -1;
-        result.requiredNodeId2 = -1;
-        result.requiredNodeId3 = -1;
+        result.requiredNodeId[0] = -1;
+        result.requiredNodeId[1] = -1;
+        result.requiredNodeId[2] = -1;
     }
 
     if (result.gene->numNodes == 1) {
@@ -381,7 +383,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
 
     if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparation) {
         auto distance = constructionData.gene->connectionDistance;
-        if (!ObjectConnectionProcessor::tryAddConnectionWithRelativeAngle(data, hostObject, newObject, distance, anglesForNewConnection.referenceAngle)) {
+        if (!ObjectConnectionProcessor::tryAddConnectionWithRelAngle(data, hostObject, newObject, distance, anglesForNewConnection.referenceAngle)) {
             ObjectConnectionProcessor::scheduleDeleteObject(data, cellPointerIndex);
         }
     }
@@ -516,7 +518,8 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         if (otherObject->tryLock()) {
             if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
-                if (ObjectConnectionProcessor::tryAddConnectionWithRelativeAngle(data, newObject, otherObject, desiredDistance, 0)) {
+                auto requiredAngle = constructionData.requiredNodeAngle[i];
+                if (ObjectConnectionProcessor::tryAddConnectionWithAbsAngle(data, newObject, otherObject, desiredDistance, requiredAngle)) {
                     ++numConnectedObjects;
                 }
             }
@@ -587,17 +590,17 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
             || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
             return;
         }
-        if (constructionData.numAdditionalConnections >= 1 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId1) {
+        if (constructionData.numAdditionalConnections >= 1 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId[0]) {
             result[0] = otherObject;
             ++numResultCells;
             return;
         }
-        if (constructionData.numAdditionalConnections >= 2 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId2) {
+        if (constructionData.numAdditionalConnections >= 2 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId[1]) {
             result[1] = otherObject;
             ++numResultCells;
             return;
         }
-        if (constructionData.numAdditionalConnections >= 3 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId3) {
+        if (constructionData.numAdditionalConnections >= 3 && otherObject->typeData.cell.nodeIndex == constructionData.requiredNodeId[2]) {
             result[2] = otherObject;
             ++numResultCells;
             return;

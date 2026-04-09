@@ -24,7 +24,7 @@ public:
     // angle of object2 will be automatically determined by current geometry
     // if desiredRelAngle=0: angle of object1 will be automatically determined by current geometry
     // if desiredDistance=0: distance will be automatically determined by current geometry
-    __inline__ __device__ static bool tryAddConnectionWithRelativeAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance = 0, float desiredRelAngle = 0);
+    __inline__ __device__ static bool tryAddConnectionWithRelAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance = 0, float desiredRelAngle = 0);
 
     // angle of object1 is given by desiredRelAngle with respect to connections[0] and between [0, +360)
     // angle of object2 will be automatically determined by current geometry
@@ -231,7 +231,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
     }
 }
 
-__inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithRelativeAngle(
+__inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithRelAngle(
     SimulationData& data,
     Object* object1,
     Object* object2,
@@ -311,7 +311,7 @@ __inline__ __device__ void ObjectConnectionProcessor::lockAndTryAddConnections(S
 
         if (!alreadyConnected && object1->numConnections < MAX_OBJECT_CONNECTIONS && object2->numConnections < MAX_OBJECT_CONNECTIONS) {
 
-            tryAddConnectionWithRelativeAngle(data, object1, object2);
+            tryAddConnectionWithRelAngle(data, object1, object2);
         }
 
         lock.releaseLock();
