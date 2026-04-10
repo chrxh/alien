@@ -258,9 +258,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
                 result.requiredNodeId[0] = generationResult.requiredNodeId1;
                 result.requiredNodeId[1] = generationResult.requiredNodeId2;
                 result.requiredNodeId[2] = generationResult.requiredNodeId3;
-                result.requiredNodeAngle[0] = 0;
-                result.requiredNodeAngle[1] = 0;
-                result.requiredNodeAngle[2] = 0;
+                result.requiredNodeAngle[0] = 0;    // TODO
+                result.requiredNodeAngle[1] = 0;    // TODO
+                result.requiredNodeAngle[2] = 0;    // TODO
             }
         }
     } else {
@@ -519,6 +519,12 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         if (otherObject->tryLock()) {
             if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
                 auto requiredAngle = constructionData.requiredNodeAngle[i];
+
+                // requiredAngle is given from connection to hostCell
+                // in the separating case, this connection is lost
+                if (separation) {
+                    requiredAngle += 180.0f + constructionData.angle;
+                }
                 if (ObjectConnectionProcessor::tryAddConnectionWithAbsAngle(data, newObject, otherObject, desiredDistance, requiredAngle)) {
                     ++numConnectedObjects;
                 }
@@ -577,6 +583,7 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
     float2 const& newObjectPos,
     ConstructionData const& constructionData)
 {
+    numResultCells = 0;
     if (constructionData.numAdditionalConnections == 0) {
         return;
     }

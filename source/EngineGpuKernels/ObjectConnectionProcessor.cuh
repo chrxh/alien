@@ -444,6 +444,7 @@ ObjectConnectionProcessor::tryAddConnectionWithAbsAngle_oneWay(Object* object1, 
     // Find connection index to insert
     auto insertIndex = 0;
     auto summedAngle = 0.0f;
+    desiredAbsAngle = Math::getNormalizedAngle(desiredAbsAngle, 0.0f);
     for (int i = 1; i <= n; ++i) {
         auto const& angleFromPrevious = object1->getConnection(i).angleFromPrevious;
 
@@ -462,12 +463,12 @@ ObjectConnectionProcessor::tryAddConnectionWithAbsAngle_oneWay(Object* object1, 
     newConnection.angleFromPrevious = desiredAbsAngle - summedAngle;
 
     // Insert new connection
-    auto refAngle = object1->connections[insertIndex].angleFromPrevious;
-    for (int j = object1->numConnections; j > insertIndex; --j) {
+    auto refAngle = object1->getConnection(insertIndex).angleFromPrevious;
+    for (int j = n; j > insertIndex; --j) {
         object1->connections[j] = object1->connections[j - 1];
     }
     object1->connections[insertIndex] = newConnection;
-    object1->connections[(insertIndex + 1) % (object1->numConnections + 1)].angleFromPrevious = refAngle - newConnection.angleFromPrevious;
+    object1->connections[(insertIndex + 1) % (n + 1)].angleFromPrevious = refAngle - newConnection.angleFromPrevious;
     ++object1->numConnections;
 
     return true;
