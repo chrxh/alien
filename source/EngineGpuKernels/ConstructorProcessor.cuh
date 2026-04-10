@@ -518,7 +518,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         if (otherObject->tryLock()) {
             if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
-                auto requiredAngle = constructionData.requiredNodeAngle[i];
+                auto requiredAngle = constructionData.requiredNodeAngle[i] - constructionData.angle;
 
                 // requiredAngle is given from connection to hostCell
                 // in the separating case, this connection is lost
