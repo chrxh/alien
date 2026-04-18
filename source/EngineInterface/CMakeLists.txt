@@ -69,6 +69,25 @@ target_link_libraries(EngineInterface Base)
 target_link_libraries(EngineInterface Boost::boost)
 target_link_libraries(EngineInterface glad::glad)
 
+target_precompile_headers(EngineInterface PRIVATE
+    <algorithm>
+    <array>
+    <cmath>
+    <cstdint>
+    <functional>
+    <map>
+    <memory>
+    <numeric>
+    <optional>
+    <ranges>
+    <set>
+    <string>
+    <unordered_map>
+    <unordered_set>
+    <variant>
+    <vector>
+)
+
 if (MSVC)
     target_compile_options(EngineInterface PRIVATE "/MP")
 endif()

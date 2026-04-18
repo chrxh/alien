@@ -5,8 +5,6 @@
 
 #include <Base/Hashes.h>
 
-#include "GenomeDesc.h"
-
 template <>
 struct std::hash<NeuralNetGenomeDesc>
 {
@@ -501,7 +499,6 @@ struct std::hash<NodeDesc>
         std::size_t seed = 0;
         hash_combine(seed, desc._referenceAngle);
         hash_combine(seed, desc._color);
-        hash_combine(seed, desc._numAdditionalConnections);
         hash_combine(seed, std::hash<NeuralNetGenomeDesc>{}(desc._neuralNetwork));
         hash_combine(seed, std::hash<CellTypeGenomeDesc>{}(desc._cellType));
         if (desc._constructor.has_value()) {
@@ -526,7 +523,6 @@ struct std::hash<GeneDesc>
         hash_combine(seed, desc._separation);
         hash_combine(seed, desc._numBranches);
         hash_combine(seed, desc._numConcatenations);
-        hash_combine(seed, static_cast<int>(desc._angleAlignment));
         hash_combine(seed, desc._stiffness);
         hash_combine(seed, desc._connectionDistance);
         return seed;

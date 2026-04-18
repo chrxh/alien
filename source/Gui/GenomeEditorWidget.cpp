@@ -85,8 +85,8 @@ void _GenomeEditorWidget::processHeaderData()
             auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
             AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth), &_editData->genome._frontAngle);
 
             table.next();
 

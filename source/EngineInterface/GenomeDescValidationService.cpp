@@ -11,7 +11,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
 {
     // Validate genome-level attributes
     // frontAngle is unbounded, so no validation needed
-    genome._frontAngle = Math::modulo(genome._frontAngle, 360.0f);
+    genome._frontAngle = Math::getNormalizedAngle(genome._frontAngle, -180.0f);
 
     // Validate mutation rate fields
     genome._lineageId = std::max(genome._lineageId, 0);
@@ -37,16 +37,14 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
         // Validate gene-level attributes
         gene._numBranches = std::max(gene._numBranches, 1);
         gene._numConcatenations = std::max(gene._numConcatenations, 1);
-        gene._angleAlignment = std::clamp(gene._angleAlignment, 0, ConstructorAngleAlignment_Count - 1);
-        gene._stiffness = std::max(gene._stiffness, 0.0f);
-        gene._connectionDistance = std::clamp(gene._connectionDistance, 0.5f, 2.0f);
+        gene._stiffness = std::max(gene._stiffness, 0.05f);
+        gene._connectionDistance = std::clamp(gene._connectionDistance, 0.5f, 1.5f);
         gene._shape = std::clamp(gene._shape, 1, ConstructorShape_Count - 1);
 
         // Validate each node in the gene
         for (auto& node : gene._nodes) {
             // Validate node-level attributes
             node._color = std::clamp(node._color, 0, MAX_COLORS - 1);
-            node._numAdditionalConnections = std::clamp(node._numAdditionalConnections, 0, MAX_OBJECT_CONNECTIONS - 1);
 
             // Validate neural network
             for (auto& activationFunction : node._neuralNetwork._activationFunctions) {

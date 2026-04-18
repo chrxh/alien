@@ -4,10 +4,10 @@
 
 #include <EngineInterface/SpaceCalculator.h>
 
-#include <EngineGpuKernels/DebugKernels.cuh>
-#include <EngineGpuKernels/ForceFieldKernels.cuh>
-#include <EngineGpuKernels/SimulationKernels.cuh>
-#include <EngineGpuKernels/SimulationStatistics.cuh>
+#include <EngineKernels/DebugKernels.cuh>
+#include <EngineKernels/ForceFieldKernels.cuh>
+#include <EngineKernels/SimulationKernels.cuh>
+#include <EngineKernels/SimulationStatistics.cuh>
 
 #include "GarbageCollectorKernelsService.cuh"
 
@@ -130,7 +130,7 @@ void SimulationKernelsService::launchTimestepKernels(
     if (considerInnerFriction) {
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
     }
-    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data);
+    STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, false);
 
     if (considerRigidityUpdate && config.rigidityEnabled) {
         STREAM_KERNEL_CALL(cudaInitClusterData, _stream, numBlocks, data);
@@ -265,7 +265,7 @@ void SimulationKernelsService::launchPreviewKernels(
         if (considerInnerFriction) {
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
         }
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, true);
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
@@ -311,7 +311,7 @@ void SimulationKernelsService::launchPreviewKernels(
         if (considerInnerFriction) {
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
         }
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data);
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, true);
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);

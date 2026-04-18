@@ -38,7 +38,7 @@ PUBLIC
     VoidTests.cpp)
 
 target_link_libraries(EngineTests Base)
-target_link_libraries(EngineTests EngineGpuKernels)
+target_link_libraries(EngineTests EngineKernels)
 target_link_libraries(EngineTests EngineImpl)
 target_link_libraries(EngineTests EngineInterface)
 target_link_libraries(EngineTests PersisterInterface)
@@ -56,6 +56,16 @@ target_link_libraries(EngineTests GLEW::GLEW)
 target_link_libraries(EngineTests glfw)
 target_link_libraries(EngineTests glad::glad)
 target_link_libraries(EngineTests GTest::GTest GTest::Main)
+
+target_precompile_headers(EngineTests PRIVATE
+    <algorithm>
+    <cmath>
+    <memory>
+    <ranges>
+    <string>
+    <vector>
+    <gtest/gtest.h>
+)
 
 if (MSVC)
     target_compile_options(EngineTests PRIVATE "/MP")

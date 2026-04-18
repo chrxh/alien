@@ -74,9 +74,10 @@ void EditorController::onInspectSelectedObjects()
 {
     Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
     if (!onInspectObjects(DescEditService::get().getObjects(selectedData), false)) {
-        showMessage(
-            "Inspection not possible",
-            "Too many objects are selected for inspection. A maximum of " + std::to_string(Const::MaxInspectedObjects) + " objects are allowed.");
+        std::string message = "Too many objects are selected for inspection. A maximum of ";
+        message += std::to_string(Const::MaxInspectedObjects);
+        message += " objects are allowed.";
+        showMessage("Inspection not possible", message);
     }
 }
 

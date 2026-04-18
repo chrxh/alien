@@ -10,8 +10,8 @@
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/NumberGenerator.h>
 
-#include <EngineGpuKernels/TOProvider.cuh>
-#include <EngineGpuKernels/TOs.cuh>
+#include <EngineKernels/TOProvider.cuh>
+#include <EngineKernels/TOs.cuh>
 
 #include "DescConverterService.h"
 

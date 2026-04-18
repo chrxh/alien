@@ -23,7 +23,7 @@
 #include <EngineInterface/StatisticsHistory.h>
 #include <EngineInterface/StatisticsRawData.h>
 
-#include <EngineGpuKernels/Definitions.h>
+#include <EngineKernels/Definitions.h>
 
 #include "Definitions.h"
 

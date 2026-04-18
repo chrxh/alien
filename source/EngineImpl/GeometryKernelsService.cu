@@ -4,8 +4,8 @@
 
 #include <EngineInterface/SettingsForSimulation.h>
 
-#include <EngineGpuKernels/CudaGeometryBuffers.cuh>
-#include <EngineGpuKernels/GeometryKernels.cuh>
+#include <EngineKernels/CudaGeometryBuffers.cuh>
+#include <EngineKernels/GeometryKernels.cuh>
 
 void GeometryKernelsService::init()
 {

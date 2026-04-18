@@ -223,20 +223,6 @@ void _NodeEditorWidget::processNodeAttributes()
                 node._referenceAngle);
             //}
 
-            // Previous nodes connections
-            //if (nodeIndex != 0) {
-            //    auto numAdditionalConnections = node._numAdditionalConnections + 1;
-            //    if (AlienGui::InputInt(
-            //            AlienGui::InputIntParameters()
-            //                .name("Prev nodes connections")
-            //                .infoLabel(gene._shape != ConstructorShape_Custom ? std::make_optional(std::string("Deduced")) : std::nullopt)
-            //                .textWidth(rightColumnWidth),
-            //            numAdditionalConnections)) {
-            //        gene._shape = ConstructorShape_Custom;
-            //    }
-            //    node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
-            //}
-
             AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(rightColumnWidth), node._color);
 
             // Type

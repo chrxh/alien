@@ -132,7 +132,7 @@ IncludeCategories:
     Priority: 207
 
   # Engine GPU kernels includes
-  - Regex: '^<EngineGpuKernels/.*>$'
+  - Regex: '^<EngineKernels/.*>$'
     Priority: 208
 
   # Engine tests includes

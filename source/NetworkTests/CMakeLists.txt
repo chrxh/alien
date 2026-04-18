@@ -14,6 +14,13 @@ target_link_libraries(NetworkTests glfw)
 target_link_libraries(NetworkTests glad::glad)
 target_link_libraries(NetworkTests GTest::GTest GTest::Main)
 
+target_precompile_headers(NetworkTests PRIVATE
+    <memory>
+    <string>
+    <vector>
+    <gtest/gtest.h>
+)
+
 if (MSVC)
     target_compile_options(NetworkTests PRIVATE "/MP")
 endif()

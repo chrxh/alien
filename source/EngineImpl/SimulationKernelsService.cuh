@@ -6,8 +6,8 @@
 
 #include <EngineInterface/SettingsForSimulation.h>
 
-#include <EngineGpuKernels/Definitions.cuh>
-#include <EngineGpuKernels/Macros.cuh>
+#include <EngineKernels/Definitions.cuh>
+#include <EngineKernels/Macros.cuh>
 
 // Configuration key for CUDA Graph caching
 // Captures all runtime-varying parameters that affect kernel execution

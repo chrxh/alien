@@ -1,7 +1,7 @@
 #include "SelectionKernelsService.cuh"
 
-#include <EngineGpuKernels/DataAccessKernels.cuh>
-#include <EngineGpuKernels/SelectionKernels.cuh>
+#include <EngineKernels/DataAccessKernels.cuh>
+#include <EngineKernels/SelectionKernels.cuh>
 
 #include "GarbageCollectorKernelsService.cuh"
 

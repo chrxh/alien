@@ -4,10 +4,10 @@
 
 #include <EngineInterface/CudaSettings.h>
 
-#include <EngineGpuKernels/Base.cuh>
-#include <EngineGpuKernels/Definitions.cuh>
-#include <EngineGpuKernels/GarbageCollectorKernels.cuh>
-#include <EngineGpuKernels/Macros.cuh>
+#include <EngineKernels/Base.cuh>
+#include <EngineKernels/Definitions.cuh>
+#include <EngineKernels/GarbageCollectorKernels.cuh>
+#include <EngineKernels/Macros.cuh>
 
 class GarbageCollectorKernelsService
 {

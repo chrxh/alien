@@ -31,17 +31,21 @@ public:
                     .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDesc(),
-            GenomeDesc().lineageId(0).prevLineageId(0).genes({
+            GenomeDesc().lineageId(0).prevLineageId(0).frontAngle(225.0f).genes({
                 GeneDesc()
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
                     .nodes({
-                        NodeDesc().cellType(DigestorGenomeDesc()),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
-                        NodeDesc().constructor(ConstructorGenomeDesc()),
                         NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
-                        NodeDesc().cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc())),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc()
+                            .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
+                            .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
+                        NodeDesc().constructor(ConstructorGenomeDesc()),
+                        NodeDesc().cellType(DigestorGenomeDesc()),
+                        NodeDesc()
+                            .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
+                            .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
                         NodeDesc().cellType(AttackerGenomeDesc()),
                     }),
             }));
@@ -56,7 +60,9 @@ public:
     {
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto& numberGen = NumberGenerator::get();
-        auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 0.8f : 0.2f;
+        auto highDigestion = digestionCapability == DigestionCapability::High;
+        auto obligatoryDigestor = DigestorGenomeDesc().rawEnergyConductivity(0.9f);
+        auto optionalDigestor = highDigestion ? CellTypeGenomeDesc(DigestorGenomeDesc()) : CellTypeGenomeDesc(BaseGenomeDesc());
         return Desc().addCreature(
             {
                 ObjectDesc()
@@ -64,30 +70,34 @@ public:
                     .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDesc(),
-            GenomeDesc().lineageId(1).prevLineageId(1).genes({
+            GenomeDesc().lineageId(1).prevLineageId(1).frontAngle(225.0f).genes({
                 GeneDesc()
                     .separation(true)
                     .shape(ConstructorShape_Hexagon)
                     .nodes({
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDesc().cellType(DigestorGenomeDesc()),
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(AttackerGenomeDesc()),
+                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
+                        NodeDesc().cellType(obligatoryDigestor),
+                        NodeDesc().cellType(optionalDigestor),
+                        NodeDesc().cellType(obligatoryDigestor),
+                        NodeDesc().cellType(obligatoryDigestor),
+                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
                         NodeDesc().cellType(AttackerGenomeDesc()),
                         NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
                         NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDesc().cellType(obligatoryDigestor),
+                        NodeDesc()
+                            .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
+                            .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
+                        NodeDesc().cellType(optionalDigestor),
+                        NodeDesc().cellType(optionalDigestor),
+                        NodeDesc().cellType(optionalDigestor).constructor(ConstructorGenomeDesc()),
+                        NodeDesc().cellType(optionalDigestor),
+                        NodeDesc().cellType(optionalDigestor),
+                        NodeDesc()
+                            .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
+                            .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
                         NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().constructor(ConstructorGenomeDesc()),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(DigestorGenomeDesc().rawEnergyConductivity(rawEnergyConductivity)),
                     }),
             }));
     }
@@ -109,7 +119,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(12000);
+    _simulationFacade->calcTimesteps(20000);
     auto actualData = _simulationFacade->getSimulationData();
 
     // Create a map of genomeId to lineageId

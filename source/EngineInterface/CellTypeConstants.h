@@ -63,13 +63,8 @@ namespace Const
         "Communicator",
         "Void"};
 
-    std::vector<std::string> const ObjectTypeStrings = {
-        "Solid",
-        "Fluid",
-        "Free Cell",
-        "Cell"};
+    std::vector<std::string> const ObjectTypeStrings = {"Solid", "Fluid", "Free Cell", "Cell"};
 }
-
 
 
 using CellState = int;
@@ -123,23 +118,6 @@ namespace Channels
     auto constexpr ConstructorSuccess = 1;
 }
 
-using ConstructorAngleAlignment = int;
-enum ConstructorAlignment_
-{
-    ConstructorAngleAlignment_None = 0,
-    ConstructorAngleAlignment_180 = 1,
-    ConstructorAngleAlignment_120 = 2,
-    ConstructorAngleAlignment_90 = 3,
-    ConstructorAngleAlignment_72 = 4,
-    ConstructorAngleAlignment_60 = 5,
-    ConstructorAngleAlignment_Count = 6,
-};
-
-namespace Const
-{
-    std::vector<std::string> const ConstructorAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
-}
-
 using ConstructorShape = int;
 enum ConstructorShape_
 {
@@ -148,9 +126,8 @@ enum ConstructorShape_
     ConstructorShape_Triangle,
     ConstructorShape_Rectangle,
     ConstructorShape_Hexagon,
-    ConstructorShape_Loop,
     ConstructorShape_Tube,
-    ConstructorShape_Lolli,
+    ConstructorShape_LargeLolli,
     ConstructorShape_SmallLolli,
     ConstructorShape_Zigzag,
     ConstructorShape_Count,
@@ -168,7 +145,7 @@ enum ProvideEnergy_
 namespace Const
 {
     std::vector<std::string> const ConstructorShapeWithoutCustomStrings =
-        {"Segment", "Triangle", "Rectangle", "Hexagon", "Loop", "Tube", "Lolli", "Small Lolli", "Zigzag"};
+        {"Segment", "Triangle", "Rectangle", "Hexagon", "Tube", "Large Lolli", "Small Lolli", "Zigzag"};
 }
 
 //**********************

@@ -3,7 +3,7 @@
 
 #include <EngineInterface/StatisticsConverterService.h>
 
-#include <EngineGpuKernels/Base.cuh>
+#include <EngineKernels/Base.cuh>
 
 namespace
 {

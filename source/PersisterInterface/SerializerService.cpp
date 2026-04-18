@@ -184,14 +184,12 @@ namespace
     auto constexpr Id_Gene_Shape = 1;
     auto constexpr Id_Gene_NumBranches = 2;
     auto constexpr Id_Gene_Separation = 3;
-    auto constexpr Id_Gene_AngleAlignment = 4;
     auto constexpr Id_Gene_Stiffness = 5;
     auto constexpr Id_Gene_ConnectionDistance = 6;
     auto constexpr Id_Gene_NumRepetitions = 7;
 
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
-    auto constexpr Id_Node_NumAdditionalConnections = 2;
 
     auto constexpr Id_NeuralNetGenome_Weights = 0;
     auto constexpr Id_NeuralNetGenome_Biases = 1;
@@ -746,7 +744,6 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
         loadSave(task, auxiliaries, Id_Node_Color, data._color, defaultObject._color);
-        loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._neuralNetwork, data._cellType, data._constructor);
@@ -762,7 +759,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
         loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
         loadSave(task, auxiliaries, Id_Gene_Separation, data._separation, defaultObject._separation);
-        loadSave(task, auxiliaries, Id_Gene_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
         loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
         loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);

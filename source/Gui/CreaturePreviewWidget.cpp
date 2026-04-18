@@ -45,8 +45,7 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, fl
     auto geneStartIndex = _subGenome.startIndex;
 
     auto conversionResult =
-        PreviewDescConverterService::get().convertToPreviewDesc(_editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
-    _visualFrontAngle = conversionResult.visualFrontAngle;
+        PreviewDescConverterService::get().convertToPreviewDesc(_editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed));
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
 
@@ -91,11 +90,6 @@ SubGenomeDesc const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
 void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDesc const& value)
 {
     _subGenome = value;
-}
-
-void _CreaturePreviewWidget::resetVisualFrontAngle()
-{
-    _visualFrontAngle.reset();
 }
 
 _CreaturePreviewWidget::_CreaturePreviewWidget(
@@ -186,15 +180,16 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
         auto textSize = scale(12.0f);
 
-        auto frontStartPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius - textSize / 2);
-        auto frontEndPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize / 2);
+        auto const visualFrontAngle = 0;
+        auto frontStartPos = center + Math::unitVectorOfAngle(visualFrontAngle) * (radius - textSize / 2);
+        auto frontEndPos = center + Math::unitVectorOfAngle(visualFrontAngle) * (radius + textSize / 2);
         drawList->AddLine({frontStartPos.x, frontStartPos.y}, {frontEndPos.x, frontEndPos.y}, ImColor::HSV(0, 0, 0.4f));
 
         AlienGui::RotateStart(drawList);
-        auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize);
+        auto textPos = center + Math::unitVectorOfAngle(visualFrontAngle) * (radius + textSize);
         AlienGui::AddTextWithSubpixelAccuracy(
             drawList, ImGui::GetFont(), textSize, {textPos.x - textSize, textPos.y - textSize / 2}, ImColor::HSV(0, 0, 0.4f), "Front");
-        AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
+        AlienGui::RotateEnd(visualFrontAngle, drawList);
     }
 
     // Draw selected gene

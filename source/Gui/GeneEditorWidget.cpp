@@ -99,15 +99,6 @@ void _GeneEditorWidget::processHeaderData()
                 }
             }
 
-            // Angle alignment
-            //AlienGui::BeginIndent();
-            //if (gene._shape == ConstructorShape_Custom) {
-            //    AlienGui::Combo(
-            //        AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(rightColumnWidth),
-            //        gene._angleAlignment);
-            //}
-            //AlienGui::EndIndent();
-
             // Connection distance
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
