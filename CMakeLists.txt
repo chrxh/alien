@@ -22,6 +22,10 @@ set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -lineinfo --use-local-env -use_fast_math")
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --threads 0")
+endif()
+
 project(alien-project LANGUAGES C CXX CUDA)
 
 include_directories(
@@ -71,7 +75,7 @@ find_package(CLI11 CONFIG REQUIRED)
 add_subdirectory(external/ImFileDialog)
 add_subdirectory(source/Base)
 add_subdirectory(source/Cli)
-add_subdirectory(source/EngineGpuKernels)
+add_subdirectory(source/EngineKernels)
 add_subdirectory(source/EngineImpl)
 add_subdirectory(source/EngineInterface)
 add_subdirectory(source/EngineInterfaceTests)
