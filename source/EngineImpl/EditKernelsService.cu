@@ -1,9 +1,9 @@
 #include "EditKernelsService.cuh"
 
-#include <EngineGpuKernels/DataAccessKernels.cuh>
-#include <EngineGpuKernels/EditKernels.cuh>
-#include <EngineGpuKernels/SelectionKernels.cuh>
-#include <EngineGpuKernels/SimulationKernels.cuh>
+#include <EngineKernels/DataAccessKernels.cuh>
+#include <EngineKernels/EditKernels.cuh>
+#include <EngineKernels/SelectionKernels.cuh>
+#include <EngineKernels/SimulationKernels.cuh>
 
 #include "GarbageCollectorKernelsService.cuh"
 #include "SelectionKernelsService.cuh"

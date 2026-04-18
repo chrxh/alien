@@ -169,7 +169,7 @@ PUBLIC
     WindowController.h)
 
 target_link_libraries(alien Base)
-target_link_libraries(alien EngineGpuKernels)
+target_link_libraries(alien EngineKernels)
 target_link_libraries(alien EngineImpl)
 target_link_libraries(alien EngineInterface)
 target_link_libraries(alien Network)
@@ -193,6 +193,26 @@ target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
 
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
+
+target_precompile_headers(alien PRIVATE
+    <algorithm>
+    <chrono>
+    <cmath>
+    <filesystem>
+    <functional>
+    <map>
+    <memory>
+    <optional>
+    <ranges>
+    <sstream>
+    <string>
+    <unordered_map>
+    <unordered_set>
+    <variant>
+    <vector>
+    <imgui.h>
+    <boost/algorithm/string.hpp>
+)
 
 if (MSVC)
     target_compile_options(alien PRIVATE "/MP")

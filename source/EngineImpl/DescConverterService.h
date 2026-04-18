@@ -8,8 +8,8 @@
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/SimulationParameters.h>
 
-#include <EngineGpuKernels/Definitions.h>
-#include <EngineGpuKernels/TOs.cuh>
+#include <EngineKernels/Definitions.h>
+#include <EngineKernels/TOs.cuh>
 
 #include "Definitions.h"
 

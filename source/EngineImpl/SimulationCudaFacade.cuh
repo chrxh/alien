@@ -20,8 +20,8 @@
 #include <EngineInterface/StatisticsHistory.h>
 #include <EngineInterface/StatisticsRawData.h>
 
-#include <EngineGpuKernels/Definitions.cuh>
-#include <EngineGpuKernels/TOs.cuh>
+#include <EngineKernels/Definitions.cuh>
+#include <EngineKernels/TOs.cuh>
 
 #include <vector_types.h>
 

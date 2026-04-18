@@ -216,6 +216,8 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                     AlienGui::InputInt(
                         AlienGui::InputIntParameters().name("Prev lineage id").textWidth(BaseTabTextWidth), extendedCell.genome->_prevLineageId.value());
                 }
+                //AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Head").textWidth(BaseTabTextWidth), object.getCellRef()._headCell);
+                //AlienGui::InputInt(AlienGui::InputIntParameters().name("Last update").textWidth(BaseTabTextWidth), object.getCellRef()._lastUpdate);
                 ImGui::TreePop();
             }
             if (ImGui::TreeNodeEx("Genome", TreeNodeFlags)) {
@@ -318,9 +320,9 @@ void _InspectorWindow::processCellTypeTab(ObjectDesc& object)
                     object.getCellRef()._activationTime);
                 AlienGui::Combo(
                     AlienGui::ComboParameters()
-                        .name("Living state")
+                        .name("Cell state")
                         .textWidth(CellTypeBaseTabTextWidth)
-                        .values({"Ready", "Under construction", "Activating", "Detached", "Reviving", "Dying"})
+                        .values({"Ready", "Constructing", "Activating", "Dying", "Instant dying"})
                         .tooltip(Const::CellCellStateTooltip),
                     object.getCellRef()._cellState);
                 ImGui::TreePop();

@@ -8,7 +8,6 @@
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
 #include "ShallowUpdateSelectionData.h"
-#include "SimulationFacade.h"
 #include "SimulationParametersUpdateConfig.h"
 #include "StatisticsHistory.h"
 

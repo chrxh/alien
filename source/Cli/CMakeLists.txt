@@ -3,7 +3,7 @@ PUBLIC
     Main.cpp)
 
 target_link_libraries(cli Base)
-target_link_libraries(cli EngineGpuKernels)
+target_link_libraries(cli EngineKernels)
 target_link_libraries(cli EngineImpl)
 target_link_libraries(cli EngineInterface)
 target_link_libraries(cli PersisterInterface)
@@ -23,6 +23,12 @@ target_link_libraries(cli GTest::GTest GTest::Main)
 target_link_libraries(cli glad::glad)
 target_link_libraries(cli CLI11::CLI11)
 target_link_libraries(cli ZLIB::ZLIB)
+
+target_precompile_headers(cli PRIVATE
+    <memory>
+    <string>
+    <vector>
+)
 
 if (MSVC)
     target_compile_options(cli PRIVATE "/MP")

@@ -32,6 +32,7 @@ void _GenomeTabWidget::process()
 
         if (ImGui::BeginChild("Editors", ImVec2(0, ImGui::GetContentRegionAvail().y - _layoutData->previewsHeight), 0)) {
             processEditors();
+            GenomeDescValidationService::get().validateAndCorrect(_editData->genome);
         }
         ImGui::EndChild();
 
@@ -45,8 +46,6 @@ void _GenomeTabWidget::process()
         ImGui::PopID();
     }
     ImGui::EndChild();
-
-    GenomeDescValidationService::get().validateAndCorrect(_editData->genome);
 }
 
 int _GenomeTabWidget::getTabId() const
@@ -104,6 +103,22 @@ void _GenomeTabWidget::revertChanges()
 {
     _editData->genome = _editData->origGenome;
     _editData->changesMade = false;
+
+    // Maintain selection only for valid nodes and genes
+    if (_editData->selectedGeneIndex) {
+        if (_editData->genome._genes.size() <= _editData->selectedGeneIndex.value()) {
+            _editData->selectedGeneIndex.reset();
+        }
+    }
+    std::map<int, int> newSelectedNodeByGeneIndex;
+    for (auto& [geneIndex, nodeIndex] : _editData->selectedNodeByGeneIndex) {
+        if (_editData->genome._genes.size() > geneIndex) {
+            if (_editData->genome._genes.at(geneIndex)._nodes.size() > nodeIndex) {
+                newSelectedNodeByGeneIndex.emplace(geneIndex, nodeIndex);
+            }
+        }
+    }
+    _editData->selectedNodeByGeneIndex = newSelectedNodeByGeneIndex;
 }
 
 _GenomeTabWidget::_GenomeTabWidget(

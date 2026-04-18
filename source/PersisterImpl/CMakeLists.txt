@@ -14,6 +14,13 @@ target_link_libraries(PersisterImpl PersisterInterface)
 
 target_link_libraries(PersisterImpl Boost::boost)
 
+target_precompile_headers(PersisterImpl PRIVATE
+    <memory>
+    <optional>
+    <string>
+    <vector>
+)
+
 if (MSVC)
     target_compile_options(PersisterImpl PRIVATE "/MP")
 endif()

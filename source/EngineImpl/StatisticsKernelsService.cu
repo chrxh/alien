@@ -1,6 +1,6 @@
 #include "StatisticsKernelsService.cuh"
 
-#include <EngineGpuKernels/StatisticsKernels.cuh>
+#include <EngineKernels/StatisticsKernels.cuh>
 
 void StatisticsKernelsService::init() {}
 

@@ -8,9 +8,9 @@
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
-#include <EngineGpuKernels/Base.cuh>
-#include <EngineGpuKernels/Definitions.cuh>
-#include <EngineGpuKernels/Macros.cuh>
+#include <EngineKernels/Base.cuh>
+#include <EngineKernels/Definitions.cuh>
+#include <EngineKernels/Macros.cuh>
 
 class DataAccessKernelsService
 {

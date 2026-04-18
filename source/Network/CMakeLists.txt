@@ -18,6 +18,13 @@ add_library(Network
 target_link_libraries(Network Base)
 target_link_libraries(Network Boost::boost)
     
+target_precompile_headers(Network PRIVATE
+    <memory>
+    <optional>
+    <string>
+    <vector>
+)
+
 if (MSVC)
     target_compile_options(Network PRIVATE "/MP")
 endif()

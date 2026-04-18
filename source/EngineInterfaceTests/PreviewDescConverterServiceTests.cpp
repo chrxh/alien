@@ -70,7 +70,7 @@ TEST_F(PreviewDescConverterServiceTests, convertEmptyCollection)
 {
     Desc input;
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(GenomeDesc(), 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(GenomeDesc(), 0, std::move(input));
 
     EXPECT_TRUE(result.description._objects.empty());
     EXPECT_TRUE(result.description._connections.empty());
@@ -92,7 +92,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation)
         genome);
     input.addConnection(1, 2);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
@@ -126,7 +126,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_n
         genome);
     input.addConnection(1, 2);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 1, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 1, std::move(input));
 
     ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
@@ -159,7 +159,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withoutSeparatio
         genome);
     input.addConnection(1, 2);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
@@ -195,7 +195,7 @@ TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
     input.addConnection(2, 3);
     input.addConnection(3, 1);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(3, result.description._objects.size());
     ASSERT_EQ(3, result.description._connections.size());
@@ -241,7 +241,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_multipleNodes_m
         input.addConnection(i + 1, i + 2);
     }
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(8, result.description._objects.size());
     ASSERT_EQ(7, result.description._connections.size());
@@ -290,7 +290,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_oneNode_multipl
         input.addConnection(i + 1, i + 2);
     }
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(8, result.description._objects.size());
     ASSERT_EQ(7, result.description._connections.size());
@@ -344,7 +344,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
     input.addConnection(7, 8);
     input.addConnection(8, 1);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(8, result.description._objects.size());
     ASSERT_EQ(7, result.description._connections.size());
@@ -389,7 +389,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGenes_twoNode_multip
     input.addConnection(6, 7);
     input.addConnection(7, 8);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(8, result.description._objects.size());
     ASSERT_EQ(7, result.description._connections.size());
@@ -437,7 +437,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
         CreatureDesc(),
         genome);
     {
-        auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(inputCreature1), std::nullopt);
+        auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(inputCreature1));
 
         ASSERT_EQ(1, result.description._objects.size());
         ASSERT_EQ(0, result.description._connections.size());
@@ -446,7 +446,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
         EXPECT_EQ(1, object1._constructorGeneIndex);
     }
     {
-        auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 1, std::move(inputCreature2), std::nullopt);
+        auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 1, std::move(inputCreature2));
 
         ASSERT_EQ(1, result.description._objects.size());
         ASSERT_EQ(0, result.description._connections.size());
@@ -473,7 +473,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withoutSeparat
         genome);
     input.addConnection(0, 1);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
@@ -503,7 +503,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
         genome);
     input.addConnection(1, 2);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
@@ -533,7 +533,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_connectionWeight
         genome);
     input.addConnection(1, 2);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());

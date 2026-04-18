@@ -159,7 +159,6 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
         .constructor(ConstructorGenomeDesc().autoTriggerInterval(55).geneIndex(1).constructionActivationTime(95).constructionAngle(25.0f).provideEnergy(
             ProvideEnergy_FreeGeneration))
         .color(4)
-        .numAdditionalConnections(3)
         .referenceAngle(90.0f);
 }
 
@@ -182,7 +181,6 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                               .numBranches(4)
                               .separation(true)
                               .numConcatenations(6)
-                              .angleAlignment(ConstructorAngleAlignment_180)
                               .stiffness(0.75f)
                               .connectionDistance(0.8f)
                               .nodes({

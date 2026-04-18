@@ -321,6 +321,7 @@ GenomeDesc GenomeEditorWindow::getDefaultGenome()
 {
     return GenomeDesc()
         .name("Draft " + std::to_string(++_sequenceNumberForCreatedGenomes))
+        .frontAngle(-180.0f)
         .genes({
             GeneDesc().name("Gene 1").nodes({NodeDesc()}).separation(true).shape(ConstructorShape_Segment),
         });

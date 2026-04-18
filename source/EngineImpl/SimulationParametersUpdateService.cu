@@ -5,9 +5,9 @@
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SpaceCalculator.h>
 
-#include <EngineGpuKernels/Base.cuh>
-#include <EngineGpuKernels/MaxAgeBalancer.cuh>
-#include <EngineGpuKernels/SimulationData.cuh>
+#include <EngineKernels/Base.cuh>
+#include <EngineKernels/MaxAgeBalancer.cuh>
+#include <EngineKernels/SimulationData.cuh>
 
 SimulationParameters SimulationParametersUpdateService::integrateChanges(
     SimulationParameters const& currentParameters,

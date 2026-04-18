@@ -4,7 +4,7 @@
 
 #include <EngineInterface/StatisticsHistory.h>
 
-#include <EngineGpuKernels/Definitions.cuh>
+#include <EngineKernels/Definitions.cuh>
 
 class StatisticsService
 {

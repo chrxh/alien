@@ -293,18 +293,12 @@ namespace Const
     std::string const GenomeStiffnessTooltip = "This value sets the stiffness for the entire encoded cell network. The stiffness determines the amount of "
                                                "force generated to push the cell network to its reference configuration.";
 
-    std::string const GenomeAngleAlignmentTooltip =
-        "Triples of connected cells within a network have specific spatial angles relative to each other. These angles "
-        "are guided by the reference angles encoded in the cells. With this setting, it is optionally possible to specify that the reference angles must only "
-        "be multiples of certain values. This allows for greater stability of the created networks, as the angles would otherwise be more susceptible to "
-        "external influences. Choosing 60 degrees is recommended here, as it allows for the accurate representation of most geometries.";
-
     std::string const GenomeNumBranchesTooltip = "Specifies how many branches the constructor can use to build the cell networks. Each branch is connected to "
                                                  "the constructor cell and consists of repetitions of the encoded cell network.";
 
     std::string const GenomeRepetitionsPerBranchTooltip =
         "This value specifies how many times the cell network described in the genome should be concatenated for each construction. For a value greater "
-        "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and lolli geometries are not suitable for "
+        "than 1, the cell network geometry has to fulfill certain requirements (e.g. rectangle, hexagon, loop and large lolli geometries are not suitable for "
         "concatenation). A value of infinity is also possible, but should not be used for an activated completeness check (see simulation parameters).";
 
     std::string const GenomeConcatenationAngle1 =
@@ -327,8 +321,8 @@ namespace Const
     std::string const CellMaxConnectionTooltip = "The maximum number of bonds a cell can form with other cells.";
 
     std::string const CellFixedTooltip = "When a cell is set as fixed, it becomes immortal, resistant to external forces, but still "
-                                                  "capable of linear movement. Furthermore, unconnected "
-                                                  "normal cells and energy particles bounce off from indestructible ones.";
+                                         "capable of linear movement. Furthermore, unconnected "
+                                         "normal cells and energy particles bounce off from indestructible ones.";
 
     std::string const CellReferenceDistanceTooltip =
         "The reference distance defines the distance at which no forces act between two connected cells. If the actual distance is greater than the reference "
@@ -466,7 +460,8 @@ namespace Const
 
     std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of solid objects.";
 
-    std::string const CreatorDrawingTypeTooltip = "Specifies whether the drawn solid objects should form a solid body (with connections) or a fluid (without connections).";
+    std::string const CreatorDrawingTypeTooltip =
+        "Specifies whether the drawn solid objects should form a solid body (with connections) or a fluid (without connections).";
 
     std::string const CreatorRectangleWidthTooltip = "The width of the rectangle in cells.";
 

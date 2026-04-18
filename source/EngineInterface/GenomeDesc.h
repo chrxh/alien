@@ -23,6 +23,8 @@ struct NeuralNetGenomeDesc
     auto operator<=>(NeuralNetGenomeDesc const&) const = default;
 
     NeuralNetGenomeDesc& weight(int row, int col, NeuralNetWeight value);
+    NeuralNetGenomeDesc& connectionWeight(int index, float value);
+    NeuralNetGenomeDesc& bias(int index, float value);
 
     MEMBER(NeuralNetGenomeDesc, std::vector<NeuralNetWeight>, weights, {});
     MEMBER(NeuralNetGenomeDesc, std::vector<float>, biases, {});
@@ -386,7 +388,6 @@ struct NodeDesc
 
     MEMBER(NodeDesc, float, referenceAngle, 0.0f);
     MEMBER(NodeDesc, int, color, 0);
-    MEMBER(NodeDesc, int, numAdditionalConnections, 0);
 
     MEMBER(NodeDesc, NeuralNetGenomeDesc, neuralNetwork, NeuralNetGenomeDesc());
     MEMBER(NodeDesc, CellTypeGenomeDesc, cellType, BaseGenomeDesc());
@@ -405,7 +406,6 @@ struct GeneDesc
     MEMBER(GeneDesc, bool, separation, false);
     MEMBER(GeneDesc, int, numBranches, 1);        // For separation = false
     MEMBER(GeneDesc, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
-    MEMBER(GeneDesc, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
     MEMBER(GeneDesc, float, stiffness, 1.0f);
     MEMBER(GeneDesc, float, connectionDistance, 1.0f);
 

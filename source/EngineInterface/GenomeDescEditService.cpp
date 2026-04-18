@@ -86,7 +86,15 @@ void GenomeDescEditService::addNode(GeneDesc& gene, int index, NodeDesc const& n
 
 void GenomeDescEditService::removeNode(GeneDesc& gene, int index) const
 {
+    auto deleteAtStart = index == 0;
+    auto deleteAtEnd = index == gene._nodes.size() - 1;
     gene._nodes.erase(gene._nodes.begin() + index);
+    if (deleteAtStart) {
+        gene._nodes.front()._referenceAngle = 0;
+    }
+    if (deleteAtEnd) {
+        gene._nodes.back()._referenceAngle = 0;
+    }
 }
 
 void GenomeDescEditService::swapNodes(GeneDesc& gene, int index) const
@@ -282,11 +290,15 @@ Desc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome,
     result._genomes.emplace_back(subGenome.genome);
     auto creature = CreatureDesc().genomeId(subGenome.genome._id);
     result._creatures.emplace_back(creature);
-    result._objects.emplace_back(ObjectDesc()
-                                   .color(PreviewColor)
-                                   .stiffness(1.0f)
-                                   .pos(pos)
-                                   .type(CellDesc().headCell(true).creatureId(creature._id).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))));
+    result._objects.emplace_back(
+        ObjectDesc()
+            .color(PreviewColor)
+            .stiffness(1.0f)
+            .pos(pos)
+            .type(CellDesc()
+                      .headCell(true)
+                      .creatureId(creature._id)
+                      .constructor(ConstructorDesc().autoTriggerInterval(100).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))));
     return result;
 }
 

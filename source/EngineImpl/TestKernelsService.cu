@@ -2,8 +2,8 @@
 
 #include <EngineInterface/EngineConstants.h>
 
-#include <EngineGpuKernels/Macros.cuh>
-#include <EngineGpuKernels/TestKernels.cuh>
+#include <EngineKernels/Macros.cuh>
+#include <EngineKernels/TestKernels.cuh>
 
 void TestKernelsService::init()
 {

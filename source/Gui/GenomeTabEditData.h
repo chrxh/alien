@@ -59,16 +59,12 @@ struct _GenomeTabEditData
     {
         ShapeGenerator shapeGenerator;
         auto& gene = getSelectedGeneRef();
-        gene._angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);
         auto numNodes = gene._nodes.size();
         int index = 0;
         for (auto& node : gene._nodes) {
             auto shapeGenerationResult = shapeGenerator.generateNextConstructionData(shape);
             if (index > 0 && index < numNodes - 1) {
                 node._referenceAngle = shapeGenerationResult.angle;
-            }
-            if (index > 0) {
-                node._numAdditionalConnections = shapeGenerationResult.numAdditionalConnections;
             }
             ++index;
         }

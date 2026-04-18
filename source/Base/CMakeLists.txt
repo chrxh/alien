@@ -30,6 +30,28 @@ add_library(Base
 
 target_link_libraries(Base Boost::boost)
 
+target_precompile_headers(Base PRIVATE
+    <algorithm>
+    <array>
+    <chrono>
+    <cstdint>
+    <filesystem>
+    <functional>
+    <initializer_list>
+    <list>
+    <map>
+    <memory>
+    <mutex>
+    <optional>
+    <set>
+    <sstream>
+    <string>
+    <unordered_map>
+    <unordered_set>
+    <variant>
+    <vector>
+)
+
 if (MSVC)
     target_compile_options(Base PRIVATE "/MP")
 endif()

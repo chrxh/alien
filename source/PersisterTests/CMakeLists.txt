@@ -4,7 +4,7 @@ PUBLIC
     Testsuite.cpp)
 
 target_link_libraries(PersisterTests Base)
-target_link_libraries(PersisterTests EngineGpuKernels)
+target_link_libraries(PersisterTests EngineKernels)
 target_link_libraries(PersisterTests EngineImpl)
 target_link_libraries(PersisterTests EngineInterface)
 target_link_libraries(PersisterTests EngineTestData)
@@ -22,6 +22,13 @@ target_link_libraries(PersisterTests GLEW::GLEW)
 target_link_libraries(PersisterTests glfw)
 target_link_libraries(PersisterTests glad::glad)
 target_link_libraries(PersisterTests GTest::GTest GTest::Main)
+
+target_precompile_headers(PersisterTests PRIVATE
+    <memory>
+    <string>
+    <vector>
+    <gtest/gtest.h>
+)
 
 if (MSVC)
     target_compile_options(PersisterTests PRIVATE "/MP")

@@ -22,7 +22,19 @@ NeuralNetGenomeDesc::NeuralNetGenomeDesc()
 
 NeuralNetGenomeDesc& NeuralNetGenomeDesc::weight(int row, int col, NeuralNetWeight value)
 {
-    _weights[row * NEURONS_PER_CELL + col] = value;
+    _weights.at(row * NEURONS_PER_CELL + col) = value;
+    return *this;
+}
+
+NeuralNetGenomeDesc& NeuralNetGenomeDesc::connectionWeight(int index, float value)
+{
+    _connectionWeights.at(index) = value;
+    return *this;
+}
+
+NeuralNetGenomeDesc& NeuralNetGenomeDesc::bias(int index, float value)
+{
+    _biases.at(index) = value;
     return *this;
 }
 

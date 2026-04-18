@@ -72,7 +72,6 @@ void _PreviewWidget::createSubGenomesForPreview()
             auto& creatureWidget = _creatureWidgets.at(i);
             creatureWidget->setGeneIndices(geneIndicesForSubGenomes.at(i));
             creatureWidget->setGenomeWithStartIndex(subGenomesForPreview.at(i));
-            creatureWidget->resetVisualFrontAngle();
         }
     }
 }

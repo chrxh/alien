@@ -61,6 +61,17 @@ target_link_libraries(PersisterInterface ZLIB::ZLIB)
 find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
 target_include_directories(PersisterInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
 
+target_precompile_headers(PersisterInterface PRIVATE
+    <algorithm>
+    <filesystem>
+    <memory>
+    <optional>
+    <ranges>
+    <sstream>
+    <string>
+    <vector>
+)
+
 if (MSVC)
     target_compile_options(PersisterInterface PRIVATE "/MP")
 endif()

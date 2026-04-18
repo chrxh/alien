@@ -14,7 +14,7 @@
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/NumberGenerator.h>
 
-#include <EngineGpuKernels/TOProvider.cuh>
+#include <EngineKernels/TOProvider.cuh>
 
 
 namespace
@@ -628,7 +628,6 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
     NodeDesc nodeDesc;
     nodeDesc._referenceAngle = nodeTO->referenceAngle;
     nodeDesc._color = nodeTO->color;
-    nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
 
     nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
 
@@ -891,7 +890,6 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
         geneDesc._numBranches = geneTO->numBranches;
         geneDesc._separation = geneTO->separation;
         geneDesc._shape = geneTO->shape;
-        geneDesc._angleAlignment = geneTO->angleAlignment;
         geneDesc._stiffness = geneTO->stiffness;
         geneDesc._connectionDistance = geneTO->connectionDistance;
         geneDesc._numConcatenations = geneTO->numConcatenations;
@@ -981,7 +979,6 @@ void DescConverterService::convertGenomeToTO(
         geneTO.shape = geneDesc._shape;
         geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches);
         geneTO.separation = geneDesc._separation;
-        geneTO.angleAlignment = geneDesc._angleAlignment;
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
         geneTO.numConcatenations = geneDesc._numConcatenations;
@@ -995,7 +992,6 @@ void DescConverterService::convertGenomeToTO(
             NodeTO& nodeTO = nodeTOs.at(nodeArrayStartIndex + nodeIndex);
             nodeTO.referenceAngle = nodeDesc._referenceAngle;
             nodeTO.color = nodeDesc._color;
-            nodeTO.numAdditionalConnections = nodeDesc._numAdditionalConnections;
             nodeTO.neuralNetwork = convert(nodeDesc._neuralNetwork);
 
             nodeTO.cellType = nodeDesc.getCellType();
