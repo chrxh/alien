@@ -19,11 +19,11 @@ private:
     void startNewMeasurement(uint64_t timestep);
     void saveLastState(SimulationParameters const& parameters);
 
-    ColorVector<uint64_t> _numReplicators = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> _numReplicators = {};
     int _numMeasurements = 0;
     std::optional<uint64_t> _lastTimestep;
-    ColorVector<double> _cellMaxAge = {0, 0, 0, 0, 0, 0, 0};  //cloned parameter with double precision
+    ColorVector<double> _cellMaxAge = {};  //cloned parameter with double precision
 
     bool _lastAdaptiveCellMaxAge = false;
-    ColorVector<int> _lastObjectMaxAge = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> _lastObjectMaxAge = {};
 };
