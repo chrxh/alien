@@ -1,16 +1,9 @@
 #pragma once
 
-#include "EngineConstants.h"
-
 #include <stdint.h>
 
-#ifndef HOST_DEVICE
-#if defined(__CUDACC__)
-#define HOST_DEVICE __host__ __device__ __inline__
-#else
-#define HOST_DEVICE inline
-#endif
-#endif
+#include "EngineConstants.h"
+#include "Definitions.h"
 
 namespace Const
 {
