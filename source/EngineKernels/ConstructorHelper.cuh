@@ -16,6 +16,7 @@ public:
     __inline__ __device__ static Node* getCurrentNode(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static bool hasInfiniteConcatenations(Gene* gene);
     __inline__ __device__ static int getNumConstructedCellsOnBranch(Constructor const& constructor, Genome const& genome);
+    __inline__ __device__ static Object* getLastConstructedCellOnBranch(Object* constructorCell);
 };
 
 /************************************************************************/
@@ -95,4 +96,18 @@ __inline__ __device__ int ConstructorHelper::getNumConstructedCellsOnBranch(Cons
 {
     auto gene = getCurrentGene(constructor, genome);
     return constructor.currentConcatenation * gene->numNodes + constructor.currentNodeIndex;
+}
+
+__inline__ __device__ Object* ConstructorHelper::getLastConstructedCellOnBranch(Object* constructorCell)
+{
+    auto const& constructor = constructorCell->typeData.cell.constructor;
+    if (constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64) {
+        for (int i = 0; i < constructorCell->numConnections; ++i) {
+            auto const& connectedObject = constructorCell->connections[i].object;
+            if (connectedObject->id == constructor.lastConstructedCellId) {
+                return connectedObject;
+            }
+        }
+    }
+    return nullptr;
 }

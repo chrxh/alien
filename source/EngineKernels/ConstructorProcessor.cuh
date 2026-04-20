@@ -41,7 +41,6 @@ private:
     tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void tryScheduleMutations(SimulationData& data, Object* hostObject);
 
-    __inline__ __device__ static Object* getLastConstructedCellOnBranch(Object* hostObject);
     __inline__ __device__ static Object*
     startConstructionOnNewBranch(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static Object*
@@ -180,7 +179,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
 
     // Current branch under construction => use creature reference from there
     if (!(ConstructorHelper::isFirstNode(constructor) && ConstructorHelper::isFirstConcatenation(constructor))) {
-        auto lastConstructionCell = getLastConstructedCellOnBranch(object);
+        auto lastConstructionCell = ConstructorHelper::getLastConstructedCellOnBranch(object);
         if (lastConstructionCell) {
             return lastConstructionCell->typeData.cell.creature;
         }
@@ -217,7 +216,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, *genome);
 
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
-    result.lastConstructionObject = getLastConstructedCellOnBranch(object);
+    result.lastConstructionObject = ConstructorHelper::getLastConstructedCellOnBranch(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     result.neededReservedEnergy = 0;
     if (result.node->constructorAvailable) {
@@ -303,20 +302,6 @@ __inline__ __device__ void ConstructorProcessor::tryScheduleMutations(Simulation
 {
     atomicCAS(&hostObject->typeData.cell.creature->mutationState, MutationState_NotMutated, MutationState_MutationInProgress);
     hostObject->typeData.cell.constructor.offspring = nullptr;
-}
-
-__inline__ __device__ Object* ConstructorProcessor::getLastConstructedCellOnBranch(Object* hostObject)
-{
-    auto const& constructor = hostObject->typeData.cell.constructor;
-    if (constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64) {
-        for (int i = 0; i < hostObject->numConnections; ++i) {
-            auto const& connectedObject = hostObject->connections[i].object;
-            if (connectedObject->id == constructor.lastConstructedCellId) {
-                return connectedObject;
-            }
-        }
-    }
-    return nullptr;
 }
 
 __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch(
@@ -645,7 +630,7 @@ __inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Objec
     auto& constructor = hostObject->typeData.cell.constructor;
     auto& genome = constructor.offspring->genome;
 
-    auto lastConstructionCell = getLastConstructedCellOnBranch(hostObject);
+    auto lastConstructionCell = ConstructorHelper::getLastConstructedCellOnBranch(hostObject);
     if (!(constructor.currentNodeIndex == 0 && constructor.currentConcatenation == 0 && constructor.currentBranch == 0)) {
         if (lastConstructionCell == nullptr) {
             return false;
