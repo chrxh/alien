@@ -70,9 +70,6 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             cloneCreature->numCells = 1;
             injectedCell->typeData.cell.creature = cloneCreature;
             injectedCell->typeData.cell.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
-            injectedCell->typeData.cell.constructor.currentNodeIndex = 0;
-            injectedCell->typeData.cell.constructor.currentConcatenation = 0;
-            injectedCell->typeData.cell.constructor.currentBranch = 0;
             injectedCell->typeData.cell.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
             object->typeData.cell.signal.channels[Channels::InjectorSuccess] = 1;
 

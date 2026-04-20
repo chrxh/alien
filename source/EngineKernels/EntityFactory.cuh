@@ -577,7 +577,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         } break;
         }
 
-        // Handle optional constructor field
         cell->constructorAvailable = cellTO.constructorAvailable;
         if (cellTO.constructorAvailable) {
             cell->constructor.autoTriggerInterval = cellTO.constructor.autoTriggerInterval;
@@ -586,10 +585,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.provideEnergy = cellTO.constructor.provideEnergy;
             cell->constructor.geneIndex = cellTO.constructor.geneIndex;
             cell->constructor.lastConstructedCellId = cellTO.constructor.lastConstructedCellId;
-            cell->constructor.currentNodeIndex = cellTO.constructor.currentNodeIndex;
-            cell->constructor.currentConcatenation = cellTO.constructor.currentConcatenation;
             cell->constructor.currentOffspring = cellTO.constructor.currentOffspring;
-            cell->constructor.currentBranch = cellTO.constructor.currentBranch;
             cell->constructor.offspring = nullptr;
         }
     }
@@ -957,7 +953,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     } break;
     }
 
-    // Handle optional constructor field
     cell.constructorAvailable = node->constructorAvailable;
     if (node->constructorAvailable) {
         auto const& nodeConstructor = node->constructor;
@@ -968,10 +963,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.provideEnergy = nodeConstructor.provideEnergy;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
-        constructor.currentNodeIndex = 0;
-        constructor.currentConcatenation = 0;
         constructor.currentOffspring = 0;
-        constructor.currentBranch = 0;
         constructor.offspring = nullptr;
     }
 

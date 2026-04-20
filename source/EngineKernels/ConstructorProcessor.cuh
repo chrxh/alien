@@ -119,7 +119,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         constructor.offspring = findOrCreateNewCreature(data, object);
 
-        if (ConstructorHelper::isFinished(constructor, *constructor.offspring->genome)) {
+        if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
             return;
         }
 
@@ -218,9 +218,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
     if (shape != ConstructorShape_Custom) {
-        for (int i = 0; i <= currentNodeIndex; ++i) {
+        for (int i = 0; i <= result.currentNodeIndex; ++i) {
             auto generationResult = shapeGenerator.generateNextConstructionData(shape);
-            if (i == currentNodeIndex) {
+            if (i == result.currentNodeIndex) {
                 result.shapeResult = generationResult;
             }
         }
@@ -240,7 +240,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     }
 
     if (result.isFirstNode) {
-        if (result.isFirstNodeOfFirstConcatenation && currentBranch == 0) {
+        if (result.isFirstNodeOfFirstConcatenation && result.currentBranch == 0) {
             result.shapeResult.angle = constructor.constructionAngle;
         } else if (isFirstConcatenation) {
             result.shapeResult.angle = 0;
