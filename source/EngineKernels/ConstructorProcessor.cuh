@@ -20,6 +20,9 @@ private:
         bool isSeparation;
 
         // Construction position
+        uint16_t currentNodeIndex;
+        uint32_t currentConcatenation;
+        uint8_t currentBranch;
         bool isFirstNode;
         bool isFirstNodeOfFirstConcatenation;
         bool isLastNode;
@@ -62,7 +65,6 @@ private:
         float2 newObjectPos,
         ConstructionData const& constructionData);
 
-    __inline__ __device__ static bool checkForValidConstruction(Object* hostObject);
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
@@ -121,27 +123,13 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             return;
         }
 
-        if (!checkForValidConstruction(object)) {
-            constructor.currentNodeIndex = 0;
-            constructor.currentConcatenation = 0;
-        }
-
         auto constructionData = createConstructionData(object);
         if (tryConstructCell(data, statistics, object, constructionData)) {
             object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
             ++constructionData.creature->numCells;
-            if (!constructionData.isLastNode) {
-                ++constructor.currentNodeIndex;
-            } else {
-                constructor.currentNodeIndex = 0;
-                ++constructor.currentConcatenation;
-            }
             if (constructionData.isLastNodeOfLastConcatenation) {
-                constructor.currentConcatenation = 0;
-                if (!constructionData.isSeparation) {
-                    ++constructor.currentBranch;
-                } else {
+                if (constructionData.isSeparation) {
                     ++constructor.currentOffspring;
                     if (constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
                         constructor.provideEnergy = ProvideEnergy_CellOnly;
@@ -178,16 +166,9 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     }
 
     // Current branch under construction => use creature reference from there
-    if (!(ConstructorHelper::isFirstNode(constructor) && ConstructorHelper::isFirstConcatenation(constructor))) {
-        auto lastConstructionCell = ConstructorHelper::getLastConstructedCellOnBranch(object);
-        if (lastConstructionCell) {
-            return lastConstructionCell->typeData.cell.creature;
-        }
-    }
-
-    // Other branches already constructed => same creature
-    if (constructor.currentBranch > 0) {
-        return object->typeData.cell.creature;
+    auto lastConstructionCell = ConstructorHelper::getLastConstructedCell(object);
+    if (lastConstructionCell) {
+        return lastConstructionCell->typeData.cell.creature;
     }
 
     // Nothing found => clone creature
@@ -203,20 +184,19 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     auto& constructor = object->typeData.cell.constructor;
     auto& genome = constructor.offspring->genome;
 
-    auto isFirstConcatenation = ConstructorHelper::isFirstConcatenation(constructor);
-
     ConstructionData result;
+    ConstructorHelper::getConstructorIndices(result.currentNodeIndex, result.currentConcatenation, result.currentBranch, object, *genome);
     result.creature = constructor.offspring;
     result.gene = ConstructorHelper::getCurrentGene(constructor, *genome);
-    result.node = ConstructorHelper::getCurrentNode(constructor, *genome);
+    result.node = &result.gene->nodes[result.currentNodeIndex];
     result.isSeparation = result.gene->separation;
-    result.isFirstNode = ConstructorHelper::isFirstNode(constructor);
+    result.isFirstNode = result.currentNodeIndex == 0;
+    auto isFirstConcatenation = result.currentConcatenation == 0;
     result.isFirstNodeOfFirstConcatenation = result.isFirstNode && isFirstConcatenation;
-    result.isLastNode = ConstructorHelper::isLastNode(constructor, *genome);
-    result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, *genome);
-
+    result.isLastNode = result.currentNodeIndex == result.gene->numNodes - 1;
+    result.isLastNodeOfLastConcatenation = result.isLastNode && result.currentConcatenation == result.gene->numConcatenations - 1;
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
-    result.lastConstructionObject = ConstructorHelper::getLastConstructedCellOnBranch(object);
+    result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     result.neededReservedEnergy = 0;
     if (result.node->constructorAvailable) {
@@ -238,9 +218,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     ShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
     if (shape != ConstructorShape_Custom) {
-        for (int i = 0; i <= constructor.currentNodeIndex; ++i) {
+        for (int i = 0; i <= currentNodeIndex; ++i) {
             auto generationResult = shapeGenerator.generateNextConstructionData(shape);
-            if (i == constructor.currentNodeIndex) {
+            if (i == currentNodeIndex) {
                 result.shapeResult = generationResult;
             }
         }
@@ -260,7 +240,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     }
 
     if (result.isFirstNode) {
-        if (result.isFirstNodeOfFirstConcatenation && ConstructorHelper::isFirstBranch(constructor)) {
+        if (result.isFirstNodeOfFirstConcatenation && currentBranch == 0) {
             result.shapeResult.angle = constructor.constructionAngle;
         } else if (isFirstConcatenation) {
             result.shapeResult.angle = 0;
@@ -596,10 +576,10 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         objectIndex,
         constructionData.creature,
         constructor.geneIndex,
-        constructor.currentNodeIndex,
+        constructionData.currentNodeIndex,
         hostObject->typeData.cell.nodeIndex,
-        constructor.currentConcatenation,
-        constructor.currentBranch,
+        constructionData.currentConcatenation,
+        constructionData.currentBranch,
         posOfNewObject,
         hostObject->vel,
         constructionData.neededUsableEnergy,
@@ -623,24 +603,6 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     statistics.incNumCreatedCells(hostObject->color);
 
     return result;
-}
-
-__inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Object* hostObject)
-{
-    auto& constructor = hostObject->typeData.cell.constructor;
-    auto& genome = constructor.offspring->genome;
-
-    auto lastConstructionCell = ConstructorHelper::getLastConstructedCellOnBranch(hostObject);
-    if (!(constructor.currentNodeIndex == 0 && constructor.currentConcatenation == 0 && constructor.currentBranch == 0)) {
-        if (lastConstructionCell == nullptr) {
-            return false;
-        }
-    }
-    if (lastConstructionCell && lastConstructionCell->numConnections == 1) {
-        int numConstructedCells = ConstructorHelper::getNumConstructedCellsOnBranch(constructor, *genome);
-        return numConstructedCells <= 1;
-    }
-    return true;
 }
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData)
