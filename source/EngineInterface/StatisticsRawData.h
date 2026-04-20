@@ -5,32 +5,32 @@
 
 struct TimestepStatistics
 {
-    ColorVector<int> numObjects = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<int> numSelfReplicators = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<int> numColonies = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<int> numViruses = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<int> numFreeCells = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<int> numEnergyParticles = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> totalEnergy = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numObjects = {};
+    ColorVector<int> numSelfReplicators = {};
+    ColorVector<int> numColonies = {};
+    ColorVector<int> numViruses = {};
+    ColorVector<int> numFreeCells = {};
+    ColorVector<int> numEnergyParticles = {};
+    ColorVector<float> totalEnergy = {};
 };
 
 struct AccumulatedStatistics
 {
-    ColorVector<uint64_t> numCreatedCells = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numCreatedReplicators = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numAttacks = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numMuscleActivities = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numDefenderActivities = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numDepotActivities = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numInjectionActivities = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numCompletedInjections = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numGeneratorPulses = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numNeuronActivities = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numSensorActivities = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numSensorMatches = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numReconnectorCreated = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numReconnectorRemoved = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numDetonations = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numCreatedCells = {};
+    ColorVector<uint64_t> numCreatedReplicators = {};
+    ColorVector<uint64_t> numAttacks = {};
+    ColorVector<uint64_t> numMuscleActivities = {};
+    ColorVector<uint64_t> numDefenderActivities = {};
+    ColorVector<uint64_t> numDepotActivities = {};
+    ColorVector<uint64_t> numInjectionActivities = {};
+    ColorVector<uint64_t> numCompletedInjections = {};
+    ColorVector<uint64_t> numGeneratorPulses = {};
+    ColorVector<uint64_t> numNeuronActivities = {};
+    ColorVector<uint64_t> numSensorActivities = {};
+    ColorVector<uint64_t> numSensorMatches = {};
+    ColorVector<uint64_t> numReconnectorCreated = {};
+    ColorVector<uint64_t> numReconnectorRemoved = {};
+    ColorVector<uint64_t> numDetonations = {};
 };
 
 struct TimelineStatistics

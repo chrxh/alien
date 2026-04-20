@@ -41,26 +41,26 @@ struct SimulationParameters
     LayerParameter<RealVector2D> layerPosition;
     LayerParameter<RealVector2D> layerVelocity;
     LayerParameter<LayerShapeType> layerShape = {{LayerShapeType_Circular}};
-    LayerParameter<float> layerCoreRadius = {{100.0f}};                 
-    LayerParameter<RealVector2D> layerCoreRect = {{{100.0f, 100.0f}}};  
+    LayerParameter<float> layerCoreRadius = {{100.0f}};
+    LayerParameter<RealVector2D> layerCoreRect = {{{100.0f, 100.0f}}};
     LayerParameter<float> layerFadeoutRadius = {{100.0f}};
     SourceParameter<SourceShapeType> sourceShapeType = {{SourceShapeType_Circular}};
-    SourceParameter<float> sourceCircularRadius = {{1.0f}};                    
-    SourceParameter<RealVector2D> sourceRectangularRect = {{{30.0f, 60.0f}}};  
+    SourceParameter<float> sourceCircularRadius = {{1.0f}};
+    SourceParameter<RealVector2D> sourceRectangularRect = {{{30.0f, 60.0f}}};
     SourceParameter<RealVector2D> sourcePosition;
     SourceParameter<RealVector2D> sourceVelocity;
 
     // Force field
     EnableableLayerParameter<ForceField> layerForceFieldType = {.layerValues = {{ForceField_None, false}}};
-    LayerParameter<Orientation> layerRadialForceFieldOrientation = {{Orientation_Clockwise}};  
-    LayerParameter<float> layerRadialForceFieldStrength = {{0.001f}};                          
-    LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};                          
-    LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};                          
+    LayerParameter<Orientation> layerRadialForceFieldOrientation = {{Orientation_Clockwise}};
+    LayerParameter<float> layerRadialForceFieldStrength = {{0.001f}};
+    LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};
+    LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};
     LayerParameter<float> layerLinearForceFieldAngle = {{0}};
     LayerParameter<float> layerLinearForceFieldStrength = {{0.0001f}};
-    LayerParameter<float> layerPerlinNoiseForceFieldStrength = {{0.001f}};      
-    LayerParameter<float> layerPerlinNoiseForceFieldSpatialSize = {{20.0f}};    
-    LayerParameter<float> layerPerlinNoiseForceFieldTemporalSize = {{1000.0f}}; 
+    LayerParameter<float> layerPerlinNoiseForceFieldStrength = {{0.001f}};
+    LayerParameter<float> layerPerlinNoiseForceFieldSpatialSize = {{20.0f}};
+    LayerParameter<float> layerPerlinNoiseForceFieldTemporalSize = {{1000.0f}};
 
     // Physics: Motion
     BaseParameter<float> timestepSize = {1.0f};
@@ -73,9 +73,9 @@ struct SimulationParameters
 
     // Physics: Thresholds
     BaseParameter<float> maxVelocity = {2.0f};
-    BaseLayerParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
+    BaseLayerParameter<ColorVector<float>> maxForce = {.baseValue = ColorVector<float>::uniform(0.8f)};
     BaseParameter<float> minObjectDistance = {0.3f};
-    BaseParameter<ColorVector<float>> maxBindingDistance = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
+    BaseParameter<ColorVector<float>> maxBindingDistance = {ColorVector<float>::uniform(3.6f)};
     BaseLayerParameter<float> objectFusionVelocity = {.baseValue = 0.1f};
     static float constexpr maxAcceleration = 0.4f;
     static float constexpr maxForceDecayProbability = 0.2f;
@@ -83,13 +83,12 @@ struct SimulationParameters
     // Radiation
     PinBaseParameter relativeStrengthBasePin = {false};
     LayerParameter<bool> disableRadiationSources = {{false}};
-    BaseLayerParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
-    BaseLayerParameter<ColorVector<float>> radiationType1_strength = {
-        .baseValue = {0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f}};
-    BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-    BaseParameter<ColorVector<float>> radiationType2_strength = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-    BaseParameter<ColorVector<float>> radiationType2_energyThreshold = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
-    BaseParameter<ColorVector<float>> particleSplitEnergy = {{50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorption = {.baseValue = ColorVector<float>::uniform(1.0f)};
+    BaseLayerParameter<ColorVector<float>> radiationType1_strength = {.baseValue = ColorVector<float>::uniform(0.0f)};
+    BaseParameter<ColorVector<int>> radiationType1_minimumAge = {ColorVector<int>::uniform(0)};
+    BaseParameter<ColorVector<float>> radiationType2_strength = {ColorVector<float>::uniform(0.0f)};
+    BaseParameter<ColorVector<float>> radiationType2_energyThreshold = {ColorVector<float>::uniform(500.0f)};
+    BaseParameter<ColorVector<float>> particleSplitEnergy = {ColorVector<float>::uniform(50.0f)};
     BaseParameter<bool> particleTransformationAllowed = {false};
     EnableableSourceParameter<float> sourceRadiationAngle = {{{.value = 0.0f, .enabled = false}}};
     static float constexpr radiationProbability = 0.03f;
@@ -97,24 +96,13 @@ struct SimulationParameters
     static float constexpr radiationVelocityPerturbation = 0.5f;
 
     // Cell life cycle
-    BaseParameter<ColorVector<int>> maxCellAge = {
-        {Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value}};
-    BaseLayerParameter<ColorVector<float>> minCellEnergy = {.baseValue = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
-    BaseParameter<ColorVector<float>> normalCellEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
-    BaseLayerParameter<ColorVector<float>> cellDeathProbability = {
-        .baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
+    BaseParameter<ColorVector<int>> maxCellAge = {ColorVector<int>::uniform(Infinity<int>::value)};
+    BaseLayerParameter<ColorVector<float>> minCellEnergy = {.baseValue = ColorVector<float>::uniform(50.0f)};
+    BaseParameter<ColorVector<float>> normalCellEnergy = {ColorVector<float>::uniform(100.0f)};
+    BaseLayerParameter<ColorVector<float>> cellDeathProbability = {.baseValue = ColorVector<float>::uniform(0.001f)};
 
     // Cell constructor
-    BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f, 3.5f}};
+    BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {ColorVector<float>::uniform(3.5f)};
 
     // Meta mutations
     BaseParameter<float> metaMutationNeuronsSigma = {0};
@@ -122,79 +110,58 @@ struct SimulationParameters
     BaseParameter<float> metaMutationLineagesSigma = {0};
 
     // Cell type: Attacker
-    BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-    BaseLayerParameter<ColorMatrix<float>> attackerFoodChainColorMatrix = {
-        .baseValue = {
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}};
-    BaseParameter<ColorVector<float>> attackerRelatedLineageProtection = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
-    BaseParameter<ColorVector<float>> attackerStrength = {{0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f}};
-    BaseParameter<ColorVector<float>> attackerRadius = {{2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}};
+    BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = ColorVector<float>::uniform(0.0f)};
+    BaseLayerParameter<ColorMatrix<float>> attackerFoodChainColorMatrix = {.baseValue = ColorMatrix<float>::uniform(1.0f)};
+    BaseParameter<ColorVector<float>> attackerRelatedLineageProtection = {ColorVector<float>::uniform(0.5f)};
+    BaseParameter<ColorVector<float>> attackerStrength = {ColorVector<float>::uniform(0.05f)};
+    BaseParameter<ColorVector<float>> attackerRadius = {ColorVector<float>::uniform(2.0f)};
     static float constexpr attackerMaxRawEnergyThreshold = 2.0f;
     static float constexpr attackerCreatureSensorRange = 5.0f;
 
     // Cell type: Digestor
-    BaseParameter<ColorVector<float>> maxRawEnergyConductivity = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
-    BaseParameter<ColorVector<float>> maxRawEnergyConversion = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    BaseParameter<ColorVector<float>> maxRawEnergyConductivity = {ColorVector<float>::uniform(3.0f)};
+    BaseParameter<ColorVector<float>> maxRawEnergyConversion = {ColorVector<float>::uniform(0.1f)};
     static float constexpr maxRawEnergyThresholdForConduction = 100.0f;
 
     // Cell type: Defender
-    BaseParameter<ColorVector<float>> defenderAntiAttackerStrength = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
-    BaseParameter<ColorVector<float>> defenderAntiInjectorStrength = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
+    BaseParameter<ColorVector<float>> defenderAntiAttackerStrength = {ColorVector<float>::uniform(0.5f)};
+    BaseParameter<ColorVector<float>> defenderAntiInjectorStrength = {ColorVector<float>::uniform(0.5f)};
 
     // Cell type: Injector
-    BaseParameter<ColorVector<float>> injectorEnergyCost = {{50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
-    BaseParameter<ColorVector<float>> injectorRadius = {{3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f}};
+    BaseParameter<ColorVector<float>> injectorEnergyCost = {ColorVector<float>::uniform(50.0f)};
+    BaseParameter<ColorVector<float>> injectorRadius = {ColorVector<float>::uniform(3.0f)};
 
     // Cell type: Muscle
-    BaseParameter<ColorVector<float>> muscleEnergyCost = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-    BaseParameter<ColorVector<float>> muscleMovementAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
-    BaseParameter<ColorVector<float>> muscleCrawlingAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
-    BaseParameter<ColorVector<float>> muscleBendingAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseParameter<ColorVector<float>> muscleEnergyCost = {ColorVector<float>::uniform(0.0f)};
+    BaseParameter<ColorVector<float>> muscleMovementAcceleration = {ColorVector<float>::uniform(1.0f)};
+    BaseParameter<ColorVector<float>> muscleCrawlingAcceleration = {ColorVector<float>::uniform(1.0f)};
+    BaseParameter<ColorVector<float>> muscleBendingAcceleration = {ColorVector<float>::uniform(1.0f)};
     static int constexpr muscleActivationCountdown = 10;
 
     // Cell type: Sensor
-    BaseParameter<ColorVector<float>> sensorRadius = {{255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f}};
+    BaseParameter<ColorVector<float>> sensorRadius = {ColorVector<float>::uniform(255.0f)};
 
     // Cell type: Depot
     static float constexpr depotEnergyTransferUnit = 2.0f;
     static float constexpr depotStorageLimit = 500.0f;
 
     // Cell type: Reconnector
-    BaseParameter<ColorVector<float>> reconnectorRadius = {{2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}};
+    BaseParameter<ColorVector<float>> reconnectorRadius = {ColorVector<float>::uniform(2.0f)};
 
     // Cell type: Detonator
-    BaseParameter<ColorVector<float>> detonatorRadius = {{10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f}};
-    BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
+    BaseParameter<ColorVector<float>> detonatorRadius = {ColorVector<float>::uniform(10.0f)};
+    BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {ColorVector<float>::uniform(0.2f)};
 
     // Expert settings: Advanced absorption control
     ExpertToggle advancedAbsorptionControlToggle = {false};
-    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowNumCellsPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowNumCellsPenalty = {.baseValue = ColorVector<float>::uniform(0.0f)};
+    BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {ColorVector<float>::uniform(0.0f)};
+    BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {ColorVector<float>::uniform(0.0f)};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = ColorVector<float>::uniform(0.0f)};
 
     // Expert settings: Cell age limiter
     ExpertToggle cellAgeLimiterToggle = {false};
-    BaseParameter<ColorVector<int>> freeCellMaxAge = {
-        {Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value,
-         Infinity<int>::value}};
+    BaseParameter<ColorVector<int>> freeCellMaxAge = {ColorVector<int>::uniform(Infinity<int>::value)};
     BaseParameter<bool> resetCellAgeAfterActivation = {false};  // Candidate for deletion
     EnableableBaseParameter<int> maxCellAgeBalancerInterval = {.value = 10000, .enabled = false};
 
@@ -209,10 +176,10 @@ struct SimulationParameters
     // Expert settings: External energy settings
     ExpertToggle externalEnergyControlToggle = {false};
     BaseParameter<float> externalEnergy = {0.0f};
-    BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
-    BaseParameter<ColorVector<float>> externalEnergyConditionalInflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {ColorVector<float>::uniform(1.0f)};
+    BaseParameter<ColorVector<float>> externalEnergyConditionalInflowFactor = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<bool> externalEnergyInflowOnlyForFirstOffspring = {false};
-    BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
 
     bool operator==(SimulationParameters const&) const = default;
