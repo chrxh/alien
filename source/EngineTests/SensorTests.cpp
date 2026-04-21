@@ -1656,7 +1656,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_30cells)
     // Create a target creature with exactly 30 cells (should give density ~0.5)
     std::vector<ObjectDesc> targetCells;
     for (int i = 0; i < 30; ++i) {
-        targetCells.emplace_back(ObjectDesc().id(10 + i).pos({95.0f + (i % 6), 80.0f + (i / 6)}));
+        targetCells.emplace_back(ObjectDesc().id(10 + i).pos({95.0f + (i % 6), 90.0f + (i / 6)}));
     }
     data.addCreature(targetCells, CreatureDesc().id(1));
 
