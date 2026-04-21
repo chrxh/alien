@@ -70,10 +70,11 @@ __inline__ __device__ void ConstructorHelper::getConstructorIndices(
 
         auto& constructor = constructorCell->typeData.cell.constructor;
         auto const& gene = getCurrentGene(constructor, genome);
-        if (currentNodeIndex >= gene->numNodes - 1) {
+        ++currentNodeIndex;
+        if (currentNodeIndex >= gene->numNodes) {
             currentNodeIndex = 0;
             currentConcatenation++;
-            if (currentConcatenation >= gene->numConcatenations - 1) {
+            if (currentConcatenation >= gene->numConcatenations) {
                 currentConcatenation = 0;
                 currentBranch++;
             }

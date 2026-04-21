@@ -595,9 +595,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     auto prevPrevConstructedCell = actualData.getObjectRef(3);
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
-
     EXPECT_EQ(CellState_Ready, prevConstructedCell.getCellRef()._cellState);
-
     EXPECT_EQ(CellState_Ready, prevPrevConstructedCell.getCellRef()._cellState);
 }
 
