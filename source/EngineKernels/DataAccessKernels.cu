@@ -535,10 +535,7 @@ namespace
                 cellTO.constructor.provideEnergy = cell.constructor.provideEnergy;
                 cellTO.constructor.geneIndex = cell.constructor.geneIndex;
                 cellTO.constructor.lastConstructedCellId = cell.constructor.lastConstructedCellId;
-                cellTO.constructor.currentNodeIndex = cell.constructor.currentNodeIndex;
-                cellTO.constructor.currentConcatenation = cell.constructor.currentConcatenation;
                 cellTO.constructor.currentOffspring = cell.constructor.currentOffspring;
-                cellTO.constructor.currentBranch = cell.constructor.currentBranch;
             }
         }
     }

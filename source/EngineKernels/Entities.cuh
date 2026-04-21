@@ -82,10 +82,10 @@ struct Constructor
 
     // Process data
     uint64_t lastConstructedCellId;  // May be invalid
-    uint16_t currentNodeIndex;
-    uint16_t currentConcatenation;
+    //uint16_t currentNodeIndex;
+    //uint16_t currentConcatenation;
     uint16_t currentOffspring;
-    uint8_t currentBranch;
+    //uint8_t currentBranch;
 
     // Temp data
     Creature* offspring;  // Must be reset if separated construction is finished

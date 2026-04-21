@@ -200,10 +200,12 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
 
     // Add target creature with constructor that has some progress
-    data.addCreature({
-        ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(5).currentNodeIndex(3).currentConcatenation(2))),
-        ObjectDesc().id(101).pos({101.0f, 103.0f}),
-    }, CreatureDesc().id(2));
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(5).lastConstructedCellId(101))),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}).type(CellDesc().nodeIndex(3).concatenationIndex(2)),
+        },
+        CreatureDesc().id(2));
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
@@ -216,6 +218,5 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     EXPECT_EQ(2, actualConstructor._geneIndex);
 
     // Construction progress should be reset
-    EXPECT_EQ(0, actualConstructor._currentNodeIndex);
-    EXPECT_EQ(0, actualConstructor._currentConcatenation);
+    EXPECT_FALSE(actualConstructor._lastConstructedCellId.has_value());
 }

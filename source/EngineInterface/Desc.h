@@ -66,10 +66,7 @@ struct ConstructorDesc
 
     // Process data
     MEMBER(ConstructorDesc, std::optional<uint64_t>, lastConstructedCellId, std::nullopt);
-    MEMBER(ConstructorDesc, int, currentNodeIndex, 0);
-    MEMBER(ConstructorDesc, int, currentConcatenation, 0);
     MEMBER(ConstructorDesc, int, currentOffspring, 0);
-    MEMBER(ConstructorDesc, int, currentBranch, 0);
 };
 
 struct TelemetryDesc

@@ -5,73 +5,43 @@
 class ConstructorHelper
 {
 public:
-    __inline__ __device__ static bool isStarting(Constructor const& constructor);
-    __inline__ __device__ static bool isFinished(Constructor const& constructor, Genome const& genome);
-    __inline__ __device__ static bool isFirstNode(Constructor const& constructor);
-    __inline__ __device__ static bool isLastNode(Constructor const& constructor, Genome const& genome);
-    __inline__ __device__ static bool isFirstConcatenation(Constructor const& constructor);
-    __inline__ __device__ static bool isLastConcatenation(Constructor const& constructor, Genome const& genome);
-    __inline__ __device__ static bool isFirstBranch(Constructor const& constructor);
+    __inline__ __device__ static bool isFinished(Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
-    __inline__ __device__ static Node* getCurrentNode(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static bool hasInfiniteConcatenations(Gene* gene);
-    __inline__ __device__ static int getNumConstructedCellsOnBranch(Constructor const& constructor, Genome const& genome);
+    __inline__ __device__ static void getConstructorIndices(uint16_t& currentNodeIndex, uint32_t& currentConcatenation, uint8_t& currentBranch, Object* constructorCell, Genome const& genome);
+    __inline__ __device__ static Object* getLastConstructedCell(Object* constructorCell);
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ bool ConstructorHelper::isStarting(Constructor const& constructor)
-{
-    return constructor.currentNodeIndex == 0 && constructor.currentBranch == 0 && constructor.currentConcatenation == 0;
-}
-
-__inline__ __device__ bool ConstructorHelper::isFinished(Constructor const& constructor, Genome const& genome)
+__inline__ __device__ bool ConstructorHelper::isFinished(Object* constructorCell, Genome const& genome)
 {
     if (genome.numGenes == 0) {
         return true;
     }
+
+    auto& constructor = constructorCell->typeData.cell.constructor;
     if (constructor.geneIndex >= genome.numGenes) {
         return true;
     }
+
+    uint16_t currentNodeIndex;
+    uint32_t currentConcatenation;
+    uint8_t currentBranch;
+    ConstructorHelper::getConstructorIndices(currentNodeIndex, currentConcatenation, currentBranch, constructorCell, genome);
+
     auto const& gene = getCurrentGene(constructor, genome);
-    if (constructor.currentNodeIndex >= gene->numNodes) {
+    if (currentNodeIndex >= gene->numNodes) {
         return true;
     }
-    if (constructor.currentConcatenation >= gene->numConcatenations) {
+    if (currentConcatenation >= gene->numConcatenations) {
         return true;
     }
     if (gene->separation) {
         return false;
     }
-    return constructor.currentBranch >= gene->numBranches;
-}
-
-__inline__ __device__ bool ConstructorHelper::isFirstNode(Constructor const& constructor)
-{
-    return constructor.currentNodeIndex == 0;
-}
-
-__inline__ __device__ bool ConstructorHelper::isLastNode(Constructor const& constructor, Genome const& genome)
-{
-    auto const& gene = getCurrentGene(constructor, genome);
-    return constructor.currentNodeIndex == gene->numNodes - 1;
-}
-
-__inline__ __device__ bool ConstructorHelper::isFirstConcatenation(Constructor const& constructor)
-{
-    return constructor.currentConcatenation == 0;
-}
-
-__inline__ __device__ bool ConstructorHelper::isLastConcatenation(Constructor const& constructor, Genome const& genome)
-{
-    auto const& gene = getCurrentGene(constructor, genome);
-    return constructor.currentConcatenation == gene->numConcatenations - 1;
-}
-
-__inline__ __device__ bool ConstructorHelper::isFirstBranch(Constructor const& constructor)
-{
-    return constructor.currentBranch == 0;
+    return currentBranch >= gene->numBranches;
 }
 
 __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const& constructor, Genome const& genome)
@@ -80,19 +50,52 @@ __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const&
     return &genome.genes[constructor.geneIndex];
 }
 
-__inline__ __device__ Node* ConstructorHelper::getCurrentNode(Constructor const& constructor, Genome const& genome)
-{
-    auto gene = getCurrentGene(constructor, genome);
-    return &gene->nodes[constructor.currentNodeIndex];
-}
-
 __inline__ __device__ bool ConstructorHelper::hasInfiniteConcatenations(Gene* gene)
 {
     return gene->numConcatenations == 0x7fffffff;
 }
 
-__inline__ __device__ int ConstructorHelper::getNumConstructedCellsOnBranch(Constructor const& constructor, Genome const& genome)
+__inline__ __device__ void ConstructorHelper::getConstructorIndices(
+    uint16_t& currentNodeIndex,
+    uint32_t& currentConcatenation,
+    uint8_t& currentBranch,
+    Object* constructorCell,
+    Genome const& genome)
 {
-    auto gene = getCurrentGene(constructor, genome);
-    return constructor.currentConcatenation * gene->numNodes + constructor.currentNodeIndex;
+    auto lastConstructedCell = ConstructorHelper::getLastConstructedCell(constructorCell);
+    if (lastConstructedCell) {
+        currentNodeIndex = lastConstructedCell->typeData.cell.nodeIndex;
+        currentConcatenation = lastConstructedCell->typeData.cell.concatenationIndex;
+        currentBranch = lastConstructedCell->typeData.cell.branchIndex;
+
+        auto& constructor = constructorCell->typeData.cell.constructor;
+        auto const& gene = getCurrentGene(constructor, genome);
+        ++currentNodeIndex;
+        if (currentNodeIndex >= gene->numNodes) {
+            currentNodeIndex = 0;
+            currentConcatenation++;
+            if (currentConcatenation >= gene->numConcatenations) {
+                currentConcatenation = 0;
+                currentBranch++;
+            }
+        }
+    } else {
+        currentNodeIndex = 0;
+        currentConcatenation = 0;
+        currentBranch = 0;
+    }
+}
+
+__inline__ __device__ Object* ConstructorHelper::getLastConstructedCell(Object* constructorCell)
+{
+    auto const& constructor = constructorCell->typeData.cell.constructor;
+    if (constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64) {
+        for (int i = 0; i < constructorCell->numConnections; ++i) {
+            auto const& connectedObject = constructorCell->connections[i].object;
+            if (connectedObject->id == constructor.lastConstructedCellId) {
+                return connectedObject;
+            }
+        }
+    }
+    return nullptr;
 }
