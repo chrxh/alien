@@ -42,8 +42,8 @@ TEST_F(ConstructorTests, alreadyFinished)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentBranch(1))),
-            ObjectDesc().id(1).pos({100.0f, 101.0f}),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+            ObjectDesc().id(1).pos({100.0f, 101.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
@@ -65,9 +65,6 @@ TEST_F(ConstructorTests, alreadyFinished)
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(1, hostConstructor._currentBranch);
     EXPECT_EQ(0, hostConstructor._currentOffspring);
     // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
@@ -80,7 +77,7 @@ TEST_F(ConstructorTests, emptyGenome)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentBranch(0))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
         },
         CreatureDesc().id(0),
         GenomeDesc());
@@ -98,12 +95,8 @@ TEST_F(ConstructorTests, emptyGenome)
     ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
     ASSERT_EQ(1, creature._numCells);
 
-    auto hostObject = actualData.getObjectRef(0);
-    auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(0, hostConstructor._currentBranch);
     // Verify no active signal
+    auto hostObject = actualData.getObjectRef(0);
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
@@ -114,7 +107,7 @@ TEST_F(ConstructorTests, emptyGene)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentBranch(0))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({GeneDesc().separation(true)}));
@@ -133,79 +126,9 @@ TEST_F(ConstructorTests, emptyGene)
     ASSERT_EQ(1, creature._numCells);
 
     auto hostObject = actualData.getObjectRef(0);
-    auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(0, hostConstructor._currentBranch);
+
     // Verify no active signal
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
-}
-
-TEST_F(ConstructorTests, nodeIndexOutOfRange)
-{
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc()
-                .id(0)
-                .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).currentBranch(0).currentNodeIndex(1))),
-        },
-        CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(true)}));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
-    ASSERT_EQ(1, actualData._creatures.size());
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-
-    auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(1, creature._numCells);
-
-    auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(1, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(0, hostConstructor._currentBranch);
-    // Verify no active signal
-    EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
-}
-
-TEST_F(ConstructorTests, geneIndexOutOfRange)
-{
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc()
-                .id(0)
-                .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).currentBranch(0).currentNodeIndex(0))),
-        },
-        CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(true)}));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
-    ASSERT_EQ(1, actualData._creatures.size());
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-
-    auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
-    ASSERT_EQ(1, creature._numCells);
-
-    auto hostObject = actualData.getObjectRef(0);
-    auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(0, hostConstructor._currentBranch);
-    // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
@@ -213,7 +136,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0).currentBranch(0).currentNodeIndex(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
@@ -233,9 +156,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(0, hostConstructor._currentBranch);
+
     // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
@@ -248,7 +169,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
                 .id(0)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc().constructor(
-                    ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))),  // Not enough energy
+                    ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0))),  // Not enough energy
             ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         },
         CreatureDesc().id(0),
@@ -270,9 +191,6 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(0, hostConstructor._currentBranch);
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[Channels::ConstructorSuccess]));
 }
 
@@ -285,7 +203,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
                           .usableEnergy(getConstructorEnergy())
-                          .constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))),
+                          .constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0))),
             ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         },
         CreatureDesc().id(0),
@@ -307,9 +225,6 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(1, hostConstructor._currentBranch);
     EXPECT_TRUE(approxCompare(1.0f, hostObject.getCellRef()._signal._channels[Channels::ConstructorSuccess]));
 }
 
@@ -322,7 +237,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
                           .usableEnergy(getConstructorEnergy())
-                          .constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))),
+                          .constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0))),
             ObjectDesc().id(1).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
@@ -344,9 +259,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
 
     auto hostObject = actualData.getObjectRef(0);
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
-    EXPECT_EQ(0, hostConstructor._currentBranch);
+
     // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
