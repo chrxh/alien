@@ -11,12 +11,20 @@
 using CreationMode = int;
 enum CreationMode_
 {
-    CreationMode_CreateParticle,
     CreationMode_CreateObject,
     CreationMode_CreateRectangle,
     CreationMode_CreateHexagon,
     CreationMode_CreateDisc,
     CreationMode_Drawing
+};
+
+using CreationMaterial = int;
+enum CreationMaterial_
+{
+    CreationMaterial_Solid,
+    CreationMaterial_Fluid,
+    CreationMaterial_FreeCell,
+    CreationMaterial_EnergyParticle
 };
 
 class CreatorWindow : public AlienWindow
@@ -41,6 +49,7 @@ private:
     void createDisc();
 
     void validateAndCorrect();
+    bool isEnergyMaterial() const;
 
     ObjectTypeDesc getObjectTypeDesc() const;
 
@@ -65,6 +74,7 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
+    CreationMaterial _material = CreationMaterial_Solid;
     ObjectType _objectType = ObjectType_Solid;
     Desc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
