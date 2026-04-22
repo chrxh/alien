@@ -464,7 +464,7 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     parameters.layerRadialForceFieldDriftAngle.layerValues[index] = 0.0f;
     parameters.layerPerlinNoiseForceFieldStrength.layerValues[index] = 0.001f;
     parameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index] = 20.0f;
-    parameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index] = 100.0f;
+    parameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index] = 10000.0f;
 
     origParameters.backgroundColor.layerValues[index] = parameters.backgroundColor.layerValues[index];
     origParameters.layerShape.layerValues[index] = parameters.layerShape.layerValues[index];
