@@ -104,7 +104,7 @@ void CreatorWindow::processIntern()
         if (_objectType == ObjectType_Fluid) {
             AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
         }
-        if (_mode != CreationMode_CreateParticle) {
+        if (_mode != CreationMode_CreateParticle && _objectType != ObjectType_Fluid) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
                 &_stiffness);
