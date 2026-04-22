@@ -75,7 +75,6 @@ private:
 
     //drawing
     CreationMaterial _material = CreationMaterial_Solid;
-    ObjectType _objectType = ObjectType_Solid;
     Desc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;

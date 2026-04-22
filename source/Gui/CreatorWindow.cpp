@@ -39,15 +39,6 @@ namespace
 
 void CreatorWindow::initIntern() {}
 
-namespace
-{
-    std::map<CreationMaterial, ObjectType> materialToObjectType = {
-        {CreationMaterial_Solid, ObjectType_Solid},
-        {CreationMaterial_Fluid, ObjectType_Fluid},
-        {CreationMaterial_FreeCell, ObjectType_FreeCell},
-    };
-}
-
 void CreatorWindow::processIntern()
 {
     AlienGui::SelectableToolbarButton(ICON_DOT, _mode, CreationMode_CreateObject, CreationMode_CreateObject);
@@ -97,15 +88,12 @@ void CreatorWindow::processIntern()
                 .tooltip(Const::CreatorDrawingTypeTooltip),
             material);
         _material = material;
-        if (!isEnergyMaterial()) {
-            _objectType = materialToObjectType.at(_material);
-        }
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
-        if (!isEnergyMaterial() && _objectType == ObjectType_Fluid) {
+        if (_material == CreationMaterial_Fluid) {
             AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
         }
-        if (!isEnergyMaterial() && _objectType != ObjectType_Fluid) {
+        if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
                 &_stiffness);
@@ -244,12 +232,12 @@ void CreatorWindow::onDrawing()
             }
         }
 
-        if (!isEnergyMaterial() && _objectType != ObjectType_Fluid) {
+        if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
             DescEditService::get().reconnectObjects(newEntities, 1.5f);
         }
         _SimulationFacade::get()->addAndSelectSimulationData(std::move(newEntities));
 
-        if (!isEnergyMaterial() && _objectType != ObjectType_Fluid) {
+        if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
             _SimulationFacade::get()->reconnectSelectedObjects();
         }
     }
@@ -418,12 +406,12 @@ bool CreatorWindow::isEnergyMaterial() const
 
 ObjectTypeDesc CreatorWindow::getObjectTypeDesc() const
 {
-    switch (_objectType) {
-    case ObjectType_Solid:
+    switch (_material) {
+    case CreationMaterial_Solid:
         return SolidDesc().energy(_energy);
-    case ObjectType_Fluid:
+    case CreationMaterial_Fluid:
         return FluidDesc().energy(_energy).glow(_glow);
-    case ObjectType_FreeCell:
+    case CreationMaterial_FreeCell:
         return FreeCellDesc().energy(_energy);
     default:
         CHECK(false);
