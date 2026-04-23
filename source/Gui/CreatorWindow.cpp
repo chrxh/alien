@@ -27,7 +27,6 @@
 namespace
 {
     auto const ModeText = std::unordered_map<CreationMode, std::string>{
-        {CreationMode_CreateParticle, "Create a single energy particle"},
         {CreationMode_CreateObject, "Create a single object"},
         {CreationMode_CreateRectangle, "Create a rectangular object network"},
         {CreationMode_CreateHexagon, "Create a hexagonal object network"},
@@ -40,18 +39,8 @@ namespace
 
 void CreatorWindow::initIntern() {}
 
-namespace
-{
-    std::map<ObjectType, int> objectTypeToMaterial = {{ObjectType_Solid, 0}, {ObjectType_Fluid, 1}, {ObjectType_FreeCell, 2}};
-    std::map<ObjectType, int> materialToObjectType = {{0, ObjectType_Solid}, {1, ObjectType_Fluid}, {2, ObjectType_FreeCell}};
-}
-
 void CreatorWindow::processIntern()
 {
-    AlienGui::SelectableToolbarButton(ICON_FA_SUN, _mode, CreationMode_CreateParticle, CreationMode_CreateParticle);
-    AlienGui::Tooltip(ModeText.at(CreationMode_CreateParticle));
-
-    ImGui::SameLine();
     AlienGui::SelectableToolbarButton(ICON_DOT, _mode, CreationMode_CreateObject, CreationMode_CreateObject);
     AlienGui::Tooltip(ModeText.at(CreationMode_CreateObject));
 
@@ -90,21 +79,19 @@ void CreatorWindow::processIntern()
                 &pencilWidth);
             EditorModel::get().setPencilWidth(pencilWidth);
         }
-        int material = objectTypeToMaterial.at(_objectType);
         AlienGui::Switcher(
             AlienGui::SwitcherParameters()
                 .name("Material")
                 .textWidth(RightColumnWidth)
-                .values({"Solid", "Fluid", "Free cells"})
+                .values({"Solid", "Fluid", "Free cells", "Energy particles"})
                 .tooltip(Const::CreatorDrawingTypeTooltip),
-            material);
-        _objectType = materialToObjectType.at(material);
+            _material);
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
-        if (_objectType == ObjectType_Fluid) {
+        if (_material == CreationMaterial_Fluid) {
             AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Glow").min(0).max(1.0f).format("%.2f").textWidth(RightColumnWidth), &_glow);
         }
-        if (_mode != CreationMode_CreateParticle && _objectType != ObjectType_Fluid) {
+        if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
                 &_stiffness);
@@ -139,10 +126,10 @@ void CreatorWindow::processIntern()
                     .tooltip(Const::CreatorDistanceTooltip),
                 _objectDistance);
         }
-        if (_mode != CreationMode_CreateParticle & _mode != CreationMode_CreateObject) {
+        if (_mode != CreationMode_CreateObject) {
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
         }
-        if (_mode != CreationMode_CreateParticle) {
+        if (!isEnergyMaterial()) {
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Fixed").textWidth(RightColumnWidth).tooltip(Const::CellFixedTooltip), _fixed);
         }
     }
@@ -156,10 +143,7 @@ void CreatorWindow::processIntern()
         simInteractionController.setDrawMode(false);
         if (AlienGui::Button("Build")) {
             if (_mode == CreationMode_CreateObject) {
-                createObject();
-            }
-            if (_mode == CreationMode_CreateParticle) {
-                createParticle();
+                createEntity();
             }
             if (_mode == CreationMode_CreateRectangle) {
                 createRectangle();
@@ -186,25 +170,25 @@ void CreatorWindow::onDrawing()
     auto mousePos = ImGui::GetMousePos();
     auto pos = Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
 
-    auto objectTypeDesc = getObjectTypeDesc();
     auto createAlignedCircle = [&](auto pos) {
         if (EditorModel::get().getPencilWidth() > 1 + NEAR_ZERO) {
             pos.x = toFloat(toInt(pos.x));
             pos.y = toFloat(toInt(pos.y));
         }
-        return DescEditService::get().createCircle(DescEditService::CreateCircleParameters()
-                                                                  .center(pos)
-                                                                  .radius(EditorModel::get().getPencilWidth())
-                                                                  .type(objectTypeDesc)
-                                                                  .stiffness(_stiffness)
-                                                                  .sticky(_makeSticky)
-                                                                  .cellDistance(1.0f)
-                                                                  .color(EditorModel::get().getDefaultColorCode())
-                                                                  .fixed(_fixed)
-                                                                  .connectObjects(false));
+        auto desc = DescEditService::get().createCircle(DescEditService::CreateCircleParameters()
+                                                            .center(pos)
+                                                            .radius(EditorModel::get().getPencilWidth())
+                                                            .type(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
+                                                            .stiffness(_stiffness)
+                                                            .sticky(_makeSticky)
+                                                            .cellDistance(1.0f)
+                                                            .color(EditorModel::get().getDefaultColorCode())
+                                                            .fixed(_fixed)
+                                                            .connectObjects(false));
+        return isEnergyMaterial() ? convertToEnergyParticles(desc) : desc;
     };
 
-    auto prevObjectCount = _drawingDescription._objects.size();
+    auto prevEntityCount = isEnergyMaterial() ? _drawingDescription._energies.size() : _drawingDescription._objects.size();
 
     if (_drawingDescription.isEmpty()) {
         DescEditService::get().addIfSpaceAvailable(
@@ -223,19 +207,23 @@ void CreatorWindow::onDrawing()
         }
     }
 
-    auto newObjectCount = _drawingDescription._objects.size();
-    if (newObjectCount > prevObjectCount) {
-        Desc newObjects;
-        for (auto i = prevObjectCount; i < newObjectCount; ++i) {
-            newObjects._objects.emplace_back(_drawingDescription._objects[i]);
+    auto newEntityCount = isEnergyMaterial() ? _drawingDescription._energies.size() : _drawingDescription._objects.size();
+    if (newEntityCount > prevEntityCount) {
+        Desc newEntities;
+        for (auto i = prevEntityCount; i < newEntityCount; ++i) {
+            if (isEnergyMaterial()) {
+                newEntities._energies.emplace_back(_drawingDescription._energies.at(i));
+            } else {
+                newEntities._objects.emplace_back(_drawingDescription._objects.at(i));
+            }
         }
 
-        if (_objectType != ObjectType_Fluid) {
-            DescEditService::get().reconnectObjects(newObjects, 1.5f);
+        if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
+            DescEditService::get().reconnectObjects(newEntities, 1.5f);
         }
-        _SimulationFacade::get()->addAndSelectSimulationData(std::move(newObjects));
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(newEntities));
 
-        if (_objectType != ObjectType_Fluid) {
+        if (!isEnergyMaterial() && _material != CreationMaterial_Fluid) {
             _SimulationFacade::get()->reconnectSelectedObjects();
         }
     }
@@ -252,25 +240,20 @@ CreatorWindow::CreatorWindow()
     : AlienWindow("Creator", "editors.creator", false)
 {}
 
-void CreatorWindow::createObject()
+void CreatorWindow::createEntity()
 {
-    auto object = ObjectDesc()
-                      .pos(getRandomPos())
-                      .stiffness(_stiffness)
-                      .color(EditorModel::get().getDefaultColorCode())
-                      .fixed(_fixed)
-                      .sticky(_makeSticky)
-                      .type(getObjectTypeDesc());
     Desc description;
-    description._objects.emplace_back(object);
-    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-}
-
-void CreatorWindow::createParticle()
-{
-    auto energyParticle = EnergyDesc().pos(getRandomPos()).energy(_energy);
-    Desc description;
-    description._energies.emplace_back(energyParticle);
+    if (isEnergyMaterial()) {
+        description._energies.emplace_back(EnergyDesc().pos(getRandomPos()).energy(_energy).color(EditorModel::get().getDefaultColorCode()));
+    } else {
+        description._objects.emplace_back(ObjectDesc()
+                                              .pos(getRandomPos())
+                                              .stiffness(_stiffness)
+                                              .color(EditorModel::get().getDefaultColorCode())
+                                              .fixed(_fixed)
+                                              .sticky(_makeSticky)
+                                              .type(getObjectTypeDesc()));
+    }
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
@@ -281,7 +264,7 @@ void CreatorWindow::createRectangle()
     }
 
     auto description = DescEditService::get().createRect(DescEditService::CreateRectParameters()
-                                                             .objectType(getObjectTypeDesc())
+                                                             .objectType(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
                                                              .width(_rectHorizontalObjects)
                                                              .height(_rectVerticalObjects)
                                                              .cellDistance(_objectDistance)
@@ -290,7 +273,9 @@ void CreatorWindow::createRectangle()
                                                              .color(EditorModel::get().getDefaultColorCode())
                                                              .center(getRandomPos())
                                                              .fixed(_fixed));
-
+    if (isEnergyMaterial()) {
+        description = convertToEnergyParticles(description);
+    }
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
@@ -299,8 +284,9 @@ void CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    Desc description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
-                                                            .objectType(getObjectTypeDesc())
+
+    auto description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
+                                                            .objectType(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
                                                             .layers(_layers)
                                                             .cellDistance(_objectDistance)
                                                             .stiffness(_stiffness)
@@ -308,8 +294,12 @@ void CreatorWindow::createHexagon()
                                                             .color(EditorModel::get().getDefaultColorCode())
                                                             .center(getRandomPos())
                                                             .fixed(_fixed));
+    if (isEnergyMaterial()) {
+        description = convertToEnergyParticles(description);
+    } else {
+        DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
+    }
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-    DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
 }
 
 void CreatorWindow::createDisc()
@@ -319,6 +309,8 @@ void CreatorWindow::createDisc()
     }
 
     Desc description;
+    auto const color = EditorModel::get().getDefaultColorCode();
+    auto const objectType = isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc();
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius <= _outerRadius + SmallValue; radius += _objectDistance) {
         float angleInc = [&] {
@@ -328,31 +320,44 @@ void CreatorWindow::createDisc()
             }
             return 360.0f;
         }();
-        std::unordered_set<uint64_t> objectIds;
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
-
             description._objects.emplace_back(ObjectDesc()
                                                   .id(NumberGenerator::get().createEntityId())
                                                   .stiffness(_stiffness)
                                                   .sticky(_makeSticky)
                                                   .pos(relPos)
-                                                  .color(EditorModel::get().getDefaultColorCode())
+                                                  .color(color)
                                                   .fixed(_fixed)
-                                                  .type(getObjectTypeDesc()));
+                                                  .type(objectType));
         }
     }
 
-    DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
+    if (isEnergyMaterial()) {
+        description = convertToEnergyParticles(description);
+    } else {
+        DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
+    }
     DescEditService::get().setCenter(description, getRandomPos());
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
+}
+
+Desc CreatorWindow::convertToEnergyParticles(Desc const& description) const
+{
+    Desc result;
+    auto const color = EditorModel::get().getDefaultColorCode();
+    for (auto const& object : description._objects) {
+        result._energies.emplace_back(EnergyDesc().pos(object._pos).energy(_energy).color(color));
+    }
+    return result;
 }
 
 void CreatorWindow::validateAndCorrect()
 {
     _energy = std::max(0.0f, _energy);
     _stiffness = std::min(1.0f, std::max(0.0f, _stiffness));
-    _objectDistance = std::min(10.0f, std::max(0.1f, _objectDistance));
+    _material = std::max(static_cast<int>(CreationMaterial_Solid), std::min(static_cast<int>(CreationMaterial_EnergyParticle), _material));
+    _objectDistance = std::min(10.0f, std::max(0.5f, _objectDistance));
     _rectHorizontalObjects = std::max(1, _rectHorizontalObjects);
     _rectVerticalObjects = std::max(1, _rectVerticalObjects);
     _layers = std::max(1, _layers);
@@ -360,14 +365,19 @@ void CreatorWindow::validateAndCorrect()
     _outerRadius = std::max(_innerRadius, _outerRadius);
 }
 
+bool CreatorWindow::isEnergyMaterial() const
+{
+    return _material == CreationMaterial_EnergyParticle;
+}
+
 ObjectTypeDesc CreatorWindow::getObjectTypeDesc() const
 {
-    switch (_objectType) {
-    case ObjectType_Solid:
+    switch (_material) {
+    case CreationMaterial_Solid:
         return SolidDesc().energy(_energy);
-    case ObjectType_Fluid:
+    case CreationMaterial_Fluid:
         return FluidDesc().energy(_energy).glow(_glow);
-    case ObjectType_FreeCell:
+    case CreationMaterial_FreeCell:
         return FreeCellDesc().energy(_energy);
     default:
         CHECK(false);

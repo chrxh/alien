@@ -11,12 +11,20 @@
 using CreationMode = int;
 enum CreationMode_
 {
-    CreationMode_CreateParticle,
     CreationMode_CreateObject,
     CreationMode_CreateRectangle,
     CreationMode_CreateHexagon,
     CreationMode_CreateDisc,
     CreationMode_Drawing
+};
+
+using CreationMaterial = int;
+enum CreationMaterial_
+{
+    CreationMaterial_Solid,
+    CreationMaterial_Fluid,
+    CreationMaterial_FreeCell,
+    CreationMaterial_EnergyParticle
 };
 
 class CreatorWindow : public AlienWindow
@@ -34,13 +42,15 @@ private:
     void processIntern() override;
     bool isShown() override;
 
-    void createObject();
-    void createParticle();
+    void createEntity();
     void createRectangle();
     void createHexagon();
     void createDisc();
 
+    Desc convertToEnergyParticles(Desc const& description) const;
+
     void validateAndCorrect();
+    bool isEnergyMaterial() const;
 
     ObjectTypeDesc getObjectTypeDesc() const;
 
@@ -53,19 +63,19 @@ private:
     float _glow = 0.0f;
     bool _makeSticky = false;
 
-    //rectangle
+    // Rectangle data
     int _rectHorizontalObjects = 10;
     int _rectVerticalObjects = 10;
 
-    //hexagon
+    // Hexagon data
     int _layers = 10;
 
-    //disc
+    // Disc data
     float _outerRadius = 10.0f;
     float _innerRadius = 5.0f;
 
-    //drawing
-    ObjectType _objectType = ObjectType_Solid;
+    // Drawing data
+    CreationMaterial _material = CreationMaterial_Solid;
     Desc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
