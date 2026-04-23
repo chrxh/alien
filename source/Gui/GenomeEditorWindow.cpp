@@ -6,6 +6,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/GenomeDescInfoService.h>
@@ -66,12 +67,16 @@ void GenomeEditorWindow::initIntern()
     ChangeColorDialog::get().setup();
 
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
+    _genomeEditData->showNodeIndex = GlobalSettings::get().getValue("windows.genome editor.show node index", true);
 
     // Initialize the first tab with default genome
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
 }
 
-void GenomeEditorWindow::shutdownIntern() {}
+void GenomeEditorWindow::shutdownIntern()
+{
+    GlobalSettings::get().setValue("windows.genome editor.show node index", _genomeEditData->showNodeIndex);
+}
 
 void GenomeEditorWindow::processIntern()
 {

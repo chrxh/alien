@@ -88,8 +88,13 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     for (auto const& object : phenotype._objects) {
         auto const& node = getNode(object);
         auto const& color = object.getCellRef()._cellState == CellState_Ready ? node._color : -1;
-        auto previewCell =
-            CellPreviewDesc().id(object._id).pos(object._pos).color(color).geneIndex(object.getCellRef()._geneIndex).nodeIndex(object.getCellRef()._nodeIndex);
+        auto previewCell = CellPreviewDesc()
+                               .id(object._id)
+                               .pos(object._pos)
+                               .color(color)
+                               .geneIndex(object.getCellRef()._geneIndex)
+                               .nodeIndex(object.getCellRef()._nodeIndex)
+                               .cellType(node.getCellType());
 
         previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
         if (node._constructor.has_value()) {

@@ -13,6 +13,7 @@
 #include <Base/Math.h>
 #include <Base/StringHelper.h>
 
+#include <EngineInterface/CellTypeStrings.h>
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/PreviewDescConverterService.h>
 #include <EngineInterface/SpaceCalculator.h>
@@ -31,10 +32,13 @@ namespace
 }
 
 
-CreaturePreviewWidget
-_CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex)
+CreaturePreviewWidget _CreaturePreviewWidget::create(
+    GenomeWindowEditData const& genomeEditData,
+    GenomeTabEditData const& editData,
+    GeneIndicesForSubGenome const& geneIndices,
+    SubGenomeDesc const& genomeWithStartIndex)
 {
-    return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
+    return CreaturePreviewWidget(new _CreaturePreviewWidget(genomeEditData, editData, geneIndices, genomeWithStartIndex));
 }
 
 void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, float width)
@@ -93,10 +97,12 @@ void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDesc const& value)
 }
 
 _CreaturePreviewWidget::_CreaturePreviewWidget(
+    GenomeWindowEditData const& genomeEditData,
     GenomeTabEditData const& editData,
     GeneIndicesForSubGenome const& geneIndices,
     SubGenomeDesc const& genomeWithStartIndex)
-    : _editData(editData)
+    : _genomeEditData(genomeEditData)
+    , _editData(editData)
     , _geneIndices(geneIndices)
     , _subGenome(genomeWithStartIndex)
 {
@@ -238,11 +244,16 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
-    // Draw node indices
+    // Draw node indices or cell functions
     if (_zoom > ZoomLevelForNodeIndices) {
         for (auto const& object : desc._objects) {
             auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
-            auto text = std::to_string(object._nodeIndex + 1);
+            std::string text;
+            if (_genomeEditData->showNodeIndex) {
+                text = std::to_string(object._nodeIndex + 1);
+            } else {
+                text = Const::CellTypeStrings.at(object._cellType);
+            }
             auto fontSize = cellSize * 0.18f;
             auto textWidth = fontSize * toFloat(text.size()) * 0.55f;
             AlienGui::AddTextWithSubpixelAccuracy(
@@ -412,7 +423,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
 void _CreaturePreviewWidget::processActionButtons()
 {
     ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10.0f), ImGui::GetScrollY() + ImGui::GetWindowHeight() - scale(40.0f)});
-    if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), 0)) {
+    if (ImGui::BeginChild("##buttons", ImVec2(scale(160), scale(30)), 0)) {
         ImGui::SetCursorPos({0, 0});
         ImGui::PushID(1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
@@ -423,6 +434,12 @@ void _CreaturePreviewWidget::processActionButtons()
         ImGui::PushID(2);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_MINUS))) {
             _zoom /= 1.5f;
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+        ImGui::PushID(3);
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(_genomeEditData->showNodeIndex ? "123" : "Abc"))) {
+            _genomeEditData->showNodeIndex = !_genomeEditData->showNodeIndex;
         }
         ImGui::PopID();
     }
