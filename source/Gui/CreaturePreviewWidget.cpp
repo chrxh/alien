@@ -20,7 +20,6 @@
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
-#include "GenomeWindowEditData.h"
 #include "SimulationScrollbars.h"
 #include "StyleRepository.h"
 
@@ -35,12 +34,11 @@ namespace
 
 
 CreaturePreviewWidget _CreaturePreviewWidget::create(
-    GenomeWindowEditData const& genomeEditData,
     GenomeTabEditData const& editData,
     GeneIndicesForSubGenome const& geneIndices,
     SubGenomeDesc const& genomeWithStartIndex)
 {
-    return CreaturePreviewWidget(new _CreaturePreviewWidget(genomeEditData, editData, geneIndices, genomeWithStartIndex));
+    return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
 void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, float width)
@@ -98,12 +96,10 @@ void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDesc const& value)
 }
 
 _CreaturePreviewWidget::_CreaturePreviewWidget(
-    GenomeWindowEditData const& genomeEditData,
     GenomeTabEditData const& editData,
     GeneIndicesForSubGenome const& geneIndices,
     SubGenomeDesc const& genomeWithStartIndex)
-    : _genomeEditData(genomeEditData)
-    , _editData(editData)
+    : _editData(editData)
     , _geneIndices(geneIndices)
     , _subGenome(genomeWithStartIndex)
 {

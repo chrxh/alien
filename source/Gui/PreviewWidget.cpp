@@ -69,7 +69,7 @@ void _PreviewWidget::createSubGenomesForPreview()
     if (_creatureWidgets.size() != subGenomesForPreview.size()) {
         _creatureWidgets.clear();
         for (auto const& [geneIndices, subGenome] : boost::combine(geneIndicesForSubGenomes, subGenomesForPreview)) {
-            _creatureWidgets.emplace_back(_CreaturePreviewWidget::create(_genomeEditData, _editData, geneIndices, subGenome));
+            _creatureWidgets.emplace_back(_CreaturePreviewWidget::create(_editData, geneIndices, subGenome));
         }
     } else {
 

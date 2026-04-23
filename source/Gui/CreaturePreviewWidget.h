@@ -9,7 +9,6 @@ class _CreaturePreviewWidget
 {
 public:
     static CreaturePreviewWidget create(
-        GenomeWindowEditData const& genomeEditData,
         GenomeTabEditData const& editData,
         GeneIndicesForSubGenome const& geneIndices,
         SubGenomeDesc const& genomeWithStartIndex);
@@ -27,7 +26,6 @@ public:
 
 private:
     _CreaturePreviewWidget(
-        GenomeWindowEditData const& genomeEditData,
         GenomeTabEditData const& editData,
         GeneIndicesForSubGenome const& geneIndices,
         SubGenomeDesc const& genomeWithStartIndex);
@@ -47,7 +45,6 @@ private:
 
     SimulationScrollbars _scrollbars;
 
-    GenomeWindowEditData _genomeEditData;
     GenomeTabEditData _editData;
     GeneIndicesForSubGenome _geneIndices;
     SubGenomeDesc _subGenome;
