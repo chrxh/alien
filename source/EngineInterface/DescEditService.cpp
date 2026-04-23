@@ -323,20 +323,20 @@ Desc DescEditService::randomMultiply(
     return result;
 }
 
-void DescEditService::addIfSpaceAvailable(Desc& result, Occupancy& cellOccupancy, Desc const& toAdd, float distance, IntVector2D const& worldSize) const
+void DescEditService::addIfSpaceAvailable(Desc& result, Occupancy& occupancy, Desc const& toAdd, float distance, IntVector2D const& worldSize) const
 {
     SpaceCalculator space(worldSize);
 
     for (auto const& object : toAdd._objects) {
-        if (!isCellPresent(cellOccupancy, space, object._pos, distance)) {
+        if (!isCellPresent(occupancy, space, object._pos, distance)) {
             result._objects.emplace_back(object);
-            cellOccupancy[toIntVector2D(object._pos)].emplace_back(object._pos);
+            occupancy[toIntVector2D(object._pos)].emplace_back(object._pos);
         }
     }
     for (auto const& energy : toAdd._energies) {
-        if (!isCellPresent(cellOccupancy, space, energy._pos, distance)) {
+        if (!isCellPresent(occupancy, space, energy._pos, distance)) {
             result._energies.emplace_back(energy);
-            cellOccupancy[toIntVector2D(energy._pos)].emplace_back(energy._pos);
+            occupancy[toIntVector2D(energy._pos)].emplace_back(energy._pos);
         }
     }
 }

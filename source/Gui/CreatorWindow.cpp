@@ -359,7 +359,7 @@ void CreatorWindow::validateAndCorrect()
     _energy = std::max(0.0f, _energy);
     _stiffness = std::min(1.0f, std::max(0.0f, _stiffness));
     _material = std::max(static_cast<int>(CreationMaterial_Solid), std::min(static_cast<int>(CreationMaterial_EnergyParticle), _material));
-    _objectDistance = std::min(10.0f, std::max(0.1f, _objectDistance));
+    _objectDistance = std::min(10.0f, std::max(0.5f, _objectDistance));
     _rectHorizontalObjects = std::max(1, _rectHorizontalObjects);
     _rectVerticalObjects = std::max(1, _rectVerticalObjects);
     _layers = std::max(1, _layers);

@@ -93,7 +93,7 @@ public:
         bool& overlappingCheckSuccessful) const;
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
-    void addIfSpaceAvailable(Desc& result, Occupancy& cellOccupancy, Desc const& toAdd, float distance, IntVector2D const& worldSize) const;
+    void addIfSpaceAvailable(Desc& result, Occupancy& occupancy, Desc const& toAdd, float distance, IntVector2D const& worldSize) const;
 
     void flattenTopology(Desc& description, IntVector2D const& worldSize) const;
 
