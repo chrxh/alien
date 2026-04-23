@@ -138,7 +138,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         __shared__ int2 cellPosInt;
 
         __shared__ Object* fixedCells[MaxBarrierCellsForCollision];
-        __shared__ int numFixedCells;
+        __shared__ int numFixedObjects;
 
         __shared__ float2 F_pressure;
         __shared__ float2 F_viscosity;
@@ -152,7 +152,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
             scanLength = radiusInt * 2 + 1;
             cellPosInt = {floorInt(object->pos.x) - radiusInt, floorInt(object->pos.y) - radiusInt};
 
-            numFixedCells = 0;
+            numFixedObjects = 0;
             F_pressure = {0, 0};
             F_viscosity = {0, 0};
             cellPosDelta = {0, 0};
@@ -187,7 +187,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     }
 
                     if (otherObject->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherObject->detached != 1) {
-                        auto index = atomicAdd(&numFixedCells, 1);
+                        auto index = atomicAdd(&numFixedObjects, 1);
                         if (index < MaxBarrierCellsForCollision) {
                             fixedCells[index] = otherObject;
                         }
@@ -271,46 +271,58 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         }
         block.sync();
 
+        // Calculate forces with fixed objects
         if (block.thread_rank() == 0) {
-            // Calculate fixed forces
-            numFixedCells = min(MaxBarrierCellsForCollision, numFixedCells);
-            if (numFixedCells > 0) {
-                Object* closestFixedCell = nullptr;
-                float closestFixedCellDistance;
-                for (int i = 0; i < numFixedCells; ++i) {
+            numFixedObjects = min(MaxBarrierCellsForCollision, numFixedObjects);
+            if (numFixedObjects > 0) {
+
+                // Calc forces only to the closest fixed object
+                Object* closestFixedObject = nullptr;
+                float closestFixedObjectDistance;
+                for (int i = 0; i < numFixedObjects; ++i) {
                     auto const& fixedCell = fixedCells[i];
                     auto distance = data.objectMap.getDistance(object->pos, fixedCell->pos);
-                    if (!closestFixedCell || distance < closestFixedCellDistance) {
-                        closestFixedCell = fixedCell;
-                        closestFixedCellDistance = distance;
+                    if (!closestFixedObject || distance < closestFixedObjectDistance) {
+                        closestFixedObject = fixedCell;
+                        closestFixedObjectDistance = distance;
+                    }
+                }
+                auto connectedToObject = false;
+                auto numConnections = closestFixedObject->numConnections;
+                for (int i = 0; i < numConnections; ++i) {
+                    if (closestFixedObject->connections[i].object == object) {
+                        connectedToObject = true;
+                        break;
                     }
                 }
 
-                float2 r{0, 0};
-                if (closestFixedCell->numConnections <= 1) {
-                    r = data.objectMap.getCorrectedDirection(object->pos - closestFixedCell->pos);
-                } else {
-                    auto angleToCell = Math::angleOfVector(data.objectMap.getCorrectedDirection(object->pos - closestFixedCell->pos));
-                    auto numConnections = closestFixedCell->numConnections;
-                    for (int i = 0; i < numConnections; ++i) {
-                        auto otherObject1 = closestFixedCell->connections[i].object;
-                        auto otherObject2 = closestFixedCell->connections[(i + 1) % numConnections].object;
-                        auto angleToOtherObject1 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherObject1->pos - closestFixedCell->pos));
-                        auto angleToOtherObject2 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherObject2->pos - closestFixedCell->pos));
-                        if (Math::isAngleInBetween(angleToOtherObject1, angleToOtherObject2, angleToCell)) {
-                            r = otherObject2->pos - otherObject1->pos;
-                            Math::rotateQuarterCounterClockwise(r);
-                            break;
+                if (!connectedToObject) {
+                    float2 r{0, 0};
+                    if (closestFixedObject->numConnections <= 1) {
+                        r = data.objectMap.getCorrectedDirection(object->pos - closestFixedObject->pos);
+                    } else {
+                        auto angleToObject = Math::angleOfVector(data.objectMap.getCorrectedDirection(object->pos - closestFixedObject->pos));
+                        for (int i = 0; i < numConnections; ++i) {
+                            auto otherObject1 = closestFixedObject->connections[i].object;
+                            auto otherObject2 = closestFixedObject->connections[(i + 1) % numConnections].object;
+                            auto angleToOtherObject1 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherObject1->pos - closestFixedObject->pos));
+                            auto angleToOtherObject2 = Math::angleOfVector(data.objectMap.getCorrectedDirection(otherObject2->pos - closestFixedObject->pos));
+                            if (Math::isAngleInBetween(angleToOtherObject1, angleToOtherObject2, angleToObject)) {
+                                r = otherObject2->pos - otherObject1->pos;
+                                Math::rotateQuarterCounterClockwise(r);
+                                break;
+                            }
                         }
                     }
-                }
-                auto vr = object->vel - closestFixedCell->vel;
-                auto dot_vr_r = Math::dot(vr, r);
+                    auto vr = object->vel - closestFixedObject->vel;
+                    auto dot_vr_r = Math::dot(vr, r);
 
-                if (dot_vr_r < 0) {
-                    auto truncated_r_squared = max(0.05f, Math::lengthSquared(r));
-                    auto truncated_distance = max(0.05f, closestFixedCellDistance);
-                    object->tempValue1.as_float2 += (vr - r * 2 * dot_vr_r / truncated_r_squared + closestFixedCell->vel - object->vel) / truncated_distance;
+                    if (dot_vr_r < 0) {
+                        auto truncated_r_squared = max(0.05f, Math::lengthSquared(r));
+                        auto truncated_distance = max(0.05f, closestFixedObjectDistance);
+                        object->tempValue1.as_float2 +=
+                            (vr - r * 2 * dot_vr_r / truncated_r_squared + closestFixedObject->vel - object->vel) / truncated_distance;
+                    }
                 }
             }
 
@@ -455,7 +467,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (0 == object->numConnections || object->fixed) {
+        if (0 == object->numConnections /* || object->fixed*/) {
             continue;
         }
         float2 force{0, 0};
@@ -475,7 +487,6 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
             auto bondDistance = object->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
             force = force + Math::getNormalized(displacement) * deviation * (cellStiffnessSquared + connectedObjectStiffnessSquared) / 6;
-
             if (calcAngularForces) {
                 auto lastIndex = (i + numConnections - 1) % numConnections;
                 auto lastConnectedObject = object->connections[lastIndex].object;
@@ -501,12 +512,10 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                 auto force2 = r1 * strength1;
                 auto force1 = r2 * strength2;
 
-                if (!connectedObject->fixed && !lastConnectedObject->fixed) {
-                    atomicAdd(&connectedObject->tempValue1.as_float2.x, force1.x);
-                    atomicAdd(&connectedObject->tempValue1.as_float2.y, force1.y);
-                    atomicAdd(&lastConnectedObject->tempValue1.as_float2.x, force2.x);
-                    atomicAdd(&lastConnectedObject->tempValue1.as_float2.y, force2.y);
-                }
+                atomicAdd(&connectedObject->tempValue1.as_float2.x, force1.x);
+                atomicAdd(&connectedObject->tempValue1.as_float2.y, force1.y);
+                atomicAdd(&lastConnectedObject->tempValue1.as_float2.x, force2.x);
+                atomicAdd(&lastConnectedObject->tempValue1.as_float2.y, force2.y);
                 force -= force1 + force2;
             }
 
