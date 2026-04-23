@@ -31,8 +31,7 @@ void _PreviewWidget::process()
     // Has genome changed?
     auto sessionId = _SimulationFacade::get()->getSessionId();
     if (_editData->scheduleReload || !_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome
-        || !_sessionIdFromPreviousFrame.has_value()
-        || sessionId != _sessionIdFromPreviousFrame.value()) {
+        || !_sessionIdFromPreviousFrame.has_value() || sessionId != _sessionIdFromPreviousFrame.value()) {
         if (_editData->run) {
             createSubGenomesForPreview();
             setupPreviewData();
@@ -64,7 +63,8 @@ _PreviewWidget::_PreviewWidget(GenomeWindowEditData const& genomeEditData, Genom
 void _PreviewWidget::createSubGenomesForPreview()
 {
     auto geneIndicesForSubGenomes = GenomeDescInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
-    auto subGenomesForPreview = GenomeDescEditService::get().createSubGenomesForPreview(_editData->genome, geneIndicesForSubGenomes, _editData->detailSimulation);
+    auto subGenomesForPreview =
+        GenomeDescEditService::get().createSubGenomesForPreview(_editData->genome, geneIndicesForSubGenomes, _editData->detailSimulation);
 
     if (_creatureWidgets.size() != subGenomesForPreview.size()) {
         _creatureWidgets.clear();
@@ -180,6 +180,12 @@ void _PreviewWidget::processActionBar()
             _editData->detailSimulation)) {
         onRestart();
     }
+
+    ImGui::SameLine();
+    if (AlienGui::Button(_editData->showNodeIndex ? "123" : "Abc", 35.0f)) {
+        _editData->showNodeIndex = !_editData->showNodeIndex;
+    }
+    AlienGui::Tooltip("Toggle between node index and cell function display");
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);

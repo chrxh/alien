@@ -24,6 +24,7 @@ struct CellPreviewDesc
     MEMBER(CellPreviewDesc, int, color, 0);  // -1 if cell is not in ready state
     MEMBER(CellPreviewDesc, int, geneIndex, 0);
     MEMBER(CellPreviewDesc, int, nodeIndex, 0);
+    MEMBER(CellPreviewDesc, int, cellType, 0);
     MEMBER(CellPreviewDesc, SignalPreviewDesc, signal, SignalPreviewDesc());
     MEMBER(CellPreviewDesc, std::optional<int>, constructorGeneIndex, std::nullopt);
 };

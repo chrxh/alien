@@ -71,7 +71,9 @@ void GenomeEditorWindow::initIntern()
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
 }
 
-void GenomeEditorWindow::shutdownIntern() {}
+void GenomeEditorWindow::shutdownIntern()
+{
+}
 
 void GenomeEditorWindow::processIntern()
 {
