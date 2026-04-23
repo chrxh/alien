@@ -30,6 +30,7 @@ namespace
     auto constexpr ZoomLevelForNodeIndices = 32.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
     auto constexpr SignalTextWidth = 40.0f;
+    auto constexpr MaxCellFunctionTextSize = 16.0f;
 }
 
 
@@ -254,7 +255,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             } else {
                 text = Const::CellTypeStrings.at(object._cellType);
             }
-            auto fontSize = cellSize * 0.18f;
+            auto fontSize = std::min(cellSize * 0.18f, MaxCellFunctionTextSize);
             auto font = style.getSmallBoldFont();
             auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text.c_str());
             AlienGui::AddTextWithSubpixelAccuracy(
