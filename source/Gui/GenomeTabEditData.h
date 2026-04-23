@@ -18,6 +18,7 @@ struct _GenomeTabEditData
     bool scheduleReload = false;
     int simulationSpeed = 50;  // In percent of full speed
     bool detailSimulation = false;
+    bool showNodeIndex = true;  // true = show node index, false = show cell function
 
     std::optional<int> getSelectedNodeIndex() const
     {

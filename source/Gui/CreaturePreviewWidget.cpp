@@ -250,7 +250,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         for (auto const& object : desc._objects) {
             auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
             std::string text;
-            if (_genomeEditData->showNodeIndex) {
+            if (_editData->showNodeIndex) {
                 text = std::to_string(object._nodeIndex + 1);
             } else {
                 text = Const::CellTypeStrings.at(object._cellType);
@@ -439,8 +439,8 @@ void _CreaturePreviewWidget::processActionButtons()
         ImGui::PopID();
         ImGui::SameLine();
         ImGui::PushID(3);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(_genomeEditData->showNodeIndex ? "123" : "Abc"))) {
-            _genomeEditData->showNodeIndex = !_genomeEditData->showNodeIndex;
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(_editData->showNodeIndex ? "123" : "Abc"))) {
+            _editData->showNodeIndex = !_editData->showNodeIndex;
         }
         ImGui::PopID();
     }
