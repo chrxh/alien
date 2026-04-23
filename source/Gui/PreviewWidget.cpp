@@ -182,7 +182,7 @@ void _PreviewWidget::processActionBar()
     }
 
     ImGui::SameLine();
-    if (AlienGui::Button(_editData->showNodeIndex ? "123" : "Abc")) {
+    if (AlienGui::Button(_editData->showNodeIndex ? "123" : "Abc", 35.0f)) {
         _editData->showNodeIndex = !_editData->showNodeIndex;
     }
     AlienGui::Tooltip("Toggle between node index and cell function display");
