@@ -449,22 +449,23 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     auto worldSize = _SimulationFacade::get()->getWorldSize();
     auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
 
+    SimulationParameters defaultParameters;
     auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedOrderNumber);
     parameters.backgroundColor.layerValues[index].enabled = true;
     parameters.backgroundColor.layerValues[index].value = _layerColorPalette.getColor((2 + parameters.numLayers) * 8);
-    parameters.layerShape.layerValues[index] = LayerShapeType_Circular;
+    parameters.layerShape.layerValues[index] = defaultParameters.layerShape.layerValues[0];
     parameters.layerPosition.layerValues[index] = {
         toFloat(worldSize.x / 2 + (_insertedLocationCounter % 10) * worldSize.x / 20),
         toFloat(worldSize.y / 2 + (_insertedLocationCounter % 10) * worldSize.y / 20)};
     parameters.layerCoreRadius.layerValues[index] = minRadius / 3;
     parameters.layerCoreRect.layerValues[index] = {minRadius / 3, minRadius / 3};
     parameters.layerFadeoutRadius.layerValues[index] = minRadius / 5;
-    parameters.layerRadialForceFieldOrientation.layerValues[index] = Orientation_Clockwise;
-    parameters.layerRadialForceFieldStrength.layerValues[index] = 0.001f;
-    parameters.layerRadialForceFieldDriftAngle.layerValues[index] = 0.0f;
-    parameters.layerPerlinNoiseForceFieldStrength.layerValues[index] = 0.001f;
-    parameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index] = 20.0f;
-    parameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index] = 10000.0f;
+    parameters.layerRadialForceFieldOrientation.layerValues[index] = defaultParameters.layerRadialForceFieldOrientation.layerValues[0];
+    parameters.layerRadialForceFieldStrength.layerValues[index] = defaultParameters.layerRadialForceFieldStrength.layerValues[0];
+    parameters.layerRadialForceFieldDriftAngle.layerValues[index] = defaultParameters.layerRadialForceFieldDriftAngle.layerValues[0];
+    parameters.layerPerlinNoiseForceFieldStrength.layerValues[index] = defaultParameters.layerPerlinNoiseForceFieldStrength.layerValues[0];
+    parameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[index] = defaultParameters.layerPerlinNoiseForceFieldSpatialSize.layerValues[0];
+    parameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[index] = defaultParameters.layerPerlinNoiseForceFieldTemporalSize.layerValues[0];
 
     origParameters.backgroundColor.layerValues[index] = parameters.backgroundColor.layerValues[index];
     origParameters.layerShape.layerValues[index] = parameters.layerShape.layerValues[index];
