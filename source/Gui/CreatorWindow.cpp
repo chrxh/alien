@@ -177,24 +177,17 @@ void CreatorWindow::onDrawing()
             pos.x = toFloat(toInt(pos.x));
             pos.y = toFloat(toInt(pos.y));
         }
-        auto circle = DescEditService::CreateCircleParameters()
-                          .center(pos)
-                          .radius(EditorModel::get().getPencilWidth())
-                          .type(getObjectTypeDesc())
-                          .stiffness(_stiffness)
-                          .sticky(_makeSticky)
-                          .cellDistance(1.0f)
-                          .color(EditorModel::get().getDefaultColorCode())
-                          .fixed(_fixed)
-                          .connectObjects(false);
-        if (isEnergyMaterial()) {
-            Desc energyCircle;
-            for (auto const& object : circle._objects) {
-                energyCircle._energies.emplace_back(EnergyDesc().pos(object._pos).energy(_energy).color(EditorModel::get().getDefaultColorCode()));
-            }
-            return energyCircle;
-        }
-        return circle;
+        auto desc = DescEditService::get().createCircle(DescEditService::CreateCircleParameters()
+                                                            .center(pos)
+                                                            .radius(EditorModel::get().getPencilWidth())
+                                                            .type(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
+                                                            .stiffness(_stiffness)
+                                                            .sticky(_makeSticky)
+                                                            .cellDistance(1.0f)
+                                                            .color(EditorModel::get().getDefaultColorCode())
+                                                            .fixed(_fixed)
+                                                            .connectObjects(false));
+        return isEnergyMaterial() ? convertToEnergyParticles(desc) : desc;
     };
 
     auto prevEntityCount = isEnergyMaterial() ? _drawingDescription._energies.size() : _drawingDescription._objects.size();
@@ -272,25 +265,8 @@ void CreatorWindow::createRectangle()
         return;
     }
 
-    if (isEnergyMaterial()) {
-        Desc description;
-        auto center = getRandomPos();
-        auto color = EditorModel::get().getDefaultColorCode();
-        auto horizontalOffset = toFloat(_rectHorizontalObjects - 1) / 2.0f;
-        auto verticalOffset = toFloat(_rectVerticalObjects - 1) / 2.0f;
-        for (int y = 0; y < _rectVerticalObjects; ++y) {
-            for (int x = 0; x < _rectHorizontalObjects; ++x) {
-                auto pos =
-                    RealVector2D{center.x + (toFloat(x) - horizontalOffset) * _objectDistance, center.y + (toFloat(y) - verticalOffset) * _objectDistance};
-                description._energies.emplace_back(EnergyDesc().pos(pos).energy(_energy).color(color));
-            }
-        }
-        _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-        return;
-    }
-
     auto description = DescEditService::get().createRect(DescEditService::CreateRectParameters()
-                                                             .objectType(getObjectTypeDesc())
+                                                             .objectType(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
                                                              .width(_rectHorizontalObjects)
                                                              .height(_rectVerticalObjects)
                                                              .cellDistance(_objectDistance)
@@ -299,7 +275,9 @@ void CreatorWindow::createRectangle()
                                                              .color(EditorModel::get().getDefaultColorCode())
                                                              .center(getRandomPos())
                                                              .fixed(_fixed));
-
+    if (isEnergyMaterial()) {
+        description = convertToEnergyParticles(description);
+    }
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
@@ -308,21 +286,9 @@ void CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    if (isEnergyMaterial()) {
-        auto objectTemplate = DescEditService::get().createHex(
-            DescEditService::CreateHexParameters().objectType(SolidDesc()).layers(_layers).cellDistance(_objectDistance).connectObjects(false));
-        Desc description;
-        auto color = EditorModel::get().getDefaultColorCode();
-        for (auto const& object : objectTemplate._objects) {
-            description._energies.emplace_back(EnergyDesc().pos(object._pos).energy(_energy).color(color));
-        }
-        DescEditService::get().setCenter(description, getRandomPos());
-        _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-        return;
-    }
 
-    Desc description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
-                                                            .objectType(getObjectTypeDesc())
+    auto description = DescEditService::get().createHex(DescEditService::CreateHexParameters()
+                                                            .objectType(isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc())
                                                             .layers(_layers)
                                                             .cellDistance(_objectDistance)
                                                             .stiffness(_stiffness)
@@ -330,8 +296,12 @@ void CreatorWindow::createHexagon()
                                                             .color(EditorModel::get().getDefaultColorCode())
                                                             .center(getRandomPos())
                                                             .fixed(_fixed));
+    if (isEnergyMaterial()) {
+        description = convertToEnergyParticles(description);
+    } else {
+        DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
+    }
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-    DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
 }
 
 void CreatorWindow::createDisc()
@@ -341,7 +311,8 @@ void CreatorWindow::createDisc()
     }
 
     Desc description;
-    auto color = EditorModel::get().getDefaultColorCode();
+    auto const color = EditorModel::get().getDefaultColorCode();
+    auto const objectType = isEnergyMaterial() ? ObjectTypeDesc{SolidDesc()} : getObjectTypeDesc();
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius <= _outerRadius + SmallValue; radius += _objectDistance) {
         float angleInc = [&] {
@@ -351,29 +322,36 @@ void CreatorWindow::createDisc()
             }
             return 360.0f;
         }();
-        std::unordered_set<uint64_t> objectIds;
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
-            if (isEnergyMaterial()) {
-                description._energies.emplace_back(EnergyDesc().pos(relPos).energy(_energy).color(color));
-            } else {
-                description._objects.emplace_back(ObjectDesc()
-                                                      .id(NumberGenerator::get().createEntityId())
-                                                      .stiffness(_stiffness)
-                                                      .sticky(_makeSticky)
-                                                      .pos(relPos)
-                                                      .color(color)
-                                                      .fixed(_fixed)
-                                                      .type(getObjectTypeDesc()));
-            }
+            description._objects.emplace_back(ObjectDesc()
+                                                  .id(NumberGenerator::get().createEntityId())
+                                                  .stiffness(_stiffness)
+                                                  .sticky(_makeSticky)
+                                                  .pos(relPos)
+                                                  .color(color)
+                                                  .fixed(_fixed)
+                                                  .type(objectType));
         }
     }
 
-    if (!isEnergyMaterial()) {
+    if (isEnergyMaterial()) {
+        description = convertToEnergyParticles(description);
+    } else {
         DescEditService::get().reconnectObjects(description, _objectDistance * 1.7f);
     }
     DescEditService::get().setCenter(description, getRandomPos());
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
+}
+
+Desc CreatorWindow::convertToEnergyParticles(Desc const& description) const
+{
+    Desc result;
+    auto const color = EditorModel::get().getDefaultColorCode();
+    for (auto const& object : description._objects) {
+        result._energies.emplace_back(EnergyDesc().pos(object._pos).energy(_energy).color(color));
+    }
+    return result;
 }
 
 void CreatorWindow::validateAndCorrect()

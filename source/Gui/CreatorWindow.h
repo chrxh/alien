@@ -47,6 +47,8 @@ private:
     void createHexagon();
     void createDisc();
 
+    Desc convertToEnergyParticles(Desc const& description) const;
+
     void validateAndCorrect();
     bool isEnergyMaterial() const;
 
