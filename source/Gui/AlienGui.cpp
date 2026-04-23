@@ -1918,11 +1918,28 @@ namespace
         if (allowInfinity && value == Infinity<T>::value) {
             return "Infinity";
         }
-        if (tryMaintainFormat) {
-            return format;
-        }
         if constexpr (std::is_same_v<T, float>) {
-            // Extract decimal places from format string like "%.3f"
+            // For small values or when maintaining format, use original format to preserve precision
+            // This prevents ImGui from resetting small values (< 0.001) to zero
+            if (tryMaintainFormat) {
+                // Only use formatted separators for large values
+                if (std::abs(value) >= 1000.0f) {
+                    // Extract decimal places from format string like "%.3f"
+                    int decimalPlaces = 3;  // default
+                    auto dotPos = format.find('.');
+                    if (dotPos != std::string::npos) {
+                        auto fPos = format.find('f', dotPos);
+                        if (fPos != std::string::npos) {
+                            auto decimalStr = format.substr(dotPos + 1, fPos - dotPos - 1);
+                            decimalPlaces = std::stoi(decimalStr);
+                        }
+                    }
+                    return StringHelper::format(value, decimalPlaces);
+                }
+                // For small values, keep original format string
+                return format;
+            }
+            // When not maintaining format (e.g., for display in ranges), use formatted output
             int decimalPlaces = 3;  // default
             auto dotPos = format.find('.');
             if (dotPos != std::string::npos) {
@@ -1934,6 +1951,9 @@ namespace
             }
             return StringHelper::format(value, decimalPlaces);
         } else if constexpr (std::is_same_v<T, int>) {
+            if (tryMaintainFormat) {
+                return format;
+            }
             return StringHelper::format(value, 0);
         } else {
             char result[16];
