@@ -49,8 +49,7 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, fl
 
     auto geneStartIndex = _subGenome.startIndex;
 
-    auto conversionResult =
-        PreviewDescConverterService::get().convertToPreviewDesc(_editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed));
+    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(_editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed));
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
 
@@ -256,14 +255,10 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 text = Const::CellTypeStrings.at(object._cellType);
             }
             auto fontSize = cellSize * 0.18f;
-            auto textWidth = fontSize * toFloat(text.size()) * 0.55f;
+            auto font = style.getSmallBoldFont();
+            auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text.c_str());
             AlienGui::AddTextWithSubpixelAccuracy(
-                drawList,
-                style.getSmallBoldFont(),
-                fontSize,
-                {cellPos.x - textWidth / 2, cellPos.y - fontSize / 2},
-                ImColor::HSV(0, 0, 1.0f, 0.7f),
-                text.c_str());
+                drawList, font, fontSize, {cellPos.x - textSize.x / 2, cellPos.y - textSize.y / 2}, ImColor::HSV(0, 0, 1.0f, 0.7f), text.c_str());
         }
     }
 
@@ -424,7 +419,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& p
 void _CreaturePreviewWidget::processActionButtons()
 {
     ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10.0f), ImGui::GetScrollY() + ImGui::GetWindowHeight() - scale(40.0f)});
-    if (ImGui::BeginChild("##buttons", ImVec2(scale(160), scale(30)), 0)) {
+    if (ImGui::BeginChild("##buttons", ImVec2(scale(110), scale(30)), 0)) {
         ImGui::SetCursorPos({0, 0});
         ImGui::PushID(1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
@@ -435,12 +430,6 @@ void _CreaturePreviewWidget::processActionButtons()
         ImGui::PushID(2);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_MINUS))) {
             _zoom /= 1.5f;
-        }
-        ImGui::PopID();
-        ImGui::SameLine();
-        ImGui::PushID(3);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(_editData->showNodeIndex ? "123" : "Abc"))) {
-            _editData->showNodeIndex = !_editData->showNodeIndex;
         }
         ImGui::PopID();
     }
