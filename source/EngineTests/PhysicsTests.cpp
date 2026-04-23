@@ -8,6 +8,9 @@
 
 #include "IntegrationTestFramework.h"
 
+#include "PersisterInterface/DeserializedSimulation.h"
+#include "PersisterInterface/SerializerService.h"
+
 class PhysicsTests : public IntegrationTestFramework
 {
 public:
@@ -167,4 +170,28 @@ TEST_F(PhysicsTests, noGhostMovements)
     auto newCenter = DescEditService::get().calcCenter(actualData);
 
     EXPECT_TRUE(approxCompare(center, newCenter, 0.01f));
+}
+
+TEST_F(PhysicsTests, angularForcesBetweenFixedAndNonFixedObject)
+{
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).fixed(true),
+        ObjectDesc().id(2).pos({10.0f, 11.0f}).fixed(true),
+        ObjectDesc().id(3).pos({11.0f, 11.0f}).type(CellDesc().headCell(true)),
+    });
+    data.addConnection(2, 1);
+    data.addConnection(2, 3);
+    data.getConnectionRef(2, 1)._angleFromPrevious = 180.0f;
+    data.getConnectionRef(2, 3)._angleFromPrevious = 180.0f;
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(100);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto object1 = actualData.getObjectRef(1);
+    auto object2 = actualData.getObjectRef(2);
+    auto object3 = actualData.getObjectRef(3);
+    auto actualAngle = Math::angle(object1._pos, object2._pos, object3._pos);
+    EXPECT_TRUE(abs(Math::getNormalizedAngle(actualAngle, 0.0f) - 180.0f) < 10.0f);
 }
