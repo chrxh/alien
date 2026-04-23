@@ -7,6 +7,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/GlobalSettings.h>
 #include <Base/Math.h>
 
 #include <EngineInterface/Desc.h>
@@ -37,7 +38,40 @@ namespace
     auto const RightColumnWidth = 160.0f;
 }
 
-void CreatorWindow::initIntern() {}
+void CreatorWindow::initIntern()
+{
+    _energy = GlobalSettings::get().getValue("editors.creator.energy", _energy);
+    _stiffness = GlobalSettings::get().getValue("editors.creator.stiffness", _stiffness);
+    _fixed = GlobalSettings::get().getValue("editors.creator.fixed", _fixed);
+    _objectDistance = GlobalSettings::get().getValue("editors.creator.object distance", _objectDistance);
+    _glow = GlobalSettings::get().getValue("editors.creator.glow", _glow);
+    _makeSticky = GlobalSettings::get().getValue("editors.creator.make sticky", _makeSticky);
+    _rectHorizontalObjects = GlobalSettings::get().getValue("editors.creator.rect horizontal objects", _rectHorizontalObjects);
+    _rectVerticalObjects = GlobalSettings::get().getValue("editors.creator.rect vertical objects", _rectVerticalObjects);
+    _layers = GlobalSettings::get().getValue("editors.creator.layers", _layers);
+    _outerRadius = GlobalSettings::get().getValue("editors.creator.outer radius", _outerRadius);
+    _innerRadius = GlobalSettings::get().getValue("editors.creator.inner radius", _innerRadius);
+    _material = GlobalSettings::get().getValue("editors.creator.material", _material);
+    _mode = GlobalSettings::get().getValue("editors.creator.mode", _mode);
+}
+
+void CreatorWindow::shutdownIntern()
+{
+    GlobalSettings::get().setValue("editors.creator.energy", _energy);
+    GlobalSettings::get().setValue("editors.creator.stiffness", _stiffness);
+    GlobalSettings::get().setValue("editors.creator.fixed", _fixed);
+    GlobalSettings::get().setValue("editors.creator.object distance", _objectDistance);
+    GlobalSettings::get().setValue("editors.creator.glow", _glow);
+    GlobalSettings::get().setValue("editors.creator.make sticky", _makeSticky);
+    GlobalSettings::get().setValue("editors.creator.rect horizontal objects", _rectHorizontalObjects);
+    GlobalSettings::get().setValue("editors.creator.rect vertical objects", _rectVerticalObjects);
+    GlobalSettings::get().setValue("editors.creator.layers", _layers);
+    GlobalSettings::get().setValue("editors.creator.outer radius", _outerRadius);
+    GlobalSettings::get().setValue("editors.creator.inner radius", _innerRadius);
+    GlobalSettings::get().setValue("editors.creator.material", _material);
+    GlobalSettings::get().setValue("editors.creator.mode", _mode);
+}
+
 
 void CreatorWindow::processIntern()
 {
