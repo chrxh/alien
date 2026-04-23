@@ -13,13 +13,14 @@
 #include <Base/Math.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/CellTypeStrings.h>
+#include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/PreviewDescConverterService.h>
 #include <EngineInterface/SpaceCalculator.h>
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
+#include "GenomeWindowEditData.h"
 #include "SimulationScrollbars.h"
 #include "StyleRepository.h"
 
