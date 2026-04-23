@@ -177,25 +177,24 @@ void CreatorWindow::onDrawing()
             pos.x = toFloat(toInt(pos.x));
             pos.y = toFloat(toInt(pos.y));
         }
+        auto circle = DescEditService::CreateCircleParameters()
+                          .center(pos)
+                          .radius(EditorModel::get().getPencilWidth())
+                          .type(getObjectTypeDesc())
+                          .stiffness(_stiffness)
+                          .sticky(_makeSticky)
+                          .cellDistance(1.0f)
+                          .color(EditorModel::get().getDefaultColorCode())
+                          .fixed(_fixed)
+                          .connectObjects(false);
         if (isEnergyMaterial()) {
-            auto circle = DescEditService::get().createCircle(
-                DescEditService::CreateCircleParameters().center(pos).radius(EditorModel::get().getPencilWidth()).connectObjects(false));
-            Desc result;
+            Desc energyCircle;
             for (auto const& object : circle._objects) {
-                result._energies.emplace_back(EnergyDesc().pos(object._pos).energy(_energy).color(EditorModel::get().getDefaultColorCode()));
+                energyCircle._energies.emplace_back(EnergyDesc().pos(object._pos).energy(_energy).color(EditorModel::get().getDefaultColorCode()));
             }
-            return result;
+            return energyCircle;
         }
-        return DescEditService::get().createCircle(DescEditService::CreateCircleParameters()
-                                                       .center(pos)
-                                                       .radius(EditorModel::get().getPencilWidth())
-                                                       .type(getObjectTypeDesc())
-                                                       .stiffness(_stiffness)
-                                                       .sticky(_makeSticky)
-                                                       .cellDistance(1.0f)
-                                                       .color(EditorModel::get().getDefaultColorCode())
-                                                       .fixed(_fixed)
-                                                       .connectObjects(false));
+        return circle;
     };
 
     auto prevEntityCount = isEnergyMaterial() ? _drawingDescription._energies.size() : _drawingDescription._objects.size();
