@@ -79,15 +79,13 @@ void CreatorWindow::processIntern()
                 &pencilWidth);
             EditorModel::get().setPencilWidth(pencilWidth);
         }
-        int material = _material;
         AlienGui::Switcher(
             AlienGui::SwitcherParameters()
                 .name("Material")
                 .textWidth(RightColumnWidth)
                 .values({"Solid", "Fluid", "Free cells", "Energy particles"})
                 .tooltip(Const::CreatorDrawingTypeTooltip),
-            material);
-        _material = material;
+            _material);
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
         if (_material == CreationMaterial_Fluid) {

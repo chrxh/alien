@@ -63,18 +63,18 @@ private:
     float _glow = 0.0f;
     bool _makeSticky = false;
 
-    //rectangle
+    // Rectangle data
     int _rectHorizontalObjects = 10;
     int _rectVerticalObjects = 10;
 
-    //hexagon
+    // Hexagon data
     int _layers = 10;
 
-    //disc
+    // Disc data
     float _outerRadius = 10.0f;
     float _innerRadius = 5.0f;
 
-    //drawing
+    // Drawing data
     CreationMaterial _material = CreationMaterial_Solid;
     Desc _drawingDescription;
     DescEditService::Occupancy _drawingOccupancy;
