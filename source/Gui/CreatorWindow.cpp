@@ -145,11 +145,7 @@ void CreatorWindow::processIntern()
         simInteractionController.setDrawMode(false);
         if (AlienGui::Button("Build")) {
             if (_mode == CreationMode_CreateObject) {
-                if (isEnergyMaterial()) {
-                    createParticle();
-                } else {
-                    createObject();
-                }
+                createEntity();
             }
             if (_mode == CreationMode_CreateRectangle) {
                 createRectangle();
@@ -254,25 +250,20 @@ CreatorWindow::CreatorWindow()
     : AlienWindow("Creator", "editors.creator", false)
 {}
 
-void CreatorWindow::createObject()
+void CreatorWindow::createEntity()
 {
-    auto object = ObjectDesc()
-                      .pos(getRandomPos())
-                      .stiffness(_stiffness)
-                      .color(EditorModel::get().getDefaultColorCode())
-                      .fixed(_fixed)
-                      .sticky(_makeSticky)
-                      .type(getObjectTypeDesc());
     Desc description;
-    description._objects.emplace_back(object);
-    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
-}
-
-void CreatorWindow::createParticle()
-{
-    auto energyParticle = EnergyDesc().pos(getRandomPos()).energy(_energy);
-    Desc description;
-    description._energies.emplace_back(energyParticle);
+    if (isEnergyMaterial()) {
+        description._energies.emplace_back(EnergyDesc().pos(getRandomPos()).energy(_energy).color(EditorModel::get().getDefaultColorCode()));
+    } else {
+        description._objects.emplace_back(ObjectDesc()
+                                              .pos(getRandomPos())
+                                              .stiffness(_stiffness)
+                                              .color(EditorModel::get().getDefaultColorCode())
+                                              .fixed(_fixed)
+                                              .sticky(_makeSticky)
+                                              .type(getObjectTypeDesc()));
+    }
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 

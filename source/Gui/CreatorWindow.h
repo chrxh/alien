@@ -42,8 +42,7 @@ private:
     void processIntern() override;
     bool isShown() override;
 
-    void createObject();
-    void createParticle();
+    void createEntity();
     void createRectangle();
     void createHexagon();
     void createDisc();

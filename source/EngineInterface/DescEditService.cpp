@@ -333,6 +333,12 @@ void DescEditService::addIfSpaceAvailable(Desc& result, Occupancy& cellOccupancy
             cellOccupancy[toIntVector2D(object._pos)].emplace_back(object._pos);
         }
     }
+    for (auto const& energy : toAdd._energies) {
+        if (!isCellPresent(cellOccupancy, space, energy._pos, distance)) {
+            result._energies.emplace_back(energy);
+            cellOccupancy[toIntVector2D(energy._pos)].emplace_back(energy._pos);
+        }
+    }
 }
 
 void DescEditService::flattenTopology(Desc& description, IntVector2D const& worldSize) const
