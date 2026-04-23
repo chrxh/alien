@@ -15,6 +15,7 @@ struct _GenomeTabEditData
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
     bool run = true;
+    bool scheduleReload = false;
     int simulationSpeed = 50;  // In percent of full speed
     bool detailSimulation = false;
 

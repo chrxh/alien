@@ -30,12 +30,17 @@ void _PreviewWidget::process()
 {
     // Has genome changed?
     auto sessionId = _SimulationFacade::get()->getSessionId();
-    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome || !_sessionIdFromPreviousFrame.has_value()
+    if (_editData->scheduleReload || !_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome
+        || !_sessionIdFromPreviousFrame.has_value()
         || sessionId != _sessionIdFromPreviousFrame.value()) {
-        createSubGenomesForPreview();
-        setupPreviewData();
-        _editData->run = true;
-        _savepoints.clear();
+        if (_editData->run) {
+            createSubGenomesForPreview();
+            setupPreviewData();
+            _editData->run = true;
+            _savepoints.clear();
+        } else {
+            _editData->scheduleReload = true;
+        }
     }
 
     // Has tab changed?
