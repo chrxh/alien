@@ -115,6 +115,8 @@ PUBLIC
     OverlayController.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    PreviewSettingsDialog.cpp
+    PreviewSettingsDialog.h
     PreviewWidget.cpp
     PreviewWidget.h
     RenderPipeline.cpp
