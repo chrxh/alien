@@ -1,7 +1,10 @@
 #include "GenomeDescEditService.h"
 
 #include <algorithm>
+#include <deque>
 #include <iterator>
+#include <map>
+#include <set>
 
 #include <boost/range/adaptors.hpp>
 
@@ -104,46 +107,158 @@ void GenomeDescEditService::swapNodes(GeneDesc& gene, int index) const
 
 namespace
 {
-    // Returns true if genome has been trimmed
-    bool trimNodes(GenomeDesc& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
+    struct GeneNodeInfo
     {
-        auto result = false;
-        auto& gene = genome._genes.at(startGeneIndex);
+        int geneIndex;
+        int depth;  // Distance from start gene (for BFS ordering)
+    };
 
-        // Trim nodes if limit is exceeded
-        if (nodeCounter + toInt(gene._nodes.size()) > nodeLimit) {
-            auto newSize = std::max(0, nodeLimit - nodeCounter);
-            gene._nodes.resize(newSize);
-            gene._numConcatenations = 1;
-            for (auto& node : gene._nodes) {
-                if (node._constructor.has_value()) {
-                    auto& constructor = node._constructor.value();
-                    constructor._geneIndex = toInt(genome._genes.size());  // Castrate further construction
-                }
+    // Collects all genes in the reference tree using breadth-first search
+    std::vector<GeneNodeInfo> collectGenesInBFS(GenomeDesc const& genome, int startGeneIndex)
+    {
+        std::vector<GeneNodeInfo> result;
+        std::set<int> visited;
+        std::deque<GeneNodeInfo> queue;
+
+        queue.push_back({startGeneIndex, 0});
+        visited.insert(startGeneIndex);
+
+        while (!queue.empty()) {
+            auto current = queue.front();
+            queue.pop_front();
+            result.push_back(current);
+
+            if (current.geneIndex >= genome._genes.size()) {
+                continue;
             }
-            return true;
-        }
 
-        // Trim concatenations if limit is exceeded
-        auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);  // Prevent overflow
-        if (nodeCounter + gene._nodes.size() * truncatedNumConcatenations > nodeLimit) {
-            gene._numConcatenations = (nodeLimit - nodeCounter) / toInt(gene._nodes.size());
-            result = true;
-        }
-
-        nodeCounter += toInt(gene._nodes.size()) * gene._numConcatenations;
-
-        // Continue with constructor nodes
-        for (auto const& node : gene._nodes) {
-            if (node._constructor.has_value()) {
-                auto const& constructor = node._constructor.value();
-                if (constructor._geneIndex < genome._genes.size()) {
-                    result |= trimNodes(genome, nodeCounter, constructor._geneIndex, nodeLimit);
+            auto const& gene = genome._genes.at(current.geneIndex);
+            for (auto const& node : gene._nodes) {
+                if (node._constructor.has_value()) {
+                    auto const& constructor = node._constructor.value();
+                    if (constructor._geneIndex < genome._genes.size() && !visited.contains(constructor._geneIndex)) {
+                        queue.push_back({constructor._geneIndex, current.depth + 1});
+                        visited.insert(constructor._geneIndex);
+                    }
                 }
             }
         }
 
         return result;
+    }
+
+    // Returns true if genome has been trimmed
+    bool trimNodes(GenomeDesc& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
+    {
+        // Collect all genes in breadth-first order
+        auto genesInBFS = collectGenesInBFS(genome, startGeneIndex);
+
+        // Calculate how many nodes we can allocate per gene on average
+        // We distribute the budget more evenly across all genes
+        std::map<int, int> geneNodeBudget;
+        int totalNodesNeeded = 0;
+
+        // First pass: calculate total nodes needed (with bounded concatenations)
+        for (auto const& geneInfo : genesInBFS) {
+            if (geneInfo.geneIndex >= genome._genes.size()) {
+                continue;
+            }
+            auto const& gene = genome._genes.at(geneInfo.geneIndex);
+            auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);  // Prevent overflow
+            totalNodesNeeded += toInt(gene._nodes.size()) * truncatedNumConcatenations;
+        }
+
+        // If we're under the limit, no trimming needed
+        if (totalNodesNeeded <= nodeLimit) {
+            nodeCounter = totalNodesNeeded;
+            return false;
+        }
+
+        // We need to trim - distribute budget proportionally but ensure each gene gets at least some nodes
+        bool trimmed = false;
+        int remainingBudget = nodeLimit;
+
+        // Second pass: allocate budget to each gene, ensuring fair distribution
+        // Strategy: give each gene a proportional share, but with a minimum allocation
+        for (auto const& geneInfo : genesInBFS) {
+            if (geneInfo.geneIndex >= genome._genes.size()) {
+                continue;
+            }
+
+            auto& gene = genome._genes.at(geneInfo.geneIndex);
+            if (gene._nodes.empty()) {
+                geneNodeBudget[geneInfo.geneIndex] = 0;
+                continue;
+            }
+
+            // Calculate proportional share
+            auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);
+            int idealNodes = toInt(gene._nodes.size()) * truncatedNumConcatenations;
+            int allocatedNodes = (idealNodes * nodeLimit) / std::max(1, totalNodesNeeded);
+
+            // Ensure minimum: at least one full copy of the gene's nodes
+            allocatedNodes = std::max(toInt(gene._nodes.size()), allocatedNodes);
+
+            // Don't allocate more than we have remaining
+            allocatedNodes = std::min(allocatedNodes, remainingBudget);
+
+            geneNodeBudget[geneInfo.geneIndex] = allocatedNodes;
+            remainingBudget -= allocatedNodes;
+
+            if (remainingBudget <= 0) {
+                // No more budget - subsequent genes get nothing
+                break;
+            }
+        }
+
+        // Third pass: apply the budget to each gene
+        for (auto const& geneInfo : genesInBFS) {
+            if (geneInfo.geneIndex >= genome._genes.size()) {
+                continue;
+            }
+
+            auto& gene = genome._genes.at(geneInfo.geneIndex);
+            int budget = geneNodeBudget[geneInfo.geneIndex];
+
+            if (budget == 0) {
+                // No budget for this gene - remove all nodes and castrate
+                gene._nodes.clear();
+                gene._numConcatenations = 1;
+                trimmed = true;
+                continue;
+            }
+
+            int nodesPerCopy = toInt(gene._nodes.size());
+            if (nodesPerCopy == 0) {
+                continue;
+            }
+
+            // Calculate how many concatenations we can afford
+            int affordableConcatenations = budget / nodesPerCopy;
+
+            // If we can't even afford one full copy, trim nodes
+            if (affordableConcatenations == 0) {
+                gene._nodes.resize(budget);
+                gene._numConcatenations = 1;
+                trimmed = true;
+
+                // Castrate constructors in trimmed nodes
+                for (auto& node : gene._nodes) {
+                    if (node._constructor.has_value()) {
+                        auto& constructor = node._constructor.value();
+                        constructor._geneIndex = toInt(genome._genes.size());
+                    }
+                }
+            } else if (affordableConcatenations < gene._numConcatenations) {
+                // Reduce concatenations to fit budget
+                gene._numConcatenations = affordableConcatenations;
+                trimmed = true;
+            }
+
+            nodeCounter += toInt(gene._nodes.size()) * gene._numConcatenations;
+        }
+
+        return trimmed;
     }
 }
 
