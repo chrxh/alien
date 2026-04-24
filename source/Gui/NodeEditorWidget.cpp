@@ -230,6 +230,8 @@ void _NodeEditorWidget::processNodeAttributes()
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeStrings).textWidth(rightColumnWidth), nodeType)) {
                 if (nodeIndex.value() == 0 && nodeType == CellType_Void) {
                     showMessage("Error", "The first node cannot be void.");
+                } else if (nodeIndex.value() == gene._nodes.size() - 1 && nodeType == CellType_Void) {
+                    showMessage("Error", "The last node cannot be void.");
                 } else {
                     node._cellType = createCellTypeGenomeDesc(nodeType);
                 }
