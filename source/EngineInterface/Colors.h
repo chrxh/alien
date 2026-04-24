@@ -16,7 +16,7 @@ namespace Const
     uint32_t constexpr IndividualObjectColor7 = 0x90FF20;
     uint32_t constexpr IndividualObjectColor8 = 0x20FF20;
     uint32_t constexpr IndividualObjectColor9 = 0x20FFB5;
-    uint32_t constexpr IndividualObjectColor10 = 0x20C7FF;
+    uint32_t constexpr IndividualObjectColor10 = 0xFFFFFF;
 
     uint32_t constexpr IndividualObjectColors[MAX_COLORS] = {  //array for convenience
         IndividualObjectColor1,
