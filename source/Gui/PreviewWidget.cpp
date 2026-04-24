@@ -38,6 +38,7 @@ void _PreviewWidget::process()
             setupPreviewData();
             _editData->run = true;
             _savepoints.clear();
+            _editData->scheduleReload = false;
         } else {
             _editData->scheduleReload = true;
         }
