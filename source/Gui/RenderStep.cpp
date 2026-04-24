@@ -149,7 +149,7 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
 
     // Enable depth testing for proper occlusion
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
