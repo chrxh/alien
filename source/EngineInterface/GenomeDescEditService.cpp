@@ -153,33 +153,31 @@ namespace
         // Collect all genes in breadth-first order
         auto genesInBFS = collectGenesInBFS(genome, startGeneIndex);
 
-        // Calculate how many nodes we can allocate per gene on average
-        // We distribute the budget more evenly across all genes
-        std::map<int, int> geneNodeBudget;
-        int totalNodesNeeded = 0;
-
-        // First pass: calculate total nodes needed (with bounded concatenations)
+        // Calculate total nodes needed (with bounded concatenations)
+        int64_t totalNodesNeeded = 0;
         for (auto const& geneInfo : genesInBFS) {
             if (geneInfo.geneIndex >= genome._genes.size()) {
                 continue;
             }
             auto const& gene = genome._genes.at(geneInfo.geneIndex);
             auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);  // Prevent overflow
-            totalNodesNeeded += toInt(gene._nodes.size()) * truncatedNumConcatenations;
+            totalNodesNeeded += static_cast<int64_t>(gene._nodes.size()) * truncatedNumConcatenations;
         }
 
         // If we're under the limit, no trimming needed
         if (totalNodesNeeded <= nodeLimit) {
-            nodeCounter = totalNodesNeeded;
+            nodeCounter = static_cast<int>(totalNodesNeeded);
             return false;
         }
 
-        // We need to trim - distribute budget proportionally but ensure each gene gets at least some nodes
+        // We need to trim - distribute budget proportionally across all genes
         bool trimmed = false;
         int remainingBudget = nodeLimit;
 
-        // Second pass: allocate budget to each gene, ensuring fair distribution
-        // Strategy: give each gene a proportional share, but with a minimum allocation
+        // Allocate budget to each gene proportionally, ensuring genes at each depth get adequate representation
+        std::map<int, int> geneNodeBudget;
+
+        // First, ensure every gene gets at least one full copy of its nodes if possible
         for (auto const& geneInfo : genesInBFS) {
             if (geneInfo.geneIndex >= genome._genes.size()) {
                 continue;
@@ -191,27 +189,38 @@ namespace
                 continue;
             }
 
-            // Calculate proportional share
-            auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);
-            int idealNodes = toInt(gene._nodes.size()) * truncatedNumConcatenations;
-            int allocatedNodes = (idealNodes * nodeLimit) / std::max(1, totalNodesNeeded);
-
-            // Ensure minimum: at least one full copy of the gene's nodes
-            allocatedNodes = std::max(toInt(gene._nodes.size()), allocatedNodes);
-
-            // Don't allocate more than we have remaining
-            allocatedNodes = std::min(allocatedNodes, remainingBudget);
-
-            geneNodeBudget[geneInfo.geneIndex] = allocatedNodes;
-            remainingBudget -= allocatedNodes;
-
-            if (remainingBudget <= 0) {
-                // No more budget - subsequent genes get nothing
-                break;
+            int nodesInGene = toInt(gene._nodes.size());
+            if (remainingBudget >= nodesInGene) {
+                geneNodeBudget[geneInfo.geneIndex] = nodesInGene;
+                remainingBudget -= nodesInGene;
+            } else {
+                geneNodeBudget[geneInfo.geneIndex] = remainingBudget;
+                remainingBudget = 0;
             }
         }
 
-        // Third pass: apply the budget to each gene
+        // Then, distribute remaining budget proportionally
+        if (remainingBudget > 0) {
+            for (auto const& geneInfo : genesInBFS) {
+                if (geneInfo.geneIndex >= genome._genes.size()) {
+                    continue;
+                }
+
+                auto& gene = genome._genes.at(geneInfo.geneIndex);
+                if (gene._nodes.empty()) {
+                    continue;
+                }
+
+                // Calculate additional budget proportionally
+                auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);
+                int64_t idealNodes = static_cast<int64_t>(gene._nodes.size()) * truncatedNumConcatenations;
+                int64_t additionalBudget = (idealNodes * remainingBudget) / std::max(static_cast<int64_t>(1), totalNodesNeeded);
+
+                geneNodeBudget[geneInfo.geneIndex] += static_cast<int>(additionalBudget);
+            }
+        }
+
+        // Apply the budget to each gene
         for (auto const& geneInfo : genesInBFS) {
             if (geneInfo.geneIndex >= genome._genes.size()) {
                 continue;
@@ -221,7 +230,7 @@ namespace
             int budget = geneNodeBudget[geneInfo.geneIndex];
 
             if (budget == 0) {
-                // No budget for this gene - remove all nodes and castrate
+                // No budget for this gene - remove all nodes
                 gene._nodes.clear();
                 gene._numConcatenations = 1;
                 trimmed = true;
@@ -236,7 +245,7 @@ namespace
             // Calculate how many concatenations we can afford
             int affordableConcatenations = budget / nodesPerCopy;
 
-            // If we can't even afford one full copy, trim nodes
+            // If we can't afford even one full copy, trim nodes
             if (affordableConcatenations == 0) {
                 gene._nodes.resize(budget);
                 gene._numConcatenations = 1;
