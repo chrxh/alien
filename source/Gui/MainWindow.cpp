@@ -67,6 +67,7 @@
 #include "PatternEditorWindow.h"
 #include <EngineInterface/SimulationFacade.h>
 #include <PersisterInterface/PersisterFacade.h>
+#include "PreviewSettingsDialog.h"
 #include "ResetPasswordDialog.h"
 #include "SelectionWindow.h"
 #include "SimulationInteractionController.h"
@@ -153,6 +154,7 @@ _MainWindow::_MainWindow()
     DisplaySettingsDialog::get().setup();
     NetworkSettingsDialog::get().setup();
     NewPasswordDialog::get().setup();
+    PreviewSettingsDialog::get().setup();
     ResetPasswordDialog::get().setup();
     GenericMessageDialog::get().setup();
     GenericFileDialog::get().setup();

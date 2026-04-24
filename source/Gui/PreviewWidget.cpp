@@ -18,6 +18,7 @@
 #include "CreaturePreviewWidget.h"
 #include "GenomeTabEditData.h"
 #include "GenomeWindowEditData.h"
+#include "PreviewSettingsDialog.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
 
@@ -182,10 +183,11 @@ void _PreviewWidget::processActionBar()
     }
 
     ImGui::SameLine();
-    if (AlienGui::Button(_editData->showNodeIndex ? "123" : "Abc", 35.0f)) {
-        _editData->showNodeIndex = !_editData->showNodeIndex;
+    if (AlienGui::Button(ICON_FA_COG, 35.0f)) {
+        PreviewSettingsDialog::get().setEditData(_editData);
+        PreviewSettingsDialog::get().open();
     }
-    AlienGui::Tooltip("Toggle between node index and cell function display");
+    AlienGui::Tooltip("Preview settings");
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);

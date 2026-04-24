@@ -101,6 +101,8 @@ class AutosaveWindow;
 
 class GenomeEditorWindow;
 
+class PreviewSettingsDialog;
+
 class FileTransferController;
 
 class _LocationWidget;
