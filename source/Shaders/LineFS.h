@@ -24,7 +24,7 @@ void main()
         gl_FragDepth = gl_FragCoord.z;
     }
 
-    FragColor = vec4(fragColor * edgeAlpha, 1.0);
+    FragColor = vec4(fragColor, edgeAlpha);
 }
 )";
 }
