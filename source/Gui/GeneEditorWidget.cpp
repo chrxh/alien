@@ -347,6 +347,12 @@ void _GeneEditorWidget::onMoveNodeDownward()
 {
     auto indexToMove = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
+
+    if (indexToMove == gene._nodes.size() - 2 && gene._nodes.at(indexToMove).getCellType() == CellType_Void) {
+        showMessage("Error", "The last node cannot be void.");
+        return;
+    }
+
     GenomeDescEditService::get().swapNodes(gene, indexToMove);
 
     // Adapt gene selection
