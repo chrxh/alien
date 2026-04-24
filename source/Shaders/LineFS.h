@@ -7,14 +7,21 @@ namespace Shaders
     std::string_view const LineFS = R"(
 #version 330 core
 in vec3 fragColor;
-in float edgeDist;
-in float coreEdge;
+in vec2 lineCoord;
+flat in float lineLength;
+flat in float coreHalfWidth;
+flat in float aaMargin;
 out vec4 FragColor;
 
 void main()
 {
-    // Core region at full brightness, fade only in the AA margin
-    float edgeAlpha = 1.0 - smoothstep(coreEdge, 1.0, abs(edgeDist));
+    float capDistance = max(max(-lineCoord.x, lineCoord.x - lineLength), 0.0);
+    float distanceToLine = length(vec2(capDistance, lineCoord.y));
+    float edgeAlpha = 1.0 - smoothstep(coreHalfWidth, coreHalfWidth + aaMargin, distanceToLine);
+
+    if (edgeAlpha <= 0.0) {
+        discard;
+    }
 
     // Push edge pixels to far depth so triangles can overwrite them;
     // core pixels (edgeAlpha ~1.0) keep normal depth to block overwrites
