@@ -36,7 +36,6 @@ void _PreviewWidget::process()
         if (_editData->run) {
             createSubGenomesForPreview();
             setupPreviewData();
-            _editData->run = true;
             _savepoints.clear();
             _editData->scheduleReload = false;
         } else {
