@@ -1,7 +1,10 @@
 #include "GenomeDescEditService.h"
 
 #include <algorithm>
+#include <deque>
 #include <iterator>
+#include <map>
+#include <set>
 
 #include <boost/range/adaptors.hpp>
 
@@ -104,46 +107,167 @@ void GenomeDescEditService::swapNodes(GeneDesc& gene, int index) const
 
 namespace
 {
-    // Returns true if genome has been trimmed
-    bool trimNodes(GenomeDesc& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
+    struct GeneNodeInfo
     {
-        auto result = false;
-        auto& gene = genome._genes.at(startGeneIndex);
+        int geneIndex;
+        int depth;  // Distance from start gene (for BFS ordering)
+    };
 
-        // Trim nodes if limit is exceeded
-        if (nodeCounter + toInt(gene._nodes.size()) > nodeLimit) {
-            auto newSize = std::max(0, nodeLimit - nodeCounter);
-            gene._nodes.resize(newSize);
-            gene._numConcatenations = 1;
-            for (auto& node : gene._nodes) {
-                if (node._constructor.has_value()) {
-                    auto& constructor = node._constructor.value();
-                    constructor._geneIndex = toInt(genome._genes.size());  // Castrate further construction
-                }
+    // Collects all genes in the reference tree using breadth-first search
+    std::vector<GeneNodeInfo> collectGenesInBFS(GenomeDesc const& genome, int startGeneIndex)
+    {
+        std::vector<GeneNodeInfo> result;
+        std::set<int> visited;
+        std::deque<GeneNodeInfo> queue;
+
+        queue.push_back({startGeneIndex, 0});
+        visited.insert(startGeneIndex);
+
+        while (!queue.empty()) {
+            auto current = queue.front();
+            queue.pop_front();
+            result.push_back(current);
+
+            if (current.geneIndex >= genome._genes.size()) {
+                continue;
             }
-            return true;
-        }
 
-        // Trim concatenations if limit is exceeded
-        auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);  // Prevent overflow
-        if (nodeCounter + gene._nodes.size() * truncatedNumConcatenations > nodeLimit) {
-            gene._numConcatenations = (nodeLimit - nodeCounter) / toInt(gene._nodes.size());
-            result = true;
-        }
-
-        nodeCounter += toInt(gene._nodes.size()) * gene._numConcatenations;
-
-        // Continue with constructor nodes
-        for (auto const& node : gene._nodes) {
-            if (node._constructor.has_value()) {
-                auto const& constructor = node._constructor.value();
-                if (constructor._geneIndex < genome._genes.size()) {
-                    result |= trimNodes(genome, nodeCounter, constructor._geneIndex, nodeLimit);
+            auto const& gene = genome._genes.at(current.geneIndex);
+            for (auto const& node : gene._nodes) {
+                if (node._constructor.has_value()) {
+                    auto const& constructor = node._constructor.value();
+                    if (constructor._geneIndex < genome._genes.size() && !visited.contains(constructor._geneIndex)) {
+                        queue.push_back({constructor._geneIndex, current.depth + 1});
+                        visited.insert(constructor._geneIndex);
+                    }
                 }
             }
         }
 
         return result;
+    }
+
+    // Returns true if genome has been trimmed
+    bool trimNodes(GenomeDesc& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
+    {
+        // Collect all genes in breadth-first order
+        auto genesInBFS = collectGenesInBFS(genome, startGeneIndex);
+
+        // Calculate total nodes needed (with bounded concatenations)
+        int64_t totalNodesNeeded = 0;
+        for (auto const& geneInfo : genesInBFS) {
+            if (geneInfo.geneIndex >= genome._genes.size()) {
+                continue;
+            }
+            auto const& gene = genome._genes.at(geneInfo.geneIndex);
+            auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);  // Prevent overflow
+            totalNodesNeeded += static_cast<int64_t>(gene._nodes.size()) * truncatedNumConcatenations;
+        }
+
+        // If we're under the limit, no trimming needed
+        if (totalNodesNeeded <= nodeLimit) {
+            nodeCounter = static_cast<int>(totalNodesNeeded);
+            return false;
+        }
+
+        // We need to trim - distribute budget proportionally across all genes
+        bool trimmed = false;
+        int remainingBudget = nodeLimit;
+
+        // Allocate budget to each gene proportionally, ensuring genes at each depth get adequate representation
+        std::map<int, int> geneNodeBudget;
+
+        // First, ensure every gene gets at least one full copy of its nodes if possible
+        for (auto const& geneInfo : genesInBFS) {
+            if (geneInfo.geneIndex >= genome._genes.size()) {
+                continue;
+            }
+
+            auto& gene = genome._genes.at(geneInfo.geneIndex);
+            if (gene._nodes.empty()) {
+                geneNodeBudget[geneInfo.geneIndex] = 0;
+                continue;
+            }
+
+            int nodesInGene = toInt(gene._nodes.size());
+            if (remainingBudget >= nodesInGene) {
+                geneNodeBudget[geneInfo.geneIndex] = nodesInGene;
+                remainingBudget -= nodesInGene;
+            } else {
+                geneNodeBudget[geneInfo.geneIndex] = remainingBudget;
+                remainingBudget = 0;
+            }
+        }
+
+        // Then, distribute remaining budget proportionally
+        if (remainingBudget > 0) {
+            for (auto const& geneInfo : genesInBFS) {
+                if (geneInfo.geneIndex >= genome._genes.size()) {
+                    continue;
+                }
+
+                auto& gene = genome._genes.at(geneInfo.geneIndex);
+                if (gene._nodes.empty()) {
+                    continue;
+                }
+
+                // Calculate additional budget proportionally
+                auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);
+                int64_t idealNodes = static_cast<int64_t>(gene._nodes.size()) * truncatedNumConcatenations;
+                int64_t additionalBudget = (idealNodes * remainingBudget) / std::max(static_cast<int64_t>(1), totalNodesNeeded);
+
+                geneNodeBudget[geneInfo.geneIndex] += static_cast<int>(additionalBudget);
+            }
+        }
+
+        // Apply the budget to each gene
+        for (auto const& geneInfo : genesInBFS) {
+            if (geneInfo.geneIndex >= genome._genes.size()) {
+                continue;
+            }
+
+            auto& gene = genome._genes.at(geneInfo.geneIndex);
+            int budget = geneNodeBudget[geneInfo.geneIndex];
+
+            if (budget == 0) {
+                // No budget for this gene - remove all nodes
+                gene._nodes.clear();
+                gene._numConcatenations = 1;
+                trimmed = true;
+                continue;
+            }
+
+            int nodesPerCopy = toInt(gene._nodes.size());
+            if (nodesPerCopy == 0) {
+                continue;
+            }
+
+            // Calculate how many concatenations we can afford
+            int affordableConcatenations = budget / nodesPerCopy;
+
+            // If we can't afford even one full copy, trim nodes
+            if (affordableConcatenations == 0) {
+                gene._nodes.resize(budget);
+                gene._numConcatenations = 1;
+                trimmed = true;
+
+                // Castrate constructors in trimmed nodes
+                for (auto& node : gene._nodes) {
+                    if (node._constructor.has_value()) {
+                        auto& constructor = node._constructor.value();
+                        constructor._geneIndex = toInt(genome._genes.size());
+                    }
+                }
+            } else if (affordableConcatenations < gene._numConcatenations) {
+                // Reduce concatenations to fit budget
+                gene._numConcatenations = affordableConcatenations;
+                trimmed = true;
+            }
+
+            nodeCounter += toInt(gene._nodes.size()) * gene._numConcatenations;
+        }
+
+        return trimmed;
     }
 }
 
