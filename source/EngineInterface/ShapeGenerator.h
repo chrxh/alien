@@ -461,43 +461,46 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     }
 
     // Calculate requiredNodeAngle2 based on construction angle
-    if (result.angle == 0.0f) {
-        // Special case for angle = 0
-        if (result.requiredNodeId[0] != -1) {
-            result.requiredNodeAngle2[0] = 180.0f;
-        }
-        if (result.requiredNodeId[1] != -1) {
-            result.requiredNodeAngle2[1] = 240.0f;
-        }
-        if (result.requiredNodeId[2] != -1) {
-            result.requiredNodeAngle2[2] = 0.0f;
-        }
-    } else {
-        // General case: angle2 = angle - 60, then +60 for each subsequent connection
-        float base = result.angle - 60.0f;
-        while (base < 0.0f) {
-            base += 360.0f;
-        }
-        while (base >= 360.0f) {
-            base -= 360.0f;
-        }
+    // Only set angle2 values when angleSign < 0 (negative sign connections)
+    if (angleSign < 0.0f) {
+        if (result.angle == 0.0f) {
+            // Special case for angle = 0
+            if (result.requiredNodeId[0] != -1) {
+                result.requiredNodeAngle2[0] = 180.0f;
+            }
+            if (result.requiredNodeId[1] != -1) {
+                result.requiredNodeAngle2[1] = 240.0f;
+            }
+            if (result.requiredNodeId[2] != -1) {
+                result.requiredNodeAngle2[2] = 0.0f;
+            }
+        } else {
+            // General case: angle2 = angle - 60, then +60 for each subsequent connection
+            float base = result.angle - 60.0f;
+            while (base < 0.0f) {
+                base += 360.0f;
+            }
+            while (base >= 360.0f) {
+                base -= 360.0f;
+            }
 
-        if (result.requiredNodeId[0] != -1) {
-            result.requiredNodeAngle2[0] = base;
-        }
-        if (result.requiredNodeId[1] != -1) {
-            float angle1 = base + 60.0f;
-            if (angle1 >= 360.0f) {
-                angle1 -= 360.0f;
+            if (result.requiredNodeId[0] != -1) {
+                result.requiredNodeAngle2[0] = base;
             }
-            result.requiredNodeAngle2[1] = angle1;
-        }
-        if (result.requiredNodeId[2] != -1) {
-            float angle2 = base + 120.0f;
-            if (angle2 >= 360.0f) {
-                angle2 -= 360.0f;
+            if (result.requiredNodeId[1] != -1) {
+                float angle1 = base + 60.0f;
+                if (angle1 >= 360.0f) {
+                    angle1 -= 360.0f;
+                }
+                result.requiredNodeAngle2[1] = angle1;
             }
-            result.requiredNodeAngle2[2] = angle2;
+            if (result.requiredNodeId[2] != -1) {
+                float angle2 = base + 120.0f;
+                if (angle2 >= 360.0f) {
+                    angle2 -= 360.0f;
+                }
+                result.requiredNodeAngle2[2] = angle2;
+            }
         }
     }
 
