@@ -10,6 +10,7 @@ struct ShapeGeneratorResult
 
     int requiredNodeId[3] = {-1, -1, -1};
     float requiredNodeAngle[3] = {0, 0, 0};
+    float requiredNodeAngle2[3] = {0, 0, 0};
 };
 
 class ShapeGenerator
@@ -257,6 +258,32 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.requiredNodeId[1] = e.r2;
         result.requiredNodeId[2] = e.r3;
         angleSign = e.sign;
+
+        // Set requiredNodeAngle2 for base table
+        if (angleSign == -1.0f) {
+            int numConn = (e.r1 != -1 ? 1 : 0) + (e.r2 != -1 ? 1 : 0) + (e.r3 != -1 ? 1 : 0);
+            if (e.angle == 120.0f) {
+                if (numConn == 3) {
+                    result.requiredNodeAngle2[0] = 60.0f;
+                    result.requiredNodeAngle2[1] = 120.0f;
+                    result.requiredNodeAngle2[2] = 180.0f;
+                } else if (numConn == 2) {
+                    result.requiredNodeAngle2[0] = 60.0f;
+                    result.requiredNodeAngle2[1] = 120.0f;
+                } else if (numConn == 1) {
+                    result.requiredNodeAngle2[0] = 60.0f;
+                }
+            } else if (e.angle == -60.0f) {
+                result.requiredNodeAngle2[0] = 240.0f;
+            } else if (e.angle == 0.0f) {
+                if (numConn == 2) {
+                    result.requiredNodeAngle2[0] = 180.0f;
+                    result.requiredNodeAngle2[1] = 240.0f;
+                } else if (numConn == 1) {
+                    result.requiredNodeAngle2[0] = 180.0f;
+                }
+            }
+        }
     } else {
         // Shell decomposition for angle
         int k = 1;
@@ -447,6 +474,84 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 } else {
                     result.requiredNodeId[0] = E - (u - 1);
                     result.requiredNodeId[1] = E - u;
+                }
+            }
+        }
+
+        // Set requiredNodeAngle2 for shell-based nodes
+        int numConn = (result.requiredNodeId[0] != -1 ? 1 : 0) + (result.requiredNodeId[1] != -1 ? 1 : 0) + (result.requiredNodeId[2] != -1 ? 1 : 0);
+
+        if (s % 2 == 1) {
+            // ODD SHELL
+            if (1 <= t && t <= 2 * s - 2) {
+                // Segment A
+                int u = t - 1;
+                if (u % 2 == 0 && numConn > 0) {
+                    if (u == 2 * s - 4) {
+                        result.requiredNodeAngle2[0] = 120.0f;
+                    } else {
+                        result.requiredNodeAngle2[0] = 60.0f;
+                    }
+                }
+            } else if (2 * s <= t && t <= 4 * s) {
+                // Segment B
+                int u = t - 2 * s;
+                if (u % 2 == 0 && u > 0 && numConn > 0) {
+                    result.requiredNodeAngle2[0] = 60.0f;
+                }
+            } else if (5 * s <= t && t <= 6 * s) {
+                // Segment C2
+                int u = t - 5 * s;
+                if (u == 1 && numConn > 0) {
+                    result.requiredNodeAngle2[0] = 240.0f;
+                } else if (u >= 2 && u < s) {
+                    if (numConn >= 2) {
+                        result.requiredNodeAngle2[0] = 180.0f;
+                        result.requiredNodeAngle2[1] = 240.0f;
+                    }
+                } else if (u == s && numConn > 0) {
+                    result.requiredNodeAngle2[0] = 180.0f;
+                }
+            }
+        } else {
+            // EVEN SHELL
+            if (1 <= t && t <= 2 * s) {
+                // Segment A1
+                int u = t - 1;
+                if (u % 2 == 0 && numConn > 0) {
+                    if (u == 2 * s - 2) {
+                        result.requiredNodeAngle2[0] = 60.0f;
+                        result.requiredNodeAngle2[1] = 120.0f;
+                    } else if (numConn == 3) {
+                        result.requiredNodeAngle2[0] = 60.0f;
+                        result.requiredNodeAngle2[1] = 120.0f;
+                        result.requiredNodeAngle2[2] = 180.0f;
+                    }
+                }
+            } else if (2 * s + 1 <= t && t <= 4 * s) {
+                // Segment A2
+                int u = t - (2 * s + 1);
+                if (u == 0 && numConn > 0) {
+                    result.requiredNodeAngle2[0] = 240.0f;
+                } else if (u % 2 == 0 && u >= 2 && numConn > 0) {
+                    if (numConn == 3) {
+                        result.requiredNodeAngle2[0] = 60.0f;
+                        result.requiredNodeAngle2[1] = 120.0f;
+                        result.requiredNodeAngle2[2] = 180.0f;
+                    }
+                }
+            } else if (4 * s + 1 <= t && t <= 5 * s - 1) {
+                // Segment C1
+                if (numConn >= 2) {
+                    result.requiredNodeAngle2[0] = 180.0f;
+                    result.requiredNodeAngle2[1] = 240.0f;
+                }
+            } else if (5 * s <= t && t <= 6 * s) {
+                // Segment C2
+                int u = t - 5 * s;
+                if (u == 0 && numConn >= 2) {
+                    result.requiredNodeAngle2[0] = 60.0f;
+                    result.requiredNodeAngle2[1] = 120.0f;
                 }
             }
         }
