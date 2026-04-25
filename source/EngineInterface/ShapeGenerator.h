@@ -9,7 +9,7 @@ struct ShapeGeneratorResult
     int numAdditionalConnections = 0;
 
     int requiredNodeId[3] = {-1, -1, -1};
-    float requiredNodeAngle1[3] = {0, 0, 0};
+    float requiredNodeAngle11[3] = {0, 0, 0};
     float requiredNodeAngle2[3] = {0, 0, 0};
 };
 
@@ -600,7 +600,7 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     //   15  14  13  12
     //     16  17  18
     // Tail: 19, 20, 21, ... extending diagonally from node 18.
-    // Entry fields: {angle, requiredNodeId0, requiredNodeAngle0, requiredNodeId1, requiredNodeAngle1, requiredNodeId2, requiredNodeAngle2}
+    // Entry fields: {angle, requiredNodeId0, requiredNodeAngle10, requiredNodeId1, requiredNodeAngle11, requiredNodeId2, requiredNodeAngle2}
     ShapeGeneratorResult result;
 
     if (_nodePos < 19) {
@@ -627,10 +627,10 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
             {0.0f, 7, 120.0f, -1, 0.0f, -1, 0.0f},       // 09
             {120.0f, -1, 0.0f, -1, 0.0f, -1, 0.0f},      // 10
             {-120.0f, 9, 120.0f, 7, 60.0f, 6, 0.0f},     // 11
-            {120.0f, 10, -120.0f, -1, 0.0f, -1, 0.0f},   // 12
+            {120.0f, 10, -120.0f, -1, 0.0f, -1, 0.0f},      // 12
             {0.0f, 11, 120.0f, 6, 60.0f, -1, 0.0f},      // 13
             {0.0f, 6, 120.0f, 5, 60.0f, -1, 0.0f},       // 14
-            {-120.0f, 5, 120.0f, 4, 60.0f, -1, 0.0f},    // 15
+            {-120.0f, 5, 120.0f, 4, 60.0f, -1, 0.0f},     // 15
             {-60.0f, 14, -120.0f, -1, 0.0f, -1, 0.0f},   // 16
             {0.0f, 14, -120.0f, 13, -60.0f, -1, 0.0f},   // 17
             {60.0f, 13, -120.0f, 12, -60.0f, -1, 0.0f},  // 18
