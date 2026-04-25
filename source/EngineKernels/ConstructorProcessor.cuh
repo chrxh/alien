@@ -457,7 +457,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
     // Connect to surrounding cells if possible
     int numConnectedObjects = 0;
-    printf(">>>>>>>>>>>>\n");
     for (int i = 0; i < numObjectsToConnect; ++i) {
         Object* otherObject = objectsToConnect[i];
 
@@ -480,7 +479,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             break;
         }
     }
-    printf("<<<<<<<<<<<<<\n\n\n");
 
     // Adapt angles on other connected cells
     auto n = newObject->numConnections;

@@ -490,15 +490,15 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
             result.requiredNodeAngle2[2] = angle2;
         }
     } else {
-        // For angleSign >= 0, explicitly set angle2 to 0.0 for all required connections
+        // For angleSign >= 0, use -1.0f to indicate relative angle positioning should be used
         if (result.requiredNodeId[0] != -1) {
-            result.requiredNodeAngle2[0] = 0.0f;
+            result.requiredNodeAngle2[0] = -1.0f;
         }
         if (result.requiredNodeId[1] != -1) {
-            result.requiredNodeAngle2[1] = 0.0f;
+            result.requiredNodeAngle2[1] = -1.0f;
         }
         if (result.requiredNodeId[2] != -1) {
-            result.requiredNodeAngle2[2] = 0.0f;
+            result.requiredNodeAngle2[2] = -1.0f;
         }
     }
 
