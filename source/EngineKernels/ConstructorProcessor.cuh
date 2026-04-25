@@ -219,8 +219,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     auto shape = result.gene->shape;
     if (shape != ConstructorShape_Custom) {
         for (int i = 0; i <= result.currentNodeIndex; ++i) {
+            auto generationResult = shapeGenerator.generateNextConstructionData(shape);
             if (i == result.currentNodeIndex) {
-                result.shapeResult = shapeGenerator.generateNextConstructionData(shape);
+                result.shapeResult = generationResult;
             }
         }
     } else {
