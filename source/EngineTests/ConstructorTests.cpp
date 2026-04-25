@@ -2080,7 +2080,7 @@ TEST_F(ConstructorTests, generateRectangle_49cells_withSeparation)
 
 TEST_F(ConstructorTests, generateHexagon_61cells_withSeparation)
 {
-    auto const n = 61;
+    auto const n = 461;
     auto const AutoTriggerInterval = 30;
 
     auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Hexagon);

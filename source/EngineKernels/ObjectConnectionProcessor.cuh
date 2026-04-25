@@ -25,6 +25,9 @@ public:
     __inline__ __device__ static bool
     tryAddConnectionWithAbsAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle);
 
+    __inline__ __device__ static bool
+    tryAddConnectionWithAbsAngle2(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2);
+
     __inline__ __device__ static void deleteConnections(Object* object1, Object* object2);
     __inline__ __device__ static void deleteConnectionOneWay(Object* object1, Object* object2);
 
@@ -282,6 +285,36 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithAbsAng
     return true;
 }
 
+__inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithAbsAngle2(
+    SimulationData& data,
+    Object* object1,
+    Object* object2,
+    float desiredDistance,
+    float desiredAbsAngle1,
+    float desiredAbsAngle2)
+{
+    auto posDelta = object2->pos - object1->pos;
+    data.objectMap.correctDirection(posDelta);
+
+    ObjectConnection origConnections[MAX_OBJECT_CONNECTIONS];
+    int origNumConnection = object1->numConnections;
+    for (int i = 0; i < origNumConnection; ++i) {
+        origConnections[i] = object1->connections[i];
+    }
+
+    if (!tryAddConnectionWithAbsAngle_oneWay(object1, object2, desiredDistance, desiredAbsAngle1)) {
+        return false;
+    }
+    if (!tryAddConnectionWithAbsAngle_oneWay(object2, object1, desiredDistance, desiredAbsAngle2)) {
+        object1->numConnections = origNumConnection;
+        for (int i = 0; i < origNumConnection; ++i) {
+            object1->connections[i] = origConnections[i];
+        }
+        return false;
+    }
+    return true;
+}
+
 __inline__ __device__ void ObjectConnectionProcessor::deleteConnections(Object* object1, Object* object2)
 {
     deleteConnectionOneWay(object1, object2);
@@ -463,6 +496,12 @@ ObjectConnectionProcessor::tryAddConnectionWithAbsAngle_oneWay(Object* object1, 
     object1->connections[insertIndex] = newConnection;
     object1->connections[(insertIndex + 1) % (n + 1)].angleFromPrevious = refAngle - newConnection.angleFromPrevious;
     ++object1->numConnections;
+
+    float angle = 0;
+    for (int i = 1; i < insertIndex; ++i) {
+        angle += object1->getConnection(i).angleFromPrevious;
+    }
+    printf("angle: %f\n", angle);
 
     return true;
 }

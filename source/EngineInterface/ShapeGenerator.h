@@ -9,7 +9,8 @@ struct ShapeGeneratorResult
     int numAdditionalConnections = 0;
 
     int requiredNodeId[3] = {-1, -1, -1};
-    float requiredNodeAngle[3] = {0, 0, 0};
+    float requiredNodeAngle1[3] = {0, 0, 0};
+    float requiredNodeAngle2[3] = {0, 0, 0};
 };
 
 class ShapeGenerator
@@ -116,7 +117,7 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.angle = (p == L - 1) ? 120.0f : 0.0f;
         result.numAdditionalConnections = 0;
         result.requiredNodeId[0] = -1;
-        result.requiredNodeAngle[0] = 0.0f;
+        result.requiredNodeAngle1[0] = 0.0f;
     } else {
         auto isEven = (k % 2 == 0);
 
@@ -131,17 +132,17 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         if (p == L - 1) {
             result.numAdditionalConnections = 0;
             result.requiredNodeId[0] = -1;
-            result.requiredNodeAngle[0] = 0.0f;
+            result.requiredNodeAngle1[0] = 0.0f;
         } else if (p == L - 2) {
             result.numAdditionalConnections = 1;
             result.requiredNodeId[0] = _connectedNodePos1;
-            result.requiredNodeAngle[0] = isEven ? -120.0f : 120.0f;
+            result.requiredNodeAngle1[0] = isEven ? -120.0f : 120.0f;
         } else {
             result.numAdditionalConnections = 2;
             result.requiredNodeId[0] = _connectedNodePos1;
             result.requiredNodeId[1] = _connectedNodePos1 - 1;
-            result.requiredNodeAngle[0] = isEven ? -120.0f : 120.0f;
-            result.requiredNodeAngle[1] = isEven ? -60.0f : 60.0f;
+            result.requiredNodeAngle1[0] = isEven ? -120.0f : 120.0f;
+            result.requiredNodeAngle1[1] = isEven ? -60.0f : 60.0f;
             --_connectedNodePos1;
         }
     }
@@ -173,7 +174,7 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.angle = 0.0f;
         result.numAdditionalConnections = 0;
         result.requiredNodeId[0] = -1;
-        result.requiredNodeAngle[0] = 0.0f;
+        result.requiredNodeAngle1[0] = 0.0f;
     } else {
         auto isTypeB = (k % 2 == 0);
         if (p == 0 || p == k - 1) {
@@ -187,11 +188,11 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         if (p == 0 || p == k - 1) {
             result.numAdditionalConnections = 0;
             result.requiredNodeId[0] = -1;
-            result.requiredNodeAngle[0] = 0.0f;
+            result.requiredNodeAngle1[0] = 0.0f;
         } else {
             result.numAdditionalConnections = 1;
             result.requiredNodeId[0] = _connectedNodePos1;
-            result.requiredNodeAngle[0] = isTypeB ? 90.0f : -90.0f;
+            result.requiredNodeAngle1[0] = isTypeB ? 90.0f : -90.0f;
             if (p != k - 2) {
                 --_connectedNodePos1;
             }
@@ -453,10 +454,10 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     }
 
     if (result.requiredNodeId[0] != -1) {
-        result.requiredNodeAngle[0] = angleSign * 120.0f;
+        result.requiredNodeAngle1[0] = angleSign * 120.0f;
     }
     if (result.requiredNodeId[1] != -1) {
-        result.requiredNodeAngle[1] = angleSign * 60.0f;
+        result.requiredNodeAngle1[1] = angleSign * 60.0f;
     }
 
     result.numAdditionalConnections = 0;
@@ -490,22 +491,22 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
             result.angle = sign * 60.0f;
             result.numAdditionalConnections = 1;
             result.requiredNodeId[0] = _connectedNodePos1;
-            result.requiredNodeAngle[0] = sign * 120.0f;
+            result.requiredNodeAngle1[0] = sign * 120.0f;
         } else if (posInGroup == 1) {
             result.angle = -sign * 120.0f;
             result.numAdditionalConnections = 1;
             result.requiredNodeId[0] = _connectedNodePos1;
-            result.requiredNodeAngle[0] = sign * 120.0f;
+            result.requiredNodeAngle1[0] = sign * 120.0f;
             if (_connectedNodePos1 > 0) {
                 result.numAdditionalConnections = 2;
                 result.requiredNodeId[1] = _connectedNodePos1 - 1;
-                result.requiredNodeAngle[1] = sign * 60.0f;
+                result.requiredNodeAngle1[1] = sign * 60.0f;
             }
         } else {
             result.angle = -sign * 60.0f;
             result.numAdditionalConnections = 1;
             result.requiredNodeId[0] = _nodePos - 2;
-            result.requiredNodeAngle[0] = -sign * 120.0f;
+            result.requiredNodeAngle1[0] = -sign * 120.0f;
             _connectedNodePos1 = _nodePos - 2;
         }
     }
@@ -563,11 +564,11 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         auto const& e = table[_nodePos];
         result.angle = e.angle;
         result.requiredNodeId[0] = e.r0;
-        result.requiredNodeAngle[0] = e.a0;
+        result.requiredNodeAngle1[0] = e.a0;
         result.requiredNodeId[1] = e.r1;
-        result.requiredNodeAngle[1] = e.a1;
+        result.requiredNodeAngle1[1] = e.a1;
         result.requiredNodeId[2] = e.r2;
-        result.requiredNodeAngle[2] = e.a2;
+        result.requiredNodeAngle1[2] = e.a2;
 
         result.numAdditionalConnections = 0;
         if (e.r0 != -1) {
@@ -606,29 +607,29 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.angle = 0.0f;
         result.numAdditionalConnections = 2;
         result.requiredNodeId[0] = 1;
-        result.requiredNodeAngle[0] = 120.0f;
+        result.requiredNodeAngle1[0] = 120.0f;
         result.requiredNodeId[1] = 0;
-        result.requiredNodeAngle[1] = 60.0f;
+        result.requiredNodeAngle1[1] = 60.0f;
         break;
     case 4:
         result.angle = -120.0f;
         result.numAdditionalConnections = 1;
         result.requiredNodeId[0] = 0;
-        result.requiredNodeAngle[0] = 120.0f;
+        result.requiredNodeAngle1[0] = 120.0f;
         break;
     case 5:
         result.angle = -60.0f;
         result.numAdditionalConnections = 1;
         result.requiredNodeId[0] = 3;
-        result.requiredNodeAngle[0] = -120.0f;
+        result.requiredNodeAngle1[0] = -120.0f;
         break;
     case 6:
         result.angle = 60.0f;
         result.numAdditionalConnections = 2;
         result.requiredNodeId[0] = 3;
-        result.requiredNodeAngle[0] = -120.0f;
+        result.requiredNodeAngle1[0] = -120.0f;
         result.requiredNodeId[1] = 2;
-        result.requiredNodeAngle[1] = -60.0f;
+        result.requiredNodeAngle1[1] = -60.0f;
         break;
     default:
         result.angle = 0.0f;
@@ -650,14 +651,14 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.angle = 0.0f;
         result.numAdditionalConnections = 1;
         result.requiredNodeId[0] = _nodePos - 2;
-        result.requiredNodeAngle[0] = 120.0f;
+        result.requiredNodeAngle1[0] = 120.0f;
     } else if (mod8 == 6) {
         result.angle = -120.0f;
     } else if (mod8 == 7) {
         result.angle = 0.0f;
         result.numAdditionalConnections = 1;
         result.requiredNodeId[0] = _nodePos - 2;
-        result.requiredNodeAngle[0] = -120.0f;
+        result.requiredNodeAngle1[0] = -120.0f;
     }
 
     ++_nodePos;
