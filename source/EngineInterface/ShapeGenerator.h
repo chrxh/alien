@@ -258,32 +258,6 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.requiredNodeId[1] = e.r2;
         result.requiredNodeId[2] = e.r3;
         angleSign = e.sign;
-
-        // Set requiredNodeAngle2 for base table
-        if (angleSign == -1.0f) {
-            int numConn = (e.r1 != -1 ? 1 : 0) + (e.r2 != -1 ? 1 : 0) + (e.r3 != -1 ? 1 : 0);
-            if (e.angle == 120.0f) {
-                if (numConn == 3) {
-                    result.requiredNodeAngle2[0] = 60.0f;
-                    result.requiredNodeAngle2[1] = 120.0f;
-                    result.requiredNodeAngle2[2] = 180.0f;
-                } else if (numConn == 2) {
-                    result.requiredNodeAngle2[0] = 60.0f;
-                    result.requiredNodeAngle2[1] = 120.0f;
-                } else if (numConn == 1) {
-                    result.requiredNodeAngle2[0] = 60.0f;
-                }
-            } else if (e.angle == -60.0f) {
-                result.requiredNodeAngle2[0] = 240.0f;
-            } else if (e.angle == 0.0f) {
-                if (numConn == 2) {
-                    result.requiredNodeAngle2[0] = 180.0f;
-                    result.requiredNodeAngle2[1] = 240.0f;
-                } else if (numConn == 1) {
-                    result.requiredNodeAngle2[0] = 180.0f;
-                }
-            }
-        }
     } else {
         // Shell decomposition for angle
         int k = 1;
@@ -477,84 +451,6 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 }
             }
         }
-
-        // Set requiredNodeAngle2 for shell-based nodes
-        int numConn = (result.requiredNodeId[0] != -1 ? 1 : 0) + (result.requiredNodeId[1] != -1 ? 1 : 0) + (result.requiredNodeId[2] != -1 ? 1 : 0);
-
-        if (s % 2 == 1) {
-            // ODD SHELL
-            if (1 <= t && t <= 2 * s - 2) {
-                // Segment A
-                int u = t - 1;
-                if (u % 2 == 0 && numConn > 0) {
-                    if (u == 2 * s - 4) {
-                        result.requiredNodeAngle2[0] = 120.0f;
-                    } else {
-                        result.requiredNodeAngle2[0] = 60.0f;
-                    }
-                }
-            } else if (2 * s <= t && t <= 4 * s) {
-                // Segment B
-                int u = t - 2 * s;
-                if (u % 2 == 0 && u > 0 && numConn > 0) {
-                    result.requiredNodeAngle2[0] = 60.0f;
-                }
-            } else if (5 * s <= t && t <= 6 * s) {
-                // Segment C2
-                int u = t - 5 * s;
-                if (u == 1 && numConn > 0) {
-                    result.requiredNodeAngle2[0] = 240.0f;
-                } else if (u >= 2 && u < s) {
-                    if (numConn >= 2) {
-                        result.requiredNodeAngle2[0] = 180.0f;
-                        result.requiredNodeAngle2[1] = 240.0f;
-                    }
-                } else if (u == s && numConn > 0) {
-                    result.requiredNodeAngle2[0] = 180.0f;
-                }
-            }
-        } else {
-            // EVEN SHELL
-            if (1 <= t && t <= 2 * s) {
-                // Segment A1
-                int u = t - 1;
-                if (u % 2 == 0 && numConn > 0) {
-                    if (u == 2 * s - 2) {
-                        result.requiredNodeAngle2[0] = 60.0f;
-                        result.requiredNodeAngle2[1] = 120.0f;
-                    } else if (numConn == 3) {
-                        result.requiredNodeAngle2[0] = 60.0f;
-                        result.requiredNodeAngle2[1] = 120.0f;
-                        result.requiredNodeAngle2[2] = 180.0f;
-                    }
-                }
-            } else if (2 * s + 1 <= t && t <= 4 * s) {
-                // Segment A2
-                int u = t - (2 * s + 1);
-                if (u == 0 && numConn > 0) {
-                    result.requiredNodeAngle2[0] = 240.0f;
-                } else if (u % 2 == 0 && u >= 2 && numConn > 0) {
-                    if (numConn == 3) {
-                        result.requiredNodeAngle2[0] = 60.0f;
-                        result.requiredNodeAngle2[1] = 120.0f;
-                        result.requiredNodeAngle2[2] = 180.0f;
-                    }
-                }
-            } else if (4 * s + 1 <= t && t <= 5 * s - 1) {
-                // Segment C1
-                if (numConn >= 2) {
-                    result.requiredNodeAngle2[0] = 180.0f;
-                    result.requiredNodeAngle2[1] = 240.0f;
-                }
-            } else if (5 * s <= t && t <= 6 * s) {
-                // Segment C2
-                int u = t - 5 * s;
-                if (u == 0 && numConn >= 2) {
-                    result.requiredNodeAngle2[0] = 60.0f;
-                    result.requiredNodeAngle2[1] = 120.0f;
-                }
-            }
-        }
     }
 
     if (result.requiredNodeId[0] != -1) {
@@ -562,6 +458,44 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     }
     if (result.requiredNodeId[1] != -1) {
         result.requiredNodeAngle[1] = angleSign * 60.0f;
+    }
+
+    // Derive requiredNodeAngle2 from requiredNodeAngle
+    // For most cases: angle2[i] = angle[i] + 180
+    // Special cases depend on the main 'angle' field
+    if (angleSign == -1.0f) {
+        // For angle = 120.0: simple +180 transformation
+        if (result.angle == 120.0f) {
+            for (int i = 0; i < 3; ++i) {
+                if (result.requiredNodeId[i] != -1) {
+                    result.requiredNodeAngle2[i] = result.requiredNodeAngle[i] + 180.0f;
+                }
+            }
+        }
+        // For angle = -60.0: special geometric constraint
+        else if (result.angle == -60.0f) {
+            if (result.requiredNodeId[0] != -1) {
+                result.requiredNodeAngle2[0] = 240.0f;
+            }
+        }
+        // For angle = 0.0: special geometric constraints
+        else if (result.angle == 0.0f) {
+            if (result.requiredNodeId[0] != -1) {
+                result.requiredNodeAngle2[0] = 180.0f;
+            }
+            if (result.requiredNodeId[1] != -1) {
+                result.requiredNodeAngle2[1] = 240.0f;
+            }
+        }
+    }
+    // For angleSign = 1.0 (even shells in shell-based nodes)
+    else if (angleSign == 1.0f) {
+        // Even shells also follow +180 transformation
+        for (int i = 0; i < 3; ++i) {
+            if (result.requiredNodeId[i] != -1) {
+                result.requiredNodeAngle2[i] = result.requiredNodeAngle[i] + 180.0f;
+            }
+        }
     }
 
     result.numAdditionalConnections = 0;
