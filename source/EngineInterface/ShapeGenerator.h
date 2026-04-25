@@ -460,16 +460,23 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.requiredNodeAngle1[1] = angleSign * 60.0f;
     }
 
-    // Calculate requiredNodeAngle2 based on requiredNodeAngle1
-    // Formula: angle2 = 180 - angle + i*60 (mod 360) when angleSign < 0
-    // For angleSign >= 0, explicitly set angle2[i] = 0.0
+    // Calculate requiredNodeAngle2
+    // Formula: For angleSign < 0: base = normalize(angle), then base + i*60
+    //          Special case: when angle==0, use base=240 instead
+    //          For angleSign > 0: base = normalize(angle), then base - i*60
+    //          For angleSign = 0: use -1.0 to indicate relative angle positioning
     if (angleSign < 0.0f) {
-        float base = 180.0f - result.angle;
+        float base = result.angle;
         while (base < 0.0f) {
             base += 360.0f;
         }
         while (base >= 360.0f) {
             base -= 360.0f;
+        }
+
+        // Special case: when angle is 0, use 240 as base
+        if (base < 0.01f && base > -0.01f) {  // Approximately 0
+            base = 240.0f;
         }
 
         if (result.requiredNodeId[0] != -1) {
@@ -489,8 +496,34 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
             }
             result.requiredNodeAngle2[2] = angle2;
         }
+    } else if (angleSign > 0.0f) {
+        float base = result.angle;
+        while (base < 0.0f) {
+            base += 360.0f;
+        }
+        while (base >= 360.0f) {
+            base -= 360.0f;
+        }
+
+        if (result.requiredNodeId[0] != -1) {
+            result.requiredNodeAngle2[0] = base;
+        }
+        if (result.requiredNodeId[1] != -1) {
+            float angle1 = base - 60.0f;
+            if (angle1 < 0.0f) {
+                angle1 += 360.0f;
+            }
+            result.requiredNodeAngle2[1] = angle1;
+        }
+        if (result.requiredNodeId[2] != -1) {
+            float angle2 = base - 120.0f;
+            if (angle2 < 0.0f) {
+                angle2 += 360.0f;
+            }
+            result.requiredNodeAngle2[2] = angle2;
+        }
     } else {
-        // For angleSign >= 0, use -1.0f to indicate relative angle positioning should be used
+        // For angleSign == 0, use -1.0f to indicate relative angle positioning should be used
         if (result.requiredNodeId[0] != -1) {
             result.requiredNodeAngle2[0] = -1.0f;
         }
