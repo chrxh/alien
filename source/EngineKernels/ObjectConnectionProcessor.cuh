@@ -306,16 +306,8 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithAbsAng
         return false;
     }
 
-    bool secondConnectionSuccess;
-    if (desiredAbsAngle2 < 0.0f) {
-        // Use relative angle positioning when desiredAbsAngle2 is -1.0
-        secondConnectionSuccess = tryAddConnectionWithRelAngle_oneWay(data, object2, object1, posDelta * (-1), desiredDistance);
-    } else {
-        // Use absolute angle positioning when desiredAbsAngle2 is specified (>= 0)
-        secondConnectionSuccess = tryAddConnectionWithAbsAngle_oneWay(object2, object1, desiredDistance, desiredAbsAngle2);
-    }
-
-    if (!secondConnectionSuccess) {
+    // Always use relative angle for the reverse connection (original behavior)
+    if (!tryAddConnectionWithRelAngle_oneWay(data, object2, object1, posDelta * (-1), desiredDistance)) {
         object1->numConnections = origNumConnection;
         for (int i = 0; i < origNumConnection; ++i) {
             object1->connections[i] = origConnections[i];
