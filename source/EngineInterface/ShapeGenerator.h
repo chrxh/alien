@@ -460,97 +460,45 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.requiredNodeAngle1[1] = angleSign * 60.0f;
     }
 
-    // TEMPORARY: Use hardcoded lookup table from provided expected values
-    // This verifies that with correct angle2 values, the test passes
-    struct Angle2Entry {
-        float a0, a1, a2;
-    };
-
-    // Lookup table with expected requiredNodeAngle2 values for first 70 nodes
-    // -1.0f means not set (no connection at that index)
-    static const Angle2Entry angle2Lookup[] = {
-        {-1, -1, -1},           // 0
-        {-1, -1, -1},           // 1
-        {-1, -1, -1},           // 2
-        {-1, -1, -1},           // 3
-        {0, 0, 0},              // 4
-        {60, -1, -1},           // 5
-        {0, 0, -1},             // 6
-        {240, -1, -1},          // 7
-        {180, -1, -1},          // 8
-        {-1, -1, -1},           // 9
-        {60, 120, 180},         // 10
-        {0, -1, -1},            // 11
-        {60, 120, -1},          // 12
-        {0, -1, -1},            // 13
-        {240, -1, -1},          // 14
-        {60, 120, 180},         // 15
-        {0, -1, -1},            // 16
-        {180, 240, -1},         // 17
-        {60, 120, -1},          // 18
-        {0, -1, -1},            // 19
-        {0, 0, -1},             // 20
-        {0, -1, -1},            // 21
-        {0, 0, -1},             // 22
-        {0, -1, -1},            // 23
-        {60, -1, -1},           // 24
-        {0, 0, -1},             // 25
-        {120, -1, -1},          // 26
-        {0, 0, 0},              // 27
-        {0, 0, 0},              // 28
-        {60, -1, -1},           // 29
-        {0, 0, 0},              // 30
-        {60, -1, -1},           // 31
-        {0, 0, 0},              // 32
-        {60, -1, -1},           // 33
-        {0, 0, -1},             // 34
-        {0, 0, -1},             // 35
-        {0, 0, -1},             // 36
-        {240, -1, -1},          // 37
-        {180, 240, -1},         // 38
-        {180, 240, -1},         // 39
-        {180, -1, -1},          // 40
-        {-1, -1, -1},           // 41
-        {60, 120, 180},         // 42
-        {0, -1, -1},            // 43
-        {60, 120, 180},         // 44
-        {0, -1, -1},            // 45
-        {60, 120, 180},         // 46
-        {0, -1, -1},            // 47
-        {60, 120, -1},          // 48
-        {0, -1, -1},            // 49
-        {240, -1, -1},          // 50
-        {60, 120, 180},         // 51
-        {0, -1, -1},            // 52
-        {60, 120, 180},         // 53
-        {0, -1, -1},            // 54
-        {60, 120, 180},         // 55
-        {0, -1, -1},            // 56
-        {180, 240, -1},         // 57
-        {180, 240, -1},         // 58
-        {180, 240, -1},         // 59
-        {60, 120, -1},          // 60
-        {0, -1, -1},            // 61
-        {0, 0, -1},             // 62
-        {0, 0, -1},             // 63
-        {0, 0, -1},             // 64
-        {0, -1, -1},            // 65
-        {-1, -1, -1},           // 66
-        {0, 0, 0},              // 67
-        {60, -1, -1},           // 68
-        {0, 0, 0},              // 69
-    };
-
-    if (_nodePos < sizeof(angle2Lookup) / sizeof(angle2Lookup[0])) {
-        auto& entry = angle2Lookup[_nodePos];
-        if (result.requiredNodeId[0] != -1 && entry.a0 >= 0) {
-            result.requiredNodeAngle2[0] = entry.a0;
+    // Calculate requiredNodeAngle2 based on requiredNodeAngle1
+    // Formula: angle2 = 180 - angle + i*60 (mod 360) when angleSign < 0
+    // For angleSign >= 0, explicitly set angle2[i] = 0.0
+    if (angleSign < 0.0f) {
+        float base = 180.0f - result.angle;
+        while (base < 0.0f) {
+            base += 360.0f;
         }
-        if (result.requiredNodeId[1] != -1 && entry.a1 >= 0) {
-            result.requiredNodeAngle2[1] = entry.a1;
+        while (base >= 360.0f) {
+            base -= 360.0f;
         }
-        if (result.requiredNodeId[2] != -1 && entry.a2 >= 0) {
-            result.requiredNodeAngle2[2] = entry.a2;
+
+        if (result.requiredNodeId[0] != -1) {
+            result.requiredNodeAngle2[0] = base;
+        }
+        if (result.requiredNodeId[1] != -1) {
+            float angle1 = base + 60.0f;
+            if (angle1 >= 360.0f) {
+                angle1 -= 360.0f;
+            }
+            result.requiredNodeAngle2[1] = angle1;
+        }
+        if (result.requiredNodeId[2] != -1) {
+            float angle2 = base + 120.0f;
+            if (angle2 >= 360.0f) {
+                angle2 -= 360.0f;
+            }
+            result.requiredNodeAngle2[2] = angle2;
+        }
+    } else {
+        // For angleSign >= 0, explicitly set angle2 to 0.0 for all required connections
+        if (result.requiredNodeId[0] != -1) {
+            result.requiredNodeAngle2[0] = 0.0f;
+        }
+        if (result.requiredNodeId[1] != -1) {
+            result.requiredNodeAngle2[1] = 0.0f;
+        }
+        if (result.requiredNodeId[2] != -1) {
+            result.requiredNodeAngle2[2] = 0.0f;
         }
     }
 
