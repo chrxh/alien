@@ -149,11 +149,11 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
 
     // Enable depth testing for proper occlusion
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
 
-    // Enable blending (opaque with depth test, matching _TriangleRenderStep)
+    // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ZERO);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Draw lines (geometry shader will convert to quads with proper width)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
