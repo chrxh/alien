@@ -461,8 +461,8 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     }
 
     // Calculate requiredNodeAngle2 derived from requiredNodeAngle1
-    // Formula: angle2[i] = (180 - angle + i*60) % 360
-    // Only set angle2 values when angleSign < 0 (negative sign connections)
+    // Formula: angle2[i] = (180 - angle + i*60) % 360 when angleSign < 0
+    // For angleSign >= 0, explicitly set angle2[i] = 0.0
     if (angleSign < 0.0f) {
         float base = 180.0f - result.angle;
         while (base < 0.0f) {
@@ -488,6 +488,17 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 angle2 -= 360.0f;
             }
             result.requiredNodeAngle2[2] = angle2;
+        }
+    } else {
+        // For angleSign >= 0, explicitly set angle2 to 0.0 for all required connections
+        if (result.requiredNodeId[0] != -1) {
+            result.requiredNodeAngle2[0] = 0.0f;
+        }
+        if (result.requiredNodeId[1] != -1) {
+            result.requiredNodeAngle2[1] = 0.0f;
+        }
+        if (result.requiredNodeId[2] != -1) {
+            result.requiredNodeAngle2[2] = 0.0f;
         }
     }
 
