@@ -13,7 +13,7 @@ public:
         GeneIndicesForSubGenome const& geneIndices,
         SubGenomeDesc const& genomeWithStartIndex);
 
-    void process(bool& phenotypeChanged, Desc& phenotype, float width);
+    void process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& previewGenome, float width);
 
     uint64_t getCreatureId() const;
     void setCreatureId(uint64_t value);
