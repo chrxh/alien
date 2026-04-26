@@ -1671,7 +1671,7 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
     auto const ConstructionAngle = 8.0f;
     auto const LastAngle = -5.0f;
     auto const n = 20;
-    auto const AutoTriggerInterval = 10;
+    auto const AutoTriggerInterval = 20;
 
     auto [shape, type, connectionDistance] = GetParam();
 

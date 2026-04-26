@@ -69,24 +69,6 @@ private:
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
 
-    //
-    // Assumption: object1 is connected with object2 and object2 is connected with object3
-    //
-    // If object3 is connected to object1 directly or via further cells (not object2):
-    //  Calculates the inner angle sum of the n-polygon spanned by
-    //      (1) object1
-    //      (2) object2
-    //      (3) object3
-    //      + possibly further cells between (3) and (1)
-    //  and
-    //      set the angle on cell (3) between the connected cells (2) and (4)
-    //      (where (4) can be (1) if no further cells are in the polygon, i.e. n=3)
-    //      such that the inner angle sum of the polygon is (n - 2) * 180 deg
-    // Else:
-    //  No angle correction
-    //
-    __inline__ __device__ static void correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* object3, bool goClockwiseFromObject3);
-
     __inline__ __device__ static float getRequiredEnergyForNodes(Gene* gene);
 };
 
@@ -481,34 +463,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         }
     }
 
-    // Adapt angles on other connected cells
-    auto n = newObject->numConnections;
-    auto lastObjectIndex = newObject->getConnectionIndex(constructionData.lastConstructionObject);
-
-    if (!separation) {
-        auto hostObjectIndex = newObject->getConnectionIndex(hostObject);
-
-        for (int i = lastObjectIndex; (i + n) % n != (hostObjectIndex + 1) % n && (i + n) % n !=  hostObjectIndex; --i) {
-            correctAnglesByInnerAngleSum(newObject->getConnectedObject(i), newObject, newObject->getConnectedObject(i - 1), false);
-        }
-        for (int i = lastObjectIndex + 1; i % n != hostObjectIndex; ++i) {
-            correctAnglesByInnerAngleSum(newObject->getConnectedObject(i - 1), newObject, newObject->getConnectedObject(i), true);
-        }
-    } else {
-        // lastObjectIndex is always 0 in the separating case
-        auto angleFromLastObjectToDisconnectedHost = 180.0f - constructionData.shapeResult.angle;
-        auto adaptClockwise = newObject->connections[0].angleFromPrevious > angleFromLastObjectToDisconnectedHost - NEAR_ZERO;
-        if (adaptClockwise) {
-            for (int i = 1; i < n; ++i) {
-                correctAnglesByInnerAngleSum(newObject->getConnectedObject(i - 1), newObject, newObject->getConnectedObject(i), true);
-            }
-        } else {
-            for (int i = 0; i > -n + 1; --i) {
-                correctAnglesByInnerAngleSum(newObject->getConnectedObject(i), newObject, newObject->getConnectedObject(i - 1), false);
-            }
-        }
-    }
-
     setHeadCellOnFirstNode(newObject, hostObject, constructionData);
     activateNewObjectOnLastNode(newObject, hostObject, constructionData);
 
@@ -700,138 +654,6 @@ __inline__ __device__ void ConstructorProcessor::setHeadCellOnFirstNode(Object* 
     // Head cell should be first (=> connections[0] points to nodeIndex=1 in each concatenation)
     if (constructionData.isFirstNode && (constructionData.isSeparation || constructor.geneIndex == 0)) {
         newObject->typeData.cell.headCell = true;
-    }
-}
-
-__inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Object* object1, Object* object2, Object* object3, bool goClockwiseFromObject3)
-{
-    // Check if object3 connects back to object1 (directly or via further objects, not through object2)
-    // to form a closed polygon
-    // Find the minimal path from object3 to object1 (not going through object2)
-    Object* currentObject = object3;
-    Object* previousObject = object2;
-    int numIntermediateObjects = 0;
-    bool foundPolygon = false;
-    Object* object4 = nullptr;  // The next object after object3 in the polygon
-
-    // Find object2's index in object3's connections to determine traversal direction
-    int object2IndexInObject3 = object3->getConnectionIndex(object2);
-
-    constexpr int maxPolygonSize = 50;
-    float currentAngleSum = 0.0f;
-    for (int step = 0; step < maxPolygonSize; ++step) {
-        Object* nextObject = nullptr;
-
-        if (step == 0) {
-            int startIndex = goClockwiseFromObject3 ? object2IndexInObject3 + 1 : object2IndexInObject3 - 1;
-
-            for (int i = 0; i < object3->numConnections; ++i) {
-                int index = goClockwiseFromObject3 ? startIndex + i : startIndex - i;
-
-                Object* candidate = object3->getConnectedObject(index);
-                if (candidate == object1) {
-                    nextObject = candidate;
-                    foundPolygon = true;
-                    break;
-                } else if (candidate != object2) {
-                    nextObject = candidate;
-                    object4 = candidate;
-                    break;
-                }
-            }
-        } else {
-            // Subsequent steps: find next object that's not the previous one
-            int prevIndex = currentObject->getConnectionIndex(previousObject);
-
-            // Continue in the same general direction
-            for (int i = 1; i < currentObject->numConnections; ++i) {
-                int index = goClockwiseFromObject3 ? prevIndex + i : prevIndex - i;
-
-                Object* candidate = currentObject->getConnectedObject(index);
-                if (candidate == object1) {
-                    nextObject = candidate;
-                    foundPolygon = true;
-                    break;
-                } else if (candidate != object2) {
-                    nextObject = candidate;
-                    break;
-                }
-            }
-        }
-
-        if (step > 0) {
-            if (!goClockwiseFromObject3) {
-                currentAngleSum += currentObject->getAngelSpan(nextObject, previousObject);
-            } else {
-                currentAngleSum += currentObject->getAngelSpan(previousObject, nextObject);
-            }
-        }
-
-        if (foundPolygon || nextObject == nullptr) {
-            break;
-        }
-
-        previousObject = currentObject;
-        currentObject = nextObject;
-        numIntermediateObjects++;
-    }
-
-    if (!foundPolygon) {
-        // No closed polygon found, no angle correction based on polygon possible
-        return;
-    }
-
-    // If object4 is still null, it means object3 connects directly to object1
-    if (object4 == nullptr) {
-        object4 = object1;
-    }
-
-    // Number of vertices in the polygon
-    int numVertices = 3 + numIntermediateObjects;  // object1, object2, object3, + intermediate objects
-
-    // Calculate expected inner angle sum for an n-sided polygon: (n - 2) * 180 degrees
-    float expectedAngleSum = (numVertices - 2) * 180.0f;
-
-    Object* lastObjectBeforeObject1 = currentObject;  // This is the last object we visited before reaching object1
-    if (!goClockwiseFromObject3) {
-        currentAngleSum += object1->getAngelSpan(object2, lastObjectBeforeObject1);
-        currentAngleSum += object2->getAngelSpan(object3, object1);
-        currentAngleSum += object3->getAngelSpan(object4, object2);
-    } else {
-        currentAngleSum += object1->getAngelSpan(lastObjectBeforeObject1, object2);
-        currentAngleSum += object2->getAngelSpan(object1, object3);
-        currentAngleSum += object3->getAngelSpan(object2, object4);
-    }
-    float angleCorrection = expectedAngleSum - currentAngleSum;
-
-    int object2Index = object3->getConnectionIndex(object2);
-
-    if (!goClockwiseFromObject3) {
-        object3->increaseAngle(object2Index, angleCorrection);
-
-        // If adapted angle is 0, try fallback
-        //if (abs(object3->getConnection(object2Index).angleFromPrevious) < NEAR_ZERO) {
-        //    object3->increaseAngle(object2Index, -angleCorrection);  // Revert
-        //    object2->increaseAngle(object1IndexInObject2, angleCorrection);
-
-        //    // Other angle also 0 => revert
-        //    if (abs(object2->getConnection(object1IndexInObject2).angleFromPrevious) < NEAR_ZERO) {
-        //        object2->increaseAngle(object1IndexInObject2, -angleCorrection);
-        //    }
-        //}
-    } else {
-        object3->increaseAngle(object2Index, -angleCorrection);
-
-        // If adapted angle is 0, try fallback
-        //if (abs(object3->getConnection(object2Index + 1).angleFromPrevious) < NEAR_ZERO) {
-        //    object3->increaseAngle(object2Index, angleCorrection);  // Revert
-        //    object2->increaseAngle(object1IndexInObject2, -angleCorrection);
-
-        //    // Other angle also 0 => revert
-        //    if (abs(object2->getConnection(object1IndexInObject2 + 1).angleFromPrevious) < NEAR_ZERO) {
-        //        object2->increaseAngle(object1IndexInObject2, angleCorrection);
-        //    }
-        //}
     }
 }
 
