@@ -463,13 +463,14 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         if (otherObject->tryLock()) {
             if (newObject->numConnections < MAX_OBJECT_CONNECTIONS && otherObject->numConnections < MAX_OBJECT_CONNECTIONS) {
-                auto requiredAngle = constructionData.shapeResult.requiredNodeAngle[i] - constructionData.shapeResult.angle;
+                auto requiredAngle1 = constructionData.shapeResult.requiredNodeAngle1[i] - constructionData.shapeResult.angle;
                 // requiredAngle is given from connection to hostCell
                 // in the separating case, this connection is lost
                 if (separation) {
-                    requiredAngle += 180.0f + constructionData.shapeResult.angle;
+                    requiredAngle1 += 180.0f + constructionData.shapeResult.angle;
                 }
-                if (ObjectConnectionProcessor::tryAddConnectionWithAbsAngle(data, newObject, otherObject, desiredDistance, requiredAngle)) {
+                auto requiredAngle2 = constructionData.shapeResult.requiredNodeAngle2[i];
+                if (ObjectConnectionProcessor::tryAddConnectionWithAbsAngle(data, newObject, otherObject, desiredDistance, requiredAngle1, requiredAngle2)) {
                     ++numConnectedObjects;
                 }
             }

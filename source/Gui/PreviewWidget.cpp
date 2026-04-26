@@ -183,7 +183,7 @@ void _PreviewWidget::processActionBar()
     }
 
     ImGui::SameLine();
-    if (AlienGui::Button(ICON_FA_COG, 35.0f)) {
+    if (AlienGui::Button(ICON_FA_COG, 25.0f)) {
         PreviewSettingsDialog::get().setEditData(_editData);
         PreviewSettingsDialog::get().open();
     }

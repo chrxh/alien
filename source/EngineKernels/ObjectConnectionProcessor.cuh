@@ -20,10 +20,9 @@ public:
     // if desiredDistance=0: distance will be automatically determined by current geometry
     __inline__ __device__ static bool tryAddConnectionWithRelAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance = 0, float desiredRelAngle = 0);
 
-    // angle of object1 is given by desiredRelAngle with respect to connections[0] and between [0, +360)
-    // angle of object2 will be automatically determined by current geometry
+    // angle of object1 and object2 are given by desiredRelAngle with respect to connections[0] and between [0, +360)
     __inline__ __device__ static bool
-    tryAddConnectionWithAbsAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle);
+    tryAddConnectionWithAbsAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2);
 
     __inline__ __device__ static void deleteConnections(Object* object1, Object* object2);
     __inline__ __device__ static void deleteConnectionOneWay(Object* object1, Object* object2);
@@ -258,7 +257,8 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithAbsAng
     Object* object1,
     Object* object2,
     float desiredDistance,
-    float desiredAbsAngle)
+    float desiredAbsAngle1,
+    float desiredAbsAngle2)
 {
     auto posDelta = object2->pos - object1->pos;
     data.objectMap.correctDirection(posDelta);
@@ -269,10 +269,10 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithAbsAng
         origConnections[i] = object1->connections[i];
     }
 
-    if (!tryAddConnectionWithAbsAngle_oneWay(object1, object2, desiredDistance, desiredAbsAngle)) {
+    if (!tryAddConnectionWithAbsAngle_oneWay(object1, object2, desiredDistance, desiredAbsAngle1)) {
         return false;
     }
-    if (!tryAddConnectionWithRelAngle_oneWay(data, object2, object1, posDelta * (-1), desiredDistance)) {
+    if (!tryAddConnectionWithAbsAngle_oneWay(object2, object1, desiredDistance, desiredAbsAngle2)) {
         object1->numConnections = origNumConnection;
         for (int i = 0; i < origNumConnection; ++i) {
             object1->connections[i] = origConnections[i];
