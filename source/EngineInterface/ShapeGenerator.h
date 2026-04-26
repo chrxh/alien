@@ -460,17 +460,25 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
         result.requiredNodeAngle1[1] = angleSign * 60.0f;
     }
 
-    // Generate requiredNodeAngle2 values based on angleSign
-    // Pattern: angle2 = angle1 + (angleSign > 0 ? 120 : 240)
-    float angle2Offset = (angleSign > 0.0f) ? 120.0f : 240.0f;
+    // Generate requiredNodeAngle2 values
+    // Pattern: angle2[i] = 180 - angle1[0] (using the first angle1 value for all indices)
+    // Normalize to [0, 360) range
+    float baseAngle2 = 180.0f - result.requiredNodeAngle1[0];
+    while (baseAngle2 < 0.0f) {
+        baseAngle2 += 360.0f;
+    }
+    while (baseAngle2 >= 360.0f) {
+        baseAngle2 -= 360.0f;
+    }
+
     if (result.requiredNodeId[0] != -1) {
-        result.requiredNodeAngle2[0] = result.requiredNodeAngle1[0] + angle2Offset;
+        result.requiredNodeAngle2[0] = baseAngle2;
     }
     if (result.requiredNodeId[1] != -1) {
-        result.requiredNodeAngle2[1] = result.requiredNodeAngle1[1] + angle2Offset;
+        result.requiredNodeAngle2[1] = baseAngle2;
     }
     if (result.requiredNodeId[2] != -1) {
-        result.requiredNodeAngle2[2] = result.requiredNodeAngle1[2] + angle2Offset;
+        result.requiredNodeAngle2[2] = baseAngle2;
     }
 
     result.numAdditionalConnections = 0;
