@@ -8,12 +8,10 @@
 class _CreaturePreviewWidget
 {
 public:
-    static CreaturePreviewWidget create(
-        GenomeTabEditData const& editData,
-        GeneIndicesForSubGenome const& geneIndices,
-        SubGenomeDesc const& genomeWithStartIndex);
+    static CreaturePreviewWidget
+    create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
-    void process(bool& phenotypeChanged, Desc& phenotype, float width);
+    void process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& previewGenome, float width);
 
     uint64_t getCreatureId() const;
     void setCreatureId(uint64_t value);
@@ -25,10 +23,7 @@ public:
     void setGenomeWithStartIndex(SubGenomeDesc const& value);
 
 private:
-    _CreaturePreviewWidget(
-        GenomeTabEditData const& editData,
-        GeneIndicesForSubGenome const& geneIndices,
-        SubGenomeDesc const& genomeWithStartIndex);
+    _CreaturePreviewWidget(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
     void processMouseNavigation();
     void processCellGraphAndSelection(ConversionResult const& conversionResult);

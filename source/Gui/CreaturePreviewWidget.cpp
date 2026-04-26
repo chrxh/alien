@@ -33,22 +33,20 @@ namespace
 }
 
 
-CreaturePreviewWidget _CreaturePreviewWidget::create(
-    GenomeTabEditData const& editData,
-    GeneIndicesForSubGenome const& geneIndices,
-    SubGenomeDesc const& genomeWithStartIndex)
+CreaturePreviewWidget
+_CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex)
 {
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, float width)
+void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& previewGenome, float width)
 {
     auto phenotypeWithoutSeed = phenotype;
     GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
 
     auto geneStartIndex = _subGenome.startIndex;
 
-    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(_editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed));
+    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(previewGenome, geneStartIndex, std::move(phenotypeWithoutSeed));
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
 
