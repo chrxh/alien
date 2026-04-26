@@ -80,7 +80,7 @@ HOST_DEVICE float ShapeGenerator::getPreferredFrontAngle(ConstructorShape shape)
     case ConstructorShape_LargeLolli:
         return -120.0f;
     case ConstructorShape_SmallLolli:
-        return 120.0f;
+        return -120.0f;
     case ConstructorShape_Zigzag:
         return -120.0f;
     default:

@@ -1671,7 +1671,7 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
     auto const ConstructionAngle = 8.0f;
     auto const LastAngle = -5.0f;
     auto const n = 20;
-    auto const AutoTriggerInterval = 40;
+    auto const AutoTriggerInterval = 10;
 
     auto [shape, type, connectionDistance] = GetParam();
 
@@ -1830,7 +1830,7 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
 TEST_F(ConstructorTests, generateTriangle_67cells_withSeparation)
 {
     auto const n = 67;
-    auto const AutoTriggerInterval = 20;
+    auto const AutoTriggerInterval = 10;
 
     auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Triangle);
     for (int i = 0; i < n; ++i) {
@@ -1921,7 +1921,7 @@ TEST_F(ConstructorTests, generateTriangle_67cells_withSeparation)
 TEST_F(ConstructorTests, generateRectangle_49cells_withSeparation)
 {
     auto const n = 49;
-    auto const AutoTriggerInterval = 20;
+    auto const AutoTriggerInterval = 10;
 
     auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Rectangle);
     for (int i = 0; i < n; ++i) {
@@ -2081,7 +2081,7 @@ TEST_F(ConstructorTests, generateRectangle_49cells_withSeparation)
 TEST_F(ConstructorTests, generateHexagon_61cells_withSeparation)
 {
     auto const n = 61;
-    auto const AutoTriggerInterval = 30;
+    auto const AutoTriggerInterval = 10;
 
     auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Hexagon);
     for (int i = 0; i < n; ++i) {
@@ -2232,7 +2232,7 @@ TEST_F(ConstructorTests, generateHexagon_61cells_withSeparation)
 TEST_F(ConstructorTests, generateTube_19cells_withSeparation)
 {
     auto const n = 19;
-    auto const AutoTriggerInterval = 20;
+    auto const AutoTriggerInterval = 10;
 
     auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Tube);
     for (int i = 0; i < n; ++i) {
@@ -2397,7 +2397,7 @@ TEST_F(ConstructorTests, generateTube_19cells_withSeparation)
 TEST_F(ConstructorTests, generateZigzag_24cells_withSeparation)
 {
     auto const n = 24;
-    auto const AutoTriggerInterval = 20;
+    auto const AutoTriggerInterval = 10;
 
     auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Zigzag);
     for (int i = 0; i < n; ++i) {
@@ -2528,7 +2528,7 @@ TEST_F(ConstructorTests, generateZigzag_24cells_withSeparation)
 TEST_F(ConstructorTests, generateSmallLolli_19cells_withSeparation)
 {
     auto const n = 19;
-    auto const AutoTriggerInterval = 20;
+    auto const AutoTriggerInterval = 10;
 
     auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_SmallLolli);
     for (int i = 0; i < n; ++i) {
@@ -2611,7 +2611,7 @@ TEST_F(ConstructorTests, generateSmallLolli_19cells_withSeparation)
 TEST_F(ConstructorTests, generateLargeLolli_25cells_withSeparation)
 {
     auto const n = 25;
-    auto const AutoTriggerInterval = 20;
+    auto const AutoTriggerInterval = 10;
 
     auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_LargeLolli);
     for (int i = 0; i < n; ++i) {
