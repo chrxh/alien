@@ -228,35 +228,39 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
             float angle;
             int r1, r2, r3;
             float sign;
+            float a21, a22, a23;
         };
         BaseEntry baseTable[21] = {
-            {60.0f, -1, -1, -1, 0.0f},    // 1
-            {60.0f, -1, -1, -1, 0.0f},    // 2
-            {120.0f, -1, -1, -1, 0.0f},   // 3
-            {-120.0f, 2, 1, 0, 1.0f},     // 4
-            {120.0f, 3, -1, -1, -1.0f},   // 5
-            {-120.0f, 4, 0, -1, 1.0f},    // 6
-            {-60.0f, 5, -1, -1, -1.0f},   // 7
-            {0.0f, 5, -1, -1, -1.0f},     // 8
-            {-120.0f, -1, -1, -1, 0.0f},  // 9
-            {120.0f, 8, 5, 3, -1.0f},     // 10
-            {-120.0f, 9, -1, -1, 1.0f},   // 11
-            {120.0f, 10, 3, -1, -1.0f},   // 12
-            {-120.0f, 11, -1, -1, 1.0f},  // 13
-            {-60.0f, 12, -1, -1, -1.0f},  // 14
-            {120.0f, 12, 3, 2, -1.0f},    // 15
-            {-120.0f, 14, -1, -1, 1.0f},  // 16
-            {0.0f, 15, 2, -1, -1.0f},     // 17
-            {120.0f, 2, 1, -1, -1.0f},    // 18
-            {60.0f, 17, -1, -1, 1.0f},    // 19
-            {0.0f, 17, 16, -1, 1.0f},     // 20
-            {0.0f, 16, -1, -1, 1.0f},     // 21
+            {60.0f, -1, -1, -1, 0.0f, 0.0f, 0.0f, 0.0f},        // 1
+            {60.0f, -1, -1, -1, 0.0f, 0.0f, 0.0f, 0.0f},        // 2
+            {120.0f, -1, -1, -1, 0.0f, 0.0f, 0.0f, 0.0f},       // 3
+            {-120.0f, 2, 1, 0, 1.0f, 60.0f, 60.0f, 60.0f},      // 4
+            {120.0f, 3, -1, -1, -1.0f, 300.0f, 0.0f, 0.0f},     // 5
+            {-120.0f, 4, 0, -1, 1.0f, 60.0f, 120.0f, 0.0f},     // 6
+            {-60.0f, 5, -1, -1, -1.0f, 300.0f, 0.0f, 0.0f},     // 7
+            {0.0f, 5, -1, -1, -1.0f, 240.0f, 0.0f, 0.0f},       // 8
+            {-120.0f, -1, -1, -1, 0.0f, 0.0f, 0.0f, 0.0f},      // 9
+            {120.0f, 8, 5, 3, -1.0f, 300.0f, 180.0f, 240.0f},   // 10
+            {-120.0f, 9, -1, -1, 1.0f, 60.0f, 0.0f, 0.0f},      // 11
+            {120.0f, 10, 3, -1, -1.0f, 300.0f, 180.0f, 0.0f},   // 12
+            {-120.0f, 11, -1, -1, 1.0f, 60.0f, 0.0f, 0.0f},     // 13
+            {-60.0f, 12, -1, -1, -1.0f, 300.0f, 0.0f, 0.0f},    // 14
+            {120.0f, 12, 3, 2, -1.0f, 240.0f, 120.0f, 300.0f},  // 15
+            {-120.0f, 14, -1, -1, 1.0f, 60.0f, 0.0f, 0.0f},     // 16
+            {0.0f, 15, 2, -1, -1.0f, 300.0f, 240.0f, 0.0f},     // 17
+            {120.0f, 2, 1, -1, -1.0f, 180.0f, 300.0f, 0.0f},    // 18
+            {60.0f, 17, -1, -1, 1.0f, 60.0f, 0.0f, 0.0f},       // 19
+            {0.0f, 17, 16, -1, 1.0f, 120.0f, 60.0f, 0.0f},      // 20
+            {0.0f, 16, -1, -1, 1.0f, 120.0f, 0.0f, 0.0f},       // 21
         };
         auto const& e = baseTable[n - 1];
         result.angle = e.angle;
         result.requiredNodeId[0] = e.r1;
         result.requiredNodeId[1] = e.r2;
         result.requiredNodeId[2] = e.r3;
+        result.requiredNodeAngle2[0] = e.a21;
+        result.requiredNodeAngle2[1] = e.a22;
+        result.requiredNodeAngle2[2] = e.a23;
         angleSign = e.sign;
     } else {
         // Shell decomposition for angle
@@ -330,17 +334,22 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 if (u % 2 == 0) {
                     int j = u / 2;
                     int y = Dp + (4 * s - 5) - 2 * j;
+                    result.requiredNodeAngle2[0] = 60.0f;
+                    result.requiredNodeAngle2[1] = 180.0f;
                     if (j < s - 2) {
                         result.requiredNodeId[0] = n - 2;
                         result.requiredNodeId[1] = y;
                         result.requiredNodeId[2] = y - 2;
+                        result.requiredNodeAngle2[2] = 120.0f;
                     } else {
                         result.requiredNodeId[0] = n - 2;
                         result.requiredNodeId[1] = y;
                         result.requiredNodeId[2] = y - 1;
+                        result.requiredNodeAngle2[2] = 60.0f;
                     }
                 } else {
                     result.requiredNodeId[0] = n - 2;
+                    result.requiredNodeAngle2[0] = 300.0f;
                 }
             } else if (2 * s <= t && t <= 4 * s) {
                 // Segment B: length 2*s + 1
@@ -351,15 +360,22 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                     result.requiredNodeId[0] = n - 2;
                     result.requiredNodeId[1] = n - 3;
                     result.requiredNodeId[2] = z0;
+                    result.requiredNodeAngle2[0] = 60.0f;
+                    result.requiredNodeAngle2[1] = 60.0f;
+                    result.requiredNodeAngle2[2] = 120.0f;
                 } else if (u % 2 == 1) {
                     result.requiredNodeId[0] = n - 2;
+                    result.requiredNodeAngle2[0] = 300.0f;
                 } else {
                     int j = (u - 1) / 2;
                     int z = z0 - 2 * j;
+                    result.requiredNodeAngle2[0] = 60.0f;
+                    result.requiredNodeAngle2[1] = 180.0f;
                     if (j < s - 1) {
                         result.requiredNodeId[0] = n - 2;
                         result.requiredNodeId[1] = z;
                         result.requiredNodeId[2] = z - 2;
+                        result.requiredNodeAngle2[2] = 120.0f;
                     } else {
                         result.requiredNodeId[0] = n - 2;
                         result.requiredNodeId[1] = z;
@@ -371,6 +387,8 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 int j = t - (4 * s + 1);
                 result.requiredNodeId[0] = Dp - j;
                 result.requiredNodeId[1] = Dp - j - 1;
+                result.requiredNodeAngle2[0] = (j == 0) ? 240.0f : 120.0f;
+                result.requiredNodeAngle2[1] = 60.0f;
             } else if (5 * s <= t && t <= 6 * s) {
                 // Segment C2: length s + 1
                 angleSign = -1.0f;
@@ -378,11 +396,15 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 int E = D + 5 * s - 2;
                 if (u == 0) {
                     result.requiredNodeId[0] = n - 2;
+                    result.requiredNodeAngle2[0] = 300.0f;
                 } else if (u == s) {
                     result.requiredNodeId[0] = E - (s - 1);
+                    result.requiredNodeAngle2[0] = 240.0f;
                 } else {
                     result.requiredNodeId[0] = E - (u - 1);
                     result.requiredNodeId[1] = E - u;
+                    result.requiredNodeAngle2[0] = 240.0f;
+                    result.requiredNodeAngle2[1] = 300.0f;
                 }
             }
         } else {
@@ -394,16 +416,20 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 if (u % 2 == 0) {
                     int j = u / 2;
                     int y = Dp + (4 * s - 5) - 2 * j;
+                    result.requiredNodeAngle2[0] = 300.0f;
+                    result.requiredNodeAngle2[1] = 180.0f;
                     if (j < s - 1) {
                         result.requiredNodeId[0] = n - 2;
                         result.requiredNodeId[1] = y;
                         result.requiredNodeId[2] = y - 2;
+                        result.requiredNodeAngle2[2] = 240.0f;
                     } else {
                         result.requiredNodeId[0] = n - 2;
                         result.requiredNodeId[1] = y;
                     }
                 } else {
                     result.requiredNodeId[0] = n - 2;
+                    result.requiredNodeAngle2[0] = 60.0f;
                 }
             } else if (2 * s + 1 <= t && t <= 4 * s) {
                 // Segment A2: length 2*s
@@ -412,19 +438,27 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 int z0 = Dp + (2 * s - 3);
                 if (u == 0) {
                     result.requiredNodeId[0] = n - 2;
+                    result.requiredNodeAngle2[0] = 300.0f;
                 } else if (u == 1) {
                     result.requiredNodeId[0] = n - 3;
                     result.requiredNodeId[1] = z0;
                     result.requiredNodeId[2] = z0 - 1;
+                    result.requiredNodeAngle2[0] = 240.0f;
+                    result.requiredNodeAngle2[1] = 120.0f;
+                    result.requiredNodeAngle2[2] = 300.0f;
                 } else if (u % 2 == 0) {
                     result.requiredNodeId[0] = n - 2;
+                    result.requiredNodeAngle2[0] = 60.0f;
                 } else {
                     int j = (u - 1) / 2;
                     int z = z0 - 2 * (j - 1) - 1;
+                    result.requiredNodeAngle2[0] = 300.0f;
+                    result.requiredNodeAngle2[1] = (u == 3) ? 240.0f : 180.0f;
                     if (j < s - 1) {
                         result.requiredNodeId[0] = n - 2;
                         result.requiredNodeId[1] = z;
                         result.requiredNodeId[2] = z - 2;
+                        result.requiredNodeAngle2[2] = 240.0f;
                     } else {
                         result.requiredNodeId[0] = n - 2;
                         result.requiredNodeId[1] = z;
@@ -436,6 +470,8 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 int j = t - (4 * s + 1);
                 result.requiredNodeId[0] = Dp - j;
                 result.requiredNodeId[1] = Dp - j - 1;
+                result.requiredNodeAngle2[0] = (j == 0) ? 120.0f : 240.0f;
+                result.requiredNodeAngle2[1] = 300.0f;
             } else if (5 * s <= t && t <= 6 * s) {
                 // Segment C2: length s + 1
                 angleSign = 1.0f;
@@ -443,11 +479,15 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
                 int E = D + 5 * s - 2;
                 if (u == 0) {
                     result.requiredNodeId[0] = n - 2;
+                    result.requiredNodeAngle2[0] = 60.0f;
                 } else if (u == s) {
                     result.requiredNodeId[0] = E - (s - 1);
+                    result.requiredNodeAngle2[0] = 120.0f;
                 } else {
                     result.requiredNodeId[0] = E - (u - 1);
                     result.requiredNodeId[1] = E - u;
+                    result.requiredNodeAngle2[0] = 120.0f;
+                    result.requiredNodeAngle2[1] = 60.0f;
                 }
             }
         }
@@ -552,10 +592,10 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
             {0.0f, 7, 120.0f, -1, 0.0f, -1, 0.0f},       // 09
             {120.0f, -1, 0.0f, -1, 0.0f, -1, 0.0f},      // 10
             {-120.0f, 9, 120.0f, 7, 60.0f, 6, 0.0f},     // 11
-            {120.0f, 10, -120.0f, -1, 0.0f, -1, 0.0f},      // 12
+            {120.0f, 10, -120.0f, -1, 0.0f, -1, 0.0f},   // 12
             {0.0f, 11, 120.0f, 6, 60.0f, -1, 0.0f},      // 13
             {0.0f, 6, 120.0f, 5, 60.0f, -1, 0.0f},       // 14
-            {-120.0f, 5, 120.0f, 4, 60.0f, -1, 0.0f},     // 15
+            {-120.0f, 5, 120.0f, 4, 60.0f, -1, 0.0f},    // 15
             {-60.0f, 14, -120.0f, -1, 0.0f, -1, 0.0f},   // 16
             {0.0f, 14, -120.0f, 13, -60.0f, -1, 0.0f},   // 17
             {60.0f, 13, -120.0f, 12, -60.0f, -1, 0.0f},  // 18
