@@ -461,24 +461,34 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     }
 
     // Generate requiredNodeAngle2 values
-    // Pattern: angle2[i] = 180 - angle1[0] (using the first angle1 value for all indices)
+    // Pattern: angle2[i] = result.angle - angle1[i]
     // Normalize to [0, 360) range
-    float baseAngle2 = 180.0f - result.requiredNodeAngle1[0];
-    while (baseAngle2 < 0.0f) {
-        baseAngle2 += 360.0f;
-    }
-    while (baseAngle2 >= 360.0f) {
-        baseAngle2 -= 360.0f;
-    }
-
     if (result.requiredNodeId[0] != -1) {
-        result.requiredNodeAngle2[0] = baseAngle2;
+        result.requiredNodeAngle2[0] = result.angle - result.requiredNodeAngle1[0];
+        while (result.requiredNodeAngle2[0] < 0.0f) {
+            result.requiredNodeAngle2[0] += 360.0f;
+        }
+        while (result.requiredNodeAngle2[0] >= 360.0f) {
+            result.requiredNodeAngle2[0] -= 360.0f;
+        }
     }
     if (result.requiredNodeId[1] != -1) {
-        result.requiredNodeAngle2[1] = baseAngle2;
+        result.requiredNodeAngle2[1] = result.angle - result.requiredNodeAngle1[1];
+        while (result.requiredNodeAngle2[1] < 0.0f) {
+            result.requiredNodeAngle2[1] += 360.0f;
+        }
+        while (result.requiredNodeAngle2[1] >= 360.0f) {
+            result.requiredNodeAngle2[1] -= 360.0f;
+        }
     }
     if (result.requiredNodeId[2] != -1) {
-        result.requiredNodeAngle2[2] = baseAngle2;
+        result.requiredNodeAngle2[2] = result.angle - result.requiredNodeAngle1[2];
+        while (result.requiredNodeAngle2[2] < 0.0f) {
+            result.requiredNodeAngle2[2] += 360.0f;
+        }
+        while (result.requiredNodeAngle2[2] >= 360.0f) {
+            result.requiredNodeAngle2[2] -= 360.0f;
+        }
     }
 
     result.numAdditionalConnections = 0;
