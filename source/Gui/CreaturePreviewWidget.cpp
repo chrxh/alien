@@ -33,10 +33,8 @@ namespace
 }
 
 
-CreaturePreviewWidget _CreaturePreviewWidget::create(
-    GenomeTabEditData const& editData,
-    GeneIndicesForSubGenome const& geneIndices,
-    SubGenomeDesc const& genomeWithStartIndex)
+CreaturePreviewWidget
+_CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex)
 {
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
