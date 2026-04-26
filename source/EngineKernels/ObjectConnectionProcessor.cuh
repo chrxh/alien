@@ -20,13 +20,9 @@ public:
     // if desiredDistance=0: distance will be automatically determined by current geometry
     __inline__ __device__ static bool tryAddConnectionWithRelAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance = 0, float desiredRelAngle = 0);
 
-    // angle of object1 is given by desiredRelAngle with respect to connections[0] and between [0, +360)
-    // angle of object2 will be automatically determined by current geometry
+    // angle of object1 and object2 are given by desiredRelAngle with respect to connections[0] and between [0, +360)
     __inline__ __device__ static bool
-    tryAddConnectionWithAbsAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle);
-
-    __inline__ __device__ static bool
-    tryAddConnectionWithAbsAngle2(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2);
+    tryAddConnectionWithAbsAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2);
 
     __inline__ __device__ static void deleteConnections(Object* object1, Object* object2);
     __inline__ __device__ static void deleteConnectionOneWay(Object* object1, Object* object2);
@@ -261,35 +257,6 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithAbsAng
     Object* object1,
     Object* object2,
     float desiredDistance,
-    float desiredAbsAngle)
-{
-    auto posDelta = object2->pos - object1->pos;
-    data.objectMap.correctDirection(posDelta);
-
-    ObjectConnection origConnections[MAX_OBJECT_CONNECTIONS];
-    int origNumConnection = object1->numConnections;
-    for (int i = 0; i < origNumConnection; ++i) {
-        origConnections[i] = object1->connections[i];
-    }
-
-    if (!tryAddConnectionWithAbsAngle_oneWay(object1, object2, desiredDistance, desiredAbsAngle)) {
-        return false;
-    }
-    if (!tryAddConnectionWithRelAngle_oneWay(data, object2, object1, posDelta * (-1), desiredDistance)) {
-        object1->numConnections = origNumConnection;
-        for (int i = 0; i < origNumConnection; ++i) {
-            object1->connections[i] = origConnections[i];
-        }
-        return false;
-    }
-    return true;
-}
-
-__inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionWithAbsAngle2(
-    SimulationData& data,
-    Object* object1,
-    Object* object2,
-    float desiredDistance,
     float desiredAbsAngle1,
     float desiredAbsAngle2)
 {
@@ -496,12 +463,6 @@ ObjectConnectionProcessor::tryAddConnectionWithAbsAngle_oneWay(Object* object1, 
     object1->connections[insertIndex] = newConnection;
     object1->connections[(insertIndex + 1) % (n + 1)].angleFromPrevious = refAngle - newConnection.angleFromPrevious;
     ++object1->numConnections;
-
-    float angle = 0;
-    for (int i = 1; i < insertIndex; ++i) {
-        angle += object1->getConnection(i).angleFromPrevious;
-    }
-    printf("angle: %f\n", angle);
 
     return true;
 }
