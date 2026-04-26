@@ -458,7 +458,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
     // Connect to surrounding cells if possible
     int numConnectedObjects = 0;
-    printf(">>>>>>>>>>>>\n");
     for (int i = 0; i < numObjectsToConnect; ++i) {
         Object* otherObject = objectsToConnect[i];
 
@@ -471,7 +470,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
                     requiredAngle1 += 180.0f + constructionData.shapeResult.angle;
                 }
                 auto requiredAngle2 = constructionData.shapeResult.requiredNodeAngle2[i];
-                if (ObjectConnectionProcessor::tryAddConnectionWithAbsAngle2(data, newObject, otherObject, desiredDistance, requiredAngle1, requiredAngle2)) {
+                if (ObjectConnectionProcessor::tryAddConnectionWithAbsAngle(data, newObject, otherObject, desiredDistance, requiredAngle1, requiredAngle2)) {
                     ++numConnectedObjects;
                 }
             }
@@ -481,7 +480,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             break;
         }
     }
-    printf("<<<<<<<<<<<<<\n\n\n");
 
     // Adapt angles on other connected cells
     auto n = newObject->numConnections;
