@@ -28,11 +28,9 @@ private:
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForLargeLolli();
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForSmallLolli();
     HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForZigzag();
-    HOST_DEVICE ShapeGeneratorResult generateNextConstructionDataForSpiralHexagon();
 
     int _nodePos = 0;
     int _edgePos = 0;
-    int _connectedNodePos2 = 0;
     int _connectedNodePos1 = 0;
 };
 
@@ -724,48 +722,5 @@ HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataFor
     }
 
     ++_nodePos;
-    return result;
-}
-
-HOST_DEVICE ShapeGeneratorResult ShapeGenerator::generateNextConstructionDataForSpiralHexagon()
-{
-    ShapeGeneratorResult result;
-
-    auto edgeLength = _edgePos / 6 + 1;
-    if (_edgePos % 6 == 1) {
-        --edgeLength;
-    }
-
-    if (_edgePos < 2) {
-        result.angle = 120.0f;
-        result.numAdditionalConnections = 0;
-        result.requiredNodeId[0] = -1;
-        result.requiredNodeId[1] = -1;
-    } else if (_edgePos < 6) {
-        result.angle = 60.0f;
-        result.numAdditionalConnections = 1;
-        result.requiredNodeId[0] = 0;
-        result.requiredNodeId[1] = -1;
-    } else {
-        result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
-
-        if (_nodePos < edgeLength - 1) {
-            result.numAdditionalConnections = 2;
-            result.requiredNodeId[0] = _connectedNodePos1;
-            result.requiredNodeId[1] = _connectedNodePos1 + 1;
-        } else {
-            result.numAdditionalConnections = 1;
-            result.requiredNodeId[0] = _connectedNodePos1;
-            result.requiredNodeId[1] = -1;
-        }
-    }
-
-    if (_edgePos >= 6 && _nodePos < edgeLength - 1) {
-        ++_connectedNodePos1;
-    }
-    if (++_nodePos >= edgeLength) {
-        _nodePos = 0;
-        ++_edgePos;
-    }
     return result;
 }
