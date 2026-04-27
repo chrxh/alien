@@ -83,7 +83,7 @@ void EditorController::onInspectSelectedObjects()
 
 void EditorController::onInspectSelectedGenomes()
 {
-    Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(true);
+    Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
 
     std::vector<GenomeDesc> uniqueGenomes;
     for (auto const& genome : selectedData._genomes) {
