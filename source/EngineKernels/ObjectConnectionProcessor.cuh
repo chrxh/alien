@@ -432,7 +432,13 @@ ObjectConnectionProcessor::tryAddConnectionWithAbsAngle_oneWay(Object* object1, 
     }
 
     auto const& n = object1->numConnections;
-    CUDA_CHECK(n > 0);
+    if (n == 0) {
+        object1->connections[0].object = object2;
+        object1->connections[0].distance = desiredDistance;
+        object1->connections[0].angleFromPrevious = 360.0f;
+        object1->numConnections = 1;
+        return true;
+    }
 
     // Find connection index to insert
     auto insertIndex = 0;
