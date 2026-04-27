@@ -259,7 +259,7 @@ public:
     __device__ __inline__ int tryAddEntry(T const& entry)
     {
         auto index = atomicAdd(_numEntries, 1);
-        if (index < *_size) {
+        if (index < *_size - 1) {
             (*_data)[index] = entry;
             return index;
         } else {
@@ -271,7 +271,7 @@ public:
     __device__ __inline__ int tryGetEntries(int numEntries)
     {
         auto index = atomicAdd(_numEntries, numEntries);
-        if (index < *_size) {
+        if (numEntries >= 0 && index <= *_size - numEntries) {
             return index;
         } else {
             atomicSub(_numEntries, numEntries);
