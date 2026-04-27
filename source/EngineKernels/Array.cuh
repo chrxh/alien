@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Base.cuh"
-#include "Constants.cuh"
-#include "CudaMemoryManager.cuh"
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include "Base.cuh"
+#include "Constants.cuh"
+#include "CudaMemoryManager.cuh"
 
 namespace Const
 {
@@ -259,7 +259,7 @@ public:
     __device__ __inline__ int tryAddEntry(T const& entry)
     {
         auto index = atomicAdd(_numEntries, 1);
-        if (index < *_size - 1) {
+        if (index < *_size) {
             (*_data)[index] = entry;
             return index;
         } else {
