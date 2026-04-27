@@ -237,32 +237,34 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
             }
 
-            bool hasConstructor = node._constructor.has_value();
-            if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(rightColumnWidth), hasConstructor)) {
-                if (hasConstructor) {
-                    node._constructor = ConstructorGenomeDesc();
-                } else {
+            // Construction gene combo
+            std::vector<std::string> genes;
+            genes.emplace_back("None");
+            for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
+                auto text = std::to_string(index + 1) + ": " + gene._name;
+                if (index == 0) {
+                    text += " (root)";
+                }
+                genes.emplace_back(text);
+            }
+            int constructionGeneIndex = node._constructor.has_value() ? node._constructor.value()._geneIndex + 1 : 0;
+            if (AlienGui::Combo(AlienGui::ComboParameters().name("Construction").values(genes).textWidth(rightColumnWidth), constructionGeneIndex)) {
+                if (constructionGeneIndex == 0) {
                     node._constructor = std::nullopt;
+                } else {
+                    if (!node._constructor.has_value()) {
+                        node._constructor = ConstructorGenomeDesc();
+                    }
+                    node._constructor.value()._geneIndex = constructionGeneIndex - 1;
                 }
             }
 
             AlienGui::Group(AlienGui::GroupParameters().text("Construction properties"));
 
-            if (hasConstructor) {
+            if (node._constructor.has_value()) {
                 ImGui::PushID("Constructor");
                 AlienGui::BeginIndent();
                 auto& constructor = node._constructor.value();
-
-                // Gene index
-                std::vector<std::string> genes;
-                for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
-                    auto text = std::to_string(index + 1) + ": " + gene._name;
-                    if (index == 0) {
-                        text += " (root)";
-                    }
-                    genes.emplace_back(text);
-                }
-                AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._geneIndex);
 
                 // Auto activation interval
                 AlienGui::InputOptionalInt(
