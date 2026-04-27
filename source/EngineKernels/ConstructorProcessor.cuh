@@ -352,7 +352,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         return nullptr;
     }
 
-    Object* objectsToConnect[3];
+    Object* objectsToConnect[3] = {};
     int numObjectsToConnect;
     getObjectsToConnect(objectsToConnect, numObjectsToConnect, data, hostObject, newObjectPos, constructionData);
 
@@ -483,7 +483,14 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
         return;
     }
 
+    for (int i = 0; i < constructionData.shapeResult.numAdditionalConnections; ++i) {
+        result[i] = nullptr;
+    }
+
     data.objectMap.executeForEach(newObjectPos, SimulationParameters::attackerCreatureSensorRange, hostObject->detached, [&](auto const& otherObject) {
+        if (numResultCells == constructionData.shapeResult.numAdditionalConnections) {
+            return;
+        }
         if (otherObject->type != ObjectType_Cell) {
             return;
         }
@@ -492,23 +499,12 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
             || otherObject->typeData.cell.parentNodeIndex != hostObject->typeData.cell.nodeIndex) {
             return;
         }
-        if (constructionData.shapeResult.numAdditionalConnections >= 1
-            && otherObject->typeData.cell.nodeIndex == constructionData.shapeResult.requiredNodeId[0]) {
-            result[0] = otherObject;
-            ++numResultCells;
-            return;
-        }
-        if (constructionData.shapeResult.numAdditionalConnections >= 2
-            && otherObject->typeData.cell.nodeIndex == constructionData.shapeResult.requiredNodeId[1]) {
-            result[1] = otherObject;
-            ++numResultCells;
-            return;
-        }
-        if (constructionData.shapeResult.numAdditionalConnections >= 3
-            && otherObject->typeData.cell.nodeIndex == constructionData.shapeResult.requiredNodeId[2]) {
-            result[2] = otherObject;
-            ++numResultCells;
-            return;
+        for (int i = 0; i < constructionData.shapeResult.numAdditionalConnections; ++i) {
+            if (result[i] == nullptr && otherObject->typeData.cell.nodeIndex == constructionData.shapeResult.requiredNodeId[i]) {
+                result[i] = otherObject;
+                ++numResultCells;
+                return;
+            }
         }
     });
 }
