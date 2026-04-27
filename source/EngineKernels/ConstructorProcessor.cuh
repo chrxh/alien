@@ -500,7 +500,9 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
             return;
         }
         for (int i = 0; i < constructionData.shapeResult.numAdditionalConnections; ++i) {
-            if (result[i] == nullptr && otherObject->typeData.cell.nodeIndex == constructionData.shapeResult.requiredNodeId[i]) {
+            if (result[i] == nullptr && otherObject->typeData.cell.nodeIndex == constructionData.shapeResult.requiredNodeId[i]
+                && otherObject->typeData.cell.concatenationIndex == constructionData.currentConcatenation
+                && otherObject->typeData.cell.branchIndex == constructionData.currentBranch) {
                 result[i] = otherObject;
                 ++numResultCells;
                 return;
