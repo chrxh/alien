@@ -393,3 +393,76 @@ def test_full_user_lifecycle(app_client, helpers):
 
     with main.Session(main.engine) as session:
         assert main._get_user_by_name(session, "alice") is None
+
+
+# --- Activation email -------------------------------------------------------
+def test_create_user_sends_activation_email(app_client, monkeypatch):
+    main = app_client.app_module
+    sent = []
+
+    def fake_send(recipient, user_name, code):
+        sent.append((recipient, user_name, code))
+        return True
+
+    monkeypatch.setattr(main, "_send_activation_email", fake_send)
+
+    resp = app_client.post(
+        "/createuser",
+        data={"userName": "alice", "password": "pw", "email": " a@b.c "},
+    )
+    assert resp.status_code == 200
+    assert resp.json() == {"result": True}
+
+    assert len(sent) == 1
+    recipient, user_name, code = sent[0]
+    # Spaces in the email are stripped before delivery (matches old PHP).
+    assert recipient == "a@b.c"
+    assert user_name == "alice"
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.activation_code == code
+
+
+def test_create_user_succeeds_when_smtp_send_fails(app_client, monkeypatch):
+    main = app_client.app_module
+    monkeypatch.setattr(
+        main, "_send_activation_email", lambda *_a, **_k: False
+    )
+
+    resp = app_client.post(
+        "/createuser",
+        data={"userName": "bob", "password": "pw", "email": "b@c.d"},
+    )
+    assert resp.status_code == 200
+    assert resp.json() == {"result": True}
+
+
+def test_resetpw_sends_activation_email(app_client, helpers, monkeypatch):
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    helpers.activate_user(app_client, "alice", "pw")
+
+    main = app_client.app_module
+    sent = []
+    monkeypatch.setattr(
+        main,
+        "_send_activation_email",
+        lambda r, u, c: sent.append((r, u, c)) or True,
+    )
+
+    resp = app_client.post(
+        "/resetpw", data={"userName": "alice", "email": "a@b.c"}
+    )
+    assert resp.json() == {"result": True}
+
+    assert len(sent) == 1
+    recipient, user_name, code = sent[0]
+    assert recipient == "a@b.c"
+    assert user_name == "alice"
+    with main.Session(main.engine) as session:
+        assert main._get_user_by_name(session, "alice").activation_code == code
+
+
+def test_send_activation_email_skips_when_smtp_host_unset(app_client, monkeypatch):
+    main = app_client.app_module
+    monkeypatch.delenv("SMTP_HOST", raising=False)
+    assert main._send_activation_email("a@b.c", "alice", "abcdef") is False

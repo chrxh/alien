@@ -1,7 +1,10 @@
 import hashlib
 import hmac
+import logging
 import os
 import secrets
+import smtplib
+from email.message import EmailMessage
 
 from fastapi import FastAPI, Form
 from sqlalchemy import (
@@ -109,6 +112,73 @@ def _new_activation_code() -> str:
     return secrets.token_hex(3)
 
 
+# --- Email delivery ----------------------------------------------------------
+# SMTP configuration, sourced from environment variables. Email delivery is
+# optional: if SMTP_HOST is not set, the server logs a warning and skips
+# sending. This keeps the endpoint usable in dev/CI without an SMTP server,
+# while still sending real activation emails in production.
+#
+# In production set (e.g. via /etc/alien-server.env):
+#   SMTP_HOST=alfa3211.alfahosting-server.de
+#   SMTP_PORT=465
+#   SMTP_USE_SSL=true
+#   SMTP_USERNAME=<smtp user>
+#   SMTP_PASSWORD=<smtp pass>
+#   SMTP_FROM="User registration <info@alien-project.org>"
+_SMTP_FROM_DEFAULT = "User registration <info@alien-project.org>"
+
+_logger = logging.getLogger("alien-server.email")
+
+
+def _send_activation_email(recipient: str, user_name: str, activation_code: str) -> bool:
+    """Send the activation code to ``recipient``.
+
+    Returns True if the message was handed off to the SMTP server, False if
+    SMTP is not configured or delivery failed. Failures are logged but never
+    raised: the caller should still succeed even when email delivery is
+    unavailable, mirroring the old PHP server's best-effort ``mail()`` call.
+    """
+    host = os.getenv("SMTP_HOST")
+    if not host:
+        _logger.warning(
+            "SMTP_HOST not set; skipping activation email for user %r", user_name
+        )
+        return False
+
+    port = int(os.getenv("SMTP_PORT", "465"))
+    username = os.getenv("SMTP_USERNAME")
+    password = os.getenv("SMTP_PASSWORD")
+    use_ssl = os.getenv("SMTP_USE_SSL", "true").lower() in ("1", "true", "yes")
+    sender = os.getenv("SMTP_FROM", _SMTP_FROM_DEFAULT)
+
+    msg = EmailMessage()
+    msg["Subject"] = (
+        f"Artificial Life Environment: confirmation code for user '{user_name}'"
+    )
+    msg["From"] = sender
+    msg["To"] = recipient
+    msg.set_content(
+        f"Your confirmation code for user '{user_name}' is:\n\n{activation_code}"
+    )
+
+    try:
+        if use_ssl:
+            with smtplib.SMTP_SSL(host, port, timeout=30) as smtp:
+                if username and password:
+                    smtp.login(username, password)
+                smtp.send_message(msg)
+        else:
+            with smtplib.SMTP(host, port, timeout=30) as smtp:
+                smtp.starttls()
+                if username and password:
+                    smtp.login(username, password)
+                smtp.send_message(msg)
+        return True
+    except (OSError, smtplib.SMTPException) as exc:
+        _logger.error("Failed to send activation email to %r: %s", recipient, exc)
+        return False
+
+
 def _is_activated(user: "User") -> bool:
     # The old server stored an empty string to mark an activated user.
     # The new schema uses NULL. Treat both as "activated" for safety.
@@ -147,6 +217,10 @@ def create_user(
     if not _is_valid_user_name(userName):
         return {"result": False}
 
+    # Old PHP server stripped spaces from the email before hashing AND before
+    # using it as the SMTP recipient. Preserve that behavior.
+    normalized_email = email.replace(" ", "")
+
     salt = _new_salt()
     pw_hash = _hash_password(password, salt)
     email_hash = _hash_email(email)
@@ -173,10 +247,11 @@ def create_user(
                 )
             )
 
-    # NOTE: The old PHP server used PHPMailer here to email the activation
-    # code to the user. Email delivery is intentionally not configured for the
-    # new server; the activation code is generated and persisted only.
-    # Discord notifications are intentionally not sent.
+    # Send the activation code to the user's email address. Mirrors the old
+    # PHP server's PHPMailer call in createuser.php. Best-effort: a failure
+    # here does not invalidate the freshly-created pending account (the user
+    # can retry /createuser, which will replace the pending row).
+    _send_activation_email(normalized_email, userName, activation_code)
     return {"result": True}
 
 
@@ -298,6 +373,7 @@ def reset_password(
     email: str = Form(...),
 ):
     email_hash = _hash_email(email)
+    normalized_email = email.replace(" ", "")
     activation_code = _new_activation_code()
 
     with Session(engine) as session:
@@ -312,9 +388,10 @@ def reset_password(
                 .values(activation_code=activation_code)
             )
 
-    # NOTE: The old PHP server emailed the new activation code to the user.
-    # Email delivery is intentionally not configured for the new server.
-    # Discord notifications are intentionally not sent.
+    # Email the new activation code (matches old PHP resetpw.php). Best-effort:
+    # we still report success on SMTP failure so the caller's flow isn't broken
+    # by transient mail-server issues.
+    _send_activation_email(normalized_email, userName, activation_code)
     return {"result": True}
 
 
