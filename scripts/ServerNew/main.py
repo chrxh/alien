@@ -18,10 +18,17 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 # --- DB connection ---
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg://alien:CHANGE_ME@127.0.0.1:5432/alien_db",
-)
+# DATABASE_URL is required in production. We deliberately do not ship a default
+# password here so that mis-configured deployments fail fast with a clear error
+# instead of silently trying a placeholder credential. The test suite injects
+# its own DATABASE_URL via the ``app_client`` fixture in tests/conftest.py.
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL is not set. Configure it before starting the server, e.g.\n"
+        "  export DATABASE_URL='postgresql+psycopg://alien:<password>@127.0.0.1:5432/alien_db'\n"
+        "or set EnvironmentFile=/etc/alien-server.env in the systemd unit."
+    )
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
