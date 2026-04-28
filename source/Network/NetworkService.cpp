@@ -70,7 +70,7 @@ namespace
 
 void NetworkService::setup()
 {
-    _serverAddress = GlobalSettings::get().getValue("settings.server", std::string(Const::AlienURL));
+    _serverAddress = GlobalSettings::get().getValue("settings.server", std::string(Const::AlienServerURL));
 }
 
 void NetworkService::shutdown()
@@ -118,7 +118,7 @@ bool NetworkService::createUser(std::string const& userName, std::string const& 
     params.emplace("email", email);
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/createuser.php", params); });
+        auto result = executeRequest([&] { return client.Post("/createuser", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -142,7 +142,7 @@ bool NetworkService::activateUser(std::string const& userName, std::string const
     }
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/activateuser.php", params); });
+        auto result = executeRequest([&] { return client.Post("/activateuser", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -165,7 +165,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
     }
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/login.php", params); });
+        auto result = executeRequest([&] { return client.Post("/login", params); });
 
         auto boolResult = parseBoolResult(result->body);
         if (boolResult) {
@@ -201,7 +201,7 @@ bool NetworkService::logout()
         params.emplace("password", *_password);
 
         try {
-            result = executeRequest([&] { return client.Post("/alien-server/logout.php", params); });
+            result = executeRequest([&] { return client.Post("/logout", params); });
         } catch (...) {
             logNetworkError();
             result = false;
@@ -226,7 +226,7 @@ void NetworkService::refreshLogin()
         params.emplace("password", *_password);
 
         try {
-            executeRequest([&] { return client.Post("/alien-server/refreshlogin.php", params); });
+            executeRequest([&] { return client.Post("/refreshlogin", params); });
         } catch (...) {
         }
     }
@@ -244,7 +244,7 @@ bool NetworkService::deleteUser()
     params.emplace("password", *_password);
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/deleteuser.php", params); });
+        auto postResult = executeRequest([&] { return client.Post("/deleteuser", params); });
 
         auto result = parseBoolResult(postResult->body);
         if (result) {
@@ -269,7 +269,7 @@ bool NetworkService::resetPassword(std::string const& userName, std::string cons
     params.emplace("email", email);
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/resetpw.php", params); });
+        auto result = executeRequest([&] { return client.Post("/resetpw", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -290,7 +290,7 @@ bool NetworkService::setNewPassword(std::string const& userName, std::string con
     params.emplace("activationCode", confirmationCode);
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/setnewpw.php", params); });
+        auto result = executeRequest([&] { return client.Post("/setnewpw", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -313,7 +313,7 @@ bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& resu
     }
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getversionedsimulationlist.php", params); }, withRetry);
+        auto postResult = executeRequest([&] { return client.Post("/getversionedsimulationlist", params); }, withRetry);
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -335,7 +335,7 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
 
     try {
         httplib::Params params;
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlist.php", params); }, withRetry);
+        auto postResult = executeRequest([&] { return client.Post("/getuserlist", params); }, withRetry);
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -364,7 +364,7 @@ bool NetworkService::getEmojiTypeByResourceId(std::unordered_map<std::string, in
     params.emplace("password", *_password);
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getlikedsimulations.php", params); });
+        auto postResult = executeRequest([&] { return client.Post("/getlikedsimulations", params); });
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -393,7 +393,7 @@ bool NetworkService::getUserNamesForResourceAndEmojiType(std::set<std::string>& 
     params.emplace("likeType", std::to_string(likeType));
 
     try {
-        auto postResult = executeRequest([&] { return client.Post("/alien-server/getuserlikes.php", params); });
+        auto postResult = executeRequest([&] { return client.Post("/getuserlikes", params); });
 
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
@@ -425,7 +425,7 @@ bool NetworkService::toggleReactionForResource(std::string const& simId, int lik
 
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/togglelikesimulation.php", params); });
+        auto result = executeRequest([&] { return client.Post("/togglelikesimulation", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -475,7 +475,7 @@ bool NetworkService::uploadResource(
     };
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/uploadsimulation.php", items); });
+        auto result = executeRequest([&] { return client.Post("/uploadsimulation", items); });
         if (parseBoolResult(result->body)) {
             resourceId = parseValueFromKey<std::string>(result->body, "simId");
         } else {
@@ -533,7 +533,7 @@ bool NetworkService::replaceResource(
     };
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/replacesimulation.php", items); });
+        auto result = executeRequest([&] { return client.Post("/replacesimulation", items); });
         if (!parseBoolResult(result->body)) {
             return false;
         }
@@ -578,7 +578,7 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
                 for (int chunkIndex = 0; chunkIndex < 6; ++chunkIndex) {
                     auto paramsClone = params;
                     paramsClone.emplace("chunkIndex", std::to_string(chunkIndex));
-                    auto result = executeRequest([&] { return client.Get("/alien-server/downloadcontent.php", paramsClone, {}); });
+                    auto result = executeRequest([&] { return client.Get("/downloadcontent", paramsClone, {}); });
                     if (result->body.empty()) {
                         break;
                     }
@@ -586,11 +586,11 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
                 }
             }
             {
-                auto result = executeRequest([&] { return client.Get("/alien-server/downloadsettings.php", params, {}); });
+                auto result = executeRequest([&] { return client.Get("/downloadsettings", params, {}); });
                 auxiliaryData = result->body;
             }
             {
-                auto result = executeRequest([&] { return client.Get("/alien-server/downloadstatistics.php", params, {}); });
+                auto result = executeRequest([&] { return client.Get("/downloadstatistics", params, {}); });
                 statistics = result->body;
             }
             _downloadCache.insertOrAssign(simId, ResourceData{mainData, auxiliaryData, statistics});
@@ -612,7 +612,7 @@ void NetworkService::incDownloadCounter(std::string const& simId)
 
         httplib::Params params;
         params.emplace("id", simId);
-        executeRequest([&] { return client.Get("/alien-server/incdownloadcount.php", params, {}); });
+        executeRequest([&] { return client.Get("/incdownloadcount", params, {}); });
     } catch (...) {
         //do nothing
     }
@@ -633,7 +633,7 @@ bool NetworkService::editResource(std::string const& simId, std::string const& n
     params.emplace("newDescription", newDescription);
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/editsimulation.php", params); });
+        auto result = executeRequest([&] { return client.Post("/editsimulation", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -655,7 +655,7 @@ bool NetworkService::moveResource(std::string const& simId, WorkspaceType target
     params.emplace("targetWorkspace", std::to_string(targetWorkspace));
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/movesimulation.php", params); });
+        auto result = executeRequest([&] { return client.Post("/movesimulation", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -676,7 +676,7 @@ bool NetworkService::deleteResource(std::string const& simId)
     params.emplace("simId", simId);
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/deletesimulation.php", params); });
+        auto result = executeRequest([&] { return client.Post("/deletesimulation", params); });
         return parseBoolResult(result->body);
     } catch (...) {
         logNetworkError();
@@ -698,7 +698,7 @@ bool NetworkService::appendResourceData(std::string const& resourceId, std::stri
     };
 
     try {
-        auto result = executeRequest([&] { return client.Post("/alien-server/appendsimulationdata.php", items); });
+        auto result = executeRequest([&] { return client.Post("/appendsimulationdata", items); });
         if (!parseBoolResult(result->body)) {
             return false;
         }
