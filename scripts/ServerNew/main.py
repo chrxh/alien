@@ -6,9 +6,7 @@ import secrets
 from fastapi import FastAPI, Form
 from sqlalchemy import (
     create_engine,
-    BigInteger,
     String,
-    LargeBinary,
     Integer,
     DateTime,
     delete,
@@ -34,31 +32,37 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    pw_hash: Mapped[bytes] = mapped_column(LargeBinary(256), nullable=False)
-    email_hash: Mapped[bytes] = mapped_column(LargeBinary(64), nullable=False, unique=True)
-    salt: Mapped[bytes] = mapped_column(LargeBinary(64), nullable=False)
+    pw_hash: Mapped[str] = mapped_column(
+        String(64), nullable=False, comment="SHA-256 hash of password with salt"
+    )
+    email_hash: Mapped[str] = mapped_column(
+        String(64), nullable=False, comment="SHA-256 hash of email with salt"
+    )
+    salt: Mapped[str] = mapped_column(String(64), nullable=False, comment="Salt")
 
-    activation_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    activation_code: Mapped[str | None] = mapped_column(String(6), nullable=True)
 
     flags: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
-
-    # GPU model reported by the client on login (used by the old PHP server for
-    # Discord notifications; kept for parity but not used for notifications).
-    gpu: Mapped[str | None] = mapped_column(String(256), nullable=True)
-
-    # Cumulative number of refreshLogin calls (each call adds 1), matching the
-    # old PHP server's `TIME_SPENT = COALESCE(TIME_SPENT + 1, 1)` behavior.
-    time_spent: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     timestamp: Mapped[object] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+        onupdate=func.now(),
+        comment="Last activity",
     )
+
+    # Cumulative number of refreshLogin calls (each call adds 1), matching the
+    # old PHP server's `TIME_SPENT = COALESCE(TIME_SPENT + 1, 1)` behavior.
+    time_spent: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # GPU model reported by the client on login (used by the old PHP server for
+    # Discord notifications; kept for parity but not used for notifications).
+    gpu: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     __table_args__ = (
         CheckConstraint("char_length(name) > 0", name="ck_users_name_nonempty"),
@@ -78,18 +82,19 @@ def health():
 
 
 # --- Helpers ---
-def _hash_password(password: str, salt: bytes) -> bytes:
-    return hashlib.sha256(password.encode("utf-8") + salt).digest()
+def _hash_password(password: str, salt: str) -> str:
+    return hashlib.sha256(password.encode("utf-8") + salt.encode("utf-8")).hexdigest()
 
 
-def _hash_email(email: str) -> bytes:
+def _hash_email(email: str) -> str:
     # Email is stripped of spaces (matches old PHP behavior).
     normalized = email.replace(" ", "")
-    return hashlib.sha256(normalized.encode("utf-8")).digest()
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
-def _new_salt() -> bytes:
-    return secrets.token_bytes(16)
+def _new_salt() -> str:
+    # 32 hex chars (16 random bytes), fits in VARCHAR(64).
+    return secrets.token_hex(16)
 
 
 def _new_activation_code() -> str:
