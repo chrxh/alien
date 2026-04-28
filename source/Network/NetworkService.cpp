@@ -26,6 +26,11 @@ namespace
         // are safe no-ops when the configured server URL uses plain http://.
         client.set_ca_cert_path("./resources/ca-bundle.crt");
         client.enable_server_certificate_verification(true);
+
+        // Transparently follow 301/302 redirects so that an nginx vhost
+        // redirecting http:// -> https:// (or adding/removing a trailing slash)
+        // does not surface to callers as an empty/HTML response body.
+        client.set_follow_location(true);
     }
 
     httplib::Result executeRequest(std::function<httplib::Result()> const& func, bool withRetry = true)
