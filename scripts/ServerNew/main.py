@@ -72,8 +72,18 @@ class User(Base):
         comment="Last activity",
     )
 
-    # Cumulative number of refreshLogin calls (each call adds 1)
+    # Cumulative time the user has been logged in, measured in 20-minute
+    # ticks. ``/refreshlogin`` only increments this when at least
+    # ``TIME_SPENT_TICK_MINUTES`` have passed since ``last_time_spent_update``,
+    # so spurious refreshes (e.g. opening the in-game browser repeatedly) do
+    # not inflate the counter.
     time_spent: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Timestamp of the last ``time_spent`` increment. Used to throttle the
+    # counter to one tick per ``TIME_SPENT_TICK_MINUTES``.
+    last_time_spent_update: Mapped[object] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # GPU model reported by the client on login
     gpu: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -141,10 +151,46 @@ class UserLike(Base):
 # --- FastAPI app ---
 app = FastAPI()
 
+# Number of minutes between two ``time_spent`` ticks. The C++ client refreshes
+# its login on every browser open (see ``PersisterWorker::processRequest`` for
+# ``GetNetworkResourcesRequest``), which can happen many times within a short
+# window; without this threshold ``time_spent`` would be dominated by UI
+# activity rather than by actual time spent online.
+TIME_SPENT_TICK_MINUTES = 20
+
+
+def _ensure_users_schema():
+    """Add columns introduced after the initial release.
+
+    ``Base.metadata.create_all`` only creates *missing tables*; it does not
+    migrate existing tables. For deployments upgrading from an earlier
+    revision we add the ``last_time_spent_update`` column on startup if it
+    is not present yet. Production runs on PostgreSQL (see ``README.md``);
+    the test suite uses SQLite but always starts from a fresh database, so
+    the freshly-created schema already contains the column and this ALTER
+    is never executed there.
+    """
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(engine)
+    if not inspector.has_table("users"):
+        return
+    existing_cols = {col["name"] for col in inspector.get_columns("users")}
+    if "last_time_spent_update" not in existing_cols:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "ALTER TABLE users "
+                    "ADD COLUMN last_time_spent_update TIMESTAMP WITH TIME ZONE"
+                )
+            )
+
+
 @app.on_event("startup")
 def startup():
     # creates tables only if they don't exist
     Base.metadata.create_all(bind=engine)
+    _ensure_users_schema()
 
 @app.get("/health")
 def health():
@@ -481,20 +527,39 @@ def refresh_login(
     userName: str = Form(...),
     password: str = Form(...),
 ):
+    from datetime import datetime, timedelta, timezone
+
     with Session(engine) as session:
         with session.begin():
             user = _get_user_by_name(session, userName)
             if user is None or not _check_password(user, password):
                 return {"result": False}
 
+            # Determine whether enough time has elapsed since the last
+            # ``time_spent`` tick to count this refresh as another tick.
+            try:
+                db_now = session.execute(select(func.now())).scalar_one()
+            except Exception:
+                db_now = datetime.now(timezone.utc)
+            if db_now is not None and db_now.tzinfo is None:
+                db_now = db_now.replace(tzinfo=timezone.utc)
+
+            last_tick = user.last_time_spent_update
+            if last_tick is not None and last_tick.tzinfo is None:
+                last_tick = last_tick.replace(tzinfo=timezone.utc)
+
+            should_tick = last_tick is None or (
+                db_now is not None
+                and (db_now - last_tick) >= timedelta(minutes=TIME_SPENT_TICK_MINUTES)
+            )
+
+            values = {"flags": 1, "timestamp": func.now()}
+            if should_tick:
+                values["time_spent"] = func.coalesce(User.time_spent + 1, 1)
+                values["last_time_spent_update"] = func.now()
+
             session.execute(
-                update(User)
-                .where(User.name == userName)
-                .values(
-                    flags=1,
-                    timestamp=func.now(),
-                    time_spent=func.coalesce(User.time_spent + 1, 1),
-                )
+                update(User).where(User.name == userName).values(**values)
             )
     return {"result": True}
 

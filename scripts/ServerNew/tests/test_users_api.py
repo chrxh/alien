@@ -189,21 +189,75 @@ def test_logout_with_wrong_password_fails(app_client, helpers):
 
 
 # --- /refreshlogin ------------------------------------------------------------
-def test_refresh_login_increments_time_spent(app_client, helpers):
+def test_refresh_login_increments_time_spent_first_call_only(app_client, helpers):
+    """``time_spent`` ticks at most once per ``TIME_SPENT_TICK_MINUTES``.
+
+    The C++ client refreshes its login on every browser open, so the server
+    must throttle the counter; otherwise ``time_spent`` measures UI activity
+    instead of actual time spent online.
+    """
     helpers.create_user(app_client, "alice", "pw", "a@b.c")
     helpers.activate_user(app_client, "alice", "pw")
 
-    for expected in (1, 2, 3):
+    main = app_client.app_module
+
+    # First call: no previous tick recorded -> increment to 1.
+    resp = app_client.post(
+        "/refreshlogin", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True}
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.flags == 1
+        assert user.time_spent == 1
+        assert user.last_time_spent_update is not None
+
+    # Subsequent rapid calls (well under TIME_SPENT_TICK_MINUTES apart) must
+    # NOT increment the counter.
+    for _ in range(3):
         resp = app_client.post(
             "/refreshlogin", data={"userName": "alice", "password": "pw"}
         )
         assert resp.json() == {"result": True}
-
-        main = app_client.app_module
         with main.Session(main.engine) as session:
             user = main._get_user_by_name(session, "alice")
-            assert user.flags == 1
-            assert user.time_spent == expected
+            assert user.time_spent == 1
+
+
+def test_refresh_login_increments_time_spent_after_threshold(app_client, helpers):
+    """A refresh more than ``TIME_SPENT_TICK_MINUTES`` after the previous tick
+    bumps the counter again."""
+    from datetime import timedelta
+
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    helpers.activate_user(app_client, "alice", "pw")
+
+    main = app_client.app_module
+
+    # Seed an initial tick.
+    resp = app_client.post(
+        "/refreshlogin", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True}
+
+    # Pretend the last tick happened more than one threshold ago by rewinding
+    # ``last_time_spent_update`` directly in the DB.
+    with main.Session(main.engine) as session:
+        with session.begin():
+            user = main._get_user_by_name(session, "alice")
+            assert user.time_spent == 1
+            user.last_time_spent_update = (
+                user.last_time_spent_update
+                - timedelta(minutes=main.TIME_SPENT_TICK_MINUTES + 1)
+            )
+
+    resp = app_client.post(
+        "/refreshlogin", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True}
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.time_spent == 2
 
 
 def test_refresh_login_with_wrong_password_fails(app_client, helpers):
