@@ -189,44 +189,15 @@ def test_logout_with_wrong_password_fails(app_client, helpers):
 
 
 # --- /refreshlogin ------------------------------------------------------------
-def test_refresh_login_increments_time_spent_first_call_only(app_client, helpers):
-    """``time_spent`` ticks at most once per ``TIME_SPENT_TICK_MINUTES``.
+def test_refresh_login_accumulates_seconds_capped_per_call(app_client, helpers):
+    """``time_spent`` records seconds online, accumulated on each refresh.
 
-    The C++ client refreshes its login on every browser open, so the server
-    must throttle the counter; otherwise ``time_spent`` measures UI activity
-    instead of actual time spent online.
+    The first refresh has no prior baseline (``last_time_spent_update`` was
+    set by ``/login``), so additional seconds are added on each refresh
+    proportional to the elapsed wall time. Each accumulation is capped at
+    ``TIME_SPENT_MAX_GAP_SECONDS`` to defend against idle browsers and
+    crashed sessions where ``/logout`` was never called.
     """
-    helpers.create_user(app_client, "alice", "pw", "a@b.c")
-    helpers.activate_user(app_client, "alice", "pw")
-
-    main = app_client.app_module
-
-    # First call: no previous tick recorded -> increment to 1.
-    resp = app_client.post(
-        "/refreshlogin", data={"userName": "alice", "password": "pw"}
-    )
-    assert resp.json() == {"result": True}
-    with main.Session(main.engine) as session:
-        user = main._get_user_by_name(session, "alice")
-        assert user.flags == 1
-        assert user.time_spent == 1
-        assert user.last_time_spent_update is not None
-
-    # Subsequent rapid calls (well under TIME_SPENT_TICK_MINUTES apart) must
-    # NOT increment the counter.
-    for _ in range(3):
-        resp = app_client.post(
-            "/refreshlogin", data={"userName": "alice", "password": "pw"}
-        )
-        assert resp.json() == {"result": True}
-        with main.Session(main.engine) as session:
-            user = main._get_user_by_name(session, "alice")
-            assert user.time_spent == 1
-
-
-def test_refresh_login_increments_time_spent_after_threshold(app_client, helpers):
-    """A refresh more than ``TIME_SPENT_TICK_MINUTES`` after the previous tick
-    bumps the counter again."""
     from datetime import timedelta
 
     helpers.create_user(app_client, "alice", "pw", "a@b.c")
@@ -234,21 +205,71 @@ def test_refresh_login_increments_time_spent_after_threshold(app_client, helpers
 
     main = app_client.app_module
 
-    # Seed an initial tick.
+    # /login was called by activate_user -> last_time_spent_update is set.
+    # First refresh just after login: ~0 elapsed seconds, time_spent stays 0
+    # (or None). Rapid follow-up refreshes also add ~0 seconds.
+    for _ in range(3):
+        resp = app_client.post(
+            "/refreshlogin", data={"userName": "alice", "password": "pw"}
+        )
+        assert resp.json() == {"result": True}
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.flags == 1
+        # Accept 0 (column never written) or a tiny number of seconds from
+        # test-runtime jitter.
+        assert (user.time_spent or 0) < 5
+        assert user.last_time_spent_update is not None
+
+    # Simulate that 90 seconds passed since the last refresh.
+    with main.Session(main.engine) as session:
+        with session.begin():
+            user = main._get_user_by_name(session, "alice")
+            user.last_time_spent_update = (
+                user.last_time_spent_update - timedelta(seconds=90)
+            )
+            previous = user.time_spent or 0
+
     resp = app_client.post(
         "/refreshlogin", data={"userName": "alice", "password": "pw"}
     )
     assert resp.json() == {"result": True}
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.time_spent is not None
+        gained = user.time_spent - previous
+        # ~90s elapsed; allow a few seconds of test-runtime slack.
+        assert 88 <= gained <= 95
 
-    # Pretend the last tick happened more than one threshold ago by rewinding
-    # ``last_time_spent_update`` directly in the DB.
+
+def test_refresh_login_caps_long_gap_at_max(app_client, helpers):
+    """A refresh after a long gap (e.g. user left app idle for hours, or the
+    program crashed and reconnected without going through ``/login`` again)
+    must add at most ``TIME_SPENT_MAX_GAP_SECONDS`` seconds — not the full
+    real elapsed gap.
+    """
+    from datetime import timedelta
+
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    helpers.activate_user(app_client, "alice", "pw")
+
+    main = app_client.app_module
+
+    # Establish a baseline timestamp.
+    resp = app_client.post(
+        "/refreshlogin", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True}
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        baseline = user.time_spent or 0
+
+    # Pretend a very long time passed (way beyond the cap).
     with main.Session(main.engine) as session:
         with session.begin():
             user = main._get_user_by_name(session, "alice")
-            assert user.time_spent == 1
             user.last_time_spent_update = (
-                user.last_time_spent_update
-                - timedelta(minutes=main.TIME_SPENT_TICK_MINUTES + 1)
+                user.last_time_spent_update - timedelta(hours=5)
             )
 
     resp = app_client.post(
@@ -257,7 +278,11 @@ def test_refresh_login_increments_time_spent_after_threshold(app_client, helpers
     assert resp.json() == {"result": True}
     with main.Session(main.engine) as session:
         user = main._get_user_by_name(session, "alice")
-        assert user.time_spent == 2
+        gained = (user.time_spent or 0) - baseline
+        assert gained == main.TIME_SPENT_MAX_GAP_SECONDS, (
+            f"long gap should be capped at {main.TIME_SPENT_MAX_GAP_SECONDS}s, "
+            f"got {gained}s"
+        )
 
 
 def test_refresh_login_with_wrong_password_fails(app_client, helpers):
@@ -270,18 +295,19 @@ def test_refresh_login_with_wrong_password_fails(app_client, helpers):
     assert resp.json() == {"result": False}
 
 
-def test_login_resets_tick_clock_so_offline_time_is_not_counted(app_client, helpers):
-    """Re-login must not count offline time toward ``time_spent``.
+def test_login_resets_clock_so_offline_time_is_not_counted(app_client, helpers):
+    """Re-login must not count offline (or post-crash) time toward ``time_spent``.
 
-    Scenario:
-      1. Alice logs in, gets one tick (``time_spent = 1``).
-      2. The server simulates a *long* absence by back-dating
-         ``last_time_spent_update`` to many hours ago (as if it was set just
-         before a previous logout).
-      3. Alice logs in again via ``/login`` — this should reset the tick clock
-         to *now* so the elapsed gap is forgotten.
-      4. An immediate ``/refreshlogin`` must NOT produce a tick because only
-         ~0 minutes have passed since login (< ``TIME_SPENT_TICK_MINUTES``).
+    Scenarios covered by this single test:
+
+    * The user logs out cleanly, stays offline for hours, then logs back in.
+    * The client crashes without calling ``/logout`` (so ``flags`` and
+      ``last_time_spent_update`` are stale on the server) and the user
+      eventually relaunches the program, triggering a new ``/login``.
+
+    Both cases land on the same code path: ``/login`` resets
+    ``last_time_spent_update = now()``, so the next ``/refreshlogin`` only
+    sees the fresh post-login interval and the long offline gap is dropped.
     """
     from datetime import timedelta
 
@@ -290,41 +316,56 @@ def test_login_resets_tick_clock_so_offline_time_is_not_counted(app_client, help
     helpers.create_user(app_client, "alice", "pw", "a@b.c")
     helpers.activate_user(app_client, "alice", "pw")
 
-    # First refresh: produces the first tick.
+    # Simulate prior activity: refresh once, then advance the clock a bit and
+    # refresh again so we have a non-zero ``time_spent`` baseline.
+    resp = app_client.post(
+        "/refreshlogin", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True}
+    with main.Session(main.engine) as session:
+        with session.begin():
+            user = main._get_user_by_name(session, "alice")
+            user.last_time_spent_update = (
+                user.last_time_spent_update - timedelta(seconds=42)
+            )
     resp = app_client.post(
         "/refreshlogin", data={"userName": "alice", "password": "pw"}
     )
     assert resp.json() == {"result": True}
     with main.Session(main.engine) as session:
         user = main._get_user_by_name(session, "alice")
-        assert user.time_spent == 1
+        baseline = user.time_spent or 0
+        assert baseline >= 40
 
-    # Simulate a long absence by back-dating last_time_spent_update so that the
-    # raw elapsed time (if not reset) would be well over the tick threshold.
+    # Pretend the user/program disappeared for many hours: ``flags`` may
+    # still say "logged in" (crash) but real wall-clock advanced far beyond
+    # the per-call cap.
     with main.Session(main.engine) as session:
         with session.begin():
             user = main._get_user_by_name(session, "alice")
             user.last_time_spent_update = (
-                user.last_time_spent_update
-                - timedelta(hours=3)
+                user.last_time_spent_update - timedelta(hours=6)
             )
 
-    # Alice re-logs in (simulates coming back after a long offline period).
+    # User reconnects and the client calls /login again.
     resp = app_client.post(
         "/login", data={"userName": "alice", "password": "pw"}
     )
     assert resp.json() == {"result": True, "errorCode": 1}
 
-    # Immediately refresh — offline gap should be ignored; no new tick.
+    # Immediately refresh — the multi-hour offline gap must NOT be counted,
+    # and even the per-call cap must not apply because /login reset the
+    # clock to "now".
     resp = app_client.post(
         "/refreshlogin", data={"userName": "alice", "password": "pw"}
     )
     assert resp.json() == {"result": True}
     with main.Session(main.engine) as session:
         user = main._get_user_by_name(session, "alice")
-        assert user.time_spent == 1, (
-            "time_spent should not tick immediately after re-login; "
-            "offline time must not be counted"
+        gained = (user.time_spent or 0) - baseline
+        assert 0 <= gained < 5, (
+            "offline / crashed time must not be counted; "
+            f"only ~0 seconds expected, got {gained}s"
         )
 
 

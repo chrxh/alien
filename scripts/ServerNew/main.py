@@ -72,15 +72,17 @@ class User(Base):
         comment="Last activity",
     )
 
-    # Cumulative time the user has been logged in, measured in 20-minute
-    # ticks. ``/refreshlogin`` only increments this when at least
-    # ``TIME_SPENT_TICK_MINUTES`` have passed since ``last_time_spent_update``,
-    # so spurious refreshes (e.g. opening the in-game browser repeatedly) do
-    # not inflate the counter.
+    # Cumulative time the user has been logged in, measured in **seconds**.
+    # ``/refreshlogin`` adds the elapsed time since ``last_time_spent_update``,
+    # capped at ``TIME_SPENT_MAX_GAP_SECONDS`` so that idle periods, browser
+    # tabs left open, app crashes (where ``/logout`` is never called), or any
+    # other reason the client stops sending refreshes do not inflate the
+    # counter with offline time.
     time_spent: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    # Timestamp of the last ``time_spent`` increment. Used to throttle the
-    # counter to one tick per ``TIME_SPENT_TICK_MINUTES``.
+    # Timestamp of the last ``time_spent`` accumulation. Reset on ``/login``
+    # so that the time gap between a previous (possibly crashed) session and
+    # this fresh login is never counted toward online time.
     last_time_spent_update: Mapped[object] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
@@ -151,12 +153,17 @@ class UserLike(Base):
 # --- FastAPI app ---
 app = FastAPI()
 
-# Number of minutes between two ``time_spent`` ticks. The C++ client refreshes
-# its login on every browser open (see ``PersisterWorker::processRequest`` for
-# ``GetNetworkResourcesRequest``), which can happen many times within a short
-# window; without this threshold ``time_spent`` would be dominated by UI
-# activity rather than by actual time spent online.
-TIME_SPENT_TICK_MINUTES = 20
+# Maximum number of seconds a single ``/refreshlogin`` call may add to
+# ``time_spent``. The C++ client only refreshes its login when the in-game
+# browser opens (see ``PersisterWorker::processRequest`` for
+# ``GetNetworkResourcesRequest``), so the gap between two refreshes does not
+# always reflect time actually spent online: the user might leave the app
+# idle, leave a tab open overnight, or the program might crash without
+# calling ``/logout``. Capping each accumulation prevents such offline /
+# idle gaps from inflating the counter. 30 minutes is generous enough to
+# cover normal usage between two browser opens while still bounding the
+# damage of a long absence.
+TIME_SPENT_MAX_GAP_SECONDS = 30 * 60
 
 
 def _ensure_users_schema():
@@ -543,8 +550,12 @@ def refresh_login(
             if user is None or not _check_password(user, password):
                 return {"result": False}
 
-            # Determine whether enough time has elapsed since the last
-            # ``time_spent`` tick to count this refresh as another tick.
+            # Accumulate the elapsed time since the previous refresh into
+            # ``time_spent`` (counted in seconds). The increment is capped at
+            # ``TIME_SPENT_MAX_GAP_SECONDS`` so idle browsers, sporadic
+            # refreshes, or sessions interrupted by a client crash (where
+            # ``/logout`` is never called and the next reconnect happens hours
+            # later) do not inflate the counter with offline time.
             try:
                 db_now = session.execute(select(func.now())).scalar_one()
             except Exception:
@@ -556,15 +567,25 @@ def refresh_login(
             if last_tick is not None and last_tick.tzinfo is None:
                 last_tick = last_tick.replace(tzinfo=timezone.utc)
 
-            should_tick = last_tick is None or (
-                db_now is not None
-                and (db_now - last_tick) >= timedelta(minutes=TIME_SPENT_TICK_MINUTES)
-            )
+            elapsed_seconds = 0
+            if last_tick is not None and db_now is not None:
+                gap = (db_now - last_tick).total_seconds()
+                # Negative gaps (clock skew) and gaps larger than the cap are
+                # both clamped. ``last_time_spent_update is None`` only happens
+                # if the column was never initialised by /login (legacy rows);
+                # in that case we count nothing for this refresh and just set
+                # the timestamp so the next refresh has a baseline.
+                elapsed_seconds = max(0, min(int(gap), TIME_SPENT_MAX_GAP_SECONDS))
 
-            values = {"flags": 1, "timestamp": func.now()}
-            if should_tick:
-                values["time_spent"] = func.coalesce(User.time_spent + 1, 1)
-                values["last_time_spent_update"] = func.now()
+            values = {
+                "flags": 1,
+                "timestamp": func.now(),
+                "last_time_spent_update": func.now(),
+            }
+            if elapsed_seconds > 0:
+                values["time_spent"] = func.coalesce(
+                    User.time_spent + elapsed_seconds, elapsed_seconds
+                )
 
             session.execute(
                 update(User).where(User.name == userName).values(**values)

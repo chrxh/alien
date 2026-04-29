@@ -14,8 +14,6 @@
 
 namespace
 {
-    auto constexpr RefreshInterval = 20;  // in minutes
-
     void configureClient(httplib::Client& client)
     {
         // CA bundle / cert verification only matter for HTTPS connections; both calls
@@ -342,9 +340,9 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
         boost::property_tree::read_json(stream, tree);
         result.clear();
         result = NetworkResourceParserService::get().decodeUserData(tree);
-        for (UserTO& userData : result) {
-            userData.timeSpent = userData.timeSpent * RefreshInterval / 60;
-        }
+        // ``timeSpent`` is reported by the server in seconds (cumulative
+        // online time). The UI converts to a human-readable form on display;
+        // no transformation is applied here.
         return true;
     } catch (...) {
         logNetworkError();
