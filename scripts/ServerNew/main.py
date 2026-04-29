@@ -66,12 +66,10 @@ class User(Base):
         comment="Last activity",
     )
 
-    # Cumulative number of refreshLogin calls (each call adds 1), matching the
-    # old PHP server's `TIME_SPENT = COALESCE(TIME_SPENT + 1, 1)` behavior.
+    # Cumulative number of refreshLogin calls (each call adds 1)
     time_spent: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    # GPU model reported by the client on login (used by the old PHP server for
-    # Discord notifications; kept for parity but not used for notifications).
+    # GPU model reported by the client on login
     gpu: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     __table_args__ = (
@@ -97,7 +95,7 @@ def _hash_password(password: str, salt: str) -> str:
 
 
 def _hash_email(email: str) -> str:
-    # Email is stripped of spaces (matches old PHP behavior).
+    # Email is stripped of spaces
     normalized = email.replace(" ", "")
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
@@ -136,7 +134,7 @@ def _send_activation_email(recipient: str, user_name: str, activation_code: str)
     Returns True if the message was handed off to the SMTP server, False if
     SMTP is not configured or delivery failed. Failures are logged but never
     raised: the caller should still succeed even when email delivery is
-    unavailable, mirroring the old PHP server's best-effort ``mail()`` call.
+    unavailable.
     """
     host = os.getenv("SMTP_HOST")
     if not host:
@@ -180,8 +178,7 @@ def _send_activation_email(recipient: str, user_name: str, activation_code: str)
 
 
 def _is_activated(user: "User") -> bool:
-    # The old server stored an empty string to mark an activated user.
-    # The new schema uses NULL. Treat both as "activated" for safety.
+    # NULL to mark an activated user.
     return not user.activation_code
 
 
@@ -199,7 +196,6 @@ def _check_password_and_activation_code(user: "User", password: str, activation_
 
 
 def _is_valid_user_name(user_name: str) -> bool:
-    # Match the old PHP regex: non-empty, no spaces.
     return bool(user_name) and " " not in user_name
 
 
@@ -217,8 +213,8 @@ def create_user(
     if not _is_valid_user_name(userName):
         return {"result": False}
 
-    # Old PHP server stripped spaces from the email before hashing AND before
-    # using it as the SMTP recipient. Preserve that behavior.
+    # Stripped spaces from the email before hashing AND before
+    # using it as the SMTP recipient.
     normalized_email = email.replace(" ", "")
 
     salt = _new_salt()
@@ -247,10 +243,7 @@ def create_user(
                 )
             )
 
-    # Send the activation code to the user's email address. Mirrors the old
-    # PHP server's PHPMailer call in createuser.php. Best-effort: a failure
-    # here does not invalidate the freshly-created pending account (the user
-    # can retry /createuser, which will replace the pending row).
+    # Send the activation code to the user's email address.
     _send_activation_email(normalized_email, userName, activation_code)
     return {"result": True}
 
@@ -284,7 +277,7 @@ def login(
     password: str = Form(...),
     gpu: str | None = Form(None),
 ):
-    # errorCode mirrors the old PHP server:
+    # errorCode:
     #   0 -> user exists but is not activated yet
     #   1 -> default (e.g. unknown user / wrong password)
     error_code = 1
@@ -361,8 +354,6 @@ def delete_user(
             if user is None or not _check_password(user, password):
                 return {"result": False}
 
-            # The old PHP server also deleted dependent rows in `userlike` and
-            # `simulation`; those tables do not yet exist in the new schema.
             session.execute(delete(User).where(User.name == userName))
     return {"result": True}
 
@@ -388,7 +379,7 @@ def reset_password(
                 .values(activation_code=activation_code)
             )
 
-    # Email the new activation code (matches old PHP resetpw.php). Best-effort:
+    # Email the new activation code. Best-effort:
     # we still report success on SMTP failure so the caller's flow isn't broken
     # by transient mail-server issues.
     _send_activation_email(normalized_email, userName, activation_code)
