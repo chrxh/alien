@@ -95,7 +95,6 @@ def test_replace_simulation_updates_owner_resource(app_client, helpers):
             "version": (None, "9.9"),
             "content": ("", b"NEW", "application/octet-stream"),
             "settings": (None, "new-settings"),
-            "symbolMap": (None, ""),
             "statistics": (None, "new-stats"),
         },
     )
@@ -132,7 +131,6 @@ def test_replace_simulation_rejects_non_owner(app_client, helpers):
             "version": (None, "v"),
             "content": ("", b"X", "application/octet-stream"),
             "settings": (None, "s"),
-            "symbolMap": (None, "x"),
             "statistics": (None, "x"),
         },
     )

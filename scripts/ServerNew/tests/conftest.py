@@ -116,7 +116,6 @@ def _upload_simulation(
     statistics: str = "stats",
     sim_type: int = 0,
     workspace: int = 0,
-    symbol_map: str = "",
 ):
     files = {
         "userName": (None, user_name),
@@ -129,7 +128,6 @@ def _upload_simulation(
         "version": (None, version),
         "content": ("", content, "application/octet-stream"),
         "settings": (None, settings),
-        "symbolMap": (None, symbol_map),
         "type": (None, str(sim_type)),
         "workspace": (None, str(workspace)),
         "statistics": (None, statistics),

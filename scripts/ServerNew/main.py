@@ -795,14 +795,10 @@ def upload_simulation(
     version: str = Form(...),
     content: bytes = Form(...),
     settings: str = Form(...),
-    # ``symbolMap`` is accepted for backwards compatibility with the C++
-    # client but ignored: the new schema has no SYMBOL_TABLE column.
-    symbolMap: str | None = Form(None),
     type: int = Form(0),
     workspace: int = Form(0),
     statistics: str = Form(""),
 ):
-    _ = symbolMap
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -852,10 +848,8 @@ def replace_simulation(
     version: str = Form(...),
     content: bytes = Form(...),
     settings: str = Form(...),
-    symbolMap: str | None = Form(None),
     statistics: str = Form(""),
 ):
-    _ = symbolMap
     sim_id = _parse_int(simId)
     with Session(engine) as session:
         with session.begin():

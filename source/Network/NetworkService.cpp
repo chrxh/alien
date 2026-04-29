@@ -461,7 +461,6 @@ bool NetworkService::uploadResource(
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "", "application/octet-stream"},
         {"settings", settings, "", ""},
-        {"symbolMap", "", "", ""},
         {"type", std::to_string(resourceType), "", ""},
         {"workspace", std::to_string(workspaceType), "", ""},
         {"statistics", statistics, "", ""},
@@ -506,7 +505,6 @@ bool NetworkService::replaceResource(
         {"version", Const::ProgramVersion, "", ""},
         {"content", mainData, "", "application/octet-stream"},
         {"settings", settings, "", ""},
-        {"symbolMap", "", "", ""},
         {"statistics", statistics, "", ""},
     };
 
