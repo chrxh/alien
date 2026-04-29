@@ -70,12 +70,12 @@ namespace
 
 void NetworkService::setup()
 {
-    _serverAddress = GlobalSettings::get().getValue("settings.server", std::string(Const::AlienServerURL));
+    _serverAddress = GlobalSettings::get().getValue("settings.server url", std::string(Const::AlienServerURL));
 }
 
 void NetworkService::shutdown()
 {
-    GlobalSettings::get().setValue("settings.server", _serverAddress);
+    GlobalSettings::get().setValue("settings.server url", _serverAddress);
     logout();
 }
 

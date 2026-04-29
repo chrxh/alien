@@ -330,7 +330,8 @@ def create_user(
             )
 
     # Send the activation code to the user's email address.
-    _send_activation_email(normalized_email, userName, activation_code)
+    if not _send_activation_email(normalized_email, userName, activation_code):
+        return {"result": False}
     return {"result": True}
 
 
