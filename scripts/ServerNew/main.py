@@ -106,7 +106,7 @@ def _new_salt() -> str:
 
 
 def _new_activation_code() -> str:
-    # 6 hex characters, matching the old PHP server's bin2hex(random(3)).
+    # 6 hex characters
     return secrets.token_hex(3)
 
 
