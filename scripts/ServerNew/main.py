@@ -6,7 +6,7 @@ import secrets
 import smtplib
 from email.message import EmailMessage
 
-from fastapi import FastAPI, File, Form, Response, UploadFile
+from fastapi import FastAPI, Form, HTTPException, Request, Response
 from sqlalchemy import (
     create_engine,
     String,
@@ -279,6 +279,75 @@ def _parse_int(value: object, default: int = 0) -> int:
         return int(str(value))
     except (TypeError, ValueError):
         return default
+
+
+# Maximum allowed simulation upload size. Generous on purpose: real-world
+# simulations easily exceed Starlette's 1 MB default ``max_part_size`` for
+# regular form fields, and the alien client may send the binary payload as
+# either an ``UploadFile`` (when its multipart part has a ``filename``) or as
+# a plain form field (older client builds). We must accept both shapes.
+_MAX_UPLOAD_SIZE = 256 * 1024 * 1024  # 256 MB
+
+
+async def _read_resource_form(request: Request) -> tuple[dict[str, str], bytes]:
+    """Parse a multipart form for the resource upload endpoints.
+
+    Returns a ``(fields, content)`` tuple where ``fields`` contains all
+    non-binary form values as strings and ``content`` is the simulation
+    payload. Raises :class:`HTTPException` on malformed input.
+
+    This intentionally does the parsing itself (rather than relying on
+    ``Form``/``File`` parameter declarations) so that:
+
+    * Starlette's per-form-part size limit is raised to ``_MAX_UPLOAD_SIZE``,
+      allowing realistically sized simulation payloads.
+    * The ``content`` part is accepted whether or not the C++ client
+      attaches a ``filename`` to its multipart part (older builds did not,
+      newer builds do).
+    """
+    try:
+        form = await request.form(
+            max_files=64,
+            max_fields=64,
+            max_part_size=_MAX_UPLOAD_SIZE,
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        raise HTTPException(status_code=400, detail=f"Invalid multipart body: {exc}")
+
+    fields: dict[str, str] = {}
+    content: bytes | None = None
+    for key, value in form.multi_items():
+        # ``request.form()`` returns Starlette ``UploadFile`` instances when a
+        # multipart part has a ``filename`` parameter, otherwise plain strings.
+        # Rely on duck typing for ``UploadFile`` because Starlette's and
+        # FastAPI's classes are not the same type.
+        is_upload = hasattr(value, "read") and hasattr(value, "filename")
+        if key == "content":
+            if is_upload:
+                content = await value.read()
+            elif isinstance(value, (bytes, bytearray)):
+                content = bytes(value)
+            else:
+                content = str(value).encode("utf-8", "surrogateescape")
+        else:
+            if is_upload:
+                fields[key] = (await value.read()).decode("utf-8", "replace")
+            else:
+                fields[key] = str(value)
+    if content is None:
+        raise HTTPException(
+            status_code=400, detail='Missing required form field "content".'
+        )
+    return fields, content
+
+
+def _require_field(fields: dict[str, str], name: str) -> str:
+    value = fields.get(name)
+    if value is None:
+        raise HTTPException(
+            status_code=400, detail=f'Missing required form field "{name}".'
+        )
+    return value
 
 
 def _checked_user(session: Session, user_name: str, password: str) -> "User | None":
@@ -783,22 +852,21 @@ def _is_owner_of_simulation(session: Session, sim_id: int, user_name: str) -> bo
 
 
 @app.post("/uploadsimulation")
-def upload_simulation(
-    userName: str = Form(...),
-    password: str = Form(...),
-    simName: str = Form(...),
-    simDesc: str = Form(...),
-    width: int = Form(...),
-    height: int = Form(...),
-    particles: int = Form(...),
-    version: str = Form(...),
-    content: UploadFile = File(...),
-    settings: str = Form(...),
-    type: int = Form(0),
-    workspace: int = Form(0),
-    statistics: str = Form(""),
-):
-    content_bytes = content.file.read()
+async def upload_simulation(request: Request):
+    fields, content_bytes = await _read_resource_form(request)
+    userName = _require_field(fields, "userName")
+    password = _require_field(fields, "password")
+    simName = _require_field(fields, "simName")
+    simDesc = _require_field(fields, "simDesc")
+    width = _parse_int(_require_field(fields, "width"))
+    height = _parse_int(_require_field(fields, "height"))
+    particles = _parse_int(_require_field(fields, "particles"))
+    version = _require_field(fields, "version")
+    settings = _require_field(fields, "settings")
+    sim_type = _parse_int(fields.get("type", "0"))
+    workspace = _parse_int(fields.get("workspace", "0"))
+    statistics = fields.get("statistics", "")
+
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -816,18 +884,18 @@ def upload_simulation(
             sim = Simulation(
                 user_id=user.id,
                 name=simName,
-                width=int(width),
-                height=int(height),
-                particles=int(particles),
+                width=width,
+                height=height,
+                particles=particles,
                 version=version,
                 description=simDesc,
                 content=content_bytes,
                 settings=settings,
                 picture=b"",
                 num_downloads=0,
-                workspace=int(workspace),
+                workspace=workspace,
                 size=len(content_bytes),
-                type=int(type),
+                type=sim_type,
                 statistics=statistics,
             )
             session.add(sim)
@@ -838,20 +906,19 @@ def upload_simulation(
 
 
 @app.post("/replacesimulation")
-def replace_simulation(
-    userName: str = Form(...),
-    password: str = Form(...),
-    simId: str = Form(...),
-    width: int = Form(...),
-    height: int = Form(...),
-    particles: int = Form(...),
-    version: str = Form(...),
-    content: UploadFile = File(...),
-    settings: str = Form(...),
-    statistics: str = Form(""),
-):
+async def replace_simulation(request: Request):
+    fields, content_bytes = await _read_resource_form(request)
+    userName = _require_field(fields, "userName")
+    password = _require_field(fields, "password")
+    simId = _require_field(fields, "simId")
+    width = _parse_int(_require_field(fields, "width"))
+    height = _parse_int(_require_field(fields, "height"))
+    particles = _parse_int(_require_field(fields, "particles"))
+    version = _require_field(fields, "version")
+    settings = _require_field(fields, "settings")
+    statistics = fields.get("statistics", "")
+
     sim_id = _parse_int(simId)
-    content_bytes = content.file.read()
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -870,11 +937,11 @@ def replace_simulation(
             ):
                 return {"result": False}
 
-            sim.particles = int(particles)
+            sim.particles = particles
             sim.version = version
             sim.content = content_bytes
-            sim.width = int(width)
-            sim.height = int(height)
+            sim.width = width
+            sim.height = height
             sim.settings = settings
             sim.size = len(content_bytes)
             sim.statistics = statistics
