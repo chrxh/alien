@@ -6,7 +6,7 @@ import secrets
 import smtplib
 from email.message import EmailMessage
 
-from fastapi import FastAPI, Form, Response
+from fastapi import FastAPI, File, Form, Response, UploadFile
 from sqlalchemy import (
     create_engine,
     String,
@@ -792,12 +792,13 @@ def upload_simulation(
     height: int = Form(...),
     particles: int = Form(...),
     version: str = Form(...),
-    content: bytes = Form(...),
+    content: UploadFile = File(...),
     settings: str = Form(...),
     type: int = Form(0),
     workspace: int = Form(0),
     statistics: str = Form(""),
 ):
+    content_bytes = content.file.read()
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -820,12 +821,12 @@ def upload_simulation(
                 particles=int(particles),
                 version=version,
                 description=simDesc,
-                content=content,
+                content=content_bytes,
                 settings=settings,
                 picture=b"",
                 num_downloads=0,
                 workspace=int(workspace),
-                size=len(content),
+                size=len(content_bytes),
                 type=int(type),
                 statistics=statistics,
             )
@@ -845,11 +846,12 @@ def replace_simulation(
     height: int = Form(...),
     particles: int = Form(...),
     version: str = Form(...),
-    content: bytes = Form(...),
+    content: UploadFile = File(...),
     settings: str = Form(...),
     statistics: str = Form(""),
 ):
     sim_id = _parse_int(simId)
+    content_bytes = content.file.read()
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -870,11 +872,11 @@ def replace_simulation(
 
             sim.particles = int(particles)
             sim.version = version
-            sim.content = content
+            sim.content = content_bytes
             sim.width = int(width)
             sim.height = int(height)
             sim.settings = settings
-            sim.size = len(content)
+            sim.size = len(content_bytes)
             sim.statistics = statistics
     return {"result": True}
 

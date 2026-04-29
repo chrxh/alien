@@ -478,7 +478,7 @@ def test_create_user_sends_activation_email(app_client, monkeypatch):
         assert user.activation_code == code
 
 
-def test_create_user_succeeds_when_smtp_send_fails(app_client, monkeypatch):
+def test_create_user_fails_when_smtp_send_fails(app_client, monkeypatch):
     main = app_client.app_module
     monkeypatch.setattr(
         main, "_send_activation_email", lambda *_a, **_k: False
@@ -489,7 +489,7 @@ def test_create_user_succeeds_when_smtp_send_fails(app_client, monkeypatch):
         data={"userName": "bob", "password": "pw", "email": "b@c.d"},
     )
     assert resp.status_code == 200
-    assert resp.json() == {"result": True}
+    assert resp.json() == {"result": False}
 
 
 def test_resetpw_sends_activation_email(app_client, helpers, monkeypatch):

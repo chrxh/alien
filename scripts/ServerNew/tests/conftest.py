@@ -52,6 +52,35 @@ def app_client(tmp_path, monkeypatch):
     # Create the schema (the app normally does this in its startup hook).
     main.Base.metadata.create_all(bind=main.engine)
 
+    # Tests don't have SMTP configured. Stub out the SMTP transports so that
+    # ``_send_activation_email`` succeeds (it returns True) without performing
+    # any network I/O. Individual tests that need to exercise the real
+    # ``_send_activation_email`` (or simulate a delivery failure) can still
+    # override this via their own monkeypatch.
+    monkeypatch.setenv("SMTP_HOST", "smtp.test.invalid")
+
+    class _StubSMTP:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_exc):
+            return False
+
+        def login(self, *args, **kwargs):
+            pass
+
+        def starttls(self, *args, **kwargs):
+            pass
+
+        def send_message(self, *args, **kwargs):
+            pass
+
+    monkeypatch.setattr(main.smtplib, "SMTP_SSL", _StubSMTP)
+    monkeypatch.setattr(main.smtplib, "SMTP", _StubSMTP)
+
     with TestClient(main.app) as client:
         client.app_module = main  # type: ignore[attr-defined]
         yield client
@@ -126,7 +155,7 @@ def _upload_simulation(
         "height": (None, str(height)),
         "particles": (None, str(particles)),
         "version": (None, version),
-        "content": ("", content, "application/octet-stream"),
+        "content": ("content.bin", content, "application/octet-stream"),
         "settings": (None, settings),
         "type": (None, str(sim_type)),
         "workspace": (None, str(workspace)),

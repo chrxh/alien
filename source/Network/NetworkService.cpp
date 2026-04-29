@@ -459,7 +459,7 @@ bool NetworkService::uploadResource(
         {"height", std::to_string(worldSize.y), "", ""},
         {"particles", std::to_string(numObjects), "", ""},
         {"version", Const::ProgramVersion, "", ""},
-        {"content", mainData, "", "application/octet-stream"},
+        {"content", mainData, "content.bin", "application/octet-stream"},
         {"settings", settings, "", ""},
         {"type", std::to_string(resourceType), "", ""},
         {"workspace", std::to_string(workspaceType), "", ""},
@@ -503,7 +503,7 @@ bool NetworkService::replaceResource(
         {"height", std::to_string(worldSize.y), "", ""},
         {"particles", std::to_string(numObjects), "", ""},
         {"version", Const::ProgramVersion, "", ""},
-        {"content", mainData, "", "application/octet-stream"},
+        {"content", mainData, "content.bin", "application/octet-stream"},
         {"settings", settings, "", ""},
         {"statistics", statistics, "", ""},
     };
