@@ -471,7 +471,6 @@ def test_create_user_sends_activation_email(app_client, monkeypatch):
 
     assert len(sent) == 1
     recipient, user_name, code = sent[0]
-    # Spaces in the email are stripped before delivery (matches old PHP).
     assert recipient == "a@b.c"
     assert user_name == "alice"
     with main.Session(main.engine) as session:

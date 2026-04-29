@@ -112,9 +112,7 @@ class Simulation(Base):
 
     # Workspace type for the simulation:
     #   0 -> Public, 1 -> AlienProject, 2 -> Private (see source/Network/Definitions.h).
-    # Historically called FROM_RELEASE in the old MySQL schema; the column name
-    # is preserved for compatibility.
-    from_release: Mapped[int] = mapped_column(
+    workspace: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default="0"
     )
     size: Mapped[int] = mapped_column(
@@ -563,7 +561,7 @@ def get_versioned_simulation_list(
                 Simulation.timestamp,
                 Simulation.num_downloads,
                 Simulation.size,
-                Simulation.from_release,
+                Simulation.workspace,
                 Simulation.type,
             ).join(User, User.id == Simulation.user_id, isouter=True)
         ).all()
@@ -610,7 +608,7 @@ def get_versioned_simulation_list(
                     # string-keyed entries so the parser maps them by like type.
                     "likesByType": {str(k): v for k, v in likes_by_type.items()},
                     "numDownloads": int(num_downloads),
-                    "fromRelease": int(workspace),
+                    "workspace": int(workspace),
                     "type": 0 if sim_type is None else int(sim_type),
                 }
             )
@@ -825,7 +823,7 @@ def upload_simulation(
                 settings=settings,
                 picture=b"",
                 num_downloads=0,
-                from_release=int(workspace),
+                workspace=int(workspace),
                 size=len(content),
                 type=int(type),
                 statistics=statistics,
@@ -864,7 +862,7 @@ def replace_simulation(
             # An entry in the curated workspace can only be replaced by the
             # dedicated alien-project user.
             if (
-                sim.from_release == _WORKSPACE_ALIEN_PROJECT
+                sim.workspace == _WORKSPACE_ALIEN_PROJECT
                 and userName != _ALIEN_PROJECT_USER_NAME
             ):
                 return {"result": False}
@@ -985,7 +983,7 @@ def move_simulation(
             session.execute(
                 update(Simulation)
                 .where(Simulation.id == sim_id)
-                .values(from_release=target, timestamp=Simulation.timestamp)
+                .values(workspace=target, timestamp=Simulation.timestamp)
             )
     return {"result": True}
 

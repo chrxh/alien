@@ -49,7 +49,7 @@ def test_upload_simulation_persists_row_and_returns_sim_id(app_client, helpers):
         assert sim.settings == '{"k":1}'
         assert sim.statistics == "stats-data"
         assert sim.size == len(b"\x00\x01\x02payload")
-        assert sim.from_release == 0
+        assert sim.workspace == 0
         assert sim.type == 0
 
 
@@ -258,7 +258,7 @@ def test_move_simulation_to_private_and_back(app_client, helpers):
     )
     assert resp.json() == {"result": True}
     with main.Session(main.engine) as session:
-        assert session.get(main.Simulation, sim_id).from_release == 2
+        assert session.get(main.Simulation, sim_id).workspace == 2
 
     resp = app_client.post(
         "/movesimulation",
@@ -269,7 +269,7 @@ def test_move_simulation_to_private_and_back(app_client, helpers):
     )
     assert resp.json() == {"result": True}
     with main.Session(main.engine) as session:
-        assert session.get(main.Simulation, sim_id).from_release == 0
+        assert session.get(main.Simulation, sim_id).workspace == 0
 
 
 def test_move_simulation_rejects_alien_project_workspace(app_client, helpers):
@@ -430,7 +430,7 @@ def test_get_versioned_simulation_list_returns_public_entries(app_client, helper
     entry = body[0]
     assert entry["simulationName"] == "public-sim"
     assert entry["userName"] == "alice"
-    assert entry["fromRelease"] == 0
+    assert entry["workspace"] == 0
     assert entry["likes"] == 0
     assert entry["likesByType"] == {}
     assert isinstance(entry["timestamp"], str)
