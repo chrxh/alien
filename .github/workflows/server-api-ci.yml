@@ -1,4 +1,4 @@
-name: ServerNew API Tests
+name: Server API Tests
 
 on:
   push:
