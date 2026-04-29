@@ -1,6 +1,6 @@
 # alien-server (FastAPI)
 
-Replacement for the legacy PHP alien-server. Provides the HTTP endpoints
+Provides the HTTP endpoints
 (`/createuser`, `/activateuser`, `/login`, ...) that the C++ client in
 `source/Network/NetworkService.cpp` talks to.
 
