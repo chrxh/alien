@@ -270,6 +270,64 @@ def test_refresh_login_with_wrong_password_fails(app_client, helpers):
     assert resp.json() == {"result": False}
 
 
+def test_login_resets_tick_clock_so_offline_time_is_not_counted(app_client, helpers):
+    """Re-login must not count offline time toward ``time_spent``.
+
+    Scenario:
+      1. Alice logs in, gets one tick (``time_spent = 1``).
+      2. The server simulates a *long* absence by back-dating
+         ``last_time_spent_update`` to many hours ago (as if it was set just
+         before a previous logout).
+      3. Alice logs in again via ``/login`` — this should reset the tick clock
+         to *now* so the elapsed gap is forgotten.
+      4. An immediate ``/refreshlogin`` must NOT produce a tick because only
+         ~0 minutes have passed since login (< ``TIME_SPENT_TICK_MINUTES``).
+    """
+    from datetime import timedelta
+
+    main = app_client.app_module
+
+    helpers.create_user(app_client, "alice", "pw", "a@b.c")
+    helpers.activate_user(app_client, "alice", "pw")
+
+    # First refresh: produces the first tick.
+    resp = app_client.post(
+        "/refreshlogin", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True}
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.time_spent == 1
+
+    # Simulate a long absence by back-dating last_time_spent_update so that the
+    # raw elapsed time (if not reset) would be well over the tick threshold.
+    with main.Session(main.engine) as session:
+        with session.begin():
+            user = main._get_user_by_name(session, "alice")
+            user.last_time_spent_update = (
+                user.last_time_spent_update
+                - timedelta(hours=3)
+            )
+
+    # Alice re-logs in (simulates coming back after a long offline period).
+    resp = app_client.post(
+        "/login", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True, "errorCode": 1}
+
+    # Immediately refresh — offline gap should be ignored; no new tick.
+    resp = app_client.post(
+        "/refreshlogin", data={"userName": "alice", "password": "pw"}
+    )
+    assert resp.json() == {"result": True}
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, "alice")
+        assert user.time_spent == 1, (
+            "time_spent should not tick immediately after re-login; "
+            "offline time must not be counted"
+        )
+
+
 # --- /deleteuser --------------------------------------------------------------
 def test_delete_user_removes_row(app_client, helpers):
     helpers.create_user(app_client, "alice", "pw", "a@b.c")

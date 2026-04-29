@@ -495,7 +495,15 @@ def login(
                 session.execute(
                     update(User)
                     .where(User.name == userName)
-                    .values(flags=1, timestamp=func.now(), gpu=(gpu or ""))
+                    .values(
+                        flags=1,
+                        timestamp=func.now(),
+                        gpu=(gpu or ""),
+                        # Reset the 20-minute tick clock so that time spent
+                        # offline (between this login and the previous logout)
+                        # is never counted by /refreshlogin.
+                        last_time_spent_update=func.now(),
+                    )
                 )
                 success = True
 
