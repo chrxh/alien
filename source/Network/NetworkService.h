@@ -76,8 +76,6 @@ public:
     bool deleteResource(std::string const& simId);
 
 private:
-    bool appendResourceData(std::string const& resourceId, std::string const& data, int chunkIndex);
-
     std::string _serverAddress;
     std::optional<std::string> _loggedInUserName;
     std::optional<std::string> _password;
