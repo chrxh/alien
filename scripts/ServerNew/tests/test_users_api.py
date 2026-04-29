@@ -231,6 +231,62 @@ def test_delete_user_removes_row(app_client, helpers):
         assert main._get_user_by_name(session, "alice") is None
 
 
+def test_delete_user_cascades_to_userlikes_and_simulations(app_client, helpers):
+    """deleteUser must also remove the user's simulations and all userlikes
+    that reference either the user or any of those simulations (foreign-key
+    dependencies on the ``users`` table)."""
+    main = app_client.app_module
+    from sqlalchemy import select as _select
+
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    helpers.create_active_user(app_client, "bob", "pw2", "b@c.d")
+
+    # Alice owns one simulation, Bob owns one.
+    resp = helpers.upload_simulation(app_client, "alice", "pw", sim_name="alice-sim")
+    assert resp.json()["result"] is True
+    alice_sim_id = int(resp.json()["simId"])
+    resp = helpers.upload_simulation(app_client, "bob", "pw2", sim_name="bob-sim")
+    assert resp.json()["result"] is True
+    bob_sim_id = int(resp.json()["simId"])
+
+    # Alice likes Bob's sim; Bob likes Alice's sim.
+    assert app_client.post(
+        "/togglelikesimulation",
+        data={"userName": "alice", "password": "pw", "simId": str(bob_sim_id), "likeType": "1"},
+    ).json() == {"result": True}
+    assert app_client.post(
+        "/togglelikesimulation",
+        data={"userName": "bob", "password": "pw2", "simId": str(alice_sim_id), "likeType": "2"},
+    ).json() == {"result": True}
+
+    with main.Session(main.engine) as session:
+        assert session.execute(_select(main.UserLike)).all()  # sanity: 2 likes exist
+        assert session.execute(_select(main.Simulation)).all()  # 2 sims exist
+
+    # Delete Alice.
+    assert app_client.post(
+        "/deleteuser", data={"userName": "alice", "password": "pw"}
+    ).json() == {"result": True}
+
+    with main.Session(main.engine) as session:
+        # Alice's user row gone.
+        assert main._get_user_by_name(session, "alice") is None
+        # Alice's simulation gone.
+        assert session.get(main.Simulation, alice_sim_id) is None
+        # Bob's simulation still there.
+        assert session.get(main.Simulation, bob_sim_id) is not None
+
+        # All remaining userlike rows must belong to Bob (the only surviving
+        # user) AND must reference Bob's surviving simulation. The two original
+        # likes (Alice→Bob's sim, Bob→Alice's sim) both involve Alice via FK
+        # and must be gone.
+        bob_user_id = main._get_user_by_name(session, "bob").id
+        remaining = session.execute(_select(main.UserLike)).scalars().all()
+        for like in remaining:
+            assert like.user_id == bob_user_id
+            assert like.simulation_id == bob_sim_id
+
+
 def test_delete_user_wrong_password_fails(app_client, helpers):
     helpers.create_user(app_client, "alice", "pw", "a@b.c")
     helpers.activate_user(app_client, "alice", "pw")
@@ -415,7 +471,6 @@ def test_create_user_sends_activation_email(app_client, monkeypatch):
 
     assert len(sent) == 1
     recipient, user_name, code = sent[0]
-    # Spaces in the email are stripped before delivery (matches old PHP).
     assert recipient == "a@b.c"
     assert user_name == "alice"
     with main.Session(main.engine) as session:
@@ -423,7 +478,7 @@ def test_create_user_sends_activation_email(app_client, monkeypatch):
         assert user.activation_code == code
 
 
-def test_create_user_succeeds_when_smtp_send_fails(app_client, monkeypatch):
+def test_create_user_fails_when_smtp_send_fails(app_client, monkeypatch):
     main = app_client.app_module
     monkeypatch.setattr(
         main, "_send_activation_email", lambda *_a, **_k: False
@@ -434,7 +489,7 @@ def test_create_user_succeeds_when_smtp_send_fails(app_client, monkeypatch):
         data={"userName": "bob", "password": "pw", "email": "b@c.d"},
     )
     assert resp.status_code == 200
-    assert resp.json() == {"result": True}
+    assert resp.json() == {"result": False}
 
 
 def test_resetpw_sends_activation_email(app_client, helpers, monkeypatch):

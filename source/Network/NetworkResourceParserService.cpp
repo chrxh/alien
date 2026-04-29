@@ -30,7 +30,7 @@ std::vector<NetworkResourceRawTO> NetworkResourceParserService::decodeRemoteSimu
             ++counter;
         }
         entry->numDownloads = subTree.get<int>("numDownloads");
-        entry->workspaceType = subTree.get<int>("fromRelease");
+        entry->workspaceType = subTree.get<int>("workspace");
         entry->resourceType = subTree.get<NetworkResourceType>("type");
         result.emplace_back(entry);
     }

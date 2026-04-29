@@ -52,6 +52,35 @@ def app_client(tmp_path, monkeypatch):
     # Create the schema (the app normally does this in its startup hook).
     main.Base.metadata.create_all(bind=main.engine)
 
+    # Tests don't have SMTP configured. Stub out the SMTP transports so that
+    # ``_send_activation_email`` succeeds (it returns True) without performing
+    # any network I/O. Individual tests that need to exercise the real
+    # ``_send_activation_email`` (or simulate a delivery failure) can still
+    # override this via their own monkeypatch.
+    monkeypatch.setenv("SMTP_HOST", "smtp.test.invalid")
+
+    class _StubSMTP:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_exc):
+            return False
+
+        def login(self, *args, **kwargs):
+            pass
+
+        def starttls(self, *args, **kwargs):
+            pass
+
+        def send_message(self, *args, **kwargs):
+            pass
+
+    monkeypatch.setattr(main.smtplib, "SMTP_SSL", _StubSMTP)
+    monkeypatch.setattr(main.smtplib, "SMTP", _StubSMTP)
+
     with TestClient(main.app) as client:
         client.app_module = main  # type: ignore[attr-defined]
         yield client
@@ -88,6 +117,53 @@ def _activate_user(client: TestClient, user_name="alice", password="pw", code=No
     return client.post("/activateuser", data=data)
 
 
+def _create_active_user(client: TestClient, user_name="alice", password="pw", email="a@b.c"):
+    """Helper: create + activate a user, returning the user's database row."""
+    code = _create_user(client, user_name, password, email)
+    resp = _activate_user(client, user_name, password, code=code)
+    assert resp.status_code == 200
+    assert resp.json() == {"result": True}
+    main = client.app_module  # type: ignore[attr-defined]
+    with main.Session(main.engine) as session:
+        user = main._get_user_by_name(session, user_name)
+        assert user is not None
+        return user
+
+
+def _upload_simulation(
+    client: TestClient,
+    user_name: str,
+    password: str,
+    sim_name: str = "sim",
+    description: str = "desc",
+    width: int = 16,
+    height: int = 8,
+    particles: int = 100,
+    version: str = "1.0",
+    content: bytes = b"\x00\x01\x02binary-payload",
+    settings: str = "{}",
+    statistics: str = "stats",
+    sim_type: int = 0,
+    workspace: int = 0,
+):
+    files = {
+        "userName": (None, user_name),
+        "password": (None, password),
+        "simName": (None, sim_name),
+        "simDesc": (None, description),
+        "width": (None, str(width)),
+        "height": (None, str(height)),
+        "particles": (None, str(particles)),
+        "version": (None, version),
+        "content": ("content.bin", content, "application/octet-stream"),
+        "settings": (None, settings),
+        "type": (None, str(sim_type)),
+        "workspace": (None, str(workspace)),
+        "statistics": (None, statistics),
+    }
+    return client.post("/uploadsimulation", files=files)
+
+
 @pytest.fixture()
 def helpers():
     """Expose helper functions to tests as a small namespace."""
@@ -95,5 +171,7 @@ def helpers():
     class Helpers:
         create_user = staticmethod(_create_user)
         activate_user = staticmethod(_activate_user)
+        create_active_user = staticmethod(_create_active_user)
+        upload_simulation = staticmethod(_upload_simulation)
 
     return Helpers
