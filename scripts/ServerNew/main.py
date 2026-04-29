@@ -11,7 +11,12 @@ from sqlalchemy import (
     create_engine,
     String,
     Integer,
+    BigInteger,
+    Boolean,
     DateTime,
+    ForeignKey,
+    LargeBinary,
+    Text,
     delete,
     func,
     select,
@@ -75,6 +80,44 @@ class User(Base):
     __table_args__ = (
         CheckConstraint("char_length(name) > 0", name="ck_users_name_nonempty"),
     )
+
+
+class Simulation(Base):
+    __tablename__ = "simulations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False
+    )
+
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    width: Mapped[int] = mapped_column(Integer, nullable=False)
+    height: Mapped[int] = mapped_column(Integer, nullable=False)
+    particles: Mapped[int] = mapped_column(Integer, nullable=False)
+    version: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    settings: Mapped[str] = mapped_column(Text, nullable=False)
+    picture: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    num_downloads: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    timestamp: Mapped[object] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    from_release: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="0"
+    )
+    size: Mapped[int] = mapped_column(
+        BigInteger, nullable=False, server_default="0"
+    )
+
+    type: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    statistics: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 # --- FastAPI app ---
 app = FastAPI()
