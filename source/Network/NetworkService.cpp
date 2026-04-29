@@ -14,7 +14,7 @@
 
 namespace
 {
-    auto constexpr RefreshInterval = 20;  //in minutes
+    auto constexpr RefreshInterval = 20;  // in minutes
 
     void configureClient(httplib::Client& client)
     {
