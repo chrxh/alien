@@ -119,6 +119,22 @@ class Simulation(Base):
     type: Mapped[int | None] = mapped_column(Integer, nullable=True)
     statistics: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+
+class UserLike(Base):
+    __tablename__ = "userlikes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False
+    )
+    simulation_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("simulations.id"), nullable=False
+    )
+
+    type: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+
 # --- FastAPI app ---
 app = FastAPI()
 
