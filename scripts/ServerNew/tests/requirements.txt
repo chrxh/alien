@@ -1,0 +1,5 @@
+fastapi
+httpx
+pytest
+sqlalchemy>=2
+python-multipart
