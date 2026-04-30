@@ -489,14 +489,17 @@ void BrowserWindow::processUserList()
                             ImGui::TableNextColumn();
                             if (item->timeSpent > 0) {
                                 // ``timeSpent`` is the cumulative online time
-                                // in seconds (accumulated by the server on
-                                // every ``/refreshlogin``). Display it in
-                                // whole minutes — the smallest unit shown to
-                                // users — so a single refresh's tiny gap does
-                                // not yet move the displayed value, while
-                                // longer sessions accumulate naturally.
-                                auto minutes = static_cast<uint64_t>(item->timeSpent / 60);
-                                processShortenedText(StringHelper::format(minutes) + "m", isBoldFont);
+                                // in seconds. Format as ``Xh`` for >= 1 hour,
+                                // otherwise as ``Ym`` so short-lived users do
+                                // not collapse to ``0h``.
+                                auto totalSeconds = item->timeSpent;
+                                std::string text;
+                                if (totalSeconds >= 3600) {
+                                    text = StringHelper::format(static_cast<uint64_t>(totalSeconds / 3600)) + "h";
+                                } else {
+                                    text = std::to_string(totalSeconds / 60) + "m";
+                                }
+                                processShortenedText(text, isBoldFont);
                             }
 
                             ImGui::TableNextColumn();
