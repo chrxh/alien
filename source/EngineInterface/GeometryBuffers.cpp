@@ -30,52 +30,65 @@ GeometryBuffers _GeometryBuffers::create()
 void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
 {
     _numObjects = numRenderObjects;
+    bool reallocated = false;
     if (numRenderObjects.objects >= _vertexBufferCapacity) {
         _vertexBufferCapacity = std::max(numRenderObjects.objects * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForObjects());
         glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(ObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
     }
     if (numRenderObjects.fluidParticles >= _fluidParticleBufferCapacity) {
         _fluidParticleBufferCapacity = std::max(numRenderObjects.fluidParticles * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForFluidParticles());
         glBufferData(GL_ARRAY_BUFFER, toInt(_fluidParticleBufferCapacity * sizeof(FluidParticleVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
     }
     if (numRenderObjects.locations >= _locationBufferCapacity) {
         _locationBufferCapacity = std::max(numRenderObjects.locations * 2, static_cast<uint64_t>(1000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForLocations());
         glBufferData(GL_ARRAY_BUFFER, toInt(_locationBufferCapacity * sizeof(LocationVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
     }
     if (numRenderObjects.selectedObjects >= _selectedObjectBufferCapacity) {
         _selectedObjectBufferCapacity = std::max(numRenderObjects.selectedObjects * 2, static_cast<uint64_t>(10000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedObjects());
         glBufferData(GL_ARRAY_BUFFER, toInt(_selectedObjectBufferCapacity * sizeof(SelectedObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
     }
     if (numRenderObjects.lineIndices >= _lineIndexBufferCapacity) {
         _lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
         glBindVertexArray(getVaoForPointsAndLines());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, getEboForLines());
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(_lineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
     }
     if (numRenderObjects.triangleIndices >= _triangleIndexBufferCapacity) {
         _triangleIndexBufferCapacity = std::max(numRenderObjects.triangleIndices * 2, static_cast<uint64_t>(100000));
         glBindVertexArray(getVaoForTriangles());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, getEboForTriangles());
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(_triangleIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
     }
     if (numRenderObjects.connectionArrowVertices >= _connectionArrowVertexBufferCapacity) {
         _connectionArrowVertexBufferCapacity = std::max(numRenderObjects.connectionArrowVertices * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedConnections());
         glBufferData(GL_ARRAY_BUFFER, toInt(_connectionArrowVertexBufferCapacity * sizeof(ConnectionArrowVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
     }
     if (numRenderObjects.attackEventVertices >= _attackEventVertexBufferCapacity) {
         _attackEventVertexBufferCapacity = std::max(numRenderObjects.attackEventVertices * 2, static_cast<uint64_t>(10000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForAttackEvents());
         glBufferData(GL_ARRAY_BUFFER, toInt(_attackEventVertexBufferCapacity * sizeof(AttackEventVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
     }
     if (numRenderObjects.detonationEventVertices >= _detonationEventVertexBufferCapacity) {
         _detonationEventVertexBufferCapacity = std::max(numRenderObjects.detonationEventVertices * 2, static_cast<uint64_t>(10000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForDetonationEvents());
         glBufferData(GL_ARRAY_BUFFER, toInt(_detonationEventVertexBufferCapacity * sizeof(DetonationEventVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        reallocated = true;
+    }
+    if (reallocated) {
+        ++_buffersVersion;
     }
 }
 

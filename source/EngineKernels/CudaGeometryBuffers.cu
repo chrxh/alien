@@ -27,50 +27,86 @@ namespace
 
 void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
 {
+    auto const* source = buffers.get();
+    auto const version = source->getBuffersVersion();
+
+    auto const vboObjects = buffers->getVboForObjects();
+    auto const vboFluidParticles = buffers->getVboForFluidParticles();
+    auto const vboLocations = buffers->getVboForLocations();
+    auto const vboSelectedObjects = buffers->getVboForSelectedObjects();
+    auto const eboLines = buffers->getEboForLines();
+    auto const eboTriangles = buffers->getEboForTriangles();
+    auto const vboSelectedConnections = buffers->getVboForSelectedConnections();
+    auto const vboAttackEvents = buffers->getVboForAttackEvents();
+    auto const vboDetonationEvents = buffers->getVboForDetonationEvents();
+
+    // Fast path: nothing changed since the last call. Skip the expensive
+    // unregister/re-register dance with the CUDA driver.
+    if (vertexBuffer != nullptr && source == _registeredSource && version == _registeredVersion
+        && vboObjects == _registeredVboObjects && vboFluidParticles == _registeredVboFluidParticles
+        && vboLocations == _registeredVboLocations && vboSelectedObjects == _registeredVboSelectedObjects
+        && eboLines == _registeredEboLines && eboTriangles == _registeredEboTriangles
+        && vboSelectedConnections == _registeredVboSelectedConnections && vboAttackEvents == _registeredVboAttackEvents
+        && vboDetonationEvents == _registeredVboDetonationEvents) {
+        return;
+    }
+
     if (vertexBuffer != nullptr) {
         unregisterBufferResource(vertexBuffer);
     }
-    vertexBuffer = registerBufferResource(buffers->getVboForObjects());
+    vertexBuffer = registerBufferResource(vboObjects);
 
     if (fluidParticleBuffer != nullptr) {
         unregisterBufferResource(fluidParticleBuffer);
     }
-    fluidParticleBuffer = registerBufferResource(buffers->getVboForFluidParticles());
+    fluidParticleBuffer = registerBufferResource(vboFluidParticles);
 
     if (locationBuffer != nullptr) {
         unregisterBufferResource(locationBuffer);
     }
-    locationBuffer = registerBufferResource(buffers->getVboForLocations());
+    locationBuffer = registerBufferResource(vboLocations);
 
     if (selectedObjectBuffer != nullptr) {
         unregisterBufferResource(selectedObjectBuffer);
     }
-    selectedObjectBuffer = registerBufferResource(buffers->getVboForSelectedObjects());
+    selectedObjectBuffer = registerBufferResource(vboSelectedObjects);
 
     if (lineIndexBuffer != nullptr) {
         unregisterBufferResource(lineIndexBuffer);
     }
-    lineIndexBuffer = registerBufferResource(buffers->getEboForLines());
+    lineIndexBuffer = registerBufferResource(eboLines);
 
     if (triangleIndexBuffer != nullptr) {
         unregisterBufferResource(triangleIndexBuffer);
     }
-    triangleIndexBuffer = registerBufferResource(buffers->getEboForTriangles());
+    triangleIndexBuffer = registerBufferResource(eboTriangles);
 
     if (selectedConnectionBuffer != nullptr) {
         unregisterBufferResource(selectedConnectionBuffer);
     }
-    selectedConnectionBuffer = registerBufferResource(buffers->getVboForSelectedConnections());
+    selectedConnectionBuffer = registerBufferResource(vboSelectedConnections);
 
     if (attackEventBuffer != nullptr) {
         unregisterBufferResource(attackEventBuffer);
     }
-    attackEventBuffer = registerBufferResource(buffers->getVboForAttackEvents());
+    attackEventBuffer = registerBufferResource(vboAttackEvents);
 
     if (detonationEventBuffer != nullptr) {
         unregisterBufferResource(detonationEventBuffer);
     }
-    detonationEventBuffer = registerBufferResource(buffers->getVboForDetonationEvents());
+    detonationEventBuffer = registerBufferResource(vboDetonationEvents);
+
+    _registeredSource = source;
+    _registeredVersion = version;
+    _registeredVboObjects = vboObjects;
+    _registeredVboFluidParticles = vboFluidParticles;
+    _registeredVboLocations = vboLocations;
+    _registeredVboSelectedObjects = vboSelectedObjects;
+    _registeredEboLines = eboLines;
+    _registeredEboTriangles = eboTriangles;
+    _registeredVboSelectedConnections = vboSelectedConnections;
+    _registeredVboAttackEvents = vboAttackEvents;
+    _registeredVboDetonationEvents = vboDetonationEvents;
 }
 
 void CudaGeometryBuffers::allocateBuffersForNoInterop(NumRenderObjects const& numObjects)

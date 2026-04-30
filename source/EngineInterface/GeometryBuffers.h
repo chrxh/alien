@@ -99,6 +99,12 @@ public:
 
     NumRenderObjects getNumObjects() const;
 
+    // Monotonically-increasing version that is incremented each time the underlying
+    // OpenGL buffer storage is (re)allocated via glBufferData. Consumers (e.g. the
+    // CUDA-OpenGL interop layer) can use this to detect when they need to refresh
+    // resources tied to the buffer storage.
+    uint64_t getBuffersVersion() const { return _buffersVersion; }
+
     // Methods for uploading data from host memory (used in no-interop mode)
     void setCellData(ObjectVertexData const* data, uint64_t count);
     void setFluidParticleData(FluidParticleVertexData const* data, uint64_t count);
@@ -151,6 +157,8 @@ private:
     uint64_t _triangleIndexBufferCapacity = 0;
 
     NumRenderObjects _numObjects;
+
+    uint64_t _buffersVersion = 0;
 
     _GeometryBuffers() = default;
 };
