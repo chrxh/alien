@@ -43,22 +43,4 @@ struct CudaGeometryBuffers
     void allocateBuffersForNoInterop(NumRenderObjects const& numObjects);
     void freeBuffersForNoInterop();
     void copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects);
-
-private:
-    // Cached identity of the last successfully-registered GeometryBuffers source.
-    // registerBuffers() is a no-op when the source pointer, the per-buffer GL
-    // object IDs, and the buffer storage version have not changed since the
-    // previous call. Storage reallocations (glBufferData) bump the version so
-    // CUDA resources are refreshed.
-    _GeometryBuffers const* _registeredSource = nullptr;
-    uint64_t _registeredVersion = 0;
-    unsigned int _registeredVboObjects = 0;
-    unsigned int _registeredVboFluidParticles = 0;
-    unsigned int _registeredVboLocations = 0;
-    unsigned int _registeredVboSelectedObjects = 0;
-    unsigned int _registeredEboLines = 0;
-    unsigned int _registeredEboTriangles = 0;
-    unsigned int _registeredVboSelectedConnections = 0;
-    unsigned int _registeredVboAttackEvents = 0;
-    unsigned int _registeredVboDetonationEvents = 0;
 };
