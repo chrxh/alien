@@ -25,6 +25,9 @@ namespace
         // redirecting http:// -> https:// (or adding/removing a trailing slash)
         // does not surface to callers as an empty/HTML response body.
         client.set_follow_location(true);
+        client.set_connection_timeout(std::chrono::seconds(10));
+        client.set_read_timeout(std::chrono::seconds(120));
+        client.set_write_timeout(std::chrono::seconds(120));
     }
 
     httplib::Result executeRequest(std::function<httplib::Result()> const& func, bool withRetry = true)
