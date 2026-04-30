@@ -488,7 +488,18 @@ void BrowserWindow::processUserList()
 
                             ImGui::TableNextColumn();
                             if (item->timeSpent > 0) {
-                                processShortenedText(StringHelper::format(item->timeSpent) + "h", isBoldFont);
+                                // ``timeSpent`` is the cumulative online time
+                                // in seconds. Format as ``Xh`` for >= 1 hour,
+                                // otherwise as ``Ym`` so short-lived users do
+                                // not collapse to ``0h``.
+                                auto totalSeconds = item->timeSpent;
+                                std::string text;
+                                if (totalSeconds >= 3600) {
+                                    text = StringHelper::format(static_cast<uint64_t>(totalSeconds / 3600)) + "h";
+                                } else {
+                                    text = std::to_string(totalSeconds / 60) + "m";
+                                }
+                                processShortenedText(text, isBoldFont);
                             }
 
                             ImGui::TableNextColumn();
