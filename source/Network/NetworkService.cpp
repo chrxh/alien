@@ -16,18 +16,34 @@ namespace
 {
     void configureClient(httplib::Client& client)
     {
-        // CA bundle / cert verification only matter for HTTPS connections; both calls
-        // are safe no-ops when the configured server URL uses plain http://.
         client.set_ca_cert_path("./resources/ca-bundle.crt");
         client.enable_server_certificate_verification(true);
 
         // Transparently follow 301/302 redirects so that an nginx vhost
-        // redirecting http:// -> https:// (or adding/removing a trailing slash)
-        // does not surface to callers as an empty/HTML response body.
+        // adding/removing a trailing slash does not surface to callers as an
+        // empty/HTML response body.
         client.set_follow_location(true);
         client.set_connection_timeout(std::chrono::seconds(10));
         client.set_read_timeout(std::chrono::seconds(120));
         client.set_write_timeout(std::chrono::seconds(120));
+    }
+
+    std::string toHttpsServerAddress(std::string const& serverAddress)
+    {
+        if (serverAddress.starts_with("https://")) {
+            return serverAddress;
+        }
+        if (serverAddress.starts_with("http://")) {
+            return "https://" + serverAddress.substr(7);
+        }
+        return "https://" + serverAddress;
+    }
+
+    httplib::Client createClient(std::string const& serverAddress)
+    {
+        httplib::Client client(toHttpsServerAddress(serverAddress));
+        configureClient(client);
+        return client;
     }
 
     httplib::Result executeRequest(std::function<httplib::Result()> const& func, bool withRetry = true)
@@ -110,8 +126,7 @@ bool NetworkService::createUser(std::string const& userName, std::string const& 
 {
     log(Priority::Important, "network: create user '" + userName + "'");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", userName);
@@ -131,8 +146,7 @@ bool NetworkService::activateUser(std::string const& userName, std::string const
 {
     log(Priority::Important, "network: activate user '" + userName + "'");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", userName);
@@ -155,8 +169,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
 {
     log(Priority::Important, "network: login user '" + userName + "'");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", userName);
@@ -194,8 +207,7 @@ bool NetworkService::logout()
     bool result = true;
 
     if (_loggedInUserName && _password) {
-        httplib::Client client(_serverAddress);
-        configureClient(client);
+        auto client = createClient(_serverAddress);
 
         httplib::Params params;
         params.emplace("userName", *_loggedInUserName);
@@ -219,8 +231,7 @@ void NetworkService::refreshLogin()
     if (_loggedInUserName && _password) {
         log(Priority::Important, "network: refresh login");
 
-        httplib::Client client(_serverAddress);
-        configureClient(client);
+        auto client = createClient(_serverAddress);
 
         httplib::Params params;
         params.emplace("userName", *_loggedInUserName);
@@ -237,8 +248,7 @@ bool NetworkService::deleteUser()
 {
     log(Priority::Important, "network: delete user '" + *_loggedInUserName + "'");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", *_loggedInUserName);
@@ -262,8 +272,7 @@ bool NetworkService::resetPassword(std::string const& userName, std::string cons
 {
     log(Priority::Important, "network: reset password of user '" + userName + "'");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", userName);
@@ -282,8 +291,7 @@ bool NetworkService::setNewPassword(std::string const& userName, std::string con
 {
     log(Priority::Important, "network: set new password for user '" + userName + "'");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", userName);
@@ -303,8 +311,7 @@ bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& resu
 {
     log(Priority::Important, "network: get resource list");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("version", Const::ProgramVersion);
@@ -331,8 +338,7 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
 {
     log(Priority::Important, "network: get user list");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     try {
         httplib::Params params;
@@ -357,8 +363,7 @@ bool NetworkService::getEmojiTypeByResourceId(std::unordered_map<std::string, in
 {
     log(Priority::Important, "network: get liked resources");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", *_loggedInUserName);
@@ -386,8 +391,7 @@ bool NetworkService::getUserNamesForResourceAndEmojiType(std::set<std::string>& 
 {
     log(Priority::Important, "network: get user reactions for resource with id=" + simId + " and reaction type=" + std::to_string(likeType));
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("simId", simId);
@@ -415,8 +419,7 @@ bool NetworkService::toggleReactionForResource(std::string const& simId, int lik
 {
     log(Priority::Important, "network: toggle like for resource with id=" + simId);
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", *_loggedInUserName);
@@ -448,8 +451,7 @@ bool NetworkService::uploadResource(
 {
     log(Priority::Important, "network: upload resource with name='" + resourceName + "'");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::MultipartFormDataItems items = {
         {"userName", *_loggedInUserName, "", ""},
@@ -493,8 +495,7 @@ bool NetworkService::replaceResource(
 {
     log(Priority::Important, "network: replace resource with id='" + resourceId + "'");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::MultipartFormDataItems items = {
         {"userName", *_loggedInUserName, "", ""},
@@ -536,8 +537,7 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
         } else {
             log(Priority::Important, "network: download resource with id=" + simId);
 
-            httplib::Client client(_serverAddress);
-            configureClient(client);
+            auto client = createClient(_serverAddress);
 
             httplib::Params params;
             params.emplace("id", simId);
@@ -567,8 +567,7 @@ void NetworkService::incDownloadCounter(std::string const& simId)
     try {
         log(Priority::Important, "network: increment download counter for resource with id=" + simId);
 
-        httplib::Client client(_serverAddress);
-        configureClient(client);
+        auto client = createClient(_serverAddress);
 
         httplib::Params params;
         params.emplace("id", simId);
@@ -582,8 +581,7 @@ bool NetworkService::editResource(std::string const& simId, std::string const& n
 {
     log(Priority::Important, "network: edit resource with id=" + simId);
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", *_loggedInUserName);
@@ -605,8 +603,7 @@ bool NetworkService::moveResource(std::string const& simId, WorkspaceType target
 {
     log(Priority::Important, "network: move resource with id=" + simId + " to other workspace");
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", *_loggedInUserName);
@@ -627,8 +624,7 @@ bool NetworkService::deleteResource(std::string const& simId)
 {
     log(Priority::Important, "network: delete resource with id=" + simId);
 
-    httplib::Client client(_serverAddress);
-    configureClient(client);
+    auto client = createClient(_serverAddress);
 
     httplib::Params params;
     params.emplace("userName", *_loggedInUserName);
