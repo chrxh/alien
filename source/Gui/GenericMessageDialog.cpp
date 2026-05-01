@@ -1,5 +1,7 @@
 #include "GenericMessageDialog.h"
 
+#include <algorithm>
+
 #include <boost/algorithm/string.hpp>
 
 #include <imgui.h>
@@ -66,9 +68,7 @@ void GenericMessageDialog::processInformation()
         _sizeInitialized = true;
     }
 
-    ImGui::TextWrapped("%s", _message.c_str());
-
-    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
+    processMessageText();
     AlienGui::Separator();
 
     if (AlienGui::Button("OK")) {
@@ -85,9 +85,7 @@ void GenericMessageDialog::processYesNo()
         _sizeInitialized = true;
     }
 
-    ImGui::TextWrapped("%s", _message.c_str());
-
-    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
+    processMessageText();
     AlienGui::Separator();
 
     if (AlienGui::Button("Yes")) {
@@ -98,4 +96,12 @@ void GenericMessageDialog::processYesNo()
     if (AlienGui::Button("No")) {
         close();
     }
+}
+
+void GenericMessageDialog::processMessageText()
+{
+    auto messageHeight = std::max(scale(20.0f), ImGui::GetContentRegionAvail().y - scale(50.0f));
+    ImGui::BeginChild("MessageText", {0, messageHeight});
+    ImGui::TextWrapped("%s", _message.c_str());
+    ImGui::EndChild();
 }
