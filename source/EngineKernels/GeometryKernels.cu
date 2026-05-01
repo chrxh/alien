@@ -153,29 +153,19 @@ namespace
         return getCellColorByCode(object->color);
     }
 
-    __device__ __inline__ float getGeometryCullingMargin()
+    __device__ __inline__ bool isInVisibleRect(float2 const& pos, GeometryExtractionContext const& context)
     {
-        float result = 10.0f;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            result = max(result, cudaSimulationParameters.maxBindingDistance.value[i]);
-        }
-        return result;
-    }
-
-    __device__ __inline__ bool isInVisibleRect(float2 const& pos, float2 const& visibleTopLeft, float2 const& visibleBottomRight, float margin)
-    {
-        return pos.x >= visibleTopLeft.x - margin && pos.x <= visibleBottomRight.x + margin && pos.y >= visibleTopLeft.y - margin
-            && pos.y <= visibleBottomRight.y + margin;
+        return pos.x >= context.visibleTopLeft.x - context.cullingMargin && pos.x <= context.visibleBottomRight.x + context.cullingMargin
+            && pos.y >= context.visibleTopLeft.y - context.cullingMargin && pos.y <= context.visibleBottomRight.y + context.cullingMargin;
     }
 }
 
-__global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects, float2 visibleTopLeft, float2 visibleBottomRight)
+__global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects, GeometryExtractionContext context)
 {
     auto const& objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    auto const cullingMargin = getGeometryCullingMargin();
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (!isInVisibleRect(object->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (!isInVisibleRect(object->pos, context)) {
             continue;
         }
 
@@ -247,14 +237,13 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
 }
 
 __global__ void
-cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices, float2 visibleTopLeft, float2 visibleBottomRight)
+cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    auto const cullingMargin = getGeometryCullingMargin();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (!isInVisibleRect(object->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (!isInVisibleRect(object->pos, context)) {
             continue;
         }
 
@@ -264,7 +253,7 @@ cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t*
         // Add line indices for each connection
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
-            if (!isInVisibleRect(connectedObject->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+            if (!isInVisibleRect(connectedObject->pos, context)) {
                 continue;
             }
 
@@ -284,14 +273,13 @@ cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t*
 }
 
 __global__ void
-cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices, float2 visibleTopLeft, float2 visibleBottomRight)
+cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    auto const cullingMargin = getGeometryCullingMargin();
 
     auto addTriangle = [&](Object* object, uint64_t objectIndex, Object* connectedObject, Object* prevConnectedObject) {
-        if (!isInVisibleRect(connectedObject->pos, visibleTopLeft, visibleBottomRight, cullingMargin)
-            || !isInVisibleRect(prevConnectedObject->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (!isInVisibleRect(connectedObject->pos, context)
+            || !isInVisibleRect(prevConnectedObject->pos, context)) {
             return;
         }
         // Only add triangle once (avoid duplicates by checking ids)
@@ -310,7 +298,7 @@ cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, u
     };
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (!isInVisibleRect(object->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (!isInVisibleRect(object->pos, context)) {
             continue;
         }
         if (object->numConnections <= 1) {
@@ -352,14 +340,8 @@ cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, u
     }
 }
 
-__global__ void cudaExtractFluidParticleData(
-    SimulationData data,
-    FluidParticleVertexData* fluidParticleData,
-    uint64_t* numFluidParticles,
-    float2 visibleTopLeft,
-    float2 visibleBottomRight)
+__global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles, GeometryExtractionContext context)
 {
-    auto const cullingMargin = getGeometryCullingMargin();
     // Process energy particles - each particle goes to its index position
     {
         auto const& energyPartition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
@@ -370,7 +352,7 @@ __global__ void cudaExtractFluidParticleData(
             }
 
             auto pos = energy->pos;
-            if (!isInVisibleRect(pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+            if (!isInVisibleRect(pos, context)) {
                 continue;
             }
 
@@ -400,7 +382,7 @@ __global__ void cudaExtractFluidParticleData(
             if (object->type != ObjectType_Fluid) {
                 continue;
             }
-            if (!isInVisibleRect(object->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+            if (!isInVisibleRect(object->pos, context)) {
                 continue;
             }
 
@@ -527,21 +509,15 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void cudaExtractSelectedObjectData(
-    SimulationData data,
-    SelectedObjectVertexData* selectedObjectData,
-    uint64_t* numSelectedObjects,
-    float2 visibleTopLeft,
-    float2 visibleBottomRight)
+__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects, GeometryExtractionContext context)
 {
-    auto const cullingMargin = getGeometryCullingMargin();
     // Process selected cells
     auto const& objects = data.entities.objects;
     auto numObjects = objects.getNumEntries();
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numObjects; index += blockDim.x * gridDim.x) {
         auto const& object = objects.at(index);
-        if (object->selected == 1 && isInVisibleRect(object->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (object->selected == 1 && isInVisibleRect(object->pos, context)) {
             auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = object->pos.x;
@@ -556,7 +532,7 @@ __global__ void cudaExtractSelectedObjectData(
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numEnergies; index += blockDim.x * gridDim.x) {
         auto const& energy = energies.at(index);
-        if (energy->selected == 1 && isInVisibleRect(energy->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (energy->selected == 1 && isInVisibleRect(energy->pos, context)) {
             auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = energy->pos.x;
@@ -566,29 +542,23 @@ __global__ void cudaExtractSelectedObjectData(
     }
 }
 
-__global__ void cudaExtractSelectedConnectionData(
-    SimulationData data,
-    ConnectionArrowVertexData* connectionArrowData,
-    uint64_t* numConnectionArrowVertices,
-    float2 visibleTopLeft,
-    float2 visibleBottomRight)
+__global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    auto const cullingMargin = getGeometryCullingMargin();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
         if (object->selected == 0) {
             continue;
         }
-        if (!isInVisibleRect(object->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (!isInVisibleRect(object->pos, context)) {
             continue;
         }
 
         // Process each connection from this cell
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
-            if (!isInVisibleRect(connectedObject->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+            if (!isInVisibleRect(connectedObject->pos, context)) {
                 continue;
             }
 
@@ -645,19 +615,13 @@ __global__ void cudaExtractSelectedConnectionData(
         }
     }
 }
-__global__ void cudaExtractAttackEventData(
-    SimulationData data,
-    AttackEventVertexData* attackEventData,
-    uint64_t* numAttackEventVertices,
-    float2 visibleTopLeft,
-    float2 visibleBottomRight)
+__global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    auto const cullingMargin = getGeometryCullingMargin();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (!isInVisibleRect(object->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (!isInVisibleRect(object->pos, context)) {
             continue;
         }
 
@@ -678,7 +642,7 @@ __global__ void cudaExtractAttackEventData(
         }
         // Only process cells that have been attacked and have attackVisualization enabled
         if (eventCounter > 0 && event == CellEvent_Attacked) {
-            if (!isInVisibleRect(eventPos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+            if (!isInVisibleRect(eventPos, context)) {
                 continue;
             }
 
@@ -708,22 +672,16 @@ __global__ void cudaExtractAttackEventData(
         }
     }
 }
-__global__ void cudaExtractDetonationEventData(
-    SimulationData data,
-    DetonationEventVertexData* detonationEventData,
-    uint64_t* numDetonationEventVertices,
-    float2 visibleTopLeft,
-    float2 visibleBottomRight)
+__global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-    auto const cullingMargin = getGeometryCullingMargin();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
         if (object->type != ObjectType_Cell) {
             continue;
         }
-        if (!isInVisibleRect(object->pos, visibleTopLeft, visibleBottomRight, cullingMargin)) {
+        if (!isInVisibleRect(object->pos, context)) {
             continue;
         }
 
