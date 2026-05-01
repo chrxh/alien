@@ -1769,7 +1769,7 @@ void AlienGui::StatusBar(std::vector<std::string> const& textItems)
 {
     std::string text;
     for (auto const& textItem : textItems) {
-        text += " " ICON_FA_INFO_CIRCLE " " + textItem;
+        text += " " ICON_FA_INFO_CIRCLE " " + textItem + " ";
     }
     AlienGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
