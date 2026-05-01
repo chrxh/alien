@@ -27,6 +27,7 @@ private:
 
     void processInformation();
     void processYesNo();
+    void processMessageText();
 
     bool _sizeInitialized = false;
 
