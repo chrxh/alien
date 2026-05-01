@@ -152,13 +152,22 @@ namespace
         }
         return getCellColorByCode(object->color);
     }
+
+    __device__ __inline__ bool isInVisibleRect(float2 const& pos, GeometryExtractionContext const& context)
+    {
+        return pos.x >= context.visibleTopLeft.x - context.cullingMargin && pos.x <= context.visibleBottomRight.x + context.cullingMargin
+            && pos.y >= context.visibleTopLeft.y - context.cullingMargin && pos.y <= context.visibleBottomRight.y + context.cullingMargin;
+    }
 }
 
-__global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects)
+__global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects, GeometryExtractionContext context)
 {
     auto const& objectPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
+        if (!isInVisibleRect(object->pos, context)) {
+            continue;
+        }
 
         auto idx = alienAtomicAdd64(numObjects, uint64_t(1));
         if (objectData != nullptr) {
@@ -227,12 +236,16 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
     }
 }
 
-__global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices)
+__global__ void
+cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
+        if (!isInVisibleRect(object->pos, context)) {
+            continue;
+        }
 
         // Cell index is just the array index (stored in tempValue)
         uint64_t objectIndex = object->tempValue1.as_uint64;
@@ -240,6 +253,9 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
         // Add line indices for each connection
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
+            if (!isInVisibleRect(connectedObject->pos, context)) {
+                continue;
+            }
 
             // Only add each connection once (from lower index to higher index to avoid duplicates)
             if (object->id < connectedObject->id) {
@@ -256,11 +272,16 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
     }
 }
 
-__global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices)
+__global__ void
+cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     auto addTriangle = [&](Object* object, uint64_t objectIndex, Object* connectedObject, Object* prevConnectedObject) {
+        if (!isInVisibleRect(connectedObject->pos, context)
+            || !isInVisibleRect(prevConnectedObject->pos, context)) {
+            return;
+        }
         // Only add triangle once (avoid duplicates by checking ids)
         if (Math::length(object->pos - connectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
             && Math::length(object->pos - prevConnectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
@@ -277,6 +298,9 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     };
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
+        if (!isInVisibleRect(object->pos, context)) {
+            continue;
+        }
         if (object->numConnections <= 1) {
             continue;
         }
@@ -316,7 +340,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     }
 }
 
-__global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles)
+__global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles, GeometryExtractionContext context)
 {
     // Process energy particles - each particle goes to its index position
     {
@@ -328,6 +352,9 @@ __global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleV
             }
 
             auto pos = energy->pos;
+            if (!isInVisibleRect(pos, context)) {
+                continue;
+            }
 
             float intensity = (energy->energy) / 350.0f + 0.10f;
             if (energy->selected) {
@@ -353,6 +380,9 @@ __global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleV
         for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
             auto const& object = data.entities.objects.at(index);
             if (object->type != ObjectType_Fluid) {
+                continue;
+            }
+            if (!isInVisibleRect(object->pos, context)) {
                 continue;
             }
 
@@ -479,7 +509,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
+__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects, GeometryExtractionContext context)
 {
     // Process selected cells
     auto const& objects = data.entities.objects;
@@ -487,7 +517,7 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numObjects; index += blockDim.x * gridDim.x) {
         auto const& object = objects.at(index);
-        if (object->selected == 1) {
+        if (object->selected == 1 && isInVisibleRect(object->pos, context)) {
             auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = object->pos.x;
@@ -502,7 +532,7 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
 
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numEnergies; index += blockDim.x * gridDim.x) {
         auto const& energy = energies.at(index);
-        if (energy->selected == 1) {
+        if (energy->selected == 1 && isInVisibleRect(energy->pos, context)) {
             auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = energy->pos.x;
@@ -512,7 +542,7 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
     }
 }
 
-__global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
+__global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
@@ -521,10 +551,16 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
         if (object->selected == 0) {
             continue;
         }
+        if (!isInVisibleRect(object->pos, context)) {
+            continue;
+        }
 
         // Process each connection from this cell
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
+            if (!isInVisibleRect(connectedObject->pos, context)) {
+                continue;
+            }
 
             // Only add each connection once (from lower id to higher id to avoid duplicates)
             if (object->id >= connectedObject->id) {
@@ -579,12 +615,15 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
         }
     }
 }
-__global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices)
+__global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
+        if (!isInVisibleRect(object->pos, context)) {
+            continue;
+        }
 
         CellEvent event;
         uint8_t eventCounter;
@@ -603,6 +642,9 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
         }
         // Only process cells that have been attacked and have attackVisualization enabled
         if (eventCounter > 0 && event == CellEvent_Attacked) {
+            if (!isInVisibleRect(eventPos, context)) {
+                continue;
+            }
 
             // Check if the attacker position is close enough to draw
             if (Math::length(eventPos - object->pos) < 10.0f) {
@@ -630,13 +672,16 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
         }
     }
 }
-__global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices)
+__global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
         if (object->type != ObjectType_Cell) {
+            continue;
+        }
+        if (!isInVisibleRect(object->pos, context)) {
             continue;
         }
 

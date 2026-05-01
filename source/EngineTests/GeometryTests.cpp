@@ -75,6 +75,27 @@ TEST_F(GeometryTests, copyBuffers_objects)
     EXPECT_EQ(3u, cellData.size());
 }
 
+TEST_F(GeometryTests, copyBuffers_cullsObjectsOutsideVisibleRect)
+{
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({5.0f, 5.0f}),
+        ObjectDesc().id(2).pos({500.0f, 500.0f}),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _GeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {10, 10}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+
+    auto numObjects = geometryBuffers->getNumObjects();
+    EXPECT_EQ(1u, numObjects.objects);
+
+    auto cellData = geometryBuffers->getCellData();
+    ASSERT_EQ(1u, cellData.size());
+    EXPECT_FLOAT_EQ(5.0f, cellData.at(0).pos[0]);
+    EXPECT_FLOAT_EQ(5.0f, cellData.at(0).pos[1]);
+}
+
 TEST_F(GeometryTests, copyBuffers_fluidParticles)
 {
     auto data = Desc().energies({
@@ -97,6 +118,27 @@ TEST_F(GeometryTests, copyBuffers_fluidParticles)
     EXPECT_EQ(4u, particleData.size());
 }
 
+TEST_F(GeometryTests, copyBuffers_cullsFluidParticlesOutsideVisibleRect)
+{
+    auto data = Desc().energies({
+        EnergyDesc().id(1).pos({5.0f, 5.0f}).energy(10.0f),
+        EnergyDesc().id(2).pos({500.0f, 500.0f}).energy(10.0f),
+    });
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _GeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {10, 10}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+
+    auto numObjects = geometryBuffers->getNumObjects();
+    EXPECT_EQ(1u, numObjects.fluidParticles);
+
+    auto particleData = geometryBuffers->getFluidParticleData();
+    ASSERT_EQ(1u, particleData.size());
+    EXPECT_FLOAT_EQ(5.0f, particleData.at(0).pos[0]);
+    EXPECT_FLOAT_EQ(5.0f, particleData.at(0).pos[1]);
+}
+
 TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
 {
     auto data = Desc().addCreature({
@@ -116,6 +158,31 @@ TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
     EXPECT_EQ(2u, numObjects.lineIndices);
 
     // Verify buffer entries
+    auto lines = geometryBuffers->getLineIndices();
+    EXPECT_EQ(2u, lines.size());
+}
+
+TEST_F(GeometryTests, copyBuffers_cullsConnectionsOutsideVisibleRect)
+{
+    auto data = Desc().addCreature({
+        ObjectDesc().id(1).pos({5.0f, 5.0f}),
+        ObjectDesc().id(2).pos({6.0f, 5.0f}),
+        ObjectDesc().id(3).pos({500.0f, 500.0f}),
+        ObjectDesc().id(4).pos({501.0f, 500.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(3, 4);
+    _simulationFacade->setSimulationData(data);
+
+    auto geometryBuffers = _GeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {10, 10}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+
+    auto numObjects = geometryBuffers->getNumObjects();
+    EXPECT_EQ(2u, numObjects.objects);
+    EXPECT_EQ(2u, numObjects.lineIndices);
+
     auto lines = geometryBuffers->getLineIndices();
     EXPECT_EQ(2u, lines.size());
 }
