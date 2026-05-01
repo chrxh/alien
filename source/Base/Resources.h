@@ -6,7 +6,7 @@ namespace Const
 {
     std::string const ProgramVersion = "5.0.0-alpha.12";
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
-    std::string const AlienServerURL = "http://85.214.181.38";
+    std::string const AlienServerURL = "https://api.alien-project.org";
 
     std::filesystem::path const ResourcePath = "resources";
     std::filesystem::path const AutosavePath = ResourcePath / "autosave";
