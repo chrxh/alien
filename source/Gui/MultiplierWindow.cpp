@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
+#include <Fonts/AlienIconFont.h>
 
 #include <Base/GlobalSettings.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -13,8 +14,6 @@
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 
-#include "Fonts/AlienIconFont.h"
-#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
