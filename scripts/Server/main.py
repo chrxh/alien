@@ -304,10 +304,10 @@ def _send_activation_email(recipient: str, user_name: str, activation_code: str)
 # raised so that the API endpoint still succeeds even when Discord is
 # unreachable.
 
-_DISCORD_AVATAR_URL = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/logo.png"
-_DISCORD_GALAXY_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/galaxy.png"
-_DISCORD_GENOME_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/genome.png"
-_DISCORD_USERPIC_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/userpic.png"
+_DISCORD_AVATAR_URL = "https://raw.githubusercontent.com/chrxh/alien/develop/resources/images/logo.png"
+_DISCORD_GALAXY_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/resources/images/galaxy.png"
+_DISCORD_GENOME_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/resources/images/genome.png"
+_DISCORD_USERPIC_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/resources/images/userpic.png"
 # _DISCORD_AVATAR_URL = "https://alien-project.org/alien-server/logo.png"
 # _DISCORD_GALAXY_ICON = "https://alien-project.org/alien-server/galaxy.png"
 # _DISCORD_GENOME_ICON = "https://alien-project.org/alien-server/genome.png"
