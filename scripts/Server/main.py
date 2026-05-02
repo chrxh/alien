@@ -6,6 +6,8 @@ import os
 import secrets
 import smtplib
 import urllib.request
+import urllib.error
+
 from email.message import EmailMessage
 
 from fastapi import FastAPI, Form, HTTPException, Request, Response
@@ -306,36 +308,44 @@ _DISCORD_AVATAR_URL = "https://raw.githubusercontent.com/chrxh/alien/develop/scr
 _DISCORD_GALAXY_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/galaxy.png"
 _DISCORD_GENOME_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/genome.png"
 _DISCORD_USERPIC_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/userpic.png"
+# _DISCORD_AVATAR_URL = "https://alien-project.org/alien-server/logo.png"
+# _DISCORD_GALAXY_ICON = "https://alien-project.org/alien-server/galaxy.png"
+# _DISCORD_GENOME_ICON = "https://alien-project.org/alien-server/genome.png"
+# _DISCORD_USERPIC_ICON = "https://alien-project.org/alien-server/userpic.png"
 
 _discord_logger = logging.getLogger("alien-server.discord")
 
 
 def _send_discord_message(payload: dict) -> bool:
-    """POST ``payload`` as JSON to the configured Discord webhook.
-
-    Returns True on success, False when the webhook URL is not configured or
-    the request fails. Failures are logged, not raised.
-    """
     webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
     if not webhook_url:
         _discord_logger.warning("DISCORD_WEBHOOK_URL not set; skipping Discord notification")
         return False
 
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    req = urllib.request.Request(
-        webhook_url,
-        data=body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "*/*",
+        # Pick one of these; “curl” UA often works well:
+        "User-Agent": "curl/8.0.0",
+        # or:
+        # "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) alien-server/1.0",
+    }
+
+    req = urllib.request.Request(webhook_url, data=body, headers=headers, method="POST")
+
     try:
-        with urllib.request.urlopen(req, timeout=10):
-            pass
-        return True
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            # Discord webhooks return 204 on success
+            return 200 <= resp.status < 300 or resp.status == 204
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        _discord_logger.error("Discord HTTPError %s: %s", exc.code, detail)
+        return False
     except Exception as exc:
         _discord_logger.error("Failed to send Discord notification: %s", exc)
         return False
-
 
 def _discord_notify_new_user(user_name: str, gpu: str | None) -> None:
     fields = [{"name": "Name", "value": user_name, "inline": True}]
