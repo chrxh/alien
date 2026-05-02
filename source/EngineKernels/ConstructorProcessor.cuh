@@ -77,7 +77,7 @@ private:
 /************************************************************************/
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
-    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto object = data.entities.objects.at(i);
         if (object->type != ObjectType_Cell) {
@@ -343,14 +343,6 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     //}
 
     auto newObjectPos = hostObject->pos + posDelta;
-    if (ObjectConnectionProcessor::existCrossingConnections(
-            data,
-            hostObject->pos,
-            constructionData.lastConstructionObject->pos,
-            cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color],
-            hostObject->detached)) {
-        return nullptr;
-    }
 
     Object* objectsToConnect[3] = {};
     int numObjectsToConnect;
