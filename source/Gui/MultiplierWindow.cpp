@@ -4,6 +4,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/GlobalSettings.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -27,7 +28,66 @@ namespace
 
 void MultiplierWindow::initIntern()
 {
+    auto& settings = GlobalSettings::get();
 
+    _mode = settings.getValue("editors.multiplier.mode", _mode);
+
+    _gridParameters._horizontalNumber = settings.getValue("editors.multiplier.grid.horizontal number", _gridParameters._horizontalNumber);
+    _gridParameters._horizontalDistance = settings.getValue("editors.multiplier.grid.horizontal distance", _gridParameters._horizontalDistance);
+    _gridParameters._horizontalAngleInc = settings.getValue("editors.multiplier.grid.horizontal angle inc", _gridParameters._horizontalAngleInc);
+    _gridParameters._horizontalVelXinc = settings.getValue("editors.multiplier.grid.horizontal vel x inc", _gridParameters._horizontalVelXinc);
+    _gridParameters._horizontalVelYinc = settings.getValue("editors.multiplier.grid.horizontal vel y inc", _gridParameters._horizontalVelYinc);
+    _gridParameters._horizontalAngularVelInc =
+        settings.getValue("editors.multiplier.grid.horizontal angular vel inc", _gridParameters._horizontalAngularVelInc);
+    _gridParameters._verticalNumber = settings.getValue("editors.multiplier.grid.vertical number", _gridParameters._verticalNumber);
+    _gridParameters._verticalDistance = settings.getValue("editors.multiplier.grid.vertical distance", _gridParameters._verticalDistance);
+    _gridParameters._verticalAngleInc = settings.getValue("editors.multiplier.grid.vertical angle inc", _gridParameters._verticalAngleInc);
+    _gridParameters._verticalVelXinc = settings.getValue("editors.multiplier.grid.vertical vel x inc", _gridParameters._verticalVelXinc);
+    _gridParameters._verticalVelYinc = settings.getValue("editors.multiplier.grid.vertical vel y inc", _gridParameters._verticalVelYinc);
+    _gridParameters._verticalAngularVelInc =
+        settings.getValue("editors.multiplier.grid.vertical angular vel inc", _gridParameters._verticalAngularVelInc);
+
+    _randomParameters._number = settings.getValue("editors.multiplier.random.number", _randomParameters._number);
+    _randomParameters._minAngle = settings.getValue("editors.multiplier.random.min angle", _randomParameters._minAngle);
+    _randomParameters._maxAngle = settings.getValue("editors.multiplier.random.max angle", _randomParameters._maxAngle);
+    _randomParameters._minVelX = settings.getValue("editors.multiplier.random.min vel x", _randomParameters._minVelX);
+    _randomParameters._maxVelX = settings.getValue("editors.multiplier.random.max vel x", _randomParameters._maxVelX);
+    _randomParameters._minVelY = settings.getValue("editors.multiplier.random.min vel y", _randomParameters._minVelY);
+    _randomParameters._maxVelY = settings.getValue("editors.multiplier.random.max vel y", _randomParameters._maxVelY);
+    _randomParameters._minAngularVel = settings.getValue("editors.multiplier.random.min angular vel", _randomParameters._minAngularVel);
+    _randomParameters._maxAngularVel = settings.getValue("editors.multiplier.random.max angular vel", _randomParameters._maxAngularVel);
+    _randomParameters._overlappingCheck = settings.getValue("editors.multiplier.random.overlapping check", _randomParameters._overlappingCheck);
+}
+
+void MultiplierWindow::shutdownIntern()
+{
+    auto& settings = GlobalSettings::get();
+
+    settings.setValue("editors.multiplier.mode", _mode);
+
+    settings.setValue("editors.multiplier.grid.horizontal number", _gridParameters._horizontalNumber);
+    settings.setValue("editors.multiplier.grid.horizontal distance", _gridParameters._horizontalDistance);
+    settings.setValue("editors.multiplier.grid.horizontal angle inc", _gridParameters._horizontalAngleInc);
+    settings.setValue("editors.multiplier.grid.horizontal vel x inc", _gridParameters._horizontalVelXinc);
+    settings.setValue("editors.multiplier.grid.horizontal vel y inc", _gridParameters._horizontalVelYinc);
+    settings.setValue("editors.multiplier.grid.horizontal angular vel inc", _gridParameters._horizontalAngularVelInc);
+    settings.setValue("editors.multiplier.grid.vertical number", _gridParameters._verticalNumber);
+    settings.setValue("editors.multiplier.grid.vertical distance", _gridParameters._verticalDistance);
+    settings.setValue("editors.multiplier.grid.vertical angle inc", _gridParameters._verticalAngleInc);
+    settings.setValue("editors.multiplier.grid.vertical vel x inc", _gridParameters._verticalVelXinc);
+    settings.setValue("editors.multiplier.grid.vertical vel y inc", _gridParameters._verticalVelYinc);
+    settings.setValue("editors.multiplier.grid.vertical angular vel inc", _gridParameters._verticalAngularVelInc);
+
+    settings.setValue("editors.multiplier.random.number", _randomParameters._number);
+    settings.setValue("editors.multiplier.random.min angle", _randomParameters._minAngle);
+    settings.setValue("editors.multiplier.random.max angle", _randomParameters._maxAngle);
+    settings.setValue("editors.multiplier.random.min vel x", _randomParameters._minVelX);
+    settings.setValue("editors.multiplier.random.max vel x", _randomParameters._maxVelX);
+    settings.setValue("editors.multiplier.random.min vel y", _randomParameters._minVelY);
+    settings.setValue("editors.multiplier.random.max vel y", _randomParameters._maxVelY);
+    settings.setValue("editors.multiplier.random.min angular vel", _randomParameters._minAngularVel);
+    settings.setValue("editors.multiplier.random.max angular vel", _randomParameters._maxAngularVel);
+    settings.setValue("editors.multiplier.random.overlapping check", _randomParameters._overlappingCheck);
 }
 
 MultiplierWindow::MultiplierWindow()
