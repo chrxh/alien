@@ -77,7 +77,7 @@ private:
 /************************************************************************/
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
-    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto object = data.entities.objects.at(i);
         if (object->type != ObjectType_Cell) {
