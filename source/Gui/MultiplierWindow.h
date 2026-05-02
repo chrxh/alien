@@ -24,6 +24,7 @@ private:
     MultiplierWindow();
 
     void initIntern() override;
+    void shutdownIntern() override;
     void processIntern() override;
     bool isShown() override;
 

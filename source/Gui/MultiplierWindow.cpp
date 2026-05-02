@@ -4,6 +4,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/GlobalSettings.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
@@ -27,7 +28,62 @@ namespace
 
 void MultiplierWindow::initIntern()
 {
+    _mode = GlobalSettings::get().getValue("editors.multiplier.mode", _mode);
 
+    _gridParameters._horizontalNumber = GlobalSettings::get().getValue("editors.multiplier.grid.horizontal number", _gridParameters._horizontalNumber);
+    _gridParameters._horizontalDistance = GlobalSettings::get().getValue("editors.multiplier.grid.horizontal distance", _gridParameters._horizontalDistance);
+    _gridParameters._horizontalAngleInc = GlobalSettings::get().getValue("editors.multiplier.grid.horizontal angle inc", _gridParameters._horizontalAngleInc);
+    _gridParameters._horizontalVelXinc = GlobalSettings::get().getValue("editors.multiplier.grid.horizontal vel x inc", _gridParameters._horizontalVelXinc);
+    _gridParameters._horizontalVelYinc = GlobalSettings::get().getValue("editors.multiplier.grid.horizontal vel y inc", _gridParameters._horizontalVelYinc);
+    _gridParameters._horizontalAngularVelInc =
+        GlobalSettings::get().getValue("editors.multiplier.grid.horizontal angular vel inc", _gridParameters._horizontalAngularVelInc);
+    _gridParameters._verticalNumber = GlobalSettings::get().getValue("editors.multiplier.grid.vertical number", _gridParameters._verticalNumber);
+    _gridParameters._verticalDistance = GlobalSettings::get().getValue("editors.multiplier.grid.vertical distance", _gridParameters._verticalDistance);
+    _gridParameters._verticalAngleInc = GlobalSettings::get().getValue("editors.multiplier.grid.vertical angle inc", _gridParameters._verticalAngleInc);
+    _gridParameters._verticalVelXinc = GlobalSettings::get().getValue("editors.multiplier.grid.vertical vel x inc", _gridParameters._verticalVelXinc);
+    _gridParameters._verticalVelYinc = GlobalSettings::get().getValue("editors.multiplier.grid.vertical vel y inc", _gridParameters._verticalVelYinc);
+    _gridParameters._verticalAngularVelInc =
+        GlobalSettings::get().getValue("editors.multiplier.grid.vertical angular vel inc", _gridParameters._verticalAngularVelInc);
+
+    _randomParameters._number = GlobalSettings::get().getValue("editors.multiplier.random.number", _randomParameters._number);
+    _randomParameters._minAngle = GlobalSettings::get().getValue("editors.multiplier.random.min angle", _randomParameters._minAngle);
+    _randomParameters._maxAngle = GlobalSettings::get().getValue("editors.multiplier.random.max angle", _randomParameters._maxAngle);
+    _randomParameters._minVelX = GlobalSettings::get().getValue("editors.multiplier.random.min vel x", _randomParameters._minVelX);
+    _randomParameters._maxVelX = GlobalSettings::get().getValue("editors.multiplier.random.max vel x", _randomParameters._maxVelX);
+    _randomParameters._minVelY = GlobalSettings::get().getValue("editors.multiplier.random.min vel y", _randomParameters._minVelY);
+    _randomParameters._maxVelY = GlobalSettings::get().getValue("editors.multiplier.random.max vel y", _randomParameters._maxVelY);
+    _randomParameters._minAngularVel = GlobalSettings::get().getValue("editors.multiplier.random.min angular vel", _randomParameters._minAngularVel);
+    _randomParameters._maxAngularVel = GlobalSettings::get().getValue("editors.multiplier.random.max angular vel", _randomParameters._maxAngularVel);
+    _randomParameters._overlappingCheck = GlobalSettings::get().getValue("editors.multiplier.random.overlapping check", _randomParameters._overlappingCheck);
+}
+
+void MultiplierWindow::shutdownIntern()
+{
+    GlobalSettings::get().setValue("editors.multiplier.mode", _mode);
+
+    GlobalSettings::get().setValue("editors.multiplier.grid.horizontal number", _gridParameters._horizontalNumber);
+    GlobalSettings::get().setValue("editors.multiplier.grid.horizontal distance", _gridParameters._horizontalDistance);
+    GlobalSettings::get().setValue("editors.multiplier.grid.horizontal angle inc", _gridParameters._horizontalAngleInc);
+    GlobalSettings::get().setValue("editors.multiplier.grid.horizontal vel x inc", _gridParameters._horizontalVelXinc);
+    GlobalSettings::get().setValue("editors.multiplier.grid.horizontal vel y inc", _gridParameters._horizontalVelYinc);
+    GlobalSettings::get().setValue("editors.multiplier.grid.horizontal angular vel inc", _gridParameters._horizontalAngularVelInc);
+    GlobalSettings::get().setValue("editors.multiplier.grid.vertical number", _gridParameters._verticalNumber);
+    GlobalSettings::get().setValue("editors.multiplier.grid.vertical distance", _gridParameters._verticalDistance);
+    GlobalSettings::get().setValue("editors.multiplier.grid.vertical angle inc", _gridParameters._verticalAngleInc);
+    GlobalSettings::get().setValue("editors.multiplier.grid.vertical vel x inc", _gridParameters._verticalVelXinc);
+    GlobalSettings::get().setValue("editors.multiplier.grid.vertical vel y inc", _gridParameters._verticalVelYinc);
+    GlobalSettings::get().setValue("editors.multiplier.grid.vertical angular vel inc", _gridParameters._verticalAngularVelInc);
+
+    GlobalSettings::get().setValue("editors.multiplier.random.number", _randomParameters._number);
+    GlobalSettings::get().setValue("editors.multiplier.random.min angle", _randomParameters._minAngle);
+    GlobalSettings::get().setValue("editors.multiplier.random.max angle", _randomParameters._maxAngle);
+    GlobalSettings::get().setValue("editors.multiplier.random.min vel x", _randomParameters._minVelX);
+    GlobalSettings::get().setValue("editors.multiplier.random.max vel x", _randomParameters._maxVelX);
+    GlobalSettings::get().setValue("editors.multiplier.random.min vel y", _randomParameters._minVelY);
+    GlobalSettings::get().setValue("editors.multiplier.random.max vel y", _randomParameters._maxVelY);
+    GlobalSettings::get().setValue("editors.multiplier.random.min angular vel", _randomParameters._minAngularVel);
+    GlobalSettings::get().setValue("editors.multiplier.random.max angular vel", _randomParameters._maxAngularVel);
+    GlobalSettings::get().setValue("editors.multiplier.random.overlapping check", _randomParameters._overlappingCheck);
 }
 
 MultiplierWindow::MultiplierWindow()
