@@ -25,6 +25,7 @@ jobs:
       with:
         submodules: recursive
         clean: false
+        fetch-depth: 0
     
     - name: Unshallow vcpkg submodule
       run: |
