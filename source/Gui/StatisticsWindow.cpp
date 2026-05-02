@@ -6,6 +6,8 @@
 #include <boost/algorithm/string.hpp>
 
 #include <imgui.h>
+#include <ImFileDialog.h>
+#include <implot.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
@@ -22,10 +24,6 @@
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
-
-#include <ImFileDialog.h>
-#include <implot.h>
-#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
@@ -201,7 +199,7 @@ void StatisticsWindow::processHistogramsTab()
     if (ImPlot::BeginPlot("##Histograms", ImVec2(-1, -1))) {
         ImPlot::SetupAxisTicks(ImAxis_Y1, positionsY, 5, labelsY);
         ImPlot::SetupAxisTicks(ImAxis_X1, positionsX, 5, labelsX);
-        ImPlot::SetupAxes("Age", "Cell count");
+        ImPlot::SetupAxes("Age", "Object count");
         ImPlot::SetupAxisFormat(ImAxis_X1, "");
         auto const width = 1.0f / MAX_COLORS;
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -304,7 +302,7 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numObjects);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Cells");
+        AlienGui::Text("Objects");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
