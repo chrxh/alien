@@ -343,6 +343,14 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     //}
 
     auto newObjectPos = hostObject->pos + posDelta;
+    if (ObjectConnectionProcessor::existCrossingConnections(
+            data,
+            hostObject->pos,
+            constructionData.lastConstructionObject->pos,
+            cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color],
+            hostObject->detached)) {
+        return nullptr;
+    }
 
     Object* objectsToConnect[3] = {};
     int numObjectsToConnect;
