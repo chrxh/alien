@@ -75,9 +75,13 @@ jobs:
     - name: Check for engine source changes
       id: engine_changes
       run: |
-        git fetch origin ${{ github.base_ref || 'develop' }} 2>/dev/null || true
-        BASE_SHA=$(git merge-base HEAD origin/${{ github.base_ref || 'develop' }} 2>/dev/null || git rev-parse HEAD^1 2>/dev/null || echo "")
-        if [ -z "$BASE_SHA" ]; then
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          git fetch origin ${{ github.base_ref }} 2>/dev/null || true
+          BASE_SHA=$(git merge-base HEAD origin/${{ github.base_ref }} 2>/dev/null || echo "")
+        else
+          BASE_SHA="${{ github.event.before }}"
+        fi
+        if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
           echo "changed=true" >> $GITHUB_OUTPUT
         else
           CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
