@@ -73,7 +73,83 @@ jobs:
         ./NetworkTests
         ./PersisterTests
 
+    - name: Check for engine source changes
+      id: engine_changes
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          git fetch origin ${{ github.base_ref }} 2>/dev/null || true
+          BASE_SHA=$(git merge-base HEAD origin/${{ github.base_ref }} 2>/dev/null || echo "")
+        else
+          BASE_SHA="${{ github.event.before }}"
+        fi
+        if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
+            source/EngineInterface \
+            source/EngineImpl \
+            source/EngineKernels \
+            source/EngineTestData \
+            source/EngineTests)
+          if [ -n "$CHANGED" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+        fi
+
+    - name: Check previous EngineTests result
+      id: previous_engine_tests
+      if: steps.engine_changes.outputs.changed != 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const branch = context.payload.pull_request?.head?.ref || context.ref.replace('refs/heads/', '');
+          const runs = await github.paginate(
+            github.rest.actions.listWorkflowRuns,
+            {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ubuntu-ci.yml',
+              branch,
+              status: 'completed',
+              per_page: 100,
+            }
+          );
+
+          for (const run of runs) {
+            if (run.id === context.runId) {
+              continue;
+            }
+
+            const jobs = await github.paginate(
+              github.rest.actions.listJobsForWorkflowRun,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id,
+                per_page: 100,
+              }
+            );
+
+            for (const job of jobs) {
+              const step = job.steps?.find(step => step.name === 'Run EngineTests');
+              if (!step || step.conclusion === 'skipped' || step.conclusion == null) {
+                continue;
+              }
+
+              const failed = step.conclusion !== 'success';
+              core.info(`Last executed EngineTests step conclusion on branch ${branch}: ${step.conclusion} (run ${run.id})`);
+              core.setOutput('failed', failed ? 'true' : 'false');
+              return;
+            }
+          }
+
+          core.info(`No previous executed EngineTests step found on branch ${branch}.`);
+          core.setOutput('failed', 'false');
+
     - name: Run EngineTests
+      if: steps.engine_changes.outputs.changed == 'true' || steps.previous_engine_tests.outputs.failed == 'true'
       run: |
         cd build
         ./EngineTests
