@@ -1,4 +1,4 @@
-name: CMake
+name: linux-build-and-integration-tests
 
 on:
   push:
