@@ -986,6 +986,9 @@ bool AlienGui::SelectableButton(SelectableButtonParameters const& parameters, bo
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)buttonColorHovered);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)buttonColorActive);
     auto result = ImGui::Button(parameters._name.c_str(), {scale(parameters._width), 0});
+    if (parameters._tooltip.has_value()) {
+        AlienGui::Tooltip(*parameters._tooltip);
+    }
     if (result) {
         value = !value;
     }
