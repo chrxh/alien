@@ -129,8 +129,11 @@ void OverlayController::processProgressAnimation()
         auto getPoint = [&](int index, float offset) {
             auto t = toFloat(index) / toFloat(helixSegments - 1);
             auto angle = t * helixTurns * 2.0f * Const::Pi + phase + offset;
+            auto amplitudeWave = (sinf(t * 5.0f * Const::Pi - duration / 620.0f) + 1.0f) / 2.0f;
+            auto amplitudePulse = 0.85f + 0.15f * sinf(duration / 900.0f);
+            auto localHelixHeight = helixHeight * (0.6f + 0.4f * amplitudeWave) * amplitudePulse;
             auto x = left + t * helixWidth;
-            auto y = center.y + height / 2 + sinf(angle) * helixHeight;
+            auto y = center.y + height / 2 + sinf(angle) * localHelixHeight;
             auto depth = (cosf(angle) + 1.0f) / 2.0f;
             return std::tuple<ImVec2, float>{ImVec2{x, y}, depth};
         };
