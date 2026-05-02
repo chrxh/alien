@@ -318,6 +318,7 @@ def _send_discord_message(payload: dict) -> bool:
     """
     webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
     if not webhook_url:
+        _discord_logger.warning("DISCORD_WEBHOOK_URL not set; skipping Discord notification")
         return False
 
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
