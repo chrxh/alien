@@ -1,6 +1,7 @@
 #include "OverlayController.h"
 
 #include <cmath>
+#include <tuple>
 
 #include <imgui.h>
 
@@ -8,12 +9,12 @@
 
 #include <Base/Math.h>
 
+#include <PersisterInterface/PersisterFacade.h>
 #include "AlienGui.h"
 #include "MainLoopEntityController.h"
 #include "StyleRepository.h"
 #include "UiController.h"
 #include "Viewport.h"
-#include <PersisterInterface/PersisterFacade.h>
 
 namespace
 {
@@ -24,10 +25,7 @@ namespace
     auto constexpr FadeoutProgressAnimationDuration = 1000;
 }
 
-void OverlayController::setup()
-{
-
-}
+void OverlayController::setup() {}
 
 void OverlayController::process()
 {
@@ -118,18 +116,53 @@ void OverlayController::processProgressAnimation()
             ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f));
-        auto N = 16 + toInt(powf(sinf(duration / 500.0f - Const::Pi / 4) + 1, 3.0f) * 5);
-        for (int i = 0; i < N; ++i) {
-            auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - duration / 700.0f /** (1.0f + 0.3f * sinf(std::min(5000.0f, duration) / 1000))*/);
-            auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - duration / 100.0f /** (1.0f + 0.3f * cosf(std::min(5000.0f, duration) / 1000))*/);
-            //auto hue = toFloat((i * 1000 / N + toInt(duration)) % 3000) / 4500.0f;
-            //hue = hue < 0.33f ? 0.66f + hue : 0.66f + 0.66f - hue;
-            auto y1 = center.y + height / 2 - amplitude1 * height;
-            auto y2 = center.y + height / 2 - amplitude2 * height;
-            drawList->AddRectFilled(
-                ImVec2{center.x - width / 2 + toFloat(i) / N * width, std::min(y1, y2)},
-                ImVec2{center.x - width / 2 + toFloat(i + 1) / N * width - scale(3), std::max(y1, y2)},
-                ImColor::HSV(0.625f, 0.8f, 0.45f, 0.7f * alpha));
+        auto const helixSegments = 64;
+        auto const helixTurns = 2.75f;
+        auto const helixHeight = scale(22.0f);
+        auto const helixWidth = width * 1.15f;
+        auto const phase = duration / 420.0f;
+        auto const left = center.x - helixWidth / 2;
+        auto const strandThickness = scale(2.0f);
+        auto const rungThickness = scale(1.0f);
+        auto const dotRadius = scale(2.2f);
+
+        auto getPoint = [&](int index, float offset) {
+            auto t = toFloat(index) / toFloat(helixSegments - 1);
+            auto angle = t * helixTurns * 2.0f * Const::Pi + phase + offset;
+            auto x = left + t * helixWidth;
+            auto y = center.y + height / 2 + sinf(angle) * helixHeight;
+            auto depth = (cosf(angle) + 1.0f) / 2.0f;
+            return std::tuple<ImVec2, float>{ImVec2{x, y}, depth};
+        };
+
+        for (int i = 0; i < helixSegments; i += 4) {
+            auto [point1, depth1] = getPoint(i, 0.0f);
+            auto [point2, depth2] = getPoint(i, Const::Pi);
+            auto depth = (depth1 + depth2) / 2.0f;
+            drawList->AddLine(point1, point2, ImColor::HSV(0.58f, 0.7f, 0.5f, (0.25f + depth * 0.25f) * alpha), rungThickness);
+        }
+
+        for (int i = 1; i < helixSegments; ++i) {
+            auto [previousPoint1, previousDepth1] = getPoint(i - 1, 0.0f);
+            auto [currentPoint1, currentDepth1] = getPoint(i, 0.0f);
+            auto [previousPoint2, previousDepth2] = getPoint(i - 1, Const::Pi);
+            auto [currentPoint2, currentDepth2] = getPoint(i, Const::Pi);
+            auto depth1 = (previousDepth1 + currentDepth1) / 2.0f;
+            auto depth2 = (previousDepth2 + currentDepth2) / 2.0f;
+
+            drawList->AddLine(
+                previousPoint1, currentPoint1, ImColor::HSV(0.61f, 0.85f, 0.65f + depth1 * 0.25f, (0.45f + depth1 * 0.35f) * alpha), strandThickness);
+            drawList->AddLine(
+                previousPoint2, currentPoint2, ImColor::HSV(0.67f, 0.85f, 0.65f + depth2 * 0.25f, (0.45f + depth2 * 0.35f) * alpha), strandThickness);
+        }
+
+        for (int i = 0; i < helixSegments; i += 2) {
+            auto [point1, depth1] = getPoint(i, 0.0f);
+            auto [point2, depth2] = getPoint(i, Const::Pi);
+            drawList->AddCircleFilled(
+                point1, dotRadius * (0.75f + depth1 * 0.5f), ImColor::HSV(0.61f, 0.75f, 0.75f + depth1 * 0.2f, (0.5f + depth1 * 0.4f) * alpha));
+            drawList->AddCircleFilled(
+                point2, dotRadius * (0.75f + depth2 * 0.5f), ImColor::HSV(0.67f, 0.75f, 0.75f + depth2 * 0.2f, (0.5f + depth2 * 0.4f) * alpha));
         }
         drawList->AddText(
             StyleRepository::get().getReefMediumFont(),
