@@ -1,9 +1,13 @@
 import hashlib
 import hmac
+import json
 import logging
 import os
 import secrets
 import smtplib
+import urllib.request
+import urllib.error
+
 from email.message import EmailMessage
 
 from fastapi import FastAPI, Form, HTTPException, Request, Response
@@ -292,6 +296,140 @@ def _send_activation_email(recipient: str, user_name: str, activation_code: str)
         return False
 
 
+# --- Discord notifications ---------------------------------------------------
+# Discord webhook notifications are sent for key events (new user, new/updated
+# resource). Sending is conditional on the ``DISCORD_WEBHOOK_URL`` environment
+# variable being set. When the variable is absent (e.g. during CI / pytest
+# runs) all notification functions are no-ops. Failures are logged but never
+# raised so that the API endpoint still succeeds even when Discord is
+# unreachable.
+
+_DISCORD_AVATAR_URL = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/logo.png"
+_DISCORD_GALAXY_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/galaxy.png"
+_DISCORD_GENOME_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/genome.png"
+_DISCORD_USERPIC_ICON = "https://raw.githubusercontent.com/chrxh/alien/develop/scripts/Server/images/userpic.png"
+# _DISCORD_AVATAR_URL = "https://alien-project.org/alien-server/logo.png"
+# _DISCORD_GALAXY_ICON = "https://alien-project.org/alien-server/galaxy.png"
+# _DISCORD_GENOME_ICON = "https://alien-project.org/alien-server/genome.png"
+# _DISCORD_USERPIC_ICON = "https://alien-project.org/alien-server/userpic.png"
+
+_discord_logger = logging.getLogger("alien-server.discord")
+
+
+def _send_discord_message(payload: dict) -> bool:
+    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+    if not webhook_url:
+        _discord_logger.warning("DISCORD_WEBHOOK_URL not set; skipping Discord notification")
+        return False
+
+    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "*/*",
+        # Pick one of these; “curl” UA often works well:
+        "User-Agent": "curl/8.0.0",
+        # or:
+        # "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) alien-server/1.0",
+    }
+
+    req = urllib.request.Request(webhook_url, data=body, headers=headers, method="POST")
+
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            # Discord webhooks return 204 on success
+            return 200 <= resp.status < 300 or resp.status == 204
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        _discord_logger.error("Discord HTTPError %s: %s", exc.code, detail)
+        return False
+    except Exception as exc:
+        _discord_logger.error("Failed to send Discord notification: %s", exc)
+        return False
+
+def _discord_notify_new_user(user_name: str, gpu: str | None) -> None:
+    fields = [{"name": "Name", "value": user_name, "inline": True}]
+    if gpu:
+        fields.append({"name": "Powered by", "value": gpu, "inline": True})
+    _send_discord_message(
+        {
+            "username": "alien-project",
+            "avatar_url": _DISCORD_AVATAR_URL,
+            "content": "",
+            "embeds": [
+                {
+                    "author": {
+                        "name": "New simulator added to the database",
+                        "icon_url": _DISCORD_USERPIC_ICON,
+                    },
+                    "fields": fields,
+                }
+            ],
+        }
+    )
+
+
+def _discord_notify_resource(
+    title: str,
+    sim_name: str,
+    user_name: str,
+    description: str,
+    width: int,
+    height: int,
+    particles: int,
+    sim_type: int,
+) -> None:
+    """Send a Discord notification for a new or updated simulation/genome."""
+    if sim_type == 0:
+        particles_str = (
+            f"{particles}" if particles < 1000 else f"{particles // 1000} K"
+        )
+        _send_discord_message(
+            {
+                "username": "alien-project",
+                "avatar_url": _DISCORD_AVATAR_URL,
+                "content": "",
+                "embeds": [
+                    {
+                        "author": {
+                            "name": title,
+                            "icon_url": _DISCORD_GALAXY_ICON,
+                        },
+                        "title": sim_name,
+                        "description": description,
+                        "fields": [
+                            {"name": "User", "value": user_name, "inline": True},
+                            {"name": "Size", "value": f"{width} x {height}", "inline": True},
+                            {"name": "Objects", "value": particles_str, "inline": True},
+                        ],
+                    }
+                ],
+            }
+        )
+    else:
+        _send_discord_message(
+            {
+                "username": "alien-project",
+                "avatar_url": _DISCORD_AVATAR_URL,
+                "content": "",
+                "embeds": [
+                    {
+                        "author": {
+                            "name": title,
+                            "icon_url": _DISCORD_GENOME_ICON,
+                        },
+                        "title": sim_name,
+                        "description": description,
+                        "fields": [
+                            {"name": "User", "value": user_name, "inline": True},
+                            {"name": "Cells", "value": str(particles), "inline": True},
+                        ],
+                    }
+                ],
+            }
+        )
+
+
 def _is_activated(user: "User") -> bool:
     # NULL to mark an activated user.
     return not user.activation_code
@@ -474,9 +612,7 @@ def activate_user(
                 update(User).where(User.name == userName).values(activation_code=None)
             )
 
-    # Discord notifications are intentionally not sent (the `gpu` parameter is
-    # accepted for client compatibility but ignored).
-    _ = gpu
+    _discord_notify_new_user(userName, gpu)
     return {"result": True}
 
 
@@ -996,6 +1132,11 @@ async def upload_simulation(request: Request):
             session.flush()
             sim_id = sim.id
 
+    if workspace != _WORKSPACE_PRIVATE:
+        _discord_notify_resource(
+            "New simulation added to the database" if sim_type == 0 else "New genome added to the database",
+            simName, userName, simDesc, width, height, particles, sim_type,
+        )
     return {"result": True, "simId": str(sim_id)}
 
 
@@ -1013,6 +1154,10 @@ async def replace_simulation(request: Request):
     statistics = fields.get("statistics", "")
 
     sim_id = _parse_int(simId)
+    notify_name: str | None = None
+    notify_workspace: int = _WORKSPACE_PRIVATE
+    notify_type: int = 0
+    notify_desc: str = ""
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -1031,6 +1176,11 @@ async def replace_simulation(request: Request):
             ):
                 return {"result": False}
 
+            notify_name = sim.name
+            notify_workspace = int(sim.workspace)
+            notify_type = 0 if sim.type is None else int(sim.type)
+            notify_desc = sim.description or ""
+
             sim.particles = particles
             sim.version = version
             sim.content = content_bytes
@@ -1039,6 +1189,12 @@ async def replace_simulation(request: Request):
             sim.settings = settings
             sim.size = len(content_bytes)
             sim.statistics = statistics
+
+    if notify_workspace != _WORKSPACE_PRIVATE and notify_name is not None:
+        _discord_notify_resource(
+            "Simulation updated in the database" if notify_type == 0 else "Genome updated in the database",
+            notify_name, userName, notify_desc, width, height, particles, notify_type,
+        )
     return {"result": True}
 
 
@@ -1137,6 +1293,12 @@ def move_simulation(
     # AlienProject (1) workspace is off-limits for normal moves.
     if target not in (_WORKSPACE_PUBLIC, _WORKSPACE_PRIVATE):
         return {"result": False}
+    notify_name: str | None = None
+    notify_type: int = 0
+    notify_desc: str = ""
+    notify_width: int = 0
+    notify_height: int = 0
+    notify_particles: int = 0
     with Session(engine) as session:
         with session.begin():
             user = _checked_user(session, userName, password)
@@ -1144,11 +1306,27 @@ def move_simulation(
                 return {"result": False}
             if not _is_owner_of_simulation(session, sim_id, userName):
                 return {"result": False}
+
+            sim = session.get(Simulation, sim_id)
+            if sim is not None and target == _WORKSPACE_PUBLIC:
+                notify_name = sim.name
+                notify_type = 0 if sim.type is None else int(sim.type)
+                notify_desc = sim.description or ""
+                notify_width = int(sim.width)
+                notify_height = int(sim.height)
+                notify_particles = int(sim.particles)
+
             session.execute(
                 update(Simulation)
                 .where(Simulation.id == sim_id)
                 .values(workspace=target, timestamp=Simulation.timestamp)
             )
+
+    if target != _WORKSPACE_PRIVATE and notify_name is not None:
+        _discord_notify_resource(
+            "New simulation added to the database" if notify_type == 0 else "New genome added to the database",
+            notify_name, userName, notify_desc, notify_width, notify_height, notify_particles, notify_type,
+        )
     return {"result": True}
 
 
