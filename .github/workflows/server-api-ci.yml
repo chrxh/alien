@@ -4,12 +4,12 @@ on:
   push:
     branches: [ develop ]
     paths:
-      - 'scripts/ServerNew/**'
+      - 'scripts/Server/**'
       - '.github/workflows/server-api-ci.yml'
   pull_request:
     branches: [ develop ]
     paths:
-      - 'scripts/ServerNew/**'
+      - 'scripts/Server/**'
       - '.github/workflows/server-api-ci.yml'
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: scripts/ServerNew
+        working-directory: scripts/Server
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
-          cache-dependency-path: scripts/ServerNew/tests/requirements.txt
+          cache-dependency-path: scripts/Server/tests/requirements.txt
 
       - name: Install dependencies
         run: |
