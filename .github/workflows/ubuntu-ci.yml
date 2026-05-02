@@ -71,4 +71,34 @@ jobs:
         ./EngineInterfaceTests
         ./NetworkTests
         ./PersisterTests
+
+    - name: Check for engine source changes
+      id: engine_changes
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          git fetch origin ${{ github.base_ref }} 2>/dev/null || true
+          BASE_SHA=$(git merge-base HEAD origin/${{ github.base_ref }} 2>/dev/null || echo "")
+        else
+          BASE_SHA="${{ github.event.before }}"
+        fi
+        if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          CHANGED=$(git diff --name-only "$BASE_SHA" HEAD -- \
+            source/EngineInterface \
+            source/EngineImpl \
+            source/EngineKernels \
+            source/EngineTestData \
+            source/EngineTests)
+          if [ -n "$CHANGED" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+        fi
+
+    - name: Run EngineTests
+      if: steps.engine_changes.outputs.changed == 'true'
+      run: |
+        cd build
         ./EngineTests
