@@ -109,6 +109,50 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation)
     checkConnections(result.description, {{object1._pos, object2._pos, 1.0f, 1.0f}});
 }
 
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_setsVisualFrontAngle)
+{
+    auto genome = GenomeDesc().frontAngle(30.0f).genes({
+        GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+    });
+
+    Desc input;
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+        },
+        CreatureDesc(),
+        genome);
+    input.addConnection(1, 2);
+
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
+
+    ASSERT_TRUE(result.visualFrontAngle.has_value());
+    EXPECT_TRUE(TestHelper::approxCompareAngles(120.0f, result.visualFrontAngle.value()));
+}
+
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_smoothsVisualFrontAngle)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+    });
+
+    Desc input;
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+        },
+        CreatureDesc(),
+        genome);
+    input.addConnection(1, 2);
+
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), 0.0f);
+
+    ASSERT_TRUE(result.visualFrontAngle.has_value());
+    EXPECT_TRUE(TestHelper::approxCompareAngles(18.0f, result.visualFrontAngle.value()));
+}
+
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_nonRootGene)
 {
     auto genome = GenomeDesc().genes({

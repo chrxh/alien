@@ -28,10 +28,12 @@ namespace
 ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     GenomeDesc const& genome,
     int startGeneIndex,
-    Desc&& phenotype) const
+    Desc&& phenotype,
+    std::optional<float> const& lastVisualFrontAngle) const
 {
     ConversionResult result;
     result.frontAngle = genome._frontAngle;
+    result.visualFrontAngle = lastVisualFrontAngle;
 
     auto const& editService = DescEditService::get();
 
@@ -77,8 +79,14 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
 
     // Rotate preview
     if (secondCell.has_value()) {
-        auto angle = Math::angleOfVector(secondCell->_pos - firstCell._pos) + genome._frontAngle;
-        editService.rotate(phenotype, -angle);
+        auto angle = Math::getNormalizedAngle(Math::angleOfVector(secondCell->_pos - firstCell._pos) + genome._frontAngle, 0.0f);
+        if (!result.visualFrontAngle.has_value()) {
+            result.visualFrontAngle = angle;
+        } else {
+            result.visualFrontAngle.value() += Math::getNormalizedAngle(angle - result.visualFrontAngle.value(), -180.0f) / 5.0f;
+            result.visualFrontAngle.value() = Math::getNormalizedAngle(result.visualFrontAngle.value(), 0.0f);
+        }
+        editService.rotate(phenotype, -result.visualFrontAngle.value());
     }
 
     // Create preview cells

@@ -46,7 +46,9 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, Ge
 
     auto geneStartIndex = _subGenome.startIndex;
 
-    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(previewGenome, geneStartIndex, std::move(phenotypeWithoutSeed));
+    auto conversionResult =
+        PreviewDescConverterService::get().convertToPreviewDesc(previewGenome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
+    _visualFrontAngle = conversionResult.visualFrontAngle;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
 
@@ -91,6 +93,11 @@ SubGenomeDesc const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
 void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDesc const& value)
 {
     _subGenome = value;
+}
+
+void _CreaturePreviewWidget::resetVisualFrontAngle()
+{
+    _visualFrontAngle.reset();
 }
 
 _CreaturePreviewWidget::_CreaturePreviewWidget(

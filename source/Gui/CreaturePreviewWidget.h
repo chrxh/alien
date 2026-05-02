@@ -22,6 +22,8 @@ public:
     SubGenomeDesc const& getGenomeWithStartIndex() const;
     void setGenomeWithStartIndex(SubGenomeDesc const& value);
 
+    void resetVisualFrontAngle();
+
 private:
     _CreaturePreviewWidget(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
@@ -44,6 +46,7 @@ private:
     GeneIndicesForSubGenome _geneIndices;
     SubGenomeDesc _subGenome;
     uint64_t _creatureId = 0;
+    std::optional<float> _visualFrontAngle;
     std::optional<uint64_t> _selectedCellIdFromPreview;
 
     RealVector2D _worldCenter;
