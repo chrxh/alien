@@ -118,10 +118,14 @@ void OverlayController::processProgressAnimation()
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f));
         auto const helixSegments = 64;
         auto const helixTurns = 2.75f;
-        auto const helixHeight = scale(22.0f);
+        auto const helixRadius = scale(22.0f);
         auto const helixWidth = width * 1.15f;
+        auto const maxDepth = sqrtf(helixWidth * helixWidth / 4 + helixRadius * helixRadius);
+        auto const perspectiveDistance = maxDepth * 3.5f;
         auto const phase = duration / 420.0f;
-        auto const left = center.x - helixWidth / 2;
+        auto const yRotationPhase = duration / 1800.0f;
+        auto const maxYRotationAngle = 50.0f * Const::Pi / 180.0f;
+        auto const yRotationAngle = sinf(yRotationPhase) * maxYRotationAngle;
         auto const strandThickness = scale(2.0f);
         auto const rungThickness = scale(1.0f);
         auto const dotRadius = scale(2.2f);
@@ -129,16 +133,19 @@ void OverlayController::processProgressAnimation()
         auto getPoint = [&](int index, float offset) {
             auto t = toFloat(index) / toFloat(helixSegments - 1);
             auto angle = t * helixTurns * 2.0f * Const::Pi + phase + offset;
-            auto amplitudeWave = (sinf(t * 5.0f * Const::Pi - duration / 620.0f) + 1.0f) / 2.0f;
-            auto amplitudePulse = 0.85f + 0.15f * sinf(duration / 900.0f);
-            auto localHelixHeight = helixHeight * (0.6f + 0.4f * amplitudeWave) * amplitudePulse;
-            auto x = left + t * helixWidth;
-            auto y = center.y + height / 2 + sinf(angle) * localHelixHeight;
-            auto depth = (cosf(angle) + 1.0f) / 2.0f;
+            auto xRotation = (t - 0.5f) * helixWidth;
+            auto yRotation = sinf(angle) * helixRadius;
+            auto zRotation = cosf(angle) * helixRadius;
+            auto rotatedX = xRotation * cosf(yRotationAngle) + zRotation * sinf(yRotationAngle);
+            auto rotatedZ = -xRotation * sinf(yRotationAngle) + zRotation * cosf(yRotationAngle);
+            auto perspective = perspectiveDistance / (perspectiveDistance - rotatedZ);
+            auto x = center.x + rotatedX * perspective;
+            auto y = center.y + height / 2 + yRotation;
+            auto depth = (rotatedZ / maxDepth + 1.0f) / 2.0f;
             return std::tuple<ImVec2, float>{ImVec2{x, y}, depth};
         };
 
-        for (int i = 0; i < helixSegments; i += 4) {
+        for (int i = 0; i < helixSegments; i += 2) {
             auto [point1, depth1] = getPoint(i, 0.0f);
             auto [point2, depth2] = getPoint(i, Const::Pi);
             auto depth = (depth1 + depth2) / 2.0f;
