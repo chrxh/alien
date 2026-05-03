@@ -3082,7 +3082,11 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneIncludesNestedConstructors)
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
-                          .constructor(ConstructorDesc().provideEnergy(ProvideEnergy_CellAndGene).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_CellAndGene)
+                                           .geneIndex(0)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -3130,7 +3134,11 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneSkipsCyclicReferences)
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
-                          .constructor(ConstructorDesc().provideEnergy(ProvideEnergy_CellAndGene).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_CellAndGene)
+                                           .geneIndex(0)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -3193,7 +3201,11 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneLimitsReferenceDepth)
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
-                          .constructor(ConstructorDesc().provideEnergy(ProvideEnergy_CellAndGene).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc()
+                                           .provideEnergy(ProvideEnergy_CellAndGene)
+                                           .geneIndex(0)
+                                           .autoTriggerInterval(1)
+                                           .lastConstructedCellId(1))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
