@@ -122,7 +122,7 @@ void OverlayController::processProgressAnimation()
         auto const helixWidth = width * 1.15f;
         auto const maxDepth = sqrtf(helixWidth * helixWidth / 4 + helixRadius * helixRadius);
         auto const perspectiveDistance = maxDepth * 3.5f;
-        auto const phase = duration / 420.0f;
+        auto const phase = duration / 420.0f + 1.4f * sinf(duration / 700.0f);
         auto const yRotationPhase = duration / 1800.0f;
         auto const maxYRotationAngle = 50.0f * Const::Pi / 180.0f;
         auto const yRotationAngle = sinf(yRotationPhase) * maxYRotationAngle;
