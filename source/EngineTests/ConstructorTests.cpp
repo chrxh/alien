@@ -346,7 +346,7 @@ TEST_F(ConstructorTests, DISABLED_insufficientSpace)
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
 }
 
-TEST_F(ConstructorTests, crossingLinks)
+TEST_F(ConstructorTests, crossingLinks_allowed)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc(), NodeDesc(), NodeDesc()}),
@@ -374,11 +374,10 @@ TEST_F(ConstructorTests, crossingLinks)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    // No cell constructed
     ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, actualData.getObjectsForCreature(creature._id).size());
+    ASSERT_EQ(5, actualData.getObjectsForCreature(creature._id).size());
 }
 
 using NodeParameter = DescTestDataFactory::NodeParameter;
