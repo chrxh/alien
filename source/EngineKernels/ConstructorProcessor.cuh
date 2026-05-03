@@ -686,7 +686,7 @@ __inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Geno
         }
 
         auto const referencedGeneIndex = node.constructor.geneIndex;
-        auto const& referencedGene = genome->genes[referencedGeneIndex];
+        auto& referencedGene = genome->genes[referencedGeneIndex];
         if (referencedGene.separation || depth == MaxReferenceDepth) {
             continue;
         }
