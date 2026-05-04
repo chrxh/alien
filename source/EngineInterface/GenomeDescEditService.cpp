@@ -92,11 +92,13 @@ void GenomeDescEditService::removeNode(GeneDesc& gene, int index) const
     auto deleteAtStart = index == 0;
     auto deleteAtEnd = index == gene._nodes.size() - 1;
     gene._nodes.erase(gene._nodes.begin() + index);
-    if (deleteAtStart) {
-        gene._nodes.front()._referenceAngle = 0;
-    }
-    if (deleteAtEnd) {
-        gene._nodes.back()._referenceAngle = 0;
+    if (!gene._nodes.empty()) {
+        if (deleteAtStart) {
+            gene._nodes.front()._referenceAngle = 0;
+        }
+        if (deleteAtEnd) {
+            gene._nodes.back()._referenceAngle = 0;
+        }
     }
 }
 
