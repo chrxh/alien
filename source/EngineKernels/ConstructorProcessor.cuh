@@ -656,11 +656,13 @@ __inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Geno
     int geneIndexByDepth[MaxReferenceDepth + 1];
     int nextNodeIndexByDepth[MaxReferenceDepth + 1];
     float multiplierByDepth[MaxReferenceDepth + 1];
+    bool includeReferencedGenesByDepth[MaxReferenceDepth + 1];
 
     auto depth = 0;
     geneIndexByDepth[0] = geneIndex;
     nextNodeIndexByDepth[0] = 0;
     multiplierByDepth[0] = 1.0f;
+    includeReferencedGenesByDepth[0] = includeReferencedGenes;
 
     while (depth >= 0) {
         auto const& gene = genome->genes[geneIndexByDepth[depth]];
@@ -682,7 +684,7 @@ __inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Geno
         }
 
         auto const& node = gene.nodes[nextNodeIndexByDepth[depth]++];
-        if (!includeReferencedGenes || !node.constructorAvailable || node.constructor.geneIndex >= genome->numGenes) {
+        if (!includeReferencedGenesByDepth[depth] || !node.constructorAvailable || node.constructor.geneIndex >= genome->numGenes) {
             continue;
         }
 
@@ -709,6 +711,7 @@ __inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Geno
         geneIndexByDepth[depth] = referencedGeneIndex;
         nextNodeIndexByDepth[depth] = 0;
         multiplierByDepth[depth] = multiplier * referencedGeneMultiplier;
+        includeReferencedGenesByDepth[depth] = node.constructor.provideEnergy == ProvideEnergy_CellAndGene;
     }
     return result;
 }

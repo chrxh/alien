@@ -3207,6 +3207,58 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneSkipsCyclicReferences)
     EXPECT_TRUE(approxCompare(expectedReservedEnergy, actualConstructedCell.getCellRef()._reservedEnergy));
 }
 
+TEST_F(ConstructorTests, provideEnergy_cellAndGeneLimitsCellOnlyReferenceDepth)
+{
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto expectedReservedEnergy = normalCellEnergy * 2;
+    auto constructorEnergy = expectedReservedEnergy + normalCellEnergy * 2 + 1.0f;
+
+    auto genome = GenomeDesc().genes({
+        GeneDesc().separation(false).nodes({
+            NodeDesc(),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).provideEnergy(ProvideEnergy_CellAndGene)),
+        }),
+        GeneDesc().separation(false).nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        }),
+        GeneDesc().separation(false).nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
+        }),
+        GeneDesc().separation(false).nodes({
+            NodeDesc(),
+        }),
+    });
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .type(
+                    CellDesc()
+                        .usableEnergy(constructorEnergy)
+                        .constructor(ConstructorDesc().provideEnergy(ProvideEnergy_CellAndGene).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
+
+    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(expectedReservedEnergy, actualConstructedCell.getCellRef()._reservedEnergy));
+}
+
 TEST_F(ConstructorTests, provideEnergy_cellAndGeneLimitsReferenceDepth)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
