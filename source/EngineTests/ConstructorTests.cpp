@@ -2867,7 +2867,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
     auto genome = GenomeDesc().genes({
         GeneDesc().separation(false).nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).provideEnergy(ProvideEnergy_CellAndGene)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
             NodeDesc(),
         }),
         GeneDesc().separation(separation == Separation::Yes).numBranches(2).numConcatenations(3).nodes({NodeDesc(), NodeDesc()}),
@@ -2918,7 +2918,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
         EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._reservedEnergy));
         auto newConstructor = actualConstructedCell.getCellRef()._constructor.value();
         if (separation == Separation::Yes) {
-            EXPECT_EQ(ProvideEnergy_CellAndGene, newConstructor._provideEnergy);
+            EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
         } else {
             EXPECT_EQ(ProvideEnergy_FreeGeneration, newConstructor._provideEnergy);
         }
@@ -2943,7 +2943,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
     auto genome = GenomeDesc().genes({
         GeneDesc().separation(false).nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).provideEnergy(ProvideEnergy_CellAndGene)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
             NodeDesc(),
         }),
         GeneDesc().separation(separation == Separation::Yes).numBranches(2).numConcatenations(3).nodes({NodeDesc(), NodeDesc()}),
@@ -2985,7 +2985,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     auto genome = GenomeDesc().genes({
         GeneDesc().separation(false).nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).provideEnergy(ProvideEnergy_CellAndGene)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
             NodeDesc(),
         }),
         GeneDesc().separation(separation == Separation::Yes).numBranches(2).numConcatenations(std::numeric_limits<int>::max()).nodes({NodeDesc(), NodeDesc()}),
@@ -3048,7 +3048,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     }
 }
 
-TEST_F(ConstructorTests, provideEnergy_cellAndGeneWithCellOnlyConstructorNodeIncludesReferencedGeneOnly)
+TEST_F(ConstructorTests, provideEnergy_cellAndGene_cellOnly_none)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto expectedReservedEnergy = normalCellEnergy * 2 * 2 * 3;
@@ -3095,7 +3095,7 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneWithCellOnlyConstructorNodeInc
     EXPECT_TRUE(approxCompare(expectedReservedEnergy, actualConstructedCell.getCellRef()._reservedEnergy));
 }
 
-TEST_F(ConstructorTests, provideEnergy_cellAndGeneIncludesNestedConstructors)
+TEST_F(ConstructorTests, provideEnergy_cellAndGene_cellAndGene_cellOnly_none)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto expectedReservedEnergy = normalCellEnergy * (3 + 2 * 2 * 2) * 2 * 3;
