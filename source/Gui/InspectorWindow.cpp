@@ -112,6 +112,7 @@ void _InspectorWindow::processObject(ExtendedObjectDesc& extendedObject)
             processCellTypeTab(object);
             processCellTypePropertiesTab(object);
             if (object.getCellRef()._constructor.has_value()) {
+                processConstructorContent(object.getCellRef()._constructor.value());
                 processCellGenomeTab(object.getCellRef()._constructor.value());
             }
             if (object.getCellRef().getCellType() == CellType_Injector) {
@@ -548,32 +549,55 @@ void _InspectorWindow::processNeuronContent(ObjectDesc& object)
 
 void _InspectorWindow::processConstructorContent(ConstructorDesc& constructor)
 {
-    if (ImGui::TreeNodeEx("Properties###constructor", TreeNodeFlags)) {
-        int constructorMode = constructor._autoTriggerInterval == 0 ? 0 : 1;
-        if (AlienGui::Combo(
-                AlienGui::ComboParameters()
-                    .name("Activation mode")
-                    .textWidth(CellTypeTextWidth)
-                    .values({"Manual", "Automatic"})
-                    .tooltip(Const::GenomeConstructorActivationModeTooltip),
-                constructorMode)) {
-            constructor._autoTriggerInterval = constructorMode;
+    if (ImGui::BeginTabItem("Constructor", nullptr, ImGuiTabItemFlags_None)) {
+        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            if (ImGui::TreeNodeEx("Properties###constructor", TreeNodeFlags)) {
+                int constructorMode = constructor._autoTriggerInterval == 0 ? 0 : 1;
+                if (AlienGui::Combo(
+                        AlienGui::ComboParameters()
+                            .name("Activation mode")
+                            .textWidth(CellTypeTextWidth)
+                            .values({"Manual", "Automatic"})
+                            .tooltip(Const::GenomeConstructorActivationModeTooltip),
+                        constructorMode)) {
+                    constructor._autoTriggerInterval = constructorMode;
+                }
+                if (constructorMode == 1) {
+                    AlienGui::InputOptionalInt(
+                        AlienGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
+                        constructor._autoTriggerInterval);
+                }
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters()
+                        .name("Offspring activation time")
+                        .textWidth(CellTypeTextWidth)
+                        .tooltip(Const::GenomeConstructorOffspringActivationTime),
+                    constructor._constructionActivationTime);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters()
+                        .name("Construction angle")
+                        .textWidth(CellTypeTextWidth)
+                        .format("%.1f")
+                        .tooltip("Angle for construction direction"),
+                    constructor._constructionAngle);
+                int provideEnergy = constructor._provideEnergy;
+                if (AlienGui::Combo(
+                        AlienGui::ComboParameters()
+                            .name("Provide energy")
+                            .textWidth(CellTypeTextWidth)
+                            .values({
+                                "Cell only",
+                                "Cell and gene",
+                                "Free generation",
+                            }),
+                        provideEnergy)) {
+                    constructor._provideEnergy = provideEnergy;
+                }
+                ImGui::TreePop();
+            }
         }
-        if (constructorMode == 1) {
-            AlienGui::InputOptionalInt(
-                AlienGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
-                constructor._autoTriggerInterval);
-        }
-        AlienGui::InputInt(
-            AlienGui::InputIntParameters()
-                .name("Offspring activation time")
-                .textWidth(CellTypeTextWidth)
-                .tooltip(Const::GenomeConstructorOffspringActivationTime),
-            constructor._constructionActivationTime);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Construction angle").textWidth(CellTypeTextWidth).format("%.1f").tooltip("Angle for construction direction"),
-            constructor._constructionAngle);
-        ImGui::TreePop();
+        ImGui::EndChild();
+        ImGui::EndTabItem();
     }
 }
 
