@@ -3262,7 +3262,7 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneLimitsCellOnlyReferenceDepth)
 TEST_F(ConstructorTests, provideEnergy_cellAndGeneLimitsReferenceDepth)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    auto expectedReservedEnergy = normalCellEnergy * 2;
+    auto expectedReservedEnergy = normalCellEnergy * 6;
     auto constructorEnergy = expectedReservedEnergy + normalCellEnergy * 2 + 1.0f;
 
     auto genome = GenomeDesc().genes({
