@@ -3048,9 +3048,10 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     }
 }
 
-TEST_F(ConstructorTests, provideEnergy_cellAndGeneRequiresConstructedConstructorOptIn)
+TEST_F(ConstructorTests, provideEnergy_cellAndGeneWithCellOnlyConstructorNodeIncludesReferencedGeneOnly)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto expectedReservedEnergy = normalCellEnergy * 2 * 2 * 3;
     auto genome = GenomeDesc().genes({
         GeneDesc().separation(false).nodes({
             NodeDesc(),
@@ -3066,7 +3067,7 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneRequiresConstructedConstructor
                 .id(0)
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
-                          .usableEnergy(normalCellEnergy * 2 + 1.0f)
+                          .usableEnergy(expectedReservedEnergy + normalCellEnergy * 2 + 1.0f)
                           .constructor(ConstructorDesc()
                                            .provideEnergy(ProvideEnergy_CellAndGene)
                                            .geneIndex(0)
@@ -3091,7 +3092,7 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneRequiresConstructedConstructor
     auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
     EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
     EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
-    EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._reservedEnergy));
+    EXPECT_TRUE(approxCompare(expectedReservedEnergy, actualConstructedCell.getCellRef()._reservedEnergy));
 }
 
 TEST_F(ConstructorTests, provideEnergy_cellAndGeneIncludesNestedConstructors)
@@ -3112,7 +3113,7 @@ TEST_F(ConstructorTests, provideEnergy_cellAndGeneIncludesNestedConstructors)
             .numConcatenations(3)
             .nodes({
                 NodeDesc(),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).provideEnergy(ProvideEnergy_CellAndGene)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
                 NodeDesc(),
             }),
         GeneDesc().separation(false).numBranches(2).numConcatenations(2).nodes({

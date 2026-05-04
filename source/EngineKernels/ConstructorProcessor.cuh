@@ -69,7 +69,7 @@ private:
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
 
-    __inline__ __device__ static float getRequiredEnergyForNodes(Genome* genome, int geneIndex);
+    __inline__ __device__ static float getRequiredEnergyForNodes(Genome* genome, int geneIndex, bool includeReferencedGenes);
 };
 
 /************************************************************************/
@@ -183,11 +183,11 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.neededReservedEnergy = 0;
     if (result.node->constructorAvailable) {
         auto const& constructorNode = result.node->constructor;
-        if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.provideEnergy == ProvideEnergy_CellAndGene
-            && constructorNode.geneIndex < result.creature->genome->numGenes) {
+        if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
             auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
             if (!referencedGene.separation) {
-                auto requiredEnergyForNodes = getRequiredEnergyForNodes(result.creature->genome, constructorNode.geneIndex);
+                auto requiredEnergyForNodes =
+                    getRequiredEnergyForNodes(result.creature->genome, constructorNode.geneIndex, constructorNode.provideEnergy == ProvideEnergy_CellAndGene);
                 if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
                     result.neededReservedEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
                 } else {
@@ -648,7 +648,7 @@ __inline__ __device__ void ConstructorProcessor::setHeadCellOnFirstNode(Object* 
     }
 }
 
-__inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Genome* genome, int geneIndex)
+__inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Genome* genome, int geneIndex, bool includeReferencedGenes)
 {
     auto constexpr MaxReferenceDepth = 5;
 
@@ -682,7 +682,7 @@ __inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Geno
         }
 
         auto const& node = gene.nodes[nextNodeIndexByDepth[depth]++];
-        if (!node.constructorAvailable || node.constructor.provideEnergy != ProvideEnergy_CellAndGene || node.constructor.geneIndex >= genome->numGenes) {
+        if (!includeReferencedGenes || !node.constructorAvailable || node.constructor.geneIndex >= genome->numGenes) {
             continue;
         }
 
