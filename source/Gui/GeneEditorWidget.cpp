@@ -85,15 +85,6 @@ void _GeneEditorWidget::processHeaderData()
             // Gene name
             AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
 
-            auto reservedEnergyNodes = 0;
-            for (auto const& node : gene._nodes) {
-                if (node._constructor.has_value()) {
-                    reservedEnergyNodes += node._constructor->_reservedEnergyNodes;
-                }
-            }
-            AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Reserved energy nodes").readOnly(true).textWidth(rightColumnWidth), reservedEnergyNodes);
-
             // Shape
             auto shapeWithoutCustom = gene._shape - 1;
             if (AlienGui::Combo(
