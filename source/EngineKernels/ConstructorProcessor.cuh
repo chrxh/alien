@@ -650,7 +650,7 @@ __inline__ __device__ void ConstructorProcessor::setHeadCellOnFirstNode(Object* 
 
 __inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Genome* genome, int geneIndex, bool includeReferencedGenes)
 {
-    auto constexpr MaxReferenceDepth = 5;
+    auto constexpr MaxReferenceDepth = 1;
 
     auto result = 0.0f;
     int geneIndexByDepth[MaxReferenceDepth + 1];
