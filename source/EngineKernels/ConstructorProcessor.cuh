@@ -183,7 +183,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.neededReservedEnergy = 0;
     if (result.node->constructorAvailable) {
         auto const& constructorNode = result.node->constructor;
-        if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
+        if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.provideEnergy == ProvideEnergy_CellAndGene
+            && constructorNode.geneIndex < result.creature->genome->numGenes) {
             auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
             if (!referencedGene.separation) {
                 auto requiredEnergyForNodes = getRequiredEnergyForNodes(result.creature->genome, constructorNode.geneIndex);
