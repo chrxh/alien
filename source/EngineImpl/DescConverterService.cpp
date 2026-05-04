@@ -845,6 +845,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         constructorDesc._constructionActivationTime = nodeTO->constructor.constructionActivationTime;
         constructorDesc._constructionAngle = nodeTO->constructor.constructionAngle;
         constructorDesc._provideEnergy = nodeTO->constructor.provideEnergy;
+        constructorDesc._reservedEnergyNodes = nodeTO->constructor.reservedEnergyNodes;
         nodeDesc._constructor = constructorDesc;
     }
 
@@ -1189,6 +1190,7 @@ void DescConverterService::convertGenomeToTO(
                 nodeTO.constructor.constructionActivationTime = constructorDesc._constructionActivationTime;
                 nodeTO.constructor.constructionAngle = constructorDesc._constructionAngle;
                 nodeTO.constructor.provideEnergy = constructorDesc._provideEnergy;
+                nodeTO.constructor.reservedEnergyNodes = constructorDesc._reservedEnergyNodes;
             }
         }
     }

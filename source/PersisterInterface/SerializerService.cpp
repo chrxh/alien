@@ -206,6 +206,7 @@ namespace
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 2;
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
+    auto constexpr Id_ConstructorGenome_ReservedEnergyNodes = 5;
 
     auto constexpr Id_SensorGenome_AutoTrigger = 0;
     auto constexpr Id_SensorGenome_MinRange = 1;
@@ -333,6 +334,7 @@ namespace cereal
             task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ReservedEnergyNodes, data._reservedEnergyNodes, defaultObject._reservedEnergyNodes);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDesc)

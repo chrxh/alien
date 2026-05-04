@@ -58,6 +58,7 @@ struct std::hash<ConstructorGenomeDesc>
         }
         hash_combine(seed, desc._geneIndex);
         hash_combine(seed, desc._constructionActivationTime);
+        hash_combine(seed, desc._reservedEnergyNodes);
         return seed;
     }
 };

@@ -153,8 +153,13 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
     return NodeDesc()
         .neuralNetwork(nn)
         .cellType(createNonDefaultCellTypeGenomeDesc(nodeParameter))
-        .constructor(ConstructorGenomeDesc().autoTriggerInterval(55).geneIndex(1).constructionActivationTime(95).constructionAngle(25.0f).provideEnergy(
-            ProvideEnergy_FreeGeneration))
+        .constructor(ConstructorGenomeDesc()
+                         .autoTriggerInterval(55)
+                         .geneIndex(1)
+                         .constructionActivationTime(95)
+                         .constructionAngle(25.0f)
+                         .provideEnergy(ProvideEnergy_FreeGeneration)
+                         .reservedEnergyNodes(7))
         .color(4)
         .referenceAngle(90.0f);
 }

@@ -298,6 +298,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.constructor.constructionActivationTime = nodeTO.constructor.constructionActivationTime;
                 node.constructor.constructionAngle = nodeTO.constructor.constructionAngle;
                 node.constructor.provideEnergy = nodeTO.constructor.provideEnergy;
+                node.constructor.reservedEnergyNodes = nodeTO.constructor.reservedEnergyNodes;
             }
         }
     }

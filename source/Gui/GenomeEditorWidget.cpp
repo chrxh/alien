@@ -85,6 +85,17 @@ void _GenomeEditorWidget::processHeaderData()
             auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
             AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
+            auto reservedEnergyNodes = 0;
+            for (auto const& gene : _editData->genome._genes) {
+                for (auto const& node : gene._nodes) {
+                    if (node._constructor.has_value()) {
+                        reservedEnergyNodes += node._constructor->_reservedEnergyNodes;
+                    }
+                }
+            }
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Reserved energy nodes").readOnly(true).textWidth(rightColumnWidth), reservedEnergyNodes);
+
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth), &_editData->genome._frontAngle);
 

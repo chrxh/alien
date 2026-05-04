@@ -242,6 +242,7 @@ namespace
                         nodeTO.constructor.constructionActivationTime = node.constructor.constructionActivationTime;
                         nodeTO.constructor.constructionAngle = node.constructor.constructionAngle;
                         nodeTO.constructor.provideEnergy = node.constructor.provideEnergy;
+                        nodeTO.constructor.reservedEnergyNodes = node.constructor.reservedEnergyNodes;
                     }
                 }
             }

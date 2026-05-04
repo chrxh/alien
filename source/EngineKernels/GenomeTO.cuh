@@ -80,6 +80,7 @@ struct ConstructorGenomeTO
     uint16_t constructionActivationTime;
     float constructionAngle;
     ProvideEnergy provideEnergy;
+    uint16_t reservedEnergyNodes;
 };
 
 struct SquareSignalGenomeTO

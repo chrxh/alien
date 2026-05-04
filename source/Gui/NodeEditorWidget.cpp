@@ -283,6 +283,9 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Provide energy").textWidth(rightColumnWidth), provideEnergy);
                 constructor._provideEnergy = provideEnergy ? ProvideEnergy_CellAndGene : ProvideEnergy_CellOnly;
 
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Reserved energy nodes").textWidth(rightColumnWidth), constructor._reservedEnergyNodes);
+
                 AlienGui::EndIndent();
                 ImGui::PopID();
             }
