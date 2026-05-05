@@ -206,7 +206,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                     }
 
                     // Block ray if it encounters solid cells
-                    if (densityMap.getStructureDensity(scanPos) > 0) {
+                    if (densityMap.getSolidDensity(scanPos) > 0) {
                         break;
                     }
                 }
@@ -231,7 +231,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             auto matchPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
             data.objectMap.correctPosition(matchPos);
 
-            // No relocation for structures
+            // No relocation for solids
             if (object->typeData.cell.cellTypeData.sensor.mode != SensorMode_DetectSolid) {
                 object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = true;
                 object->typeData.cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;
@@ -297,7 +297,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
                 auto scanDistance = toFloat(index) * ScanStep;
                 auto scanPos = data.objectMap.getCorrectedPosition(object->pos + direction * scanDistance);
-                if (densityMap.getStructureDensity(scanPos) > 0) {
+                if (densityMap.getSolidDensity(scanPos) > 0) {
                     lookupResult = 0xffffffffffffffff;
                     break;
                 }
@@ -355,7 +355,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             return pack(distance, absAngle, density);
         }
     } else if (mode == SensorMode_DetectSolid) {
-        if (densityMap.getStructureDensity(scanPos) > 0) {
+        if (densityMap.getSolidDensity(scanPos) > 0) {
             return pack(distance, absAngle, 1.0f);
         }
     } else if (mode == SensorMode_DetectFreeCell) {

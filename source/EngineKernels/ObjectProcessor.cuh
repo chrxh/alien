@@ -78,7 +78,7 @@ __inline__ __device__ void ObjectProcessor::fillDensityMap(SimulationData& data)
         if (object->type == ObjectType_FreeCell) {
             data.preprocessedSimulationData.densityMap.addFreeCell(object);
         } else if (object->type == ObjectType_Solid) {
-            data.preprocessedSimulationData.densityMap.addStructureObject(object);
+            data.preprocessedSimulationData.densityMap.addSolidObject(object);
         }
     }
 }

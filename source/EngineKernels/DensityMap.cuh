@@ -11,7 +11,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<float>(_densityMapSize.x * _densityMapSize.y, _energyParticleDensityMap);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _freeCellDensityMap1);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _freeCellDensityMap2);
-        CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _structureCellDensityMap);
+        CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _solidDensityMap);
         _slotSize = slotSize;
     }
 
@@ -20,7 +20,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_energyParticleDensityMap);
         CudaMemoryManager::getInstance().freeMemory(_freeCellDensityMap1);
         CudaMemoryManager::getInstance().freeMemory(_freeCellDensityMap2);
-        CudaMemoryManager::getInstance().freeMemory(_structureCellDensityMap);
+        CudaMemoryManager::getInstance().freeMemory(_solidDensityMap);
     }
 
     __device__ __inline__ void clear()
@@ -30,7 +30,7 @@ public:
             _energyParticleDensityMap[index] = 0.0f;
             _freeCellDensityMap1[index] = 0;
             _freeCellDensityMap2[index] = 0;
-            _structureCellDensityMap[index] = 0;
+            _solidDensityMap[index] = 0;
         }
     }
 
@@ -69,11 +69,11 @@ public:
         return 0.0f;
     }
 
-    __device__ __inline__ uint32_t getStructureDensity(float2 const& pos) const
+    __device__ __inline__ uint32_t getSolidDensity(float2 const& pos) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            return _structureCellDensityMap[index];
+            return _solidDensityMap[index];
         }
         return 0;
     }
@@ -100,11 +100,11 @@ public:
         }
     }
 
-    __device__ __inline__ void addStructureObject(Object* object)
+    __device__ __inline__ void addSolidObject(Object* object)
     {
         auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            atomicAdd(&_structureCellDensityMap[index], 1u);
+            atomicAdd(&_solidDensityMap[index], 1u);
         }
     }
 
@@ -114,5 +114,5 @@ private:
     float* _energyParticleDensityMap;
     uint64_t* _freeCellDensityMap1;
     uint64_t* _freeCellDensityMap2;
-    uint32_t* _structureCellDensityMap;
+    uint32_t* _solidDensityMap;
 };
