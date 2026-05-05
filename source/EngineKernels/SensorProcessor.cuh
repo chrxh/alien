@@ -156,21 +156,16 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     if (object->typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
 
         auto const nearDistance = toInt(ScanStep);
-        auto const nearRadius = toInt(ceilf(sqrtf(2.0f) * toFloat(nearDistance)));
-        int diameter = 2 * nearRadius + 1;
+        int diameter = 2 * nearDistance + 1;
         int totalPositions = diameter * diameter;
 
         // Each thread scans different positions in parallel
         for (int idx = threadIdx.x; idx < totalPositions; idx += blockDim.x) {
-            auto dx = toFloat((idx % diameter) - nearRadius);
-            auto dy = toFloat((idx / diameter) - nearRadius);
+            auto dx = toFloat((idx % diameter) - nearDistance);
+            auto dy = toFloat((idx / diameter) - nearDistance);
 
             auto delta = float2{dx, dy};
             auto distance = Math::length(delta);
-            if (distance > toFloat(nearRadius)) {
-                continue;
-            }
-
             auto angle = Math::angleOfVector(delta);
             float2 scanPos = object->pos + delta;
             data.objectMap.correctPosition(scanPos);
