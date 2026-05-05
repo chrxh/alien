@@ -2999,10 +2999,9 @@ TEST_F(ConstructorTests, constructConstructorNodeWithReservedEnergy)
             ObjectDesc()
                 .id(0)
                 .pos({10.0f, 10.0f})
-                .type(
-                    CellDesc()
-                        .usableEnergy(reservedEnergy + normalCellEnergy * 2 + 1.0f)
-                        .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                .type(CellDesc()
+                          .usableEnergy(reservedEnergy + normalCellEnergy * 2 + 1.0f)
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
