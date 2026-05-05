@@ -330,7 +330,6 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         CellDesc cellDesc;
         cellDesc._usableEnergy = objectTO.typeData.cell.usableEnergy;
         cellDesc._rawEnergy = objectTO.typeData.cell.rawEnergy;
-        cellDesc._reservedEnergy = objectTO.typeData.cell.reservedEnergy;
         cellDesc._cellState = objectTO.typeData.cell.cellState;
         cellDesc._age = objectTO.typeData.cell.age;
         cellDesc._frontAngle = objectTO.typeData.cell.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(objectTO.typeData.cell.frontAngle) : std::nullopt;
@@ -595,6 +594,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             constructor._constructionActivationTime = objectTO.typeData.cell.constructor.constructionActivationTime;
             constructor._constructionAngle = objectTO.typeData.cell.constructor.constructionAngle;
             constructor._provideEnergy = objectTO.typeData.cell.constructor.provideEnergy;
+            constructor._reservedEnergy = objectTO.typeData.cell.constructor.reservedEnergy;
             constructor._geneIndex = objectTO.typeData.cell.constructor.geneIndex;
             constructor._lastConstructedCellId = objectTO.typeData.cell.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
                 ? std::make_optional(objectTO.typeData.cell.constructor.lastConstructedCellId)
@@ -845,6 +845,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         constructorDesc._constructionActivationTime = nodeTO->constructor.constructionActivationTime;
         constructorDesc._constructionAngle = nodeTO->constructor.constructionAngle;
         constructorDesc._provideEnergy = nodeTO->constructor.provideEnergy;
+        constructorDesc._reservedEnergy = nodeTO->constructor.reservedEnergy;
         nodeDesc._constructor = constructorDesc;
     }
 
@@ -1189,6 +1190,7 @@ void DescConverterService::convertGenomeToTO(
                 nodeTO.constructor.constructionActivationTime = constructorDesc._constructionActivationTime;
                 nodeTO.constructor.constructionAngle = constructorDesc._constructionAngle;
                 nodeTO.constructor.provideEnergy = constructorDesc._provideEnergy;
+                nodeTO.constructor.reservedEnergy = constructorDesc._reservedEnergy;
             }
         }
     }
@@ -1271,7 +1273,6 @@ void DescConverterService::convertObjectToTO(
         objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
         checkAndCorrectInvalidEnergy(objectTO.typeData.cell.usableEnergy);
         objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;
-        objectTO.typeData.cell.reservedEnergy = cellDesc._reservedEnergy;
         objectTO.typeData.cell.cellState = cellDesc._cellState;
         objectTO.typeData.cell.cellType = cellDesc.getCellType();
         objectTO.typeData.cell.nodeIndex = cellDesc._nodeIndex;
@@ -1510,6 +1511,7 @@ void DescConverterService::convertObjectToTO(
             constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
             constructorTO.constructionAngle = constructorDesc._constructionAngle;
             constructorTO.provideEnergy = constructorDesc._provideEnergy;
+            constructorTO.reservedEnergy = constructorDesc._reservedEnergy;
             constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
             constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
             constructorTO.currentOffspring = static_cast<uint16_t>(constructorDesc._currentOffspring);

@@ -158,8 +158,6 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                     AlienGui::InputFloatParameters().name("Usable energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._usableEnergy);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Raw energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._rawEnergy);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._reservedEnergy);
                 AlienGui::InputInt(
                     AlienGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), object.getCellRef()._age);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(BaseTabTextWidth), object._pos.x);
@@ -587,12 +585,13 @@ void _InspectorWindow::processConstructorContent(ConstructorDesc& constructor)
                             .textWidth(CellTypeTextWidth)
                             .values({
                                 "Cell only",
-                                "Cell and gene",
                                 "Free generation",
                             }),
                         provideEnergy)) {
                     constructor._provideEnergy = provideEnergy;
                 }
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(CellTypeTextWidth), constructor._reservedEnergy);
                 ImGui::TreePop();
             }
         }
@@ -618,10 +617,7 @@ void _InspectorWindow::processAttackerContent(AttackerDesc& attacker)
         if (mode == AttackerMode_FreeCell) {
             auto& attackFreeCell = std::get<AttackFreeCellDesc>(attacker._mode);
             AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters()
-                    .name("Restrict to colors")
-                    .textWidth(CellTypeTextWidth),
-                attackFreeCell._restrictToColors);
+                AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(CellTypeTextWidth), attackFreeCell._restrictToColors);
         }
         ImGui::TreePop();
     }
@@ -696,20 +692,14 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                     .tooltip(Const::GenomeSensorMinDensityTooltip),
                 detectFreeCell._minDensity);
             AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters()
-                    .name("Restrict to color")
-                    .textWidth(CellTypeTextWidth)
-                    .tooltip(Const::GenomeSensorScanColorTooltip),
+                AlienGui::ColorCheckboxesParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
                 detectFreeCell._restrictToColors);
         } else if (mode == SensorMode_DetectCreature) {
             auto& detectCreature = std::get<DetectCreatureDesc>(sensor._mode);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(CellTypeTextWidth), detectCreature._minNumCells);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(CellTypeTextWidth), detectCreature._maxNumCells);
             AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters()
-                    .name("Restrict to color")
-                    .textWidth(CellTypeTextWidth)
-                    .tooltip(Const::GenomeSensorScanColorTooltip),
+                AlienGui::ColorCheckboxesParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
                 detectCreature._restrictToColors);
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Related lineage", "Unrelated lineage"}).textWidth(CellTypeTextWidth),
@@ -847,6 +837,7 @@ void _InspectorWindow::validateAndCorrect(ObjectDesc& object) const
 
             constructor._constructionActivationTime =
                 ((constructor._constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
+            constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
             if (constructor._constructionActivationTime < 0) {
                 constructor._constructionActivationTime = 0;
             }

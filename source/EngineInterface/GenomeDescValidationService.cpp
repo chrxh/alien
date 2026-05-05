@@ -227,6 +227,7 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, MAX_ACTIVATION_TIME);
                 constructor._provideEnergy =
                     std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
+                constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
             }
         }
     }

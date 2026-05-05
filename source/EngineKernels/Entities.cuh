@@ -76,6 +76,7 @@ struct Constructor
     uint16_t constructionActivationTime;
     float constructionAngle;
     ProvideEnergy provideEnergy;
+    float reservedEnergy;
 
     // Genome data
     uint16_t geneIndex;
@@ -492,7 +493,6 @@ struct Cell
     // General
     float usableEnergy;
     float rawEnergy;
-    float reservedEnergy;
     float frontAngle;  // May be invalid
     uint32_t age;
     CellState cellState;
@@ -530,7 +530,10 @@ struct Cell
 
     __device__ __inline__ float getEnergy() const
     {
-        auto result = usableEnergy + rawEnergy + reservedEnergy;
+        auto result = usableEnergy + rawEnergy;
+        if (constructorAvailable) {
+            result += constructor.reservedEnergy;
+        }
         if (cellType == CellType_Depot) {
             result += cellTypeData.depot.storedUsableEnergy;
         }

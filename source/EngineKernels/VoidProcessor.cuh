@@ -30,7 +30,7 @@ __device__ __inline__ void VoidProcessor::process(SimulationData& data, Simulati
 
 __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    auto totalEnergy = object->typeData.cell.usableEnergy + object->typeData.cell.rawEnergy + object->typeData.cell.reservedEnergy;
+    auto totalEnergy = object->typeData.cell.getEnergy();
 
     int cellNeighborCount = 0;
     for (int i = 0; i < object->numConnections; ++i) {
@@ -49,7 +49,9 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
         }
         object->typeData.cell.usableEnergy = 0;
         object->typeData.cell.rawEnergy = 0;
-        object->typeData.cell.reservedEnergy = 0;
+        if (object->typeData.cell.constructorAvailable) {
+            object->typeData.cell.constructor.reservedEnergy = 0;
+        }
     }
 
     object->typeData.cell.cellState = CellState_InstantDying;

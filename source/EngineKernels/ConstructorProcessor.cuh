@@ -34,7 +34,7 @@ private:
         ShapeGeneratorResult shapeResult;
         float neededUsableEnergy;
         float neededReservedEnergy;
-        float depotEnergy;
+        float neededDepotEnergy;
     };
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
@@ -68,8 +68,6 @@ private:
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
-
-    __inline__ __device__ static float getRequiredEnergyForNodes(Genome* genome, int geneIndex, bool includeReferencedGenes);
 };
 
 /************************************************************************/
@@ -180,23 +178,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
     result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-    result.neededReservedEnergy = 0;
-    if (result.node->constructorAvailable) {
-        auto const& constructorNode = result.node->constructor;
-        if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
-            auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
-            if (!referencedGene.separation) {
-                auto requiredEnergyForNodes =
-                    getRequiredEnergyForNodes(result.creature->genome, constructorNode.geneIndex, constructorNode.provideEnergy == ProvideEnergy_CellAndGene);
-                if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
-                    result.neededReservedEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
-                } else {
-                    result.neededReservedEnergy += requiredEnergyForNodes;
-                }
-            }
-        }
-    }
-    result.depotEnergy = result.node->cellType == CellType_Depot ? result.node->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
+    result.neededReservedEnergy = result.node->constructorAvailable ? result.node->constructor.reservedEnergy : 0.0f;
+    result.neededDepotEnergy = result.node->cellType == CellType_Depot ? result.node->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
 
     ShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
@@ -528,8 +511,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         constructionData.currentBranch,
         posOfNewObject,
         hostObject->vel,
-        constructionData.neededUsableEnergy,
-        constructionData.neededReservedEnergy);
+        constructionData.neededUsableEnergy);
     result->typeData.cell.headUpdateId = constructionData.creature->headUpdateId;
 
     constructor.lastConstructedCellId = result->id;
@@ -557,7 +539,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return true;
     }
 
-    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.depotEnergy;
+    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
 
     if (cudaSimulationParameters.externalEnergyControlToggle.value && hostObject->typeData.cell.usableEnergy < requiredEnergy + normalCellEnergy
@@ -599,14 +581,17 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }();
 
-    // Use reserved energy first
-    auto energyNeededFromHost = min(requiredEnergy, hostObject->typeData.cell.reservedEnergy);
+    // First, take reserved energy into account 
+    auto& hostCell = hostObject->typeData.cell;
+    auto hostReservedEnergy = 0.0f;
+    if (hostCell.constructorAvailable) {
+        hostReservedEnergy = hostCell.constructor.reservedEnergy;
+    }
+    auto energyNeededFromHost = min(requiredEnergy, hostReservedEnergy);
 
     // Then use external energy supply for the remaining energy
     energyNeededFromHost += (requiredEnergy - energyNeededFromHost) * (1.0f - externalEnergyConditionalInflowFactor);
-
-    if (externalEnergyConditionalInflowFactor < 1.0f
-        && hostObject->typeData.cell.usableEnergy + hostObject->typeData.cell.reservedEnergy < normalCellEnergy + energyNeededFromHost) {
+    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell.usableEnergy + hostReservedEnergy < normalCellEnergy + energyNeededFromHost) {
         return false;
     }
     auto energyNeededFromExternalSource = requiredEnergy - energyNeededFromHost;
@@ -615,7 +600,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     float finalEnergyNeededFromHost;
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
-        if (hostObject->typeData.cell.usableEnergy + hostObject->typeData.cell.reservedEnergy < normalCellEnergy + requiredEnergy) {
+        if (hostCell.usableEnergy + hostReservedEnergy < normalCellEnergy + requiredEnergy) {
             return false;
         }
         finalEnergyNeededFromHost = requiredEnergy;
@@ -623,11 +608,15 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         finalEnergyNeededFromHost = energyNeededFromHost;
     }
 
-    hostObject->typeData.cell.reservedEnergy -= finalEnergyNeededFromHost;
-    if (hostObject->typeData.cell.reservedEnergy < 0) {
-        hostObject->typeData.cell.usableEnergy += hostObject->typeData.cell.reservedEnergy;
-        hostObject->typeData.cell.reservedEnergy = 0.0f;
+    // Reduce reserved energy
+    if (hostCell.constructorAvailable) {
+        auto energyNeededFromReserved = min(hostCell.constructor.reservedEnergy, finalEnergyNeededFromHost);
+        hostCell.constructor.reservedEnergy -= energyNeededFromReserved;
+        finalEnergyNeededFromHost -= energyNeededFromReserved;
     }
+
+    // Reduce usable energy
+    hostCell.usableEnergy -= finalEnergyNeededFromHost;
     return true;
 }
 
@@ -646,72 +635,4 @@ __inline__ __device__ void ConstructorProcessor::setHeadCellOnFirstNode(Object* 
     if (constructionData.isFirstNode && (constructionData.isSeparation || constructor.geneIndex == 0)) {
         newObject->typeData.cell.headCell = true;
     }
-}
-
-__inline__ __device__ float ConstructorProcessor::getRequiredEnergyForNodes(Genome* genome, int geneIndex, bool includeReferencedGenes)
-{
-    auto constexpr MaxReferenceDepth = 5;
-
-    auto result = 0.0f;
-    int geneIndexByDepth[MaxReferenceDepth + 1];
-    int nextNodeIndexByDepth[MaxReferenceDepth + 1];
-    float multiplierByDepth[MaxReferenceDepth + 1];
-    bool includeReferencedGenesByDepth[MaxReferenceDepth + 1];
-
-    auto depth = 0;
-    geneIndexByDepth[0] = geneIndex;
-    nextNodeIndexByDepth[0] = 0;
-    multiplierByDepth[0] = 1.0f;
-    includeReferencedGenesByDepth[0] = includeReferencedGenes;
-
-    while (depth >= 0) {
-        auto const& gene = genome->genes[geneIndexByDepth[depth]];
-        auto const multiplier = multiplierByDepth[depth];
-
-        if (nextNodeIndexByDepth[depth] == 0) {
-            for (int i = 0, j = gene.numNodes; i < j; ++i) {
-                auto const& node = &gene.nodes[i];
-                result += cudaSimulationParameters.normalCellEnergy.value[node->color] * multiplier;
-                if (node->cellType == CellType_Depot) {
-                    result += node->cellTypeData.depot.initialStoredUsableEnergy * multiplier;
-                }
-            }
-        }
-
-        if (nextNodeIndexByDepth[depth] >= gene.numNodes) {
-            --depth;
-            continue;
-        }
-
-        auto const& node = gene.nodes[nextNodeIndexByDepth[depth]++];
-        if (!includeReferencedGenesByDepth[depth] || !node.constructorAvailable || node.constructor.geneIndex >= genome->numGenes) {
-            continue;
-        }
-
-        auto const referencedGeneIndex = node.constructor.geneIndex;
-        auto& referencedGene = genome->genes[referencedGeneIndex];
-        if (referencedGene.separation || depth == MaxReferenceDepth) {
-            continue;
-        }
-
-        auto cyclicReference = false;
-        for (int i = 0; i <= depth; ++i) {
-            if (geneIndexByDepth[i] == referencedGeneIndex) {
-                cyclicReference = true;
-                break;
-            }
-        }
-        if (cyclicReference) {
-            continue;
-        }
-
-        auto const referencedGeneMultiplier =
-            !ConstructorHelper::hasInfiniteConcatenations(&referencedGene) ? referencedGene.numBranches * referencedGene.numConcatenations : 1;
-        ++depth;
-        geneIndexByDepth[depth] = referencedGeneIndex;
-        nextNodeIndexByDepth[depth] = 0;
-        multiplierByDepth[depth] = multiplier * referencedGeneMultiplier;
-        includeReferencedGenesByDepth[depth] = node.constructor.provideEnergy == ProvideEnergy_CellAndGene;
-    }
-    return result;
 }

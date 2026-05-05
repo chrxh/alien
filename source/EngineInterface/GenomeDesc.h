@@ -54,6 +54,7 @@ struct ConstructorGenomeDesc
     MEMBER(ConstructorGenomeDesc, int, constructionActivationTime, 100);
     MEMBER(ConstructorGenomeDesc, float, constructionAngle, 0.0f);
     MEMBER(ConstructorGenomeDesc, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
+    MEMBER(ConstructorGenomeDesc, float, reservedEnergy, 0.0f);
 };
 
 struct TelemetryGenomeDesc

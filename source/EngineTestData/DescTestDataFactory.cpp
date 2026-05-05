@@ -71,7 +71,6 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                       .neuralNetwork(nn)
                       .usableEnergy(150.0f)
                       .rawEnergy(12.5f)
-                      .reservedEnergy(5.5f)
                       .age(42)
                       .cellState(false)
                       .geneIndex(42)
@@ -85,7 +84,8 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                                        .geneIndex(1)
                                        .constructionActivationTime(95)
                                        .constructionAngle(25.0f)
-                                       .provideEnergy(ProvideEnergy_CellAndGene)
+                                       .provideEnergy(ProvideEnergy_FreeGeneration)
+                                       .reservedEnergy(5.5f)
                                        .currentOffspring(3))
                       .lastUpdate(7)
                       .concatenationIndex(3)
@@ -153,8 +153,13 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
     return NodeDesc()
         .neuralNetwork(nn)
         .cellType(createNonDefaultCellTypeGenomeDesc(nodeParameter))
-        .constructor(ConstructorGenomeDesc().autoTriggerInterval(55).geneIndex(1).constructionActivationTime(95).constructionAngle(25.0f).provideEnergy(
-            ProvideEnergy_FreeGeneration))
+        .constructor(ConstructorGenomeDesc()
+                         .autoTriggerInterval(55)
+                         .geneIndex(1)
+                         .constructionActivationTime(95)
+                         .constructionAngle(25.0f)
+                         .provideEnergy(ProvideEnergy_FreeGeneration)
+                         .reservedEnergy(7.0f))
         .color(4)
         .referenceAngle(90.0f);
 }
@@ -630,9 +635,6 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             return false;
         }
         if (constructor._constructionAngle != nodeConstructor._constructionAngle) {
-            return false;
-        }
-        if (constructor._provideEnergy != nodeConstructor._provideEnergy) {
             return false;
         }
     }

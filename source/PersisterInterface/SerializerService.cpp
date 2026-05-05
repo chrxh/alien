@@ -206,6 +206,7 @@ namespace
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 2;
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
+    auto constexpr Id_ConstructorGenome_ReservedEnergy = 5;
 
     auto constexpr Id_SensorGenome_AutoTrigger = 0;
     auto constexpr Id_SensorGenome_MinRange = 1;
@@ -333,6 +334,7 @@ namespace cereal
             task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDesc)
@@ -893,6 +895,7 @@ namespace
     auto constexpr Id_Constructor_ConstructionAngle = 7;
     auto constexpr Id_Constructor_ProvideEnergy = 8;
     auto constexpr Id_Constructor_CurrentOffspring = 9;
+    auto constexpr Id_Constructor_ReservedEnergy = 10;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -1068,6 +1071,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
         loadSave(task, auxiliaries, Id_Constructor_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
         loadSave(task, auxiliaries, Id_Constructor_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
+        loadSave(task, auxiliaries, Id_Constructor_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorDesc)
@@ -1537,7 +1541,6 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Cell_UsableEnergy, data._usableEnergy, defaultObject._usableEnergy);
         loadSave(task, auxiliaries, Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
-        loadSave(task, auxiliaries, Id_Cell_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
         loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
         loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);

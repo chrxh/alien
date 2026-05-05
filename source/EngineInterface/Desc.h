@@ -60,6 +60,7 @@ struct ConstructorDesc
     MEMBER(ConstructorDesc, int, constructionActivationTime, 100);
     MEMBER(ConstructorDesc, float, constructionAngle, 0.0f);
     MEMBER(ConstructorDesc, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
+    MEMBER(ConstructorDesc, float, reservedEnergy, 0.0f);
 
     // Genome data
     MEMBER(ConstructorDesc, int, geneIndex, 0);
@@ -483,7 +484,6 @@ struct CellDesc
 
     MEMBER(CellDesc, float, usableEnergy, 100.0f);
     MEMBER(CellDesc, float, rawEnergy, 0.0f);
-    MEMBER(CellDesc, float, reservedEnergy, 0.0f);
     MEMBER(
         CellDesc,
         std::optional<float>,
