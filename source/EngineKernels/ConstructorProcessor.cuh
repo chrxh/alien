@@ -609,13 +609,12 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         finalEnergyNeededFromHost = energyNeededFromHost;
     }
 
-    if (reservedEnergy > 0.0f) {
-        hostCell.constructor.reservedEnergy -= finalEnergyNeededFromHost;
-        if (hostCell.constructor.reservedEnergy < 0) {
-            hostCell.usableEnergy += reservedEnergy;
-            hostCell.constructor.reservedEnergy = 0.0f;
-        }
+    if (hostCell.constructorAvailable) {
+        auto energyNeededFromReserved = min(hostCell.constructor.reservedEnergy, finalEnergyNeededFromHost);
+        hostCell.constructor.reservedEnergy -= energyNeededFromReserved;
+        finalEnergyNeededFromHost -= energyNeededFromReserved;
     }
+    hostCell.usableEnergy -= finalEnergyNeededFromHost;
     return true;
 }
 
@@ -635,4 +634,3 @@ __inline__ __device__ void ConstructorProcessor::setHeadCellOnFirstNode(Object* 
         newObject->typeData.cell.headCell = true;
     }
 }
-
