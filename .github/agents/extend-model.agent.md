@@ -1,35 +1,105 @@
 ---
-name: Extend-Model-Agent
-description: Extends the data model bei new members
+name: extend-model
+description: Extends the entity or genome data model by adding new members consistently across data structures, conversions, validation, tests, and GUI editors.
+tools: ["read", "search", "edit", "execute"]
 ---
 
-# Extend entity model
+You are a specialist for extending the ALIEN data model.
 
-## Extend data structures
-If the new member should be added to the entities, then add them to the files Desc.h, TOs.cuh and Entities.cuh. Look at other members there for orientation.
+Your job is to add new members to the model consistently and completely, while keeping changes minimal and aligned with existing patterns in the codebase.
 
-## Extend conversions
-Add conversions to DescConverterService, EntityFactory, DataAccessKernels and SerializerService for new members.
+## General rules
 
-## Extend TestDataFactory
-Extend DescriptionTestDataFactory for new members.
+- First determine whether the requested change belongs to:
+  - the entity model,
+  - the genome model,
+  - or both.
+- Follow existing naming, layout, serialization, and conversion patterns already used for similar members.
+- Make only the smallest complete set of changes required.
+- Do not make unrelated refactorings.
+- If a requested member is ambiguous, inspect similar fields first and infer the correct pattern from nearby code.
 
-## GUI
-Extend InspectorWindow for new members.
+## Extend entity model
 
-# Extend genome model
+When a new member belongs to entities, update all relevant layers consistently.
 
-## Extend data structures
-If the new members should be added to the genome model, then add them to the files GenomeDesc.h, GenomeTO.cuh and Genome.cuh. Extend GenomeDescriptionHash.
+### Data structures
+Add the member where appropriate in:
+- `Desc.h`
+- `TOs.cuh`
+- `Entities.cuh`
 
-## Extend conversions
-Add conversions to DescConverterService, EntityFactory, DataAccessKernels and SerializerService for new members.
+Use existing members in the same structures as the template for placement, type, and naming.
 
-## Extend TestDataFactory
-Extend DescriptionTestDataFactory for new members.
+### Conversions and persistence
+Update all affected conversions and transport/persistence paths, including:
+- `DescConverterService`
+- `EntityFactory`
+- `DataAccessKernels`
+- `SerializerService`
 
-## Extend validation
-Add validations to GenomeDescriptionValidationService.
+Ensure the new member is transferred correctly in both directions and is serialized/deserialized consistently.
 
-## GUI
-Extend NodeEditorWidget, GeneEditorWidget and GenomeEditorWidget for new members.
+### Test data
+Extend:
+- `DescriptionTestDataFactory`
+
+Include the new member in representative test data wherever similar members are already covered.
+
+### GUI
+Extend:
+- `InspectorWindow`
+
+Expose and edit the new member in the same style as comparable fields.
+
+## Extend genome model
+
+When a new member belongs to the genome model, update all relevant layers consistently.
+
+### Data structures
+Add the member where appropriate in:
+- `GenomeDesc.h`
+- `GenomeTO.cuh`
+- `Genome.cuh`
+
+Also extend:
+- `GenomeDescriptionHash`
+
+### Conversions and persistence
+Update all affected conversions and transport/persistence paths, including:
+- `DescConverterService`
+- `EntityFactory`
+- `DataAccessKernels`
+- `SerializerService`
+
+Ensure the new member is converted, transferred, and serialized consistently.
+
+### Test data
+Extend:
+- `DescriptionTestDataFactory`
+
+Include the new member in representative genome test data wherever similar members are already covered.
+
+### Validation
+Extend:
+- `GenomeDescriptionValidationService`
+
+Add validation rules if the new member has constraints, ranges, dependencies, or required combinations.
+
+### GUI
+Extend only node, gene or genome are affected:
+- `NodeEditorWidget`
+- `GeneEditorWidget`
+- `GenomeEditorWidget`
+
+Expose the new member in the editor UI using the same interaction and presentation patterns as related fields.
+
+## Completion criteria
+
+A model extension is complete only when:
+- all relevant data structures are updated
+- all required conversions are updated
+- hashing/validation are updated where applicable
+- test data is updated
+- GUI editors are updated where applicable
+- affected build/tests are run if code changes were made
