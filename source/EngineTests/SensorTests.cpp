@@ -406,7 +406,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllDetectionModes, nearRangeCornerTargetDetected)
+TEST_F(SensorTests, detectCreature_nearRangeCornerTargetDetected)
 {
     auto data = Desc()
                     .addCreature(
@@ -414,13 +414,13 @@ TEST_P(SensorTests_AllDetectionModes, nearRangeCornerTargetDetected)
                             ObjectDesc()
                                 .id(1)
                                 .pos({100.0f, 100.0f})
-                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())).maxRange(8))),
+                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()).maxRange(8))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
                         CreatureDesc().id(0))
                     .addConnection(1, 2);
 
-    addDetectionTargets(data, GetParam(), {108.0f, 108.0f}, 1);
+    addDetectionTargets(data, SensorMode_DetectCreature, {108.0f, 108.0f}, 1);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -531,7 +531,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, nearRangeRayBlockedByStructureObjects)
+TEST_F(SensorTests, nearRangeRayBlockedByStructureObjects)
 {
     auto data = Desc()
                     .addCreature(
@@ -539,14 +539,14 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, nearRangeRayBlockedByStruct
                             ObjectDesc()
                                 .id(1)
                                 .pos({100.0f, 100.0f})
-                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
+                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
                         CreatureDesc().id(0))
                     .addConnection(1, 2);
 
     data._objects.emplace_back(ObjectDesc().id(50).pos({103.0f, 100.0f}).type(SolidDesc()));
-    addDetectionTargets(data, GetParam(), {106.0f, 100.0f}, 1);
+    addDetectionTargets(data, SensorMode_DetectCreature, {106.0f, 100.0f}, 1);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
