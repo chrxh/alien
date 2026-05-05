@@ -278,11 +278,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
 
-                // Provide energy at construction
-                auto freeGeneration = constructor._provideEnergy == ProvideEnergy_FreeGeneration;
-                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Free generation").textWidth(rightColumnWidth), freeGeneration);
-                constructor._provideEnergy = freeGeneration ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly;
-
+                // Reserved energy
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Reserved energy").textWidth(rightColumnWidth), constructor._reservedEnergy);
 
                 AlienGui::EndIndent();
