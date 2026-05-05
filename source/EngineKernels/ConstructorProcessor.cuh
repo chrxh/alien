@@ -34,7 +34,7 @@ private:
         ShapeGeneratorResult shapeResult;
         float neededUsableEnergy;
         float neededReservedEnergy;
-        float depotEnergy;
+        float neededDepotEnergy;
     };
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
@@ -179,7 +179,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     result.neededReservedEnergy = result.node->constructorAvailable ? result.node->constructor.reservedEnergy : 0.0f;
-    result.depotEnergy = result.node->cellType == CellType_Depot ? result.node->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
+    result.neededDepotEnergy = result.node->cellType == CellType_Depot ? result.node->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
 
     ShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
@@ -539,7 +539,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return true;
     }
 
-    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.depotEnergy;
+    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
 
     if (cudaSimulationParameters.externalEnergyControlToggle.value && hostObject->typeData.cell.usableEnergy < requiredEnergy + normalCellEnergy
@@ -581,18 +581,17 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }();
 
-    // Use reserved energy first
+    // First, take reserved energy into account 
     auto& hostCell = hostObject->typeData.cell;
-    auto reservedEnergy = 0.0f;
+    auto hostReservedEnergy = 0.0f;
     if (hostCell.constructorAvailable) {
-        reservedEnergy = hostCell.constructor.reservedEnergy;
+        hostReservedEnergy = hostCell.constructor.reservedEnergy;
     }
-    auto energyNeededFromHost = min(requiredEnergy, reservedEnergy);
+    auto energyNeededFromHost = min(requiredEnergy, hostReservedEnergy);
 
     // Then use external energy supply for the remaining energy
     energyNeededFromHost += (requiredEnergy - energyNeededFromHost) * (1.0f - externalEnergyConditionalInflowFactor);
-
-    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell.usableEnergy + reservedEnergy < normalCellEnergy + energyNeededFromHost) {
+    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell.usableEnergy + hostReservedEnergy < normalCellEnergy + energyNeededFromHost) {
         return false;
     }
     auto energyNeededFromExternalSource = requiredEnergy - energyNeededFromHost;
@@ -601,7 +600,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     float finalEnergyNeededFromHost;
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
-        if (hostCell.usableEnergy + reservedEnergy < normalCellEnergy + requiredEnergy) {
+        if (hostCell.usableEnergy + hostReservedEnergy < normalCellEnergy + requiredEnergy) {
             return false;
         }
         finalEnergyNeededFromHost = requiredEnergy;
@@ -609,13 +608,15 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         finalEnergyNeededFromHost = energyNeededFromHost;
     }
 
-    if (reservedEnergy > 0.0f) {
-        hostCell.constructor.reservedEnergy -= finalEnergyNeededFromHost;
-        if (hostCell.constructor.reservedEnergy < 0) {
-            hostCell.usableEnergy += reservedEnergy;
-            hostCell.constructor.reservedEnergy = 0.0f;
-        }
+    // Reduce reserved energy
+    if (hostCell.constructorAvailable) {
+        auto energyNeededFromReserved = min(hostCell.constructor.reservedEnergy, finalEnergyNeededFromHost);
+        hostCell.constructor.reservedEnergy -= energyNeededFromReserved;
+        finalEnergyNeededFromHost -= energyNeededFromReserved;
     }
+
+    // Reduce usable energy
+    hostCell.usableEnergy -= finalEnergyNeededFromHost;
     return true;
 }
 
@@ -635,4 +636,3 @@ __inline__ __device__ void ConstructorProcessor::setHeadCellOnFirstNode(Object* 
         newObject->typeData.cell.headCell = true;
     }
 }
-

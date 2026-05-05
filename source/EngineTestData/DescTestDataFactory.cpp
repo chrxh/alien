@@ -84,7 +84,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                                        .geneIndex(1)
                                        .constructionActivationTime(95)
                                        .constructionAngle(25.0f)
-                                       .provideEnergy(ProvideEnergy_CellAndGene)
+                                       .provideEnergy(ProvideEnergy_FreeGeneration)
                                        .reservedEnergy(5.5f)
                                        .currentOffspring(3))
                       .lastUpdate(7)
