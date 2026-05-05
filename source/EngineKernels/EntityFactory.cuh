@@ -958,7 +958,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
         constructor.constructionAngle = nodeConstructor.constructionAngle;
-        constructor.provideEnergy = nodeConstructor.provideEnergy;
+        constructor.provideEnergy = ProvideEnergy_CellOnly;
         constructor.reservedEnergy = nodeConstructor.reservedEnergy;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;

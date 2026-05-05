@@ -637,9 +637,6 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
         if (constructor._constructionAngle != nodeConstructor._constructionAngle) {
             return false;
         }
-        if (constructor._provideEnergy != nodeConstructor._provideEnergy) {
-            return false;
-        }
     }
 
     return true;

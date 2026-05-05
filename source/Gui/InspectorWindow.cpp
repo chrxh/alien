@@ -585,7 +585,6 @@ void _InspectorWindow::processConstructorContent(ConstructorDesc& constructor)
                             .textWidth(CellTypeTextWidth)
                             .values({
                                 "Cell only",
-                                "Cell and gene",
                                 "Free generation",
                             }),
                         provideEnergy)) {
