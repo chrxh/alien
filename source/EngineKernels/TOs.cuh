@@ -56,6 +56,7 @@ struct ConstructorTO
     uint16_t constructionActivationTime;
     float constructionAngle;
     ProvideEnergy provideEnergy;
+    float reservedEnergy;
 
     // Genome data
     uint16_t geneIndex;
@@ -84,8 +85,8 @@ struct DetectFreeCellTO
 
 struct DetectCreatureTO
 {
-    uint32_t minNumCells;      // 0 = no restriction
-    uint32_t maxNumCells;      // 0 = no restriction
+    uint32_t minNumCells;       // 0 = no restriction
+    uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
@@ -269,8 +270,8 @@ struct ReconnectFreeCellTO
 
 struct ReconnectCreatureTO
 {
-    uint32_t minNumCells;     // 0 = no restriction
-    uint32_t maxNumCells;     // 0 = no restriction
+    uint32_t minNumCells;       // 0 = no restriction
+    uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
@@ -417,7 +418,6 @@ struct CellTO
     // General
     float usableEnergy;
     float rawEnergy;
-    float reservedEnergy;
     float frontAngle;  // May be invalid
     uint32_t age;
     CellState cellState;

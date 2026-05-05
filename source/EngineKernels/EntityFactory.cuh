@@ -298,7 +298,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.constructor.constructionActivationTime = nodeTO.constructor.constructionActivationTime;
                 node.constructor.constructionAngle = nodeTO.constructor.constructionAngle;
                 node.constructor.provideEnergy = nodeTO.constructor.provideEnergy;
-                node.constructor.reservedEnergyNodes = nodeTO.constructor.reservedEnergyNodes;
+                node.constructor.reservedEnergy = nodeTO.constructor.reservedEnergy;
             }
         }
     }
@@ -382,7 +382,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         cell->cellState = cellTO.cellState;
         cell->usableEnergy = cellTO.usableEnergy;
         cell->rawEnergy = cellTO.rawEnergy;
-        cell->reservedEnergy = cellTO.reservedEnergy;
         cell->cellType = cellTO.cellType;
         cell->age = cellTO.age;
         cell->frontAngle = cellTO.frontAngle;
@@ -584,6 +583,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.constructionActivationTime = cellTO.constructor.constructionActivationTime;
             cell->constructor.constructionAngle = cellTO.constructor.constructionAngle;
             cell->constructor.provideEnergy = cellTO.constructor.provideEnergy;
+            cell->constructor.reservedEnergy = cellTO.constructor.reservedEnergy;
             cell->constructor.geneIndex = cellTO.constructor.geneIndex;
             cell->constructor.lastConstructedCellId = cellTO.constructor.lastConstructedCellId;
             cell->constructor.currentOffspring = cellTO.constructor.currentOffspring;
@@ -732,7 +732,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.frontAngle = VALUE_NOT_SET_FLOAT;
     cell.usableEnergy = usableEnergy;
     cell.rawEnergy = 0.0f;
-    cell.reservedEnergy = reservedEnergy;
     cell.age = 0;
     cell.cellState = CellState_Constructing;
     cell.creature = creature;
@@ -962,6 +961,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
         constructor.constructionAngle = nodeConstructor.constructionAngle;
         constructor.provideEnergy = nodeConstructor.provideEnergy;
+        constructor.reservedEnergy = reservedEnergy;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
         constructor.currentOffspring = 0;

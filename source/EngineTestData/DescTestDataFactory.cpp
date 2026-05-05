@@ -71,7 +71,6 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                       .neuralNetwork(nn)
                       .usableEnergy(150.0f)
                       .rawEnergy(12.5f)
-                      .reservedEnergy(5.5f)
                       .age(42)
                       .cellState(false)
                       .geneIndex(42)
@@ -86,6 +85,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                                        .constructionActivationTime(95)
                                        .constructionAngle(25.0f)
                                        .provideEnergy(ProvideEnergy_CellAndGene)
+                                       .reservedEnergy(5.5f)
                                        .currentOffspring(3))
                       .lastUpdate(7)
                       .concatenationIndex(3)
@@ -159,7 +159,7 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
                          .constructionActivationTime(95)
                          .constructionAngle(25.0f)
                          .provideEnergy(ProvideEnergy_FreeGeneration)
-                         .reservedEnergyNodes(7))
+                         .reservedEnergy(7.0f))
         .color(4)
         .referenceAngle(90.0f);
 }

@@ -48,8 +48,8 @@ struct DetectFreeCellGenomeTO
 
 struct DetectCreatureGenomeTO
 {
-    uint32_t minNumCells;      // 0 = no restriction
-    uint32_t maxNumCells;      // 0 = no restriction
+    uint32_t minNumCells;       // 0 = no restriction
+    uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
@@ -80,7 +80,7 @@ struct ConstructorGenomeTO
     uint16_t constructionActivationTime;
     float constructionAngle;
     ProvideEnergy provideEnergy;
-    uint16_t reservedEnergyNodes;
+    float reservedEnergy;
 };
 
 struct SquareSignalGenomeTO
@@ -117,8 +117,8 @@ struct AttackFreeCellGenomeTO
 
 struct AttackCreatureGenomeTO
 {
-    uint32_t minNumCells;     // 0 = no restriction
-    uint32_t maxNumCells;     // 0 = no restriction
+    uint32_t minNumCells;      // 0 = no restriction
+    uint32_t maxNumCells;      // 0 = no restriction
     uint8_t restrictToColors;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
@@ -204,8 +204,8 @@ struct ReconnectFreeCellGenomeTO
 
 struct ReconnectCreatureGenomeTO
 {
-    uint32_t minNumCells;     // 0 = no restriction
-    uint32_t maxNumCells;     // 0 = no restriction
+    uint32_t minNumCells;       // 0 = no restriction
+    uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };

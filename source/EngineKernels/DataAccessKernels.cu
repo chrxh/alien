@@ -242,7 +242,7 @@ namespace
                         nodeTO.constructor.constructionActivationTime = node.constructor.constructionActivationTime;
                         nodeTO.constructor.constructionAngle = node.constructor.constructionAngle;
                         nodeTO.constructor.provideEnergy = node.constructor.provideEnergy;
-                        nodeTO.constructor.reservedEnergyNodes = node.constructor.reservedEnergyNodes;
+                        nodeTO.constructor.reservedEnergy = node.constructor.reservedEnergy;
                     }
                 }
             }
@@ -326,7 +326,6 @@ namespace
             cellTO.creatureIndex = cell.creature->creatureIndex;
             cellTO.usableEnergy = cell.usableEnergy;
             cellTO.rawEnergy = cell.rawEnergy;
-            cellTO.reservedEnergy = cell.reservedEnergy;
             cellTO.cellState = cell.cellState;
             cellTO.frontAngle = cell.frontAngle;
             cellTO.age = cell.age;
@@ -534,6 +533,7 @@ namespace
                 cellTO.constructor.constructionActivationTime = cell.constructor.constructionActivationTime;
                 cellTO.constructor.constructionAngle = cell.constructor.constructionAngle;
                 cellTO.constructor.provideEnergy = cell.constructor.provideEnergy;
+                cellTO.constructor.reservedEnergy = cell.constructor.reservedEnergy;
                 cellTO.constructor.geneIndex = cell.constructor.geneIndex;
                 cellTO.constructor.lastConstructedCellId = cell.constructor.lastConstructedCellId;
                 cellTO.constructor.currentOffspring = cell.constructor.currentOffspring;
