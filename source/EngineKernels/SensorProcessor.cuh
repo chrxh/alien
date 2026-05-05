@@ -25,6 +25,7 @@ private:
 
     __inline__ __device__ static bool
     isRayBlockedByCreatureConnections(Object** nearSameCreatureCells, int numNearSameCreatureCells, float2 const& rayOrigin, float angle);
+    __inline__ __device__ static bool isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
@@ -154,26 +155,31 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     // 1. Near range scan
     if (object->typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
 
-        // Calculate the total number of scan positions in the [-range, range] x [-range, range] region
         auto const nearDistance = toInt(ScanStep);
-        int diameter = 2 * nearDistance + 1;
+        auto const nearRadius = toInt(ceilf(sqrtf(2.0f) * toFloat(nearDistance)));
+        int diameter = 2 * nearRadius + 1;
         int totalPositions = diameter * diameter;
 
         // Each thread scans different positions in parallel
         for (int idx = threadIdx.x; idx < totalPositions; idx += blockDim.x) {
-            auto dx = toFloat((idx % diameter) - nearDistance);
-            auto dy = toFloat((idx / diameter) - nearDistance);
+            auto dx = toFloat((idx % diameter) - nearRadius);
+            auto dy = toFloat((idx / diameter) - nearRadius);
 
             auto delta = float2{dx, dy};
+            auto distance = Math::length(delta);
+            if (distance > toFloat(nearRadius)) {
+                continue;
+            }
+
             auto angle = Math::angleOfVector(delta);
             float2 scanPos = object->pos + delta;
             data.objectMap.correctPosition(scanPos);
 
             // Check all cells at this position (including overlapping cells)
-            auto distange = Math::length(delta);
-            uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distange, ScanType::LocateMatch);
+            uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
             if (matchInfo != 0xffffffffffffffff) {
-                if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)) {
+                if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)
+                    && !isRayBlockedBySolid(data, object->pos, angle, distance)) {
                     alienAtomicMin64(&lookupResult, matchInfo);
                 }
             }
@@ -437,6 +443,19 @@ SensorProcessor::isRayBlockedByCreatureConnections(Object** nearSameCreatureCell
             if (Math::crossing(nearObject->pos, connectedNearObject->pos, rayOrigin, rayEnd)) {
                 return true;
             }
+        }
+    }
+    return false;
+}
+
+__inline__ __device__ bool SensorProcessor::isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance)
+{
+    auto const& densityMap = data.preprocessedSimulationData.densityMap;
+    auto direction = Math::unitVectorOfAngle(angle);
+    for (float scanDistance = 1.0f; scanDistance < distance; scanDistance += 1.0f) {
+        auto scanPos = data.objectMap.getCorrectedPosition(rayOrigin + direction * scanDistance);
+        if (densityMap.getSolidDensity(scanPos) > 0) {
+            return true;
         }
     }
     return false;
