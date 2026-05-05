@@ -601,16 +601,16 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
     // Use reserved energy first
     auto& hostCell = hostObject->typeData.cell;
-    if (!hostCell.constructorAvailable) {
-        return false;
+    auto reservedEnergy = 0.0f;
+    if (hostCell.constructorAvailable) {
+        reservedEnergy = hostCell.constructor.reservedEnergy;
     }
-    auto& hostConstructor = hostCell.constructor;
-    auto energyNeededFromHost = min(requiredEnergy, hostConstructor.reservedEnergy);
+    auto energyNeededFromHost = min(requiredEnergy, reservedEnergy);
 
     // Then use external energy supply for the remaining energy
     energyNeededFromHost += (requiredEnergy - energyNeededFromHost) * (1.0f - externalEnergyConditionalInflowFactor);
 
-    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell.usableEnergy + hostConstructor.reservedEnergy < normalCellEnergy + energyNeededFromHost) {
+    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell.usableEnergy + reservedEnergy < normalCellEnergy + energyNeededFromHost) {
         return false;
     }
     auto energyNeededFromExternalSource = requiredEnergy - energyNeededFromHost;
@@ -619,7 +619,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     float finalEnergyNeededFromHost;
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
-        if (hostCell.usableEnergy + hostConstructor.reservedEnergy < normalCellEnergy + requiredEnergy) {
+        if (hostCell.usableEnergy + reservedEnergy < normalCellEnergy + requiredEnergy) {
             return false;
         }
         finalEnergyNeededFromHost = requiredEnergy;
@@ -627,10 +627,12 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         finalEnergyNeededFromHost = energyNeededFromHost;
     }
 
-    hostConstructor.reservedEnergy -= finalEnergyNeededFromHost;
-    if (hostConstructor.reservedEnergy < 0) {
-        hostCell.usableEnergy += hostConstructor.reservedEnergy;
-        hostConstructor.reservedEnergy = 0.0f;
+    if (reservedEnergy > 0.0f) {
+        hostCell.constructor.reservedEnergy -= finalEnergyNeededFromHost;
+        if (hostCell.constructor.reservedEnergy < 0) {
+            hostCell.usableEnergy += reservedEnergy;
+            hostCell.constructor.reservedEnergy = 0.0f;
+        }
     }
     return true;
 }

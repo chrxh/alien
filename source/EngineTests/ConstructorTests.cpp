@@ -30,7 +30,8 @@ protected:
     {
         return _parameters.normalCellEnergy.value[0] * 3.5f;  // Provide enough energy
     }
-    float getOffspringDistance() const { return 1.0f; }
+
+    static float getOffspringDistance() { return 1.0f; }
     static float getReservedEnergy(CellDesc const& cell) { return cell._constructor.has_value() ? cell._constructor->_reservedEnergy : 0.0f; }
 
     DescTestDataFactory* _descTestDataFactory;
