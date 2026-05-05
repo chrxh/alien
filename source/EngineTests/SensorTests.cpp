@@ -539,7 +539,7 @@ TEST_F(SensorTests, nearRangeRayBlockedByStructureObjects)
                             ObjectDesc()
                                 .id(1)
                                 .pos({100.0f, 100.0f})
-                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
+                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()).maxRange(5))),
                             ObjectDesc().id(2).pos({101.0f, 100.0f}),
                         },
                         CreatureDesc().id(0))
