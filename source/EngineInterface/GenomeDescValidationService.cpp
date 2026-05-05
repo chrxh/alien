@@ -225,9 +225,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 }
                 constructor._geneIndex = std::max(constructor._geneIndex, 0);
                 constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, MAX_ACTIVATION_TIME);
-                if (constructor._provideEnergy != ProvideEnergy_CellOnly && constructor._provideEnergy != ProvideEnergy_FreeGeneration) {
-                    constructor._provideEnergy = ProvideEnergy_CellOnly;
-                }
+                constructor._provideEnergy =
+                    std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
                 constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
             }
         }

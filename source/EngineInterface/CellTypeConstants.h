@@ -137,8 +137,8 @@ using ProvideEnergy = uint8_t;
 enum ProvideEnergy_
 {
     ProvideEnergy_CellOnly = 0,
-    ProvideEnergy_FreeGeneration = 2,
-    ProvideEnergy_Count = 3,
+    ProvideEnergy_FreeGeneration = 1,
+    ProvideEnergy_Count = 2,
 };
 
 namespace Const
