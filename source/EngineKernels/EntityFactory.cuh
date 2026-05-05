@@ -35,8 +35,7 @@ public:
         int branchIndex,
         float2 pos,
         float2 vel,
-        float usableEnergy,
-        float reservedEnergy);
+        float usableEnergy);
 
     __inline__ __device__ Genome* createEmptyGenome();
     __inline__ __device__ Creature* createEmptyCreature();
@@ -704,8 +703,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     int branchIndex,
     float2 pos,
     float2 vel,
-    float usableEnergy,
-    float reservedEnergy)
+    float usableEnergy)
 {
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
@@ -961,7 +959,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
         constructor.constructionAngle = nodeConstructor.constructionAngle;
         constructor.provideEnergy = nodeConstructor.provideEnergy;
-        constructor.reservedEnergy = reservedEnergy;
+        constructor.reservedEnergy = nodeConstructor.reservedEnergy;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
         constructor.currentOffspring = 0;
