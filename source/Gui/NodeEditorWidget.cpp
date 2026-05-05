@@ -279,7 +279,8 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
 
                 // Reserved energy
-                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Reserved energy").textWidth(rightColumnWidth), constructor._reservedEnergy);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Reserved energy").textWidth(rightColumnWidth).format("%.1f"), constructor._reservedEnergy);
 
                 AlienGui::EndIndent();
                 ImGui::PopID();
@@ -295,7 +296,8 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Max energy for storage").format("%.1f").textWidth(rightColumnWidth), depot._storageLimit);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Initial stored energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
+                    AlienGui::InputFloatParameters().name("Initial stored energy").textWidth(rightColumnWidth).format("%.1f"),
+                    depot._initialStoredUsableEnergy);
             } else if (nodeType == CellType_Sensor) {
 
                 ImGui::PushID("Sensor");

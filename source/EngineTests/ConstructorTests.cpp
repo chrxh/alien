@@ -412,10 +412,11 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_TRUE(newObject.getCellRef()._headCell);
     EXPECT_EQ(newCreature._headUpdateId, newObject.getCellRef()._headUpdateId);
     EXPECT_TRUE(approxCompare(0.5f, Math::length(hostObject._pos - newObject._pos)));
-    EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
 
-    auto hostConstructor = hostObject.getCellRef()._constructor.value();
+    EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
+    auto newConstructor = newObject.getCellRef()._constructor.value();
+    EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
 
     // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
@@ -455,8 +456,11 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(CellState_Activating, newObject.getCellRef()._cellState);
     EXPECT_TRUE(newObject.getCellRef()._headCell);
     EXPECT_TRUE(Math::length(hostObject._pos - newObject._pos) > 50.0f);  // Preview specific: Move seed far away from construction
-    EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostObject._id, newObject._id));
+
+    EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
+    auto newConstructor = newObject.getCellRef()._constructor.value();
+    EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview_detail)
