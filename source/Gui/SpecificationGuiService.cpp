@@ -460,13 +460,29 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
 
-    AlienGui::ColorButtonWithPicker(
-        AlienGui::ColorButtonWithPickerParameters()
-            .name(parameterSpec._name)
-            .textWidth(TextColumnWidth)
-            .highlightedSubString(filter.containedText)
-            .defaultValue(*origValue),
-        *value);
+    if (valueType == ColorDependence::ColorVector) {
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            ImGui::PushID(color);
+            auto widgetParameters = AlienGui::ColorButtonWithPickerParameters()
+                                        .name("Color " + std::to_string(color + 1))
+                                        .textWidth(TextColumnWidth)
+                                        .highlightedSubString(filter.containedText)
+                                        .defaultValue(origValue[color]);
+            if (color == 0) {
+                widgetParameters.tooltip(parameterSpec._description);
+            }
+            AlienGui::ColorButtonWithPicker(widgetParameters, value[color]);
+            ImGui::PopID();
+        }
+    } else {
+        AlienGui::ColorButtonWithPicker(
+            AlienGui::ColorButtonWithPickerParameters()
+                .name(parameterSpec._name)
+                .textWidth(TextColumnWidth)
+                .highlightedSubString(filter.containedText)
+                .defaultValue(*origValue),
+            *value);
+    }
 }
 
 void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(

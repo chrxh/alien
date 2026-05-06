@@ -87,50 +87,16 @@ namespace
 
     __device__ __inline__ uint32_t getCellColorByCode(int colorCode)
     {
-        uint32_t result;
-        switch (calcMod(colorCode, MAX_COLORS)) {
-        case 0: {
-            result = Const::IndividualObjectColor1;
-            break;
-        }
-        case 1: {
-            result = Const::IndividualObjectColor2;
-            break;
-        }
-        case 2: {
-            result = Const::IndividualObjectColor3;
-            break;
-        }
-        case 3: {
-            result = Const::IndividualObjectColor4;
-            break;
-        }
-        case 4: {
-            result = Const::IndividualObjectColor5;
-            break;
-        }
-        case 5: {
-            result = Const::IndividualObjectColor6;
-            break;
-        }
-        case 6: {
-            result = Const::IndividualObjectColor7;
-            break;
-        }
-        case 7: {
-            result = Const::IndividualObjectColor8;
-            break;
-        }
-        case 8: {
-            result = Const::IndividualObjectColor9;
-            break;
-        }
-        case 9: {
-            result = Const::IndividualObjectColor10;
-            break;
-        }
-        }
-        return result;
+        auto const& color = cudaSimulationParameters.objectColors.value[calcMod(colorCode, MAX_COLORS)];
+        auto const toInt = [](float value) {
+            if (value < 0.0f) {
+                value = 0.0f;
+            } else if (value > 1.0f) {
+                value = 1.0f;
+            }
+            return min(255u, static_cast<uint32_t>(value * 255.0f + 0.5f));
+        };
+        return (toInt(color.r) << 16) | (toInt(color.g) << 8) | toInt(color.b);
     }
 
     __device__ __inline__ uint32_t getCellColor(Object* object)

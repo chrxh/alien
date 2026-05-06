@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include <Base/MathTypes.h>
+
 #include "EngineConstants.h"
 #include "Definitions.h"
 
@@ -18,7 +20,19 @@ namespace Const
     uint32_t constexpr IndividualObjectColor9 = 0x20FFB5;
     uint32_t constexpr IndividualObjectColor10 = 0xFFFFFF;
 
-    uint32_t constexpr IndividualObjectColors[MAX_COLORS] = {  //array for convenience
+    uint32_t constexpr DefaultIndividualObjectColors[MAX_COLORS] = {  //array for convenience
+        IndividualObjectColor1,
+        IndividualObjectColor2,
+        IndividualObjectColor3,
+        IndividualObjectColor4,
+        IndividualObjectColor5,
+        IndividualObjectColor6,
+        IndividualObjectColor7,
+        IndividualObjectColor8,
+        IndividualObjectColor9,
+        IndividualObjectColor10};
+
+    inline uint32_t IndividualObjectColors[MAX_COLORS] = {
         IndividualObjectColor1,
         IndividualObjectColor2,
         IndividualObjectColor3,
@@ -72,3 +86,40 @@ struct ColorMatrix
 
     bool operator==(ColorMatrix const&) const = default;
 };
+
+constexpr FloatColorRGB toFloatColorRGB(uint32_t rgb)
+{
+    return {
+        static_cast<float>((rgb >> 16) & 0xff) / 255.0f,
+        static_cast<float>((rgb >> 8) & 0xff) / 255.0f,
+        static_cast<float>(rgb & 0xff) / 255.0f};
+}
+
+constexpr ColorVector<FloatColorRGB> createDefaultIndividualObjectColorVector()
+{
+    ColorVector<FloatColorRGB> result;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        result.values[i] = toFloatColorRGB(Const::DefaultIndividualObjectColors[i]);
+    }
+    return result;
+}
+
+inline uint32_t toRgbColor(FloatColorRGB const& color)
+{
+    auto const toInt = [](float value) {
+        if (value < 0.0f) {
+            value = 0.0f;
+        } else if (value > 1.0f) {
+            value = 1.0f;
+        }
+        return static_cast<uint32_t>(value * 255.0f + 0.5f);
+    };
+    return (toInt(color.r) << 16) | (toInt(color.g) << 8) | toInt(color.b);
+}
+
+inline void syncIndividualObjectColors(ColorVector<FloatColorRGB> const& colors)
+{
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        Const::IndividualObjectColors[i] = toRgbColor(colors.values[i]);
+    }
+}
