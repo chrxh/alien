@@ -845,7 +845,7 @@ void StatisticsWindow::validateAndCorrect()
 {
     _timeHorizonForLiveStatistics = std::max(1.0f, std::min(TimelineLiveStatistics::MaxLiveHistory, _timeHorizonForLiveStatistics));
     _timeHorizonForLongtermStatistics = std::max(1.0f, std::min(100.0f, _timeHorizonForLongtermStatistics));
-    _plotType = std::clamp(_plotType, PlotType_Accumulated, PlotType_Color0 + MAX_COLORS - 1);
+    _plotType = std::clamp(_plotType, static_cast<PlotType>(PlotType_Accumulated), PlotType_Color0 + MAX_COLORS - 1);
 }
 
 float StatisticsWindow::calcPlotHeight(int row) const
