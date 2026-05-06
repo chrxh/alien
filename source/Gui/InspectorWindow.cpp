@@ -120,7 +120,7 @@ void _InspectorWindow::processObject(ExtendedObjectDesc& extendedObject)
             }
         }
         if (object.getObjectType() == ObjectType_Solid) {
-            processStructureTab(object);
+            processSolidTab(object);
         }
         if (object.getObjectType() == ObjectType_Fluid) {
             processFluidTab(object);
@@ -768,7 +768,7 @@ void _InspectorWindow::processDetonatorContent(DetonatorDesc& detonator)
     }
 }
 
-void _InspectorWindow::processStructureTab(ObjectDesc& object)
+void _InspectorWindow::processSolidTab(ObjectDesc& object)
 {
     if (ImGui::BeginTabItem("Solid", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {

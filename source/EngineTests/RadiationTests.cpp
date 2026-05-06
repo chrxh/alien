@@ -50,7 +50,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
     EXPECT_TRUE(approxCompare(initialEnergy, object.getCellRef()._usableEnergy));
 }
 
-TEST_F(RadiationTests, structureCells_shouldNotRadiate)
+TEST_F(RadiationTests, solid_shouldNotRadiate)
 {
     Desc data;
     data._objects.emplace_back(

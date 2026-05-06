@@ -25,6 +25,8 @@ private:
 
     __inline__ __device__ static bool
     isRayBlockedByCreatureConnections(Object** nearSameCreatureCells, int numNearSameCreatureCells, float2 const& rayOrigin, float angle);
+    __inline__ __device__ static bool isSolidAtPosition(SimulationData& data, float2 const& pos);
+    __inline__ __device__ static bool isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
@@ -154,7 +156,6 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     // 1. Near range scan
     if (object->typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
 
-        // Calculate the total number of scan positions in the [-range, range] x [-range, range] region
         auto const nearDistance = toInt(ScanStep);
         int diameter = 2 * nearDistance + 1;
         int totalPositions = diameter * diameter;
@@ -165,15 +166,16 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             auto dy = toFloat((idx / diameter) - nearDistance);
 
             auto delta = float2{dx, dy};
+            auto distance = Math::length(delta);
             auto angle = Math::angleOfVector(delta);
             float2 scanPos = object->pos + delta;
             data.objectMap.correctPosition(scanPos);
 
             // Check all cells at this position (including overlapping cells)
-            auto distange = Math::length(delta);
-            uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distange, ScanType::LocateMatch);
+            uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
             if (matchInfo != 0xffffffffffffffff) {
-                if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)) {
+                if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)
+                    && !isRayBlockedBySolid(data, object->pos, angle, distance)) {
                     alienAtomicMin64(&lookupResult, matchInfo);
                 }
             }
@@ -191,7 +193,8 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             auto angle = 360.0f * toFloat(rayIdx) / toFloat(NumScanRays) + seedAngle;
             auto seedDistance = data.primaryNumberGen.random(0, ScanStep);
 
-            if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)) {
+            if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)
+                && !isRayBlockedBySolid(data, object->pos, angle, seedDistance)) {
                 for (float distance = seedDistance; distance <= endRadius; distance += ScanStep) {
                     auto delta = Math::unitVectorOfAngle(angle) * distance;
                     auto scanPos = object->pos + delta;
@@ -200,7 +203,9 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                     if (distance > startRadius) {
                         uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
                         if (matchInfo != 0xffffffffffffffff) {
-                            alienAtomicMin64(&lookupResult, matchInfo);
+                            if (!isRayBlockedBySolid(data, object->pos, angle, distance)) {
+                                alienAtomicMin64(&lookupResult, matchInfo);
+                            }
                             break;
                         }
                     }
@@ -437,6 +442,30 @@ SensorProcessor::isRayBlockedByCreatureConnections(Object** nearSameCreatureCell
             if (Math::crossing(nearObject->pos, connectedNearObject->pos, rayOrigin, rayEnd)) {
                 return true;
             }
+        }
+    }
+    return false;
+}
+
+__inline__ __device__ bool SensorProcessor::isSolidAtPosition(SimulationData& data, float2 const& pos)
+{
+    auto object = data.objectMap.getFirst(pos);
+    while (object != nullptr) {
+        if (object->type == ObjectType_Solid) {
+            return true;
+        }
+        object = object->nextObject;
+    }
+    return false;
+}
+
+__inline__ __device__ bool SensorProcessor::isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance)
+{
+    auto direction = Math::unitVectorOfAngle(angle);
+    for (float scanDistance = 0.0f; scanDistance <= distance; scanDistance += 1.0f) {
+        auto scanPos = data.objectMap.getCorrectedPosition(rayOrigin + direction * scanDistance);
+        if (isSolidAtPosition(data, scanPos)) {
+            return true;
         }
     }
     return false;

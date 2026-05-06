@@ -35,7 +35,7 @@ protected:
     }
 
     // Helper to create a large creature (10x10 grid) at the specified position
-    Desc createLargeCreature(RealVector2D const& startPos = RealVector2D{95.0f, 80.0f}, int diameterCount = 10)
+    Desc createCreature(RealVector2D const& startPos = RealVector2D{95.0f, 80.0f}, int diameterCount = 10)
     {
         Desc result;
         std::vector<ObjectDesc> target;
@@ -53,7 +53,7 @@ protected:
         return result;
     }
 
-    int _nextStructureId = 10000;
+    int _nextSolidId = 10000;
 
     // Helper to add detection targets
     void addDetectionTargets(Desc& data, SensorMode const& mode, RealVector2D const& startPos, int count = 8, bool assignNewIds = true)
@@ -67,8 +67,8 @@ protected:
                 data._objects.emplace_back(ObjectDesc().pos({startPos.x + i, startPos.y}).type(FreeCellDesc()));
             }
         } else if (mode == SensorMode_DetectSolid) {
-            auto baseId = _nextStructureId;
-            _nextStructureId += count;
+            auto baseId = _nextSolidId;
+            _nextSolidId += count;
             for (int i = 0; i < count; ++i) {
                 data._objects.emplace_back(ObjectDesc().id(baseId + i).pos({startPos.x + i, startPos.y}).type(SolidDesc()));
             }
@@ -76,7 +76,7 @@ protected:
                 data.addConnection(baseId + i, baseId + i + 1);
             }
         } else if (mode == SensorMode_DetectCreature) {
-            data.add(createLargeCreature(startPos, count), assignNewIds);
+            data.add(createCreature(startPos, count), assignNewIds);
         } else {
             CHECK(false);
         }
@@ -406,6 +406,29 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
+TEST_F(SensorTests, detectCreature_nearRangeCornerTargetDetected)
+{
+    auto data = Desc()
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(1)
+                                .pos({101.0f, 100.0f})
+                                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
+                            ObjectDesc().id(2).pos({100.0f, 100.0f}),
+                        },
+                        CreatureDesc().id(0))
+                    .addConnection(1, 2);
+
+    addDetectionTargets(data, SensorMode_DetectCreature, {108.0f, 108.0f}, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
 TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
 {
     auto data = Desc().addCreature(
@@ -464,18 +487,18 @@ TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-class SensorTests_AllDetectionModesExceptStructure
+class SensorTests_AllDetectionModesExceptSolid
     : public SensorTests
     , public testing::WithParamInterface<SensorMode>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    SensorTests_AllDetectionModesExceptStructure,
-    SensorTests_AllDetectionModesExceptStructure,
+    SensorTests_AllDetectionModesExceptSolid,
+    SensorTests_AllDetectionModesExceptSolid,
     ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
 
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObjects)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidFar_targetFar)
 {
     auto data = Desc().addCreature(
         {
@@ -508,7 +531,73 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObjects_behind)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidNear_targetFar)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+
+    // Add solid cells between sensor and target (to block the ray)
+    for (int i = 0; i < 10; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.5f + i, 99.0f}).type(SolidDesc()));
+    }
+    for (int i = 0; i < 9; ++i) {
+        data.addConnection(50 + i, 50 + i + 1);
+    }
+
+    // Add target behind the solid cells
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+
+    // Should not find target because ray is blocked by solid cells
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidNear_targetNear)
+{
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(createModeWithDensity(GetParam())))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}),
+        },
+        CreatureDesc().id(0));
+    data.addConnection(1, 2);
+
+    // Add solid cells between sensor and target (to block the ray)
+    for (int i = 0; i < 10; ++i) {
+        data._objects.emplace_back(ObjectDesc().id(50 + i).pos({95.5f + i, 99.0f}).type(SolidDesc()));
+    }
+    for (int i = 0; i < 9; ++i) {
+        data.addConnection(50 + i, 50 + i + 1);
+    }
+
+    // Add target behind the solid cells
+    addDetectionTargets(data, GetParam(), {98.0f, 89.0f}, 10);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
+
+    // Should not find target because ray is blocked by solid cells
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_behind)
 {
     auto data = Desc().addCreature(
         {
@@ -529,7 +618,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
         data.addConnection(50 + i, 50 + i + 1);
     }
 
-    // Add target behind the solid cells
+    // Add target before the solid cells
     addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
@@ -541,7 +630,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
     EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObjects_differentAngle)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_differentAngle)
 {
     auto data = Desc()
                     .addCreature(
@@ -575,7 +664,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
     EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetStationary)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
@@ -627,7 +716,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
@@ -690,7 +779,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_aboveMaxRange)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_aboveMaxRange)
 {
     // First scan - target is detected and position stored (within maxRange of 60)
     // Using negative signal in channel #0 to enable relocation
@@ -751,7 +840,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belowMinRange)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_belowMinRange)
 {
     // First scan - target is detected and position stored (beyond minRange of 40)
     // Using negative signal in channel #0 to enable relocation
@@ -812,7 +901,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forceInitialScan)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_forceInitialScan)
 {
     // First scan - target is detected and position stored
     auto data = Desc()
@@ -871,7 +960,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeared)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetDisappeared)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
@@ -924,7 +1013,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetBlocked)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
@@ -1295,7 +1384,7 @@ TEST_F(SensorTests, detectCreature_restrictToColors_notFound)
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    data.add(createLargeCreature());
+    data.add(createCreature());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -1319,7 +1408,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_found)
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    data.add(createLargeCreature());
+    data.add(createCreature());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -1344,7 +1433,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_notFound)
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    data.add(createLargeCreature());
+    data.add(createCreature());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -1368,7 +1457,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_found)
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    data.add(createLargeCreature());
+    data.add(createCreature());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -1393,7 +1482,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
         CreatureDesc().id(0));
     data.addConnection(1, 2);
 
-    data.add(createLargeCreature());
+    data.add(createCreature());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -1420,7 +1509,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_found)
     data.addConnection(1, 2);
 
     // Create a large creature with same lineage
-    auto creatureData = createLargeCreature();
+    auto creatureData = createCreature();
     creatureData._genomes.front()._lineageId = 42;
     data.add(std::move(creatureData));
 
@@ -1450,7 +1539,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage2_found)
     data.addConnection(1, 2);
 
     // Create a large creature with same lineage
-    auto creatureData = createLargeCreature();
+    auto creatureData = createCreature();
     creatureData._genomes.front().lineageId(43).prevLineageId(42);
     data.add(std::move(creatureData));
 
@@ -1481,7 +1570,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_relatedLineage_notFound)
     data.addConnection(1, 2);
 
     // Create a large creature with different lineage
-    auto creatureData = createLargeCreature();
+    auto creatureData = createCreature();
     creatureData._genomes.front()._lineageId = 41;
     data.add(std::move(creatureData));
 
@@ -1510,7 +1599,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_found)
     data.addConnection(1, 2);
 
     // Create a large creature with different lineage
-    auto creatureData = createLargeCreature();
+    auto creatureData = createCreature();
     creatureData._genomes.front()._lineageId = 41;
     data.add(std::move(creatureData));
 
@@ -1540,7 +1629,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
     data.addConnection(1, 2);
 
     // Create a large creature with same lineage
-    auto creatureData = createLargeCreature();
+    auto creatureData = createCreature();
     creatureData._genomes.front()._lineageId = 42;
     data.add(std::move(creatureData));
 
@@ -1553,7 +1642,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_ignoreStructureObjects)
+TEST_F(SensorTests, detectCreature_ignoreSolidObjects)
 {
     auto data = Desc().addCreature(
         {
