@@ -346,6 +346,11 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         auto connectionIndex = hostObject->getConnectionIndex(lastObject);
         MuscleProcessor::restoreInitialAngleFromPrevious(lastObject, hostObject, connectionIndex);
     }
+    if (hostObject->typeData.cell.cellType == CellType_Muscle && hostObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
+        hostObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
+        auto connectionIndex = lastObject->getConnectionIndex(hostObject);
+        MuscleProcessor::restoreInitialAngleFromPrevious(hostObject, lastObject, connectionIndex);
+    }
 
     uint64_t cellPointerIndex;
     Object* newObject = constructCellIntern(data, statistics, cellPointerIndex, hostObject, newObjectPos, constructionData);
@@ -581,7 +586,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }();
 
-    // First, take reserved energy into account 
+    // First, take reserved energy into account
     auto& hostCell = hostObject->typeData.cell;
     auto hostReservedEnergy = 0.0f;
     if (hostCell.constructorAvailable) {
