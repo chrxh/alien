@@ -9,8 +9,6 @@
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
-#include <PersisterInterface/DeserializedSimulation.h>
-#include <PersisterInterface/SerializerService.h>
 
 #include "IntegrationTestFramework.h"
 
