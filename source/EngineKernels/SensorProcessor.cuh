@@ -148,6 +148,8 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
     __syncthreads();
 
+    auto const& densityMap = data.preprocessedSimulationData.densityMap;
+
     auto const startRadius = toFloat(object->typeData.cell.cellTypeData.sensor.minRange);
     auto endRadius = min(cudaSimulationParameters.sensorRadius.value[object->color], toFloat(object->typeData.cell.cellTypeData.sensor.maxRange));
 
@@ -209,7 +211,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                     }
 
                     // Block ray if it encounters solid cells
-                    if (isSolidAtPosition(data, scanPos)) {
+                    if (densityMap.getSolidDensity(scanPos) > 0) {
                         break;
                     }
                 }
@@ -460,7 +462,7 @@ __inline__ __device__ bool SensorProcessor::isSolidAtPosition(SimulationData& da
 __inline__ __device__ bool SensorProcessor::isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance)
 {
     auto direction = Math::unitVectorOfAngle(angle);
-    for (float scanDistance = 1.0f; scanDistance < distance; scanDistance += 1.0f) {
+    for (float scanDistance = 0.0f; scanDistance <= distance; scanDistance += 1.0f) {
         auto scanPos = data.objectMap.getCorrectedPosition(rayOrigin + direction * scanDistance);
         if (isSolidAtPosition(data, scanPos)) {
             return true;
