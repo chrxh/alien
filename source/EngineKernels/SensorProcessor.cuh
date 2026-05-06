@@ -25,6 +25,7 @@ private:
 
     __inline__ __device__ static bool
     isRayBlockedByCreatureConnections(Object** nearSameCreatureCells, int numNearSameCreatureCells, float2 const& rayOrigin, float angle);
+    __inline__ __device__ static bool isSolidAtPosition(SimulationData& data, float2 const& pos);
     __inline__ __device__ static bool isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
@@ -147,8 +148,6 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
 
     __syncthreads();
 
-    auto const& densityMap = data.preprocessedSimulationData.densityMap;
-
     auto const startRadius = toFloat(object->typeData.cell.cellTypeData.sensor.minRange);
     auto endRadius = min(cudaSimulationParameters.sensorRadius.value[object->color], toFloat(object->typeData.cell.cellTypeData.sensor.maxRange));
 
@@ -192,7 +191,8 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             auto angle = 360.0f * toFloat(rayIdx) / toFloat(NumScanRays) + seedAngle;
             auto seedDistance = data.primaryNumberGen.random(0, ScanStep);
 
-            if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)) {
+            if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)
+                && !isRayBlockedBySolid(data, object->pos, angle, seedDistance)) {
                 for (float distance = seedDistance; distance <= endRadius; distance += ScanStep) {
                     auto delta = Math::unitVectorOfAngle(angle) * distance;
                     auto scanPos = object->pos + delta;
@@ -201,13 +201,15 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                     if (distance > startRadius) {
                         uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
                         if (matchInfo != 0xffffffffffffffff) {
-                            alienAtomicMin64(&lookupResult, matchInfo);
+                            if (!isRayBlockedBySolid(data, object->pos, angle, distance)) {
+                                alienAtomicMin64(&lookupResult, matchInfo);
+                            }
                             break;
                         }
                     }
 
                     // Block ray if it encounters solid cells
-                    if (densityMap.getSolidDensity(scanPos) > 0) {
+                    if (isSolidAtPosition(data, scanPos)) {
                         break;
                     }
                 }
@@ -443,13 +445,24 @@ SensorProcessor::isRayBlockedByCreatureConnections(Object** nearSameCreatureCell
     return false;
 }
 
+__inline__ __device__ bool SensorProcessor::isSolidAtPosition(SimulationData& data, float2 const& pos)
+{
+    auto object = data.objectMap.getFirst(pos);
+    while (object != nullptr) {
+        if (object->type == ObjectType_Solid) {
+            return true;
+        }
+        object = object->nextObject;
+    }
+    return false;
+}
+
 __inline__ __device__ bool SensorProcessor::isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance)
 {
-    auto const& densityMap = data.preprocessedSimulationData.densityMap;
     auto direction = Math::unitVectorOfAngle(angle);
     for (float scanDistance = 1.0f; scanDistance < distance; scanDistance += 1.0f) {
         auto scanPos = data.objectMap.getCorrectedPosition(rayOrigin + direction * scanDistance);
-        if (densityMap.getSolidDensity(scanPos) > 0) {
+        if (isSolidAtPosition(data, scanPos)) {
             return true;
         }
     }
