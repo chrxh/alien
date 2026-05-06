@@ -19,6 +19,42 @@ namespace
 {
     auto constexpr ColumnWidth = 550.0f;
     auto constexpr TextColumnWidth = 260.0f;
+    auto constexpr ColorButtonSize = 20.0f;
+
+    void colorButtonWithPicker(FloatColorRGB& color, int colorIndex)
+    {
+        auto imGuiColor = ImVec4(color.r, color.g, color.b, 1.0f);
+        if (ImGui::ColorButton(
+                "##color",
+                imGuiColor,
+                ImGuiColorEditFlags_NoBorder,
+                ImVec2(StyleRepository::get().scale(ColorButtonSize), StyleRepository::get().scale(ColorButtonSize)))) {
+            ImGui::OpenPopup("colorpicker");
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Color %d", colorIndex + 1);
+        }
+        if (ImGui::BeginPopup("colorpicker")) {
+            ImGui::Text("Please choose a color");
+            ImGui::Separator();
+            ImGui::ColorPicker4("##picker", (float*)&imGuiColor, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+            ImGui::EndPopup();
+        }
+
+        color.r = ImColor(imGuiColor).Value.x;
+        color.g = ImColor(imGuiColor).Value.y;
+        color.b = ImColor(imGuiColor).Value.z;
+    }
+
+    bool isColorVectorDefault(FloatColorRGB* value, FloatColorRGB* origValue)
+    {
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            if (value[color] != origValue[color]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 void SpecificationGuiService::createWidgetsForParameters(
@@ -461,18 +497,31 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
 
     if (valueType == ColorDependence::ColorVector) {
+        ImGui::BeginGroup();
         for (int color = 0; color < MAX_COLORS; ++color) {
             ImGui::PushID(color);
-            auto widgetParameters = AlienGui::ColorButtonWithPickerParameters()
-                                        .name("Color " + std::to_string(color + 1))
-                                        .textWidth(TextColumnWidth)
-                                        .highlightedSubString(filter.containedText)
-                                        .defaultValue(origValue[color]);
-            if (color == 0) {
-                widgetParameters.tooltip(parameterSpec._description);
+            colorButtonWithPicker(value[color], color);
+            if (color < MAX_COLORS - 1) {
+                ImGui::SameLine();
             }
-            AlienGui::ColorButtonWithPicker(widgetParameters, value[color]);
             ImGui::PopID();
+        }
+        ImGui::EndGroup();
+
+        ImGui::SameLine();
+        ImGui::BeginDisabled(isColorVectorDefault(value, origValue));
+        if (ImGui::Button(("Reset##" + parameterSpec._name).c_str())) {
+            for (int color = 0; color < MAX_COLORS; ++color) {
+                value[color] = origValue[color];
+            }
+        }
+        AlienGui::Tooltip("Revert changes", true, ImGuiHoveredFlags_None);
+        ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        AlienGui::Text(AlienGui::TextParameters().text(parameterSpec._name).highlightedSubString(filter.containedText));
+        if (parameterSpec._description) {
+            AlienGui::HelpMarker(*parameterSpec._description);
         }
     } else {
         AlienGui::ColorButtonWithPicker(
