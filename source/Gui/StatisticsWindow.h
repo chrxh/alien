@@ -93,13 +93,7 @@ private:
     {
         PlotType_Accumulated,
         PlotType_ByColor,
-        PlotType_Color0,
-        PlotType_Color1,
-        PlotType_Color2,
-        PlotType_Color3,
-        PlotType_Color4,
-        PlotType_Color5,
-        PlotType_Color6
+        PlotType_Color0
     };
     PlotType _plotType = PlotType_Accumulated;
 
