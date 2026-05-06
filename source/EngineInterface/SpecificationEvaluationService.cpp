@@ -217,9 +217,7 @@ ValueRef<FloatColorRGB> SpecificationEvaluationService::getRef(FloatColorRGBMemb
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     if (locationType == LocationType::Base && std::holds_alternative<ColorVectorFloatColorRGBMember>(member)) {
-        return ValueRef{
-            .value = (parameters.**std::get<ColorVectorFloatColorRGBMember>(member)).value.values,
-            .colorDependence = ColorDependence::ColorVector};
+        return ValueRef{.value = (parameters.**std::get<ColorVectorFloatColorRGBMember>(member)).value.values, .colorDependence = ColorDependence::ColorVector};
     }
     if (locationType != LocationType::Source && std::holds_alternative<FloatColorRGBBaseLayerMember>(member)) {
         switch (LocationHelper::getLocationType(orderNumber, parameters)) {

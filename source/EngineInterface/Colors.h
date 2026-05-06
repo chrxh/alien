@@ -4,8 +4,8 @@
 
 #include <Base/MathTypes.h>
 
-#include "EngineConstants.h"
 #include "Definitions.h"
+#include "EngineConstants.h"
 
 namespace Const
 {
@@ -89,10 +89,7 @@ struct ColorMatrix
 
 constexpr FloatColorRGB toFloatColorRGB(uint32_t rgb)
 {
-    return {
-        static_cast<float>((rgb >> 16) & 0xff) / 255.0f,
-        static_cast<float>((rgb >> 8) & 0xff) / 255.0f,
-        static_cast<float>(rgb & 0xff) / 255.0f};
+    return {static_cast<float>((rgb >> 16) & 0xff) / 255.0f, static_cast<float>((rgb >> 8) & 0xff) / 255.0f, static_cast<float>(rgb & 0xff) / 255.0f};
 }
 
 constexpr ColorVector<FloatColorRGB> createDefaultIndividualObjectColorVector()
