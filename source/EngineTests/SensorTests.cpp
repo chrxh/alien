@@ -53,7 +53,7 @@ protected:
         return result;
     }
 
-    int _nextStructureId = 10000;
+    int _nextSolidId = 10000;
 
     // Helper to add detection targets
     void addDetectionTargets(Desc& data, SensorMode const& mode, RealVector2D const& startPos, int count = 8, bool assignNewIds = true)
@@ -67,8 +67,8 @@ protected:
                 data._objects.emplace_back(ObjectDesc().pos({startPos.x + i, startPos.y}).type(FreeCellDesc()));
             }
         } else if (mode == SensorMode_DetectSolid) {
-            auto baseId = _nextStructureId;
-            _nextStructureId += count;
+            auto baseId = _nextSolidId;
+            _nextSolidId += count;
             for (int i = 0; i < count; ++i) {
                 data._objects.emplace_back(ObjectDesc().id(baseId + i).pos({startPos.x + i, startPos.y}).type(SolidDesc()));
             }
@@ -487,18 +487,18 @@ TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-class SensorTests_AllDetectionModesExceptStructure
+class SensorTests_AllDetectionModesExceptSolid
     : public SensorTests
     , public testing::WithParamInterface<SensorMode>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    SensorTests_AllDetectionModesExceptStructure,
-    SensorTests_AllDetectionModesExceptStructure,
+    SensorTests_AllDetectionModesExceptSolid,
+    SensorTests_AllDetectionModesExceptSolid,
     ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
 
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObjects_solidFar_targetFar)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidFar_targetFar)
 {
     auto data = Desc().addCreature(
         {
@@ -531,7 +531,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObjects_solidNear_targetFar)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidNear_targetFar)
 {
     auto data = Desc().addCreature(
         {
@@ -564,7 +564,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObjects_solidNear_targetNear)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayBlockedBySolidObjects_solidNear_targetNear)
 {
     auto data = Desc().addCreature(
         {
@@ -597,7 +597,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureObject
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObjects_behind)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_behind)
 {
     auto data = Desc().addCreature(
         {
@@ -630,7 +630,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
     EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObjects_differentAngle)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, rayNotBlockedBySolidObjects_differentAngle)
 {
     auto data = Desc()
                     .addCreature(
@@ -664,7 +664,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureObj
     EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetStationary)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
@@ -716,7 +716,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
@@ -779,7 +779,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_aboveMaxRange)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_aboveMaxRange)
 {
     // First scan - target is detected and position stored (within maxRange of 60)
     // Using negative signal in channel #0 to enable relocation
@@ -840,7 +840,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belowMinRange)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_belowMinRange)
 {
     // First scan - target is detected and position stored (beyond minRange of 40)
     // Using negative signal in channel #0 to enable relocation
@@ -901,7 +901,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forceInitialScan)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetMoved_forceInitialScan)
 {
     // First scan - target is detected and position stored
     auto data = Desc()
@@ -960,7 +960,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeared)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetDisappeared)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
@@ -1013,7 +1013,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
+TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetBlocked)
 {
     // First scan - target is detected and position stored
     // Using negative signal in channel #0 to enable relocation
@@ -1642,7 +1642,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_unrelatedLineage_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_ignoreStructureObjects)
+TEST_F(SensorTests, detectCreature_ignoreSolidObjects)
 {
     auto data = Desc().addCreature(
         {

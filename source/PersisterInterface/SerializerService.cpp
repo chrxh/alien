@@ -840,7 +840,7 @@ namespace
     auto constexpr Id_Creature_GenomeId = 6;
     auto constexpr Id_Creature_HaveMutationsApplied = 7;
 
-    auto constexpr Id_Structure_Energy = 0;
+    auto constexpr Id_Solid_Energy = 0;
 
     auto constexpr Id_Fluid_Energy = 0;
     auto constexpr Id_Fluid_Glow = 1;
@@ -1507,7 +1507,7 @@ namespace cereal
     {
         SolidDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Structure_Energy, data._energy, defaultObject._energy);
+        loadSave(task, auxiliaries, Id_Solid_Energy, data._energy, defaultObject._energy);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SolidDesc)

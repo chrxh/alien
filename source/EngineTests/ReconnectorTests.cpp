@@ -65,7 +65,7 @@ protected:
 //* Solid mode tests
 //*******************************************
 
-TEST_F(ReconnectorTests, structureMode_connectToStructure)
+TEST_F(ReconnectorTests, solidMode_connectToSolid)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
@@ -84,7 +84,7 @@ TEST_F(ReconnectorTests, structureMode_connectToStructure)
     EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
-TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
+TEST_F(ReconnectorTests, solidMode_ignoreNonSolid)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
@@ -101,7 +101,7 @@ TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
     EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
 
-TEST_F(ReconnectorTests, structureMode_ignoreFluidParticle)
+TEST_F(ReconnectorTests, solidMode_ignoreFluidParticle)
 {
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
 
@@ -119,7 +119,7 @@ TEST_F(ReconnectorTests, structureMode_ignoreFluidParticle)
     EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
 
-TEST_F(ReconnectorTests, structureMode_outOfRange)
+TEST_F(ReconnectorTests, solidMode_outOfRange)
 {
     auto range = _parameters.reconnectorRadius.value[0];
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectSolidDesc());
@@ -489,7 +489,7 @@ TEST_F(ReconnectorTests, creatureMode_unrelatedLineage_failed)
 //* Remove connections tests
 //*******************************************
 
-TEST_F(ReconnectorTests, removeConnections_removeStructureConnection)
+TEST_F(ReconnectorTests, removeConnections_removeSolidConnection)
 {
     auto data = createReconnectorWithNegativeSignal({100.0f, 100.0f}, ReconnectCreatureDesc());
 

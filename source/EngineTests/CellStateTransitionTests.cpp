@@ -158,7 +158,7 @@ INSTANTIATE_TEST_SUITE_P(
     CellStateTransitionTests_AllStates,
     ::testing::Values(CellState_Ready, CellState_Constructing, CellState_Activating, CellState_Dying));
 
-TEST_P(CellStateTransitionTests_AllStates, structure_cell)
+TEST_P(CellStateTransitionTests_AllStates, solid_cell)
 {
     auto cellState = GetParam();
 
