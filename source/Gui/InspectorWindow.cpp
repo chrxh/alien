@@ -172,8 +172,9 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                         .textWidth(BaseTabTextWidth)
                         .tooltip(Const::CellStiffnessTooltip),
                     object._stiffness);
-                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(BaseTabTextWidth).tooltip(Const::CellFixedTooltip), object._sticky);
-                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Fixed").textWidth(BaseTabTextWidth).tooltip(Const::CellFixedTooltip), object._fixed);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(BaseTabTextWidth), object._sticky);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Fixed").textWidth(BaseTabTextWidth), object._fixed);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Head").textWidth(BaseTabTextWidth), object.getCellRef()._headCell);
                 AlienGui::InputText(
                     AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), objectId);
                 if (auto frontAngle = object.getCellRef()._frontAngle) {
