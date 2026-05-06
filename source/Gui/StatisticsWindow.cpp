@@ -1,5 +1,6 @@
 #include "StatisticsWindow.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 
@@ -32,6 +33,15 @@ namespace
     auto constexpr RightColumnWidthTable = 200.0f;
     auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
     auto constexpr SettingsHeight = 130.0f;
+
+    std::vector<std::string> createPlotTypeStrings()
+    {
+        std::vector<std::string> result = {"Accumulate values for all colors", "Break down by color"};
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            result.emplace_back("Color #" + std::to_string(color));
+        }
+        return result;
+    }
 }
 
 void StatisticsWindow::initIntern()
@@ -59,6 +69,7 @@ void StatisticsWindow::initIntern()
             _collapsedPlotIndices.emplace(std::stoi(s));
         }
     }
+    validateAndCorrect();
 }
 
 StatisticsWindow::StatisticsWindow()
@@ -126,13 +137,7 @@ void StatisticsWindow::processTimelinesTab()
 
     AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").textWidth(RightColumnWidth).values({"Real-time plots", "Entire history plots"}), _plotMode);
 
-    AlienGui::Switcher(
-        AlienGui::SwitcherParameters()
-            .name("Plot type")
-            .textWidth(RightColumnWidth)
-            .values(
-                {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
-        _plotType);
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Plot type").textWidth(RightColumnWidth).values(createPlotTypeStrings()), _plotType);
 
     if (ImGui::BeginChild("##plots", ImVec2(0, 0), false)) {
         processTimelineStatistics();
@@ -840,6 +845,7 @@ void StatisticsWindow::validateAndCorrect()
 {
     _timeHorizonForLiveStatistics = std::max(1.0f, std::min(TimelineLiveStatistics::MaxLiveHistory, _timeHorizonForLiveStatistics));
     _timeHorizonForLongtermStatistics = std::max(1.0f, std::min(100.0f, _timeHorizonForLongtermStatistics));
+    _plotType = std::clamp(_plotType, PlotType_Accumulated, PlotType_Color0 + MAX_COLORS - 1);
 }
 
 float StatisticsWindow::calcPlotHeight(int row) const
