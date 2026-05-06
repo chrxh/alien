@@ -587,3 +587,30 @@ TEST_F(CreatureTests_NumCells, numCellsUnchangedWhenNoCellDies)
     EXPECT_EQ(3, toInt(actualObjects.size()));
     EXPECT_EQ(3, creature._numCells);
 }
+
+TEST_F(CreatureTests, muscleSeed)
+{
+    Desc data;
+    data.addCreature(
+        {
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({
+            GeneDesc().separation(true).nodes({NodeDesc().cellType(MuscleGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(1))}),
+            GeneDesc().separation(false).shape(ConstructorShape_Hexagon).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+        }));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(300);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(4, actualData._objects.size());
+
+    auto cellIt = std::ranges::find_if(
+        actualData._objects, [](ObjectDesc const& object) { return object.getObjectType() == ObjectType_Cell && object.getCellRef()._nodeIndex == 1; });
+    ASSERT_NE(cellIt, actualData._objects.end());
+    auto cell1 = *cellIt;
+    EXPECT_TRUE(approxCompare(240.0f, cell1._connections.at(0)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(120.0f, cell1._connections.at(1)._angleFromPrevious));
+}
