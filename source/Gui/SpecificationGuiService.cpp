@@ -5,6 +5,7 @@
 
 #include <boost/range/adaptors.hpp>
 
+#include <Fonts/IconsFontAwesome5.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SimulationParametersTypes.h>
@@ -497,6 +498,8 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
 
     if (valueType == ColorDependence::ColorVector) {
+        auto controlStartX = ImGui::GetCursorPosX();
+        auto controlWidth = ImGui::GetContentRegionAvail().x - StyleRepository::get().scale(TextColumnWidth);
         ImGui::BeginGroup();
         for (int color = 0; color < MAX_COLORS; ++color) {
             ImGui::PushID(color);
@@ -507,10 +510,11 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
             ImGui::PopID();
         }
         ImGui::EndGroup();
+        auto colorGroupWidth = ImGui::GetItemRectSize().x;
 
-        ImGui::SameLine();
+        ImGui::SameLine(controlStartX + std::max(controlWidth, colorGroupWidth));
         ImGui::BeginDisabled(isColorVectorDefault(value, origValue));
-        if (ImGui::Button(("Reset##" + parameterSpec._name).c_str())) {
+        if (ImGui::Button((ICON_FA_UNDO "##" + parameterSpec._name).c_str())) {
             for (int color = 0; color < MAX_COLORS; ++color) {
                 value[color] = origValue[color];
             }
