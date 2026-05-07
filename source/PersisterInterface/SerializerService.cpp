@@ -187,6 +187,7 @@ namespace
     auto constexpr Id_Gene_Stiffness = 5;
     auto constexpr Id_Gene_ConnectionDistance = 6;
     auto constexpr Id_Gene_NumRepetitions = 7;
+    auto constexpr Id_Gene_Shape_OldCustom = 0;
 
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
@@ -759,6 +760,9 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Gene_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
+        if (task == SerializationTask::Load && data._shape == Id_Gene_Shape_OldCustom) {
+            data._shape = ConstructorShape_Segment;
+        }
         loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
         loadSave(task, auxiliaries, Id_Gene_Separation, data._separation, defaultObject._separation);
         loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);

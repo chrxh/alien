@@ -218,7 +218,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     .name("Angle")
                     .textWidth(rightColumnWidth)
                     .readOnly(isInnerNode)
-                    .infoLabel(gene._shape != ConstructorShape_Custom && isInnerNode ? std::make_optional(std::string("Deduced")) : std::nullopt)
+                    .infoLabel(isInnerNode ? std::make_optional(std::string("Deduced")) : std::nullopt)
                     .format("%.1f"),
                 node._referenceAngle);
             //}

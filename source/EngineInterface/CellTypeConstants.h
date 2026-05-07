@@ -121,8 +121,7 @@ namespace Channels
 using ConstructorShape = int;
 enum ConstructorShape_
 {
-    ConstructorShape_Custom,
-    ConstructorShape_Segment,
+    ConstructorShape_Segment = 1,
     ConstructorShape_Triangle,
     ConstructorShape_Rectangle,
     ConstructorShape_Hexagon,

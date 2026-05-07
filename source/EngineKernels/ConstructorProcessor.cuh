@@ -183,19 +183,11 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 
     ShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
-    if (shape != ConstructorShape_Custom) {
-        for (int i = 0; i <= result.currentNodeIndex; ++i) {
-            auto generationResult = shapeGenerator.generateNextConstructionData(shape);
-            if (i == result.currentNodeIndex) {
-                result.shapeResult = generationResult;
-            }
+    for (int i = 0; i <= result.currentNodeIndex; ++i) {
+        auto generationResult = shapeGenerator.generateNextConstructionData(shape);
+        if (i == result.currentNodeIndex) {
+            result.shapeResult = generationResult;
         }
-    } else {
-        result.shapeResult.angle = result.node->referenceAngle;
-        result.shapeResult.numAdditionalConnections = 0;
-        result.shapeResult.requiredNodeId[0] = -1;
-        result.shapeResult.requiredNodeId[1] = -1;
-        result.shapeResult.requiredNodeId[2] = -1;
     }
     if (result.isFirstNode || result.isLastNode) {
         result.shapeResult.angle = result.node->referenceAngle;
