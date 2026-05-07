@@ -146,6 +146,7 @@ public:
     static void InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2);
 
     static bool ColorField(uint32_t cellColor, float width = 0, float height = 0);
+    static uint32_t GetObjectColor(int color);
 
     struct CheckboxColorMatrixParameters
     {

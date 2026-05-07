@@ -225,7 +225,7 @@ void _GeneEditorWidget::processNodeList()
                     // Column 4: Color
                     ImGui::TableNextColumn();
                     if (ImGui::BeginChild("color", {0, ImGui::GetTextLineHeight()}, 0, ImGuiWindowFlags_NoInputs)) {
-                        AlienGui::ColorField(Const::IndividualObjectColors[node._color], 40.0f, ImGui::GetTextLineHeight());
+                        AlienGui::ColorField(AlienGui::GetObjectColor(node._color), 40.0f, ImGui::GetTextLineHeight());
                     }
                     ImGui::EndChild();
 

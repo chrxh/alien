@@ -32,7 +32,7 @@ void MassOperationsDialog::processIntern()
             ImGui::SameLine();
         }
         auto id = "##color" + std::to_string(i + 1);
-        colorCheckbox(id, Const::IndividualObjectColors[i], _checkedCellColors[i]);
+        colorCheckbox(id, AlienGui::GetObjectColor(i), _checkedCellColors[i]);
     }
     ImGui::EndDisabled();
     ImGui::PopID();
@@ -47,7 +47,7 @@ void MassOperationsDialog::processIntern()
             ImGui::SameLine();
         }
         auto id = "##color" + std::to_string(i + 1);
-        colorCheckbox(id, Const::IndividualObjectColors[i], _checkedGenomeColors[i]);
+        colorCheckbox(id, AlienGui::GetObjectColor(i), _checkedGenomeColors[i]);
     }
     ImGui::EndDisabled();
     ImGui::PopID();

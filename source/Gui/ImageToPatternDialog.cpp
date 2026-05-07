@@ -42,16 +42,14 @@ namespace
     void getMatchedCellColor(ImColor const& color, int& matchedCellColor, float& matchedCellIntensity)
     {
         using Color = std::array<float, 3>;
-        static std::vector<Color> cellColors;
+        std::vector<Color> cellColors;
         auto toHsv = [](uint32_t color) {
             float h, s, v;
             AlienGui::ConvertRGBtoHSV(color, h, s, v);
             return Color{h, s, v};
         };
-        if (cellColors.empty()) {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                cellColors.emplace_back(toHsv(Const::IndividualObjectColors[i]));
-            }
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            cellColors.emplace_back(toHsv(AlienGui::GetObjectColor(i)));
         }
 
         std::optional<int> bestMatchIndex;
@@ -98,7 +96,12 @@ void ImageToPatternDialog::show()
                     int matchedCellColor;
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
-                    dataDesc._objects.emplace_back(ObjectDesc().id(NumberGenerator::get().createEntityId()).pos({toFloat(x) + xOffset, toFloat(y)}).color(matchedCellColor).fixed(false).type(SolidDesc()));
+                    dataDesc._objects.emplace_back(ObjectDesc()
+                                                       .id(NumberGenerator::get().createEntityId())
+                                                       .pos({toFloat(x) + xOffset, toFloat(y)})
+                                                       .color(matchedCellColor)
+                                                       .fixed(false)
+                                                       .type(SolidDesc()));
                 }
             }
         }

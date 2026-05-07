@@ -17,6 +17,7 @@
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/NumberGenerator.h>
+#include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include "GenericFileDialog.h"
@@ -397,6 +398,12 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
     return result;
 }
 
+uint32_t AlienGui::GetObjectColor(int color)
+{
+    auto objectColors = _SimulationFacade::get()->getSimulationParameters().objectColors.value;
+    return getIndividualObjectColor(objectColors, color);
+}
+
 void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
 {
     BasicInputColorMatrixParameters<bool> basicParameters;
@@ -729,7 +736,7 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
                 value = n;
             }
             ImGui::SameLine();
-            ColorField(Const::IndividualObjectColors[n], colorFieldWidth1, ImGui::GetTextLineHeight());
+            ColorField(AlienGui::GetObjectColor(n), colorFieldWidth1, ImGui::GetTextLineHeight());
             if (isSelected) {
                 ImGui::SetItemDefaultFocus();
             }
@@ -740,7 +747,7 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
 
     ImGuiStyle& style = ImGui::GetStyle();
     float h, s, v;
-    AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[value], h, s, v);
+    AlienGui::ConvertRGBtoHSV(AlienGui::GetObjectColor(value), h, s, v);
     if (enabled && !(*enabled)) {
         s = 0;
         v = 0.2f;
@@ -772,7 +779,7 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
 {
     // Source color field
     ImGui::PushID(sourceColor);
-    AlienGui::ColorField(Const::IndividualObjectColors[sourceColor]);
+    AlienGui::ColorField(AlienGui::GetObjectColor(sourceColor));
     ImGui::SameLine();
 
     // Combo for target color
@@ -957,7 +964,7 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
         bool checked = (value >> i) & 1;
 
         float h, s, v;
-        AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[i], h, s, v);
+        AlienGui::ConvertRGBtoHSV(AlienGui::GetObjectColor(i), h, s, v);
         ImGui::PushStyleColor(ImGuiCol_CheckMark, (ImVec4)ImColor::HSV(h, s, v));
         if (ImGui::Checkbox(("###" + std::to_string(i)).c_str(), &checked)) {
             if (checked) {
@@ -990,7 +997,7 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
         bool checked = (value >> i) & 1;
 
         float h, s, v;
-        AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[i], h, s, v);
+        AlienGui::ConvertRGBtoHSV(AlienGui::GetObjectColor(i), h, s, v);
         ImGui::PushStyleColor(ImGuiCol_CheckMark, (ImVec4)ImColor::HSV(h, s, v));
         if (ImGui::Checkbox(("###" + std::to_string(i)).c_str(), &checked)) {
             if (checked) {
@@ -2126,7 +2133,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
         ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - pinnedButtonWidth);
         if (parameters._colorDependence && isExpanded) {
-            AlienGui::ColorField(Const::IndividualObjectColors[color], 0);
+            AlienGui::ColorField(AlienGui::GetObjectColor(color), 0);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
         }
@@ -2333,9 +2340,9 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
                         width += 3.0f;
                     }
                     if (row == 0 && col > 0) {
-                        ColorField(Const::IndividualObjectColors[col - 1], width);
+                        ColorField(AlienGui::GetObjectColor(col - 1), width);
                     } else if (row > 0 && col == 0) {
-                        ColorField(Const::IndividualObjectColors[row - 1], width);
+                        ColorField(AlienGui::GetObjectColor(row - 1), width);
                     } else if (row > 0 && col > 0) {
                         if constexpr (std::is_same<T, float>()) {
                             SliderFloat(

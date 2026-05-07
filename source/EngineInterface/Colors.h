@@ -32,17 +32,6 @@ namespace Const
         IndividualObjectColor9,
         IndividualObjectColor10};
 
-    inline uint32_t IndividualObjectColors[MAX_COLORS] = {
-        IndividualObjectColor1,
-        IndividualObjectColor2,
-        IndividualObjectColor3,
-        IndividualObjectColor4,
-        IndividualObjectColor5,
-        IndividualObjectColor6,
-        IndividualObjectColor7,
-        IndividualObjectColor8,
-        IndividualObjectColor9,
-        IndividualObjectColor10};
 }
 
 template <typename T>
@@ -114,9 +103,7 @@ inline uint32_t toRgbColor(FloatColorRGB const& color)
     return (toInt(color.r) << 16) | (toInt(color.g) << 8) | toInt(color.b);
 }
 
-inline void syncIndividualObjectColors(ColorVector<FloatColorRGB> const& colors)
+inline uint32_t getIndividualObjectColor(ColorVector<FloatColorRGB> const& colors, int color)
 {
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        Const::IndividualObjectColors[i] = toRgbColor(colors.values[i]);
-    }
+    return toRgbColor(colors.values[color]);
 }

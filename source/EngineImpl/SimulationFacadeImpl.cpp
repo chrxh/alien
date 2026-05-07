@@ -14,7 +14,6 @@ void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& 
     _origSettings.worldSizeX = worldSize.x;
     _origSettings.worldSizeY = worldSize.y;
     _origSettings.simulationParameters = parameters;
-    syncIndividualObjectColors(parameters.objectColors.value);
     _worker.newSimulation(timestep, _origSettings);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
@@ -238,7 +237,6 @@ SimulationParameters const& _SimulationFacadeImpl::getOriginalSimulationParamete
 
 void _SimulationFacadeImpl::setSimulationParameters(SimulationParameters const& parameters, SimulationParametersUpdateConfig const& updateConfig)
 {
-    syncIndividualObjectColors(parameters.objectColors.value);
     _worker.setSimulationParameters(parameters, updateConfig);
 }
 

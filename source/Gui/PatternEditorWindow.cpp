@@ -194,7 +194,7 @@ void PatternEditorWindow::processIntern()
                 ImGui::SameLine();
             }
             auto label = "    ##color" + std::to_string(i + 1);
-            if (colorButton(label.c_str(), Const::IndividualObjectColors[i])) {
+            if (colorButton(label.c_str(), AlienGui::GetObjectColor(i))) {
                 _SimulationFacade::get()->colorSelectedObjects(i, EditorModel::get().isRolloutToClusters());
                 EditorModel::get().setDefaultColorCode(i);
             }
