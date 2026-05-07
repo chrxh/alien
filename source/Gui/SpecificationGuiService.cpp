@@ -5,7 +5,6 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include <Fonts/IconsFontAwesome5.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SimulationParametersTypes.h>
@@ -20,49 +19,6 @@ namespace
 {
     auto constexpr ColumnWidth = 550.0f;
     auto constexpr TextColumnWidth = 260.0f;
-    auto constexpr ColorButtonSize = 20.0f;
-
-    void colorButtonWithPicker(FloatColorRGB& color, int colorIndex)
-    {
-        auto imGuiColor = ImVec4(color.r, color.g, color.b, 1.0f);
-        if (ImGui::ColorButton(
-                "##color",
-                imGuiColor,
-                ImGuiColorEditFlags_NoBorder,
-                ImVec2(StyleRepository::get().scale(ColorButtonSize), StyleRepository::get().scale(ColorButtonSize)))) {
-            ImGui::OpenPopup("colorpicker");
-        }
-        if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("Color %d", colorIndex + 1);
-        }
-        if (ImGui::BeginPopup("colorpicker")) {
-            ImGui::Text("Please choose a color");
-            ImGui::Separator();
-            ImGui::ColorPicker4("##picker", (float*)&imGuiColor, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
-            ImGui::EndPopup();
-        }
-
-        color.r = ImColor(imGuiColor).Value.x;
-        color.g = ImColor(imGuiColor).Value.y;
-        color.b = ImColor(imGuiColor).Value.z;
-    }
-
-    bool isColorVectorDefault(FloatColorRGB const* value, FloatColorRGB const* origValue)
-    {
-        for (int color = 0; color < MAX_COLORS; ++color) {
-            if (value[color] != origValue[color]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void copyColorVector(FloatColorRGB* target, ColorVector<FloatColorRGB> const& source)
-    {
-        for (int color = 0; color < MAX_COLORS; ++color) {
-            target[color] = source.values[color];
-        }
-    }
 }
 
 void SpecificationGuiService::createWidgetsForParameters(
@@ -505,44 +461,16 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
 
     if (valueType == ColorDependence::ColorVector) {
-        auto controlStartX = ImGui::GetCursorPosX();
-        auto controlWidth = ImGui::GetContentRegionAvail().x - StyleRepository::get().scale(TextColumnWidth);
-        auto textStartX = controlStartX + controlWidth + ImGui::GetStyle().ItemSpacing.x + ImGui::CalcTextSize(ICON_FA_UNDO).x
-            + ImGui::GetStyle().FramePadding.x * 2 + ImGui::GetStyle().ItemSpacing.x;
         auto const defaultColors = createDefaultIndividualObjectColorVector();
-        ImGui::BeginGroup();
-        for (int color = 0; color < MAX_COLORS; ++color) {
-            ImGui::PushID(color);
-            colorButtonWithPicker(value[color], color);
-            if (color < MAX_COLORS - 1) {
-                ImGui::SameLine();
-            }
-            ImGui::PopID();
-        }
-        ImGui::EndGroup();
-        auto colorGroupWidth = ImGui::GetItemRectSize().x;
-
-        ImGui::SameLine(controlStartX + std::max(controlWidth, colorGroupWidth));
-        ImGui::BeginDisabled(isColorVectorDefault(value, origValue));
-        if (ImGui::Button((ICON_FA_UNDO "##" + parameterSpec._name).c_str())) {
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                value[color] = origValue[color];
-            }
-        }
-        AlienGui::Tooltip("Revert changes", true, ImGuiHoveredFlags_None);
-        ImGui::EndDisabled();
-
-        ImGui::SameLine(textStartX);
-        AlienGui::Text(AlienGui::TextParameters().text(parameterSpec._name).highlightedSubString(filter.containedText));
-        ImGui::SameLine();
-        ImGui::BeginDisabled(isColorVectorDefault(value, defaultColors.values));
-        if (ImGui::Button(("Default##" + parameterSpec._name).c_str())) {
-            copyColorVector(value, defaultColors);
-        }
-        ImGui::EndDisabled();
-        if (parameterSpec._description) {
-            AlienGui::HelpMarker(*parameterSpec._description);
-        }
+        AlienGui::ObjectColorPalette(
+            AlienGui::ObjectColorPaletteParameters()
+                .name(parameterSpec._name)
+                .textWidth(TextColumnWidth)
+                .defaultValue(origValue)
+                .builtinDefaultValue(defaultColors.values)
+                .highlightedSubString(filter.containedText)
+                .tooltip(parameterSpec._description),
+            value);
     } else {
         AlienGui::ColorButtonWithPicker(
             AlienGui::ColorButtonWithPickerParameters()

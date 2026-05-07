@@ -367,6 +367,17 @@ public:
     };
     static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, FloatColorRGB& color);
 
+    struct ObjectColorPaletteParameters
+    {
+        MEMBER(ObjectColorPaletteParameters, std::string, name, "");
+        MEMBER(ObjectColorPaletteParameters, float, textWidth, 100);
+        MEMBER(ObjectColorPaletteParameters, std::optional<FloatColorRGB const*>, defaultValue, std::nullopt);
+        MEMBER(ObjectColorPaletteParameters, std::optional<FloatColorRGB const*>, builtinDefaultValue, std::nullopt);
+        MEMBER(ObjectColorPaletteParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
+        MEMBER(ObjectColorPaletteParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static void ObjectColorPalette(ObjectColorPaletteParameters const& parameters, FloatColorRGB* colors);
+
     static void MoveTickLeft();
     static void MoveTickUp();
     static void Separator();

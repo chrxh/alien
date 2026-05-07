@@ -1,5 +1,6 @@
 #include "AlienGui.h"
 
+#include <algorithm>
 #include <chrono>
 #include <ranges>
 
@@ -27,6 +28,44 @@
 namespace
 {
     auto constexpr HoveredTimer = 0.5f;
+
+    bool isColorVectorDefault(FloatColorRGB const* value, FloatColorRGB const* defaultValue)
+    {
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            if (value[color] != defaultValue[color]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void copyColorVector(FloatColorRGB* target, FloatColorRGB const* source)
+    {
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            target[color] = source[color];
+        }
+    }
+
+    void objectColorButtonWithPicker(FloatColorRGB& color, int colorIndex, float width)
+    {
+        auto imGuiColor = ImVec4(color.r, color.g, color.b, 1.0f);
+        if (ImGui::ColorButton("##color", imGuiColor, ImGuiColorEditFlags_NoBorder, ImVec2(width, ImGui::GetFrameHeight()))) {
+            ImGui::OpenPopup("colorpicker");
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Color %d", colorIndex + 1);
+        }
+        if (ImGui::BeginPopup("colorpicker")) {
+            ImGui::Text("Please choose a color");
+            ImGui::Separator();
+            ImGui::ColorPicker4("##picker", (float*)&imGuiColor, ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+            ImGui::EndPopup();
+        }
+
+        color.r = ImColor(imGuiColor).Value.x;
+        color.g = ImColor(imGuiColor).Value.y;
+        color.b = ImColor(imGuiColor).Value.z;
+    }
 }
 
 std::unordered_set<unsigned int> AlienGui::_basicSilderExpanded;
@@ -1386,6 +1425,54 @@ void AlienGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& para
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
+}
+
+void AlienGui::ObjectColorPalette(ObjectColorPaletteParameters const& parameters, FloatColorRGB* colors)
+{
+    ImGui::PushID(parameters._name.c_str());
+
+    auto textWidth = scale(parameters._textWidth);
+    auto controlWidth = ImGui::GetContentRegionAvail().x - textWidth;
+    auto buttonSpacing = ImGui::GetStyle().ItemSpacing.x;
+    auto buttonWidth = std::max(1.0f, (controlWidth - buttonSpacing * (MAX_COLORS - 1)) / MAX_COLORS);
+
+    ImGui::BeginGroup();
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        ImGui::PushID(color);
+        objectColorButtonWithPicker(colors[color], color, buttonWidth);
+        if (color < MAX_COLORS - 1) {
+            ImGui::SameLine();
+        }
+        ImGui::PopID();
+    }
+    ImGui::EndGroup();
+
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        ImGui::BeginDisabled(isColorVectorDefault(colors, *parameters._defaultValue));
+        if (RevertButton(parameters._name)) {
+            copyColorVector(colors, *parameters._defaultValue);
+        }
+        ImGui::EndDisabled();
+    }
+
+    ImGui::SameLine();
+    Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
+
+    if (parameters._builtinDefaultValue) {
+        ImGui::SameLine();
+        ImGui::BeginDisabled(isColorVectorDefault(colors, *parameters._builtinDefaultValue));
+        if (ImGui::Button(("Default##" + parameters._name).c_str())) {
+            copyColorVector(colors, *parameters._builtinDefaultValue);
+        }
+        ImGui::EndDisabled();
+    }
+
+    if (parameters._tooltip) {
+        HelpMarker(*parameters._tooltip);
+    }
+
+    ImGui::PopID();
 }
 
 void AlienGui::MoveTickLeft()
