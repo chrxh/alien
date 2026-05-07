@@ -87,7 +87,7 @@ namespace
 
     __device__ __inline__ uint32_t getCellColorByCode(int colorCode)
     {
-        auto const& color = cudaSimulationParameters.objectColors.value[calcMod(colorCode, MAX_COLORS)];
+        auto const& color = cudaSimulationParameters.customizationColors.value[calcMod(colorCode, MAX_COLORS)];
         auto const toInt = [](float value) {
             if (value < 0.0f) {
                 value = 0.0f;

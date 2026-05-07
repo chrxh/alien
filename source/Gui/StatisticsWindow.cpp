@@ -150,6 +150,7 @@ void StatisticsWindow::processHistogramsTab()
     if (!_histogramLiveStatistics.isDataAvailable()) {
         return;
     }
+    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
     ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha * 0.5 * Const::WindowAlpha));
     ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha * 0.5 * Const::WindowAlpha));
     auto const& histogramData = _histogramLiveStatistics.getData();
@@ -209,7 +210,7 @@ void StatisticsWindow::processHistogramsTab()
         auto const width = 1.0f / MAX_COLORS;
         for (int i = 0; i < MAX_COLORS; ++i) {
             float h, s, v;
-            AlienGui::ConvertRGBtoHSV(AlienGui::GetObjectColor(i), h, s, v);
+            AlienGui::ConvertRGBtoHSV(customizationColors.values[i].toRgbColor(), h, s, v);
             ImPlot::PushStyleColor(ImPlotCol_Fill, (ImVec4)ImColor::HSV(h, s /** 3 / 4*/, v /** 3 / 4*/, ImGui::GetStyle().Alpha));
             ImPlot::PlotBars((" ##" + std::to_string(i)).c_str(), histogramData->numCellsByColorBySlot[i], MAX_HISTOGRAM_SLOTS, width, width * i);
             ImPlot::PopStyleColor(1);
@@ -625,6 +626,7 @@ void StatisticsWindow::plotByColorIntern(
     double endTime,
     int fracPartDecimals)
 {
+    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
     auto upperBound = 0.0;
     for (int i = 0; i < MAX_COLORS; ++i) {
         upperBound = std::max(upperBound, getMaxWithDataPointStride(reinterpret_cast<double const*>(values) + i, timePoints, startTime, count));
@@ -649,7 +651,7 @@ void StatisticsWindow::plotByColorIntern(
         setPlotScale();
         for (int i = 0; i < MAX_COLORS; ++i) {
             ImGui::PushID(i);
-            auto colorRaw = AlienGui::GetObjectColor(i);
+            auto colorRaw = customizationColors.values[i].toRgbColor();
             ImColor color(toInt((colorRaw >> 16) & 0xff), toInt((colorRaw >> 8) & 0xff), toInt(colorRaw & 0xff));
 
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
@@ -680,6 +682,7 @@ void StatisticsWindow::plotForColorIntern(
 {
     auto constexpr strideBytes = sizeof(DataPointCollection);
     auto constexpr strideDouble = sizeof(DataPointCollection) / sizeof(double);
+    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
     auto valuesForColor = reinterpret_cast<double const*>(values) + colorIndex;
     auto upperBound = getMaxWithDataPointStride(valuesForColor, timePoints, startTime, count);
@@ -700,7 +703,7 @@ void StatisticsWindow::plotForColorIntern(
         setPlotScale();
 
         float h, s, v;
-        AlienGui::ConvertRGBtoHSV(AlienGui::GetObjectColor(colorIndex), h, s, v);
+        AlienGui::ConvertRGBtoHSV(customizationColors.values[colorIndex].toRgbColor(), h, s, v);
         auto color = static_cast<ImVec4>(ImColor::HSV(h, s, v));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::Annotation(

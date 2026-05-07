@@ -17,7 +17,6 @@
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/NumberGenerator.h>
-#include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParameters.h>
 
 #include "GenericFileDialog.h"
@@ -47,7 +46,7 @@ namespace
         }
     }
 
-    void objectColorButtonWithPicker(FloatColorRGB& color, int colorIndex, float width)
+    void colorButton(FloatColorRGB& color, int colorIndex, float width)
     {
         auto imGuiColor = ImVec4(color.r, color.g, color.b, 1.0f);
         if (ImGui::ColorButton("##color", imGuiColor, ImGuiColorEditFlags_NoBorder, ImVec2(width, ImGui::GetFrameHeight()))) {
@@ -398,17 +397,12 @@ bool AlienGui::ColorField(uint32_t cellColor, float width, float height)
     return result;
 }
 
-uint32_t AlienGui::GetObjectColor(int color)
-{
-    auto objectColors = _SimulationFacade::get()->getSimulationParameters().objectColors.value;
-    return getIndividualObjectColor(objectColors, color);
-}
-
 void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS])
 {
     BasicInputColorMatrixParameters<bool> basicParameters;
     basicParameters._name = parameters._name;
     basicParameters._textWidth = parameters._textWidth;
+    basicParameters._customizationColors = parameters._customizationColors;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
@@ -424,6 +418,7 @@ void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& paramete
     basicParameters._format = "%d";
     basicParameters._logarithmic = parameters._logarithmic;
     basicParameters._textWidth = parameters._textWidth;
+    basicParameters._customizationColors = parameters._customizationColors;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._highlightedSubString = parameters._highlightedSubString;
@@ -439,6 +434,7 @@ void AlienGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& para
     basicParameters._logarithmic = parameters._logarithmic;
     basicParameters._format = parameters._format;
     basicParameters._textWidth = parameters._textWidth;
+    basicParameters._customizationColors = parameters._customizationColors;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._disabledValue = parameters._disabledValue;
@@ -736,7 +732,7 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
                 value = n;
             }
             ImGui::SameLine();
-            ColorField(AlienGui::GetObjectColor(n), colorFieldWidth1, ImGui::GetTextLineHeight());
+            ColorField(parameters._customizationColors[n].toRgbColor(), colorFieldWidth1, ImGui::GetTextLineHeight());
             if (isSelected) {
                 ImGui::SetItemDefaultFocus();
             }
@@ -747,7 +743,7 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
 
     ImGuiStyle& style = ImGui::GetStyle();
     float h, s, v;
-    AlienGui::ConvertRGBtoHSV(AlienGui::GetObjectColor(value), h, s, v);
+    AlienGui::ConvertRGBtoHSV(parameters._customizationColors[value].toRgbColor(), h, s, v);
     if (enabled && !(*enabled)) {
         s = 0;
         v = 0.2f;
@@ -779,14 +775,14 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
 {
     // Source color field
     ImGui::PushID(sourceColor);
-    AlienGui::ColorField(AlienGui::GetObjectColor(sourceColor));
+    AlienGui::ColorField(parameters._customizationColors[sourceColor].toRgbColor());
     ImGui::SameLine();
 
     // Combo for target color
     AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_LONG_ARROW_ALT_RIGHT));
     ImGui::SameLine();
     ImGui::PushID("color");
-    AlienGui::ComboColor(AlienGui::ComboColorParameters().width(70.0f).textWidth(0), targetColor);
+    AlienGui::ComboColor(AlienGui::ComboColorParameters().width(70.0f).textWidth(0).customizationColors(parameters._customizationColors), targetColor);
     ImGui::PopID();
 
 
@@ -964,7 +960,7 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
         bool checked = (value >> i) & 1;
 
         float h, s, v;
-        AlienGui::ConvertRGBtoHSV(AlienGui::GetObjectColor(i), h, s, v);
+        AlienGui::ConvertRGBtoHSV(parameters._customizationColors[i].toRgbColor(), h, s, v);
         ImGui::PushStyleColor(ImGuiCol_CheckMark, (ImVec4)ImColor::HSV(h, s, v));
         if (ImGui::Checkbox(("###" + std::to_string(i)).c_str(), &checked)) {
             if (checked) {
@@ -997,7 +993,7 @@ bool AlienGui::ColorCheckboxes(ColorCheckboxesParameters const& parameters, int&
         bool checked = (value >> i) & 1;
 
         float h, s, v;
-        AlienGui::ConvertRGBtoHSV(AlienGui::GetObjectColor(i), h, s, v);
+        AlienGui::ConvertRGBtoHSV(parameters._customizationColors[i].toRgbColor(), h, s, v);
         ImGui::PushStyleColor(ImGuiCol_CheckMark, (ImVec4)ImColor::HSV(h, s, v));
         if (ImGui::Checkbox(("###" + std::to_string(i)).c_str(), &checked)) {
             if (checked) {
@@ -1341,7 +1337,7 @@ void AlienGui::EndMenuBar()
     }
 }
 
-void AlienGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, FloatColorRGB& color)
+void AlienGui::ColorButton(ColorButtonParameters const& parameters, FloatColorRGB& color)
 {
     static FloatColorRGB backupColor;
     static LayerColorPalette layerColorPalette;
@@ -1434,7 +1430,7 @@ void AlienGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& para
     }
 }
 
-void AlienGui::ObjectColorPalette(ObjectColorPaletteParameters const& parameters, FloatColorRGB* colors)
+void AlienGui::ColorVectorButtons(ColorVectorButtonsParameters const& parameters, FloatColorRGB* colors)
 {
     ImGui::PushID(parameters._name.c_str());
 
@@ -1446,7 +1442,7 @@ void AlienGui::ObjectColorPalette(ObjectColorPaletteParameters const& parameters
     ImGui::BeginGroup();
     for (int color = 0; color < MAX_COLORS; ++color) {
         ImGui::PushID(color);
-        objectColorButtonWithPicker(colors[color], color, buttonWidth);
+        colorButton(colors[color], color, buttonWidth);
         if (color < MAX_COLORS - 1) {
             ImGui::SameLine();
         }
@@ -2133,7 +2129,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
         ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - pinnedButtonWidth);
         if (parameters._colorDependence && isExpanded) {
-            AlienGui::ColorField(AlienGui::GetObjectColor(color), 0);
+            AlienGui::ColorField(parameters._customizationColors[color].toRgbColor(), 0);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
         }
@@ -2340,9 +2336,9 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
                         width += 3.0f;
                     }
                     if (row == 0 && col > 0) {
-                        ColorField(AlienGui::GetObjectColor(col - 1), width);
+                        ColorField(parameters._customizationColors[col - 1].toRgbColor(), width);
                     } else if (row > 0 && col == 0) {
-                        ColorField(AlienGui::GetObjectColor(row - 1), width);
+                        ColorField(parameters._customizationColors[row - 1].toRgbColor(), width);
                     } else if (row > 0 && col > 0) {
                         if constexpr (std::is_same<T, float>()) {
                             SliderFloat(

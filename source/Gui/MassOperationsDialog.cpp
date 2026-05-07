@@ -22,6 +22,8 @@ void MassOperationsDialog::initIntern() {}
 
 void MassOperationsDialog::processIntern()
 {
+    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
+
     AlienGui::Group(AlienGui::GroupParameters().text("Cell colors"));
     ImGui::PushID("cell");
     ImGui::Checkbox("##colors", &_randomizeCellColors);
@@ -32,7 +34,7 @@ void MassOperationsDialog::processIntern()
             ImGui::SameLine();
         }
         auto id = "##color" + std::to_string(i + 1);
-        colorCheckbox(id, AlienGui::GetObjectColor(i), _checkedCellColors[i]);
+        colorCheckbox(id, customizationColors.values[i].toRgbColor(), _checkedCellColors[i]);
     }
     ImGui::EndDisabled();
     ImGui::PopID();
@@ -47,7 +49,7 @@ void MassOperationsDialog::processIntern()
             ImGui::SameLine();
         }
         auto id = "##color" + std::to_string(i + 1);
-        colorCheckbox(id, AlienGui::GetObjectColor(i), _checkedGenomeColors[i]);
+        colorCheckbox(id, customizationColors.values[i].toRgbColor(), _checkedGenomeColors[i]);
     }
     ImGui::EndDisabled();
     ImGui::PopID();
@@ -123,8 +125,7 @@ void MassOperationsDialog::processIntern()
 
 MassOperationsDialog::MassOperationsDialog()
     : AlienDialog("Mass operations")
-{
-}
+{}
 
 void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {

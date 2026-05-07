@@ -4,6 +4,8 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <EngineInterface/SimulationFacade.h>
+
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
 #include "StyleRepository.h"
@@ -29,7 +31,12 @@ void ChangeColorDialog::processIntern()
 
         ImGui::TableSetColumnIndex(0);
         ImGui::PushID("##1");
-        AlienGui::ComboColor(AlienGui::ComboColorParameters().textWidth(0).width(0), _sourceColor);
+        AlienGui::ComboColor(
+            AlienGui::ComboColorParameters()
+                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                .textWidth(0)
+                .width(0),
+            _sourceColor);
         ImGui::PopID();
 
         ImGui::TableSetColumnIndex(1);
@@ -37,7 +44,12 @@ void ChangeColorDialog::processIntern()
 
         ImGui::TableSetColumnIndex(2);
         ImGui::PushID("target color");
-        AlienGui::ComboColor(AlienGui::ComboColorParameters().textWidth(0).width(0), _targetColor);
+        AlienGui::ComboColor(
+            AlienGui::ComboColorParameters()
+                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                .textWidth(0)
+                .width(0),
+            _targetColor);
         ImGui::PopID();
 
         ImGui::EndTable();

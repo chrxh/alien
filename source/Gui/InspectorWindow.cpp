@@ -153,7 +153,12 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
                 auto objectId = ss.str();
 
                 AlienGui::ComboColor(
-                    AlienGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), object._color);
+                    AlienGui::ComboColorParameters()
+                        .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                        .name("Color")
+                        .textWidth(BaseTabTextWidth)
+                        .tooltip(Const::GenomeColorTooltip),
+                    object._color);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Usable energy").format("%.2f").textWidth(BaseTabTextWidth), object.getCellRef()._usableEnergy);
                 AlienGui::InputFloat(
@@ -618,7 +623,11 @@ void _InspectorWindow::processAttackerContent(AttackerDesc& attacker)
         if (mode == AttackerMode_FreeCell) {
             auto& attackFreeCell = std::get<AttackFreeCellDesc>(attacker._mode);
             AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().name("Restrict to colors").textWidth(CellTypeTextWidth), attackFreeCell._restrictToColors);
+                AlienGui::ColorCheckboxesParameters()
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                    .name("Restrict to colors")
+                    .textWidth(CellTypeTextWidth),
+                attackFreeCell._restrictToColors);
         }
         ImGui::TreePop();
     }
@@ -693,14 +702,22 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                     .tooltip(Const::GenomeSensorMinDensityTooltip),
                 detectFreeCell._minDensity);
             AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+                AlienGui::ColorCheckboxesParameters()
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                    .name("Restrict to color")
+                    .textWidth(CellTypeTextWidth)
+                    .tooltip(Const::GenomeSensorScanColorTooltip),
                 detectFreeCell._restrictToColors);
         } else if (mode == SensorMode_DetectCreature) {
             auto& detectCreature = std::get<DetectCreatureDesc>(sensor._mode);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(CellTypeTextWidth), detectCreature._minNumCells);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(CellTypeTextWidth), detectCreature._maxNumCells);
             AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+                AlienGui::ColorCheckboxesParameters()
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                    .name("Restrict to color")
+                    .textWidth(CellTypeTextWidth)
+                    .tooltip(Const::GenomeSensorScanColorTooltip),
                 detectCreature._restrictToColors);
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Related lineage", "Unrelated lineage"}).textWidth(CellTypeTextWidth),
@@ -728,6 +745,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
             auto& freeCell = std::get<ReconnectFreeCellDesc>(reconnector._mode);
             AlienGui::ColorCheckboxes(
                 AlienGui::ColorCheckboxesParameters()
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
                     .name("Restrict to colors")
                     .textWidth(CellTypeTextWidth)
                     .tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
@@ -738,6 +756,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(CellTypeTextWidth), creature._maxNumCells);
             AlienGui::ColorCheckboxes(
                 AlienGui::ColorCheckboxesParameters()
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
                     .name("Restrict to colors")
                     .textWidth(CellTypeTextWidth)
                     .tooltip(Const::GenomeReconnectorRestrictToColorTooltip),

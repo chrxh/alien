@@ -178,6 +178,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
             AlienGui::CheckboxColorMatrixParameters()
                 .name(parameterSpec._name)
                 .textWidth(TextColumnWidth)
+                .customizationColors(parameters.customizationColors.value.values)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(origRef.value)))
                 .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description),
@@ -218,6 +219,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .max(intSpec._max)
                 .logarithmic(intSpec._logarithmic)
                 .textWidth(TextColumnWidth)
+                .customizationColors(parameters.customizationColors.value.values)
                 .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(origValue))),
@@ -237,7 +239,8 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .defaultEnabledValue(origEnabledValue)
                 .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description)
-                .colorDependence(valueType == ColorDependence::ColorVector),
+                .colorDependence(valueType == ColorDependence::ColorVector)
+                .customizationColors(parameters.customizationColors.value.values),
             value,
             enabledValue);
     }
@@ -277,6 +280,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .logarithmic(floatSpec._logarithmic)
                 .format(floatSpec._format)
                 .textWidth(TextColumnWidth)
+                .customizationColors(parameters.customizationColors.value.values)
                 .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(origValue)))
@@ -312,6 +316,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .defaultValue(origValue)
                     .defaultEnabledValue(origEnabledValue)
                     .colorDependence(valueType == ColorDependence::ColorVector)
+                    .customizationColors(parameters.customizationColors.value.values)
                     .highlightedSubString(filter.containedText)
                     .tooltip(parameterSpec._description),
                 value,
@@ -461,9 +466,9 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
 
     if (valueType == ColorDependence::ColorVector) {
-        auto const defaultColors = createDefaultIndividualObjectColorVector();
-        AlienGui::ObjectColorPalette(
-            AlienGui::ObjectColorPaletteParameters()
+        auto const defaultColors = defaultCustomizationColorVector();
+        AlienGui::ColorVectorButtons(
+            AlienGui::ColorVectorButtonsParameters()
                 .name(parameterSpec._name)
                 .textWidth(TextColumnWidth)
                 .defaultValue(origValue)
@@ -472,8 +477,8 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
                 .tooltip(parameterSpec._description),
             value);
     } else {
-        AlienGui::ColorButtonWithPicker(
-            AlienGui::ColorButtonWithPickerParameters()
+        AlienGui::ColorButton(
+            AlienGui::ColorButtonParameters()
                 .name(parameterSpec._name)
                 .textWidth(TextColumnWidth)
                 .highlightedSubString(filter.containedText)
@@ -501,6 +506,7 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
         ImGui::PushID(color);
         auto widgetParameters = AlienGui::InputColorTransitionParameters()
                                     .textWidth(TextColumnWidth)
+                                    .customizationColors(parameters.customizationColors.value.values)
                                     .color(color)
                                     .defaultTargetColor(origValue[color].targetColor)
                                     .defaultTransitionAge(origValue[color].duration)
