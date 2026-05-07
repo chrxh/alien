@@ -62,7 +62,6 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1
         for (int i = CellType_Base; i < CellType_Count; ++i) {
             data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
         }
-        *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
         data.entities.saveNumEntries();
 
         ObjectConnectionProcessor::scheduleAddConnectionPair(data, object1, object2);
