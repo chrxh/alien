@@ -38,7 +38,7 @@ namespace
     {
         std::vector<std::string> result = {"Accumulate values for all colors", "Break down by color"};
         for (int color = 0; color < MAX_COLORS; ++color) {
-            result.emplace_back("Color #" + std::to_string(color));
+            result.emplace_back("Color #" + std::to_string(color + 1));
         }
         return result;
     }

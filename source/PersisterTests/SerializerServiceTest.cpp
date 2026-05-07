@@ -86,20 +86,3 @@ TEST_P(SerializerServiceTests_AllNodeTypes, objectWithNonEmptyGenome)
 
     testSerializationAndDeserialization(data);
 }
-
-TEST_F(SerializerServiceTests, oldCustomConstructorShapeLoadsAsSegment)
-{
-    Desc data;
-    data._genomes.emplace_back(GenomeDesc().genes({GeneDesc().shape(0).nodes({NodeDesc()})}));
-
-    DeserializedSimulation deserializedSimulationBefore{.mainData = data};
-    SerializedSimulation serializedSimulation;
-    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore));
-
-    DeserializedSimulation deserializedSimulationAfter;
-    ASSERT_TRUE(_serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation));
-
-    ASSERT_EQ(1, deserializedSimulationAfter.mainData._genomes.size());
-    ASSERT_EQ(1, deserializedSimulationAfter.mainData._genomes.at(0)._genes.size());
-    EXPECT_EQ(ConstructorShape_Segment, deserializedSimulationAfter.mainData._genomes.at(0)._genes.at(0)._shape);
-}

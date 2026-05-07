@@ -121,7 +121,7 @@ namespace Channels
 using ConstructorShape = int;
 enum ConstructorShape_
 {
-    ConstructorShape_Segment = 1,
+    ConstructorShape_Segment,
     ConstructorShape_Triangle,
     ConstructorShape_Rectangle,
     ConstructorShape_Hexagon,
@@ -142,7 +142,7 @@ enum ProvideEnergy_
 
 namespace Const
 {
-    std::vector<std::string> const ConstructorShapeWithoutCustomStrings =
+    std::vector<std::string> const ConstructorShapeStrings =
         {"Segment", "Triangle", "Rectangle", "Hexagon", "Tube", "Large Lolli", "Small Lolli", "Zigzag"};
 }
 
@@ -361,7 +361,7 @@ enum MemoryMode_
 
 namespace Const
 {
-    std::vector<std::string> const MemoryModeStrings = {"Signal delay", "Signal recorder", "Signal retrieval", "Signal integrator"};
+    std::vector<std::string> const MemoryModeStrings = {"Signal delay", "Signal recorder", "Signal storage", "Signal integrator"};
 }
 
 using SignalRecorderState = uint8_t;
