@@ -100,9 +100,9 @@ using Char64MemberVariant = std::variant<std::monostate, Char64Member, Char64Lay
 
 using _FloatColorRGBBaseLayerMember = BaseLayerParameter<FloatColorRGB> SimulationParameters::*;
 using FloatColorRGBBaseLayerMember = std::shared_ptr<_FloatColorRGBBaseLayerMember>;
-using _ColorVectorFloatColorRGBMember = BaseParameter<ColorVector<FloatColorRGB>> SimulationParameters::*;
-using ColorVectorFloatColorRGBMember = std::shared_ptr<_ColorVectorFloatColorRGBMember>;
-using FloatColorRGBMemberVariant = std::variant<std::monostate, FloatColorRGBBaseLayerMember, ColorVectorFloatColorRGBMember>;
+using _ColorVectorRGBMember = BaseParameter<ColorVector<FloatColorRGB>> SimulationParameters::*;
+using ColorVectorRGBMember = std::shared_ptr<_ColorVectorRGBMember>;
+using FloatColorRGBMemberVariant = std::variant<std::monostate, FloatColorRGBBaseLayerMember, ColorVectorRGBMember>;
 
 using _ColorTransitionRulesBaseLayerMember = BaseLayerParameter<ColorVector<ColorTransitionRule>> SimulationParameters::*;
 using ColorTransitionRulesBaseLayerMember = std::shared_ptr<_ColorTransitionRulesBaseLayerMember>;
@@ -206,7 +206,7 @@ struct AlternativeSpec
 struct ColorSpec
 {
     SETTER_SHARED_PTR(ColorSpec, FloatColorRGBBaseLayerMember, member);
-    SETTER_SHARED_PTR(ColorSpec, ColorVectorFloatColorRGBMember, member);
+    SETTER_SHARED_PTR(ColorSpec, ColorVectorRGBMember, member);
     FloatColorRGBMemberVariant _member = std::monostate();
 };
 

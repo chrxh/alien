@@ -466,7 +466,7 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
 
     if (valueType == ColorDependence::ColorVector) {
-        auto const defaultColors = defaultCustomizationColorVector();
+        auto const defaultColors = getDefaultCustomizationColorVector();
         AlienGui::ColorVectorButtons(
             AlienGui::ColorVectorButtonsParameters()
                 .name(parameterSpec._name)

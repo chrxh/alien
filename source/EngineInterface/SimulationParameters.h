@@ -29,7 +29,7 @@ struct SimulationParameters
 
     // Visualization
     BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
-    BaseParameter<ColorVector<FloatColorRGB>> customizationColors = {defaultCustomizationColorVector()};
+    BaseParameter<ColorVector<FloatColorRGB>> customizationColors = {getDefaultCustomizationColorVector()};
     BaseParameter<CellColoring> cellColoring = {CellColoring_CellColor};
     BaseParameter<CellType> highlightedCellType = {CellType_Base};
     BaseParameter<float> glow = {0.3f};

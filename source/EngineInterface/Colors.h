@@ -81,7 +81,7 @@ constexpr FloatColorRGB toFloatColorRGB(uint32_t rgb)
     return {static_cast<float>((rgb >> 16) & 0xff) / 255.0f, static_cast<float>((rgb >> 8) & 0xff) / 255.0f, static_cast<float>(rgb & 0xff) / 255.0f};
 }
 
-constexpr ColorVector<FloatColorRGB> defaultCustomizationColorVector()
+constexpr ColorVector<FloatColorRGB> getDefaultCustomizationColorVector()
 {
     ColorVector<FloatColorRGB> result;
     for (int i = 0; i < MAX_COLORS; ++i) {
