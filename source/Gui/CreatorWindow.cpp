@@ -100,7 +100,7 @@ void CreatorWindow::processIntern()
         auto color = EditorModel::get().getDefaultColorCode();
         AlienGui::ComboColor(
             AlienGui::ComboColorParameters()
-                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                 .name("Color")
                 .textWidth(RightColumnWidth)
                 .tooltip(Const::GenomeColorTooltip),

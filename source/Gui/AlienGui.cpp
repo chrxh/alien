@@ -29,7 +29,7 @@ namespace
 {
     auto constexpr HoveredTimer = 0.5f;
 
-    bool isColorVectorDefault(FloatColorRGB const* value, FloatColorRGB const* defaultValue)
+    bool isColorVectorDefault(FloatColorRGB* value, ColorVector<FloatColorRGB> const& defaultValue)
     {
         for (int color = 0; color < MAX_COLORS; ++color) {
             if (value[color] != defaultValue[color]) {
@@ -39,7 +39,7 @@ namespace
         return true;
     }
 
-    void copyColorVector(FloatColorRGB* target, FloatColorRGB const* source)
+    void copyColorVector(FloatColorRGB* target, ColorVector<FloatColorRGB> const& source)
     {
         for (int color = 0; color < MAX_COLORS; ++color) {
             target[color] = source[color];

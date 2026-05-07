@@ -33,7 +33,7 @@ void ChangeColorDialog::processIntern()
         ImGui::PushID("##1");
         AlienGui::ComboColor(
             AlienGui::ComboColorParameters()
-                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                 .textWidth(0)
                 .width(0),
             _sourceColor);
@@ -46,7 +46,7 @@ void ChangeColorDialog::processIntern()
         ImGui::PushID("target color");
         AlienGui::ComboColor(
             AlienGui::ComboColorParameters()
-                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                 .textWidth(0)
                 .width(0),
             _targetColor);

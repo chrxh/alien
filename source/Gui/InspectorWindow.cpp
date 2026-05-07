@@ -154,7 +154,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedObjectDesc& extendedCell)
 
                 AlienGui::ComboColor(
                     AlienGui::ComboColorParameters()
-                        .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                        .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                         .name("Color")
                         .textWidth(BaseTabTextWidth)
                         .tooltip(Const::GenomeColorTooltip),
@@ -624,7 +624,7 @@ void _InspectorWindow::processAttackerContent(AttackerDesc& attacker)
             auto& attackFreeCell = std::get<AttackFreeCellDesc>(attacker._mode);
             AlienGui::ColorCheckboxes(
                 AlienGui::ColorCheckboxesParameters()
-                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                     .name("Restrict to colors")
                     .textWidth(CellTypeTextWidth),
                 attackFreeCell._restrictToColors);
@@ -703,7 +703,7 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
                 detectFreeCell._minDensity);
             AlienGui::ColorCheckboxes(
                 AlienGui::ColorCheckboxesParameters()
-                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                     .name("Restrict to color")
                     .textWidth(CellTypeTextWidth)
                     .tooltip(Const::GenomeSensorScanColorTooltip),
@@ -714,7 +714,7 @@ void _InspectorWindow::processSensorContent(SensorDesc& sensor)
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(CellTypeTextWidth), detectCreature._maxNumCells);
             AlienGui::ColorCheckboxes(
                 AlienGui::ColorCheckboxesParameters()
-                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                     .name("Restrict to color")
                     .textWidth(CellTypeTextWidth)
                     .tooltip(Const::GenomeSensorScanColorTooltip),
@@ -745,7 +745,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
             auto& freeCell = std::get<ReconnectFreeCellDesc>(reconnector._mode);
             AlienGui::ColorCheckboxes(
                 AlienGui::ColorCheckboxesParameters()
-                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                     .name("Restrict to colors")
                     .textWidth(CellTypeTextWidth)
                     .tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
@@ -756,7 +756,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDesc& reconnector)
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(CellTypeTextWidth), creature._maxNumCells);
             AlienGui::ColorCheckboxes(
                 AlienGui::ColorCheckboxesParameters()
-                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value.values)
+                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
                     .name("Restrict to colors")
                     .textWidth(CellTypeTextWidth)
                     .tooltip(Const::GenomeReconnectorRestrictToColorTooltip),

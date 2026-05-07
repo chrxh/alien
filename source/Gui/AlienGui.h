@@ -8,6 +8,7 @@
 #include <Base/Definitions.h>
 
 #include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/Colors.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/GenomeDesc.h>
 #include <EngineInterface/PreviewDesc.h>
@@ -45,7 +46,7 @@ public:
         MEMBER(SliderFloatParameters, float, width, 0);
         MEMBER(SliderFloatParameters, float, textWidth, 100);
         MEMBER(SliderFloatParameters, bool, colorDependence, false);
-        MEMBER(SliderFloatParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(SliderFloatParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(SliderFloatParameters, bool, readOnly, false);
         MEMBER(SliderFloatParameters, bool, tiny, false);
         MEMBER(SliderFloatParameters, float const*, defaultValue, nullptr);
@@ -68,7 +69,7 @@ public:
         MEMBER(SliderIntParameters, float, width, 0);
         MEMBER(SliderIntParameters, float, textWidth, 100);
         MEMBER(SliderIntParameters, bool, colorDependence, false);
-        MEMBER(SliderIntParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(SliderIntParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(SliderIntParameters, bool, readOnly, false);
         MEMBER(SliderIntParameters, bool, tiny, false);
         MEMBER(SliderIntParameters, int const*, defaultValue, nullptr);
@@ -153,7 +154,7 @@ public:
     {
         MEMBER(CheckboxColorMatrixParameters, std::string, name, "");
         MEMBER(CheckboxColorMatrixParameters, float, textWidth, 100);
-        MEMBER(CheckboxColorMatrixParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(CheckboxColorMatrixParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(CheckboxColorMatrixParameters, std::optional<std::vector<std::vector<bool>>>, defaultValue, std::nullopt);
         MEMBER(CheckboxColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(CheckboxColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -167,7 +168,7 @@ public:
         MEMBER(InputIntColorMatrixParameters, int, max, 0);
         MEMBER(InputIntColorMatrixParameters, bool, logarithmic, false);
         MEMBER(InputIntColorMatrixParameters, float, textWidth, 100);
-        MEMBER(InputIntColorMatrixParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(InputIntColorMatrixParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(InputIntColorMatrixParameters, std::optional<std::vector<std::vector<int>>>, defaultValue, std::nullopt);
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -182,7 +183,7 @@ public:
         MEMBER(InputFloatColorMatrixParameters, bool, logarithmic, false);
         MEMBER(InputFloatColorMatrixParameters, std::string, format, "%.2f");
         MEMBER(InputFloatColorMatrixParameters, float, textWidth, 100);
-        MEMBER(InputFloatColorMatrixParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(InputFloatColorMatrixParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, disabledValue, std::nullopt);
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
@@ -256,7 +257,7 @@ public:
         MEMBER(ComboColorParameters, std::string, name, "");
         MEMBER(ComboColorParameters, float, width, 0);
         MEMBER(ComboColorParameters, float, textWidth, 100);
-        MEMBER(ComboColorParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(ComboColorParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
@@ -268,7 +269,7 @@ public:
         MEMBER(InputColorTransitionParameters, std::string, name, "");
         MEMBER(InputColorTransitionParameters, int, color, 0);
         MEMBER(InputColorTransitionParameters, float, textWidth, 100);
-        MEMBER(InputColorTransitionParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(InputColorTransitionParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(InputColorTransitionParameters, int, min, 1);
         MEMBER(InputColorTransitionParameters, int, max, 10000000);
         MEMBER(InputColorTransitionParameters, bool, logarithmic, false);
@@ -302,7 +303,7 @@ public:
     {
         MEMBER(ColorCheckboxesParameters, std::string, name, "");
         MEMBER(ColorCheckboxesParameters, float, textWidth, 100);
-        MEMBER(ColorCheckboxesParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(ColorCheckboxesParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(ColorCheckboxesParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ColorCheckboxes(ColorCheckboxesParameters const& parameters, int& value);
@@ -379,8 +380,8 @@ public:
     {
         MEMBER(ColorVectorButtonsParameters, std::string, name, "");
         MEMBER(ColorVectorButtonsParameters, float, textWidth, 100);
-        MEMBER(ColorVectorButtonsParameters, std::optional<FloatColorRGB const*>, defaultValue, std::nullopt);
-        MEMBER(ColorVectorButtonsParameters, std::optional<FloatColorRGB const*>, builtinDefaultValue, std::nullopt);
+        MEMBER(ColorVectorButtonsParameters, std::optional<ColorVector<FloatColorRGB>>, defaultValue, std::nullopt);
+        MEMBER(ColorVectorButtonsParameters, std::optional<ColorVector<FloatColorRGB>>, builtinDefaultValue, std::nullopt);
         MEMBER(ColorVectorButtonsParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(ColorVectorButtonsParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
@@ -527,7 +528,7 @@ private:
         MEMBER(BasicInputColorMatrixParameters, bool, logarithmic, false);
         MEMBER(BasicInputColorMatrixParameters, std::string, format, "%.2f");
         MEMBER(BasicInputColorMatrixParameters, float, textWidth, 100);
-        MEMBER(BasicInputColorMatrixParameters, FloatColorRGB const*, customizationColors, nullptr);
+        MEMBER(BasicInputColorMatrixParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
         MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
         MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
