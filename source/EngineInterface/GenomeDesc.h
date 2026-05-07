@@ -403,7 +403,7 @@ struct GeneDesc
 
     MEMBER(GeneDesc, std::string, name, "");
     MEMBER(GeneDesc, std::vector<NodeDesc>, nodes, {});
-    MEMBER(GeneDesc, ConstructorShape, shape, ConstructorShape_Custom);
+    MEMBER(GeneDesc, ConstructorShape, shape, ConstructorShape_Segment);
     MEMBER(GeneDesc, bool, separation, false);
     MEMBER(GeneDesc, int, numBranches, 1);        // For separation = false
     MEMBER(GeneDesc, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations

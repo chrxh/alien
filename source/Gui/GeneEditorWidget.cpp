@@ -86,11 +86,9 @@ void _GeneEditorWidget::processHeaderData()
             AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
 
             // Shape
-            auto shapeWithoutCustom = gene._shape - 1;
             if (AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeWithoutCustomStrings).textWidth(rightColumnWidth),
-                    shapeWithoutCustom)) {
-                gene._shape = shapeWithoutCustom + 1;
+                    AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth),
+                    gene._shape)) {
                 {
                     ShapeGenerator shapeGenerator;
                     if (_editData->selectedGeneIndex.value() == 0) {

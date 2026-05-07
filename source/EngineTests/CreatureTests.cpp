@@ -602,7 +602,7 @@ TEST_F(CreatureTests, muscleSeed)
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(250);
+    _simulationFacade->calcTimesteps(200);
 
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(4, actualData._objects.size());
