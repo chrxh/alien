@@ -16,6 +16,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/PreviewDescConverterService.h>
+#include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SpaceCalculator.h>
 
 #include "AlienGui.h"
@@ -149,6 +150,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     auto selectedNode = _editData->getSelectedNodeIndex();
     auto drawList = ImGui::GetWindowDrawList();
     auto& style = StyleRepository::get();
+    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
     RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
     RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
     auto mousePos = ImGui::GetMousePos();
@@ -214,7 +216,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
         if (selectedGene.has_value() && selectedNode.has_value() && object._geneIndex == selectedGene.value() && object._nodeIndex == selectedNode.value()) {
             float h, s, v;
-            AlienGui::ConvertRGBtoHSV(Const::IndividualObjectColors[object._color], h, s, v);
+            AlienGui::ConvertRGBtoHSV(customizationColors.values[object._color].toRgbColor(), h, s, v);
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.4f, ImColor::HSV(h, 0.5f, 0.4f));
         }
     }
@@ -223,7 +225,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     for (auto const& object : desc._objects) {
         auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
         float h, s, v;
-        uint32_t color = object._color != -1 ? Const::IndividualObjectColors[object._color] : 0x707070;
+        uint32_t color = object._color != -1 ? customizationColors.values[object._color].toRgbColor() : 0x707070;
         AlienGui::ConvertRGBtoHSV(color, h, s, v);
 
         auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.15f : 0.5f;

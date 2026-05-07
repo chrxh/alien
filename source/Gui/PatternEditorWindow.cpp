@@ -21,8 +21,8 @@
 #include "StyleRepository.h"
 #include "Viewport.h"
 
-#include <ImFileDialog.h>
 #include <EngineInterface/SimulationFacade.h>
+#include <ImFileDialog.h>
 
 namespace
 {
@@ -43,6 +43,7 @@ void PatternEditorWindow::processIntern()
 {
 
     auto selection = EditorModel::get().getSelectionShallowData();
+    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
     if (hasSelectionChanged(selection)) {
         _angle = 0;
         _angularVel = 0;
@@ -194,7 +195,7 @@ void PatternEditorWindow::processIntern()
                 ImGui::SameLine();
             }
             auto label = "    ##color" + std::to_string(i + 1);
-            if (colorButton(label.c_str(), Const::IndividualObjectColors[i])) {
+            if (colorButton(label.c_str(), customizationColors.values[i].toRgbColor())) {
                 _SimulationFacade::get()->colorSelectedObjects(i, EditorModel::get().isRolloutToClusters());
                 EditorModel::get().setDefaultColorCode(i);
             }

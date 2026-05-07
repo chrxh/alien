@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <functional>
 #include <initializer_list>
 
@@ -69,6 +70,8 @@ struct FloatColorRGB
     float r = 0;
     float g = 0;
     float b = 0;
+
+    uint32_t toRgbColor() const;
 
     bool operator==(FloatColorRGB const&) const = default;
 };

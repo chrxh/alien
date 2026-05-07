@@ -39,19 +39,17 @@ void ImageToPatternDialog::shutdown()
 
 namespace
 {
-    void getMatchedCellColor(ImColor const& color, int& matchedCellColor, float& matchedCellIntensity)
+    void getMatchedCellColor(ImColor const& color, ColorVector<FloatColorRGB> const& customizationColors, int& matchedCellColor, float& matchedCellIntensity)
     {
         using Color = std::array<float, 3>;
-        static std::vector<Color> cellColors;
+        std::vector<Color> cellColors;
         auto toHsv = [](uint32_t color) {
             float h, s, v;
             AlienGui::ConvertRGBtoHSV(color, h, s, v);
             return Color{h, s, v};
         };
-        if (cellColors.empty()) {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                cellColors.emplace_back(toHsv(Const::IndividualObjectColors[i]));
-            }
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            cellColors.emplace_back(toHsv(customizationColors.values[i].toRgbColor()));
         }
 
         std::optional<int> bestMatchIndex;
@@ -79,6 +77,7 @@ namespace
 void ImageToPatternDialog::show()
 {
     GenericFileDialog::get().showOpenFileDialog("Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
+        auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
@@ -97,8 +96,13 @@ void ImageToPatternDialog::show()
                 if (r > 20 || g > 20 || b > 20) {
                     int matchedCellColor;
                     float matchedCellIntensity;
-                    getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
-                    dataDesc._objects.emplace_back(ObjectDesc().id(NumberGenerator::get().createEntityId()).pos({toFloat(x) + xOffset, toFloat(y)}).color(matchedCellColor).fixed(false).type(SolidDesc()));
+                    getMatchedCellColor(ImColor(r, g, b, 255), customizationColors, matchedCellColor, matchedCellIntensity);
+                    dataDesc._objects.emplace_back(ObjectDesc()
+                                                       .id(NumberGenerator::get().createEntityId())
+                                                       .pos({toFloat(x) + xOffset, toFloat(y)})
+                                                       .color(matchedCellColor)
+                                                       .fixed(false)
+                                                       .type(SolidDesc()));
                 }
             }
         }

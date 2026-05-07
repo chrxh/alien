@@ -216,6 +216,9 @@ ValueRef<FloatColorRGB> SpecificationEvaluationService::getRef(FloatColorRGBMemb
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
+    if (locationType == LocationType::Base && std::holds_alternative<ColorVectorRGBMember>(member)) {
+        return ValueRef{.value = (parameters.**std::get<ColorVectorRGBMember>(member)).value.values, .colorDependence = ColorDependence::ColorVector};
+    }
     if (locationType != LocationType::Source && std::holds_alternative<FloatColorRGBBaseLayerMember>(member)) {
         switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
@@ -305,7 +308,8 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
             }
         } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
             auto const& colorPickerSpec = std::get<ColorSpec>(parameterSpec._reference);
-            if (std::holds_alternative<FloatColorRGBBaseLayerMember>(colorPickerSpec._member)) {
+            if (std::holds_alternative<FloatColorRGBBaseLayerMember>(colorPickerSpec._member)
+                || std::holds_alternative<ColorVectorRGBMember>(colorPickerSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {

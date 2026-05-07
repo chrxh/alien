@@ -16,7 +16,6 @@
 #include "SimulationView.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
@@ -395,7 +394,8 @@ void SimulationInteractionController::drawCursor()
         } else {
             auto zoom = Viewport::get().getZoomFactor();
             auto radius = EditorModel::get().getPencilWidth() * zoom;
-            auto color = Const::IndividualObjectColors[EditorModel::get().getDefaultColorCode()];
+            auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
+            auto color = customizationColors.values[EditorModel::get().getDefaultColorCode()].toRgbColor();
             float h, s, v;
             AlienGui::ConvertRGBtoHSV(color, h, s, v);
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));

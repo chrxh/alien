@@ -77,6 +77,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec().name("Background color").reference(ColorSpec().member(&SimulationParameters::backgroundColor)),
                     ParameterSpec()
+                        .name("Customization colors")
+                        .reference(ColorSpec().member(&SimulationParameters::customizationColors))
+                        .description("Defines the 10 standard customization colors used for cell rendering and color-based editing throughout the simulation."),
+                    ParameterSpec()
                         .name("Cell coloring")
                         .reference(AlternativeSpec()
                                        .member(&SimulationParameters::cellColoring)

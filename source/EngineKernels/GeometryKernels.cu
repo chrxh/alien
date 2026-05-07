@@ -87,50 +87,16 @@ namespace
 
     __device__ __inline__ uint32_t getCellColorByCode(int colorCode)
     {
-        uint32_t result;
-        switch (calcMod(colorCode, MAX_COLORS)) {
-        case 0: {
-            result = Const::IndividualObjectColor1;
-            break;
-        }
-        case 1: {
-            result = Const::IndividualObjectColor2;
-            break;
-        }
-        case 2: {
-            result = Const::IndividualObjectColor3;
-            break;
-        }
-        case 3: {
-            result = Const::IndividualObjectColor4;
-            break;
-        }
-        case 4: {
-            result = Const::IndividualObjectColor5;
-            break;
-        }
-        case 5: {
-            result = Const::IndividualObjectColor6;
-            break;
-        }
-        case 6: {
-            result = Const::IndividualObjectColor7;
-            break;
-        }
-        case 7: {
-            result = Const::IndividualObjectColor8;
-            break;
-        }
-        case 8: {
-            result = Const::IndividualObjectColor9;
-            break;
-        }
-        case 9: {
-            result = Const::IndividualObjectColor10;
-            break;
-        }
-        }
-        return result;
+        auto const& color = cudaSimulationParameters.customizationColors.value[calcMod(colorCode, MAX_COLORS)];
+        auto const toInt = [](float value) {
+            if (value < 0.0f) {
+                value = 0.0f;
+            } else if (value > 1.0f) {
+                value = 1.0f;
+            }
+            return min(255u, static_cast<uint32_t>(value * 255.0f + 0.5f));
+        };
+        return (toInt(color.r) << 16) | (toInt(color.g) << 8) | toInt(color.b);
     }
 
     __device__ __inline__ uint32_t getCellColor(Object* object)
@@ -236,8 +202,7 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
     }
 }
 
-__global__ void
-cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices, GeometryExtractionContext context)
+__global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
@@ -272,14 +237,12 @@ cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t*
     }
 }
 
-__global__ void
-cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices, GeometryExtractionContext context)
+__global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
     auto addTriangle = [&](Object* object, uint64_t objectIndex, Object* connectedObject, Object* prevConnectedObject) {
-        if (!isInVisibleRect(connectedObject->pos, context)
-            || !isInVisibleRect(prevConnectedObject->pos, context)) {
+        if (!isInVisibleRect(connectedObject->pos, context) || !isInVisibleRect(prevConnectedObject->pos, context)) {
             return;
         }
         // Only add triangle once (avoid duplicates by checking ids)
@@ -340,7 +303,8 @@ cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, u
     }
 }
 
-__global__ void cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles, GeometryExtractionContext context)
+__global__ void
+cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles, GeometryExtractionContext context)
 {
     // Process energy particles - each particle goes to its index position
     {
@@ -509,7 +473,11 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects, GeometryExtractionContext context)
+__global__ void cudaExtractSelectedObjectData(
+    SimulationData data,
+    SelectedObjectVertexData* selectedObjectData,
+    uint64_t* numSelectedObjects,
+    GeometryExtractionContext context)
 {
     // Process selected cells
     auto const& objects = data.entities.objects;
@@ -542,7 +510,11 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
     }
 }
 
-__global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices, GeometryExtractionContext context)
+__global__ void cudaExtractSelectedConnectionData(
+    SimulationData data,
+    ConnectionArrowVertexData* connectionArrowData,
+    uint64_t* numConnectionArrowVertices,
+    GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
@@ -615,7 +587,8 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
         }
     }
 }
-__global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices, GeometryExtractionContext context)
+__global__ void
+cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices, GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
@@ -672,7 +645,11 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
         }
     }
 }
-__global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices, GeometryExtractionContext context)
+__global__ void cudaExtractDetonationEventData(
+    SimulationData data,
+    DetonationEventVertexData* detonationEventData,
+    uint64_t* numDetonationEventVertices,
+    GeometryExtractionContext context)
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 

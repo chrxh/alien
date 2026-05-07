@@ -98,7 +98,13 @@ void CreatorWindow::processIntern()
         AlienGui::Group(AlienGui::GroupParameters().text(ModeText.at(_mode)));
 
         auto color = EditorModel::get().getDefaultColorCode();
-        AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(RightColumnWidth).tooltip(Const::GenomeColorTooltip), color);
+        AlienGui::ComboColor(
+            AlienGui::ComboColorParameters()
+                .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
+                .name("Color")
+                .textWidth(RightColumnWidth)
+                .tooltip(Const::GenomeColorTooltip),
+            color);
         EditorModel::get().setDefaultColorCode(color);
         if (_mode == CreationMode_Drawing) {
             auto pencilWidth = EditorModel::get().getPencilWidth();

@@ -7,6 +7,7 @@
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/GenomeDescEditService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
 #include "GenericMessageDialog.h"
@@ -137,6 +138,7 @@ void _GeneEditorWidget::processHeaderData()
 void _GeneEditorWidget::processNodeList()
 {
     if (ImGui::BeginChild("NodeList", ImVec2(0, 0))) {
+        auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
         auto scrollToNodeIndex = -1;
         auto selectedNode = _editData->getSelectedNodeIndex();
         if (!_selectedNodeFromPreviousFrame.has_value() || _selectedNodeFromPreviousFrame != selectedNode) {
@@ -223,7 +225,7 @@ void _GeneEditorWidget::processNodeList()
                     // Column 4: Color
                     ImGui::TableNextColumn();
                     if (ImGui::BeginChild("color", {0, ImGui::GetTextLineHeight()}, 0, ImGuiWindowFlags_NoInputs)) {
-                        AlienGui::ColorField(Const::IndividualObjectColors[node._color], 40.0f, ImGui::GetTextLineHeight());
+                        AlienGui::ColorField(customizationColors.values[node._color].toRgbColor(), 40.0f, ImGui::GetTextLineHeight());
                     }
                     ImGui::EndChild();
 
