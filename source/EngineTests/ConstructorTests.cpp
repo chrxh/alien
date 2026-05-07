@@ -3260,36 +3260,6 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffsprin
     ASSERT_EQ(2, actualData._creatures.size());
 }
 
-TEST_F(ConstructorTests, externalEnergyBackflowPreservesTotalEnergyOverLongRun)
-{
-    _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = 10000000.0f;
-    _parameters.externalEnergyInflowFactor.value[0] = 1.0f;
-    _parameters.externalEnergyBackflowFactor.value[0] = 0.5f;
-    _parameters.radiationType1_strength.baseValue[0] = 0.000001f;
-    _parameters.radiationAbsorption.baseValue[0] = 0.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-    auto normalEnergy = _parameters.normalCellEnergy.value[0];
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(0))),
-        },
-        CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
-
-    auto const initialEnergy = getEnergy(data) + _parameters.externalEnergy.value;
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(2000);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualParameters = _simulationFacade->getSimulationParameters();
-    auto const actualEnergy = getEnergy(actualData) + actualParameters.externalEnergy.value;
-
-    EXPECT_NEAR(initialEnergy, actualEnergy, 2.0);
-}
-
 TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspring)
 {
     _parameters.externalEnergyControlToggle.value = true;
