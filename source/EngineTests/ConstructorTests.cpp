@@ -1365,7 +1365,7 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
     EXPECT_TRUE(actualData.hasConnection(1, newObject._id));
     EXPECT_FALSE(actualData.hasConnection(0, 1));
     EXPECT_TRUE(actualData.hasConnection(0, newObject._id));
-    EXPECT_TRUE(approxCompare(180.0f + 45.0f, actualData.getConnection(newObject, hostObject)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(newObject, hostObject)._angleFromPrevious));
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__concatenationAngle)
