@@ -1,4 +1,5 @@
 #include "AttackerProcessor.cuh"
+#include "ObjectProcessor.cuh"
 #include "ClusterProcessor.cuh"
 #include "CommunicatorProcessor.cuh"
 #include "ConstructorProcessor.cuh"
@@ -9,11 +10,10 @@
 #include "GeneratorProcessor.cuh"
 #include "InjectorProcessor.cuh"
 #include "MemoryProcessor.cuh"
-#include "MutationProcessor.cuh"
-#include "ObjectProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "SimulationKernels.cuh"
+#include "MutationProcessor.cuh"
 #include "VoidProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data)
