@@ -47,7 +47,7 @@ namespace
         color.b = ImColor(imGuiColor).Value.z;
     }
 
-    bool isColorVectorDefault(FloatColorRGB* value, FloatColorRGB* origValue)
+    bool isColorVectorDefault(FloatColorRGB const* value, FloatColorRGB const* origValue)
     {
         for (int color = 0; color < MAX_COLORS; ++color) {
             if (value[color] != origValue[color]) {
@@ -55,6 +55,13 @@ namespace
             }
         }
         return true;
+    }
+
+    void copyColorVector(FloatColorRGB* target, ColorVector<FloatColorRGB> const& source)
+    {
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            target[color] = source.values[color];
+        }
     }
 }
 
@@ -500,6 +507,9 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
     if (valueType == ColorDependence::ColorVector) {
         auto controlStartX = ImGui::GetCursorPosX();
         auto controlWidth = ImGui::GetContentRegionAvail().x - StyleRepository::get().scale(TextColumnWidth);
+        auto textStartX = controlStartX + controlWidth + ImGui::GetStyle().ItemSpacing.x + ImGui::CalcTextSize(ICON_FA_UNDO).x
+            + ImGui::GetStyle().FramePadding.x * 2 + ImGui::GetStyle().ItemSpacing.x;
+        auto const defaultColors = createDefaultIndividualObjectColorVector();
         ImGui::BeginGroup();
         for (int color = 0; color < MAX_COLORS; ++color) {
             ImGui::PushID(color);
@@ -522,8 +532,14 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
         AlienGui::Tooltip("Revert changes", true, ImGuiHoveredFlags_None);
         ImGui::EndDisabled();
 
-        ImGui::SameLine();
+        ImGui::SameLine(textStartX);
         AlienGui::Text(AlienGui::TextParameters().text(parameterSpec._name).highlightedSubString(filter.containedText));
+        ImGui::SameLine();
+        ImGui::BeginDisabled(isColorVectorDefault(value, defaultColors.values));
+        if (ImGui::Button(("Default##" + parameterSpec._name).c_str())) {
+            copyColorVector(value, defaultColors);
+        }
+        ImGui::EndDisabled();
         if (parameterSpec._description) {
             AlienGui::HelpMarker(*parameterSpec._description);
         }
