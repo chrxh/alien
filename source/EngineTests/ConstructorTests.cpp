@@ -3273,7 +3273,10 @@ TEST_F(ConstructorTests, externalEnergyBackflowPreservesTotalEnergyOverLongRun)
     auto normalEnergy = _parameters.normalCellEnergy.value[0];
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(0))),
+            ObjectDesc()
+                .id(0)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(0))),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
