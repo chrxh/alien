@@ -3236,6 +3236,52 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
     _simulationFacade->calcTimesteps(10000);
 }
 
+TEST_F(ConstructorTests, externalEnergyInflowAndBackflowPreservesTotalEnergy)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().separation(true).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
+        GeneDesc().separation(false).nodes({
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+        }),
+    });
+    std::vector<ObjectDesc> cells;
+    for (int i = 0; i < 50; ++i) {
+        cells.emplace_back(
+            ObjectDesc().id(i).pos({toFloat(i), 0.0f}).type(CellDesc().headCell(true).constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(30))));
+    }
+
+    Desc data;
+    data.addCreature(cells, CreatureDesc(), genome);
+    for (int i = 1; i < 50; ++i) {
+        data.addConnection(i, i - 1);
+    }
+
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = 1e8f;
+    _parameters.externalEnergyBackflowFactor.value[0] = 0.5f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto const initialTotalEnergy = getEnergy(data) + _parameters.externalEnergy.value;
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1000);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualParameters = _simulationFacade->getSimulationParameters();
+    auto const actualTotalEnergy = getEnergy(actualData) + actualParameters.externalEnergy.value;
+
+    EXPECT_NEAR(initialTotalEnergy, actualTotalEnergy, 10.0);
+}
+
 TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffspring)
 {
     _parameters.externalEnergyControlToggle.value = true;
