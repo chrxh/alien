@@ -46,4 +46,4 @@ jobs:
 
     - name: Build
       shell: pwsh
-      run: cmake --build build -j32
+      run: cmake --build build --config ${{ env.BUILD_TYPE }} --clean-first -j32
