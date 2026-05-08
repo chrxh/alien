@@ -4,7 +4,6 @@
 
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
-#include "SimulationStatistics.cuh"
 
 class VoidProcessor
 {
