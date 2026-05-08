@@ -34,7 +34,7 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
 
     int cellNeighborCount = 0;
     for (int i = 0; i < object->numConnections; ++i) {
-        if (object->connections[i].object->type == ObjectType_Cell) {
+        if (object->connections[i].object->type == ObjectType_Cell && object->connections[i].object->typeData.cell.cellType != CellType_Void) {
             ++cellNeighborCount;
         }
     }
@@ -43,7 +43,7 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
         auto energyPerNeighbor = totalEnergy / cellNeighborCount;
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedObject = object->connections[i].object;
-            if (connectedObject->type == ObjectType_Cell) {
+            if (connectedObject->type == ObjectType_Cell && connectedObject->typeData.cell.cellType != CellType_Void) {
                 atomicAdd(&connectedObject->typeData.cell.usableEnergy, energyPerNeighbor);
             }
         }
