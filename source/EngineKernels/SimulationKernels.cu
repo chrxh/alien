@@ -1,4 +1,5 @@
 #include "AttackerProcessor.cuh"
+#include "ObjectProcessor.cuh"
 #include "ClusterProcessor.cuh"
 #include "CommunicatorProcessor.cuh"
 #include "ConstructorProcessor.cuh"
@@ -9,11 +10,10 @@
 #include "GeneratorProcessor.cuh"
 #include "InjectorProcessor.cuh"
 #include "MemoryProcessor.cuh"
-#include "MutationProcessor.cuh"
-#include "ObjectProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "SimulationKernels.cuh"
+#include "MutationProcessor.cuh"
 #include "VoidProcessor.cuh"
 
 __global__ void cudaNextTimestep_prepare(SimulationData data)
@@ -31,13 +31,9 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     for (int i = CellType_Base; i < CellType_Count; ++i) {
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
+    *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
 
     data.entities.saveNumEntries();
-}
-
-__global__ void cudaApplySimulationParametersChanges(SimulationData data)
-{
-    *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
 }
 
 __global__ void cudaNextTimestep_physics_init(SimulationData data)

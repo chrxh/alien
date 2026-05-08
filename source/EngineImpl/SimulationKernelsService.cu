@@ -395,7 +395,6 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
     _previewGraphCache.clear();
 
     auto const gpuSettings = settings.cudaSettings;
-    KERNEL_CALL_1_1(cudaApplySimulationParametersChanges, data);
     KERNEL_CALL(cudaResetDensity, data);
 }
 
