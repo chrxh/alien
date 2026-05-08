@@ -17,8 +17,8 @@ public:
     __inline__ __device__ static void splitting(SimulationData& data);
     __inline__ __device__ static void transformation(SimulationData& data);
 
-    __inline__ __device__ static void radiate(SimulationData& data, Object* cell, float energy);
-    __inline__ __device__ static void createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy);
+    __inline__ __device__ static void radiate(SimulationData& data, Object* cell, double energy);
+    __inline__ __device__ static void createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, double energy);
 
 private:
     static auto constexpr MaxFusionEnergy = 5.0f;
@@ -221,7 +221,7 @@ __inline__ __device__ void EnergyProcessor::transformation(SimulationData& data)
     }
 }
 
-__inline__ __device__ void EnergyProcessor::radiate(SimulationData& data, Object* cell, float energy)
+__inline__ __device__ void EnergyProcessor::radiate(SimulationData& data, Object* cell, double energy)
 {
     auto const cellEnergy = atomicAdd(&cell->typeData.cell.usableEnergy, 0);
 
@@ -242,7 +242,7 @@ __inline__ __device__ void EnergyProcessor::radiate(SimulationData& data, Object
     EnergyProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
 }
 
-__inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy)
+__inline__ __device__ void EnergyProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, double energy)
 {
     auto numActiveSources = data.preprocessedSimulationData.activeRadiationSources.getNumActiveSources();
     if (numActiveSources > 0) {

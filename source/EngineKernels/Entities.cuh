@@ -17,7 +17,7 @@ struct Energy
     float2 pos;
     float2 vel;
     uint8_t color;
-    float energy;
+    double energy;
     Object* lastAbsorbedObject;  //could be invalid
 
     // Editing data
@@ -66,7 +66,7 @@ struct VoidCell
 struct Depot
 {
     float storageLimit;
-    float storedUsableEnergy;
+    double storedUsableEnergy;
 };
 
 struct Constructor
@@ -76,7 +76,7 @@ struct Constructor
     uint16_t constructionActivationTime;
     float constructionAngle;
     ProvideEnergy provideEnergy;
-    float reservedEnergy;
+    double reservedEnergy;
 
     // Genome data
     uint16_t geneIndex;
@@ -459,7 +459,7 @@ struct Creature
 
 struct Solid
 {
-    float energy;
+    double energy;
 
     // Cluster data
     uint32_t clusterIndex;
@@ -473,13 +473,13 @@ struct Solid
 
 struct Fluid
 {
-    float energy;
+    double energy;
     float glow;
 };
 
 struct FreeCell
 {
-    float energy;
+    double energy;
     uint32_t age;
 
     // Additional rendering data
@@ -491,8 +491,8 @@ struct FreeCell
 struct Cell
 {
     // General
-    float usableEnergy;
-    float rawEnergy;
+    double usableEnergy;
+    double rawEnergy;
     float frontAngle;  // May be invalid
     uint32_t age;
     CellState cellState;
@@ -528,7 +528,7 @@ struct Cell
 
     __device__ __inline__ bool isSameCreature(Cell* otherCell) { return otherCell->creature->id == this->creature->id; }
 
-    __device__ __inline__ float getEnergy() const
+    __device__ __inline__ double getEnergy() const
     {
         auto result = usableEnergy + rawEnergy;
         if (constructorAvailable) {
@@ -610,7 +610,7 @@ struct Object
         angle2 -= increment;
     }
 
-    __device__ __inline__ float getEnergy() const
+    __device__ __inline__ double getEnergy() const
     {
         if (type == ObjectType_Cell) {
             return typeData.cell.getEnergy();

@@ -13,7 +13,7 @@
 struct EnergyTO
 {
     uint64_t id;
-    float energy;
+    double energy;
     float2 pos;
     float2 vel;
     uint8_t color;
@@ -46,7 +46,7 @@ struct VoidTO
 struct DepotTO
 {
     float storageLimit;
-    float storedUsableEnergy;
+    double storedUsableEnergy;
 };
 
 struct ConstructorTO
@@ -56,7 +56,7 @@ struct ConstructorTO
     uint16_t constructionActivationTime;
     float constructionAngle;
     ProvideEnergy provideEnergy;
-    float reservedEnergy;
+    double reservedEnergy;
 
     // Genome data
     uint16_t geneIndex;
@@ -398,26 +398,26 @@ struct SignalTO
 
 struct SolidTO
 {
-    float energy;
+    double energy;
 };
 
 struct FluidTO
 {
-    float energy;
+    double energy;
     float glow;
 };
 
 struct FreeCellTO
 {
-    float energy;
+    double energy;
     uint32_t age;
 };
 
 struct CellTO
 {
     // General
-    float usableEnergy;
-    float rawEnergy;
+    double usableEnergy;
+    double rawEnergy;
     float frontAngle;  // May be invalid
     uint32_t age;
     CellState cellState;

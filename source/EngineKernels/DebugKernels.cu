@@ -1,6 +1,6 @@
 ﻿#include "DebugKernels.cuh"
 
-__device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int location)
+__device__ void DEBUG_checkCells(SimulationData& data, double* sumEnergy, int location)
 {
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
@@ -87,7 +87,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
     }
 }
 
-__device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int location)
+__device__ void DEBUG_checkParticles(SimulationData& data, double* sumEnergy, int location)
 {
     auto partition = calcSystemThreadPartition(data.entities.energies.getNumEntries());
 
@@ -138,7 +138,7 @@ __global__ void DEBUG_checkAngles(SimulationData data)
     }
 }
 
-__global__ void DEBUG_checkCellsAndParticles(SimulationData data, float* sumEnergy, int location)
+__global__ void DEBUG_checkCellsAndParticles(SimulationData data, double* sumEnergy, int location)
 {
     DEBUG_checkCells(data, sumEnergy, location);
     DEBUG_checkParticles(data, sumEnergy, location);
@@ -146,12 +146,12 @@ __global__ void DEBUG_checkCellsAndParticles(SimulationData data, float* sumEner
 
 //__global__ void DEBUG_kernel(SimulationData data, int location)
 //{
-//    float* sumEnergy = new float;
+//    double* sumEnergy = new float;
 //    *sumEnergy = 0;
 //
 //    DEPRECATED_KERNEL_CALL_SYNC(DEBUG_checkCellsAndParticles, data, sumEnergy, location);
 //
-//    float const expectedEnergy = 187500;
+//    double const expectedEnergy = 187500;
 //    if (abs(*sumEnergy - expectedEnergy) > 1) {
 //        printf("location: %d, actual energy: %f, expected energy: %f\n", location, *sumEnergy, expectedEnergy);
 //        CUDA_THROW_NOT_IMPLEMENTED();

@@ -32,9 +32,9 @@ private:
         // Construction data
         Object* lastConstructionObject;
         ShapeGeneratorResult shapeResult;
-        float neededUsableEnergy;
-        float neededReservedEnergy;
-        float neededDepotEnergy;
+        double neededUsableEnergy;
+        double neededReservedEnergy;
+        double neededDepotEnergy;
     };
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
@@ -594,7 +594,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     auto energyNeededFromExternalSource = requiredEnergy - energyNeededFromHost;
     auto orig = atomicAdd(data.externalEnergy, -energyNeededFromExternalSource);
 
-    float finalEnergyNeededFromHost;
+    double finalEnergyNeededFromHost;
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
         if (hostCell.usableEnergy + hostReservedEnergy < normalCellEnergy + requiredEnergy) {

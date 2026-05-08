@@ -19,8 +19,8 @@ public:
     __inline__ __device__ void changeObjectFromTO(TOs const& to, ObjectTO const& objectTO, Object* object);
     __inline__ __device__ void changeEnergyFromTO(EnergyTO const& particleTO, Energy* particle);
 
-    __inline__ __device__ Energy* createEnergy(float energy, float2 const& pos, float2 const& vel, int color);
-    __inline__ __device__ Object* createFreeCell(float energy, float2 const& pos, float2 const& vel);
+    __inline__ __device__ Energy* createEnergy(double energy, float2 const& pos, float2 const& vel, int color);
+    __inline__ __device__ Object* createFreeCell(double energy, float2 const& pos, float2 const& vel);
 
     __inline__ __device__ Creature* cloneCreature(Creature* creature);
     __inline__ __device__ Genome* cloneGenome(Genome* genome);
@@ -35,7 +35,7 @@ public:
         int branchIndex,
         float2 pos,
         float2 vel,
-        float usableEnergy);
+        double usableEnergy);
 
     __inline__ __device__ Genome* createEmptyGenome();
     __inline__ __device__ Creature* createEmptyCreature();
@@ -615,7 +615,7 @@ __inline__ __device__ void EntityFactory::copyDataToHeap(uint64_t size, uint64_t
     }
 }
 
-__inline__ __device__ Energy* EntityFactory::createEnergy(float energy, float2 const& pos, float2 const& vel, int color)
+__inline__ __device__ Energy* EntityFactory::createEnergy(double energy, float2 const& pos, float2 const& vel, int color)
 {
     Energy** particlePointer = _data->entities.energies.getNewElement();
     Energy* particle = _data->entities.heap.getTypedSubArray<Energy>(1);
@@ -631,7 +631,7 @@ __inline__ __device__ Energy* EntityFactory::createEnergy(float energy, float2 c
     return particle;
 }
 
-__inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2 const& pos, float2 const& vel)
+__inline__ __device__ Object* EntityFactory::createFreeCell(double energy, float2 const& pos, float2 const& vel)
 {
     auto object = _data->entities.heap.getTypedSubArray<Object>(1);
     auto objectPointers = _data->entities.objects.getNewElement();
@@ -703,7 +703,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     int branchIndex,
     float2 pos,
     float2 vel,
-    float usableEnergy)
+    double usableEnergy)
 {
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];

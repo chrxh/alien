@@ -26,7 +26,7 @@ struct VoidGenome
 struct DepotGenome
 {
     float storageLimit;
-    float initialStoredUsableEnergy;
+    double initialStoredUsableEnergy;
 };
 
 struct TelemetryGenome
@@ -80,7 +80,7 @@ struct ConstructorGenome
     uint16_t constructionActivationTime;
     float constructionAngle;
     ProvideEnergy provideEnergy;
-    float reservedEnergy;
+    double reservedEnergy;
 };
 
 struct SquareSignalGenome
