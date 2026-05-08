@@ -17,8 +17,12 @@ private:
 
     __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static bool
-    isContainedInSensorMatches(uint64_t const* sensorTargetCreatureIds, uint16_t const* sensorRestrictToColors, int numSensorTargets, uint64_t creatureId, int color);
+    __inline__ __device__ static bool isContainedInSensorMatches(
+        uint64_t const* sensorTargetCreatureIds,
+        uint16_t const* sensorRestrictToColors,
+        int numSensorTargets,
+        uint64_t creatureId,
+        int color);
 
     static constexpr int MaxSensorTargets = 8;
 };
@@ -240,7 +244,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         // Output (signal is already present since attacker can only be manually triggered)
-            cell->signal.channels[Channels::AttackerSuccess] = toFloat(min(1.0, max(0.0, sumEnergyToTransfer / 10)));
+        cell->signal.channels[Channels::AttackerSuccess] = toFloat(min(1.0, max(0.0, sumEnergyToTransfer / 10)));
     }
 }
 
@@ -264,8 +268,12 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
     return result;
 }
 
-__inline__ __device__ bool
-AttackerProcessor::isContainedInSensorMatches(uint64_t const* sensorTargetCreatureIds, uint16_t const* sensorRestrictToColors, int numSensorTargets, uint64_t creatureId, int color)
+__inline__ __device__ bool AttackerProcessor::isContainedInSensorMatches(
+    uint64_t const* sensorTargetCreatureIds,
+    uint16_t const* sensorRestrictToColors,
+    int numSensorTargets,
+    uint64_t creatureId,
+    int color)
 {
     // The sensor stores only the lower 16 bits of the creatureId (creatureIdPart)
     auto creatureIdPart = creatureId & 0xffff;
