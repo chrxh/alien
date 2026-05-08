@@ -653,10 +653,10 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
         }
         if (data.primaryNumberGen.random() < cudaSimulationParameters.radiationProbability) {
 
-            auto radiation1 = 0.0f;
-            auto radiation2 = 0.0f;
-            auto usableEnergy = 0.0f;
-            auto rawEnergy = 0.0f;
+            auto radiation1 = 0.0;
+            auto radiation2 = 0.0;
+            auto usableEnergy = 0.0;
+            auto rawEnergy = 0.0;
             auto age = 0u;
 
             // Fill radiation values based on object type
@@ -682,8 +682,8 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
             radiation1 *= usableEnergy;
             radiation2 *= rawEnergy;
 
-            radiation1 = max(min(radiation1 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, usableEnergy - 1), 0.0f);
-            radiation2 = max(min(radiation2 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, rawEnergy - 1), 0.0f);
+            radiation1 = max(min(radiation1 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, usableEnergy - 1), 0.0);
+            radiation2 = max(min(radiation2 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, rawEnergy - 1), 0.0);
 
             // Radiate (same code for both cases)
             if (radiation1 > 0 || radiation2 > 0) {

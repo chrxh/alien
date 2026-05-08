@@ -102,7 +102,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             });
         }
 
-        auto sumEnergyToTransfer = 0.0f;
+        auto sumEnergyToTransfer = 0.0;
         data.objectMap.executeForEach(
             object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
                 if (otherObject->type == ObjectType_Solid || otherObject->type == ObjectType_Fluid) {
@@ -240,7 +240,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         // Output (signal is already present since attacker can only be manually triggered)
-        cell->signal.channels[Channels::AttackerSuccess] = min(1.0f, max(0.0f, sumEnergyToTransfer / 10));
+            cell->signal.channels[Channels::AttackerSuccess] = toFloat(min(1.0, max(0.0, sumEnergyToTransfer / 10)));
     }
 }
 

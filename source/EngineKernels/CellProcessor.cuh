@@ -298,7 +298,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
             auto connectedObjectNeedsEnergy = needsEnergy(connectedObject);
             auto connectedObjectLowEnergy = lowEnergy(object);
 
-            auto flow = 0.0f;
+            auto flow = 0.0;
             if (connectedObjectLowEnergy) {
                 if (object->typeData.cell.usableEnergy > connectedObject->typeData.cell.usableEnergy) {
                     flow = (object->typeData.cell.usableEnergy - connectedObject->typeData.cell.usableEnergy) / 2;
@@ -317,7 +317,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
             }
 
             if (flow > 0) {
-                flow = min(2.0f, flow);
+                flow = min(2.0, flow);
                 auto orig = atomicAdd(&object->typeData.cell.usableEnergy, -flow);
                 if (orig < cellMinEnergy) {
                     atomicAdd(&object->typeData.cell.usableEnergy, flow);
@@ -332,8 +332,8 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
             if (object->typeData.cell.cellState == CellState_Ready && connectedObject->typeData.cell.cellState == CellState_Ready
                 && connectedObject->typeData.cell.rawEnergy < SimulationParameters::maxRawEnergyThresholdForConduction) {
 
-                auto flow = 0.0f;
-                auto maxFlow = 0.0f;
+                auto flow = 0.0;
+                auto maxFlow = 0.0;
                 if (connectedObject->typeData.cell.cellType == CellType_Digestor) {
                     maxFlow += connectedObject->typeData.cell.cellTypeData.digestor.rawEnergyConductivity
                         * cudaSimulationParameters.maxRawEnergyConductivity.value[connectedObject->color] * TIMESTEPS_PER_CELL_FUNCTION;
@@ -350,7 +350,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
                         auto targetEnergy = (object->typeData.cell.rawEnergy + connectedObject->typeData.cell.rawEnergy) * cellConversionRate
                             / (cellConversionRate + connectedObjectConversionRate);
-                        flow = max(object->typeData.cell.rawEnergy - targetEnergy, 0.0f);
+                        flow = max(object->typeData.cell.rawEnergy - targetEnergy, 0.0);
                     } else {
                         flow = object->typeData.cell.rawEnergy;
                     }

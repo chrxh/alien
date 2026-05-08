@@ -545,7 +545,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
             if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value) {
                 return hostObject->typeData.cell.constructor.currentOffspring == 0
                     ? requiredEnergy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostObject->color]
-                    : 0.0f;
+                    : 0.0;
             } else {
                 return requiredEnergy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostObject->color];
             }
@@ -555,7 +555,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         if (origExternalEnergy == Infinity<float>::value) {
             hostObject->typeData.cell.usableEnergy += externalEnergyPortion;
         } else {
-            externalEnergyPortion = max(0.0f, min(origExternalEnergy, externalEnergyPortion));
+            externalEnergyPortion = max(0.0, min(origExternalEnergy, externalEnergyPortion));
             auto origExternalEnergy_tickLater = atomicAdd(data.externalEnergy, -externalEnergyPortion);
             if (origExternalEnergy_tickLater >= externalEnergyPortion) {
                 hostObject->typeData.cell.usableEnergy += externalEnergyPortion;
@@ -565,7 +565,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }
 
-    auto externalEnergyConditionalInflowFactor = [&] {
+    auto externalEnergyConditionalInflowFactor = [&]() -> float {
         if (!cudaSimulationParameters.externalEnergyControlToggle.value) {
             return 0.0f;
         }
@@ -580,7 +580,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
     // First, take reserved energy into account
     auto& hostCell = hostObject->typeData.cell;
-    auto hostReservedEnergy = 0.0f;
+    auto hostReservedEnergy = 0.0;
     if (hostCell.constructorAvailable) {
         hostReservedEnergy = hostCell.constructor.reservedEnergy;
     }
