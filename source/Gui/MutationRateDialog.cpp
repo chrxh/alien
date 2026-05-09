@@ -14,16 +14,11 @@ namespace
 
 MutationRateDialog::MutationRateDialog()
     : AlienDialog("Set mutation rates")
-{
-}
+{}
 
-void MutationRateDialog::initIntern()
-{
-}
+void MutationRateDialog::initIntern() {}
 
-void MutationRateDialog::shutdownIntern()
-{
-}
+void MutationRateDialog::shutdownIntern() {}
 
 void MutationRateDialog::processIntern()
 {
@@ -33,14 +28,7 @@ void MutationRateDialog::processIntern()
 
         AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 1"));
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters()
-                .name("Probability")
-                .id("CMR1")
-                .min(0.0f)
-                .max(1.0f)
-                .logarithmic(true)
-                .format("%.5f")
-                .textWidth(rightColumnWidth),
+            AlienGui::SliderFloatParameters().name("Probability").id("CMR1").min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
             &_connectionMutationRate1._probability);
         AlienGui::SliderFloat(
             AlienGui::SliderFloatParameters().name("Sigma").id("CMR1").min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
@@ -48,14 +36,7 @@ void MutationRateDialog::processIntern()
 
         AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 2"));
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters()
-                .name("Probability")
-                .id("CMR2")
-                .min(0.0f)
-                .max(1.0f)
-                .logarithmic(true)
-                .format("%.5f")
-                .textWidth(rightColumnWidth),
+            AlienGui::SliderFloatParameters().name("Probability").id("CMR2").min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
             &_connectionMutationRate2._probability);
         AlienGui::SliderFloat(
             AlienGui::SliderFloatParameters().name("Sigma").id("CMR2").min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
@@ -64,24 +45,10 @@ void MutationRateDialog::processIntern()
 
         AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 1"));
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters()
-                .name("Probability")
-                .id("NMR1")
-                .min(0.0f)
-                .max(1.0f)
-                .logarithmic(true)
-                .format("%.5f")
-                .textWidth(rightColumnWidth),
+            AlienGui::SliderFloatParameters().name("Probability").id("NMR1").min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
             &_neuronMutation1._probability);
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters()
-                .name("Weight sigma")
-                .id("NMR1")
-                .min(0.0f)
-                .max(2.0f)
-                .logarithmic(true)
-                .format("%.2f")
-                .textWidth(rightColumnWidth),
+            AlienGui::SliderFloatParameters().name("Weight sigma").id("NMR1").min(0.0f).max(2.0f).logarithmic(true).format("%.2f").textWidth(rightColumnWidth),
             &_neuronMutation1._weightSigma);
         AlienGui::SliderFloat(
             AlienGui::SliderFloatParameters().name("Bias sigma").id("NMR1").min(0.0f).max(2.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
@@ -100,24 +67,10 @@ void MutationRateDialog::processIntern()
 
         AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 2"));
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters()
-                .name("Probability")
-                .id("NMR2")
-                .min(0.0f)
-                .max(1.0f)
-                .logarithmic(true)
-                .format("%.5f")
-                .textWidth(rightColumnWidth),
+            AlienGui::SliderFloatParameters().name("Probability").id("NMR2").min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
             &_neuronMutation2._probability);
         AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters()
-                .name("Weight sigma")
-                .id("NMR2")
-                .min(0.0f)
-                .max(2.0f)
-                .logarithmic(true)
-                .format("%.2f")
-                .textWidth(rightColumnWidth),
+            AlienGui::SliderFloatParameters().name("Weight sigma").id("NMR2").min(0.0f).max(2.0f).logarithmic(true).format("%.2f").textWidth(rightColumnWidth),
             &_neuronMutation2._weightSigma);
         AlienGui::SliderFloat(
             AlienGui::SliderFloatParameters().name("Bias sigma").id("NMR2").min(0.0f).max(2.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
