@@ -456,7 +456,7 @@ struct GenomeDesc
     MEMBER(GenomeDesc, std::optional<int>, prevLineageId, std::nullopt);
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
 
-    MEMBER(GenomeDesc, MutationsDesc, mutation, MutationsDesc());
+    MEMBER(GenomeDesc, MutationsDesc, mutations, MutationsDesc());
 };
 
 struct SubGenomeDesc
