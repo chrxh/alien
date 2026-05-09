@@ -38,7 +38,7 @@ ParametersSpec const& SimulationParameters::getSpec()
         std::string const coloringTooltip =
             "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
             " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
-            " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
+            " Customization colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
             " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or "
             "duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
             " Mutant and cell function: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
@@ -87,7 +87,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                        .alternatives({{"Energy", {}}})
                                        .alternatives({
                                            {"Energy", {}},
-                                           {"Standard cell color", {}},
+                                           {"Customization color", {}},
                                            {"Lineage", {}},
                                        }))
                         .description(coloringTooltip),
