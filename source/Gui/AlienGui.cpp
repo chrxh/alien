@@ -2005,6 +2005,14 @@ void AlienGui::DisabledField()
 
 namespace
 {
+    std::string formatInteger(int value)
+    {
+        if (value < 0) {
+            return "-" + StringHelper::format(static_cast<uint64_t>(-static_cast<int64_t>(value)));
+        }
+        return StringHelper::format(static_cast<uint64_t>(value));
+    }
+
     template <typename T>
     std::string applyFormatToValue(T const& value, std::string const& format, bool allowInfinity = false, bool tryMaintainFormat = false)
     {
@@ -2045,9 +2053,12 @@ namespace
             return StringHelper::format(value, decimalPlaces);
         } else if constexpr (std::is_same_v<T, int>) {
             if (tryMaintainFormat) {
+                if (std::abs(value) >= 1000) {
+                    return formatInteger(value);
+                }
                 return format;
             }
-            return StringHelper::format(value, 0);
+            return formatInteger(value);
         } else {
             char result[16];
             snprintf(result, sizeof(result), format.c_str(), value);
