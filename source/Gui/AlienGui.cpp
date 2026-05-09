@@ -2044,10 +2044,7 @@ namespace
             }
             return StringHelper::format(value, decimalPlaces);
         } else if constexpr (std::is_same_v<T, int>) {
-            if (tryMaintainFormat) {
-                return format;
-            }
-            return StringHelper::format(value, 0);
+            return StringHelper::format(value);
         } else {
             char result[16];
             snprintf(result, sizeof(result), format.c_str(), value);

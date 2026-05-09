@@ -416,12 +416,17 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                     ParameterSpec()
                         .name("Minimum energy")
-                        .reference(FloatSpec().member(&SimulationParameters::minCellEnergy).min(10.0f).max(200.0f))
+                        .reference(FloatSpec().member(&SimulationParameters::minCellEnergy).min(10.0f).max(200.0f).format("%.1f"))
                         .description("Minimum energy a cell needs to exist."),
                     ParameterSpec()
                         .name("Normal energy")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::normalCellEnergy).min(10.0f).max(200.0f).greaterThan(&SimulationParameters::minCellEnergy))
+                            FloatSpec()
+                                .member(&SimulationParameters::normalCellEnergy)
+                                .min(10.0f)
+                                .max(200.0f)
+                                .format("%.1f")
+                                .greaterThan(&SimulationParameters::minCellEnergy))
                         .description(
                             "The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
                             "\n\n" ICON_FA_CHEVRON_RIGHT
