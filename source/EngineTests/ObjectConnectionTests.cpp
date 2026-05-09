@@ -23,10 +23,8 @@ TEST_F(ObjectConnectionTests, decay)
     _parameters.cellDeathProbability.baseValue[0] = 0.5f;
 
     _simulationFacade->setSimulationParameters(_parameters);
-    auto origData = DescEditService::get().createRect(DescEditService::CreateRectParameters()
-                                                                 .width(1)
-                                                                 .height(1)
-                                                                 .objectType(FreeCellDesc().energy(_parameters.minCellEnergy.baseValue[0] / 2)));
+    auto origData = DescEditService::get().createRect(
+        DescEditService::CreateRectParameters().width(1).height(1).objectType(FreeCellDesc().energy(_parameters.minCellEnergy.baseValue[0] / 2)));
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);

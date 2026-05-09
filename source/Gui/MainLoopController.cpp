@@ -40,6 +40,7 @@
 #include "LoginDialog.h"
 #include "MassOperationsDialog.h"
 #include "MultiplierWindow.h"
+#include "MutationRateDialog.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
 #include "OpenGLHelper.h"

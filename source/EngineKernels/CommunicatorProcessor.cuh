@@ -2,8 +2,8 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 
-#include "SimulationStatistics.cuh"
 #include "ObjectConnectionProcessor.cuh"
+#include "SimulationStatistics.cuh"
 
 class CommunicatorProcessor
 {
@@ -78,7 +78,8 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         if (otherObject->type != ObjectType_Cell) {
             return false;
         }
-        if (otherObject->typeData.cell.cellType != CellType_Communicator || otherObject->typeData.cell.cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
+        if (otherObject->typeData.cell.cellType != CellType_Communicator
+            || otherObject->typeData.cell.cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
             return false;
         }
 

@@ -71,7 +71,12 @@ void DataAccessKernelsService::getInspectedData(CudaSettings const& gpuSettings,
     KERNEL_CALL(cudaGetInspectedEnergyData, entityIds, data, to);
 }
 
-void DataAccessKernelsService::getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TOs const& to)
+void DataAccessKernelsService::getOverlayData(
+    CudaSettings const& gpuSettings,
+    SimulationData const& data,
+    int2 rectUpperLeft,
+    int2 rectLowerRight,
+    TOs const& to)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, to);
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, to);

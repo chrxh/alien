@@ -29,7 +29,8 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
                 if (reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome->genes) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome->genes) + sizeof(Gene) * object->typeData.cell.creature->genome->numGenes
+                    || reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome->genes)
+                            + sizeof(Gene) * object->typeData.cell.creature->genome->numGenes
                         >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                     printf("wrong genes pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();

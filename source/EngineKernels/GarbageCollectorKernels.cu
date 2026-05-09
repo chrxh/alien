@@ -87,8 +87,7 @@ __global__ void cudaCleanupDependentCellData(Array<Object*> cells, Heap newHeap)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = cells.at(index);
         if (object->type == ObjectType_Cell) {
-            copyAndAssignNewHeapData(
-                reinterpret_cast<uint8_t*&>(object->typeData.cell.neuralNetwork), sizeof(*object->typeData.cell.neuralNetwork), newHeap);
+            copyAndAssignNewHeapData(reinterpret_cast<uint8_t*&>(object->typeData.cell.neuralNetwork), sizeof(*object->typeData.cell.neuralNetwork), newHeap);
             if (object->typeData.cell.cellType == CellType_Memory) {
                 copyAndAssignNewHeapData(
                     reinterpret_cast<uint8_t*&>(object->typeData.cell.cellTypeData.memory.signalEntries),

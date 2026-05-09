@@ -60,7 +60,8 @@ __inline__ __device__ void MemoryProcessor::processIntegrator(SimulationData& da
         auto const& newSignalWeight = memory.modeData.signalIntegrator.newSignalWeight;
         auto const& channelBitMask = memory.channelBitMask;
         for (int i = 0; i < NEURONS_PER_CELL; ++i) {
-            memory.signalEntries->channels[i] = (1.0f - newSignalWeight) * memory.signalEntries->channels[i] + newSignalWeight * object->typeData.cell.signal.channels[i];
+            memory.signalEntries->channels[i] =
+                (1.0f - newSignalWeight) * memory.signalEntries->channels[i] + newSignalWeight * object->typeData.cell.signal.channels[i];
             if (channelBitMask & (1 << i)) {
                 object->typeData.cell.signal.channels[i] = memory.signalEntries->channels[i];
             }

@@ -7,8 +7,8 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "GarbageCollectorKernels.cuh"
 #include "EntityFactory.cuh"
+#include "GarbageCollectorKernels.cuh"
 #include "SelectionResult.cuh"
 
 __global__ void cudaRemoveSelection(SimulationData data, bool onlyClusterSelection);

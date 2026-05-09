@@ -165,11 +165,12 @@ namespace cereal
 /************************************************************************/
 namespace
 {
+    auto constexpr Id_Mutations_LineageMutationProbability = 0;
+
     auto constexpr Id_Genome_Id = 0;
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
-    auto constexpr Id_Genome_LineageMutationProbability = 4;
     auto constexpr Id_Genome_PrevLineageId = 5;
 
     auto constexpr Id_NeuronMutation_Probability = 0;
@@ -800,6 +801,21 @@ namespace cereal
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, MutationRatesDesc& data)
+    {
+        MutationRatesDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Mutations_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._neuronMutation1);
+        ar(data._neuronMutation2);
+        ar(data._connectionMutation1);
+        ar(data._connectionMutation2);
+    }
+    SPLIT_SERIALIZATION(MutationRatesDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GenomeDesc& data)
     {
         GenomeDesc defaultObject;
@@ -809,14 +825,9 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
-        loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._genes);
-        ar(data._neuronMutation1);
-        ar(data._neuronMutation2);
-        ar(data._connectionMutationRate1);
-        ar(data._connectionMutationRate2);
+        ar(data._genes, data._mutationRates);
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }

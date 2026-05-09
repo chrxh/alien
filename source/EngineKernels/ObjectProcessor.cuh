@@ -328,7 +328,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
             object->pos += cellPosDelta;
             object->tempValue1.as_float2 +=
-                (F_pressure * cudaSimulationParameters.pressureStrength.value * density + F_viscosity * cudaSimulationParameters.viscosityStrength.value) * 2.0f;
+                (F_pressure * cudaSimulationParameters.pressureStrength.value * density + F_viscosity * cudaSimulationParameters.viscosityStrength.value)
+                * 2.0f;
             object->tempValue2.as_float2.x = density;
         }
         block.sync();

@@ -44,9 +44,9 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
     auto data = DescEditService::get().createHex(DescEditService::CreateHexParameters().layers(10).center({100.0f, 100.0}));
     for (int i = 0; i < 100; ++i) {
         data._energies.emplace_back(EnergyDesc()
-                                         .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
-                                         .vel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
-                                         .energy(numberGen.getRandomFloat(0.0f, 100.0f)));
+                                        .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
+                                        .vel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
+                                        .energy(numberGen.getRandomFloat(0.0f, 100.0f)));
     }
     _simulationFacade->setSimulationData(data);
 
@@ -71,8 +71,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
     // Create a genome with memory cell type nodes that have memory entries
     auto genome = GenomeDesc().genes({GeneDesc().separation(true).nodes({
         NodeDesc().cellType(MemoryGenomeDesc().signalEntries({SignalEntryGenomeDesc()})),
-        NodeDesc().cellType(
-            MemoryGenomeDesc().signalEntries({SignalEntryGenomeDesc(), SignalEntryGenomeDesc(), SignalEntryGenomeDesc()})),
+        NodeDesc().cellType(MemoryGenomeDesc().signalEntries({SignalEntryGenomeDesc(), SignalEntryGenomeDesc(), SignalEntryGenomeDesc()})),
     })});
 
     auto data = Desc().addCreature(

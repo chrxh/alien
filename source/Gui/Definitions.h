@@ -103,6 +103,8 @@ class GenomeEditorWindow;
 
 class PreviewSettingsDialog;
 
+class MutationRateDialog;
+
 class FileTransferController;
 
 class _LocationWidget;

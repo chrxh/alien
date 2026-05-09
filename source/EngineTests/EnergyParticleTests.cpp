@@ -161,10 +161,8 @@ TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
     auto cellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
     auto depotEnergy = 100.0f;
 
-    auto data = Desc().addCreature({ObjectDesc()
-                                               .pos({100.4f, 100.4f})
-                                               .color(0)
-                                               .type(CellDesc().usableEnergy(cellEnergy).cellType(DepotDesc().storedUsableEnergy(depotEnergy)))});
+    auto data = Desc().addCreature(
+        {ObjectDesc().pos({100.4f, 100.4f}).color(0).type(CellDesc().usableEnergy(cellEnergy).cellType(DepotDesc().storedUsableEnergy(depotEnergy)))});
 
     _simulationFacade->setSimulationData(data);
 
@@ -190,10 +188,7 @@ TEST_F(EnergyParticleTests, freeCellToParticle_belowMinEnergy)
 
     auto freeCellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
 
-    auto data = Desc().addObjects({ObjectDesc()
-                                               .pos({100.4f, 100.4f})
-                                               .color(0)
-                                               .type(FreeCellDesc().energy(freeCellEnergy))});
+    auto data = Desc().addObjects({ObjectDesc().pos({100.4f, 100.4f}).color(0).type(FreeCellDesc().energy(freeCellEnergy))});
 
     _simulationFacade->setSimulationData(data);
 

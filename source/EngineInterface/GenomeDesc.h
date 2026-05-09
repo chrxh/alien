@@ -431,6 +431,17 @@ struct ConnectionMutationDesc
     MEMBER(ConnectionMutationDesc, float, sigma, 0.0f);
 };
 
+struct MutationRatesDesc
+{
+    auto operator<=>(MutationRatesDesc const&) const = default;
+
+    MEMBER(MutationRatesDesc, float, lineageMutationProbability, 0.0f);
+    MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation1, NeuronMutationDesc());
+    MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation2, NeuronMutationDesc());
+    MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation1, ConnectionMutationDesc());
+    MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation2, ConnectionMutationDesc());
+};
+
 struct GenomeDesc
 {
     GenomeDesc();
@@ -445,13 +456,7 @@ struct GenomeDesc
     MEMBER(GenomeDesc, std::optional<int>, prevLineageId, std::nullopt);
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
 
-    MEMBER(GenomeDesc, float, lineageMutationProbability, 0.0f);
-
-    MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutation1, NeuronMutationDesc());
-    MEMBER(GenomeDesc, NeuronMutationDesc, neuronMutation2, NeuronMutationDesc());
-
-    MEMBER(GenomeDesc, ConnectionMutationDesc, connectionMutationRate1, ConnectionMutationDesc());
-    MEMBER(GenomeDesc, ConnectionMutationDesc, connectionMutationRate2, ConnectionMutationDesc());
+    MEMBER(GenomeDesc, MutationRatesDesc, mutationRates, MutationRatesDesc());
 };
 
 struct SubGenomeDesc

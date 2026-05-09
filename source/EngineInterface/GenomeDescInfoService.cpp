@@ -148,10 +148,8 @@ auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome
     return result;
 }
 
-auto GenomeDescInfoService::getGeneIndicesForSubGenomes(
-    GenomeDesc const& genome,
-    std::set<int> const& nonInspectedGeneIndices,
-    int startGeneIndex) const -> std::vector<GeneIndicesForSubGenome>
+auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome, std::set<int> const& nonInspectedGeneIndices, int startGeneIndex) const
+    -> std::vector<GeneIndicesForSubGenome>
 {
     CHECK(!genome._genes.empty());
     CHECK(startGeneIndex >= 0 && startGeneIndex < genome._genes.size());

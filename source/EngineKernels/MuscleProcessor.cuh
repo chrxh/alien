@@ -10,7 +10,9 @@ class MuscleProcessor
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
-    __inline__ __device__ static float getInitialAngleFromPrevious(Object* object, int connectionIndex);  // Return the angleFromPrevious without muscle distortions
+    __inline__ __device__ static float getInitialAngleFromPrevious(
+        Object* object,
+        int connectionIndex);  // Return the angleFromPrevious without muscle distortions
     __inline__ __device__ static void restoreInitialAngleFromPrevious(Object* muscleCell, Object* affectedCell, int connectionIndex);
 
 private:
@@ -65,7 +67,8 @@ __device__ __inline__ float MuscleProcessor::getInitialAngleFromPrevious(Object*
     for (int i = 0, j = object->numConnections; i < j; ++i) {
         auto connectedObject = object->connections[i].object;
         if (connectedObject->typeData.cell.cellType == CellType_Muscle
-            && (connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending || connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
+            && (connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending
+                || connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
 
             auto const& initialAngle = connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending
                 ? connectedObject->typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle
@@ -259,7 +262,8 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         for (int k = 0, l = pivotCell->numConnections; k < l; ++k) {
             auto connectedObject = pivotCell->connections[k].object;
             if (connectedObject->typeData.cell.cellType == CellType_Muscle
-                && (connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending || connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
+                && (connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending
+                    || connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
                 auto const& initialAngle = connectedObject->typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending
                     ? connectedObject->typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle
                     : connectedObject->typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle;
@@ -440,7 +444,8 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
     auto direction = calcAverageDirection(data, object);
 
-    auto front = Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
+    auto front =
+        Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
     if (Math::dot(front, direction) > 0) {
         direction *= -1.0f;
     }
@@ -508,7 +513,8 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     }
     auto direction = calcAverageDirection(data, object);
 
-    auto front = Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
+    auto front =
+        Math::rotateClockwise(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos), object->typeData.cell.frontAngle);
     if (Math::dot(front, direction) > 0) {
         direction *= -1.0f;
     }
@@ -530,7 +536,8 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
         return;
     }
     auto direction = ObjectConnectionProcessor::calcReferenceDirection(data, object);
-    auto angle = Math::getNormalizedAngle(object->typeData.cell.frontAngle + max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
+    auto angle = Math::getNormalizedAngle(
+        object->typeData.cell.frontAngle + max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
     direction = Math::rotateClockwise(direction, angle);
 
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
@@ -572,7 +579,7 @@ __inline__ __device__ void MuscleProcessor::getChain(Object** chain, int& chainL
     chain[0] = startCell;
 
     //if (startCell->numConnections == 1) {
-        chain[1] = startCell->connections[0].object;
+    chain[1] = startCell->connections[0].object;
     //} else if (startCell->numConnections == 2) {
     //    chain[1] = startCell->connections[1].object;
     //} else {

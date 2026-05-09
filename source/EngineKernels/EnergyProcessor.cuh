@@ -114,7 +114,8 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                     if (particle->lastAbsorbedObject == object) {
                         continue;
                     }
-                    auto radiationAbsorption = ParameterCalculator::calcParameter(cudaSimulationParameters.radiationAbsorption, data, object->pos, object->color);
+                    auto radiationAbsorption =
+                        ParameterCalculator::calcParameter(cudaSimulationParameters.radiationAbsorption, data, object->pos, object->color);
 
                     if (radiationAbsorption < NEAR_ZERO) {
                         continue;
@@ -126,14 +127,15 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
 
                         auto energyToTransfer = particle->energy * radiationAbsorption;
                         if (cudaSimulationParameters.advancedAbsorptionControlToggle.value) {
-                            energyToTransfer *=
-                                max(0.0f, 1.0f - Math::length(object->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty.value[object->color]);
+                            energyToTransfer *= max(
+                                0.0f, 1.0f - Math::length(object->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty.value[object->color]);
 
                             auto radiationAbsorptionLowVelocityPenalty = ParameterCalculator::calcParameter(
                                 cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty, data, object->pos, object->color);
                             energyToTransfer *= 1.0f - radiationAbsorptionLowVelocityPenalty / powf(1.0f + Math::length(object->vel), 10.0f);
                             energyToTransfer *= powf(
-                                toFloat(object->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[object->color]);
+                                toFloat(object->numConnections + 1) / 7.0f,
+                                cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[object->color]);
 
                             //auto radiationAbsorptionLowNumCellsPenalty = ParameterCalculator::calcParameter(
                             //    cudaSimulationParameters.radiationAbsorptionLowNumCellsPenalty, data, object->pos, object->color);

@@ -5,9 +5,9 @@
 #include <windows.h>
 #endif
 
-#include <cuda_gl_interop.h>
 #include <algorithm>
 #include <vector>
+#include <cuda_gl_interop.h>
 
 namespace
 {
@@ -194,10 +194,7 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
     if (numObjects.fluidParticles > 0) {
         std::vector<FluidParticleVertexData> hostFluidParticleBuffer(numObjects.fluidParticles);
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-            hostFluidParticleBuffer.data(),
-            deviceFluidParticleBuffer,
-            numObjects.fluidParticles * sizeof(FluidParticleVertexData),
-            cudaMemcpyDeviceToHost));
+            hostFluidParticleBuffer.data(), deviceFluidParticleBuffer, numObjects.fluidParticles * sizeof(FluidParticleVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setFluidParticleData(hostFluidParticleBuffer.data(), numObjects.fluidParticles);
     }
 

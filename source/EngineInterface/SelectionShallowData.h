@@ -19,7 +19,8 @@ struct SelectionShallowData
 
     bool compareSizes(SelectionShallowData const& other) const
     {
-        return numObjects == other.numObjects && numCreatures == other.numCreatures && numClusterCells == other.numClusterCells && numEnergyParticles == other.numEnergyParticles;
+        return numObjects == other.numObjects && numCreatures == other.numCreatures && numClusterCells == other.numClusterCells
+            && numEnergyParticles == other.numEnergyParticles;
     }
 
     bool operator==(SelectionShallowData const& other) const = default;

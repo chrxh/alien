@@ -53,8 +53,7 @@ struct PartitionData
 
 __device__ __inline__ PartitionData calcSystemThreadPartition(uint64_t numEntities)
 {
-    return PartitionData{
-        .startIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x), .endIndex = toInt(numEntities - 1), .step = toInt(blockDim.x * gridDim.x)};
+    return PartitionData{.startIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x), .endIndex = toInt(numEntities - 1), .step = toInt(blockDim.x * gridDim.x)};
 }
 
 __device__ __inline__ PartitionData calcBlockPartition(uint64_t numEntities)

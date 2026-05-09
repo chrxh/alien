@@ -33,29 +33,30 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
         Object* injectedCell = nullptr;
         int numDefenders = 0;
-        data.objectMap.executeForEach(object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached, [&](auto const& otherObject) {
-            if (injectedCell != nullptr) {
-                return;
-            }
-            if (otherObject->type != ObjectType_Cell) {
-                return;
-            }
-            if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
-                return;
-            }
-            if (otherObject->fixed) {
-                return;
-            }
-            if (!otherObject->typeData.cell.constructorAvailable) {
-                return;
-            }
-            // Only inject to other cells which are in a visible cone with respect to the injector cell
-            if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
-                return;
-            }
-            injectedCell = otherObject;
-            numDefenders = countDefenderCells(statistics, otherObject);
-        });
+        data.objectMap.executeForEach(
+            object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached, [&](auto const& otherObject) {
+                if (injectedCell != nullptr) {
+                    return;
+                }
+                if (otherObject->type != ObjectType_Cell) {
+                    return;
+                }
+                if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
+                    return;
+                }
+                if (otherObject->fixed) {
+                    return;
+                }
+                if (!otherObject->typeData.cell.constructorAvailable) {
+                    return;
+                }
+                // Only inject to other cells which are in a visible cone with respect to the injector cell
+                if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
+                    return;
+                }
+                injectedCell = otherObject;
+                numDefenders = countDefenderCells(statistics, otherObject);
+            });
 
         if (injectedCell) {
             injectorEnergyCost *= (1.0f + toFloat(numDefenders) * 0.5f);
@@ -87,7 +88,8 @@ __inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatis
     int result = 0;
     for (int i = 0; i < object->numConnections; ++i) {
         auto connectedObject = object->connections[i].object;
-        if (connectedObject->typeData.cell.cellType == CellType_Defender && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
+        if (connectedObject->typeData.cell.cellType == CellType_Defender
+            && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
             statistics.incNumDefenderActivities(connectedObject->color);
             ++result;
         }

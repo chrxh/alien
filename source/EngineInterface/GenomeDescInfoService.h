@@ -24,8 +24,8 @@ public:
     std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDesc const& genome) const;
 
 private:
-    std::vector<GeneIndicesForSubGenome>
-    getGeneIndicesForSubGenomes(GenomeDesc const& genome, std::set<int> const& nonInspectedGeneIndices, int startGeneIndex) const;
+    std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDesc const& genome, std::set<int> const& nonInspectedGeneIndices, int startGeneIndex)
+        const;
 
     struct ReferencedGenes
     {

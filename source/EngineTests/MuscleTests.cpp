@@ -685,10 +685,8 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .type(CellDesc()
-                          .frontAngle(180.0f)
-                          .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(nn)),
+                .type(
+                    CellDesc().frontAngle(180.0f).cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(nn)),
             ObjectDesc().id(3).pos({12.0f, 10.0f}).type(CellDesc().frontAngle(180.0f)),
         },
         CreatureDesc().id(0),
@@ -760,10 +758,8 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .type(CellDesc()
-                          .frontAngle(180.0f)
-                          .cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation)))
-                          .neuralNetwork(nn)),
+                .type(
+                    CellDesc().frontAngle(180.0f).cellType(MuscleDesc().mode(AutoCrawlingDesc().maxDistanceDeviation(MaxDistanceDeviation))).neuralNetwork(nn)),
         },
         CreatureDesc().id(0),
         GenomeDesc().frontAngle(180.0f));

@@ -512,9 +512,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 {
     // Create test data
-    auto data = Desc()
-                    .addCreature({ObjectDesc()}, CreatureDesc().id(2))
-                    .addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(2));
+    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(2)).addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(2));
 
     // Perform action
     data.assignNewEntityIds();
@@ -543,9 +541,7 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 {
     // Create test data
-    auto data = Desc()
-                    .addCreature({ObjectDesc()}, CreatureDesc().id(2))
-                    .addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(1));
+    auto data = Desc().addCreature({ObjectDesc()}, CreatureDesc().id(2)).addCreature({ObjectDesc()}, CreatureDesc().id(3).ancestorId(1));
 
     // Perform action
     data.assignNewEntityIds();
