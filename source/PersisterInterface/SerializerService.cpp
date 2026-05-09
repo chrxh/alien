@@ -121,10 +121,6 @@ namespace cereal
                 if (std::get<bool>(variantData)) {
                     ar(value);
                 }
-            } else {
-                // For backward compatibility with old formats that don't have the flag,
-                // still try to load the value directly
-                ar(value);
             }
         } else {
             loadSaveMap.emplace(key, true);
