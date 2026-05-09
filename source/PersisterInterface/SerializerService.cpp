@@ -2107,8 +2107,8 @@ namespace
                 dataPoint.values[i] = std::stod(serializedData.at(index));
             }
         }
-        if (startIndex + 7 < serializedData.size()) {
-            dataPoint.summedValues = std::stod(serializedData.at(startIndex + 7));
+        if (startIndex + MAX_COLORS < serializedData.size()) {
+            dataPoint.summedValues = std::stod(serializedData.at(startIndex + MAX_COLORS));
         }
     }
 
