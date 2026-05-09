@@ -801,19 +801,19 @@ namespace cereal
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, MutationsDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, MutationRatesDesc& data)
     {
-        MutationsDesc defaultObject;
+        MutationRatesDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Mutations_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._neuronMutation1);
         ar(data._neuronMutation2);
-        ar(data._connectionMutationRate1);
-        ar(data._connectionMutationRate2);
+        ar(data._connectionMutation1);
+        ar(data._connectionMutation2);
     }
-    SPLIT_SERIALIZATION(MutationsDesc)
+    SPLIT_SERIALIZATION(MutationRatesDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GenomeDesc& data)
@@ -827,7 +827,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._genes, data._mutations);
+        ar(data._genes, data._mutationRates);
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }

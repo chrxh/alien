@@ -18,19 +18,19 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
     if (genome._prevLineageId.has_value()) {
         genome._prevLineageId = std::max(genome._prevLineageId.value(), 0);
     }
-    genome._mutations._lineageMutationProbability = std::clamp(genome._mutations._lineageMutationProbability, 0.0f, 1.0f);
-    genome._mutations._neuronMutation1._probability = std::clamp(genome._mutations._neuronMutation1._probability, 0.0f, 1.0f);
-    genome._mutations._neuronMutation1._weightSigma = std::max(genome._mutations._neuronMutation1._weightSigma, 0.0f);
-    genome._mutations._neuronMutation1._biasSigma = std::max(genome._mutations._neuronMutation1._biasSigma, 0.0f);
-    genome._mutations._neuronMutation1._activationFunctionProbability = std::clamp(genome._mutations._neuronMutation1._activationFunctionProbability, 0.0f, 1.0f);
-    genome._mutations._neuronMutation2._probability = std::clamp(genome._mutations._neuronMutation2._probability, 0.0f, 1.0f);
-    genome._mutations._neuronMutation2._weightSigma = std::max(genome._mutations._neuronMutation2._weightSigma, 0.0f);
-    genome._mutations._neuronMutation2._biasSigma = std::max(genome._mutations._neuronMutation2._biasSigma, 0.0f);
-    genome._mutations._neuronMutation2._activationFunctionProbability = std::clamp(genome._mutations._neuronMutation2._activationFunctionProbability, 0.0f, 1.0f);
-    genome._mutations._connectionMutationRate1._probability = std::clamp(genome._mutations._connectionMutationRate1._probability, 0.0f, 1.0f);
-    genome._mutations._connectionMutationRate1._sigma = std::max(genome._mutations._connectionMutationRate1._sigma, 0.0f);
-    genome._mutations._connectionMutationRate2._probability = std::clamp(genome._mutations._connectionMutationRate2._probability, 0.0f, 1.0f);
-    genome._mutations._connectionMutationRate2._sigma = std::max(genome._mutations._connectionMutationRate2._sigma, 0.0f);
+    genome._mutationRates._lineageMutationProbability = std::clamp(genome._mutationRates._lineageMutationProbability, 0.0f, 1.0f);
+    genome._mutationRates._neuronMutation1._probability = std::clamp(genome._mutationRates._neuronMutation1._probability, 0.0f, 1.0f);
+    genome._mutationRates._neuronMutation1._weightSigma = std::max(genome._mutationRates._neuronMutation1._weightSigma, 0.0f);
+    genome._mutationRates._neuronMutation1._biasSigma = std::max(genome._mutationRates._neuronMutation1._biasSigma, 0.0f);
+    genome._mutationRates._neuronMutation1._activationFunctionProbability = std::clamp(genome._mutationRates._neuronMutation1._activationFunctionProbability, 0.0f, 1.0f);
+    genome._mutationRates._neuronMutation2._probability = std::clamp(genome._mutationRates._neuronMutation2._probability, 0.0f, 1.0f);
+    genome._mutationRates._neuronMutation2._weightSigma = std::max(genome._mutationRates._neuronMutation2._weightSigma, 0.0f);
+    genome._mutationRates._neuronMutation2._biasSigma = std::max(genome._mutationRates._neuronMutation2._biasSigma, 0.0f);
+    genome._mutationRates._neuronMutation2._activationFunctionProbability = std::clamp(genome._mutationRates._neuronMutation2._activationFunctionProbability, 0.0f, 1.0f);
+    genome._mutationRates._connectionMutation1._probability = std::clamp(genome._mutationRates._connectionMutation1._probability, 0.0f, 1.0f);
+    genome._mutationRates._connectionMutation1._sigma = std::max(genome._mutationRates._connectionMutation1._sigma, 0.0f);
+    genome._mutationRates._connectionMutation2._probability = std::clamp(genome._mutationRates._connectionMutation2._probability, 0.0f, 1.0f);
+    genome._mutationRates._connectionMutation2._sigma = std::max(genome._mutationRates._connectionMutation2._sigma, 0.0f);
 
     // Validate each gene
     for (auto& gene : genome._genes) {
