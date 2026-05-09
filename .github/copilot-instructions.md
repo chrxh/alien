@@ -75,7 +75,8 @@ cd build
 - **NetworkTests**: tests pass in <1 second
 - **PersisterTests**: tests pass in ~1.4 seconds
 - **EngineTests**: tests pass in >4 min
-- Always run `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests` to verify your changes don't break core functionality
+- Pure GUI-only changes in `source/Gui/` that do not affect engine, network, persistence, or CLI logic do **not** require running tests
+- For all other changes, run `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests` to verify your changes don't break core functionality
 - `./EngineTests` are most important and contain the entire simulation logic written in CUDA
 
 ### Application Validation
@@ -94,7 +95,7 @@ clang-format --style=file:source/_clang-format -i path/to/modified/files.cpp
 # 2. Build (NEVER CANCEL - ~ 1 minute)
 cmake --build build --config Release -j32
 
-# 3. Run core tests (required - these must pass)
+# 3. Run core tests (required unless the change is pure GUI-only in source/Gui)
 cd build && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests & ./EngineTests
 
 # 4. Test CLI functionality
