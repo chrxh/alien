@@ -800,6 +800,21 @@ namespace cereal
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, MutationDesc& data)
+    {
+        MutationDesc defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._neuronMutation1);
+        ar(data._neuronMutation2);
+        ar(data._connectionMutationRate1);
+        ar(data._connectionMutationRate2);
+    }
+    SPLIT_SERIALIZATION(MutationDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GenomeDesc& data)
     {
         GenomeDesc defaultObject;
@@ -809,14 +824,10 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
-        loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);
-        ar(data._neuronMutation1);
-        ar(data._neuronMutation2);
-        ar(data._connectionMutationRate1);
-        ar(data._connectionMutationRate2);
+        ar(data._mutation);
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }

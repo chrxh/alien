@@ -21,9 +21,5 @@ private:
 
     void onAdopt();
 
-    ConnectionMutationDesc _connectionMutationRate1;
-    ConnectionMutationDesc _connectionMutationRate2;
-    NeuronMutationDesc _neuronMutation1;
-    NeuronMutationDesc _neuronMutation2;
-    float _lineageMutationProbability = 0.0f;
+    MutationDesc _mutation;
 };
