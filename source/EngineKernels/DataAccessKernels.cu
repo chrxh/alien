@@ -34,19 +34,19 @@ namespace
             genomeTO.lineageId = genome->lineageId;
             genomeTO.prevLineageId = genome->prevLineageId;
             genomeTO.frontAngle = genome->frontAngle;
-            genomeTO.lineageMutationProbability = genome->mutation.lineageMutationProbability;
-            genomeTO.neuronMutation1 = {
+            genomeTO.mutation.lineageMutationProbability = genome->mutation.lineageMutationProbability;
+            genomeTO.mutation.neuronMutation1 = {
                 genome->mutation.neuronMutation1.probability,
                 genome->mutation.neuronMutation1.weightSigma,
                 genome->mutation.neuronMutation1.biasSigma,
                 genome->mutation.neuronMutation1.activationFunctionProbability};
-            genomeTO.neuronMutation2 = {
+            genomeTO.mutation.neuronMutation2 = {
                 genome->mutation.neuronMutation2.probability,
                 genome->mutation.neuronMutation2.weightSigma,
                 genome->mutation.neuronMutation2.biasSigma,
                 genome->mutation.neuronMutation2.activationFunctionProbability};
-            genomeTO.connectionMutationRate1 = {genome->mutation.connectionMutationRate1.probability, genome->mutation.connectionMutationRate1.sigma};
-            genomeTO.connectionMutationRate2 = {genome->mutation.connectionMutationRate2.probability, genome->mutation.connectionMutationRate2.sigma};
+            genomeTO.mutation.connectionMutationRate1 = {genome->mutation.connectionMutationRate1.probability, genome->mutation.connectionMutationRate1.sigma};
+            genomeTO.mutation.connectionMutationRate2 = {genome->mutation.connectionMutationRate2.probability, genome->mutation.connectionMutationRate2.sigma};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];

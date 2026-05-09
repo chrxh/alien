@@ -21,5 +21,5 @@ private:
 
     void onAdopt();
 
-    MutationDesc _mutation;
+    MutationsDesc _mutation;
 };

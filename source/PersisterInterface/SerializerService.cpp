@@ -800,9 +800,9 @@ namespace cereal
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, MutationDesc& data)
+    void loadSave(SerializationTask task, Archive& ar, MutationsDesc& data)
     {
-        MutationDesc defaultObject;
+        MutationsDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -812,7 +812,7 @@ namespace cereal
         ar(data._connectionMutationRate1);
         ar(data._connectionMutationRate2);
     }
-    SPLIT_SERIALIZATION(MutationDesc)
+    SPLIT_SERIALIZATION(MutationsDesc)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GenomeDesc& data)

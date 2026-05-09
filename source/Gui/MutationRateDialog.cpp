@@ -117,7 +117,7 @@ void MutationRateDialog::openIntern()
 {
     // Initialize with default values or current values when the dialog is opened
     // For now, the dialog is not connected, so we just initialize with defaults
-    _mutation = MutationDesc();
+    _mutation = MutationsDesc();
 }
 
 void MutationRateDialog::onAdopt()
