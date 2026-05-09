@@ -221,6 +221,32 @@ def test_edit_simulation_updates_name_and_description(app_client, helpers):
         assert sim.description == "renamed-desc"
 
 
+def test_edit_simulation_accepts_empty_description(app_client, helpers):
+    helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
+    sim_id = int(
+        helpers.upload_simulation(
+            app_client, "alice", "pw", sim_name="orig", description="orig-desc"
+        ).json()["simId"]
+    )
+    resp = app_client.post(
+        "/editsimulation",
+        data={
+            "userName": "alice",
+            "password": "pw",
+            "simId": str(sim_id),
+            "newName": "renamed",
+            "newDescription": "",
+        },
+    )
+    assert resp.json() == {"result": True}
+
+    main = app_client.app_module
+    with main.Session(main.engine) as session:
+        sim = session.get(main.Simulation, sim_id)
+        assert sim.name == "renamed"
+        assert sim.description == ""
+
+
 def test_edit_simulation_rejects_non_owner(app_client, helpers):
     helpers.create_active_user(app_client, "alice", "pw", "a@b.c")
     helpers.create_active_user(app_client, "bob", "pw2", "b@c.d")

@@ -1262,7 +1262,7 @@ def edit_simulation(
     password: str = Form(...),
     simId: str = Form(...),
     newName: str = Form(...),
-    newDescription: str = Form(...),
+    newDescription: str = Form(""),
 ):
     sim_id = _parse_int(simId)
     with Session(engine) as session:
