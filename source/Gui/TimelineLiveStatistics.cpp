@@ -14,15 +14,6 @@ std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointColl
     return _dataPointCollectionHistory;
 }
 
-void TimelineLiveStatistics::reset()
-{
-    _timeSinceSimStart = 0;
-    _dataPointCollectionHistory.clear();
-    _lastTimestep.reset();
-    _lastTimepoint.reset();
-    _lastData.reset();
-}
-
 void TimelineLiveStatistics::update(TimelineStatistics const& data, uint64_t timestep)
 {
     truncate();

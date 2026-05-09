@@ -19,9 +19,6 @@ class StatisticsWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(StatisticsWindow);
 
-public:
-    void resetLiveStatistics();
-
 private:
     StatisticsWindow();
 

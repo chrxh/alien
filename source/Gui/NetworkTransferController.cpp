@@ -6,16 +6,15 @@
 
 #include <PersisterInterface/TaskProcessor.h>
 
-#include <EngineInterface/SimulationFacade.h>
-#include <PersisterInterface/PersisterFacade.h>
 #include "BrowserWindow.h"
 #include "EditorController.h"
 #include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "OverlayController.h"
-#include "StatisticsWindow.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
+#include <EngineInterface/SimulationFacade.h>
+#include <PersisterInterface/PersisterFacade.h>
 
 void NetworkTransferController::init()
 {
@@ -53,7 +52,6 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                     _SimulationFacade::get()->setRealTime(deserializedSimulation.auxiliaryData.realTime);
                     _SimulationFacade::get()->setSimulationData(deserializedSimulation.mainData);
                     _SimulationFacade::get()->setStatisticsHistory(deserializedSimulation.statistics);
-                    StatisticsWindow::get().resetLiveStatistics();
                 } catch (CudaMemoryAllocationException const& exception) {
                     errorMessage = exception.what();
                 } catch (...) {
@@ -147,8 +145,7 @@ void NetworkTransferController::onEdit(EditNetworkResourceRequestData const& req
 
     _editProcessor->executeTask(
         [&](auto const& senderId) {
-            return _PersisterFacade::get()->scheduleEditNetworkResource(
-                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+            return _PersisterFacade::get()->scheduleEditNetworkResource(SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
             _PersisterFacade::get()->fetchEditNetworkResourcesData(requestId);
@@ -163,8 +160,7 @@ void NetworkTransferController::onMove(MoveNetworkResourceRequestData const& req
 
     _moveProcessor->executeTask(
         [&](auto const& senderId) {
-            return _PersisterFacade::get()->scheduleMoveNetworkResource(
-                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+            return _PersisterFacade::get()->scheduleMoveNetworkResource(SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
             _PersisterFacade::get()->fetchMoveNetworkResourcesData(requestId);
