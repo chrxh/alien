@@ -2010,8 +2010,8 @@ namespace
         {"Created cells", true},
         {"Attacks", true},
         {"Muscle activities", true},
-        {"Depot activities", true},
         {"Defender activities", true},
+        {"Depot activities", true},
         {"Injection activities", true},
         {"Completed injections", true},
         {"Generator pulses", true},
@@ -2181,6 +2181,19 @@ namespace
         }
         return std::nullopt;
     }
+
+    void correctLegacyStatisticsColumnOrder(std::vector<ParsedColumnInfo>& colInfos)
+    {
+        for (size_t i = 0; i + 1 < colInfos.size(); ++i) {
+            auto& colInfo = colInfos.at(i);
+            auto& nextColInfo = colInfos.at(i + 1);
+            if (colInfo.name == "Depot activities" && nextColInfo.name == "Defender activities" && colInfo.size == MAX_COLORS + 1
+                && nextColInfo.size == MAX_COLORS + 1) {
+                std::swap(colInfo.colIndex, nextColInfo.colIndex);
+                return;
+            }
+        }
+    }
 }
 
 void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const
@@ -2246,6 +2259,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
             }
         }
     }
+    correctLegacyStatisticsColumnOrder(colInfos);
 
     // data lines
     while (std::getline(stream, header)) {

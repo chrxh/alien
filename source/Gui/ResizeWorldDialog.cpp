@@ -5,14 +5,12 @@
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "AlienGui.h"
-#include "TemporalControlWindow.h"
 #include <EngineInterface/SimulationFacade.h>
+#include "AlienGui.h"
+#include "StatisticsWindow.h"
+#include "TemporalControlWindow.h"
 
-void ResizeWorldDialog::initIntern()
-{
-
-}
+void ResizeWorldDialog::initIntern() {}
 
 void ResizeWorldDialog::open()
 {
@@ -96,5 +94,6 @@ void ResizeWorldDialog::onResizing()
     _SimulationFacade::get()->setSimulationData(content);
     _SimulationFacade::get()->setStatisticsHistory(statistics);
     _SimulationFacade::get()->setRealTime(realtime);
+    StatisticsWindow::get().resetLiveStatistics();
     TemporalControlWindow::get().onSnapshot();
 }

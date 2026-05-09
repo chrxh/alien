@@ -14,6 +14,7 @@ public:
     float getCreatedCellsPerSecond() const;
     float getCreatedReplicatorsPerSecond() const;
 
+    void reset();
     void update(TimelineStatistics const& data);
 
 private:

@@ -7,12 +7,13 @@
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
+#include "StatisticsWindow.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
 
-#include <ImFileDialog.h>
 #include <EngineInterface/SimulationFacade.h>
 #include <PersisterInterface/PersisterFacade.h>
+#include <ImFileDialog.h>
 
 #include "PersisterInterface/SerializerService.h"
 
@@ -51,6 +52,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
                 _SimulationFacade::get()->setSimulationData(data.deserializedSimulation.mainData);
                 _SimulationFacade::get()->setStatisticsHistory(data.deserializedSimulation.statistics);
                 _SimulationFacade::get()->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
+                StatisticsWindow::get().resetLiveStatistics();
             } catch (CudaMemoryAllocationException const& exception) {
                 errorMessage = exception.what();
             } catch (...) {
@@ -96,10 +98,7 @@ void FileTransferController::onSaveSimulationDialog()
 void FileTransferController::onOpenGenomeDialog(std::function<void(GenomeDesc const&)> const& openFunc)
 {
     GenericFileDialog::get().showOpenFileDialog(
-        "Open genome",
-        "Genome (*.genome){.genome},.*",
-        _referencePath,
-        [&, openFunc = openFunc](std::filesystem::path const& path) {
+        "Open genome", "Genome (*.genome){.genome},.*", _referencePath, [&, openFunc = openFunc](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _referencePath = firstFilenameCopy.remove_filename().string();

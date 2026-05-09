@@ -14,6 +14,7 @@ public:
     static auto constexpr MaxLiveHistory = 240.0f;  //in seconds
 
     std::vector<DataPointCollection> const& getDataPointCollectionHistory() const;
+    void reset();
     void update(TimelineStatistics const& statistics, uint64_t timestep);
 
 private:

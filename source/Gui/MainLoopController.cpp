@@ -150,6 +150,7 @@ void MainLoopController::processLoadingScreen()
             auto const& deserializedSim = data.deserializedSimulation;
             Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
             Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            StatisticsWindow::get().resetLiveStatistics();
             TemporalControlWindow::get().onSnapshot();
 
             _simulationLoadedTimepoint = std::chrono::steady_clock::now();
@@ -171,6 +172,7 @@ void MainLoopController::processLoadingScreen()
             _SimulationFacade::get()->setSimulationData(deserializedSim.mainData);
             _SimulationFacade::get()->setStatisticsHistory(deserializedSim.statistics);
             _SimulationFacade::get()->setRealTime(deserializedSim.auxiliaryData.realTime);
+            StatisticsWindow::get().resetLiveStatistics();
             Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
             Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
             TemporalControlWindow::get().onSnapshot();

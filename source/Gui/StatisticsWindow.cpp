@@ -76,6 +76,14 @@ StatisticsWindow::StatisticsWindow()
     : AlienWindow("Statistics", "windows.statistics", false)
 {}
 
+void StatisticsWindow::resetLiveStatistics()
+{
+    _lastTimepoint.reset();
+    _timelineLiveStatistics.reset();
+    _histogramLiveStatistics.reset();
+    _tableLiveStatistics.reset();
+}
+
 void StatisticsWindow::shutdownIntern()
 {
     GlobalSettings::get().setValue("windows.statistics.starting path", _startingPath);

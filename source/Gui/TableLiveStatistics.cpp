@@ -32,6 +32,14 @@ float TableLiveStatistics::getCreatedReplicatorsPerSecond() const
     return calcObjectsPerSecond(_lastData->accumulated.numCreatedReplicators, _currentData->accumulated.numCreatedReplicators);
 }
 
+void TableLiveStatistics::reset()
+{
+    _currentData.reset();
+    _currentDataTimepoint.reset();
+    _lastData.reset();
+    _lastDataTimepoint.reset();
+}
+
 void TableLiveStatistics::update(TimelineStatistics const& data)
 {
     auto timepoint = std::chrono::steady_clock::now();

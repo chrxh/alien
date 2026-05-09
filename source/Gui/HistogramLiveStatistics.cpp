@@ -10,6 +10,11 @@ std::optional<HistogramData> const& HistogramLiveStatistics::getData() const
     return _lastHistogramData;
 }
 
+void HistogramLiveStatistics::reset()
+{
+    _lastHistogramData.reset();
+}
+
 void HistogramLiveStatistics::update(HistogramData const& data)
 {
     _lastHistogramData = data;

@@ -6,11 +6,12 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
+#include <EngineInterface/SimulationFacade.h>
 #include "AlienGui.h"
+#include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
-#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
@@ -78,6 +79,7 @@ void NewSimulationDialog::onNewSimulation()
     _SimulationFacade::get()->closeSimulation();
 
     _SimulationFacade::get()->newSimulation(0, {_width, _height}, parameters);
+    StatisticsWindow::get().resetLiveStatistics();
     Viewport::get().setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     Viewport::get().setZoomFactor(4.0f);
     TemporalControlWindow::get().onSnapshot();
