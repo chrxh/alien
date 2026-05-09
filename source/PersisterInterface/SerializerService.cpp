@@ -111,6 +111,23 @@ namespace cereal
         }
     }
 
+    template <typename T>
+    void loadSaveDesc(SerializationTask task, std::unordered_map<int, VariantData>& loadSaveMap, int key, T& value)
+    {
+        if (task == SerializationTask::Load) {
+            auto findResult = loadSaveMap.find(key);
+            if (findResult != loadSaveMap.end()) {
+                auto variantData = findResult->second;
+                if (std::get<bool>(variantData)) {
+                    ar(value);
+                }
+            }
+        } else {
+            loadSaveMap.emplace(key, true);
+            ar(value);
+        }
+    }
+
     // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
     void loadSave(
         SerializationTask task,
