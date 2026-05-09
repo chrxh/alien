@@ -98,6 +98,7 @@ namespace cereal
     public:
         LoadSaveMapWrapper(SerializationTask task, Archive& ar) : _task(task), _ar(ar), _map()
         {
+            // Always read/write map first to maintain correct archive order
             if (_task == SerializationTask::Load) {
                 _ar(_map);
             }
@@ -152,33 +153,49 @@ namespace cereal
         if (task == SerializationTask::Load) {
             auto findResult = loadSaveMap.find(key);
             if (findResult != loadSaveMap.end()) {
-                auto variantData = findResult->second;
-                if (std::get<bool>(variantData)) {
-                    ar(value);
+                auto& variantData = findResult->second;
+                // Check if this key has a marker (true = data present in archive)
+                if (std::holds_alternative<bool>(variantData) && std::get<bool>(variantData)) {
+                    // Read size-prefixed data from archive
+                    uint64_t dataSize = 0;
+                    ar(dataSize);
+
+                    // Read serialized data into buffer
+                    std::vector<uint8_t> buffer(dataSize);
+                    ar(cereal::binary_data(buffer.data(), dataSize));
+
+                    // Deserialize from buffer
+                    std::stringstream ss(std::string(buffer.begin(), buffer.end()));
+                    cereal::PortableBinaryInputArchive bufferAr(ss);
+                    bufferAr(value);
+
+                    // Mark as consumed
+                    variantData = false;
                 }
+            } else {
+                // Key not in map - Desc type not present in saved data, use default
+                value = T{};
             }
         } else {
-            // For Save: ONLY add marker to map, don't serialize yet
-            // The serialization happens in two phases:
-            // Phase 1: Add all markers (via this function)
-            // Phase 2: Serialize map (via processLoadSaveMap called by CALLER)
-            // Phase 3: Serialize nested objects (via this function called again)
-            //
-            // But we can't split the call, so we need to serialize the map on FIRST call only
-            auto markerKey = key;
-            auto wasEmpty = loadSaveMap.empty() || (loadSaveMap.size() == 1 && loadSaveMap.count(-1) > 0);
-
-            // Add marker
+            // Add marker to map
             loadSaveMap.emplace(key, true);
 
-            // On first loadSaveDesc call for this object, serialize the map
-            // We detect "first call" by checking if map only contains simple field markers
-            // Actually, we can't reliably detect this. Let's just ALWAYS call processLoadSaveMap
-            // and rely on it clearing the map after first serialization
+            // Write map first (only on first call due to sentinel in processLoadSaveMap)
             processLoadSaveMap(task, ar, loadSaveMap);
 
-            // Now serialize the nested object
-            ar(value);
+            // Then serialize to buffer and write size+data
+            std::stringstream ss;
+            {
+                cereal::PortableBinaryOutputArchive bufferAr(ss);
+                bufferAr(value);
+            }
+
+            std::string serializedData = ss.str();
+            uint64_t dataSize = serializedData.size();
+
+            // Write size-prefixed data to archive
+            ar(dataSize);
+            ar(cereal::binary_data(serializedData.data(), dataSize));
         }
     }
 
@@ -221,6 +238,19 @@ namespace cereal
             if (loadSaveMap.find(SERIALIZED_MARKER) == loadSaveMap.end()) {
                 ar(loadSaveMap);
                 loadSaveMap.emplace(SERIALIZED_MARKER, true);  // Mark as serialized
+            }
+        } else {
+            // On Load: skip any unprocessed Desc objects (removed from code but in saved data)
+            for (auto& [key, variantData] : loadSaveMap) {
+                if (std::holds_alternative<bool>(variantData) && std::get<bool>(variantData)) {
+                    // Unprocessed Desc marker - skip its size-prefixed data
+                    uint64_t dataSize = 0;
+                    ar(dataSize);
+
+                    // Read and discard data
+                    std::vector<uint8_t> buffer(dataSize);
+                    ar(cereal::binary_data(buffer.data(), dataSize));
+                }
             }
         }
     }
