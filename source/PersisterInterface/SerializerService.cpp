@@ -824,6 +824,14 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+
+        // Backward compatibility: in old format, lineageMutationProbability was at GenomeDesc level
+        // In new format, it's nested in MutationsDesc
+        if (task == SerializationTask::Load && auxiliaries.find(Id_Genome_LineageMutationProbability) != auxiliaries.end()) {
+            // Old format detected: load lineageMutationProbability from GenomeDesc auxiliaries
+            loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._mutation._lineageMutationProbability, defaultObject._mutation._lineageMutationProbability);
+        }
+
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);
