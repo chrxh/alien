@@ -27,10 +27,8 @@ public:
 
 protected:
     // Helper to create a memory cell with custom memory entries and settings
-    Desc createMemoryCellWithIncomingSignal(
-        MemoryModeDesc const& mode,
-        std::vector<float> const& signal,
-        std::vector<SignalEntryDesc> const& signalEntries = {})
+    Desc
+    createMemoryCellWithIncomingSignal(MemoryModeDesc const& mode, std::vector<float> const& signal, std::vector<SignalEntryDesc> const& signalEntries = {})
     {
         auto data = Desc().addCreature({
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(MemoryDesc().mode(mode).signalEntries(signalEntries))),
@@ -73,9 +71,8 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})
-            .type(CellDesc().cellType(MemoryDesc()
-                                                 .mode(SignalIntegratorDesc().newSignalWeight(newSignalWeight))
-                                                 .signalEntries({SignalEntryDesc().channels(storedSignal)}))),
+            .type(CellDesc().cellType(
+                MemoryDesc().mode(SignalIntegratorDesc().newSignalWeight(newSignalWeight)).signalEntries({SignalEntryDesc().channels(storedSignal)}))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
     });
     data.addConnection(1, 2);
@@ -103,9 +100,8 @@ TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})
-            .type(CellDesc().cellType(MemoryDesc()
-                                                 .mode(SignalIntegratorDesc().newSignalWeight(1.0f))
-                                                 .signalEntries({SignalEntryDesc().channels(storedSignal)}))),
+            .type(
+                CellDesc().cellType(MemoryDesc().mode(SignalIntegratorDesc().newSignalWeight(1.0f)).signalEntries({SignalEntryDesc().channels(storedSignal)}))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
     });
     data.addConnection(1, 2);
@@ -130,9 +126,8 @@ TEST_F(MemoryTests, signalIntegrator_weightOfZero_preservesStoredSignal)
         ObjectDesc()
             .id(1)
             .pos({100.0f, 100.0f})
-            .type(CellDesc().cellType(MemoryDesc()
-                                                 .mode(SignalIntegratorDesc().newSignalWeight(0.0f))
-                                                 .signalEntries({SignalEntryDesc().channels(storedSignal)}))),
+            .type(
+                CellDesc().cellType(MemoryDesc().mode(SignalIntegratorDesc().newSignalWeight(0.0f)).signalEntries({SignalEntryDesc().channels(storedSignal)}))),
         ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().signal(incomingSignal)),
     });
     data.addConnection(1, 2);

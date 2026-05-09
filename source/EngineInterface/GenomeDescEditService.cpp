@@ -385,7 +385,7 @@ std::vector<Desc> GenomeDescEditService::extractPhenotypesFromPreview(Desc&& pre
             // Genome already added from the seed creature (should be the same since no mutations in preview)
         }
     }
-    for (auto& object: preview._objects) {
+    for (auto& object : preview._objects) {
         auto creatureIndex = cache->creatureIdToIndex.at(object.getCellRef()._creatureId);
         auto& creature = preview._creatures.at(creatureIndex);
         auto phenotypeIndex = creatureIdToIndex.at(creature._generation == 0 ? creature._id : creature._ancestorId.value());
@@ -497,8 +497,7 @@ namespace
     }
 }
 
-void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneIndicesForSubGenome const& geneIndices, bool detailSimulation)
-    const
+void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneIndicesForSubGenome const& geneIndices, bool detailSimulation) const
 {
     auto startGeneIndex = geneIndices.front();
 
@@ -513,11 +512,11 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
         genome._genes.at(startGeneIndex)._numBranches = 1;
     }
     genome._lineageId = 0;
-    genome._lineageMutationProbability = 0;
-    genome._neuronMutation1 = NeuronMutationDesc();
-    genome._neuronMutation2 = NeuronMutationDesc();
-    genome._connectionMutationRate1 = ConnectionMutationDesc();
-    genome._connectionMutationRate2 = ConnectionMutationDesc();
+    genome._mutation._lineageMutationProbability = 0;
+    genome._mutation._neuronMutation1 = NeuronMutationDesc();
+    genome._mutation._neuronMutation2 = NeuronMutationDesc();
+    genome._mutation._connectionMutationRate1 = ConnectionMutationDesc();
+    genome._mutation._connectionMutationRate2 = ConnectionMutationDesc();
 
     genome._genes.at(startGeneIndex)._separation = true;
     resetUnusedGenes(genome, geneIndices);

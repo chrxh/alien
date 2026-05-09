@@ -2,8 +2,8 @@
 
 #include <map>
 
-#include "Macros.cuh"
 #include <cuda/helper_cuda.h>
+#include "Macros.cuh"
 
 class CudaMemoryManager
 {

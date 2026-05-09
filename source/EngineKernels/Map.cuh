@@ -135,8 +135,8 @@ public:
     __device__ __inline__ Object* getFirst(int2 const& pos) const { return _map[pos.x + pos.y * _size.x]; }
 
     template <typename MatchFunc>
-    __device__ __inline__ void getMatchingObjects(Object* objects[], int arraySize, int& numObjects, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
-        const
+    __device__ __inline__ void
+    getMatchingObjects(Object* objects[], int arraySize, int& numObjects, float2 const& pos, float radius, int detached, MatchFunc matchFunc) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numObjects = 0;

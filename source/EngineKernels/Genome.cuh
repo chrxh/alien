@@ -354,6 +354,15 @@ struct ConnectionMutation
     float sigma;
 };
 
+struct MutationData
+{
+    float lineageMutationProbability;
+    NeuronMutation neuronMutation1;
+    NeuronMutation neuronMutation2;
+    ConnectionMutation connectionMutationRate1;
+    ConnectionMutation connectionMutationRate2;
+};
+
 struct Genome
 {
     uint64_t id;
@@ -364,12 +373,7 @@ struct Genome
     uint32_t lineageId;
     uint32_t prevLineageId;
     float frontAngle;
-    float lineageMutationProbability;
-
-    NeuronMutation neuronMutation1;
-    NeuronMutation neuronMutation2;
-    ConnectionMutation connectionMutationRate1;
-    ConnectionMutation connectionMutationRate2;
+    MutationData mutation;
 
     // Temporary data
     uint64_t genomeIndex;  // May be invalid

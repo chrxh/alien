@@ -192,8 +192,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedSelectedConnectionBuffer), &selectedConnectionBufferSize, renderingData.selectedConnectionBuffer));
         setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(
-            cudaExtractSelectedConnectionData, data, mappedSelectedConnectionBuffer, _numSelectedConnectionVertices, context);
+        KERNEL_CALL(cudaExtractSelectedConnectionData, data, mappedSelectedConnectionBuffer, _numSelectedConnectionVertices, context);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedConnectionBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.attackEventBuffer));
@@ -234,18 +233,12 @@ void GeometryKernelsService::extractObjectData(
         KERNEL_CALL(cudaExtractTriangleIndices, data, renderingData.deviceTriangleIndexBuffer, _numTriangleIndices, context);
 
         setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(
-            cudaExtractSelectedConnectionData,
-            data,
-            renderingData.deviceSelectedConnectionBuffer,
-            _numSelectedConnectionVertices,
-            context);
+        KERNEL_CALL(cudaExtractSelectedConnectionData, data, renderingData.deviceSelectedConnectionBuffer, _numSelectedConnectionVertices, context);
 
         setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractAttackEventData, data, renderingData.deviceAttackEventBuffer, _numAttackEventVertices, context);
 
         setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(
-            cudaExtractDetonationEventData, data, renderingData.deviceDetonationEventBuffer, _numDetonationEventVertices, context);
+        KERNEL_CALL(cudaExtractDetonationEventData, data, renderingData.deviceDetonationEventBuffer, _numDetonationEventVertices, context);
     }
 }

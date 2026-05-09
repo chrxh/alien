@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SimulationData.cuh"
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
+#include "SimulationData.cuh"
 #include <sm_60_atomic_functions.h>
 
 namespace cg = cooperative_groups;
@@ -47,7 +47,7 @@ __device__ __inline__ void NeuronProcessor::calcSignal(SimulationData& data, Sim
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& object = objects.at(index);
-        
+
         if (object->type == ObjectType_Cell && object->typeData.cell.cellState != CellState_Constructing) {
             processCell(object, firstCell);
             firstCell = false;
@@ -148,11 +148,11 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         sharedMinNumTimesSent = (numConnections > 0) ? INT_MAX : 0;
     }
     block.sync();
-    
+
     // Accumulate weighted inputs from all connected cells
     for (int connIdx = 0; connIdx < numConnections; ++connIdx) {
         auto const& connectedObject = object->connections[connIdx].object;
-        
+
         if (connectedObject->type != ObjectType_Cell) {
             continue;
         }
@@ -160,11 +160,11 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         if (connectedCell.cellState == CellState_Constructing) {
             continue;
         }
-        
+
         if (laneId == 0) {
             sharedMinNumTimesSent = min(sharedMinNumTimesSent, connectedCell.signal.numTimesSent);
         }
-        
+
         if (laneId < NEURONS_PER_CELL) {
             sharedAccumulatedInput[laneId] += connectedCell.signal.channels[laneId] * cell.neuralNetwork->connectionWeights[connIdx];
         }
@@ -180,9 +180,9 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         // Compute dot product: weights[row][0:15] * input[0:15]
         // Weights are stored row-major, so weights[row][col] = weights[row * MAX_CHANNELS + col]
         auto const* weightsRow = &cell.neuralNetwork->weights[row * NEURONS_PER_CELL];
-        
-        // Unroll the inner loop for better performance
-        #pragma unroll
+
+// Unroll the inner loop for better performance
+#pragma unroll
         for (int col = 0; col < NEURONS_PER_CELL; ++col) {
             result += weightsRow[col].getValue() * sharedAccumulatedInput[col];
         }
@@ -193,7 +193,7 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         // Apply activation function and clamp
         result = applyActivationFunction(cell.neuralNetwork->activationFunctions[row], result);
         result = max(-2.0f, min(2.0f, result));
-        
+
         cell.futureSignal.channels[row] = result;
     }
 

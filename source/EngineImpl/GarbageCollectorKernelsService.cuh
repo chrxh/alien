@@ -23,7 +23,7 @@ public:
     void copyArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);
     void swapArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);
 
-    
+
 private:
     GarbageCollectorKernelsService() = default;
 

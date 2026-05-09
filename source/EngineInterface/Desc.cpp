@@ -20,7 +20,7 @@ NeuralNetDesc::NeuralNetDesc()
     _biases.resize(NEURONS_PER_CELL, 0);
 
     _activationFunctions.resize(NEURONS_PER_CELL, ActivationFunction_Identity);
-    
+
     _connectionWeights.resize(MAX_OBJECT_CONNECTIONS, 0);
     _connectionWeights.at(0) = 1.0f;
 }
@@ -382,9 +382,7 @@ void Desc::assignNewEntityIds()
         indexToOldCellId.emplace_back(i, _objects[i]._id);
     }
     // Sort by oldCellId to preserve order (lower original IDs get lower new IDs)
-    std::sort(indexToOldCellId.begin(), indexToOldCellId.end(), [](auto const& lhs, auto const& rhs) {
-        return lhs.second < rhs.second;
-    });
+    std::sort(indexToOldCellId.begin(), indexToOldCellId.end(), [](auto const& lhs, auto const& rhs) { return lhs.second < rhs.second; });
 
     // Generate new cellIds and create maps for fast access
     std::unordered_map<uint64_t, uint64_t> oldToNewObjectId;
@@ -419,7 +417,6 @@ void Desc::assignNewEntityIds()
 
     // Helper for finding new objectId (uses original cellIds)
     auto findNewObjectId = [&](std::optional<uint64_t> const& creatureId, uint64_t objectId) {
-
         // First check in creature-specific map (always preferred when available)
         auto nonUnique = false;
         auto creatureFindResult = creatureIdToOldToNewObjectId.find(creatureId);
@@ -570,9 +567,7 @@ size_t Desc::getNumObjects() const
 
 size_t Desc::getNumObjectsWithoutCreature() const
 {
-    return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) {
-        return object.getObjectType() != ObjectType_Cell;
-    });
+    return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) { return object.getObjectType() != ObjectType_Cell; });
 }
 
 std::vector<ObjectDesc> Desc::getObjectsForCreature(uint64_t creatureId) const
@@ -615,8 +610,7 @@ Desc& Desc::addConnection(uint64_t const& objectId1, uint64_t const& objectId2, 
     auto& object1 = getObjectRef(objectId1, cache);
     auto& object2 = getObjectRef(objectId2, cache);
 
-    auto addConnection = [this,
-                          &cache](ObjectDesc& object, ObjectDesc& otherObject, RealVector2D const& cellRefPos, RealVector2D const& otherObjectRefPos) {
+    auto addConnection = [this, &cache](ObjectDesc& object, ObjectDesc& otherObject, RealVector2D const& cellRefPos, RealVector2D const& otherObjectRefPos) {
         CHECK(object._connections.size() < MAX_OBJECT_CONNECTIONS);
 
         auto newAngle = Math::angleOfVector(otherObjectRefPos - cellRefPos);

@@ -541,19 +541,19 @@ struct std::hash<GenomeDesc>
         }
         hash_combine(seed, desc._frontAngle);
         hash_combine(seed, desc._prevLineageId);
-        hash_combine(seed, desc._lineageMutationProbability);
-        hash_combine(seed, desc._neuronMutation1._probability);
-        hash_combine(seed, desc._neuronMutation1._weightSigma);
-        hash_combine(seed, desc._neuronMutation1._biasSigma);
-        hash_combine(seed, desc._neuronMutation1._activationFunctionProbability);
-        hash_combine(seed, desc._neuronMutation2._probability);
-        hash_combine(seed, desc._neuronMutation2._weightSigma);
-        hash_combine(seed, desc._neuronMutation2._biasSigma);
-        hash_combine(seed, desc._neuronMutation2._activationFunctionProbability);
-        hash_combine(seed, desc._connectionMutationRate1._probability);
-        hash_combine(seed, desc._connectionMutationRate1._sigma);
-        hash_combine(seed, desc._connectionMutationRate2._probability);
-        hash_combine(seed, desc._connectionMutationRate2._sigma);
+        hash_combine(seed, desc._mutation._lineageMutationProbability);
+        hash_combine(seed, desc._mutation._neuronMutation1._probability);
+        hash_combine(seed, desc._mutation._neuronMutation1._weightSigma);
+        hash_combine(seed, desc._mutation._neuronMutation1._biasSigma);
+        hash_combine(seed, desc._mutation._neuronMutation1._activationFunctionProbability);
+        hash_combine(seed, desc._mutation._neuronMutation2._probability);
+        hash_combine(seed, desc._mutation._neuronMutation2._weightSigma);
+        hash_combine(seed, desc._mutation._neuronMutation2._biasSigma);
+        hash_combine(seed, desc._mutation._neuronMutation2._activationFunctionProbability);
+        hash_combine(seed, desc._mutation._connectionMutationRate1._probability);
+        hash_combine(seed, desc._mutation._connectionMutationRate1._sigma);
+        hash_combine(seed, desc._mutation._connectionMutationRate2._probability);
+        hash_combine(seed, desc._mutation._connectionMutationRate2._sigma);
         return seed;
     }
 };

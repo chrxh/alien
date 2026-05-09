@@ -79,23 +79,23 @@ ParameterSpec SpecificationFilterService::filterParameterSpec(ParameterSpec cons
     // If the parameter name matches, keep it visible with filtered alternatives
     if (matchesFilter(spec._name, filter)) {
         result._visible = true;
-        
+
         // If this is an AlternativeSpec, filter its nested parameters
         if (std::holds_alternative<AlternativeSpec>(spec._reference)) {
             auto const& alternativeSpec = std::get<AlternativeSpec>(spec._reference);
             AlternativeSpec filteredAltSpec = alternativeSpec;
             filteredAltSpec._alternatives.clear();
-            
+
             // Filter each alternative
             for (auto const& [name, alternativeParams] : alternativeSpec._alternatives) {
                 std::vector<ParameterSpec> filteredParams = filterAlternativeSpecs(alternativeParams, filter);
                 // Always include the alternative, even if empty
                 filteredAltSpec._alternatives.push_back({name, filteredParams});
             }
-            
+
             result._reference = filteredAltSpec;
         }
-        
+
         return result;
     }
 
@@ -104,18 +104,18 @@ ParameterSpec SpecificationFilterService::filterParameterSpec(ParameterSpec cons
         auto const& alternativeSpec = std::get<AlternativeSpec>(spec._reference);
         AlternativeSpec filteredAltSpec = alternativeSpec;
         filteredAltSpec._alternatives.clear();
-        
+
         bool anyParameterMatches = false;
-        
+
         // Filter each alternative
         for (auto const& [name, alternativeParams] : alternativeSpec._alternatives) {
             std::vector<ParameterSpec> filteredParams = filterAlternativeSpecs(alternativeParams, filter);
-            
+
             // Check if any parameters matched in this alternative
             if (!filteredParams.empty()) {
                 anyParameterMatches = true;
             }
-            
+
             // Always include the alternative, even if empty
             filteredAltSpec._alternatives.push_back({name, filteredParams});
         }

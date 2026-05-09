@@ -6,7 +6,8 @@ __global__ void cudaNextTimestep_prepare(SimulationData data);
 __global__ void cudaNextTimestep_physics_init(SimulationData data);
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data);  //requires threads/block = (ceilf(smoothingLength * 2) * 2 + 1)^2
-__global__ void cudaNextTimestep_physics_calcFluidBoundaryForces(SimulationData data);  //requires threads/block = (ceilf(smoothingLength * 2 * 2) * 2 + 1)^2, fluid uses 2x smoothingLength
+__global__ void cudaNextTimestep_physics_calcFluidBoundaryForces(
+    SimulationData data);  //requires threads/block = (ceilf(smoothingLength * 2 * 2) * 2 + 1)^2, fluid uses 2x smoothingLength
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data);
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles);

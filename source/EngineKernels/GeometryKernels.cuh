@@ -19,8 +19,11 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
 __global__ void
 cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluidParticleData, uint64_t* numFluidParticles, GeometryExtractionContext context);
 __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 visibleTopLeft);
-__global__ void
-cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects, GeometryExtractionContext context);
+__global__ void cudaExtractSelectedObjectData(
+    SimulationData data,
+    SelectedObjectVertexData* selectedObjectData,
+    uint64_t* numSelectedObjects,
+    GeometryExtractionContext context);
 __global__ void cudaExtractSelectedConnectionData(
     SimulationData data,
     ConnectionArrowVertexData* connectionArrowData,

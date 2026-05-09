@@ -1,9 +1,9 @@
 #pragma once
 
-#include <gtest/gtest.h>
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
+#include <gtest/gtest.h>
 
 #include <Base/Definitions.h>
 
@@ -51,7 +51,7 @@ private:
     struct TestSuiteContext
     {
         SimulationFacade simulationFacade;
-        
+
         void cleanup();
     };
     static TestSuiteContext _globalContext;

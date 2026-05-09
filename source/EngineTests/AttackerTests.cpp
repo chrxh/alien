@@ -761,10 +761,7 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_true)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc()
-                .id(2)
-                .pos({101.0f, 100.0f})
-                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -800,10 +797,7 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_false)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc()
-                .id(2)
-                .pos({101.0f, 100.0f})
-                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -847,14 +841,8 @@ TEST_F(AttackerTests, sensorTargeting_tagForAttackers_mixedSensors)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
-            ObjectDesc()
-                .id(2)
-                .pos({101.0f, 100.0f})
-                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch1))),
-            ObjectDesc()
-                .id(3)
-                .pos({99.0f, 100.0f})
-                .type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch2))),
+            ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(false).lastMatch(lastMatch1))),
+            ObjectDesc().id(3).pos({99.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).tagForAttackers(true).lastMatch(lastMatch2))),
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);

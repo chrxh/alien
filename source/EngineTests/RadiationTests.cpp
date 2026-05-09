@@ -18,7 +18,7 @@ public:
         // Set a very high radiation rate for all colors as requested
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0.1f;  // Very high radiation rate
-            _parameters.radiationType1_minimumAge.value[i] = 0;        // No minimum age requirement
+            _parameters.radiationType1_minimumAge.value[i] = 0;       // No minimum age requirement
         }
         _simulationFacade->setSimulationParameters(_parameters);
     }
@@ -30,9 +30,8 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
 {
     auto initialEnergy = 200.0f;
 
-    auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDesc().usableEnergy(initialEnergy))
-    });
+    auto data =
+        Desc().addCreature({ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDesc().usableEnergy(initialEnergy))});
 
     _simulationFacade->setSimulationData(data);
 
@@ -53,8 +52,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
 TEST_F(RadiationTests, solid_shouldNotRadiate)
 {
     Desc data;
-    data._objects.emplace_back(
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(SolidDesc()));
+    data._objects.emplace_back(ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(SolidDesc()));
 
     _simulationFacade->setSimulationData(data);
 
@@ -76,9 +74,8 @@ TEST_F(RadiationTests, baseCells_shouldRadiate)
 {
     auto initialEnergy = 200.0f;
 
-    auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDesc().usableEnergy(initialEnergy).cellType(BaseDesc()))
-    });
+    auto data = Desc().addCreature(
+        {ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDesc().usableEnergy(initialEnergy).cellType(BaseDesc()))});
 
     _simulationFacade->setSimulationData(data);
 
@@ -97,8 +94,7 @@ TEST_F(RadiationTests, baseCells_shouldRadiate)
 TEST_F(RadiationTests, freeCells_shouldRadiate)
 {
     Desc data;
-    data._objects.emplace_back(
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(FreeCellDesc()));
+    data._objects.emplace_back(ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(FreeCellDesc()));
 
     _simulationFacade->setSimulationData(data);
 
@@ -118,9 +114,8 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
 {
     auto initialEnergy = 200.0f;
 
-    auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDesc().usableEnergy(initialEnergy).constructor(ConstructorDesc()))
-    });
+    auto data = Desc().addCreature(
+        {ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDesc().usableEnergy(initialEnergy).constructor(ConstructorDesc()))});
 
     _simulationFacade->setSimulationData(data);
 

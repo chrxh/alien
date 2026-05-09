@@ -192,7 +192,7 @@ TEST_F(NeuronTests, mergeSignal)
                 ObjectDesc().id(5).pos({2, 1}).type(CellDesc()
                                                         .signal(SignalDesc().channels(signal2).numTimesSent(4))
                                                         .neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),  // Gets input from cell 6
-                ObjectDesc().id(6).pos({2, 0}),                                                                     // Gets input from cell 5
+                ObjectDesc().id(6).pos({2, 0}),                                                                                  // Gets input from cell 5
             })
             .addConnection(2, 1)
             .addConnection(2, 3)

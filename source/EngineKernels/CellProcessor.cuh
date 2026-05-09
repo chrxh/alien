@@ -212,7 +212,7 @@ __inline__ __device__ void CellProcessor::headUpdate_applyFutureValue(Simulation
             continue;
         }
 
-        // Regularly update creature's for headUpdateId to trigger head update 
+        // Regularly update creature's for headUpdateId to trigger head update
         auto const& creature = object->typeData.cell.creature;
         if (*data.timestep % CELL_UPDATE_INTERVAL == 0) {
             if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {

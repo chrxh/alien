@@ -8,7 +8,8 @@ public:
     __inline__ __device__ static bool isFinished(Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static bool hasInfiniteConcatenations(Gene* gene);
-    __inline__ __device__ static void getConstructorIndices(uint16_t& currentNodeIndex, uint32_t& currentConcatenation, uint8_t& currentBranch, Object* constructorCell, Genome const& genome);
+    __inline__ __device__ static void
+    getConstructorIndices(uint16_t& currentNodeIndex, uint32_t& currentConcatenation, uint8_t& currentBranch, Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Object* getLastConstructedCell(Object* constructorCell);
 };
 

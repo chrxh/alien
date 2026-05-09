@@ -27,10 +27,8 @@ public:
     void removeNode(GeneDesc& gene, int index) const;
     void swapNodes(GeneDesc& gene, int index) const;  // Swaps node at index with node at index + 1
 
-    std::vector<SubGenomeDesc> createSubGenomesForPreview(
-        GenomeDesc const& genome,
-        std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes,
-        bool detailSimulation) const;
+    std::vector<SubGenomeDesc>
+    createSubGenomesForPreview(GenomeDesc const& genome, std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes, bool detailSimulation) const;
 
     struct SeedCollectionResult
     {

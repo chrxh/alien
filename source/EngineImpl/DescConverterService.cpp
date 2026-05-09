@@ -864,19 +864,19 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     NumberGenerator::get().adaptMaxLineageId(genomeTO.lineageId);
     result._prevLineageId = genomeTO.prevLineageId != 0 ? std::make_optional(genomeTO.prevLineageId) : std::nullopt;
     result._frontAngle = genomeTO.frontAngle;
-    result._lineageMutationProbability = genomeTO.lineageMutationProbability;
-    result._neuronMutation1._probability = genomeTO.neuronMutation1.probability;
-    result._neuronMutation1._weightSigma = genomeTO.neuronMutation1.weightSigma;
-    result._neuronMutation1._biasSigma = genomeTO.neuronMutation1.biasSigma;
-    result._neuronMutation1._activationFunctionProbability = genomeTO.neuronMutation1.activationFunctionProbability;
-    result._neuronMutation2._probability = genomeTO.neuronMutation2.probability;
-    result._neuronMutation2._weightSigma = genomeTO.neuronMutation2.weightSigma;
-    result._neuronMutation2._biasSigma = genomeTO.neuronMutation2.biasSigma;
-    result._neuronMutation2._activationFunctionProbability = genomeTO.neuronMutation2.activationFunctionProbability;
-    result._connectionMutationRate1._probability = genomeTO.connectionMutationRate1.probability;
-    result._connectionMutationRate1._sigma = genomeTO.connectionMutationRate1.sigma;
-    result._connectionMutationRate2._probability = genomeTO.connectionMutationRate2.probability;
-    result._connectionMutationRate2._sigma = genomeTO.connectionMutationRate2.sigma;
+    result._mutation._lineageMutationProbability = genomeTO.lineageMutationProbability;
+    result._mutation._neuronMutation1._probability = genomeTO.neuronMutation1.probability;
+    result._mutation._neuronMutation1._weightSigma = genomeTO.neuronMutation1.weightSigma;
+    result._mutation._neuronMutation1._biasSigma = genomeTO.neuronMutation1.biasSigma;
+    result._mutation._neuronMutation1._activationFunctionProbability = genomeTO.neuronMutation1.activationFunctionProbability;
+    result._mutation._neuronMutation2._probability = genomeTO.neuronMutation2.probability;
+    result._mutation._neuronMutation2._weightSigma = genomeTO.neuronMutation2.weightSigma;
+    result._mutation._neuronMutation2._biasSigma = genomeTO.neuronMutation2.biasSigma;
+    result._mutation._neuronMutation2._activationFunctionProbability = genomeTO.neuronMutation2.activationFunctionProbability;
+    result._mutation._connectionMutationRate1._probability = genomeTO.connectionMutationRate1.probability;
+    result._mutation._connectionMutationRate1._sigma = genomeTO.connectionMutationRate1.sigma;
+    result._mutation._connectionMutationRate2._probability = genomeTO.connectionMutationRate2.probability;
+    result._mutation._connectionMutationRate2._sigma = genomeTO.connectionMutationRate2.sigma;
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -953,19 +953,19 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.lineageId = genome._lineageId;
     genomeTO.prevLineageId = genome._prevLineageId.value_or(0);
     genomeTO.frontAngle = genome._frontAngle;
-    genomeTO.lineageMutationProbability = genome._lineageMutationProbability;
+    genomeTO.lineageMutationProbability = genome._mutation._lineageMutationProbability;
     genomeTO.neuronMutation1 = {
-        genome._neuronMutation1._probability,
-        genome._neuronMutation1._weightSigma,
-        genome._neuronMutation1._biasSigma,
-        genome._neuronMutation1._activationFunctionProbability};
+        genome._mutation._neuronMutation1._probability,
+        genome._mutation._neuronMutation1._weightSigma,
+        genome._mutation._neuronMutation1._biasSigma,
+        genome._mutation._neuronMutation1._activationFunctionProbability};
     genomeTO.neuronMutation2 = {
-        genome._neuronMutation2._probability,
-        genome._neuronMutation2._weightSigma,
-        genome._neuronMutation2._biasSigma,
-        genome._neuronMutation2._activationFunctionProbability};
-    genomeTO.connectionMutationRate1 = {genome._connectionMutationRate1._probability, genome._connectionMutationRate1._sigma};
-    genomeTO.connectionMutationRate2 = {genome._connectionMutationRate2._probability, genome._connectionMutationRate2._sigma};
+        genome._mutation._neuronMutation2._probability,
+        genome._mutation._neuronMutation2._weightSigma,
+        genome._mutation._neuronMutation2._biasSigma,
+        genome._mutation._neuronMutation2._activationFunctionProbability};
+    genomeTO.connectionMutationRate1 = {genome._mutation._connectionMutationRate1._probability, genome._mutation._connectionMutationRate1._sigma};
+    genomeTO.connectionMutationRate2 = {genome._mutation._connectionMutationRate2._probability, genome._mutation._connectionMutationRate2._sigma};
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;

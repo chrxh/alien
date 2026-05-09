@@ -7,8 +7,8 @@
 
 #include <EngineInterface/Ids.h>
 
-#include "Array.cuh"
 #include <device_launch_parameters.h>
+#include "Array.cuh"
 
 class CudaNumberGenerator
 {
