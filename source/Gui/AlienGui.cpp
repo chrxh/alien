@@ -2053,7 +2053,7 @@ namespace
             return StringHelper::format(value, decimalPlaces);
         } else if constexpr (std::is_same_v<T, int>) {
             if (tryMaintainFormat) {
-                if (std::abs(value) >= 1000) {
+                if (value >= 1000 || value <= -1000) {
                     return formatInteger(value);
                 }
                 return format;
