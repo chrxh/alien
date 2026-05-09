@@ -204,6 +204,8 @@ void _NodeEditorWidget::processNodeAttributes()
     if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
+        auto const simulationParameters = _SimulationFacade::get()->getSimulationParameters();
+        auto const& customizationColors = simulationParameters.customizationColors.value;
 
         AlienGui::DynamicTableLayout table(MinColumnWidth);
         if (table.begin()) {
@@ -226,11 +228,7 @@ void _NodeEditorWidget::processNodeAttributes()
             //}
 
             AlienGui::ComboColor(
-                AlienGui::ComboColorParameters()
-                    .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                    .name("Color")
-                    .textWidth(rightColumnWidth),
-                node._color);
+                AlienGui::ComboColorParameters().customizationColors(customizationColors).name("Color").textWidth(rightColumnWidth), node._color);
 
             // Type
             auto nodeType = node.getCellType();
@@ -338,10 +336,7 @@ void _NodeEditorWidget::processNodeAttributes()
                         AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(rightColumnWidth),
                         detectFreeCell._minDensity);
                     AlienGui::ColorCheckboxes(
-                        AlienGui::ColorCheckboxesParameters()
-                            .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                            .name("Restrict to colors")
-                            .textWidth(rightColumnWidth),
+                        AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(rightColumnWidth),
                         detectFreeCell._restrictToColors);
                     AlienGui::EndIndent();
                 } else if (mode == SensorMode_DetectCreature) {
@@ -352,10 +347,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::InputOptionalInt(
                         AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), detectCreature._maxNumCells);
                     AlienGui::ColorCheckboxes(
-                        AlienGui::ColorCheckboxesParameters()
-                            .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                            .name("Restrict to colors")
-                            .textWidth(rightColumnWidth),
+                        AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(rightColumnWidth),
                         detectCreature._restrictToColors);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
@@ -424,10 +416,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     auto& attackFreeCell = std::get<AttackFreeCellGenomeDesc>(attacker._mode);
                     AlienGui::ColorCheckboxes(
-                        AlienGui::ColorCheckboxesParameters()
-                            .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                            .name("Restrict to colors")
-                            .textWidth(rightColumnWidth),
+                        AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(rightColumnWidth),
                         attackFreeCell._restrictToColors);
 
                     AlienGui::EndIndent();
@@ -552,10 +541,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
                     auto& freeCell = std::get<ReconnectFreeCellGenomeDesc>(reconnector._mode);
                     AlienGui::ColorCheckboxes(
-                        AlienGui::ColorCheckboxesParameters()
-                            .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                            .name("Restrict to colors")
-                            .textWidth(rightColumnWidth),
+                        AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(rightColumnWidth),
                         freeCell._restrictToColors);
                     AlienGui::EndIndent();
                 } else if (mode == ReconnectorMode_Creature) {
@@ -564,10 +550,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), creature._minNumCells);
                     AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), creature._maxNumCells);
                     AlienGui::ColorCheckboxes(
-                        AlienGui::ColorCheckboxesParameters()
-                            .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                            .name("Restrict to colors")
-                            .textWidth(rightColumnWidth),
+                        AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(rightColumnWidth),
                         creature._restrictToColors);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
@@ -668,10 +651,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
                     auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);
                     AlienGui::ColorCheckboxes(
-                        AlienGui::ColorCheckboxesParameters()
-                            .customizationColors(_SimulationFacade::get()->getSimulationParameters().customizationColors.value)
-                            .name("Restrict to colors")
-                            .textWidth(rightColumnWidth),
+                        AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(rightColumnWidth),
                         receiver._restrictToColors);
                     AlienGui::Combo(
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
