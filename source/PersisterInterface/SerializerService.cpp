@@ -123,14 +123,26 @@ namespace cereal
                 }
             }
         } else {
-            // Add this field to the map
+            // For Save: ONLY add marker to map, don't serialize yet
+            // The serialization happens in two phases:
+            // Phase 1: Add all markers (via this function)
+            // Phase 2: Serialize map (via processLoadSaveMap called by CALLER)
+            // Phase 3: Serialize nested objects (via this function called again)
+            //
+            // But we can't split the call, so we need to serialize the map on FIRST call only
+            auto markerKey = key;
+            auto wasEmpty = loadSaveMap.empty() || (loadSaveMap.size() == 1 && loadSaveMap.count(-1) > 0);
+
+            // Add marker
             loadSaveMap.emplace(key, true);
-            // Serialize the map if it hasn't been serialized yet (check if map is not empty)
-            // We serialize before the nested object so the order is: map, then nested object's serialization
-            if (!loadSaveMap.empty()) {
-                ar(loadSaveMap);
-                loadSaveMap.clear();  // Clear to avoid serializing again
-            }
+
+            // On first loadSaveDesc call for this object, serialize the map
+            // We detect "first call" by checking if map only contains simple field markers
+            // Actually, we can't reliably detect this. Let's just ALWAYS call processLoadSaveMap
+            // and rely on it clearing the map after first serialization
+            processLoadSaveMap(task, ar, loadSaveMap);
+
+            // Now serialize the nested object
             ar(value);
         }
     }
@@ -167,8 +179,14 @@ namespace cereal
     template <class Archive>
     void processLoadSaveMap(SerializationTask task, Archive& ar, std::unordered_map<int, VariantData>& loadSaveMap)
     {
+        constexpr int SERIALIZED_MARKER = -999999;  // Sentinel to mark map as already serialized
+
         if (task == SerializationTask::Save) {
-            ar(loadSaveMap);
+            // Only serialize if we haven't already
+            if (loadSaveMap.find(SERIALIZED_MARKER) == loadSaveMap.end()) {
+                ar(loadSaveMap);
+                loadSaveMap.emplace(SERIALIZED_MARKER, true);  // Mark as serialized
+            }
         }
     }
 
