@@ -378,7 +378,7 @@ struct GenomeTO
     uint32_t lineageId;
     uint32_t prevLineageId;
     float frontAngle;
-    MutationsTO mutation;
+    MutationsTO mutations;
 
     // Temporary data
     uint64_t genomeIndexOnGpu;

@@ -373,7 +373,7 @@ struct Genome
     uint32_t lineageId;
     uint32_t prevLineageId;
     float frontAngle;
-    Mutations mutation;
+    Mutations mutations;
 
     // Temporary data
     uint64_t genomeIndex;  // May be invalid

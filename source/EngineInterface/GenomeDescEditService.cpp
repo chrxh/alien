@@ -512,11 +512,11 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
         genome._genes.at(startGeneIndex)._numBranches = 1;
     }
     genome._lineageId = 0;
-    genome._mutation._lineageMutationProbability = 0;
-    genome._mutation._neuronMutation1 = NeuronMutationDesc();
-    genome._mutation._neuronMutation2 = NeuronMutationDesc();
-    genome._mutation._connectionMutationRate1 = ConnectionMutationDesc();
-    genome._mutation._connectionMutationRate2 = ConnectionMutationDesc();
+    genome._mutations._lineageMutationProbability = 0;
+    genome._mutations._neuronMutation1 = NeuronMutationDesc();
+    genome._mutations._neuronMutation2 = NeuronMutationDesc();
+    genome._mutations._connectionMutationRate1 = ConnectionMutationDesc();
+    genome._mutations._connectionMutationRate2 = ConnectionMutationDesc();
 
     genome._genes.at(startGeneIndex)._separation = true;
     resetUnusedGenes(genome, geneIndices);

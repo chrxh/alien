@@ -88,19 +88,19 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->lineageId = genomeTO.lineageId;
     genome->prevLineageId = genomeTO.prevLineageId;
     genome->frontAngle = genomeTO.frontAngle;
-    genome->mutation.lineageMutationProbability = genomeTO.mutation.lineageMutationProbability;
-    genome->mutation.neuronMutation1 = {
-        genomeTO.mutation.neuronMutation1.probability,
-        genomeTO.mutation.neuronMutation1.weightSigma,
-        genomeTO.mutation.neuronMutation1.biasSigma,
-        genomeTO.mutation.neuronMutation1.activationFunctionProbability};
-    genome->mutation.neuronMutation2 = {
-        genomeTO.mutation.neuronMutation2.probability,
-        genomeTO.mutation.neuronMutation2.weightSigma,
-        genomeTO.mutation.neuronMutation2.biasSigma,
-        genomeTO.mutation.neuronMutation2.activationFunctionProbability};
-    genome->mutation.connectionMutationRate1 = {genomeTO.mutation.connectionMutationRate1.probability, genomeTO.mutation.connectionMutationRate1.sigma};
-    genome->mutation.connectionMutationRate2 = {genomeTO.mutation.connectionMutationRate2.probability, genomeTO.mutation.connectionMutationRate2.sigma};
+    genome->mutations.lineageMutationProbability = genomeTO.mutations.lineageMutationProbability;
+    genome->mutations.neuronMutation1 = {
+        genomeTO.mutations.neuronMutation1.probability,
+        genomeTO.mutations.neuronMutation1.weightSigma,
+        genomeTO.mutations.neuronMutation1.biasSigma,
+        genomeTO.mutations.neuronMutation1.activationFunctionProbability};
+    genome->mutations.neuronMutation2 = {
+        genomeTO.mutations.neuronMutation2.probability,
+        genomeTO.mutations.neuronMutation2.weightSigma,
+        genomeTO.mutations.neuronMutation2.biasSigma,
+        genomeTO.mutations.neuronMutation2.activationFunctionProbability};
+    genome->mutations.connectionMutationRate1 = {genomeTO.mutations.connectionMutationRate1.probability, genomeTO.mutations.connectionMutationRate1.sigma};
+    genome->mutations.connectionMutationRate2 = {genomeTO.mutations.connectionMutationRate2.probability, genomeTO.mutations.connectionMutationRate2.sigma};
     genome->numGenes = genomeTO.numGenes;
     for (int i = 0; i < sizeof(genomeTO.name); ++i) {
         genome->name[i] = genomeTO.name[i];

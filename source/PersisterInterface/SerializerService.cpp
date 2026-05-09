@@ -165,11 +165,12 @@ namespace cereal
 /************************************************************************/
 namespace
 {
+    auto constexpr Id_Mutations_LineageMutationProbability = 0;
+
     auto constexpr Id_Genome_Id = 0;
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
-    auto constexpr Id_Genome_LineageMutationProbability = 4;
     auto constexpr Id_Genome_PrevLineageId = 5;
 
     auto constexpr Id_NeuronMutation_Probability = 0;
@@ -804,7 +805,7 @@ namespace cereal
     {
         MutationsDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
+        loadSave(task, auxiliaries, Id_Mutations_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._neuronMutation1);
@@ -824,18 +825,9 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
-
-        // Backward compatibility: in old format, lineageMutationProbability was at GenomeDesc level
-        // In new format, it's nested in MutationsDesc
-        if (task == SerializationTask::Load && auxiliaries.find(Id_Genome_LineageMutationProbability) != auxiliaries.end()) {
-            // Old format detected: load lineageMutationProbability from GenomeDesc auxiliaries
-            loadSave(task, auxiliaries, Id_Genome_LineageMutationProbability, data._mutation._lineageMutationProbability, defaultObject._mutation._lineageMutationProbability);
-        }
-
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._genes);
-        ar(data._mutation);
+        ar(data._genes, data._mutations);
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }

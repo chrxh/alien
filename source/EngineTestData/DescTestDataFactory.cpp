@@ -178,7 +178,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                       .lineageId(502)
                       .prevLineageId(501)
                       .frontAngle(270.0f)
-                      .mutation(mutation)
+                      .mutations(mutation)
                       .genes({
                           GeneDesc()
                               .name("Test Gene")
