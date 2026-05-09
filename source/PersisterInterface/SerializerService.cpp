@@ -123,7 +123,14 @@ namespace cereal
                 }
             }
         } else {
+            // Add this field to the map
             loadSaveMap.emplace(key, true);
+            // Serialize the map if it hasn't been serialized yet (check if map is not empty)
+            // We serialize before the nested object so the order is: map, then nested object's serialization
+            if (!loadSaveMap.empty()) {
+                ar(loadSaveMap);
+                loadSaveMap.clear();  // Clear to avoid serializing again
+            }
             ar(value);
         }
     }
@@ -442,8 +449,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         loadSaveDesc(task, ar, auxiliaries, Id_SensorGenome_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SensorGenomeDesc)
 
@@ -478,8 +483,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_GeneratorGenome_ValueOffset, data._valueOffset, defaultObject._valueOffset);
         loadSave(task, auxiliaries, Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
         loadSaveDesc(task, ar, auxiliaries, Id_GeneratorGenome_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(GeneratorGenomeDesc)
 
@@ -508,8 +511,6 @@ namespace cereal
         AttackerGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_AttackerGenome_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerGenomeDesc)
 
@@ -598,8 +599,6 @@ namespace cereal
         MuscleGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_MuscleGenome_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MuscleGenomeDesc)
 
@@ -651,8 +650,6 @@ namespace cereal
         ReconnectorGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_ReconnectorGenome_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ReconnectorGenomeDesc)
 
@@ -735,8 +732,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MemoryGenome_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
         loadSaveDesc(task, ar, auxiliaries, Id_MemoryGenome_Mode, data._mode);
         loadSaveDesc(task, ar, auxiliaries, Id_MemoryGenome_SignalEntries, data._signalEntries);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MemoryGenomeDesc)
 
@@ -768,8 +763,6 @@ namespace cereal
         CommunicatorGenomeDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_CommunicatorGenome_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(CommunicatorGenomeDesc)
 
@@ -791,8 +784,6 @@ namespace cereal
         loadSaveDesc(task, ar, auxiliaries, Id_Node_NeuralNetwork, data._neuralNetwork);
         loadSaveDesc(task, ar, auxiliaries, Id_Node_CellType, data._cellType);
         loadSaveDesc(task, ar, auxiliaries, Id_Node_Constructor, data._constructor);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NodeDesc)
 
@@ -809,8 +800,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
         loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
         loadSaveDesc(task, ar, auxiliaries, Id_Gene_Nodes, data._nodes);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(GeneDesc)
 
@@ -853,8 +842,6 @@ namespace cereal
         loadSaveDesc(task, ar, auxiliaries, Id_MutationRates_NeuronMutation2, data._neuronMutation2);
         loadSaveDesc(task, ar, auxiliaries, Id_MutationRates_ConnectionMutation1, data._connectionMutation1);
         loadSaveDesc(task, ar, auxiliaries, Id_MutationRates_ConnectionMutation2, data._connectionMutation2);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MutationRatesDesc)
 
@@ -870,8 +857,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         loadSaveDesc(task, ar, auxiliaries, Id_Genome_Genes, data._genes);
         loadSaveDesc(task, ar, auxiliaries, Id_Genome_MutationRates, data._mutationRates);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }
@@ -1228,8 +1213,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
         loadSaveDesc(task, ar, auxiliaries, Id_Sensor_Mode, data._mode);
         loadSaveDesc(task, ar, auxiliaries, Id_Sensor_LastMatch, data._lastMatch);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SensorDesc)
 
@@ -1265,8 +1248,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Generator_ValueOffset, data._valueOffset, defaultObject._valueOffset);
         loadSave(task, auxiliaries, Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
         loadSaveDesc(task, ar, auxiliaries, Id_Generator_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(GeneratorDesc)
 
@@ -1295,8 +1276,6 @@ namespace cereal
         AttackerDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_Attacker_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerDesc)
 
@@ -1394,8 +1373,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Muscle_LastMovementX, data._lastMovementX, defaultObject._lastMovementX);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementY, data._lastMovementY, defaultObject._lastMovementY);
         loadSaveDesc(task, ar, auxiliaries, Id_Muscle_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MuscleDesc)
 
@@ -1447,8 +1424,6 @@ namespace cereal
         ReconnectorDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_Reconnector_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ReconnectorDesc)
 
@@ -1536,8 +1511,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Memory_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
         loadSaveDesc(task, ar, auxiliaries, Id_Memory_Mode, data._mode);
         loadSaveDesc(task, ar, auxiliaries, Id_Memory_SignalEntries, data._signalEntries);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MemoryDesc)
 
@@ -1569,8 +1542,6 @@ namespace cereal
         CommunicatorDesc defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_Communicator_Mode, data._mode);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(CommunicatorDesc)
 
@@ -1641,8 +1612,6 @@ namespace cereal
         loadSaveDesc(task, ar, auxiliaries, Id_Cell_Constructor, data._constructor);
         loadSaveDesc(task, ar, auxiliaries, Id_Cell_Signal, data._signal);
         loadSaveDesc(task, ar, auxiliaries, Id_Cell_NeuralNetwork, data._neuralNetwork);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(CellDesc)
 
@@ -1660,8 +1629,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Object_Sticky, data._sticky, defaultObject._sticky);
         loadSaveDesc(task, ar, auxiliaries, Id_Object_Connections, data._connections);
         loadSaveDesc(task, ar, auxiliaries, Id_Object_Type, data._type);
-
-        processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ObjectDesc)
 
