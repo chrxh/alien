@@ -73,5 +73,5 @@ target_precompile_headers(PersisterInterface PRIVATE
 )
 
 if (MSVC)
-    target_compile_options(PersisterInterface PRIVATE "/MP")
+    target_compile_options(PersisterInterface PRIVATE "/MP" "/bigobj")
 endif()
