@@ -90,6 +90,15 @@ namespace cereal
     template <class Archive>
     void processLoadSaveMap(SerializationTask task, Archive& ar, std::unordered_map<int, VariantData>& loadSaveMap);
 
+    // Structure to hold deferred Desc serialization operations
+    template <typename T>
+    struct DeferredDescOperation
+    {
+        int id;
+        T* valuePtr;
+        std::function<void()> serializeFunc;  // For Save: stores serialization lambda
+    };
+
     // RAII wrapper that automatically calls processLoadSaveMap on destruction
     // This provides unified approach: no manual processLoadSaveMap calls needed
     template <class Archive>
@@ -107,6 +116,49 @@ namespace cereal
         ~LoadSaveMapWrapper()
         {
             processLoadSaveMap(_task, _ar, _map);
+
+            // Process deferred Desc operations
+            if (_task == SerializationTask::Save) {
+                // Save: sort IDs and write them first
+                std::vector<int> sortedIds;
+                for (const auto& op : _deferredOps) {
+                    sortedIds.push_back(op.id);
+                }
+                std::sort(sortedIds.begin(), sortedIds.end());
+                _ar(sortedIds);
+
+                // Then write size-prefixed Desc data in sorted ID order
+                for (int id : sortedIds) {
+                    // Find the operation for this ID
+                    auto it = std::find_if(_deferredOps.begin(), _deferredOps.end(),
+                        [id](const auto& op) { return op.id == id; });
+                    if (it != _deferredOps.end()) {
+                        // Execute the serialization function (writes size + data)
+                        it->serializeFunc();
+                    }
+                }
+            } else {
+                // Load: read the sorted ID vector
+                std::vector<int> savedIds;
+                _ar(savedIds);
+
+                // For each saved ID, check if we have a deferred read operation
+                for (int id : savedIds) {
+                    auto it = std::find_if(_deferredOps.begin(), _deferredOps.end(),
+                        [id](const auto& op) { return op.id == id; });
+
+                    if (it != _deferredOps.end()) {
+                        // We want to read this Desc - execute the read
+                        it->serializeFunc();
+                    } else {
+                        // Skip this Desc - read size and skip data
+                        uint64_t dataSize = 0;
+                        _ar(dataSize);
+                        std::vector<uint8_t> buffer(dataSize);
+                        _ar(cereal::binary_data(buffer.data(), dataSize));
+                    }
+                }
+            }
         }
 
         // Prevent copying
@@ -120,10 +172,24 @@ namespace cereal
         // Implicit conversion to reference
         operator std::unordered_map<int, VariantData>&() & { return _map; }
 
+        // Add a deferred Desc operation
+        template <typename T>
+        void addDeferredDescOp(int id, T* valuePtr, std::function<void()> serializeFunc)
+        {
+            _deferredOps.push_back({id, reinterpret_cast<void*>(valuePtr), std::move(serializeFunc)});
+        }
+
     private:
+        struct DeferredOp {
+            int id;
+            void* valuePtr;
+            std::function<void()> serializeFunc;
+        };
+
         SerializationTask _task;
         Archive& _ar;
         std::unordered_map<int, VariantData> _map;
+        std::vector<DeferredOp> _deferredOps;
     };
 
     template <class Archive>
@@ -148,54 +214,40 @@ namespace cereal
     }
 
     template <class Archive, typename T>
-    void loadSaveDesc(SerializationTask task, Archive& ar, std::unordered_map<int, VariantData>& loadSaveMap, int key, T& value)
+    void loadSaveDesc(SerializationTask task, Archive& ar, LoadSaveMapWrapper<Archive>& wrapper, int key, T& value)
     {
-        if (task == SerializationTask::Load) {
-            auto findResult = loadSaveMap.find(key);
-            if (findResult != loadSaveMap.end()) {
-                auto& variantData = findResult->second;
-                // Check if this key has a marker (true = data present in archive)
-                if (std::holds_alternative<bool>(variantData) && std::get<bool>(variantData)) {
-                    // Read size-prefixed data from archive
-                    uint64_t dataSize = 0;
-                    ar(dataSize);
-
-                    // Read serialized data into buffer
-                    std::vector<uint8_t> buffer(dataSize);
-                    ar(cereal::binary_data(buffer.data(), dataSize));
-
-                    // Deserialize from buffer
-                    std::stringstream ss(std::string(buffer.begin(), buffer.end()));
-                    cereal::PortableBinaryInputArchive bufferAr(ss);
+        if (task == SerializationTask::Save) {
+            // Defer the save operation
+            wrapper.addDeferredDescOp(key, &value, [&ar, &value]() {
+                // Serialize to buffer
+                std::stringstream ss;
+                {
+                    cereal::PortableBinaryOutputArchive bufferAr(ss);
                     bufferAr(value);
-
-                    // Mark as consumed
-                    variantData = false;
                 }
-            } else {
-                // Key not in map - Desc type not present in saved data, use default
-                value = T{};
-            }
+                std::string serializedData = ss.str();
+                uint64_t dataSize = serializedData.size();
+
+                // Write size-prefixed data
+                ar(dataSize);
+                ar(cereal::binary_data(serializedData.data(), dataSize));
+            });
         } else {
-            // Add marker to map
-            loadSaveMap.emplace(key, true);
+            // Defer the load operation
+            wrapper.addDeferredDescOp(key, &value, [&ar, &value]() {
+                // Read size-prefixed data
+                uint64_t dataSize = 0;
+                ar(dataSize);
 
-            // Write map first (only on first call due to sentinel in processLoadSaveMap)
-            processLoadSaveMap(task, ar, loadSaveMap);
+                // Read serialized data into buffer
+                std::vector<uint8_t> buffer(dataSize);
+                ar(cereal::binary_data(buffer.data(), dataSize));
 
-            // Then serialize to buffer and write size+data
-            std::stringstream ss;
-            {
-                cereal::PortableBinaryOutputArchive bufferAr(ss);
+                // Deserialize from buffer
+                std::stringstream ss(std::string(buffer.begin(), buffer.end()));
+                cereal::PortableBinaryInputArchive bufferAr(ss);
                 bufferAr(value);
-            }
-
-            std::string serializedData = ss.str();
-            uint64_t dataSize = serializedData.size();
-
-            // Write size-prefixed data to archive
-            ar(dataSize);
-            ar(cereal::binary_data(serializedData.data(), dataSize));
+            });
         }
     }
 
@@ -231,28 +283,10 @@ namespace cereal
     template <class Archive>
     void processLoadSaveMap(SerializationTask task, Archive& ar, std::unordered_map<int, VariantData>& loadSaveMap)
     {
-        constexpr int SERIALIZED_MARKER = -999999;  // Sentinel to mark map as already serialized
-
         if (task == SerializationTask::Save) {
-            // Only serialize if we haven't already
-            if (loadSaveMap.find(SERIALIZED_MARKER) == loadSaveMap.end()) {
-                ar(loadSaveMap);
-                loadSaveMap.emplace(SERIALIZED_MARKER, true);  // Mark as serialized
-            }
-        } else {
-            // On Load: skip any unprocessed Desc objects (removed from code but in saved data)
-            for (auto& [key, variantData] : loadSaveMap) {
-                if (std::holds_alternative<bool>(variantData) && std::get<bool>(variantData)) {
-                    // Unprocessed Desc marker - skip its size-prefixed data
-                    uint64_t dataSize = 0;
-                    ar(dataSize);
-
-                    // Read and discard data
-                    std::vector<uint8_t> buffer(dataSize);
-                    ar(cereal::binary_data(buffer.data(), dataSize));
-                }
-            }
+            ar(loadSaveMap);
         }
+        // For Load: map was already read in constructor, nothing to do here
     }
 
     template <class Archive>
