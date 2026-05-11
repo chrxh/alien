@@ -1,7 +1,7 @@
 #include "AlienDialog.h"
 
 
-AlienDialog::AlienDialog(std::string const& title, ImVec2 const& defaultSize)
+AlienDialog::AlienDialog(std::string const& title, RealVector2D const& defaultSize)
     : _title(title)
     , _defaultSize(defaultSize)
 {}
