@@ -32,6 +32,10 @@ add_library(Base
 
 target_link_libraries(Base Boost::boost)
 
+if (WIN32)
+    target_link_libraries(Base dbghelp)
+endif()
+
 target_precompile_headers(Base PRIVATE
     <algorithm>
     <array>
