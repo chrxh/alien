@@ -28,17 +28,11 @@ namespace
     std::vector<std::string> getActiveMutations(MutationRatesDesc const& mutationRates)
     {
         std::vector<std::string> activeMutations;
-        if (mutationRates._connectionMutation1._probability > 0.0f) {
-            activeMutations.push_back("Connection mutation 1");
+        if (mutationRates._connectionMutation1._probability > 0.0f || mutationRates._connectionMutation2._probability > 0.0f) {
+            activeMutations.push_back("Connection mutations");
         }
-        if (mutationRates._connectionMutation2._probability > 0.0f) {
-            activeMutations.push_back("Connection mutation 2");
-        }
-        if (mutationRates._neuronMutation1._probability > 0.0f) {
-            activeMutations.push_back("Neuron mutation 1");
-        }
-        if (mutationRates._neuronMutation2._probability > 0.0f) {
-            activeMutations.push_back("Neuron mutation 2");
+        if (mutationRates._neuronMutation1._probability > 0.0f || mutationRates._neuronMutation2._probability > 0.0f) {
+            activeMutations.push_back("Neuron mutations");
         }
         if (mutationRates._lineageMutationProbability > 0.0f) {
             activeMutations.push_back("Lineage mutation");
@@ -126,7 +120,7 @@ void _GenomeEditorWidget::processHeaderData()
                 ImGui::SameLine(availableWidth - buttonWidth);
             } else {
                 for (auto const& mutation : activeMutations) {
-                    AlienGui::Text("• " + mutation);
+                    AlienGui::Text("- " + mutation);
                 }
                 ImGui::SameLine(availableWidth - buttonWidth);
             }
