@@ -103,7 +103,7 @@ namespace cereal
 
         ~LoadSaveContext()
         {
-            // Process deferred Desc operations
+            // Process deferred operations
             if (_task == SerializationTask::Save) {
 
                 // Save map first
