@@ -13,7 +13,7 @@ namespace
 }
 
 MutationRateDialog::MutationRateDialog()
-    : AlienDialog("Mutation rates")
+    : AlienDialog("Mutation rates", ImVec2(800.0f, 400.0f))
 {}
 
 void MutationRateDialog::initIntern() {}
