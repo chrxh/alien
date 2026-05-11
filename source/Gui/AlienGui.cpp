@@ -1564,8 +1564,6 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     auto drawList = ImGui::GetWindowDrawList();
     auto style = ImGui::GetStyle();
 
-    ImGui::Spacing();
-
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto lineHeight = ImGui::GetTextLineHeight();
     auto padding = style.FramePadding;
@@ -1616,15 +1614,16 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
         ImGui::TextUnformatted("None");
     } else {
         for (auto const& item : parameters._items) {
-            ImGui::TextUnformatted(("- " + item).c_str());
+            ImGui::TextUnformatted(item.c_str());
         }
     }
     ImGui::EndDisabled();
 
-    // Move cursor to after the box
-    ImGui::SetCursorScreenPos(ImVec2(cursorPos.x, cursorPos.y + boxHeight));
+    // Move cursor to end of the box (right side), keeping same Y position for same-line layout
+    ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + width, cursorPos.y));
 
-    ImGui::Spacing();
+    // Create an invisible item with the box height to reserve vertical space
+    ImGui::Dummy(ImVec2(0, boxHeight));
 }
 
 bool AlienGui::ToolbarButton(ToolbarButtonParameters const& parameters)

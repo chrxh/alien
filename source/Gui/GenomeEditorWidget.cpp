@@ -118,8 +118,6 @@ void _GenomeEditorWidget::processHeaderData()
 
             AlienGui::ListBox(AlienGui::ListBoxParameters().items(activeMutations).width(listBoxWidth));
 
-            ImGui::SameLine();
-
             if (AlienGui::Button("Edit")) {
                 MutationRateDialog::get().open(
                     _editData->genome._mutationRates, [this](MutationRatesDesc const& mutationRates) { _editData->genome._mutationRates = mutationRates; });
