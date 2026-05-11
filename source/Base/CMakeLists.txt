@@ -1,5 +1,7 @@
 
 add_library(Base
+    Check.cpp
+    Check.h
     Cache.h
     Definitions.cpp
     Definitions.h
