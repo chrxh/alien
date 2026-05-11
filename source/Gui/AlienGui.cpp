@@ -1575,7 +1575,7 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     } else {
         // Auto-size: one line per item plus padding
         auto numItems = parameters._items.empty() ? 1 : parameters._items.size();
-        boxHeight = (lineHeight + padding.y * 2) * numItems + padding.y * 2;
+        boxHeight = (lineHeight + padding.y * 2) * numItems;
     }
 
     // Calculate width
@@ -1610,6 +1610,7 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + padding.x, cursorPos.y + padding.y));
 
     ImGui::BeginDisabled();  // This applies the disabled text color
+    ImGui::BeginGroup();
     if (parameters._items.empty()) {
         ImGui::TextUnformatted("None");
     } else {
@@ -1617,6 +1618,7 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
             ImGui::TextUnformatted(item.c_str());
         }
     }
+    ImGui::EndGroup();
     ImGui::EndDisabled();
 
     // Move cursor to end of the box (right side), keeping same Y position for same-line layout

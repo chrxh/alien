@@ -13,7 +13,7 @@ namespace
 }
 
 MutationRateDialog::MutationRateDialog()
-    : AlienDialog("Set mutation rates")
+    : AlienDialog("Mutation rates")
 {}
 
 void MutationRateDialog::initIntern() {}
