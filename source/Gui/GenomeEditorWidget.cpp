@@ -116,12 +116,19 @@ void _GenomeEditorWidget::processHeaderData()
             AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
 
             auto activeMutations = getActiveMutations(_editData->genome._mutationRates);
+
+            // Calculate button position for right alignment
+            auto buttonWidth = scale(60.0f);
+            auto availableWidth = ImGui::GetContentRegionAvail().x;
+
             if (activeMutations.empty()) {
                 AlienGui::Text(AlienGui::TextParameters().text("None").style(AlienGui::TextStyle::Decent));
+                ImGui::SameLine(availableWidth - buttonWidth);
             } else {
                 for (auto const& mutation : activeMutations) {
                     AlienGui::Text("• " + mutation);
                 }
+                ImGui::SameLine(availableWidth - buttonWidth);
             }
 
             if (AlienGui::Button("Edit")) {
