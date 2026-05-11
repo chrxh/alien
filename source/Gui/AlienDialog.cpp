@@ -1,8 +1,9 @@
 #include "AlienDialog.h"
 
 
-AlienDialog::AlienDialog(std::string const& title)
+AlienDialog::AlienDialog(std::string const& title, RealVector2D const& defaultSize)
     : _title(title)
+    , _defaultSize(defaultSize)
 {}
 
 void AlienDialog::init()
@@ -36,7 +37,7 @@ void AlienDialog::process()
     }
     if (_state == DialogState::JustOpened) {
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowSize({scale(450.0f), scale(150.0f)}, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize({scale(_defaultSize.x), scale(_defaultSize.y)}, ImGuiCond_FirstUseEver);
         ImGui::OpenPopup(_title.c_str());
         _state = DialogState::Open;
     }

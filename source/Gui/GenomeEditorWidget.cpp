@@ -16,6 +16,7 @@
 #include "GenericMessageDialog.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
+#include "MutationRateDialog.h"
 #include "StyleRepository.h"
 
 namespace
@@ -23,6 +24,21 @@ namespace
     auto constexpr HeaderMinRightColumnWidth = 160.0f;
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
     auto constexpr HeaderMinColumnWidth = 300.0f;
+
+    std::vector<std::string> getActiveMutations(MutationRatesDesc const& mutationRates)
+    {
+        std::vector<std::string> activeMutations;
+        if (mutationRates._connectionMutation1._probability > 0.0f || mutationRates._connectionMutation2._probability > 0.0f) {
+            activeMutations.push_back("Connection mutations");
+        }
+        if (mutationRates._neuronMutation1._probability > 0.0f || mutationRates._neuronMutation2._probability > 0.0f) {
+            activeMutations.push_back("Neuron mutations");
+        }
+        if (mutationRates._lineageMutationProbability > 0.0f) {
+            activeMutations.push_back("Lineage mutation");
+        }
+        return activeMutations;
+    }
 }
 
 
@@ -91,113 +107,18 @@ void _GenomeEditorWidget::processHeaderData()
 
             table.next();
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 1"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id("CMR1")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._connectionMutation1._probability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Sigma").id("CMR1").min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._connectionMutation1._sigma);
+            AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 2"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id("CMR2")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._connectionMutation2._probability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Sigma").id("CMR2").min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._connectionMutation2._sigma);
-            table.next();
+            auto buttonWidth = scale(60.0f);
+            auto availableWidth = ImGui::GetContentRegionAvail().x;
+            auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
+            AlienGui::ListBox(AlienGui::ListBoxParameters().items(getActiveMutations(_editData->genome._mutationRates)).width(listBoxWidth));
+            ImGui::SameLine();
+            if (AlienGui::Button("Edit")) {
+                MutationRateDialog::get().open(
+                    _editData->genome._mutationRates, [this](MutationRatesDesc const& mutationRates) { _editData->genome._mutationRates = mutationRates; });
+            }
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 1"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id("NMR1")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._neuronMutation1._probability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Weight sigma")
-                    .id("NMR1")
-                    .min(0.0f)
-                    .max(2.0f)
-                    .logarithmic(true)
-                    .format("%.2f")
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._neuronMutation1._weightSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Bias sigma").id("NMR1").min(0.0f).max(2.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._neuronMutation1._biasSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("ActFn probability")
-                    .id("NMR1")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._neuronMutation1._activationFunctionProbability);
-            table.next();
-
-            AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 2"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id("NMR2")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._neuronMutation2._probability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Weight sigma")
-                    .id("NMR2")
-                    .min(0.0f)
-                    .max(2.0f)
-                    .logarithmic(true)
-                    .format("%.2f")
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._neuronMutation2._weightSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Bias sigma").id("NMR2").min(0.0f).max(2.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._neuronMutation2._biasSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("ActFn probability")
-                    .id("NMR2")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._neuronMutation2._activationFunctionProbability);
-            table.next();
-
-            AlienGui::Group(AlienGui::GroupParameters().text("Lineage mutation rate"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Probability").min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
-                &_editData->genome._mutationRates._lineageMutationProbability);
             table.next();
 
             table.end();

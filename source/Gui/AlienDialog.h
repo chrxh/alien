@@ -12,7 +12,7 @@
 class AlienDialog : public MainLoopEntity
 {
 public:
-    AlienDialog(std::string const& title);
+    AlienDialog(std::string const& title, RealVector2D const& defaultSize = RealVector2D(450.0f, 150.0f));
 
     virtual void open();
 
@@ -40,4 +40,5 @@ private:
     };
     DialogState _state = DialogState::Closed;
     std::string _title;
+    RealVector2D _defaultSize;
 };

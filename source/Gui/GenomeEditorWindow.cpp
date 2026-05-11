@@ -24,6 +24,7 @@
 #include "GenomeTabLayoutData.h"
 #include "GenomeTabWidget.h"
 #include "GenomeWindowEditData.h"
+#include "MutationRateDialog.h"
 #include "OverlayController.h"
 
 void GenomeEditorWindow::openTab(GenomeDesc const& genome, bool forceNewTab, bool openEditorIfClosed)
@@ -64,6 +65,7 @@ GenomeEditorWindow::GenomeEditorWindow()
 void GenomeEditorWindow::initIntern()
 {
     ChangeColorDialog::get().setup();
+    MutationRateDialog::get().setup();
 
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
@@ -71,9 +73,7 @@ void GenomeEditorWindow::initIntern()
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
 }
 
-void GenomeEditorWindow::shutdownIntern()
-{
-}
+void GenomeEditorWindow::shutdownIntern() {}
 
 void GenomeEditorWindow::processIntern()
 {

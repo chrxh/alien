@@ -1559,6 +1559,75 @@ void AlienGui::Group(GroupParameters const& parameters)
     ImGui::Spacing();
 }
 
+void AlienGui::ListBox(ListBoxParameters const& parameters)
+{
+    auto drawList = ImGui::GetWindowDrawList();
+    auto style = ImGui::GetStyle();
+
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    auto lineHeight = ImGui::GetTextLineHeight();
+    auto padding = style.FramePadding;
+
+    // Calculate height based on items or use provided height
+    float boxHeight;
+    if (parameters._height > 0) {
+        boxHeight = scale(parameters._height);
+    } else {
+        // Auto-size: one line per item plus padding
+        auto numItems = parameters._items.empty() ? 1 : parameters._items.size();
+        boxHeight = (lineHeight + padding.y * 2) * numItems;
+    }
+
+    // Calculate width
+    float width;
+    if (parameters._width > 0) {
+        width = scale(parameters._width);
+    } else {
+        width = ImGui::GetContentRegionAvail().x;
+    }
+
+    // Use ImGui's FrameBg color to match read-only text fields
+    auto bgColor = ImGui::GetColorU32(ImGuiCol_FrameBg);
+    auto borderColor = ImGui::GetColorU32(ImGuiCol_Border);
+
+    // Draw background
+    drawList->AddRectFilled(
+        ImVec2(cursorPos.x, cursorPos.y),
+        ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
+        bgColor,
+        style.FrameRounding);
+
+    // Draw frame border
+    drawList->AddRect(
+        ImVec2(cursorPos.x, cursorPos.y),
+        ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
+        borderColor,
+        style.FrameRounding,
+        0,
+        1.0f);
+
+    // Draw items with disabled text color to match read-only fields
+    ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + padding.x, cursorPos.y + padding.y));
+
+    ImGui::BeginDisabled();  // This applies the disabled text color
+    ImGui::BeginGroup();
+    if (parameters._items.empty()) {
+        ImGui::TextUnformatted("None");
+    } else {
+        for (auto const& item : parameters._items) {
+            ImGui::TextUnformatted(item.c_str());
+        }
+    }
+    ImGui::EndGroup();
+    ImGui::EndDisabled();
+
+    // Move cursor to end of the box (right side), keeping same Y position for same-line layout
+    ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + width, cursorPos.y));
+
+    // Create an invisible item with the box height to reserve vertical space
+    ImGui::Dummy(ImVec2(0, boxHeight));
+}
+
 bool AlienGui::ToolbarButton(ToolbarButtonParameters const& parameters)
 {
     auto id = std::to_string(ImGui::GetID(parameters._text.c_str()));
