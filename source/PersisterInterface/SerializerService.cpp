@@ -86,68 +86,59 @@ namespace cereal
         std::vector<std::vector<int>>,
         std::vector<std::vector<float>>>;
 
-    // Forward declaration
-    template <class Archive>
-    void processLoadSaveMap(SerializationTask task, Archive& ar, std::unordered_map<int, VariantData>& loadSaveMap);
+    using AttributeMap = std::unordered_map<int, VariantData>;
 
-    // Structure to hold deferred Desc serialization operations
-    template <typename T>
-    struct DeferredDescOperation
-    {
-        int id;
-        T* valuePtr;
-        std::function<void()> serializeFunc;  // For Save: stores serialization lambda
-    };
-
-    // RAII wrapper that automatically calls processLoadSaveMap on destruction
-    // This provides unified approach: no manual processLoadSaveMap calls needed
+    // RAII pattern
     template <class Archive>
-    class LoadSaveMapWrapper
+    class LoadSaveContext
     {
     public:
-        LoadSaveMapWrapper(SerializationTask task, Archive& ar) : _task(task), _ar(ar), _map()
+        LoadSaveContext(SerializationTask task, Archive& ar) : _task(task), _ar(ar)
         {
-            // Always read/write map first to maintain correct archive order
+            // Read map first
             if (_task == SerializationTask::Load) {
-                _ar(_map);
+                _ar(_attributeMap);
             }
         }
 
-        ~LoadSaveMapWrapper()
+        ~LoadSaveContext()
         {
-            processLoadSaveMap(_task, _ar, _map);
-
             // Process deferred Desc operations
             if (_task == SerializationTask::Save) {
-                // Save: sort IDs and write them first
+
+                // Save map first
+                _ar(_attributeMap);
+
+                // Save sorted ids
                 std::vector<int> sortedIds;
-                for (const auto& op : _deferredOps) {
+                for (const auto& op : _deferredDescOps) {
                     sortedIds.push_back(op.id);
                 }
                 std::sort(sortedIds.begin(), sortedIds.end());
                 _ar(sortedIds);
 
-                // Then write size-prefixed Desc data in sorted ID order
+                // Then write size-prefixed Desc data in sorted id order
                 for (int id : sortedIds) {
                     // Find the operation for this ID
-                    auto it = std::find_if(_deferredOps.begin(), _deferredOps.end(),
+                    auto it = std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(),
                         [id](const auto& op) { return op.id == id; });
-                    if (it != _deferredOps.end()) {
+                    if (it != _deferredDescOps.end()) {
                         // Execute the serialization function (writes size + data)
                         it->serializeFunc();
                     }
                 }
             } else {
-                // Load: read the sorted ID vector
+
+                // Read sorted ids
                 std::vector<int> savedIds;
                 _ar(savedIds);
 
-                // For each saved ID, check if we have a deferred read operation
+                // For each id, check if we have a deferred read operation, otherwise skip bytes
                 for (int id : savedIds) {
-                    auto it = std::find_if(_deferredOps.begin(), _deferredOps.end(),
+                    auto it = std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(),
                         [id](const auto& op) { return op.id == id; });
 
-                    if (it != _deferredOps.end()) {
+                    if (it != _deferredDescOps.end()) {
                         // We want to read this Desc - execute the read
                         it->serializeFunc();
                     } else {
@@ -161,26 +152,24 @@ namespace cereal
             }
         }
 
-        // Prevent copying
-        LoadSaveMapWrapper(const LoadSaveMapWrapper&) = delete;
-        LoadSaveMapWrapper& operator=(const LoadSaveMapWrapper&) = delete;
+        LoadSaveContext(const LoadSaveContext&) = delete;
+        LoadSaveContext& operator=(const LoadSaveContext&) = delete;
 
-        // Allow moving
-        LoadSaveMapWrapper(LoadSaveMapWrapper&&) = default;
-        LoadSaveMapWrapper& operator=(LoadSaveMapWrapper&&) = default;
+        LoadSaveContext(LoadSaveContext&&) = default;
+        LoadSaveContext& operator=(LoadSaveContext&&) = default;
 
         // Implicit conversion to reference
-        operator std::unordered_map<int, VariantData>&() & { return _map; }
+        operator std::unordered_map<int, VariantData>&() & { return _attributeMap; }
 
         // Add a deferred Desc operation
         template <typename T>
         void addDeferredDescOp(int id, T* valuePtr, std::function<void()> serializeFunc)
         {
-            _deferredOps.push_back({id, reinterpret_cast<void*>(valuePtr), std::move(serializeFunc)});
+            _deferredDescOps.push_back({id, reinterpret_cast<void*>(valuePtr), std::move(serializeFunc)});
         }
 
     private:
-        struct DeferredOp {
+        struct DeferredOperation {
             int id;
             void* valuePtr;
             std::function<void()> serializeFunc;
@@ -188,17 +177,17 @@ namespace cereal
 
         SerializationTask _task;
         Archive& _ar;
-        std::unordered_map<int, VariantData> _map;
-        std::vector<DeferredOp> _deferredOps;
+        AttributeMap _attributeMap;
+        std::vector<DeferredOperation> _deferredDescOps;
     };
 
     template <class Archive>
-    LoadSaveMapWrapper<Archive> getLoadSaveMap(SerializationTask task, Archive& ar)
+    LoadSaveContext<Archive> getLoadSaveContext(SerializationTask task, Archive& ar)
     {
-        return LoadSaveMapWrapper<Archive>(task, ar);
+        return LoadSaveContext<Archive>(task, ar);
     }
     template <typename T>
-    void loadSave(SerializationTask task, std::unordered_map<int, VariantData>& loadSaveMap, int key, T& value, T const& defaultValue)
+    void loadSave(SerializationTask task, AttributeMap& loadSaveMap, int key, T& value, T const& defaultValue)
     {
         if (task == SerializationTask::Load) {
             auto findResult = loadSaveMap.find(key);
@@ -214,7 +203,7 @@ namespace cereal
     }
 
     template <class Archive, typename T>
-    void loadSaveDesc(SerializationTask task, Archive& ar, LoadSaveMapWrapper<Archive>& wrapper, int key, T& value)
+    void loadSaveDesc(SerializationTask task, Archive& ar, LoadSaveContext<Archive>& wrapper, int key, T& value)
     {
         if (task == SerializationTask::Save) {
             // Defer the save operation
@@ -252,12 +241,8 @@ namespace cereal
     }
 
     // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
-    void loadSave(
-        SerializationTask task,
-        std::unordered_map<int, VariantData>& loadSaveMap,
-        int key,
-        std::vector<NeuralNetWeight>& value,
-        std::vector<NeuralNetWeight> const& defaultValue)
+    void
+    loadSave(SerializationTask task, AttributeMap& loadSaveMap, int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
     {
         if (task == SerializationTask::Load) {
             auto findResult = loadSaveMap.find(key);
@@ -278,15 +263,6 @@ namespace cereal
             }
             loadSaveMap.emplace(key, int8Vec);
         }
-    }
-
-    template <class Archive>
-    void processLoadSaveMap(SerializationTask task, Archive& ar, std::unordered_map<int, VariantData>& loadSaveMap)
-    {
-        if (task == SerializationTask::Save) {
-            ar(loadSaveMap);
-        }
-        // For Load: map was already read in constructor, nothing to do here
     }
 
     template <class Archive>
@@ -460,7 +436,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, NeuralNetGenomeDesc& data)
     {
         NeuralNetGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
         loadSave(task, auxiliaries, Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
         loadSave(task, auxiliaries, Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
@@ -472,7 +448,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, BaseGenomeDesc& data)
     {
         BaseGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(BaseGenomeDesc)
 
@@ -480,7 +456,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DepotGenomeDesc& data)
     {
         DepotGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_DepotGenome_storageLimit, data._storageLimit, defaultObject._storageLimit);
         loadSave(task, auxiliaries, Id_DepotGenome_InitialStoredUsableEnergy, data._initialStoredUsableEnergy, defaultObject._initialStoredUsableEnergy);
     }
@@ -490,7 +466,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ConstructorGenomeDesc& data)
     {
         ConstructorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_ConstructorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_ConstructorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(
@@ -505,7 +481,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, TelemetryGenomeDesc& data)
     {
         //TelemetryGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(TelemetryGenomeDesc)
 
@@ -513,7 +489,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DetectEnergyGenomeDesc& data)
     {
         DetectEnergyGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
     }
     SPLIT_SERIALIZATION(DetectEnergyGenomeDesc)
@@ -521,7 +497,7 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectSolidGenomeDesc& data)
     {
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(DetectSolidGenomeDesc)
 
@@ -529,7 +505,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DetectFreeCellGenomeDesc& data)
     {
         DetectFreeCellGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectFreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
@@ -539,7 +515,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DetectCreatureGenomeDesc& data)
     {
         DetectCreatureGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
         loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
@@ -551,7 +527,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SensorGenomeDesc& data)
     {
         SensorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SensorGenome_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
         loadSave(task, auxiliaries, Id_SensorGenome_TagForAttackers, data._tagForAttackers, defaultObject._tagForAttackers);
         loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
@@ -564,7 +540,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SquareSignalGenomeDesc& data)
     {
         SquareSignalGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_GeneratorModeGenome_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
         loadSave(task, auxiliaries, Id_GeneratorModeGenome_SquareSignal_Period, data._period, defaultObject._period);
     }
@@ -574,7 +550,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SawtoothSignalGenomeDesc& data)
     {
         SawtoothSignalGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_GeneratorModeGenome_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
         loadSave(task, auxiliaries, Id_GeneratorModeGenome_SawtoothSignal_Period, data._period, defaultObject._period);
     }
@@ -584,7 +560,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, GeneratorGenomeDesc& data)
     {
         GeneratorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
         loadSave(task, auxiliaries, Id_GeneratorGenome_ValueOffset, data._valueOffset, defaultObject._valueOffset);
         loadSave(task, auxiliaries, Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
@@ -596,7 +572,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AttackFreeCellGenomeDesc& data)
     {
         AttackFreeCellGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_AttackerModeGenome_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(AttackFreeCellGenomeDesc)
@@ -605,7 +581,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AttackCreatureGenomeDesc& data)
     {
         AttackCreatureGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(AttackCreatureGenomeDesc)
 
@@ -613,7 +589,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AttackerGenomeDesc& data)
     {
         AttackerGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_AttackerGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(AttackerGenomeDesc)
@@ -622,7 +598,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, InjectorGenomeDesc& data)
     {
         InjectorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_InjectorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
     }
     SPLIT_SERIALIZATION(InjectorGenomeDesc)
@@ -631,7 +607,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AutoBendingGenomeDesc& data)
     {
         AutoBendingGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
@@ -641,7 +617,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ManualBendingGenomeDesc& data)
     {
         ManualBendingGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
@@ -651,7 +627,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AngleBendingGenomeDesc& data)
     {
         AngleBendingGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(
             task,
@@ -666,7 +642,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AutoCrawlingGenomeDesc& data)
     {
         AutoCrawlingGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
@@ -676,7 +652,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ManualCrawlingGenomeDesc& data)
     {
         ManualCrawlingGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
@@ -686,7 +662,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DirectMovementGenomeDesc& data)
     {
         DirectMovementGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(DirectMovementGenomeDesc)
 
@@ -694,7 +670,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, MuscleGenomeDesc& data)
     {
         MuscleGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_MuscleGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(MuscleGenomeDesc)
@@ -703,7 +679,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DefenderGenomeDesc& data)
     {
         DefenderGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_DefenderGenome_Mode, data._mode, defaultObject._mode);
     }
     SPLIT_SERIALIZATION(DefenderGenomeDesc)
@@ -712,7 +688,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReconnectSolidGenomeDesc& data)
     {
         ReconnectSolidGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(ReconnectSolidGenomeDesc)
 
@@ -720,7 +696,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellGenomeDesc& data)
     {
         ReconnectFreeCellGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorModeGenome_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(ReconnectFreeCellGenomeDesc)
@@ -729,7 +705,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReconnectCreatureGenomeDesc& data)
     {
         ReconnectCreatureGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorModeGenome_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
         loadSave(task, auxiliaries, Id_ReconnectorModeGenome_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
         loadSave(task, auxiliaries, Id_ReconnectorModeGenome_Creature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
@@ -741,7 +717,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReconnectorGenomeDesc& data)
     {
         ReconnectorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_ReconnectorGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(ReconnectorGenomeDesc)
@@ -750,7 +726,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DetonatorGenomeDesc& data)
     {
         DetonatorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_DetonatorGenome_Countdown, data._countdown, defaultObject._countdown);
     }
     SPLIT_SERIALIZATION(DetonatorGenomeDesc)
@@ -759,7 +735,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DigestorGenomeDesc& data)
     {
         DigestorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_DigestorGenome_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
     }
     SPLIT_SERIALIZATION(DigestorGenomeDesc)
@@ -768,7 +744,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalDelayGenomeDesc& data)
     {
         SignalDelayGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalDelayGenome_Delay, data._delay, defaultObject._delay);
     }
     SPLIT_SERIALIZATION(SignalDelayGenomeDesc)
@@ -777,7 +753,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalRecorderGenomeDesc& data)
     {
         SignalRecorderGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
         loadSave(task, auxiliaries, Id_SignalRecorderGenome_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
     }
@@ -787,7 +763,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalStorageGenomeDesc& data)
     {
         SignalStorageGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalStorageGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
     }
     SPLIT_SERIALIZATION(SignalStorageGenomeDesc)
@@ -796,7 +772,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalIntegratorGenomeDesc& data)
     {
         SignalIntegratorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalIntegratorGenome_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
     }
     SPLIT_SERIALIZATION(SignalIntegratorGenomeDesc)
@@ -805,7 +781,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalEntryGenomeDesc& data)
     {
         SignalEntryGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalEntryGenomeDesc)
@@ -814,7 +790,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, MemoryGenomeDesc& data)
     {
         MemoryGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MemoryGenome_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
         loadSaveDesc(task, ar, auxiliaries, Id_MemoryGenome_Mode, data._mode);
         loadSaveDesc(task, ar, auxiliaries, Id_MemoryGenome_SignalEntries, data._signalEntries);
@@ -825,7 +801,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SenderGenomeDesc& data)
     {
         SenderGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SenderGenome_Range, data._range, defaultObject._range);
         loadSave(task, auxiliaries, Id_SenderGenome_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
     }
@@ -835,7 +811,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReceiverGenomeDesc& data)
     {
         ReceiverGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_ReceiverGenome_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
         loadSave(task, auxiliaries, Id_ReceiverGenome_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
@@ -845,7 +821,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, CommunicatorGenomeDesc& data)
     {
         CommunicatorGenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_CommunicatorGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(CommunicatorGenomeDesc)
@@ -853,7 +829,7 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, VoidGenomeDesc& data)
     {
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(VoidGenomeDesc)
 
@@ -861,7 +837,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, NodeDesc& data)
     {
         NodeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
         loadSave(task, auxiliaries, Id_Node_Color, data._color, defaultObject._color);
         loadSaveDesc(task, ar, auxiliaries, Id_Node_NeuralNetwork, data._neuralNetwork);
@@ -874,7 +850,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, GeneDesc& data)
     {
         GeneDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Gene_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
         loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
@@ -890,7 +866,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, NeuronMutationDesc& data)
     {
         NeuronMutationDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_NeuronMutation_Probability, data._probability, defaultObject._probability);
         loadSave(task, auxiliaries, Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
         loadSave(task, auxiliaries, Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
@@ -907,7 +883,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ConnectionMutationDesc& data)
     {
         ConnectionMutationDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_ConnectionMutation_Probability, data._probability, defaultObject._probability);
         loadSave(task, auxiliaries, Id_ConnectionMutation_Sigma, data._sigma, defaultObject._sigma);
     }
@@ -917,7 +893,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, MutationRatesDesc& data)
     {
         MutationRatesDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Mutations_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
         loadSaveDesc(task, ar, auxiliaries, Id_MutationRates_NeuronMutation1, data._neuronMutation1);
         loadSaveDesc(task, ar, auxiliaries, Id_MutationRates_NeuronMutation2, data._neuronMutation2);
@@ -930,7 +906,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, GenomeDesc& data)
     {
         GenomeDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Genome_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
@@ -1153,7 +1129,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ConnectionDesc& data)
     {
         ConnectionDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Connection_ObjectId, data._objectId, defaultObject._objectId);
         loadSave(task, auxiliaries, Id_Connection_Distance, data._distance, defaultObject._distance);
         loadSave(task, auxiliaries, Id_Connection_AngleFromPrevious, data._angleFromPrevious, defaultObject._angleFromPrevious);
@@ -1164,7 +1140,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalDesc& data)
     {
         SignalDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Signal_Channels, data._channels, defaultObject._channels);
         loadSave(task, auxiliaries, Id_Signal_NumTimesSent, data._numTimesSent, defaultObject._numTimesSent);
     }
@@ -1174,7 +1150,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, NeuralNetDesc& data)
     {
         NeuralNetDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_NeuralNet_Weights, data._weights, defaultObject._weights);
         loadSave(task, auxiliaries, Id_NeuralNet_Biases, data._biases, defaultObject._biases);
         loadSave(task, auxiliaries, Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
@@ -1185,7 +1161,7 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, BaseDesc& data)
     {
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(BaseDesc)
 
@@ -1193,7 +1169,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DepotDesc& data)
     {
         DepotDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Depot_storageLimit, data._storageLimit, defaultObject._storageLimit);
         loadSave(task, auxiliaries, Id_Depot_StoredUsableEnergy, data._storedUsableEnergy, defaultObject._storedUsableEnergy);
     }
@@ -1203,7 +1179,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ConstructorDesc& data)
     {
         ConstructorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Constructor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
@@ -1219,7 +1195,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, TelemetryDesc& data)
     {
         //TelemetryDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(TelemetryDesc)
 
@@ -1227,7 +1203,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DetectEnergyDesc& data)
     {
         DetectEnergyDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
     }
     SPLIT_SERIALIZATION(DetectEnergyDesc)
@@ -1235,7 +1211,7 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectSolidDesc& data)
     {
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(DetectSolidDesc)
 
@@ -1243,7 +1219,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DetectFreeCellDesc& data)
     {
         DetectFreeCellDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
@@ -1253,7 +1229,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DetectCreatureDesc& data)
     {
         DetectCreatureDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
@@ -1265,7 +1241,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SensorLastMatchDesc& data)
     {
         SensorLastMatchDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_CreatureIdPart, data._creatureIdPart, defaultObject._creatureIdPart);
         loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_Pos, data._pos, defaultObject._pos);
     }
@@ -1275,7 +1251,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SensorDesc& data)
     {
         SensorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Sensor_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
         loadSave(task, auxiliaries, Id_Sensor_TagForAttackers, data._tagForAttackers, defaultObject._tagForAttackers);
         loadSave(task, auxiliaries, Id_Sensor_MinRange, data._minRange, defaultObject._minRange);
@@ -1289,7 +1265,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SquareSignalDesc& data)
     {
         SquareSignalDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_GeneratorMode_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
         loadSave(task, auxiliaries, Id_GeneratorMode_SquareSignal_Period, data._period, defaultObject._period);
     }
@@ -1299,7 +1275,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SawtoothSignalDesc& data)
     {
         SawtoothSignalDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_GeneratorMode_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
         loadSave(task, auxiliaries, Id_GeneratorMode_SawtoothSignal_Period, data._period, defaultObject._period);
     }
@@ -1309,7 +1285,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, GeneratorDesc& data)
     {
         GeneratorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Generator_Additive, data._additive, defaultObject._additive);
         loadSave(task, auxiliaries, Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
         loadSave(task, auxiliaries, Id_Generator_ValueOffset, data._valueOffset, defaultObject._valueOffset);
@@ -1322,7 +1298,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AttackFreeCellDesc& data)
     {
         AttackFreeCellDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(AttackFreeCellDesc)
@@ -1331,7 +1307,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AttackCreatureDesc& data)
     {
         AttackCreatureDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(AttackCreatureDesc)
 
@@ -1339,7 +1315,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AttackerDesc& data)
     {
         AttackerDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_Attacker_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(AttackerDesc)
@@ -1348,7 +1324,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, InjectorDesc& data)
     {
         InjectorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Injector_GeneIndex, data._geneIndex, defaultObject._geneIndex);
     }
     SPLIT_SERIALIZATION(InjectorDesc)
@@ -1357,7 +1333,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AutoBendingDesc& data)
     {
         AutoBendingDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
@@ -1369,7 +1345,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ManualBendingDesc& data)
     {
         ManualBendingDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
@@ -1381,7 +1357,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AngleBendingDesc& data)
     {
         AngleBendingDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(
             task, auxiliaries, Id_MuscleMode_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
@@ -1393,7 +1369,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, AutoCrawlingDesc& data)
     {
         AutoCrawlingDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
@@ -1406,7 +1382,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ManualCrawlingDesc& data)
     {
         ManualCrawlingDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
@@ -1419,7 +1395,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DirectMovementDesc& data)
     {
         DirectMovementDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(DirectMovementDesc)
 
@@ -1427,7 +1403,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, MuscleDesc& data)
     {
         MuscleDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementX, data._lastMovementX, defaultObject._lastMovementX);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementY, data._lastMovementY, defaultObject._lastMovementY);
         loadSaveDesc(task, ar, auxiliaries, Id_Muscle_Mode, data._mode);
@@ -1438,7 +1414,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DefenderDesc& data)
     {
         DefenderDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Defender_Mode, data._mode, defaultObject._mode);
     }
     SPLIT_SERIALIZATION(DefenderDesc)
@@ -1447,7 +1423,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReconnectSolidDesc& data)
     {
         ReconnectSolidDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(ReconnectSolidDesc)
 
@@ -1455,7 +1431,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellDesc& data)
     {
         ReconnectFreeCellDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorMode_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(ReconnectFreeCellDesc)
@@ -1464,7 +1440,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReconnectCreatureDesc& data)
     {
         ReconnectCreatureDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorMode_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
         loadSave(task, auxiliaries, Id_ReconnectorMode_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
         loadSave(task, auxiliaries, Id_ReconnectorMode_Creature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
@@ -1476,7 +1452,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReconnectorDesc& data)
     {
         ReconnectorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_Reconnector_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(ReconnectorDesc)
@@ -1485,7 +1461,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DetonatorDesc& data)
     {
         DetonatorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Detonator_State, data._state, defaultObject._state);
         loadSave(task, auxiliaries, Id_Detonator_Countdown, data._countdown, defaultObject._countdown);
     }
@@ -1495,7 +1471,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, DigestorDesc& data)
     {
         DigestorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Digestor_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
     }
     SPLIT_SERIALIZATION(DigestorDesc)
@@ -1504,7 +1480,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalDelayDesc& data)
     {
         SignalDelayDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalDelay_Delay, data._delay, defaultObject._delay);
         loadSave(task, auxiliaries, Id_SignalDelay_NumMemoryEntriesInitialized, data._numSignalEntriesInitialized, defaultObject._numSignalEntriesInitialized);
         loadSave(task, auxiliaries, Id_SignalDelay_RingBufferIndex, data._ringBufferIndex, defaultObject._ringBufferIndex);
@@ -1515,7 +1491,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalRecorderDesc& data)
     {
         SignalRecorderDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorder_ReadOnly, data._readOnly, defaultObject._readOnly);
         loadSave(task, auxiliaries, Id_SignalRecorder_State, data._state, defaultObject._state);
         loadSave(task, auxiliaries, Id_SignalRecorder_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
@@ -1527,7 +1503,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalStorageDesc& data)
     {
         SignalStorageDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalStorage_ReadOnly, data._readOnly, defaultObject._readOnly);
     }
     SPLIT_SERIALIZATION(SignalStorageDesc)
@@ -1536,7 +1512,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalIntegratorDesc& data)
     {
         SignalIntegratorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalIntegrator_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
     }
     SPLIT_SERIALIZATION(SignalIntegratorDesc)
@@ -1545,7 +1521,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SignalEntryDesc& data)
     {
         SignalEntryDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_SignalEntry_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalEntryDesc)
@@ -1554,7 +1530,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, MemoryDesc& data)
     {
         MemoryDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Memory_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
         loadSaveDesc(task, ar, auxiliaries, Id_Memory_Mode, data._mode);
         loadSaveDesc(task, ar, auxiliaries, Id_Memory_SignalEntries, data._signalEntries);
@@ -1565,7 +1541,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SenderDesc& data)
     {
         SenderDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Sender_Range, data._range, defaultObject._range);
         loadSave(task, auxiliaries, Id_Sender_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
     }
@@ -1575,7 +1551,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ReceiverDesc& data)
     {
         ReceiverDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Receiver_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
         loadSave(task, auxiliaries, Id_Receiver_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
@@ -1585,7 +1561,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, CommunicatorDesc& data)
     {
         CommunicatorDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_Communicator_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(CommunicatorDesc)
@@ -1593,7 +1569,7 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, VoidDesc& data)
     {
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
     }
     SPLIT_SERIALIZATION(VoidDesc)
 
@@ -1601,7 +1577,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, SolidDesc& data)
     {
         SolidDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Solid_Energy, data._energy, defaultObject._energy);
     }
     SPLIT_SERIALIZATION(SolidDesc)
@@ -1610,7 +1586,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, FluidDesc& data)
     {
         FluidDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Fluid_Energy, data._energy, defaultObject._energy);
         loadSave(task, auxiliaries, Id_Fluid_Glow, data._glow, defaultObject._glow);
     }
@@ -1620,7 +1596,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, FreeCellDesc& data)
     {
         FreeCellDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_FreeCell_Energy, data._energy, defaultObject._energy);
         loadSave(task, auxiliaries, Id_FreeCell_Age, data._age, defaultObject._age);
     }
@@ -1630,7 +1606,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, CellDesc& data)
     {
         CellDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Cell_UsableEnergy, data._usableEnergy, defaultObject._usableEnergy);
         loadSave(task, auxiliaries, Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
         loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
@@ -1660,7 +1636,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, ObjectDesc& data)
     {
         ObjectDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Object_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Object_Pos, data._pos, defaultObject._pos);
         loadSave(task, auxiliaries, Id_Object_Vel, data._vel, defaultObject._vel);
@@ -1677,7 +1653,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, CreatureDesc& data)
     {
         CreatureDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
@@ -1693,7 +1669,7 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, EnergyDesc& data)
     {
         EnergyDesc defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSave(task, auxiliaries, Id_Particle_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Particle_Pos, data._pos, defaultObject._pos);
         loadSave(task, auxiliaries, Id_Particle_Vel, data._vel, defaultObject._vel);
@@ -1705,7 +1681,7 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, Desc& description)
     {
-        auto auxiliaries = getLoadSaveMap(task, ar);
+        auto auxiliaries = getLoadSaveContext(task, ar);
         loadSaveDesc(task, ar, auxiliaries, Id_Desc_Objects, description._objects);
         loadSaveDesc(task, ar, auxiliaries, Id_Desc_Energies, description._energies);
         loadSaveDesc(task, ar, auxiliaries, Id_Desc_Creatures, description._creatures);
