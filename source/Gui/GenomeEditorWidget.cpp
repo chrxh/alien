@@ -111,13 +111,14 @@ void _GenomeEditorWidget::processHeaderData()
 
             auto activeMutations = getActiveMutations(_editData->genome._mutationRates);
 
-            // Calculate button position for right alignment
+            // Calculate button width and position for right alignment
             auto buttonWidth = scale(60.0f);
             auto availableWidth = ImGui::GetContentRegionAvail().x;
+            auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
 
-            AlienGui::ListBox(AlienGui::ListBoxParameters().items(activeMutations));
+            AlienGui::ListBox(AlienGui::ListBoxParameters().items(activeMutations).width(listBoxWidth));
 
-            ImGui::SameLine(availableWidth - buttonWidth);
+            ImGui::SameLine();
 
             if (AlienGui::Button("Edit")) {
                 MutationRateDialog::get().open(

@@ -416,6 +416,7 @@ public:
     {
         MEMBER(ListBoxParameters, std::vector<std::string>, items, std::vector<std::string>());
         MEMBER(ListBoxParameters, float, height, 0);  // 0 = auto-size based on items
+        MEMBER(ListBoxParameters, float, width, 0);  // 0 = use remaining width
     };
     static void ListBox(ListBoxParameters const& parameters);
 

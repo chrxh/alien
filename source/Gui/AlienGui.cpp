@@ -1580,36 +1580,46 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
         boxHeight = (lineHeight + padding.y * 2) * numItems + padding.y * 2;
     }
 
-    auto width = scale(ImGui::GetContentRegionAvail().x);
+    // Calculate width
+    float width;
+    if (parameters._width > 0) {
+        width = scale(parameters._width);
+    } else {
+        width = ImGui::GetContentRegionAvail().x;
+    }
+
+    // Use ImGui's FrameBg color to match read-only text fields
+    auto bgColor = ImGui::GetColorU32(ImGuiCol_FrameBg);
+    auto borderColor = ImGui::GetColorU32(ImGuiCol_Border);
 
     // Draw background
     drawList->AddRectFilled(
         ImVec2(cursorPos.x, cursorPos.y),
         ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
-        Const::TreeNodeLowColor,
-        2.0f);
+        bgColor,
+        style.FrameRounding);
 
     // Draw frame border
     drawList->AddRect(
         ImVec2(cursorPos.x, cursorPos.y),
         ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
-        Const::TreeNodeDefaultColor,
-        2.0f,
+        borderColor,
+        style.FrameRounding,
         0,
         1.0f);
 
-    // Draw items
+    // Draw items with disabled text color to match read-only fields
     ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + padding.x, cursorPos.y + padding.y));
 
+    ImGui::BeginDisabled();  // This applies the disabled text color
     if (parameters._items.empty()) {
-        ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImU32>(Const::TextDecentColor));
         ImGui::TextUnformatted("None");
-        ImGui::PopStyleColor();
     } else {
         for (auto const& item : parameters._items) {
             ImGui::TextUnformatted(("- " + item).c_str());
         }
     }
+    ImGui::EndDisabled();
 
     // Move cursor to after the box
     ImGui::SetCursorScreenPos(ImVec2(cursorPos.x, cursorPos.y + boxHeight));
