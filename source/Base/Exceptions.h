@@ -1,21 +1,29 @@
 #pragma once
 
-#include <exception>
 #include <stdexcept>
 #include <string>
 
-class InitialCheckException : public std::runtime_error
+class AlienException : public std::runtime_error
 {
 public:
-    InitialCheckException(std::string const& what)
-        : std::runtime_error(what.c_str())
-    {}
+    explicit AlienException(std::string const& what);
+
+    static AlienException fromCheck(char const* expression, char const* file, int line);
+
+    std::string const& getCallstack() const;
+
+private:
+    std::string _callstack;
 };
 
-class CudaMemoryAllocationException : public std::runtime_error
+class InitialCheckException : public AlienException
 {
 public:
-    CudaMemoryAllocationException(std::string const& what)
-        : std::runtime_error(what.c_str())
-    {}
+    using AlienException::AlienException;
+};
+
+class CudaMemoryAllocationException : public AlienException
+{
+public:
+    using AlienException::AlienException;
 };

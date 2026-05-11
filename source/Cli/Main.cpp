@@ -3,6 +3,7 @@
 
 #include <CLI/CLI.hpp>
 
+#include <Base/Exceptions.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
@@ -84,6 +85,11 @@ int main(int argc, char** argv)
         }
 
         std::cout << "Finished" << std::endl;
+    } catch (AlienException const& e) {
+        log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        log(Priority::Important, "Callstack:\n" + e.getCallstack());
+        std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
+        std::cerr << "Callstack:" << std::endl << e.getCallstack() << std::endl;
     } catch (std::exception const& e) {
         std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
     } catch (...) {

@@ -2,13 +2,13 @@
 
 #include <stdexcept>
 
-#include "Check.h"
+#include "Exceptions.h"
 
 #define THROW_NOT_IMPLEMENTED() throw std::runtime_error("not implemented")
 
 #define CHECK(expression) \
     if (!(expression)) { \
-        throwCheckException(#expression, __FILE__, __LINE__); \
+        throw AlienException::fromCheck(#expression, __FILE__, __LINE__); \
     }
 
 #define MEMBER(className, type, name, initialValue) \

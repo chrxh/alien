@@ -29,6 +29,12 @@ namespace
         }
         return false;
     }
+
+    void logAndPrintCallstack(AlienException const& exception)
+    {
+        log(Priority::Important, "Callstack:\n" + exception.getCallstack());
+        std::cerr << "Callstack:" << std::endl << exception.getCallstack() << std::endl;
+    }
 }
 
 int main(int argc, char** argv)
@@ -60,7 +66,14 @@ int main(int argc, char** argv)
         mainWindow->shutdown();
 
     } catch (InitialCheckException const& e) {
+        log(Priority::Important, std::string("Initial checks failed: ") + e.what());
         std::cerr << "Initial checks failed: " << std::endl << e.what() << std::endl;
+        logAndPrintCallstack(e);
+    } catch (AlienException const& e) {
+        log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
+        logAndPrintCallstack(e);
+        std::cerr << std::endl << Const::GeneralInformation << std::endl;
     } catch (std::exception const& e) {
         std::cerr << "An uncaught exception occurred: " << e.what() << std::endl << std::endl << Const::GeneralInformation << std::endl;
     } catch (...) {

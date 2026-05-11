@@ -14,7 +14,7 @@
 #include <device_launch_parameters.h>
 
 template <typename T>
-void checkAndThrowError(T result, char const* const func, const char* const file, int const line)
+void checkAndThrowError(T result)
 {
     if (result) {
         DEVICE_RESET
@@ -41,23 +41,18 @@ void checkAndThrowError(T result, char const* const func, const char* const file
             stream << "CUDA error.";
         } break;
         }
-        stream << std::endl
-               << "Location: " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "(" << _cudaGetErrorEnum(result) << ") \"" << func
-               << "\"";
         auto text = stream.str();
         log(Priority::Important, text);
 
         if (cudaError::cudaErrorMemoryAllocation == result) {
             throw CudaMemoryAllocationException(text);
         } else {
-            throw std::runtime_error(text);
+            throw AlienException(text);
         }
     }
 }
 
-#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
-
-#define CHECK_FOR_CUDA_ERROR(val) checkAndThrowError((val), #val, __FILENAME__, __LINE__)
+#define CHECK_FOR_CUDA_ERROR(val) checkAndThrowError((val))
 
 #define ABORT() (*((int*)0) = 0)
 
