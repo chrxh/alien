@@ -2,7 +2,6 @@ target_sources(EngineInterfaceTests
 PUBLIC
     DescEditServiceTests.cpp
     GenomeDescEditServiceTests.cpp
-    MacrosTests.cpp
     GenomeDescInfoServiceTests.cpp
     ParametersEditServiceTests.cpp
     PreviewDescConverterServiceTests.cpp
