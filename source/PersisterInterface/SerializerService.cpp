@@ -472,8 +472,7 @@ namespace cereal
         auto auxiliaries = getSerializationScope(task, ar);
         auxiliaries.loadSave(Id_ConstructorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         auxiliaries.loadSave(Id_ConstructorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        loadSave(
-            task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        auxiliaries.loadSave(Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         auxiliaries.loadSave(Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         auxiliaries.loadSave(Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
         auxiliaries.loadSave(Id_ConstructorGenome_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
@@ -632,12 +631,8 @@ namespace cereal
         AngleBendingGenomeDesc defaultObject;
         auto auxiliaries = getSerializationScope(task, ar);
         auxiliaries.loadSave(Id_MuscleModeGenome_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(
-            task,
-            auxiliaries,
-            Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio,
-            data._attractionRepulsionRatio,
-            defaultObject._attractionRepulsionRatio);
+        auxiliaries.loadSave(
+            Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
     }
     SPLIT_SERIALIZATION(AngleBendingGenomeDesc)
 
@@ -873,12 +868,8 @@ namespace cereal
         auxiliaries.loadSave(Id_NeuronMutation_Probability, data._probability, defaultObject._probability);
         auxiliaries.loadSave(Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
         auxiliaries.loadSave(Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
-        loadSave(
-            task,
-            auxiliaries,
-            Id_NeuronMutation_ActivationFunctionProbability,
-            data._activationFunctionProbability,
-            defaultObject._activationFunctionProbability);
+        auxiliaries.loadSave(
+            Id_NeuronMutation_ActivationFunctionProbability, data._activationFunctionProbability, defaultObject._activationFunctionProbability);
     }
     SPLIT_SERIALIZATION(NeuronMutationDesc)
 
@@ -1362,8 +1353,7 @@ namespace cereal
         AngleBendingDesc defaultObject;
         auto auxiliaries = getSerializationScope(task, ar);
         auxiliaries.loadSave(Id_MuscleMode_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(
-            task, auxiliaries, Id_MuscleMode_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
+        auxiliaries.loadSave(Id_MuscleMode_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
         auxiliaries.loadSave(Id_MuscleMode_AngleBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
     }
     SPLIT_SERIALIZATION(AngleBendingDesc)
