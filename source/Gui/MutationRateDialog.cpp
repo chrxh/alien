@@ -113,15 +113,18 @@ void MutationRateDialog::processIntern()
     }
 }
 
-void MutationRateDialog::openIntern()
+void MutationRateDialog::open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
 {
-    // Initialize with default values or current values when the dialog is opened
-    // For now, the dialog is not connected, so we just initialize with defaults
-    _mutation = MutationRatesDesc();
+    _mutation = mutationRates;
+    _onAdoptCallback = onAdoptCallback;
+    AlienDialog::open();
 }
+
+void MutationRateDialog::openIntern() {}
 
 void MutationRateDialog::onAdopt()
 {
-    // This method will be connected later to actually apply the mutation rates
-    // For now, it's just a placeholder
+    if (_onAdoptCallback) {
+        _onAdoptCallback(_mutation);
+    }
 }

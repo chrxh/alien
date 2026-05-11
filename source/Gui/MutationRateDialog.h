@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <Base/Singleton.h>
 
 #include <EngineInterface/GenomeDesc.h>
@@ -10,6 +12,9 @@
 class MutationRateDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MutationRateDialog);
+
+public:
+    void open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
 
 private:
     MutationRateDialog();
@@ -22,4 +27,5 @@ private:
     void onAdopt();
 
     MutationRatesDesc _mutation;
+    std::function<void(MutationRatesDesc const&)> _onAdoptCallback;
 };
