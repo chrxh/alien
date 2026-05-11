@@ -115,15 +115,9 @@ void _GenomeEditorWidget::processHeaderData()
             auto buttonWidth = scale(60.0f);
             auto availableWidth = ImGui::GetContentRegionAvail().x;
 
-            if (activeMutations.empty()) {
-                AlienGui::Text(AlienGui::TextParameters().text("None").style(AlienGui::TextStyle::Decent));
-                ImGui::SameLine(availableWidth - buttonWidth);
-            } else {
-                for (auto const& mutation : activeMutations) {
-                    AlienGui::Text("- " + mutation);
-                }
-                ImGui::SameLine(availableWidth - buttonWidth);
-            }
+            AlienGui::ListBox(AlienGui::ListBoxParameters().items(activeMutations));
+
+            ImGui::SameLine(availableWidth - buttonWidth);
 
             if (AlienGui::Button("Edit")) {
                 MutationRateDialog::get().open(

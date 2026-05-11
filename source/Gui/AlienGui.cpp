@@ -1559,6 +1559,64 @@ void AlienGui::Group(GroupParameters const& parameters)
     ImGui::Spacing();
 }
 
+void AlienGui::ListBox(ListBoxParameters const& parameters)
+{
+    auto drawList = ImGui::GetWindowDrawList();
+    auto style = ImGui::GetStyle();
+
+    ImGui::Spacing();
+
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    auto lineHeight = ImGui::GetTextLineHeight();
+    auto padding = style.FramePadding;
+
+    // Calculate height based on items or use provided height
+    float boxHeight;
+    if (parameters._height > 0) {
+        boxHeight = scale(parameters._height);
+    } else {
+        // Auto-size: one line per item plus padding
+        auto numItems = parameters._items.empty() ? 1 : parameters._items.size();
+        boxHeight = (lineHeight + padding.y * 2) * numItems + padding.y * 2;
+    }
+
+    auto width = scale(ImGui::GetContentRegionAvail().x);
+
+    // Draw background
+    drawList->AddRectFilled(
+        ImVec2(cursorPos.x, cursorPos.y),
+        ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
+        Const::TreeNodeLowColor,
+        2.0f);
+
+    // Draw frame border
+    drawList->AddRect(
+        ImVec2(cursorPos.x, cursorPos.y),
+        ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
+        Const::TreeNodeDefaultColor,
+        2.0f,
+        0,
+        1.0f);
+
+    // Draw items
+    ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + padding.x, cursorPos.y + padding.y));
+
+    if (parameters._items.empty()) {
+        ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImU32>(Const::TextDecentColor));
+        ImGui::TextUnformatted("None");
+        ImGui::PopStyleColor();
+    } else {
+        for (auto const& item : parameters._items) {
+            ImGui::TextUnformatted(("- " + item).c_str());
+        }
+    }
+
+    // Move cursor to after the box
+    ImGui::SetCursorScreenPos(ImVec2(cursorPos.x, cursorPos.y + boxHeight));
+
+    ImGui::Spacing();
+}
+
 bool AlienGui::ToolbarButton(ToolbarButtonParameters const& parameters)
 {
     auto id = std::to_string(ImGui::GetID(parameters._text.c_str()));

@@ -412,6 +412,13 @@ public:
     };
     static void Group(GroupParameters const& parameters);
 
+    struct ListBoxParameters
+    {
+        MEMBER(ListBoxParameters, std::vector<std::string>, items, std::vector<std::string>());
+        MEMBER(ListBoxParameters, float, height, 0);  // 0 = auto-size based on items
+    };
+    static void ListBox(ListBoxParameters const& parameters);
+
     struct ToolbarButtonParameters
     {
         MEMBER(ToolbarButtonParameters, std::string, text, std::string());
