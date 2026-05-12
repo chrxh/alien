@@ -50,7 +50,7 @@ GenomeDesc GenomeDesc::id(uint64_t id)
     return *this;
 }
 
-std::vector<std::string> MutationRatesDesc::getActiveMutations() const
+std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
 {
     std::vector<std::string> activeMutations;
     if (_connectionMutation1._probability > 0.0f || _connectionMutation2._probability > 0.0f) {
