@@ -48,6 +48,9 @@ void AlienDialog::process()
         ImGui::SetNextWindowSize({scale(_defaultSize.x), scale(_defaultSize.y)}, ImGuiCond_FirstUseEver);
         if (_isModal) {
             ImGui::OpenPopup(_title.c_str());
+        } else {
+            // For non-modal dialogs opened from modals, bring to front
+            ImGui::SetNextWindowFocus();
         }
         _state = DialogState::Open;
     }
@@ -60,8 +63,12 @@ void AlienDialog::process()
     if (_isModal) {
         shouldProcess = ImGui::BeginPopupModal(_title.c_str(), NULL, 0);
     } else {
-        auto flags = ImGuiWindowFlags_NoCollapse;
-        shouldProcess = ImGui::Begin(_title.c_str(), NULL, flags);
+        // Use a popup window instead of a regular window to render above modals
+        if (_state == DialogState::Open) {
+            ImGui::OpenPopup(_title.c_str());
+        }
+        auto flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+        shouldProcess = ImGui::BeginPopup(_title.c_str(), flags);
     }
 
     if (shouldProcess) {
@@ -77,13 +84,9 @@ void AlienDialog::process()
         processIntern();
         ImGui::PopID();
 
-        if (_isModal) {
-            ImGui::EndPopup();
-        } else {
-            ImGui::End();
-        }
-    } else if (!_isModal) {
-        // Non-modal window was closed by user clicking X button
+        ImGui::EndPopup();
+    } else if (!_isModal && _state == DialogState::Open) {
+        // Non-modal popup was closed
         _state = DialogState::Closed;
     }
 
