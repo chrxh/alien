@@ -42,7 +42,7 @@ namespace
     {
         out << "#" << frameIndex << " ";
         if (module != nullptr && module->BaseOfImage != 0 && address >= module->BaseOfImage) {
-            out << getModuleName(*module) << "+0x" << std::hex << (address - module->BaseOfImage) << " [0x" << address << std::dec << "]";
+            out << getModuleName(*module) << "+0x" << std::hex << (address - module->BaseOfImage) << std::dec;
         } else {
             out << "0x" << std::hex << address << std::dec;
         }
@@ -103,7 +103,7 @@ namespace
                 continue;
             }
 
-            out << "#" << i << " " << symbol->Name << " [0x" << std::hex << address << std::dec << "]";
+            out << "#" << i << " " << symbol->Name;
             if (lineAvailable) {
                 out << " (" << std::filesystem::path(line.FileName).filename().string() << ":" << line.LineNumber << ")";
             }
