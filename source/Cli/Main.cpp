@@ -3,6 +3,7 @@
 
 #include <CLI/CLI.hpp>
 
+#include <Base/AlienExceptions.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
@@ -17,6 +18,7 @@
 
 int main(int argc, char** argv)
 {
+    auto error = false;
     try {
         FileLogger fileLogger = std::make_shared<_FileLogger>();
 
@@ -84,10 +86,20 @@ int main(int argc, char** argv)
         }
 
         std::cout << "Finished" << std::endl;
+    } catch (AlienException const& e) {
+        log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        log(Priority::Important, "Callstack:\n" + e.getCallstack());
+        error = true;
     } catch (std::exception const& e) {
-        std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
+        log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        error = true;
     } catch (...) {
-        std::cerr << "An unknown exception occurred." << std::endl;
+        log(Priority::Important, std::string("An unknown exception occurred: "));
+        error = true;
+    }
+    if (error) {
+        std::cerr << LoggingService::get().getLogString();
+        return 1;
     }
     return 0;
 }

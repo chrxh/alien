@@ -25,13 +25,15 @@ class LoggingService
 
 public:
     void log(Priority priority, std::string const& message);
+    std::string getLogString() const;
 
     void registerCallBack(LoggingCallBack* callback);
     void unregisterCallBack(LoggingCallBack* callback);
 
 private:
     std::vector<LoggingCallBack*> _callbacks;
-    std::mutex _mutex;
+    std::vector<std::string> _messages;
+    mutable std::mutex _mutex;
 };
 
 inline void log(Priority priority, std::string const& message)

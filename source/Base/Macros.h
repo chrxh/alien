@@ -2,11 +2,13 @@
 
 #include <stdexcept>
 
+#include "AlienExceptions.h"
+
 #define THROW_NOT_IMPLEMENTED() throw std::runtime_error("not implemented")
 
 #define CHECK(expression) \
     if (!(expression)) { \
-        throw std::runtime_error("check failed"); \
+        throw AlienException("CHECK failed with expression: " #expression); \
     }
 
 #define MEMBER(className, type, name, initialValue) \

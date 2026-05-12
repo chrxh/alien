@@ -1,9 +1,10 @@
 
 add_library(Base
+    AlienExceptions.cpp
+    AlienExceptions.h
     Cache.h
     Definitions.cpp
     Definitions.h
-    Exceptions.h
     ExitScopeGuard.h
     FileLogger.cpp
     FileLogger.h
@@ -29,6 +30,10 @@ add_library(Base
     VersionParserService.h)
 
 target_link_libraries(Base Boost::boost)
+
+if (WIN32)
+    target_link_libraries(Base dbghelp)
+endif()
 
 target_precompile_headers(Base PRIVATE
     <algorithm>

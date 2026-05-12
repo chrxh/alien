@@ -7,7 +7,7 @@
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
 
-#include <Base/Exceptions.h>
+#include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>

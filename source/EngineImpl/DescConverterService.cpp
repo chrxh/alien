@@ -9,7 +9,7 @@
 
 #include <cuda_fp16.h>
 
-#include <Base/Exceptions.h>
+#include <Base/AlienExceptions.h>
 
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/NumberGenerator.h>

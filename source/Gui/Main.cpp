@@ -1,11 +1,12 @@
 #include <cstring>
 #include <iostream>
 
-#include <Base/Exceptions.h>
+#include <Base/AlienExceptions.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
@@ -16,7 +17,6 @@
 #include "HelpStrings.h"
 #include "MainWindow.h"
 
-#include "Base/StringHelper.h"
 
 namespace
 {
@@ -42,6 +42,7 @@ int main(int argc, char** argv)
 
     MainWindow mainWindow;
 
+    auto error = false;
     try {
         log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
 
@@ -60,11 +61,24 @@ int main(int argc, char** argv)
         mainWindow->shutdown();
 
     } catch (InitialCheckException const& e) {
-        std::cerr << "Initial checks failed: " << std::endl << e.what() << std::endl;
+        log(Priority::Important, std::string("Initial checks failed: ") + e.what());
+        log(Priority::Important, "Callstack:\n" + e.getCallstack());
+        error = true;
+    } catch (AlienException const& e) {
+        log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        log(Priority::Important, "Callstack:\n" + e.getCallstack());
+        error = true;
     } catch (std::exception const& e) {
-        std::cerr << "An uncaught exception occurred: " << e.what() << std::endl << std::endl << Const::GeneralInformation << std::endl;
+        log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        error = true;
     } catch (...) {
-        std::cerr << "An unknown exception occurred." << std::endl << std::endl << Const::GeneralInformation << std::endl;
+        log(Priority::Important, std::string("An unknown exception occurred."));
+        error = true;
+    }
+    if (error) {
+        std::cerr << LoggingService::get().getLogString();
+        std::cerr << std::endl << std::endl << Const::GeneralInformation << std::endl;
+        return 1;
     }
     return 0;
 }

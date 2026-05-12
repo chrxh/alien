@@ -19,7 +19,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include <Base/Exceptions.h>
+#include <Base/AlienExceptions.h>
 #include <Base/Resources.h>
 
 #include <Network/NetworkService.h>
