@@ -18,6 +18,7 @@
 
 int main(int argc, char** argv)
 {
+    auto error = false;
     try {
         FileLogger fileLogger = std::make_shared<_FileLogger>();
 
@@ -88,10 +89,16 @@ int main(int argc, char** argv)
     } catch (AlienException const& e) {
         log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
         log(Priority::Important, "Callstack:\n" + e.getCallstack());
+        error = true;
     } catch (std::exception const& e) {
         log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        error = true;
     } catch (...) {
         log(Priority::Important, std::string("An unknown exception occurred: "));
+        error = true;
+    }
+    if (error) {
+        return 1;
     }
     return 0;
 }

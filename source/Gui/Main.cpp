@@ -42,6 +42,7 @@ int main(int argc, char** argv)
 
     MainWindow mainWindow;
 
+    auto error = false;
     try {
         log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
 
@@ -62,21 +63,21 @@ int main(int argc, char** argv)
     } catch (InitialCheckException const& e) {
         log(Priority::Important, std::string("Initial checks failed: ") + e.what());
         log(Priority::Important, "Callstack:\n" + e.getCallstack());
-
-        std::cerr << std::endl << Const::GeneralInformation << std::endl;
+        error = true;
     } catch (AlienException const& e) {
         log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
         log(Priority::Important, "Callstack:\n" + e.getCallstack());
-
-        std::cerr << std::endl << Const::GeneralInformation << std::endl;
+        error = true;
     } catch (std::exception const& e) {
         log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
-
-        std::cerr << std::endl << Const::GeneralInformation << std::endl;
+        error = true;
     } catch (...) {
         log(Priority::Important, std::string("An unknown exception occurred."));
-
+        error = true;
+    }
+    if (error) {
         std::cerr << std::endl << Const::GeneralInformation << std::endl;
+        return 1;
     }
     return 0;
 }
