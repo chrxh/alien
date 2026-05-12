@@ -146,7 +146,6 @@ void MutationRateDialog::processIntern()
     AlienGui::Separator();
 
     if (AlienGui::Button("Adopt")) {
-        ImGui::CloseCurrentPopup();
         onAdopt();
         close();
     }
@@ -154,7 +153,6 @@ void MutationRateDialog::processIntern()
 
     ImGui::SameLine();
     if (AlienGui::Button("Cancel")) {
-        ImGui::CloseCurrentPopup();
         close();
     }
 }
