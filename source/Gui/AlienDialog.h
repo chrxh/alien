@@ -15,7 +15,6 @@ public:
     AlienDialog(std::string const& title, RealVector2D const& defaultSize = RealVector2D(450.0f, 150.0f));
 
     virtual void open();
-    void open(bool asNonModal);
 
 protected:
     virtual void processIntern() {}
@@ -42,5 +41,4 @@ private:
     DialogState _state = DialogState::Closed;
     std::string _title;
     RealVector2D _defaultSize;
-    bool _isModal = true;
 };

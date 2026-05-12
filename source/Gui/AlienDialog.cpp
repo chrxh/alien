@@ -14,14 +14,6 @@ void AlienDialog::init()
 void AlienDialog::open()
 {
     _state = DialogState::JustOpened;
-    _isModal = true;
-    openIntern();
-}
-
-void AlienDialog::open(bool asNonModal)
-{
-    _state = DialogState::JustOpened;
-    _isModal = !asNonModal;
     openIntern();
 }
 
@@ -46,9 +38,7 @@ void AlienDialog::process()
     if (_state == DialogState::JustOpened) {
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
         ImGui::SetNextWindowSize({scale(_defaultSize.x), scale(_defaultSize.y)}, ImGuiCond_FirstUseEver);
-        if (_isModal) {
-            ImGui::OpenPopup(_title.c_str());
-        }
+        ImGui::OpenPopup(_title.c_str());
         _state = DialogState::Open;
     }
     auto& style = ImGui::GetStyle();
@@ -56,15 +46,7 @@ void AlienDialog::process()
     style.WindowMinSize.x = scale(350.0f);
     style.WindowMinSize.y = scale(150.0f);
 
-    bool shouldProcess = false;
-    if (_isModal) {
-        shouldProcess = ImGui::BeginPopupModal(_title.c_str(), NULL, 0);
-    } else {
-        auto flags = ImGuiWindowFlags_NoCollapse;
-        shouldProcess = ImGui::Begin(_title.c_str(), NULL, flags);
-    }
-
-    if (shouldProcess) {
+    if (ImGui::BeginPopupModal(_title.c_str(), NULL, 0)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
             auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
@@ -77,14 +59,7 @@ void AlienDialog::process()
         processIntern();
         ImGui::PopID();
 
-        if (_isModal) {
-            ImGui::EndPopup();
-        } else {
-            ImGui::End();
-        }
-    } else if (!_isModal) {
-        // Non-modal window was closed by user clicking X button
-        _state = DialogState::Closed;
+        ImGui::EndPopup();
     }
 
     style.WindowMinSize = origWindowMinSize;
