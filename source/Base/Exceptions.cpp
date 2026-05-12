@@ -94,24 +94,12 @@ namespace
         return out.str();
     }
 #endif
-
-    std::string createCheckMessage(char const* expression, char const* file, int line)
-    {
-        std::ostringstream out;
-        out << "check failed: " << expression << " (" << std::filesystem::path(file).filename().string() << ":" << line << ")";
-        return out.str();
-    }
 }
 
 AlienException::AlienException(std::string const& what)
     : std::runtime_error(what)
     , _callstack(createCallstack())
 {}
-
-AlienException AlienException::fromCheck(char const* expression, char const* file, int line)
-{
-    return AlienException(createCheckMessage(expression, file, line));
-}
 
 std::string const& AlienException::getCallstack() const
 {

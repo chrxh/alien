@@ -8,7 +8,7 @@
 
 #define CHECK(expression) \
     if (!(expression)) { \
-        throw AlienException::fromCheck(#expression, __FILE__, __LINE__); \
+        throw AlienException(#expression); \
     }
 
 #define MEMBER(className, type, name, initialValue) \

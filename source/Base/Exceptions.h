@@ -8,8 +8,6 @@ class AlienException : public std::runtime_error
 public:
     explicit AlienException(std::string const& what);
 
-    static AlienException fromCheck(char const* expression, char const* file, int line);
-
     std::string const& getCallstack() const;
 
 private:
