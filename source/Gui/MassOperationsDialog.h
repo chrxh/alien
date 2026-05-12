@@ -4,6 +4,7 @@
 
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/GenomeDesc.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"
@@ -47,6 +48,9 @@ private:
     bool _randomizeGlow = false;
     float _minGlow = 0;
     float _maxGlow = 0.0f;
+
+    bool _randomizeMutationRates = false;
+    MutationRatesDesc _mutationRates;
 
     bool _restrictToSelectedCreatures = true;
 };
