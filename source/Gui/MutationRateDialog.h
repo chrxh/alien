@@ -15,6 +15,7 @@ class MutationRateDialog : public AlienDialog
 
 public:
     void open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
+    void openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
 
 private:
     MutationRateDialog();
