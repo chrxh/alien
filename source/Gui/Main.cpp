@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     }
     if (error) {
         printLog();
-        std::cerr << std::endl << Const::GeneralInformation << std::endl;
+        std::cerr << std::endl << std::endl << Const::GeneralInformation << std::endl;
         return 1;
     }
     return 0;
