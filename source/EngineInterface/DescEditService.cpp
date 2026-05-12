@@ -535,6 +535,13 @@ void DescEditService::randomizeGlow(Desc& description, float minGlow, float maxG
     }
 }
 
+void DescEditService::setMutationRates(Desc& description, MutationRatesDesc const& mutationRates) const
+{
+    for (auto& genome : description._genomes) {
+        genome._mutationRates = mutationRates;
+    }
+}
+
 void DescEditService::setCenter(Desc& description, RealVector2D const& center) const
 {
     auto origCenter = calcCenter(description);
