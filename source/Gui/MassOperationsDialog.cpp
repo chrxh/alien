@@ -41,6 +41,13 @@ void MassOperationsDialog::processIntern()
 {
     auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
+    AlienGui::Group(AlienGui::GroupParameters().text("Filter").highlighted(true));
+    ImGui::Checkbox("##restrictToSelection", &_restrictToSelectedCreatures);
+    ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
+    AlienGui::Text("Restrict to selection");
+
+    AlienGui::Group(AlienGui::GroupParameters().text("Operations").highlighted(true));
+
     if (ImGui::BeginChild("##content", ImVec2(0, -scale(50.0f)), 0)) {
         AlienGui::DynamicTableLayout table(MinColumnWidth);
         if (table.begin()) {
@@ -149,11 +156,6 @@ void MassOperationsDialog::processIntern()
             ImGui::EndDisabled();
 
             table.next();
-
-            AlienGui::Group(AlienGui::GroupParameters().text("Options").highlighted(true));
-            ImGui::Checkbox("##restrictToSelection", &_restrictToSelectedCreatures);
-            ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-            AlienGui::Text("Restrict to selection");
 
             table.end();
         }
