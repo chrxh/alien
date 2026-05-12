@@ -8,7 +8,7 @@
 
 #define CHECK(expression) \
     if (!(expression)) { \
-        throw AlienException(#expression); \
+        throw AlienException("CHECK failed with expression: " #expression); \
     }
 
 #define MEMBER(className, type, name, initialValue) \

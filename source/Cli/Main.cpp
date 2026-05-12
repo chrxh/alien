@@ -88,8 +88,6 @@ int main(int argc, char** argv)
     } catch (AlienException const& e) {
         log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
         log(Priority::Important, "Callstack:\n" + e.getCallstack());
-        std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
-        std::cerr << "Callstack:" << std::endl << e.getCallstack() << std::endl;
     } catch (std::exception const& e) {
         std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
     } catch (...) {
