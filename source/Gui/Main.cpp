@@ -29,6 +29,11 @@ namespace
         }
         return false;
     }
+
+    void printLog()
+    {
+        std::cerr << LoggingService::get().getLogString();
+    }
 }
 
 int main(int argc, char** argv)
@@ -76,6 +81,7 @@ int main(int argc, char** argv)
         error = true;
     }
     if (error) {
+        printLog();
         std::cerr << std::endl << Const::GeneralInformation << std::endl;
         return 1;
     }

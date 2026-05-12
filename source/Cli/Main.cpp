@@ -98,6 +98,7 @@ int main(int argc, char** argv)
         error = true;
     }
     if (error) {
+        std::cerr << LoggingService::get().getLogString();
         return 1;
     }
     return 0;

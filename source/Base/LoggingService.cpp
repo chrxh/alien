@@ -17,9 +17,21 @@ void LoggingService::log(Priority priority, std::string const& message)
     stream << std::put_time(&tm, "%Y-%m-%d %H-%M-%S") << ": " << message;
 
     auto enrichedMessage = stream.str();
+    _messages.emplace_back(enrichedMessage);
     for (auto const& callback : _callbacks) {
         callback->newLogMessage(priority, enrichedMessage);
     }
+}
+
+std::string LoggingService::getLogString() const
+{
+    std::lock_guard<std::mutex> lock(_mutex);
+
+    std::stringstream stream;
+    for (auto const& message : _messages) {
+        stream << message << std::endl;
+    }
+    return stream.str();
 }
 
 void LoggingService::registerCallBack(LoggingCallBack* callback)
