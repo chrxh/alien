@@ -13,8 +13,23 @@ void AlienDialog::init()
 
 void AlienDialog::open()
 {
+    _nested = false;
     _state = DialogState::JustOpened;
     openIntern();
+}
+
+void AlienDialog::openNested()
+{
+    _nested = true;
+    _state = DialogState::JustOpened;
+    openIntern();
+}
+
+void AlienDialog::processNested()
+{
+    if (_nested) {
+        processDialog();
+    }
 }
 
 void AlienDialog::close()
@@ -31,6 +46,14 @@ void AlienDialog::changeTitle(std::string const& title)
 }
 
 void AlienDialog::process()
+{
+    if (_nested) {
+        return;
+    }
+    processDialog();
+}
+
+void AlienDialog::processDialog()
 {
     if (_state == DialogState::Closed) {
         return;

@@ -151,7 +151,7 @@ void MassOperationsDialog::processIntern()
             AlienGui::ListBox(AlienGui::ListBoxParameters().items(getActiveMutations(_mutationRates)).width(listBoxWidth));
             ImGui::SameLine();
             if (AlienGui::Button("Edit")) {
-                MutationRateDialog::get().open(_mutationRates, [this](MutationRatesDesc const& mutationRates) { _mutationRates = mutationRates; });
+                MutationRateDialog::get().openNested(_mutationRates, [this](MutationRatesDesc const& mutationRates) { _mutationRates = mutationRates; });
             }
             ImGui::EndDisabled();
 
@@ -178,6 +178,7 @@ void MassOperationsDialog::processIntern()
     }
 
     validateAndCorrect();
+    MutationRateDialog::get().processNested();
 }
 
 MassOperationsDialog::MassOperationsDialog()
