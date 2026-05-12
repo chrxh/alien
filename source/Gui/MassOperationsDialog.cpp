@@ -133,7 +133,7 @@ void MassOperationsDialog::processIntern()
             auto buttonWidth = scale(60.0f);
             auto availableWidth = ImGui::GetContentRegionAvail().x;
             auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
-            AlienGui::ListBox(AlienGui::ListBoxParameters().items(MutationRateDialog::getActiveMutations(_mutationRates)).width(listBoxWidth));
+            AlienGui::ListBox(AlienGui::ListBoxParameters().items(_mutationRates.getActiveMutations()).width(listBoxWidth));
             ImGui::SameLine();
             if (AlienGui::Button("Edit")) {
                 MutationRateDialog::get().openNested(_mutationRates, [this](MutationRatesDesc const& mutationRates) { _mutationRates = mutationRates; });

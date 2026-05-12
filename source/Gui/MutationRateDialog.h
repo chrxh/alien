@@ -1,9 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <string>
-#include <vector>
-
 #include <Base/Singleton.h>
 
 #include <EngineInterface/GenomeDesc.h>
@@ -18,7 +15,6 @@ class MutationRateDialog : public AlienDialog
 public:
     void open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
     void openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
-    static std::vector<std::string> getActiveMutations(MutationRatesDesc const& mutationRates);
 
 private:
     MutationRateDialog();

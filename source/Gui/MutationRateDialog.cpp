@@ -20,21 +20,6 @@ void MutationRateDialog::initIntern() {}
 
 void MutationRateDialog::shutdownIntern() {}
 
-std::vector<std::string> MutationRateDialog::getActiveMutations(MutationRatesDesc const& mutationRates)
-{
-    std::vector<std::string> activeMutations;
-    if (mutationRates._connectionMutation1._probability > 0.0f || mutationRates._connectionMutation2._probability > 0.0f) {
-        activeMutations.push_back("Connection mutations");
-    }
-    if (mutationRates._neuronMutation1._probability > 0.0f || mutationRates._neuronMutation2._probability > 0.0f) {
-        activeMutations.push_back("Neuron mutations");
-    }
-    if (mutationRates._lineageMutationProbability > 0.0f) {
-        activeMutations.push_back("Lineage mutation");
-    }
-    return activeMutations;
-}
-
 void MutationRateDialog::processIntern()
 {
     // Use a child window with scrolling for the content, reserving space for buttons

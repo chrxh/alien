@@ -50,6 +50,21 @@ GenomeDesc GenomeDesc::id(uint64_t id)
     return *this;
 }
 
+std::vector<std::string> MutationRatesDesc::getActiveMutations() const
+{
+    std::vector<std::string> activeMutations;
+    if (_connectionMutation1._probability > 0.0f || _connectionMutation2._probability > 0.0f) {
+        activeMutations.push_back("Connection mutations");
+    }
+    if (_neuronMutation1._probability > 0.0f || _neuronMutation2._probability > 0.0f) {
+        activeMutations.push_back("Neuron mutations");
+    }
+    if (_lineageMutationProbability > 0.0f) {
+        activeMutations.push_back("Lineage mutation");
+    }
+    return activeMutations;
+}
+
 bool GenomeDesc::equalWithoutId(GenomeDesc const& other) const
 {
     auto compareClone = *this;
