@@ -548,13 +548,13 @@ void MainLoopController::processMenubar()
 
     AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_I), [&] { ImageToPatternDialog::get().show(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_C), [&] { ImageToPatternDialog::get().show(); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Save on exit").selected(_saveOnExit).closeMenuWhenItemClicked(false), [&] { _saveOnExit = !_saveOnExit; });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("CUDA settings").keyAlt(true).key(ImGuiKey_C), [&] { GpuSettingsDialog::get().open(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("CUDA settings"), [&] { GpuSettingsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Display settings").keyAlt(true).key(ImGuiKey_V), [&] { DisplaySettingsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Network settings").keyAlt(true).key(ImGuiKey_K), [&] { NetworkSettingsDialog::get().open(); });
     AlienGui::EndMenu();
