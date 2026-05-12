@@ -166,6 +166,13 @@ void MutationRateDialog::open(MutationRatesDesc const& mutationRates, std::funct
     AlienDialog::open();
 }
 
+void MutationRateDialog::open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback, bool asNonModal)
+{
+    _mutation = mutationRates;
+    _onAdoptCallback = onAdoptCallback;
+    AlienDialog::open(asNonModal);
+}
+
 void MutationRateDialog::openIntern() {}
 
 void MutationRateDialog::onAdopt()

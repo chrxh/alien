@@ -15,6 +15,7 @@ class MutationRateDialog : public AlienDialog
 
 public:
     void open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
+    void open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback, bool asNonModal);
 
 private:
     MutationRateDialog();
