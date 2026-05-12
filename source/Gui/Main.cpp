@@ -1,11 +1,12 @@
 #include <cstring>
 #include <iostream>
 
-#include <Base/Exceptions.h>
+#include <Base/AlienExceptions.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
@@ -16,7 +17,6 @@
 #include "HelpStrings.h"
 #include "MainWindow.h"
 
-#include "Base/StringHelper.h"
 
 namespace
 {

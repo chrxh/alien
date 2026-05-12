@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <Base/Exceptions.h>
+#include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 

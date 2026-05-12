@@ -3,7 +3,7 @@
 
 #include <CLI/CLI.hpp>
 
-#include <Base/Exceptions.h>
+#include <Base/AlienExceptions.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
