@@ -1,5 +1,6 @@
 #include "SerializerService.h"
 
+#include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <optional>
@@ -105,6 +106,8 @@ namespace cereal
 
         ~SerializationScope()
         {
+            std::sort(_deferredDescOps.begin(), _deferredDescOps.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+
             // Process deferred operations
             if (_task == SerializationTask::Save) {
 
@@ -113,20 +116,15 @@ namespace cereal
 
                 // Save sorted ids
                 std::vector<int> sortedIds;
+                sortedIds.reserve(_deferredDescOps.size());
                 for (const auto& op : _deferredDescOps) {
                     sortedIds.push_back(op.id);
                 }
-                std::sort(sortedIds.begin(), sortedIds.end());
                 _ar(sortedIds);
 
                 // Then write size-prefixed Desc data in sorted id order
-                for (int id : sortedIds) {
-                    // Find the operation for this ID
-                    auto it = std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });
-                    if (it != _deferredDescOps.end()) {
-                        // Execute the serialization function (writes size + data)
-                        it->serializeFunc();
-                    }
+                for (auto const& op : _deferredDescOps) {
+                    op.serializeFunc();
                 }
             } else {
 
@@ -135,12 +133,15 @@ namespace cereal
                 _ar(savedIds);
 
                 // For each id, check if we have a deferred read operation, otherwise skip bytes
+                size_t deferredOpIndex = 0;
                 for (int id : savedIds) {
-                    auto it = std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });
+                    while (deferredOpIndex < _deferredDescOps.size() && _deferredDescOps.at(deferredOpIndex).id < id) {
+                        ++deferredOpIndex;
+                    }
 
-                    if (it != _deferredDescOps.end()) {
+                    if (deferredOpIndex < _deferredDescOps.size() && _deferredDescOps.at(deferredOpIndex).id == id) {
                         // We want to read this Desc - execute the read
-                        it->serializeFunc();
+                        _deferredDescOps.at(deferredOpIndex).serializeFunc();
                     } else {
                         // Skip this Desc - read size and skip data
                         uint64_t dataSize = 0;
@@ -162,10 +163,9 @@ namespace cereal
         operator std::unordered_map<int, VariantData>&() & { return _attributeMap; }
 
         // Add a deferred Desc operation
-        template <typename T>
-        void addDeferredDescOp(int id, T* valuePtr, std::function<void()> serializeFunc)
+        void addDeferredDescOp(int id, std::function<void()> serializeFunc)
         {
-            _deferredDescOps.push_back({id, reinterpret_cast<void*>(valuePtr), std::move(serializeFunc)});
+            _deferredDescOps.push_back({id, std::move(serializeFunc)});
         }
 
         // Member function: loadSave
@@ -175,7 +175,7 @@ namespace cereal
             if (_task == SerializationTask::Load) {
                 auto findResult = _attributeMap.find(key);
                 if (findResult != _attributeMap.end()) {
-                    auto variantData = findResult->second;
+                    auto const& variantData = findResult->second;
                     value = std::get<T>(variantData);
                 } else {
                     value = defaultValue;
@@ -191,14 +191,14 @@ namespace cereal
         {
             if (_task == SerializationTask::Save) {
                 // Defer the save operation
-                addDeferredDescOp(key, &value, [this, &value]() {
+                addDeferredDescOp(key, [this, &value]() {
                     // Serialize to buffer
-                    std::stringstream ss;
+                    std::ostringstream ss(std::ios::binary);
                     {
                         cereal::PortableBinaryOutputArchive bufferAr(ss);
                         bufferAr(value);
                     }
-                    std::string serializedData = ss.str();
+                    auto serializedData = std::move(ss).str();
                     uint64_t dataSize = serializedData.size();
 
                     // Write size-prefixed data
@@ -207,17 +207,17 @@ namespace cereal
                 });
             } else {
                 // Defer the load operation
-                addDeferredDescOp(key, &value, [this, &value]() {
+                addDeferredDescOp(key, [this, &value]() {
                     // Read size-prefixed data
                     uint64_t dataSize = 0;
                     _ar(dataSize);
 
                     // Read serialized data into buffer
-                    std::vector<uint8_t> buffer(dataSize);
-                    _ar(cereal::binary_data(buffer.data(), dataSize));
+                    std::string serializedData(dataSize, '\0');
+                    _ar(cereal::binary_data(serializedData.data(), dataSize));
 
                     // Deserialize from buffer
-                    std::stringstream ss(std::string(buffer.begin(), buffer.end()));
+                    std::istringstream ss(std::move(serializedData), std::ios::binary);
                     cereal::PortableBinaryInputArchive bufferAr(ss);
                     bufferAr(value);
                 });
@@ -230,7 +230,7 @@ namespace cereal
             if (_task == SerializationTask::Load) {
                 auto findResult = _attributeMap.find(key);
                 if (findResult != _attributeMap.end()) {
-                    auto variantData = findResult->second;
+                    auto const& variantData = findResult->second;
                     auto& int8Vec = std::get<std::vector<int8_t>>(variantData);
                     value.resize(int8Vec.size());
                     for (size_t i = 0; i < int8Vec.size(); ++i) {
@@ -252,7 +252,6 @@ namespace cereal
         struct DeferredOperation
         {
             int id;
-            void* valuePtr;
             std::function<void()> serializeFunc;
         };
 
