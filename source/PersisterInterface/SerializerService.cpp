@@ -1,5 +1,6 @@
 #include "SerializerService.h"
 
+#include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <optional>
@@ -97,7 +98,6 @@ namespace cereal
             : _task(task)
             , _ar(ar)
         {
-            // Read map first
             if (_task == SerializationTask::Load) {
                 _ar(_attributeMap);
             }
@@ -105,6 +105,8 @@ namespace cereal
 
         ~SerializationScope()
         {
+            std::sort(_deferredDescOps.begin(), _deferredDescOps.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+
             // Process deferred operations
             if (_task == SerializationTask::Save) {
 
@@ -113,20 +115,15 @@ namespace cereal
 
                 // Save sorted ids
                 std::vector<int> sortedIds;
+                sortedIds.reserve(_deferredDescOps.size());
                 for (const auto& op : _deferredDescOps) {
                     sortedIds.push_back(op.id);
                 }
-                std::sort(sortedIds.begin(), sortedIds.end());
                 _ar(sortedIds);
 
                 // Then write size-prefixed Desc data in sorted id order
-                for (int id : sortedIds) {
-                    // Find the operation for this ID
-                    auto it = std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });
-                    if (it != _deferredDescOps.end()) {
-                        // Execute the serialization function (writes size + data)
-                        it->serializeFunc();
-                    }
+                for (auto const& op : _deferredDescOps) {
+                    op.serializeFunc();
                 }
             } else {
 
@@ -135,12 +132,19 @@ namespace cereal
                 _ar(savedIds);
 
                 // For each id, check if we have a deferred read operation, otherwise skip bytes
-                for (int id : savedIds) {
-                    auto it = std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });
+                auto deferredOpIndex = 0;
+                auto deferredOpSize = _deferredDescOps.size();
+                for (int savedId : savedIds) {
+                    // deferredOpIndex is an optimization to avoid 
+                    // `std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });`
+                    // for each savedId (savedIds and _deferredDescOps are sorted)
+                    while (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id < savedId) {
+                        ++deferredOpIndex;
+                    }
 
-                    if (it != _deferredDescOps.end()) {
+                    if (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id == savedId) {
                         // We want to read this Desc - execute the read
-                        it->serializeFunc();
+                        _deferredDescOps.at(deferredOpIndex).serializeFunc();
                     } else {
                         // Skip this Desc - read size and skip data
                         uint64_t dataSize = 0;
@@ -161,21 +165,13 @@ namespace cereal
         // Implicit conversion to reference
         operator std::unordered_map<int, VariantData>&() & { return _attributeMap; }
 
-        // Add a deferred Desc operation
         template <typename T>
-        void addDeferredDescOp(int id, T* valuePtr, std::function<void()> serializeFunc)
-        {
-            _deferredDescOps.push_back({id, reinterpret_cast<void*>(valuePtr), std::move(serializeFunc)});
-        }
-
-        // Member function: loadSave
-        template <typename T>
-        void loadSave(int key, T& value, T const& defaultValue)
+        void addMember(int key, T& value, T const& defaultValue)
         {
             if (_task == SerializationTask::Load) {
                 auto findResult = _attributeMap.find(key);
                 if (findResult != _attributeMap.end()) {
-                    auto variantData = findResult->second;
+                    auto const& variantData = findResult->second;
                     value = std::get<T>(variantData);
                 } else {
                     value = defaultValue;
@@ -185,20 +181,19 @@ namespace cereal
             }
         }
 
-        // Member function: loadSaveDesc
         template <typename T>
-        void loadSaveDesc(int key, T& value)
+        void addDesc(int key, T& value)
         {
             if (_task == SerializationTask::Save) {
                 // Defer the save operation
-                addDeferredDescOp(key, &value, [this, &value]() {
+                addDeferredDescOp(key, [this, &value]() {
                     // Serialize to buffer
-                    std::stringstream ss;
+                    std::ostringstream ss(std::ios::binary);
                     {
                         cereal::PortableBinaryOutputArchive bufferAr(ss);
                         bufferAr(value);
                     }
-                    std::string serializedData = ss.str();
+                    auto serializedData = std::move(ss).str();
                     uint64_t dataSize = serializedData.size();
 
                     // Write size-prefixed data
@@ -207,17 +202,17 @@ namespace cereal
                 });
             } else {
                 // Defer the load operation
-                addDeferredDescOp(key, &value, [this, &value]() {
+                addDeferredDescOp(key, [this, &value]() {
                     // Read size-prefixed data
                     uint64_t dataSize = 0;
                     _ar(dataSize);
 
                     // Read serialized data into buffer
-                    std::vector<uint8_t> buffer(dataSize);
-                    _ar(cereal::binary_data(buffer.data(), dataSize));
+                    std::string serializedData(dataSize, '\0');
+                    _ar(cereal::binary_data(serializedData.data(), dataSize));
 
                     // Deserialize from buffer
-                    std::stringstream ss(std::string(buffer.begin(), buffer.end()));
+                    std::istringstream ss(std::move(serializedData), std::ios::binary);
                     cereal::PortableBinaryInputArchive bufferAr(ss);
                     bufferAr(value);
                 });
@@ -225,12 +220,12 @@ namespace cereal
         }
 
         // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
-        void loadSave(int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
+        void addMember(int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
         {
             if (_task == SerializationTask::Load) {
                 auto findResult = _attributeMap.find(key);
                 if (findResult != _attributeMap.end()) {
-                    auto variantData = findResult->second;
+                    auto const& variantData = findResult->second;
                     auto& int8Vec = std::get<std::vector<int8_t>>(variantData);
                     value.resize(int8Vec.size());
                     for (size_t i = 0; i < int8Vec.size(); ++i) {
@@ -249,10 +244,11 @@ namespace cereal
         }
 
     private:
+        void addDeferredDescOp(int id, std::function<void()> serializeFunc) { _deferredDescOps.push_back({id, std::move(serializeFunc)}); }
+
         struct DeferredOperation
         {
             int id;
-            void* valuePtr;
             std::function<void()> serializeFunc;
         };
 
@@ -440,10 +436,10 @@ namespace cereal
     {
         NeuralNetGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
-        scope.loadSave(Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
-        scope.loadSave(Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        scope.loadSave(Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        scope.addMember(Id_NeuralNetGenome_Weights, data._weights, defaultObject._weights);
+        scope.addMember(Id_NeuralNetGenome_Biases, data._biases, defaultObject._biases);
+        scope.addMember(Id_NeuralNetGenome_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        scope.addMember(Id_NeuralNetGenome_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
     }
     SPLIT_SERIALIZATION(NeuralNetGenomeDesc)
 
@@ -460,8 +456,8 @@ namespace cereal
     {
         DepotGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_DepotGenome_storageLimit, data._storageLimit, defaultObject._storageLimit);
-        scope.loadSave(Id_DepotGenome_InitialStoredUsableEnergy, data._initialStoredUsableEnergy, defaultObject._initialStoredUsableEnergy);
+        scope.addMember(Id_DepotGenome_storageLimit, data._storageLimit, defaultObject._storageLimit);
+        scope.addMember(Id_DepotGenome_InitialStoredUsableEnergy, data._initialStoredUsableEnergy, defaultObject._initialStoredUsableEnergy);
     }
     SPLIT_SERIALIZATION(DepotGenomeDesc)
 
@@ -470,12 +466,12 @@ namespace cereal
     {
         ConstructorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_ConstructorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        scope.loadSave(Id_ConstructorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        scope.loadSave(Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
-        scope.loadSave(Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
-        scope.loadSave(Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
-        scope.loadSave(Id_ConstructorGenome_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
+        scope.addMember(Id_ConstructorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        scope.addMember(Id_ConstructorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        scope.addMember(Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        scope.addMember(Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
+        scope.addMember(Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
+        scope.addMember(Id_ConstructorGenome_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDesc)
 
@@ -492,7 +488,7 @@ namespace cereal
     {
         DetectEnergyGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SensorModeGenome_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
+        scope.addMember(Id_SensorModeGenome_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
     }
     SPLIT_SERIALIZATION(DetectEnergyGenomeDesc)
 
@@ -508,8 +504,8 @@ namespace cereal
     {
         DetectFreeCellGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SensorModeGenome_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
-        scope.loadSave(Id_SensorModeGenome_DetectFreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_SensorModeGenome_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
+        scope.addMember(Id_SensorModeGenome_DetectFreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(DetectFreeCellGenomeDesc)
 
@@ -518,10 +514,10 @@ namespace cereal
     {
         DetectCreatureGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SensorModeGenome_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        scope.loadSave(Id_SensorModeGenome_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        scope.loadSave(Id_SensorModeGenome_DetectCreature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
-        scope.loadSave(Id_SensorModeGenome_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        scope.addMember(Id_SensorModeGenome_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        scope.addMember(Id_SensorModeGenome_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        scope.addMember(Id_SensorModeGenome_DetectCreature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_SensorModeGenome_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
     SPLIT_SERIALIZATION(DetectCreatureGenomeDesc)
 
@@ -530,11 +526,11 @@ namespace cereal
     {
         SensorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SensorGenome_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
-        scope.loadSave(Id_SensorGenome_TagForAttackers, data._tagForAttackers, defaultObject._tagForAttackers);
-        scope.loadSave(Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
-        scope.loadSave(Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
-        scope.loadSaveDesc(Id_SensorGenome_Mode, data._mode);
+        scope.addMember(Id_SensorGenome_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
+        scope.addMember(Id_SensorGenome_TagForAttackers, data._tagForAttackers, defaultObject._tagForAttackers);
+        scope.addMember(Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
+        scope.addMember(Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
+        scope.addDesc(Id_SensorGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(SensorGenomeDesc)
 
@@ -543,8 +539,8 @@ namespace cereal
     {
         SquareSignalGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_GeneratorModeGenome_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
-        scope.loadSave(Id_GeneratorModeGenome_SquareSignal_Period, data._period, defaultObject._period);
+        scope.addMember(Id_GeneratorModeGenome_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        scope.addMember(Id_GeneratorModeGenome_SquareSignal_Period, data._period, defaultObject._period);
     }
     SPLIT_SERIALIZATION(SquareSignalGenomeDesc)
 
@@ -553,8 +549,8 @@ namespace cereal
     {
         SawtoothSignalGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_GeneratorModeGenome_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
-        scope.loadSave(Id_GeneratorModeGenome_SawtoothSignal_Period, data._period, defaultObject._period);
+        scope.addMember(Id_GeneratorModeGenome_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        scope.addMember(Id_GeneratorModeGenome_SawtoothSignal_Period, data._period, defaultObject._period);
     }
     SPLIT_SERIALIZATION(SawtoothSignalGenomeDesc)
 
@@ -563,10 +559,10 @@ namespace cereal
     {
         GeneratorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
-        scope.loadSave(Id_GeneratorGenome_ValueOffset, data._valueOffset, defaultObject._valueOffset);
-        scope.loadSave(Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
-        scope.loadSaveDesc(Id_GeneratorGenome_Mode, data._mode);
+        scope.addMember(Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
+        scope.addMember(Id_GeneratorGenome_ValueOffset, data._valueOffset, defaultObject._valueOffset);
+        scope.addMember(Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
+        scope.addDesc(Id_GeneratorGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(GeneratorGenomeDesc)
 
@@ -575,7 +571,7 @@ namespace cereal
     {
         AttackFreeCellGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_AttackerModeGenome_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_AttackerModeGenome_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(AttackFreeCellGenomeDesc)
 
@@ -592,7 +588,7 @@ namespace cereal
     {
         AttackerGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSaveDesc(Id_AttackerGenome_Mode, data._mode);
+        scope.addDesc(Id_AttackerGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(AttackerGenomeDesc)
 
@@ -601,7 +597,7 @@ namespace cereal
     {
         InjectorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_InjectorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        scope.addMember(Id_InjectorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
     }
     SPLIT_SERIALIZATION(InjectorGenomeDesc)
 
@@ -610,8 +606,8 @@ namespace cereal
     {
         AutoBendingGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleModeGenome_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        scope.loadSave(Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
+        scope.addMember(Id_MuscleModeGenome_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        scope.addMember(Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
     SPLIT_SERIALIZATION(AutoBendingGenomeDesc)
 
@@ -620,8 +616,8 @@ namespace cereal
     {
         ManualBendingGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleModeGenome_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        scope.loadSave(Id_MuscleModeGenome_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
+        scope.addMember(Id_MuscleModeGenome_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        scope.addMember(Id_MuscleModeGenome_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
     SPLIT_SERIALIZATION(ManualBendingGenomeDesc)
 
@@ -630,8 +626,8 @@ namespace cereal
     {
         AngleBendingGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleModeGenome_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        scope.loadSave(
+        scope.addMember(Id_MuscleModeGenome_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        scope.addMember(
             Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
     }
     SPLIT_SERIALIZATION(AngleBendingGenomeDesc)
@@ -641,8 +637,8 @@ namespace cereal
     {
         AutoCrawlingGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
-        scope.loadSave(Id_MuscleModeGenome_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
+        scope.addMember(Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
+        scope.addMember(Id_MuscleModeGenome_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
     SPLIT_SERIALIZATION(AutoCrawlingGenomeDesc)
 
@@ -651,8 +647,8 @@ namespace cereal
     {
         ManualCrawlingGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
-        scope.loadSave(Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
+        scope.addMember(Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
+        scope.addMember(Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
     }
     SPLIT_SERIALIZATION(ManualCrawlingGenomeDesc)
 
@@ -669,7 +665,7 @@ namespace cereal
     {
         MuscleGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSaveDesc(Id_MuscleGenome_Mode, data._mode);
+        scope.addDesc(Id_MuscleGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(MuscleGenomeDesc)
 
@@ -678,7 +674,7 @@ namespace cereal
     {
         DefenderGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_DefenderGenome_Mode, data._mode, defaultObject._mode);
+        scope.addMember(Id_DefenderGenome_Mode, data._mode, defaultObject._mode);
     }
     SPLIT_SERIALIZATION(DefenderGenomeDesc)
 
@@ -695,7 +691,7 @@ namespace cereal
     {
         ReconnectFreeCellGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_ReconnectorModeGenome_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_ReconnectorModeGenome_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(ReconnectFreeCellGenomeDesc)
 
@@ -704,10 +700,10 @@ namespace cereal
     {
         ReconnectCreatureGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_ReconnectorModeGenome_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        scope.loadSave(Id_ReconnectorModeGenome_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        scope.loadSave(Id_ReconnectorModeGenome_Creature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
-        scope.loadSave(Id_ReconnectorModeGenome_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        scope.addMember(Id_ReconnectorModeGenome_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        scope.addMember(Id_ReconnectorModeGenome_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        scope.addMember(Id_ReconnectorModeGenome_Creature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_ReconnectorModeGenome_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
     SPLIT_SERIALIZATION(ReconnectCreatureGenomeDesc)
 
@@ -716,7 +712,7 @@ namespace cereal
     {
         ReconnectorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSaveDesc(Id_ReconnectorGenome_Mode, data._mode);
+        scope.addDesc(Id_ReconnectorGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(ReconnectorGenomeDesc)
 
@@ -725,7 +721,7 @@ namespace cereal
     {
         DetonatorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_DetonatorGenome_Countdown, data._countdown, defaultObject._countdown);
+        scope.addMember(Id_DetonatorGenome_Countdown, data._countdown, defaultObject._countdown);
     }
     SPLIT_SERIALIZATION(DetonatorGenomeDesc)
 
@@ -734,7 +730,7 @@ namespace cereal
     {
         DigestorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_DigestorGenome_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
+        scope.addMember(Id_DigestorGenome_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
     }
     SPLIT_SERIALIZATION(DigestorGenomeDesc)
 
@@ -743,7 +739,7 @@ namespace cereal
     {
         SignalDelayGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalDelayGenome_Delay, data._delay, defaultObject._delay);
+        scope.addMember(Id_SignalDelayGenome_Delay, data._delay, defaultObject._delay);
     }
     SPLIT_SERIALIZATION(SignalDelayGenomeDesc)
 
@@ -752,8 +748,8 @@ namespace cereal
     {
         SignalRecorderGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
-        scope.loadSave(Id_SignalRecorderGenome_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
+        scope.addMember(Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
+        scope.addMember(Id_SignalRecorderGenome_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
     }
     SPLIT_SERIALIZATION(SignalRecorderGenomeDesc)
 
@@ -762,7 +758,7 @@ namespace cereal
     {
         SignalStorageGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalStorageGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
+        scope.addMember(Id_SignalStorageGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
     }
     SPLIT_SERIALIZATION(SignalStorageGenomeDesc)
 
@@ -771,7 +767,7 @@ namespace cereal
     {
         SignalIntegratorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalIntegratorGenome_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
+        scope.addMember(Id_SignalIntegratorGenome_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
     }
     SPLIT_SERIALIZATION(SignalIntegratorGenomeDesc)
 
@@ -780,7 +776,7 @@ namespace cereal
     {
         SignalEntryGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
+        scope.addMember(Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalEntryGenomeDesc)
 
@@ -789,9 +785,9 @@ namespace cereal
     {
         MemoryGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MemoryGenome_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
-        scope.loadSaveDesc(Id_MemoryGenome_Mode, data._mode);
-        scope.loadSaveDesc(Id_MemoryGenome_SignalEntries, data._signalEntries);
+        scope.addMember(Id_MemoryGenome_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
+        scope.addDesc(Id_MemoryGenome_Mode, data._mode);
+        scope.addDesc(Id_MemoryGenome_SignalEntries, data._signalEntries);
     }
     SPLIT_SERIALIZATION(MemoryGenomeDesc)
 
@@ -800,8 +796,8 @@ namespace cereal
     {
         SenderGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SenderGenome_Range, data._range, defaultObject._range);
-        scope.loadSave(Id_SenderGenome_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
+        scope.addMember(Id_SenderGenome_Range, data._range, defaultObject._range);
+        scope.addMember(Id_SenderGenome_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
     }
     SPLIT_SERIALIZATION(SenderGenomeDesc)
 
@@ -810,8 +806,8 @@ namespace cereal
     {
         ReceiverGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_ReceiverGenome_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
-        scope.loadSave(Id_ReceiverGenome_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        scope.addMember(Id_ReceiverGenome_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_ReceiverGenome_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
     SPLIT_SERIALIZATION(ReceiverGenomeDesc)
 
@@ -820,7 +816,7 @@ namespace cereal
     {
         CommunicatorGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSaveDesc(Id_CommunicatorGenome_Mode, data._mode);
+        scope.addDesc(Id_CommunicatorGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(CommunicatorGenomeDesc)
 
@@ -836,11 +832,11 @@ namespace cereal
     {
         NodeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
-        scope.loadSave(Id_Node_Color, data._color, defaultObject._color);
-        scope.loadSaveDesc(Id_Node_NeuralNetwork, data._neuralNetwork);
-        scope.loadSaveDesc(Id_Node_CellType, data._cellType);
-        scope.loadSaveDesc(Id_Node_Constructor, data._constructor);
+        scope.addMember(Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
+        scope.addMember(Id_Node_Color, data._color, defaultObject._color);
+        scope.addDesc(Id_Node_NeuralNetwork, data._neuralNetwork);
+        scope.addDesc(Id_Node_CellType, data._cellType);
+        scope.addDesc(Id_Node_Constructor, data._constructor);
     }
     SPLIT_SERIALIZATION(NodeDesc)
 
@@ -849,14 +845,14 @@ namespace cereal
     {
         GeneDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Gene_Name, data._name, defaultObject._name);
-        scope.loadSave(Id_Gene_Shape, data._shape, defaultObject._shape);
-        scope.loadSave(Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
-        scope.loadSave(Id_Gene_Separation, data._separation, defaultObject._separation);
-        scope.loadSave(Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
-        scope.loadSave(Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
-        scope.loadSave(Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
-        scope.loadSaveDesc(Id_Gene_Nodes, data._nodes);
+        scope.addMember(Id_Gene_Name, data._name, defaultObject._name);
+        scope.addMember(Id_Gene_Shape, data._shape, defaultObject._shape);
+        scope.addMember(Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
+        scope.addMember(Id_Gene_Separation, data._separation, defaultObject._separation);
+        scope.addMember(Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
+        scope.addMember(Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
+        scope.addMember(Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
+        scope.addDesc(Id_Gene_Nodes, data._nodes);
     }
     SPLIT_SERIALIZATION(GeneDesc)
 
@@ -865,10 +861,10 @@ namespace cereal
     {
         NeuronMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_NeuronMutation_Probability, data._probability, defaultObject._probability);
-        scope.loadSave(Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
-        scope.loadSave(Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
-        scope.loadSave(
+        scope.addMember(Id_NeuronMutation_Probability, data._probability, defaultObject._probability);
+        scope.addMember(Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
+        scope.addMember(Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
+        scope.addMember(
             Id_NeuronMutation_ActivationFunctionProbability, data._activationFunctionProbability, defaultObject._activationFunctionProbability);
     }
     SPLIT_SERIALIZATION(NeuronMutationDesc)
@@ -878,8 +874,8 @@ namespace cereal
     {
         ConnectionMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_ConnectionMutation_Probability, data._probability, defaultObject._probability);
-        scope.loadSave(Id_ConnectionMutation_Sigma, data._sigma, defaultObject._sigma);
+        scope.addMember(Id_ConnectionMutation_Probability, data._probability, defaultObject._probability);
+        scope.addMember(Id_ConnectionMutation_Sigma, data._sigma, defaultObject._sigma);
     }
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
 
@@ -888,11 +884,11 @@ namespace cereal
     {
         MutationRatesDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Mutations_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
-        scope.loadSaveDesc(Id_MutationRates_NeuronMutation1, data._neuronMutation1);
-        scope.loadSaveDesc(Id_MutationRates_NeuronMutation2, data._neuronMutation2);
-        scope.loadSaveDesc(Id_MutationRates_ConnectionMutation1, data._connectionMutation1);
-        scope.loadSaveDesc(Id_MutationRates_ConnectionMutation2, data._connectionMutation2);
+        scope.addMember(Id_Mutations_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
+        scope.addDesc(Id_MutationRates_NeuronMutation1, data._neuronMutation1);
+        scope.addDesc(Id_MutationRates_NeuronMutation2, data._neuronMutation2);
+        scope.addDesc(Id_MutationRates_ConnectionMutation1, data._connectionMutation1);
+        scope.addDesc(Id_MutationRates_ConnectionMutation2, data._connectionMutation2);
     }
     SPLIT_SERIALIZATION(MutationRatesDesc)
 
@@ -901,13 +897,13 @@ namespace cereal
     {
         GenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Genome_Id, data._id, defaultObject._id);
-        scope.loadSave(Id_Genome_Name, data._name, defaultObject._name);
-        scope.loadSave(Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
-        scope.loadSave(Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
-        scope.loadSave(Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
-        scope.loadSaveDesc(Id_Genome_Genes, data._genes);
-        scope.loadSaveDesc(Id_Genome_MutationRates, data._mutationRates);
+        scope.addMember(Id_Genome_Id, data._id, defaultObject._id);
+        scope.addMember(Id_Genome_Name, data._name, defaultObject._name);
+        scope.addMember(Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
+        scope.addMember(Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
+        scope.addMember(Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+        scope.addDesc(Id_Genome_Genes, data._genes);
+        scope.addDesc(Id_Genome_MutationRates, data._mutationRates);
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }
@@ -1124,9 +1120,9 @@ namespace cereal
     {
         ConnectionDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Connection_ObjectId, data._objectId, defaultObject._objectId);
-        scope.loadSave(Id_Connection_Distance, data._distance, defaultObject._distance);
-        scope.loadSave(Id_Connection_AngleFromPrevious, data._angleFromPrevious, defaultObject._angleFromPrevious);
+        scope.addMember(Id_Connection_ObjectId, data._objectId, defaultObject._objectId);
+        scope.addMember(Id_Connection_Distance, data._distance, defaultObject._distance);
+        scope.addMember(Id_Connection_AngleFromPrevious, data._angleFromPrevious, defaultObject._angleFromPrevious);
     }
     SPLIT_SERIALIZATION(ConnectionDesc)
 
@@ -1135,8 +1131,8 @@ namespace cereal
     {
         SignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Signal_Channels, data._channels, defaultObject._channels);
-        scope.loadSave(Id_Signal_NumTimesSent, data._numTimesSent, defaultObject._numTimesSent);
+        scope.addMember(Id_Signal_Channels, data._channels, defaultObject._channels);
+        scope.addMember(Id_Signal_NumTimesSent, data._numTimesSent, defaultObject._numTimesSent);
     }
     SPLIT_SERIALIZATION(SignalDesc)
 
@@ -1145,10 +1141,10 @@ namespace cereal
     {
         NeuralNetDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_NeuralNet_Weights, data._weights, defaultObject._weights);
-        scope.loadSave(Id_NeuralNet_Biases, data._biases, defaultObject._biases);
-        scope.loadSave(Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
-        scope.loadSave(Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
+        scope.addMember(Id_NeuralNet_Weights, data._weights, defaultObject._weights);
+        scope.addMember(Id_NeuralNet_Biases, data._biases, defaultObject._biases);
+        scope.addMember(Id_NeuralNet_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
+        scope.addMember(Id_NeuralNet_ConnectionWeights, data._connectionWeights, defaultObject._connectionWeights);
     }
     SPLIT_SERIALIZATION(NeuralNetDesc)
 
@@ -1164,8 +1160,8 @@ namespace cereal
     {
         DepotDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Depot_storageLimit, data._storageLimit, defaultObject._storageLimit);
-        scope.loadSave(Id_Depot_StoredUsableEnergy, data._storedUsableEnergy, defaultObject._storedUsableEnergy);
+        scope.addMember(Id_Depot_storageLimit, data._storageLimit, defaultObject._storageLimit);
+        scope.addMember(Id_Depot_StoredUsableEnergy, data._storedUsableEnergy, defaultObject._storedUsableEnergy);
     }
     SPLIT_SERIALIZATION(DepotDesc)
 
@@ -1174,14 +1170,14 @@ namespace cereal
     {
         ConstructorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Constructor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        scope.loadSave(Id_Constructor_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
-        scope.loadSave(Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
-        scope.loadSave(Id_Constructor_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        scope.loadSave(Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
-        scope.loadSave(Id_Constructor_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
-        scope.loadSave(Id_Constructor_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
-        scope.loadSave(Id_Constructor_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
+        scope.addMember(Id_Constructor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        scope.addMember(Id_Constructor_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        scope.addMember(Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
+        scope.addMember(Id_Constructor_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        scope.addMember(Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
+        scope.addMember(Id_Constructor_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
+        scope.addMember(Id_Constructor_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
+        scope.addMember(Id_Constructor_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
     }
     SPLIT_SERIALIZATION(ConstructorDesc)
 
@@ -1198,7 +1194,7 @@ namespace cereal
     {
         DetectEnergyDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SensorMode_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
+        scope.addMember(Id_SensorMode_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
     }
     SPLIT_SERIALIZATION(DetectEnergyDesc)
 
@@ -1214,8 +1210,8 @@ namespace cereal
     {
         DetectFreeCellDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
-        scope.loadSave(Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
+        scope.addMember(Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(DetectFreeCellDesc)
 
@@ -1224,10 +1220,10 @@ namespace cereal
     {
         DetectCreatureDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SensorMode_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        scope.loadSave(Id_SensorMode_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        scope.loadSave(Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
-        scope.loadSave(Id_SensorMode_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        scope.addMember(Id_SensorMode_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        scope.addMember(Id_SensorMode_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        scope.addMember(Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_SensorMode_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
     SPLIT_SERIALIZATION(DetectCreatureDesc)
 
@@ -1236,8 +1232,8 @@ namespace cereal
     {
         SensorLastMatchDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SensorMode_SensorLastMatch_CreatureIdPart, data._creatureIdPart, defaultObject._creatureIdPart);
-        scope.loadSave(Id_SensorMode_SensorLastMatch_Pos, data._pos, defaultObject._pos);
+        scope.addMember(Id_SensorMode_SensorLastMatch_CreatureIdPart, data._creatureIdPart, defaultObject._creatureIdPart);
+        scope.addMember(Id_SensorMode_SensorLastMatch_Pos, data._pos, defaultObject._pos);
     }
     SPLIT_SERIALIZATION(SensorLastMatchDesc)
 
@@ -1246,12 +1242,12 @@ namespace cereal
     {
         SensorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Sensor_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
-        scope.loadSave(Id_Sensor_TagForAttackers, data._tagForAttackers, defaultObject._tagForAttackers);
-        scope.loadSave(Id_Sensor_MinRange, data._minRange, defaultObject._minRange);
-        scope.loadSave(Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
-        scope.loadSaveDesc(Id_Sensor_Mode, data._mode);
-        scope.loadSaveDesc(Id_Sensor_LastMatch, data._lastMatch);
+        scope.addMember(Id_Sensor_AutoTrigger, data._autoTrigger, defaultObject._autoTrigger);
+        scope.addMember(Id_Sensor_TagForAttackers, data._tagForAttackers, defaultObject._tagForAttackers);
+        scope.addMember(Id_Sensor_MinRange, data._minRange, defaultObject._minRange);
+        scope.addMember(Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
+        scope.addDesc(Id_Sensor_Mode, data._mode);
+        scope.addDesc(Id_Sensor_LastMatch, data._lastMatch);
     }
     SPLIT_SERIALIZATION(SensorDesc)
 
@@ -1260,8 +1256,8 @@ namespace cereal
     {
         SquareSignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_GeneratorMode_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
-        scope.loadSave(Id_GeneratorMode_SquareSignal_Period, data._period, defaultObject._period);
+        scope.addMember(Id_GeneratorMode_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        scope.addMember(Id_GeneratorMode_SquareSignal_Period, data._period, defaultObject._period);
     }
     SPLIT_SERIALIZATION(SquareSignalDesc)
 
@@ -1270,8 +1266,8 @@ namespace cereal
     {
         SawtoothSignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_GeneratorMode_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
-        scope.loadSave(Id_GeneratorMode_SawtoothSignal_Period, data._period, defaultObject._period);
+        scope.addMember(Id_GeneratorMode_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
+        scope.addMember(Id_GeneratorMode_SawtoothSignal_Period, data._period, defaultObject._period);
     }
     SPLIT_SERIALIZATION(SawtoothSignalDesc)
 
@@ -1280,11 +1276,11 @@ namespace cereal
     {
         GeneratorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Generator_Additive, data._additive, defaultObject._additive);
-        scope.loadSave(Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
-        scope.loadSave(Id_Generator_ValueOffset, data._valueOffset, defaultObject._valueOffset);
-        scope.loadSave(Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
-        scope.loadSaveDesc(Id_Generator_Mode, data._mode);
+        scope.addMember(Id_Generator_Additive, data._additive, defaultObject._additive);
+        scope.addMember(Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
+        scope.addMember(Id_Generator_ValueOffset, data._valueOffset, defaultObject._valueOffset);
+        scope.addMember(Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
+        scope.addDesc(Id_Generator_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(GeneratorDesc)
 
@@ -1293,7 +1289,7 @@ namespace cereal
     {
         AttackFreeCellDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(AttackFreeCellDesc)
 
@@ -1310,7 +1306,7 @@ namespace cereal
     {
         AttackerDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSaveDesc(Id_Attacker_Mode, data._mode);
+        scope.addDesc(Id_Attacker_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(AttackerDesc)
 
@@ -1319,7 +1315,7 @@ namespace cereal
     {
         InjectorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Injector_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        scope.addMember(Id_Injector_GeneIndex, data._geneIndex, defaultObject._geneIndex);
     }
     SPLIT_SERIALIZATION(InjectorDesc)
 
@@ -1328,10 +1324,10 @@ namespace cereal
     {
         AutoBendingDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleMode_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        scope.loadSave(Id_MuscleMode_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
-        scope.loadSave(Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
-        scope.loadSave(Id_MuscleMode_AutoBending_Forward, data._forward, defaultObject._forward);
+        scope.addMember(Id_MuscleMode_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        scope.addMember(Id_MuscleMode_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
+        scope.addMember(Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
+        scope.addMember(Id_MuscleMode_AutoBending_Forward, data._forward, defaultObject._forward);
     }
     SPLIT_SERIALIZATION(AutoBendingDesc)
 
@@ -1340,10 +1336,10 @@ namespace cereal
     {
         ManualBendingDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleMode_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        scope.loadSave(Id_MuscleMode_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
-        scope.loadSave(Id_MuscleMode_ManualBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
-        scope.loadSave(Id_MuscleMode_ManualBending_LastAngleDelta, data._lastAngleDelta, defaultObject._lastAngleDelta);
+        scope.addMember(Id_MuscleMode_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        scope.addMember(Id_MuscleMode_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
+        scope.addMember(Id_MuscleMode_ManualBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
+        scope.addMember(Id_MuscleMode_ManualBending_LastAngleDelta, data._lastAngleDelta, defaultObject._lastAngleDelta);
     }
     SPLIT_SERIALIZATION(ManualBendingDesc)
 
@@ -1352,9 +1348,9 @@ namespace cereal
     {
         AngleBendingDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleMode_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        scope.loadSave(Id_MuscleMode_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
-        scope.loadSave(Id_MuscleMode_AngleBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
+        scope.addMember(Id_MuscleMode_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        scope.addMember(Id_MuscleMode_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
+        scope.addMember(Id_MuscleMode_AngleBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
     }
     SPLIT_SERIALIZATION(AngleBendingDesc)
 
@@ -1363,11 +1359,11 @@ namespace cereal
     {
         AutoCrawlingDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleMode_AutoCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
-        scope.loadSave(Id_MuscleMode_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
-        scope.loadSave(Id_MuscleMode_AutoCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
-        scope.loadSave(Id_MuscleMode_AutoCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
-        scope.loadSave(Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
+        scope.addMember(Id_MuscleMode_AutoCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
+        scope.addMember(Id_MuscleMode_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
+        scope.addMember(Id_MuscleMode_AutoCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
+        scope.addMember(Id_MuscleMode_AutoCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
+        scope.addMember(Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
     }
     SPLIT_SERIALIZATION(AutoCrawlingDesc)
 
@@ -1376,11 +1372,11 @@ namespace cereal
     {
         ManualCrawlingDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_MuscleMode_ManualCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
-        scope.loadSave(Id_MuscleMode_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
-        scope.loadSave(Id_MuscleMode_ManualCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
-        scope.loadSave(Id_MuscleMode_ManualCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
-        scope.loadSave(Id_MuscleMode_ManualCrawling_LastDistanceDelta, data._lastDistanceDelta, defaultObject._lastDistanceDelta);
+        scope.addMember(Id_MuscleMode_ManualCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
+        scope.addMember(Id_MuscleMode_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
+        scope.addMember(Id_MuscleMode_ManualCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
+        scope.addMember(Id_MuscleMode_ManualCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
+        scope.addMember(Id_MuscleMode_ManualCrawling_LastDistanceDelta, data._lastDistanceDelta, defaultObject._lastDistanceDelta);
     }
     SPLIT_SERIALIZATION(ManualCrawlingDesc)
 
@@ -1397,9 +1393,9 @@ namespace cereal
     {
         MuscleDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Muscle_LastMovementX, data._lastMovementX, defaultObject._lastMovementX);
-        scope.loadSave(Id_Muscle_LastMovementY, data._lastMovementY, defaultObject._lastMovementY);
-        scope.loadSaveDesc(Id_Muscle_Mode, data._mode);
+        scope.addMember(Id_Muscle_LastMovementX, data._lastMovementX, defaultObject._lastMovementX);
+        scope.addMember(Id_Muscle_LastMovementY, data._lastMovementY, defaultObject._lastMovementY);
+        scope.addDesc(Id_Muscle_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(MuscleDesc)
 
@@ -1408,7 +1404,7 @@ namespace cereal
     {
         DefenderDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Defender_Mode, data._mode, defaultObject._mode);
+        scope.addMember(Id_Defender_Mode, data._mode, defaultObject._mode);
     }
     SPLIT_SERIALIZATION(DefenderDesc)
 
@@ -1425,7 +1421,7 @@ namespace cereal
     {
         ReconnectFreeCellDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_ReconnectorMode_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_ReconnectorMode_FreeCell_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
     }
     SPLIT_SERIALIZATION(ReconnectFreeCellDesc)
 
@@ -1434,10 +1430,10 @@ namespace cereal
     {
         ReconnectCreatureDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_ReconnectorMode_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        scope.loadSave(Id_ReconnectorMode_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        scope.loadSave(Id_ReconnectorMode_Creature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
-        scope.loadSave(Id_ReconnectorMode_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        scope.addMember(Id_ReconnectorMode_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        scope.addMember(Id_ReconnectorMode_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        scope.addMember(Id_ReconnectorMode_Creature_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_ReconnectorMode_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
     SPLIT_SERIALIZATION(ReconnectCreatureDesc)
 
@@ -1446,7 +1442,7 @@ namespace cereal
     {
         ReconnectorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSaveDesc(Id_Reconnector_Mode, data._mode);
+        scope.addDesc(Id_Reconnector_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(ReconnectorDesc)
 
@@ -1455,8 +1451,8 @@ namespace cereal
     {
         DetonatorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Detonator_State, data._state, defaultObject._state);
-        scope.loadSave(Id_Detonator_Countdown, data._countdown, defaultObject._countdown);
+        scope.addMember(Id_Detonator_State, data._state, defaultObject._state);
+        scope.addMember(Id_Detonator_Countdown, data._countdown, defaultObject._countdown);
     }
     SPLIT_SERIALIZATION(DetonatorDesc)
 
@@ -1465,7 +1461,7 @@ namespace cereal
     {
         DigestorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Digestor_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
+        scope.addMember(Id_Digestor_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
     }
     SPLIT_SERIALIZATION(DigestorDesc)
 
@@ -1474,9 +1470,9 @@ namespace cereal
     {
         SignalDelayDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalDelay_Delay, data._delay, defaultObject._delay);
-        scope.loadSave(Id_SignalDelay_NumMemoryEntriesInitialized, data._numSignalEntriesInitialized, defaultObject._numSignalEntriesInitialized);
-        scope.loadSave(Id_SignalDelay_RingBufferIndex, data._ringBufferIndex, defaultObject._ringBufferIndex);
+        scope.addMember(Id_SignalDelay_Delay, data._delay, defaultObject._delay);
+        scope.addMember(Id_SignalDelay_NumMemoryEntriesInitialized, data._numSignalEntriesInitialized, defaultObject._numSignalEntriesInitialized);
+        scope.addMember(Id_SignalDelay_RingBufferIndex, data._ringBufferIndex, defaultObject._ringBufferIndex);
     }
     SPLIT_SERIALIZATION(SignalDelayDesc)
 
@@ -1485,10 +1481,10 @@ namespace cereal
     {
         SignalRecorderDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalRecorder_ReadOnly, data._readOnly, defaultObject._readOnly);
-        scope.loadSave(Id_SignalRecorder_State, data._state, defaultObject._state);
-        scope.loadSave(Id_SignalRecorder_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
-        scope.loadSave(Id_SignalRecorder_NumReadSignalEntries, data._numReadSignalEntries, defaultObject._numReadSignalEntries);
+        scope.addMember(Id_SignalRecorder_ReadOnly, data._readOnly, defaultObject._readOnly);
+        scope.addMember(Id_SignalRecorder_State, data._state, defaultObject._state);
+        scope.addMember(Id_SignalRecorder_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
+        scope.addMember(Id_SignalRecorder_NumReadSignalEntries, data._numReadSignalEntries, defaultObject._numReadSignalEntries);
     }
     SPLIT_SERIALIZATION(SignalRecorderDesc)
 
@@ -1497,7 +1493,7 @@ namespace cereal
     {
         SignalStorageDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalStorage_ReadOnly, data._readOnly, defaultObject._readOnly);
+        scope.addMember(Id_SignalStorage_ReadOnly, data._readOnly, defaultObject._readOnly);
     }
     SPLIT_SERIALIZATION(SignalStorageDesc)
 
@@ -1506,7 +1502,7 @@ namespace cereal
     {
         SignalIntegratorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalIntegrator_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
+        scope.addMember(Id_SignalIntegrator_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
     }
     SPLIT_SERIALIZATION(SignalIntegratorDesc)
 
@@ -1515,7 +1511,7 @@ namespace cereal
     {
         SignalEntryDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_SignalEntry_Channels, data._channels, defaultObject._channels);
+        scope.addMember(Id_SignalEntry_Channels, data._channels, defaultObject._channels);
     }
     SPLIT_SERIALIZATION(SignalEntryDesc)
 
@@ -1524,9 +1520,9 @@ namespace cereal
     {
         MemoryDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Memory_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
-        scope.loadSaveDesc(Id_Memory_Mode, data._mode);
-        scope.loadSaveDesc(Id_Memory_SignalEntries, data._signalEntries);
+        scope.addMember(Id_Memory_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
+        scope.addDesc(Id_Memory_Mode, data._mode);
+        scope.addDesc(Id_Memory_SignalEntries, data._signalEntries);
     }
     SPLIT_SERIALIZATION(MemoryDesc)
 
@@ -1535,8 +1531,8 @@ namespace cereal
     {
         SenderDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Sender_Range, data._range, defaultObject._range);
-        scope.loadSave(Id_Sender_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
+        scope.addMember(Id_Sender_Range, data._range, defaultObject._range);
+        scope.addMember(Id_Sender_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
     }
     SPLIT_SERIALIZATION(SenderDesc)
 
@@ -1545,8 +1541,8 @@ namespace cereal
     {
         ReceiverDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Receiver_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
-        scope.loadSave(Id_Receiver_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        scope.addMember(Id_Receiver_RestrictToColor, data._restrictToColors, defaultObject._restrictToColors);
+        scope.addMember(Id_Receiver_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
     }
     SPLIT_SERIALIZATION(ReceiverDesc)
 
@@ -1555,7 +1551,7 @@ namespace cereal
     {
         CommunicatorDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSaveDesc(Id_Communicator_Mode, data._mode);
+        scope.addDesc(Id_Communicator_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(CommunicatorDesc)
 
@@ -1571,7 +1567,7 @@ namespace cereal
     {
         SolidDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Solid_Energy, data._energy, defaultObject._energy);
+        scope.addMember(Id_Solid_Energy, data._energy, defaultObject._energy);
     }
     SPLIT_SERIALIZATION(SolidDesc)
 
@@ -1580,8 +1576,8 @@ namespace cereal
     {
         FluidDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Fluid_Energy, data._energy, defaultObject._energy);
-        scope.loadSave(Id_Fluid_Glow, data._glow, defaultObject._glow);
+        scope.addMember(Id_Fluid_Energy, data._energy, defaultObject._energy);
+        scope.addMember(Id_Fluid_Glow, data._glow, defaultObject._glow);
     }
     SPLIT_SERIALIZATION(FluidDesc)
 
@@ -1590,8 +1586,8 @@ namespace cereal
     {
         FreeCellDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_FreeCell_Energy, data._energy, defaultObject._energy);
-        scope.loadSave(Id_FreeCell_Age, data._age, defaultObject._age);
+        scope.addMember(Id_FreeCell_Energy, data._energy, defaultObject._energy);
+        scope.addMember(Id_FreeCell_Age, data._age, defaultObject._age);
     }
     SPLIT_SERIALIZATION(FreeCellDesc)
 
@@ -1600,28 +1596,28 @@ namespace cereal
     {
         CellDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Cell_UsableEnergy, data._usableEnergy, defaultObject._usableEnergy);
-        scope.loadSave(Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
-        scope.loadSave(Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
-        scope.loadSave(Id_Cell_Age, data._age, defaultObject._age);
-        scope.loadSave(Id_Cell_CellState, data._cellState, defaultObject._cellState);
-        scope.loadSave(Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
-        scope.loadSave(Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
-        scope.loadSave(Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
-        scope.loadSave(Id_Cell_ConcatenationIndex, data._concatenationIndex, defaultObject._concatenationIndex);
-        scope.loadSave(Id_Cell_BranchIndex, data._branchIndex, defaultObject._branchIndex);
-        scope.loadSave(Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        scope.loadSave(Id_Cell_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
-        scope.loadSave(Id_Cell_HeadCell, data._headCell, defaultObject._headCell);
-        scope.loadSave(Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
-        scope.loadSave(Id_Cell_Event, data._event, defaultObject._event);
-        scope.loadSave(Id_Cell_EventCounter, data._eventCounter, defaultObject._eventCounter);
-        scope.loadSave(Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
-        scope.loadSave(Id_Cell_LastUpdate, data._lastUpdate, defaultObject._lastUpdate);
-        scope.loadSaveDesc(Id_Cell_CellType, data._cellType);
-        scope.loadSaveDesc(Id_Cell_Constructor, data._constructor);
-        scope.loadSaveDesc(Id_Cell_Signal, data._signal);
-        scope.loadSaveDesc(Id_Cell_NeuralNetwork, data._neuralNetwork);
+        scope.addMember(Id_Cell_UsableEnergy, data._usableEnergy, defaultObject._usableEnergy);
+        scope.addMember(Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        scope.addMember(Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
+        scope.addMember(Id_Cell_Age, data._age, defaultObject._age);
+        scope.addMember(Id_Cell_CellState, data._cellState, defaultObject._cellState);
+        scope.addMember(Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
+        scope.addMember(Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
+        scope.addMember(Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
+        scope.addMember(Id_Cell_ConcatenationIndex, data._concatenationIndex, defaultObject._concatenationIndex);
+        scope.addMember(Id_Cell_BranchIndex, data._branchIndex, defaultObject._branchIndex);
+        scope.addMember(Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        scope.addMember(Id_Cell_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
+        scope.addMember(Id_Cell_HeadCell, data._headCell, defaultObject._headCell);
+        scope.addMember(Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
+        scope.addMember(Id_Cell_Event, data._event, defaultObject._event);
+        scope.addMember(Id_Cell_EventCounter, data._eventCounter, defaultObject._eventCounter);
+        scope.addMember(Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
+        scope.addMember(Id_Cell_LastUpdate, data._lastUpdate, defaultObject._lastUpdate);
+        scope.addDesc(Id_Cell_CellType, data._cellType);
+        scope.addDesc(Id_Cell_Constructor, data._constructor);
+        scope.addDesc(Id_Cell_Signal, data._signal);
+        scope.addDesc(Id_Cell_NeuralNetwork, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDesc)
 
@@ -1630,15 +1626,15 @@ namespace cereal
     {
         ObjectDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Object_Id, data._id, defaultObject._id);
-        scope.loadSave(Id_Object_Pos, data._pos, defaultObject._pos);
-        scope.loadSave(Id_Object_Vel, data._vel, defaultObject._vel);
-        scope.loadSave(Id_Object_Stiffness, data._stiffness, defaultObject._stiffness);
-        scope.loadSave(Id_Object_Color, data._color, defaultObject._color);
-        scope.loadSave(Id_Object_Fixed, data._fixed, defaultObject._fixed);
-        scope.loadSave(Id_Object_Sticky, data._sticky, defaultObject._sticky);
-        scope.loadSaveDesc(Id_Object_Connections, data._connections);
-        scope.loadSaveDesc(Id_Object_Type, data._type);
+        scope.addMember(Id_Object_Id, data._id, defaultObject._id);
+        scope.addMember(Id_Object_Pos, data._pos, defaultObject._pos);
+        scope.addMember(Id_Object_Vel, data._vel, defaultObject._vel);
+        scope.addMember(Id_Object_Stiffness, data._stiffness, defaultObject._stiffness);
+        scope.addMember(Id_Object_Color, data._color, defaultObject._color);
+        scope.addMember(Id_Object_Fixed, data._fixed, defaultObject._fixed);
+        scope.addMember(Id_Object_Sticky, data._sticky, defaultObject._sticky);
+        scope.addDesc(Id_Object_Connections, data._connections);
+        scope.addDesc(Id_Object_Type, data._type);
     }
     SPLIT_SERIALIZATION(ObjectDesc)
 
@@ -1647,13 +1643,13 @@ namespace cereal
     {
         CreatureDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Creature_Id, data._id, defaultObject._id);
-        scope.loadSave(Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
-        scope.loadSave(Id_Creature_Generation, data._generation, defaultObject._generation);
-        scope.loadSave(Id_Creature_NumCells, data._numCells, defaultObject._numCells);
-        scope.loadSave(Id_Creature_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
-        scope.loadSave(Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
-        scope.loadSave(Id_Creature_HaveMutationsApplied, data._mutationState, defaultObject._mutationState);
+        scope.addMember(Id_Creature_Id, data._id, defaultObject._id);
+        scope.addMember(Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
+        scope.addMember(Id_Creature_Generation, data._generation, defaultObject._generation);
+        scope.addMember(Id_Creature_NumCells, data._numCells, defaultObject._numCells);
+        scope.addMember(Id_Creature_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
+        scope.addMember(Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
+        scope.addMember(Id_Creature_HaveMutationsApplied, data._mutationState, defaultObject._mutationState);
     }
     SPLIT_SERIALIZATION(CreatureDesc)
 
@@ -1662,11 +1658,11 @@ namespace cereal
     {
         EnergyDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.loadSave(Id_Particle_Id, data._id, defaultObject._id);
-        scope.loadSave(Id_Particle_Pos, data._pos, defaultObject._pos);
-        scope.loadSave(Id_Particle_Vel, data._vel, defaultObject._vel);
-        scope.loadSave(Id_Particle_Energy, data._energy, defaultObject._energy);
-        scope.loadSave(Id_Particle_Color, data._color, defaultObject._color);
+        scope.addMember(Id_Particle_Id, data._id, defaultObject._id);
+        scope.addMember(Id_Particle_Pos, data._pos, defaultObject._pos);
+        scope.addMember(Id_Particle_Vel, data._vel, defaultObject._vel);
+        scope.addMember(Id_Particle_Energy, data._energy, defaultObject._energy);
+        scope.addMember(Id_Particle_Color, data._color, defaultObject._color);
     }
     SPLIT_SERIALIZATION(EnergyDesc)
 
@@ -1674,10 +1670,10 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, Desc& description)
     {
         auto scope = getSerializationScope(task, ar);
-        scope.loadSaveDesc(Id_Desc_Objects, description._objects);
-        scope.loadSaveDesc(Id_Desc_Energies, description._energies);
-        scope.loadSaveDesc(Id_Desc_Creatures, description._creatures);
-        scope.loadSaveDesc(Id_Desc_Genomes, description._genomes);
+        scope.addDesc(Id_Desc_Objects, description._objects);
+        scope.addDesc(Id_Desc_Energies, description._energies);
+        scope.addDesc(Id_Desc_Creatures, description._creatures);
+        scope.addDesc(Id_Desc_Genomes, description._genomes);
     }
     SPLIT_SERIALIZATION(Desc)
 }
