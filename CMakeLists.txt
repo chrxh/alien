@@ -39,10 +39,6 @@ if (MSVC)
     # Treat warnings as errors
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-WX>)
 
-    # Keep debug symbols in optimized Windows builds so runtime stacktraces can resolve application frames.
-    add_compile_options($<$<AND:$<COMPILE_LANGUAGE:CXX>,$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>>:/Zi>)
-    add_link_options($<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:/DEBUG:FULL>)
-
     # Use standard conforming preprocessor (required by CUDA CCCL headers since CUDA 13.2)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:preprocessor>)
     add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=/Zc:preprocessor>)

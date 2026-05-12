@@ -25,21 +25,20 @@ namespace
         void* stack[maxFrames] = {};
         auto const process = GetCurrentProcess();
 
-        static std::mutex mutex;
-        static bool symbolsInitialized = false;
-
-        std::lock_guard lock(mutex);
-        if (!symbolsInitialized) {
-            SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME);
-            if (!SymInitialize(process, nullptr, TRUE)) {
-                return "unavailable";
-            }
-            symbolsInitialized = true;
-        }
-
         auto const numFrames = CaptureStackBackTrace(2, maxFrames, stack, nullptr);
         if (numFrames == 0) {
             return "unavailable";
+        }
+
+        static std::mutex mutex;
+        static bool symbolInitializationAttempted = false;
+        static bool symbolsAvailable = false;
+
+        std::lock_guard lock(mutex);
+        if (!symbolInitializationAttempted) {
+            SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME);
+            symbolsAvailable = SymInitialize(process, nullptr, TRUE);
+            symbolInitializationAttempted = true;
         }
 
         std::ostringstream out;
@@ -50,8 +49,9 @@ namespace
             symbol->MaxNameLen = MAX_SYM_NAME;
 
             DWORD64 displacement = 0;
-            if (!SymFromAddr(process, reinterpret_cast<DWORD64>(stack[i]), &displacement, symbol)) {
-                out << "#" << i << " 0x" << std::hex << reinterpret_cast<std::uintptr_t>(stack[i]) << std::dec << "\n";
+            auto const address = reinterpret_cast<std::uintptr_t>(stack[i]);
+            if (!symbolsAvailable || !SymFromAddr(process, static_cast<DWORD64>(address), &displacement, symbol)) {
+                out << "#" << i << " 0x" << std::hex << address << std::dec << "\n";
                 continue;
             }
 
@@ -59,8 +59,8 @@ namespace
             line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
             DWORD lineDisplacement = 0;
 
-            out << "#" << i << " " << symbol->Name;
-            if (SymGetLineFromAddr64(process, symbol->Address, &lineDisplacement, &line)) {
+            out << "#" << i << " " << symbol->Name << " [0x" << std::hex << address << std::dec << "]";
+            if (SymGetLineFromAddr64(process, static_cast<DWORD64>(address), &lineDisplacement, &line)) {
                 out << " (" << std::filesystem::path(line.FileName).filename().string() << ":" << line.LineNumber << ")";
             }
             out << "\n";
