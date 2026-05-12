@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-
 #include <Base/Singleton.h>
 
 #include <EngineInterface/GenomeDesc.h>

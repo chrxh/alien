@@ -18,21 +18,6 @@ namespace
 {
     auto constexpr RightColumnWidth = 120.0f;
     auto constexpr MinColumnWidth = 300.0f;
-
-    std::vector<std::string> getActiveMutations(MutationRatesDesc const& mutationRates)
-    {
-        std::vector<std::string> activeMutations;
-        if (mutationRates._connectionMutation1._probability > 0.0f || mutationRates._connectionMutation2._probability > 0.0f) {
-            activeMutations.push_back("Connection mutations");
-        }
-        if (mutationRates._neuronMutation1._probability > 0.0f || mutationRates._neuronMutation2._probability > 0.0f) {
-            activeMutations.push_back("Neuron mutations");
-        }
-        if (mutationRates._lineageMutationProbability > 0.0f) {
-            activeMutations.push_back("Lineage mutation");
-        }
-        return activeMutations;
-    }
 }
 
 void MassOperationsDialog::initIntern() {}
@@ -148,7 +133,7 @@ void MassOperationsDialog::processIntern()
             auto buttonWidth = scale(60.0f);
             auto availableWidth = ImGui::GetContentRegionAvail().x;
             auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
-            AlienGui::ListBox(AlienGui::ListBoxParameters().items(getActiveMutations(_mutationRates)).width(listBoxWidth));
+            AlienGui::ListBox(AlienGui::ListBoxParameters().items(_mutationRates.getActiveMutationTypes()).width(listBoxWidth));
             ImGui::SameLine();
             if (AlienGui::Button("Edit")) {
                 MutationRateDialog::get().openNested(_mutationRates, [this](MutationRatesDesc const& mutationRates) { _mutationRates = mutationRates; });
@@ -241,9 +226,7 @@ void MassOperationsDialog::onExecute()
         DescEditService::get().randomizeGlow(content, _minGlow, _maxGlow);
     }
     if (_randomizeMutationRates) {
-        for (auto& genome : content._genomes) {
-            genome._mutationRates = _mutationRates;
-        }
+        DescEditService::get().setMutationRates(content, _mutationRates);
     }
 
     if (_restrictToSelectedCreatures) {

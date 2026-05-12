@@ -440,6 +440,8 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation2, NeuronMutationDesc());
     MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation1, ConnectionMutationDesc());
     MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation2, ConnectionMutationDesc());
+
+    std::vector<std::string> getActiveMutationTypes() const;
 };
 
 struct GenomeDesc

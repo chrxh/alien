@@ -24,21 +24,6 @@ namespace
     auto constexpr HeaderMinRightColumnWidth = 160.0f;
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
     auto constexpr HeaderMinColumnWidth = 300.0f;
-
-    std::vector<std::string> getActiveMutations(MutationRatesDesc const& mutationRates)
-    {
-        std::vector<std::string> activeMutations;
-        if (mutationRates._connectionMutation1._probability > 0.0f || mutationRates._connectionMutation2._probability > 0.0f) {
-            activeMutations.push_back("Connection mutations");
-        }
-        if (mutationRates._neuronMutation1._probability > 0.0f || mutationRates._neuronMutation2._probability > 0.0f) {
-            activeMutations.push_back("Neuron mutations");
-        }
-        if (mutationRates._lineageMutationProbability > 0.0f) {
-            activeMutations.push_back("Lineage mutation");
-        }
-        return activeMutations;
-    }
 }
 
 
@@ -112,7 +97,7 @@ void _GenomeEditorWidget::processHeaderData()
             auto buttonWidth = scale(60.0f);
             auto availableWidth = ImGui::GetContentRegionAvail().x;
             auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
-            AlienGui::ListBox(AlienGui::ListBoxParameters().items(getActiveMutations(_editData->genome._mutationRates)).width(listBoxWidth));
+            AlienGui::ListBox(AlienGui::ListBoxParameters().items(_editData->genome._mutationRates.getActiveMutationTypes()).width(listBoxWidth));
             ImGui::SameLine();
             if (AlienGui::Button("Edit")) {
                 MutationRateDialog::get().open(

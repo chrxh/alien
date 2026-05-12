@@ -106,6 +106,7 @@ public:
     void randomizeCountdowns(Desc& description, int minValue, int maxValue) const;
     void randomizeLineageIds(Desc& description) const;
     void randomizeGlow(Desc& description, float minGlow, float maxGlow) const;
+    void setMutationRates(Desc& description, MutationRatesDesc const& mutationRates) const;
 
     uint64_t getId(ExtendedObjectOrEnergyDesc const& entity) const;
     RealVector2D getPos(ExtendedObjectOrEnergyDesc const& entity) const;
