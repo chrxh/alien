@@ -435,13 +435,13 @@ struct MutationRatesDesc
 {
     auto operator<=>(MutationRatesDesc const&) const = default;
 
-    std::vector<std::string> getActiveMutations() const;
-
     MEMBER(MutationRatesDesc, float, lineageMutationProbability, 0.0f);
     MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation1, NeuronMutationDesc());
     MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation2, NeuronMutationDesc());
     MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation1, ConnectionMutationDesc());
     MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation2, ConnectionMutationDesc());
+
+    std::vector<std::string> getActiveMutationTypes() const;
 };
 
 struct GenomeDesc

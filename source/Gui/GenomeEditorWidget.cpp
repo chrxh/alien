@@ -97,7 +97,7 @@ void _GenomeEditorWidget::processHeaderData()
             auto buttonWidth = scale(60.0f);
             auto availableWidth = ImGui::GetContentRegionAvail().x;
             auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
-            AlienGui::ListBox(AlienGui::ListBoxParameters().items(_editData->genome._mutationRates.getActiveMutations()).width(listBoxWidth));
+            AlienGui::ListBox(AlienGui::ListBoxParameters().items(_editData->genome._mutationRates.getActiveMutationTypes()).width(listBoxWidth));
             ImGui::SameLine();
             if (AlienGui::Button("Edit")) {
                 MutationRateDialog::get().open(
