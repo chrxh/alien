@@ -155,7 +155,6 @@ DownloadCache& BrowserWindow::getSimulationCache()
 
 void BrowserWindow::refreshIntern(bool withRetry)
 {
-    CHECK(false);
     _refreshProcessor->executeTask(
         [&](auto const& senderId) {
             return _PersisterFacade::get()->scheduleGetNetworkResources(
