@@ -52,10 +52,14 @@ void checkAndThrowError(T result)
         case cudaError::cudaErrorMemoryAllocation:
             stream << "A CUDA error occurred while allocating memory. A possible reason could be that there is not enough memory available.";
             break;
+        case cudaError::cudaErrorIllegalAddress:
+            stream << "A CUDA error occurred (cudaErrorIllegalAddress).";
+            break;
         default: {
-            stream << "CUDA error";
+            stream << "CUDA error.";
         } break;
         }
+        stream << " Error code: " << result;
         auto text = stream.str();
         log(Priority::Important, text);
 
