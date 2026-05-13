@@ -80,6 +80,19 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                     printf("distance too large at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
+
+                auto connectionOnOtherSideFound = false;
+                for (int j = 0; j < connectedObject->numConnections; ++j) {
+                    auto connectedConnectedObject = connectedObject->connections[j].object;
+                    if (object == connectedConnectedObject) {
+                        connectionOnOtherSideFound = true;
+                        break;
+                    }
+                }
+                if (!connectionOnOtherSideFound) {
+                    printf("connection not found on other side at %d\n", location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
             }
             if (sumEnergy != nullptr) {
                 atomicAdd(sumEnergy, object->getEnergy());
