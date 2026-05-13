@@ -21,7 +21,7 @@ void SimulationKernelsService::init()
 
 void SimulationKernelsService::shutdown()
 {
-    if (!isCudaContextInvalid()) {
+    if (!CudaContextState::get().isInvalid()) {
         for (cudaGraphExec_t& graphExec : _graphCache | std::views::values) {
             CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
         }

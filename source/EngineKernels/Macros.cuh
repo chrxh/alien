@@ -8,37 +8,30 @@
 #include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
+#include <Base/Singleton.h>
 
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-inline bool& cudaContextInvalidState()
+class CudaContextState
 {
-    static bool result = false;
-    return result;
-}
+    MAKE_SINGLETON(CudaContextState);
 
-inline void setCudaContextInvalid()
-{
-    cudaContextInvalidState() = true;
-}
+public:
+    void setInvalid() { _invalid = true; }
+    void reset() { _invalid = false; }
+    bool isInvalid() const { return _invalid; }
 
-inline void resetCudaContextInvalid()
-{
-    cudaContextInvalidState() = false;
-}
-
-inline bool isCudaContextInvalid()
-{
-    return cudaContextInvalidState();
-}
+private:
+    bool _invalid = false;
+};
 
 template <typename T>
 void checkAndThrowError(T result)
 {
     if (result) {
-        setCudaContextInvalid();
+        CudaContextState::get().setInvalid();
         DEVICE_RESET
         std::stringstream stream;
         switch (result) {

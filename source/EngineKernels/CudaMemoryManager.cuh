@@ -40,7 +40,7 @@ public:
         auto const pointer = reinterpret_cast<void*>(memory);
         auto findResult = _pointerToSizeMap.find(pointer);
         if (findResult != _pointerToSizeMap.end()) {
-            if (!isCudaContextInvalid()) {
+            if (!CudaContextState::get().isInvalid()) {
                 CHECK_FOR_CUDA_ERROR(cudaFree(memory));
             }
             _bytes -= sizeof(T) * findResult->second;
