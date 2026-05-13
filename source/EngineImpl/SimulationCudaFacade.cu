@@ -102,26 +102,38 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     log(Priority::Important, std::to_string(memory / (1024 * 1024)) + " MB GPU memory used");
 }
 
-_SimulationCudaFacade::~_SimulationCudaFacade()
+_SimulationCudaFacade::~_SimulationCudaFacade() noexcept
 {
-    _cudaSimulationData->free();
-    _cudaPreviewData->free();
-    _cudaSimulationStatistics->free();
-    _cudaSelectionResult->free();
+    auto cudaContextWasInvalid = CudaContextState::get().isInvalid();
+    if (cudaContextWasInvalid) {
+        log(Priority::Unimportant, "skip CUDA shutdown because the CUDA context is invalid");
+    } else {
+        try {
+            _cudaSimulationData->free();
+            _cudaPreviewData->free();
+            _cudaSimulationStatistics->free();
+            _cudaSelectionResult->free();
 
-    SimulationKernelsService::get().shutdown();
-    DataAccessKernelsService::get().shutdown();
-    EditKernelsService::get().shutdown();
-    GeometryKernelsService::get().shutdown();
-    TestKernelsService::get().shutdown();
-    StatisticsKernelsService::get().shutdown();
-    SelectionKernelsService::get().shutdown();
-    GarbageCollectorKernelsService::get().shutdown();
+            SimulationKernelsService::get().shutdown();
+            DataAccessKernelsService::get().shutdown();
+            EditKernelsService::get().shutdown();
+            GeometryKernelsService::get().shutdown();
+            TestKernelsService::get().shutdown();
+            StatisticsKernelsService::get().shutdown();
+            SelectionKernelsService::get().shutdown();
+            GarbageCollectorKernelsService::get().shutdown();
 
-    _cudaTOProvider.reset();
-    _collectionTOProvider.reset();
-
-    CHECK_FOR_CUDA_ERROR(cudaDeviceReset());
+            auto const resetResult = cudaDeviceReset();
+            if (resetResult != cudaSuccess) {
+                log(Priority::Important, std::string("skip CUDA device reset cleanup: ") + cudaGetErrorString(resetResult));
+            }
+        } catch (std::exception const& e) {
+            log(Priority::Important, "skip CUDA shutdown: " + std::string(e.what()));
+        } catch (...) {
+            log(Priority::Important, "skip CUDA shutdown");
+        }
+    }
+    CudaMemoryManager::getInstance().reset();
     log(Priority::Important, "simulation closed");
 }
 
@@ -643,6 +655,7 @@ void _SimulationCudaFacade::initCuda()
     }
 
     cudaGetLastError();  //reset error code
+    CudaContextState::get().reset();
 
     log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
 }

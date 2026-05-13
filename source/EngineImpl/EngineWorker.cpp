@@ -370,6 +370,9 @@ void EngineWorker::runThreadLoop()
                 _accessState = 2;
             }
         }
+    } catch (AlienException const& e) {
+        std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
+        _exceptionData.errorMessage = std::string(e.what()) + "\nCallstack:\n" + e.getCallstack();
     } catch (std::exception const& e) {
         std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
         _exceptionData.errorMessage = e.what();

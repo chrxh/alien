@@ -8,15 +8,30 @@
 #include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
+#include <Base/Singleton.h>
 
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
+class CudaContextState
+{
+    MAKE_SINGLETON(CudaContextState);
+
+public:
+    void setInvalid() { _invalid = true; }
+    void reset() { _invalid = false; }
+    bool isInvalid() const { return _invalid; }
+
+private:
+    bool _invalid = false;
+};
+
 template <typename T>
 void checkAndThrowError(T result)
 {
     if (result) {
+        CudaContextState::get().setInvalid();
         DEVICE_RESET
         std::stringstream stream;
         switch (result) {
@@ -38,7 +53,7 @@ void checkAndThrowError(T result)
             stream << "A CUDA error occurred while allocating memory. A possible reason could be that there is not enough memory available.";
             break;
         default: {
-            stream << "CUDA error.";
+            stream << "CUDA error";
         } break;
         }
         auto text = stream.str();
