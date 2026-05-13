@@ -104,6 +104,7 @@ public:
     void setDetached(bool value);
 
     void runThreadLoop();
+    void checkAndThrowException() const;
     void runSimulation();
     void pauseSimulation();
     bool isSimulationRunning() const;

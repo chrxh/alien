@@ -75,6 +75,7 @@ public:
     virtual void pauseSimulation() = 0;
     virtual void applyCataclysm(int power) = 0;
     virtual bool isSimulationRunning() const = 0;
+    virtual void checkAndThrowException() const = 0;
     virtual void closeSimulation() = 0;
     virtual uint64_t getCurrentTimestep() const = 0;
     virtual void setCurrentTimestep(uint64_t value) = 0;

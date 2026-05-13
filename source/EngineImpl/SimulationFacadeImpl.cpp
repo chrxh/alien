@@ -187,6 +187,11 @@ bool _SimulationFacadeImpl::isSimulationRunning() const
     return _worker.isSimulationRunning();
 }
 
+void _SimulationFacadeImpl::checkAndThrowException() const
+{
+    _worker.checkAndThrowException();
+}
+
 void _SimulationFacadeImpl::closeSimulation()
 {
     if (_thread) {
