@@ -87,11 +87,11 @@ int main(int argc, char** argv)
 
         std::cout << "Finished" << std::endl;
     } catch (AlienException const& e) {
-        log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        log(Priority::Important, std::string("An exception occurred: ") + e.what());
         log(Priority::Important, "Callstack:\n" + e.getCallstack());
         error = true;
     } catch (std::exception const& e) {
-        log(Priority::Important, std::string("An uncaught exception occurred: ") + e.what());
+        log(Priority::Important, std::string("An exception occurred: ") + e.what());
         error = true;
     } catch (...) {
         log(Priority::Important, std::string("An unknown exception occurred: "));
