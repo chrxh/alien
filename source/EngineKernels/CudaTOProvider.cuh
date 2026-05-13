@@ -10,7 +10,7 @@ class _CudaTOProvider
 {
 public:
     _CudaTOProvider();
-    ~_CudaTOProvider();
+    ~_CudaTOProvider() noexcept;
 
     TOs provideDataTO(ArraySizesForTOs const& requiredCapacity);
 

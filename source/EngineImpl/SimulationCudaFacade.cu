@@ -53,6 +53,18 @@ namespace
     std::chrono::milliseconds const StatisticsUpdate(30);
     ArraySizesForGpuEntities const PreviewCapacityGpu{10000, 10000, 10000000};
     ArraySizesForTOs const PreviewCapacityTO{1000, 1000, 1000, 10000, 10000, 10000, 10000000};
+
+    template <typename Func>
+    void cleanupNoThrow(std::string const& description, Func&& func) noexcept
+    {
+        try {
+            func();
+        } catch (std::exception const& e) {
+            log(Priority::Unimportant, "skip CUDA cleanup for " + description + ": " + e.what());
+        } catch (...) {
+            log(Priority::Unimportant, "skip CUDA cleanup for " + description);
+        }
+    }
 }
 
 _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings)
@@ -102,26 +114,36 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     log(Priority::Important, std::to_string(memory / (1024 * 1024)) + " MB GPU memory used");
 }
 
-_SimulationCudaFacade::~_SimulationCudaFacade()
+_SimulationCudaFacade::~_SimulationCudaFacade() noexcept
 {
-    _cudaSimulationData->free();
-    _cudaPreviewData->free();
-    _cudaSimulationStatistics->free();
-    _cudaSelectionResult->free();
+    auto const cudaContextWasInvalid = isCudaContextInvalid();
+    if (!cudaContextWasInvalid) {
+        cleanupNoThrow("simulation data", [&] { _cudaSimulationData->free(); });
+        cleanupNoThrow("preview data", [&] { _cudaPreviewData->free(); });
+        cleanupNoThrow("simulation statistics", [&] { _cudaSimulationStatistics->free(); });
+        cleanupNoThrow("selection result", [&] { _cudaSelectionResult->free(); });
+    } else {
+        log(Priority::Unimportant, "skip direct CUDA resource cleanup because the CUDA context is invalid");
+    }
 
-    SimulationKernelsService::get().shutdown();
-    DataAccessKernelsService::get().shutdown();
-    EditKernelsService::get().shutdown();
-    GeometryKernelsService::get().shutdown();
-    TestKernelsService::get().shutdown();
-    StatisticsKernelsService::get().shutdown();
-    SelectionKernelsService::get().shutdown();
-    GarbageCollectorKernelsService::get().shutdown();
+    cleanupNoThrow("simulation kernels service", [] { SimulationKernelsService::get().shutdown(); });
+    cleanupNoThrow("data access kernels service", [] { DataAccessKernelsService::get().shutdown(); });
+    cleanupNoThrow("edit kernels service", [] { EditKernelsService::get().shutdown(); });
+    cleanupNoThrow("geometry kernels service", [] { GeometryKernelsService::get().shutdown(); });
+    cleanupNoThrow("test kernels service", [] { TestKernelsService::get().shutdown(); });
+    cleanupNoThrow("statistics kernels service", [] { StatisticsKernelsService::get().shutdown(); });
+    cleanupNoThrow("selection kernels service", [] { SelectionKernelsService::get().shutdown(); });
+    cleanupNoThrow("garbage collector kernels service", [] { GarbageCollectorKernelsService::get().shutdown(); });
 
     _cudaTOProvider.reset();
     _collectionTOProvider.reset();
 
-    CHECK_FOR_CUDA_ERROR(cudaDeviceReset());
+    auto const resetResult = cudaDeviceReset();
+    if (resetResult != cudaSuccess && !cudaContextWasInvalid) {
+        log(Priority::Unimportant, std::string("skip CUDA device reset cleanup: ") + cudaGetErrorString(resetResult));
+    }
+    CudaMemoryManager::getInstance().reset();
+    resetCudaContextInvalid();
     log(Priority::Important, "simulation closed");
 }
 
@@ -643,6 +665,7 @@ void _SimulationCudaFacade::initCuda()
     }
 
     cudaGetLastError();  //reset error code
+    resetCudaContextInvalid();
 
     log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
 }

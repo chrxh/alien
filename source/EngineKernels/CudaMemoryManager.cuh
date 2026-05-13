@@ -17,7 +17,11 @@ public:
     CudaMemoryManager(CudaMemoryManager const&) = delete;
     void operator=(CudaMemoryManager const&) = delete;
 
-    void reset() { _bytes = 0; }
+    void reset()
+    {
+        _bytes = 0;
+        _pointerToSizeMap.clear();
+    }
 
     template <typename T>
     void acquireMemory(uint64_t arraySize, T*& result)
@@ -33,12 +37,16 @@ public:
         if (!memory) {
             return;
         }
-        auto findResult = _pointerToSizeMap.find(reinterpret_cast<void*>(memory));
+        auto const pointer = reinterpret_cast<void*>(memory);
+        auto findResult = _pointerToSizeMap.find(pointer);
         if (findResult != _pointerToSizeMap.end()) {
-            CHECK_FOR_CUDA_ERROR(cudaFree(memory));
+            if (!isCudaContextInvalid()) {
+                CHECK_FOR_CUDA_ERROR(cudaFree(memory));
+            }
             _bytes -= sizeof(T) * findResult->second;
             _pointerToSizeMap.erase(findResult->first);
         }
+        memory = nullptr;
     }
 
     uint64_t getSizeOfAcquiredMemory() const { return _bytes; }

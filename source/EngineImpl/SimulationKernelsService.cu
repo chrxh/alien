@@ -13,27 +13,28 @@
 
 void SimulationKernelsService::init()
 {
+    _graphCache.clear();
+    _previewGraphCache.clear();
+    _stream = nullptr;
     CHECK_FOR_CUDA_ERROR(cudaStreamCreate(&_stream));
 }
 
 void SimulationKernelsService::shutdown()
 {
-    // Destroy all cached graph executables
-    for (cudaGraphExec_t& graphExec : _graphCache | std::views::values) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
+    if (!isCudaContextInvalid()) {
+        for (cudaGraphExec_t& graphExec : _graphCache | std::views::values) {
+            CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
+        }
+        for (cudaGraphExec_t& graphExec : _previewGraphCache | std::views::values) {
+            CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
+        }
+        if (_stream) {
+            CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_stream));
+        }
     }
     _graphCache.clear();
-
-    // Destroy all cached preview graph executables
-    for (cudaGraphExec_t& graphExec : _previewGraphCache | std::views::values) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
-    }
     _previewGraphCache.clear();
-
-    if (_stream) {
-        CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_stream));
-        _stream = nullptr;
-    }
+    _stream = nullptr;
 }
 
 int SimulationKernelsService::calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters) const

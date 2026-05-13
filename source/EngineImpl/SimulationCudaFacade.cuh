@@ -38,7 +38,7 @@ public:
     static GpuInfo checkAndReturnGpuInfo();
 
     _SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings);
-    ~_SimulationCudaFacade();
+    ~_SimulationCudaFacade() noexcept;
 
     void calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);

@@ -4,10 +4,13 @@
 
 _CudaTOProvider::_CudaTOProvider() {}
 
-_CudaTOProvider::~_CudaTOProvider()
+_CudaTOProvider::~_CudaTOProvider() noexcept
 {
     if (_to) {
-        destroy();
+        try {
+            destroy();
+        } catch (...) {
+        }
     }
 }
 

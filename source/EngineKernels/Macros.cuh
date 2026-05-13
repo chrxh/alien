@@ -13,10 +13,32 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
+inline bool& cudaContextInvalidState()
+{
+    static bool result = false;
+    return result;
+}
+
+inline void setCudaContextInvalid()
+{
+    cudaContextInvalidState() = true;
+}
+
+inline void resetCudaContextInvalid()
+{
+    cudaContextInvalidState() = false;
+}
+
+inline bool isCudaContextInvalid()
+{
+    return cudaContextInvalidState();
+}
+
 template <typename T>
 void checkAndThrowError(T result)
 {
     if (result) {
+        setCudaContextInvalid();
         DEVICE_RESET
         std::stringstream stream;
         switch (result) {
