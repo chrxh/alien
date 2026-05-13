@@ -376,6 +376,17 @@ void EngineWorker::runThreadLoop()
     } catch (std::exception const& e) {
         std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
         _exceptionData.errorMessage = e.what();
+    } catch (...) {
+        std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
+        _exceptionData.errorMessage = "An unknown exception occurred in the GPU worker thread.";
+    }
+}
+
+void EngineWorker::checkAndThrowException() const
+{
+    std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
+    if (_exceptionData.errorMessage) {
+        throw std::runtime_error(*_exceptionData.errorMessage);
     }
 }
 

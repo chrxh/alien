@@ -56,6 +56,7 @@ public:
     void applyCataclysm(int power) override;
 
     bool isSimulationRunning() const override;
+    void checkAndThrowException() const override;
 
     void closeSimulation() override;
 

@@ -80,6 +80,7 @@ void MainLoopController::setup()
 void MainLoopController::process()
 {
     glfwPollEvents();
+    _SimulationFacade::get()->checkAndThrowException();
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
