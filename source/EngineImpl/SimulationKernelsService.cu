@@ -4,7 +4,6 @@
 
 #include <EngineInterface/SpaceCalculator.h>
 
-#include <EngineKernels/DebugKernels.cuh>
 #include <EngineKernels/ForceFieldKernels.cuh>
 #include <EngineKernels/SimulationKernels.cuh>
 #include <EngineKernels/SimulationStatistics.cuh>
@@ -77,21 +76,17 @@ void SimulationKernelsService::launchTimestepKernels(
     bool considerInnerFriction = (config.timestepMod3 == 0);
     bool considerRigidityUpdate = (config.timestepMod3 == 0);
 
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 0);
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 1);
 
     STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
 
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidBoundaryForces, _stream, numBlocks, config.fluidBoundaryKernelThreads, data);
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 3);
 
     if (config.hasLayers) {
         STREAM_KERNEL_CALL(cudaApplyForceFields, _stream, numBlocks, data);
     }
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 4);
 
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, calcAngularForces);
@@ -106,45 +101,35 @@ void SimulationKernelsService::launchTimestepKernels(
     STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep1, _stream, numBlocks, data);
     STREAM_KERNEL_CALL(cudaNextTimestep_cellState_substep2, _stream, numBlocks, data);
 
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 5);
 
     // Signal processing and cell type-specific functions
     if (config.executeCellFunction) {
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_calcSignal, _stream, numBlocks, 32, data, statistics);
         STREAM_KERNEL_CALL(cudaNextTimestep_signal_setSignal, _stream, numBlocks, data);
-        STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 6);
 
         // Cell type-specific functions
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 7);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, false);
-        STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 8);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_injector, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, _stream, numBlocks, 4, data, statistics);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_depot, _stream, numBlocks, 4, data, statistics);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_sensor, _stream, numBlocks, 64, data, statistics);
-        STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 9);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_reconnector, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 10);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_detonator, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_digestor, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_memory, _stream, numBlocks, data, statistics);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_communicator, _stream, numBlocks, 64, data, statistics);
-        STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 11);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 12);
 
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_applyMutations, _stream, numBlocks, NEURONS_PER_CELL, data, statistics);
     }
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 13);
 
     if (considerInnerFriction) {
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
     }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, false);
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 14);
 
     if (considerRigidityUpdate && config.rigidityEnabled) {
         STREAM_KERNEL_CALL(cudaInitClusterData, _stream, numBlocks, data);
@@ -157,17 +142,11 @@ void SimulationKernelsService::launchTimestepKernels(
         STREAM_KERNEL_CALL(cudaApplyClusterData, _stream, numBlocks, data);
     }
 
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 15);
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 16);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 17);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 18);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 19);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, _stream, numBlocks, data);
-    STREAM_KERNEL_CALL(DEBUG_checkCellsAndParticles, _stream, numBlocks, data, nullptr, 20);
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
 }
