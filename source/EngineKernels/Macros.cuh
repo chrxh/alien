@@ -53,7 +53,7 @@ void checkAndThrowError(T result)
             stream << "A CUDA error occurred while allocating memory. A possible reason could be that there is not enough memory available.";
             break;
         default: {
-            stream << "CUDA error.";
+            stream << "CUDA error";
         } break;
         }
         auto text = stream.str();

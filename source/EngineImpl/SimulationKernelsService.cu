@@ -21,16 +21,14 @@ void SimulationKernelsService::init()
 
 void SimulationKernelsService::shutdown()
 {
-    if (!CudaContextState::get().isInvalid()) {
-        for (cudaGraphExec_t& graphExec : _graphCache | std::views::values) {
-            CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
-        }
-        for (cudaGraphExec_t& graphExec : _previewGraphCache | std::views::values) {
-            CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
-        }
-        if (_stream) {
-            CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_stream));
-        }
+    for (cudaGraphExec_t& graphExec : _graphCache | std::views::values) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
+    }
+    for (cudaGraphExec_t& graphExec : _previewGraphCache | std::views::values) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
+    }
+    if (_stream) {
+        CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_stream));
     }
     _graphCache.clear();
     _previewGraphCache.clear();

@@ -104,7 +104,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
 _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
 {
-    auto const cudaContextWasInvalid = CudaContextState::get().isInvalid();
+    auto cudaContextWasInvalid = CudaContextState::get().isInvalid();
     if (cudaContextWasInvalid) {
         log(Priority::Unimportant, "skip CUDA shutdown because the CUDA context is invalid");
     } else {
@@ -125,12 +125,12 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
 
             auto const resetResult = cudaDeviceReset();
             if (resetResult != cudaSuccess) {
-                log(Priority::Unimportant, std::string("skip CUDA device reset cleanup: ") + cudaGetErrorString(resetResult));
+                log(Priority::Important, std::string("skip CUDA device reset cleanup: ") + cudaGetErrorString(resetResult));
             }
         } catch (std::exception const& e) {
-            log(Priority::Unimportant, "skip CUDA shutdown: " + std::string(e.what()));
+            log(Priority::Important, "skip CUDA shutdown: " + std::string(e.what()));
         } catch (...) {
-            log(Priority::Unimportant, "skip CUDA shutdown");
+            log(Priority::Important, "skip CUDA shutdown");
         }
     }
     CudaMemoryManager::getInstance().reset();
