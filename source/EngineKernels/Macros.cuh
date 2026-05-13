@@ -55,6 +55,9 @@ void checkAndThrowError(T result)
         case cudaError::cudaErrorIllegalAddress:
             stream << "A CUDA error occurred (cudaErrorIllegalAddress).";
             break;
+        case cudaError::cudaErrorLaunchFailure:
+            stream << "A CUDA error occurred (cudaErrorLaunchFailure).";
+            break;
         default: {
             stream << "CUDA error.";
         } break;
