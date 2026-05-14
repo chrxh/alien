@@ -333,13 +333,6 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         genome);
 
     _simulationFacade->setSimulationData(data);
-    DeserializedSimulation deserializedData;
-    deserializedData.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
-    deserializedData.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-    deserializedData.auxiliaryData.timestep = _simulationFacade->getCurrentTimestep();
-    deserializedData.mainData = _simulationFacade->getSimulationData();
-    SerializerService::get().serializeSimulationToFiles("d:\\test.sim", deserializedData);
-
 
     _simulationFacade->calcTimesteps(2000);
 
