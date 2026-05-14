@@ -20,149 +20,85 @@ namespace
     auto constexpr RightColumnWidth = 120.0f;
     auto constexpr MinColumnWidth = 300.0f;
     auto constexpr SettingsPrefix = "dialogs.mass operations.";
-
-    void loadValue(bool& value, std::string const& key)
-    {
-        value = GlobalSettings::get().getValue(SettingsPrefix + key, value);
-    }
-
-    void loadValue(int& value, std::string const& key)
-    {
-        value = GlobalSettings::get().getValue(SettingsPrefix + key, value);
-    }
-
-    void loadValue(float& value, std::string const& key)
-    {
-        value = GlobalSettings::get().getValue(SettingsPrefix + key, value);
-    }
-
-    void saveValue(bool value, std::string const& key)
-    {
-        GlobalSettings::get().setValue(SettingsPrefix + key, value);
-    }
-
-    void saveValue(int value, std::string const& key)
-    {
-        GlobalSettings::get().setValue(SettingsPrefix + key, value);
-    }
-
-    void saveValue(float value, std::string const& key)
-    {
-        GlobalSettings::get().setValue(SettingsPrefix + key, value);
-    }
-
-    void loadMutationRates(MutationRatesDesc& mutationRates)
-    {
-        loadValue(mutationRates._lineageMutationProbability, "mutation rates.lineage mutation probability");
-
-        loadValue(mutationRates._connectionMutation1._probability, "mutation rates.connection mutation 1.probability");
-        loadValue(mutationRates._connectionMutation1._sigma, "mutation rates.connection mutation 1.sigma");
-        loadValue(mutationRates._connectionMutation2._probability, "mutation rates.connection mutation 2.probability");
-        loadValue(mutationRates._connectionMutation2._sigma, "mutation rates.connection mutation 2.sigma");
-
-        loadValue(mutationRates._neuronMutation1._probability, "mutation rates.neuron mutation 1.probability");
-        loadValue(mutationRates._neuronMutation1._weightSigma, "mutation rates.neuron mutation 1.weight sigma");
-        loadValue(mutationRates._neuronMutation1._biasSigma, "mutation rates.neuron mutation 1.bias sigma");
-        loadValue(mutationRates._neuronMutation1._activationFunctionProbability, "mutation rates.neuron mutation 1.activation function probability");
-
-        loadValue(mutationRates._neuronMutation2._probability, "mutation rates.neuron mutation 2.probability");
-        loadValue(mutationRates._neuronMutation2._weightSigma, "mutation rates.neuron mutation 2.weight sigma");
-        loadValue(mutationRates._neuronMutation2._biasSigma, "mutation rates.neuron mutation 2.bias sigma");
-        loadValue(mutationRates._neuronMutation2._activationFunctionProbability, "mutation rates.neuron mutation 2.activation function probability");
-    }
-
-    void saveMutationRates(MutationRatesDesc const& mutationRates)
-    {
-        saveValue(mutationRates._lineageMutationProbability, "mutation rates.lineage mutation probability");
-
-        saveValue(mutationRates._connectionMutation1._probability, "mutation rates.connection mutation 1.probability");
-        saveValue(mutationRates._connectionMutation1._sigma, "mutation rates.connection mutation 1.sigma");
-        saveValue(mutationRates._connectionMutation2._probability, "mutation rates.connection mutation 2.probability");
-        saveValue(mutationRates._connectionMutation2._sigma, "mutation rates.connection mutation 2.sigma");
-
-        saveValue(mutationRates._neuronMutation1._probability, "mutation rates.neuron mutation 1.probability");
-        saveValue(mutationRates._neuronMutation1._weightSigma, "mutation rates.neuron mutation 1.weight sigma");
-        saveValue(mutationRates._neuronMutation1._biasSigma, "mutation rates.neuron mutation 1.bias sigma");
-        saveValue(mutationRates._neuronMutation1._activationFunctionProbability, "mutation rates.neuron mutation 1.activation function probability");
-
-        saveValue(mutationRates._neuronMutation2._probability, "mutation rates.neuron mutation 2.probability");
-        saveValue(mutationRates._neuronMutation2._weightSigma, "mutation rates.neuron mutation 2.weight sigma");
-        saveValue(mutationRates._neuronMutation2._biasSigma, "mutation rates.neuron mutation 2.bias sigma");
-        saveValue(mutationRates._neuronMutation2._activationFunctionProbability, "mutation rates.neuron mutation 2.activation function probability");
-    }
 }
 
 void MassOperationsDialog::initIntern()
 {
-    loadValue(_randomizeCellColors, "randomize cell colors");
+    auto& settings = GlobalSettings::get();
+    auto const settingsPrefix = std::string(SettingsPrefix);
+
+    _randomizeCellColors = settings.getValue(settingsPrefix + "randomize cell colors", _randomizeCellColors);
     for (int i = 0; i < MAX_COLORS; ++i) {
-        loadValue(_checkedCellColors[i], "checked cell colors." + std::to_string(i));
+        _checkedCellColors[i] = settings.getValue(settingsPrefix + "checked cell colors." + std::to_string(i), _checkedCellColors[i]);
     }
 
-    loadValue(_randomizeGenomeColors, "randomize genome colors");
+    _randomizeGenomeColors = settings.getValue(settingsPrefix + "randomize genome colors", _randomizeGenomeColors);
     for (int i = 0; i < MAX_COLORS; ++i) {
-        loadValue(_checkedGenomeColors[i], "checked genome colors." + std::to_string(i));
+        _checkedGenomeColors[i] = settings.getValue(settingsPrefix + "checked genome colors." + std::to_string(i), _checkedGenomeColors[i]);
     }
 
-    loadValue(_randomizeEnergies, "randomize energies");
-    loadValue(_minEnergy, "minimum energy");
-    loadValue(_maxEnergy, "maximum energy");
+    _randomizeEnergies = settings.getValue(settingsPrefix + "randomize energies", _randomizeEnergies);
+    _minEnergy = settings.getValue(settingsPrefix + "minimum energy", _minEnergy);
+    _maxEnergy = settings.getValue(settingsPrefix + "maximum energy", _maxEnergy);
 
-    loadValue(_randomizeAges, "randomize ages");
-    loadValue(_minAge, "minimum age");
-    loadValue(_maxAge, "maximum age");
+    _randomizeAges = settings.getValue(settingsPrefix + "randomize ages", _randomizeAges);
+    _minAge = settings.getValue(settingsPrefix + "minimum age", _minAge);
+    _maxAge = settings.getValue(settingsPrefix + "maximum age", _maxAge);
 
-    loadValue(_randomizeCountdowns, "randomize countdowns");
-    loadValue(_minCountdown, "minimum countdown");
-    loadValue(_maxCountdown, "maximum countdown");
+    _randomizeCountdowns = settings.getValue(settingsPrefix + "randomize countdowns", _randomizeCountdowns);
+    _minCountdown = settings.getValue(settingsPrefix + "minimum countdown", _minCountdown);
+    _maxCountdown = settings.getValue(settingsPrefix + "maximum countdown", _maxCountdown);
 
-    loadValue(_randomizeLineageId, "randomize lineage id");
+    _randomizeLineageId = settings.getValue(settingsPrefix + "randomize lineage id", _randomizeLineageId);
 
-    loadValue(_randomizeGlow, "randomize glow");
-    loadValue(_minGlow, "minimum glow");
-    loadValue(_maxGlow, "maximum glow");
+    _randomizeGlow = settings.getValue(settingsPrefix + "randomize glow", _randomizeGlow);
+    _minGlow = settings.getValue(settingsPrefix + "minimum glow", _minGlow);
+    _maxGlow = settings.getValue(settingsPrefix + "maximum glow", _maxGlow);
 
-    loadValue(_randomizeMutationRates, "randomize mutation rates");
-    loadMutationRates(_mutationRates);
+    _randomizeMutationRates = settings.getValue(settingsPrefix + "randomize mutation rates", _randomizeMutationRates);
+    MutationRateDialog::get().loadSettings(_mutationRates, settingsPrefix + "mutation rates.");
 
-    loadValue(_restrictToSelectedCreatures, "restrict to selected creatures");
+    _restrictToSelectedCreatures = settings.getValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
     validateAndCorrect();
 }
 
 void MassOperationsDialog::shutdownIntern()
 {
-    saveValue(_randomizeCellColors, "randomize cell colors");
+    auto& settings = GlobalSettings::get();
+    auto const settingsPrefix = std::string(SettingsPrefix);
+
+    settings.setValue(settingsPrefix + "randomize cell colors", _randomizeCellColors);
     for (int i = 0; i < MAX_COLORS; ++i) {
-        saveValue(_checkedCellColors[i], "checked cell colors." + std::to_string(i));
+        settings.setValue(settingsPrefix + "checked cell colors." + std::to_string(i), _checkedCellColors[i]);
     }
 
-    saveValue(_randomizeGenomeColors, "randomize genome colors");
+    settings.setValue(settingsPrefix + "randomize genome colors", _randomizeGenomeColors);
     for (int i = 0; i < MAX_COLORS; ++i) {
-        saveValue(_checkedGenomeColors[i], "checked genome colors." + std::to_string(i));
+        settings.setValue(settingsPrefix + "checked genome colors." + std::to_string(i), _checkedGenomeColors[i]);
     }
 
-    saveValue(_randomizeEnergies, "randomize energies");
-    saveValue(_minEnergy, "minimum energy");
-    saveValue(_maxEnergy, "maximum energy");
+    settings.setValue(settingsPrefix + "randomize energies", _randomizeEnergies);
+    settings.setValue(settingsPrefix + "minimum energy", _minEnergy);
+    settings.setValue(settingsPrefix + "maximum energy", _maxEnergy);
 
-    saveValue(_randomizeAges, "randomize ages");
-    saveValue(_minAge, "minimum age");
-    saveValue(_maxAge, "maximum age");
+    settings.setValue(settingsPrefix + "randomize ages", _randomizeAges);
+    settings.setValue(settingsPrefix + "minimum age", _minAge);
+    settings.setValue(settingsPrefix + "maximum age", _maxAge);
 
-    saveValue(_randomizeCountdowns, "randomize countdowns");
-    saveValue(_minCountdown, "minimum countdown");
-    saveValue(_maxCountdown, "maximum countdown");
+    settings.setValue(settingsPrefix + "randomize countdowns", _randomizeCountdowns);
+    settings.setValue(settingsPrefix + "minimum countdown", _minCountdown);
+    settings.setValue(settingsPrefix + "maximum countdown", _maxCountdown);
 
-    saveValue(_randomizeLineageId, "randomize lineage id");
+    settings.setValue(settingsPrefix + "randomize lineage id", _randomizeLineageId);
 
-    saveValue(_randomizeGlow, "randomize glow");
-    saveValue(_minGlow, "minimum glow");
-    saveValue(_maxGlow, "maximum glow");
+    settings.setValue(settingsPrefix + "randomize glow", _randomizeGlow);
+    settings.setValue(settingsPrefix + "minimum glow", _minGlow);
+    settings.setValue(settingsPrefix + "maximum glow", _maxGlow);
 
-    saveValue(_randomizeMutationRates, "randomize mutation rates");
-    saveMutationRates(_mutationRates);
+    settings.setValue(settingsPrefix + "randomize mutation rates", _randomizeMutationRates);
+    MutationRateDialog::get().saveSettings(_mutationRates, settingsPrefix + "mutation rates.");
 
-    saveValue(_restrictToSelectedCreatures, "restrict to selected creatures");
+    settings.setValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
 }
 
 void MassOperationsDialog::processIntern()
