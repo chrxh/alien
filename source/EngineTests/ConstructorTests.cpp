@@ -541,7 +541,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__frontAngle_upperSide)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc(), NodeDesc().constructor(ConstructorGenomeDesc())}),
+        GeneDesc().separation(true).shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc().constructor(ConstructorGenomeDesc())}),
     });
     auto data = Desc()
                     .addCreature(
@@ -565,10 +565,6 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();
-    _simulationFacade->setCurrentTimestep(3);
-    for (int i = 0; i < 3; ++i) {
-        _simulationFacade->testOnly_calcTimestepWithCellFunctions();
-    }
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -596,15 +592,15 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     EXPECT_TRUE(actualData.hasConnection(actualConstructedCell._id, 2));
     EXPECT_TRUE(actualData.hasConnection(actualConstructedCell._id, 3));
 
-    EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
-    EXPECT_EQ(CellState_Ready, prevConstructedCell.getCellRef()._cellState);
-    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell.getCellRef()._cellState);
+    EXPECT_EQ(CellState_Activating, actualConstructedCell.getCellRef()._cellState);
+    EXPECT_EQ(CellState_Constructing, prevConstructedCell.getCellRef()._cellState);
+    EXPECT_EQ(CellState_Constructing, prevPrevConstructedCell.getCellRef()._cellState);
 }
 
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__frontAngle_lowerSide)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc(), NodeDesc().constructor(ConstructorGenomeDesc())}),
+        GeneDesc().separation(true).shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc().constructor(ConstructorGenomeDesc())}),
     });
     auto data = Desc()
                     .addCreature(
@@ -628,10 +624,6 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();
-    _simulationFacade->setCurrentTimestep(3);
-    for (int i = 0; i < 3; ++i) {
-        _simulationFacade->testOnly_calcTimestepWithCellFunctions();
-    }
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -644,12 +636,24 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     ASSERT_EQ(3, actualData.getObjectsForCreature(newCreature._id).size());
 
     auto actualConstructedCell = actualData.getOtherObjectRef({1, 2, 3});
+    auto hostCell = actualData.getObjectRef(1);
     auto prevConstructedCell = actualData.getObjectRef(2);
     auto prevPrevConstructedCell = actualData.getObjectRef(3);
 
-    EXPECT_EQ(CellState_Ready, actualConstructedCell.getCellRef()._cellState);
-    EXPECT_EQ(CellState_Ready, prevConstructedCell.getCellRef()._cellState);
-    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell.getCellRef()._cellState);
+    EXPECT_TRUE(hostCell._connections.empty());
+
+    EXPECT_TRUE(actualData.hasConnection(2, 3));
+    EXPECT_TRUE(actualData.hasConnection(2, actualConstructedCell._id));
+
+    EXPECT_TRUE(actualData.hasConnection(3, 2));
+    EXPECT_TRUE(actualData.hasConnection(2, actualConstructedCell._id));
+
+    EXPECT_TRUE(actualData.hasConnection(actualConstructedCell._id, 2));
+    EXPECT_TRUE(actualData.hasConnection(actualConstructedCell._id, 3));
+
+    EXPECT_EQ(CellState_Activating, actualConstructedCell.getCellRef()._cellState);
+    EXPECT_EQ(CellState_Constructing, prevConstructedCell.getCellRef()._cellState);
+    EXPECT_EQ(CellState_Constructing, prevPrevConstructedCell.getCellRef()._cellState);
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_0)
