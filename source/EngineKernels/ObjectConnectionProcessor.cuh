@@ -45,8 +45,6 @@ public:
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Object* object);
 
 private:
-    static int constexpr MaxOperationsPerCell = 30;
-
     __inline__ __device__ static void scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex);
 
     __inline__ __device__ static void lockAndTryAddConnections(SimulationData& data, Object* object1, Object* object2);
@@ -198,28 +196,23 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
             continue;
         }
         auto scheduledOperationIndex = object->scheduledOperationIndex;
-        if (scheduledOperationIndex != -1) {
-            for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
-
-                //#TODO check if following `if` can be removed because the condition should never be true
-                if (scheduledOperationIndex < 0 || scheduledOperationIndex >= data.structuralOperations.getNumEntries()) {
-                    break;
-                }
-                auto operation = data.structuralOperations.at(scheduledOperationIndex);
-                switch (operation.type) {
-                case StructuralOperation::Type::DelConnection: {
-                    deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
-                } break;
-                default:
-                    break;
-                }
-                scheduledOperationIndex = operation.nextOperationIndex;
-                if (scheduledOperationIndex == -1) {
-                    break;
-                }
+        auto numOperations = data.structuralOperations.getNumEntries();
+        for (int depth = 0; scheduledOperationIndex != -1 && depth < numOperations; ++depth) {
+            //#TODO check if following `if` can be removed because the condition should never be true
+            if (scheduledOperationIndex < 0 || scheduledOperationIndex >= numOperations) {
+                break;
             }
-            object->scheduledOperationIndex = -1;
+            auto operation = data.structuralOperations.at(scheduledOperationIndex);
+            switch (operation.type) {
+            case StructuralOperation::Type::DelConnection: {
+                deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
+            } break;
+            default:
+                break;
+            }
+            scheduledOperationIndex = operation.nextOperationIndex;
         }
+        object->scheduledOperationIndex = -1;
     }
 }
 
@@ -617,8 +610,9 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
 __inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex)
 {
     auto origOperationIndex = atomicCAS(&object->scheduledOperationIndex, -1, operationIndex);
-    for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
-        if (origOperationIndex == -1) {
+    auto numOperations = data.structuralOperations.getSize();
+    for (int depth = 0; origOperationIndex != -1 && depth < numOperations; ++depth) {
+        if (origOperationIndex < 0 || origOperationIndex >= numOperations) {
             break;
         }
         auto& origOperation = data.structuralOperations.at(origOperationIndex);
