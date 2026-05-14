@@ -627,6 +627,8 @@ bool _SimulationCudaFacade::testOnly_isDataValid()
 void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctions()
 {
     calcTimestepsInternal(1, true, true);
+
+    CHECK(testOnly_isDataValid());
 }
 
 void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
