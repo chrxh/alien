@@ -12,6 +12,9 @@
 
 #include "IntegrationTestFramework.h"
 
+#include "PersisterInterface/DeserializedSimulation.h"
+#include "PersisterInterface/SerializerService.h"
+
 enum class Direction
 {
     Forward,
@@ -330,7 +333,15 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3000);
+    DeserializedSimulation deserializedData;
+    deserializedData.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
+    deserializedData.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
+    deserializedData.auxiliaryData.timestep = _simulationFacade->getCurrentTimestep();
+    deserializedData.mainData = _simulationFacade->getSimulationData();
+    SerializerService::get().serializeSimulationToFiles("d:\\test.sim", deserializedData);
+
+
+    _simulationFacade->calcTimesteps(2000);
 
     RealVector2D movementDirection;
     {
@@ -355,7 +366,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         }
     }
 
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(1500);
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescEditService::get().removeCell(actualData, 0);
