@@ -560,6 +560,8 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
                         },
                         CreatureDesc().id(1),
                         genome);
+    // Order of connections is unusual and not as it would be in a normal construction process
+    // Thi is intentional to test that the ConstructionProcessor does not produce an invalid state
     data.addConnection(2, 3);
     data.addConnection(1, 2);
 
@@ -619,6 +621,9 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
                         },
                         CreatureDesc().id(1),
                         genome);
+
+    // Order of connections is unusual and not as it would be in a normal construction process
+    // Thi is intentional to test that the ConstructionProcessor does not produce an invalid state
     data.addConnection(2, 3);
     data.addConnection(1, 2);
 
