@@ -7,6 +7,8 @@
 #include <EngineKernels/ForceFieldKernels.cuh>
 #include <EngineKernels/SimulationKernels.cuh>
 #include <EngineKernels/SimulationStatistics.cuh>
+// Required when enabling commented-out DEBUG_checkDelConnectionBalance calls below.
+#include <EngineKernels/DebugKernels.cuh>
 
 #include "GarbageCollectorKernelsService.cuh"
 
@@ -144,7 +146,10 @@ void SimulationKernelsService::launchTimestepKernels(
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, data);
+    // To diagnose "connection not found on other side" errors after substep4, uncomment:
+    // STREAM_KERNEL_CALL(DEBUG_checkDelConnectionBalance, _stream, numBlocks, data, 0);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
+    // STREAM_KERNEL_CALL(DEBUG_checkDelConnectionBalance, _stream, numBlocks, data, 1);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, _stream, numBlocks, data);
 
@@ -268,6 +273,7 @@ void SimulationKernelsService::launchPreviewKernels(
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
+        // STREAM_KERNEL_CALL(DEBUG_checkDelConnectionBalance, _stream, numBlocks, data, 2);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
 
         GarbageCollectorKernelsService::get().launchCleanupForPreviewInGraph(_stream, numBlocks, data);
@@ -314,6 +320,7 @@ void SimulationKernelsService::launchPreviewKernels(
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
+        // STREAM_KERNEL_CALL(DEBUG_checkDelConnectionBalance, _stream, numBlocks, data, 3);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
 
         GarbageCollectorKernelsService::get().launchCleanupForPreviewInGraph(_stream, numBlocks, data);

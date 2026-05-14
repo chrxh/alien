@@ -44,6 +44,8 @@ public:
 
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Object* object);
 
+    static int constexpr MaxOperationsPerCell = 50;
+
 private:
     __inline__ __device__ static void scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex);
 
@@ -60,8 +62,6 @@ private:
 
     // angle of object1 is given by desiredRelAngle with respect to connections[0] and between [0, +360)
     __inline__ __device__ static bool tryAddConnectionWithAbsAngle_oneWay(Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle);
-
-    static int constexpr MaxOperationsPerCell = 50;
 };
 
 /************************************************************************/
@@ -119,7 +119,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteConnectionPa
     operation1.data.delConnection.connectedObject = object2;
     operation1.nextOperationIndex = -1;
     scheduleOperationOnCell(data, object1, index);
-    
+
     StructuralOperation& operation2 = data.structuralOperations.at(index + 1);
     operation2.type = StructuralOperation::Type::DelConnection;
     operation2.data.delConnection.connectedObject = object1;
