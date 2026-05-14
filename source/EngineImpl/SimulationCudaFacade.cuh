@@ -109,7 +109,7 @@ public:
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta);
-    bool testOnly_arePointersValid();
+    bool testOnly_isDataValid();
     void testOnly_calcTimestepWithCellTypeFunctions();
     void testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation);
 

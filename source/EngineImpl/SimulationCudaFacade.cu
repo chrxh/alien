@@ -616,10 +616,10 @@ void _SimulationCudaFacade::testOnly_resizeArrays(ArraySizesForGpuEntities const
     syncAndCheck();
 }
 
-bool _SimulationCudaFacade::testOnly_arePointersValid()
+bool _SimulationCudaFacade::testOnly_isDataValid()
 {
     checkAndProcessSimulationParameterChanges();
-    auto result = TestKernelsService::get().testOnly_arePointersValid(_settings.cudaSettings, getSimulationDataPtrCopy());
+    auto result = TestKernelsService::get().testOnly_isDataValid(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
     return result;
 }

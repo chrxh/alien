@@ -61,7 +61,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndPar
         _simulationFacade->testOnly_resizeArrays(ArraySizesForGpuEntities{.objectArray = 1000, .energyArray = 1000, .heap = 1000000});
         break;
     }
-    EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
+    EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
 TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCellsWithMemoryNodes)
@@ -94,5 +94,5 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
         _simulationFacade->testOnly_resizeArrays(ArraySizesForGpuEntities{.objectArray = 1000, .energyArray = 1000, .heap = 1000000});
         break;
     }
-    EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
+    EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }

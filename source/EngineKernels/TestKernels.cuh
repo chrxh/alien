@@ -7,4 +7,4 @@
 
 __global__ void cudaTestMutate(SimulationData data, uint64_t objectId);
 __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1, uint64_t objectId2);
-__global__ void cudaTestArePointersValid(SimulationData data, bool* result);
+__global__ void cudaTestIsDataValid(SimulationData data, bool* result);

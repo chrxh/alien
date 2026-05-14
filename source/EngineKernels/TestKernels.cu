@@ -122,7 +122,7 @@ namespace
     }
 }
 
-__global__ void cudaTestArePointersValid(SimulationData data, bool* result)
+__global__ void cudaTestIsDataValid(SimulationData data, bool* result)
 {
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());

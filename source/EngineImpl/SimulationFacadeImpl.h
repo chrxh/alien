@@ -111,7 +111,7 @@ public:
     void testOnly_cleanupAfterTimestep() override;
     void testOnly_cleanupAfterDataManipulation() override;
     void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta) override;
-    bool testOnly_arePointersValid() override;
+    bool testOnly_isDataValid() override;
     void testOnly_calcTimestepWithCellFunctions() override;
     void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation = false) override;
 

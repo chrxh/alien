@@ -402,9 +402,9 @@ void _SimulationFacadeImpl::testOnly_resizeArrays(ArraySizesForGpuEntities const
     _worker.testOnly_resizeArrays(sizeDelta);
 }
 
-bool _SimulationFacadeImpl::testOnly_arePointersValid()
+bool _SimulationFacadeImpl::testOnly_isDataValid()
 {
-    return _worker.testOnly_arePointersValid();
+    return _worker.testOnly_isDataValid();
 }
 
 void _SimulationFacadeImpl::testOnly_calcTimestepWithCellFunctions()
