@@ -60,6 +60,8 @@ private:
 
     // angle of object1 is given by desiredRelAngle with respect to connections[0] and between [0, +360)
     __inline__ __device__ static bool tryAddConnectionWithAbsAngle_oneWay(Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle);
+
+    static int constexpr MaxOperationsPerCell = 50;
 };
 
 /************************************************************************/
@@ -193,9 +195,12 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
             continue;
         }
         auto scheduledOperationIndex = object->scheduledOperationIndex;
-        auto numOperations = data.structuralOperations.getNumEntries();
-        for (int depth = 0; scheduledOperationIndex != -1 && depth < numOperations; ++depth) {
-            auto operation = data.structuralOperations.at(scheduledOperationIndex);
+        if (scheduledOperationIndex == -1) {
+            continue;
+        }
+
+        for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+            auto const& operation = data.structuralOperations.at(scheduledOperationIndex);
             switch (operation.type) {
             case StructuralOperation::Type::DelConnection: {
                 deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
@@ -204,6 +209,9 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
                 break;
             }
             scheduledOperationIndex = operation.nextOperationIndex;
+            if (scheduledOperationIndex == -1) {
+                break;
+            }
         }
         object->scheduledOperationIndex = -1;
     }
@@ -603,9 +611,8 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
 __inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex)
 {
     auto origOperationIndex = atomicCAS(&object->scheduledOperationIndex, -1, operationIndex);
-    auto numOperations = data.structuralOperations.getSize();
-    for (int depth = 0; origOperationIndex != -1 && depth < numOperations; ++depth) {
-        if (origOperationIndex < 0 || origOperationIndex >= numOperations) {
+    for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+        if (origOperationIndex == -1) {
             break;
         }
         auto& origOperation = data.structuralOperations.at(origOperationIndex);
