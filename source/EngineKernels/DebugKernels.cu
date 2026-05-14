@@ -1,4 +1,12 @@
-﻿#include "DebugKernels.cuh"
+#include "DebugKernels.cuh"
+
+namespace
+{
+    __device__ bool isEnergyValid(float energy)
+    {
+        return energy >= 0.0f && isfinite(energy);
+    }
+}
 
 __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int location)
 {
@@ -8,31 +16,22 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         if (auto& object = objects.at(index)) {
 
-            if (reinterpret_cast<uint64_t>(object) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                || reinterpret_cast<uint64_t>(object) + sizeof(Object)
-                    >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
+            if (!isPointerValid(object, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                 printf("wrong cell pointer at %d\n", location);
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
 
             if (object->type == ObjectType_Cell) {
-                if (reinterpret_cast<uint64_t>(object->typeData.cell.creature) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(object->typeData.cell.creature) + sizeof(Creature)
-                        >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
+                if (!isPointerValid(object->typeData.cell.creature, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                     printf("wrong creature pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                if (reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome) + sizeof(Genome)
-                        >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
+                if (!isPointerValid(object->typeData.cell.creature->genome, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                     printf("wrong genome pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
                 if (object->typeData.cell.creature->genome->numGenes > 0) {
-                    if (reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome->genes) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                        || reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome->genes)
-                                + sizeof(Gene) * object->typeData.cell.creature->genome->numGenes
-                            >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
+                    if (!isPointerValid(object->typeData.cell.creature->genome->genes, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                         printf("wrong genes pointer at %d\n", location);
                         CUDA_THROW_NOT_IMPLEMENTED();
                     }
@@ -40,25 +39,31 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 for (int i = 0; i < object->typeData.cell.creature->genome->numGenes; ++i) {
                     auto const& gene = object->typeData.cell.creature->genome->genes[i];
                     if (gene.numNodes > 0) {
-                        if (reinterpret_cast<uint64_t>(gene.nodes) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                            || reinterpret_cast<uint64_t>(gene.nodes) + sizeof(Node) * gene.numNodes
-                                >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
+                        if (!isPointerValid(gene.nodes, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                             printf("wrong nodes pointer at %d\n", location);
                             CUDA_THROW_NOT_IMPLEMENTED();
                         }
                     }
                 }
-                if (object->typeData.cell.usableEnergy < 0 || isnan(object->typeData.cell.usableEnergy)) {
+                if (!isEnergyValid(object->typeData.cell.usableEnergy)) {
                     printf("usable cell energy invalid at %d", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                if (object->typeData.cell.rawEnergy < 0 || isnan(object->typeData.cell.rawEnergy)) {
+                if (!isEnergyValid(object->typeData.cell.rawEnergy)) {
                     printf("raw cell energy invalid at %d", location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
+                if (object->typeData.cell.constructorAvailable && !isEnergyValid(object->typeData.cell.constructor.reservedEnergy)) {
+                    printf("reserved cell energy invalid at %d", location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
+                if (object->typeData.cell.cellType == CellType_Depot && !isEnergyValid(object->typeData.cell.cellTypeData.depot.storedUsableEnergy)) {
+                    printf("stored cell energy invalid at %d", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
             }
             if (object->type == ObjectType_FreeCell) {
-                if (object->typeData.freeCell.energy < 0 || isnan(object->typeData.freeCell.energy)) {
+                if (!isEnergyValid(object->typeData.freeCell.energy)) {
                     printf("raw cell energy invalid at %d", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
@@ -70,9 +75,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
             }
             for (int i = 0; i < object->numConnections; ++i) {
                 auto connectedObject = object->connections[i].object;
-                if (reinterpret_cast<uint64_t>(connectedObject) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(connectedObject) + sizeof(Object)
-                        >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
+                if (!isPointerValid(connectedObject, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                     printf("wrong connectedObject pointer (cell: %llu, numConnections: %d) at %d\n", object->id, object->numConnections, location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }

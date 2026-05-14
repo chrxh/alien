@@ -36,6 +36,13 @@ __device__ __host__ inline uint64_t toUInt64(T value)
     return static_cast<uint64_t>(value);
 }
 
+template <typename Pointer, typename HeapPointer>
+__device__ __host__ inline bool isPointerValid(Pointer pointer, HeapPointer heapArray, uint64_t heapCapacity)
+{
+    return reinterpret_cast<uint64_t>(pointer) >= reinterpret_cast<uint64_t>(heapArray)
+        && reinterpret_cast<uint64_t>(pointer) < reinterpret_cast<uint64_t>(heapArray + heapCapacity);
+}
+
 struct PartitionData
 {
     int startIndex;

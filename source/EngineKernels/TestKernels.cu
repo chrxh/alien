@@ -73,30 +73,28 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1
 
 namespace
 {
-    template <typename Pointer>
-    __device__ bool isPointerValid(SimulationData const& data, Pointer pointer)
+    __device__ bool isEnergyValid(float energy)
     {
-        return reinterpret_cast<uint64_t>(pointer) >= reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-            && reinterpret_cast<uint64_t>(pointer) < reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity());
+        return energy >= 0.0f && isfinite(energy);
     }
 
     __device__ bool isGenomeValid(SimulationData const& data, Genome* genome)
     {
         if (genome != nullptr) {
-            if (!isPointerValid(data, genome)) {
+            if (!isPointerValid(genome, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                 return false;
             } else {
 
                 // Validate genes pointer
                 if (genome->numGenes > 0) {
-                    if (!isPointerValid(data, genome->genes)) {
+                    if (!isPointerValid(genome->genes, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                         return false;
                     } else {
                         // Validate each gene's nodes pointer and memory node entries
                         for (int geneIdx = 0; geneIdx < genome->numGenes; ++geneIdx) {
                             auto& gene = genome->genes[geneIdx];
                             if (gene.numNodes > 0) {
-                                if (!isPointerValid(data, gene.nodes)) {
+                                if (!isPointerValid(gene.nodes, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                                     return false;
                                 } else {
                                     // Validate memory entries for memory nodes
@@ -105,7 +103,7 @@ namespace
                                         if (node.cellType == CellType_Memory) {
                                             if (node.cellTypeData.memory.numSignalEntries > 0) {
                                                 auto signalEntries = node.cellTypeData.memory.signalEntries;
-                                                if (!isPointerValid(data, signalEntries)) {
+                                                if (!isPointerValid(signalEntries, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                                                     return false;
                                                 }
                                             }
@@ -130,31 +128,70 @@ __global__ void cudaTestIsDataValid(SimulationData data, bool* result)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         if (auto& object = objects.at(index)) {
 
-            if (isPointerValid(data, object)) {
-                for (int i = 0; i < object->numConnections; ++i) {
-                    auto connectedObject = object->connections[i].object;
-                    *result &= isPointerValid(data, connectedObject);
+            if (isPointerValid(object, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
+                if (object->numConnections > MAX_OBJECT_CONNECTIONS) {
+                    *result = false;
+                    continue;
                 }
 
                 if (object->type == ObjectType_Cell) {
+                    *result &= isEnergyValid(object->typeData.cell.usableEnergy);
+                    *result &= isEnergyValid(object->typeData.cell.rawEnergy);
+                    if (object->typeData.cell.constructorAvailable) {
+                        *result &= isEnergyValid(object->typeData.cell.constructor.reservedEnergy);
+                    }
+                    if (object->typeData.cell.cellType == CellType_Depot) {
+                        *result &= isEnergyValid(object->typeData.cell.cellTypeData.depot.storedUsableEnergy);
+                    }
                     if (object->typeData.cell.cellType == CellType_Memory) {
                         if (object->typeData.cell.cellTypeData.memory.numSignalEntries > 0) {
                             auto signalEntries = object->typeData.cell.cellTypeData.memory.signalEntries;
-                            *result &= isPointerValid(data, signalEntries);
+                            *result &= isPointerValid(signalEntries, data.entities.heap.getArray(), data.entities.heap.getCapacity());
                         }
                     }
 
                     if (object->typeData.cell.neuralNetwork != nullptr) {
-                        *result &= isPointerValid(data, object->typeData.cell.neuralNetwork);
+                        *result &= isPointerValid(object->typeData.cell.neuralNetwork, data.entities.heap.getArray(), data.entities.heap.getCapacity());
                     }
 
                     if (object->typeData.cell.creature != nullptr) {
-                        if (!isPointerValid(data, object->typeData.cell.creature)) {
+                        if (!isPointerValid(object->typeData.cell.creature, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                             *result = false;
                         } else {
                             *result &= isGenomeValid(data, object->typeData.cell.creature->genome);
                         }
                     }
+                }
+                if (object->type == ObjectType_FreeCell) {
+                    *result &= isEnergyValid(object->typeData.freeCell.energy);
+                }
+
+                for (int i = 0; i < object->numConnections; ++i) {
+                    auto connectedObject = object->connections[i].object;
+                    auto connectedObjectValid = isPointerValid(connectedObject, data.entities.heap.getArray(), data.entities.heap.getCapacity());
+                    *result &= connectedObjectValid;
+                    if (!connectedObjectValid) {
+                        continue;
+                    }
+                    if (connectedObject->numConnections > MAX_OBJECT_CONNECTIONS) {
+                        *result = false;
+                        continue;
+                    }
+
+                    auto displacement = connectedObject->pos - object->pos;
+                    data.objectMap.correctDirection(displacement);
+                    auto actualDistance = Math::length(displacement);
+                    *result &= actualDistance <= 14.0f;
+
+                    auto connectionOnOtherSideFound = false;
+                    for (int j = 0; j < connectedObject->numConnections; ++j) {
+                        auto connectedConnectedObject = connectedObject->connections[j].object;
+                        if (object == connectedConnectedObject) {
+                            connectionOnOtherSideFound = true;
+                            break;
+                        }
+                    }
+                    *result &= connectionOnOtherSideFound;
                 }
             } else {
                 *result = false;
