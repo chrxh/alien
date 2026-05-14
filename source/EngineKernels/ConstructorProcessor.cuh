@@ -354,12 +354,9 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         newObject->typeData.cell.cellState = CellState_Dying;
     }
 
-    float origAngleFromPreviousOnLastConstructedCell;
-    for (int i = 0; i < constructionData.lastConstructionObject->numConnections; ++i) {
-        if (constructionData.lastConstructionObject->connections[i].object == hostObject) {
-            origAngleFromPreviousOnLastConstructedCell = constructionData.lastConstructionObject->connections[i].angleFromPrevious;
-        }
-    }
+    auto lastToHostConnectionIndex = constructionData.lastConstructionObject->getConnectionIndex(
+        hostObject);  // lastToHostConnectionIndex is usually 0 if construction has proceeded as planned so far
+    auto origAngleFromPreviousOnLastConstructedCell = constructionData.lastConstructionObject->connections[lastToHostConnectionIndex].angleFromPrevious;
 
     // Move connection between lastConstructionCell and hostObject to a connection between lastConstructionCell and newObject
     auto separation = constructionData.isSeparation && constructionData.isLastNodeOfLastConcatenation;
@@ -368,7 +365,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         // Connection between lastObject and newObject
         {
-            auto& connection = lastObject->connections[0];
+            auto& connection = lastObject->connections[lastToHostConnectionIndex];
             connection.object = newObject;
             connection.distance = desiredDistance;
         }
@@ -397,7 +394,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
         // Connection between lastObject and newObject
         {
-            auto& connection = lastObject->connections[0];
+            auto& connection = lastObject->connections[lastToHostConnectionIndex];
             connection.object = newObject;
             connection.distance = desiredDistance;
             connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;

@@ -1700,17 +1700,19 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(SensorDesc().autoTrigger(true).mode(DetectCreatureDesc()))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}),
-            ObjectDesc().id(3).pos({102.0f, 50.0f}),
-            ObjectDesc().id(4).pos({103.0f, 50.0f}),
-            ObjectDesc().id(5).pos({104.0f, 50.0f}),
-            ObjectDesc().id(6).pos({105.0f, 50.0f}),
-            ObjectDesc().id(7).pos({106.0f, 50.0f}),
-            ObjectDesc().id(8).pos({107.0f, 50.0f}),
-            ObjectDesc().id(9).pos({108.0f, 50.0f}),
-            ObjectDesc().id(10).pos({110.0f, 50.0f}),
+            ObjectDesc().id(3).pos({102.0f, 100.0f}),
+            ObjectDesc().id(4).pos({103.0f, 100.0f}),
+            ObjectDesc().id(5).pos({104.0f, 100.0f}),
+            ObjectDesc().id(6).pos({105.0f, 100.0f}),
+            ObjectDesc().id(7).pos({106.0f, 100.0f}),
+            ObjectDesc().id(8).pos({107.0f, 100.0f}),
+            ObjectDesc().id(9).pos({108.0f, 100.0f}),
+            ObjectDesc().id(10).pos({110.0f, 100.0f}),
+            ObjectDesc().id(11).pos({111.0f, 100.0f}),
+            ObjectDesc().id(12).pos({112.0f, 100.0f}),
         },
         CreatureDesc().id(0));
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < 11; ++i) {
         data.addConnection(1 + i, 2 + i);
     }
 

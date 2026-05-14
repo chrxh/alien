@@ -45,8 +45,6 @@ public:
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Object* object);
 
 private:
-    static int constexpr MaxOperationsPerCell = 30;
-
     __inline__ __device__ static void scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex);
 
     __inline__ __device__ static void lockAndTryAddConnections(SimulationData& data, Object* object1, Object* object2);
@@ -62,6 +60,8 @@ private:
 
     // angle of object1 is given by desiredRelAngle with respect to connections[0] and between [0, +360)
     __inline__ __device__ static bool tryAddConnectionWithAbsAngle_oneWay(Object* object1, Object* object2, float desiredDistance, float desiredAbsAngle);
+
+    static int constexpr MaxOperationsPerCell = 50;
 };
 
 /************************************************************************/
@@ -109,27 +109,22 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteAllConnectio
 
 __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteConnectionPair(SimulationData& data, Object* object1, Object* object2)
 {
-    StructuralOperation operation1;
+    auto index = data.structuralOperations.tryGetEntries(2);
+    if (index == -1) {
+        return;
+    }
+
+    StructuralOperation& operation1 = data.structuralOperations.at(index);
     operation1.type = StructuralOperation::Type::DelConnection;
     operation1.data.delConnection.connectedObject = object2;
     operation1.nextOperationIndex = -1;
-    auto operationIndex1 = data.structuralOperations.tryAddEntry(operation1);
-    if (operationIndex1 != -1) {
-        scheduleOperationOnCell(data, object1, operationIndex1);
-    } else {
-        CUDA_THROW_NOT_IMPLEMENTED();
-    }
-
-    StructuralOperation operation2;
+    scheduleOperationOnCell(data, object1, index);
+    
+    StructuralOperation& operation2 = data.structuralOperations.at(index + 1);
     operation2.type = StructuralOperation::Type::DelConnection;
     operation2.data.delConnection.connectedObject = object1;
     operation2.nextOperationIndex = -1;
-    auto operationIndex2 = data.structuralOperations.tryAddEntry(operation2);
-    if (operationIndex2 != -1) {
-        scheduleOperationOnCell(data, object2, operationIndex2);
-    } else {
-        CUDA_THROW_NOT_IMPLEMENTED();
-    }
+    scheduleOperationOnCell(data, object2, index + 1);
 }
 
 __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteObject(SimulationData& data, uint64_t const& objectIndex)
@@ -164,24 +159,26 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteObjectOperati
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::DelObject == operation.type) {
-            auto objectIndex = operation.data.delObject.objectIndex;
+            auto const& objectIndex = operation.data.delObject.objectIndex;
+
+            auto operationIndex = data.structuralOperations.tryGetEntries(MAX_OBJECT_CONNECTIONS);
+            if (operationIndex == -1) {
+                continue;
+            }
 
             Object* empty = nullptr;
             auto origObject = alienAtomicExch(&data.entities.objects.at(objectIndex), empty);
             if (origObject) {
                 EnergyProcessor::createEnergyParticle(data, origObject->pos, origObject->vel, origObject->color, origObject->getEnergy());
 
-                for (int i = 0; i < origObject->numConnections; ++i) {
-                    StructuralOperation operation;
-                    operation.type = StructuralOperation::Type::DelConnection;
-                    operation.data.delConnection.connectedObject = origObject;
-                    operation.nextOperationIndex = -1;
-                    auto operationIndex = data.structuralOperations.tryAddEntry(operation);
-                    if (operationIndex != -1) {
-                        scheduleOperationOnCell(data, origObject->connections[i].object, operationIndex);
-                    } else {
-                        CUDA_THROW_NOT_IMPLEMENTED();
-                    }
+                auto numConnections = origObject->numConnections;
+                for (int i = 0; i < numConnections; ++i) {
+                    StructuralOperation& delConnectionOperation = data.structuralOperations.at(operationIndex);
+                    delConnectionOperation.type = StructuralOperation::Type::DelConnection;
+                    delConnectionOperation.data.delConnection.connectedObject = origObject;
+                    delConnectionOperation.nextOperationIndex = -1;
+                    scheduleOperationOnCell(data, origObject->connections[i].object, operationIndex);
+                    ++operationIndex;
                 }
             }
         }
@@ -198,28 +195,25 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
             continue;
         }
         auto scheduledOperationIndex = object->scheduledOperationIndex;
-        if (scheduledOperationIndex != -1) {
-            for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
-
-                //#TODO check if following `if` can be removed because the condition should never be true
-                if (scheduledOperationIndex < 0 || scheduledOperationIndex >= data.structuralOperations.getNumEntries()) {
-                    break;
-                }
-                auto operation = data.structuralOperations.at(scheduledOperationIndex);
-                switch (operation.type) {
-                case StructuralOperation::Type::DelConnection: {
-                    deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
-                } break;
-                default:
-                    break;
-                }
-                scheduledOperationIndex = operation.nextOperationIndex;
-                if (scheduledOperationIndex == -1) {
-                    break;
-                }
-            }
-            object->scheduledOperationIndex = -1;
+        if (scheduledOperationIndex == -1) {
+            continue;
         }
+
+        for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+            auto const& operation = data.structuralOperations.at(scheduledOperationIndex);
+            switch (operation.type) {
+            case StructuralOperation::Type::DelConnection: {
+                deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
+            } break;
+            default:
+                break;
+            }
+            scheduledOperationIndex = operation.nextOperationIndex;
+            if (scheduledOperationIndex == -1) {
+                break;
+            }
+        }
+        object->scheduledOperationIndex = -1;
     }
 }
 

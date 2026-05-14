@@ -125,6 +125,13 @@ __device__ __inline__ T alienAtomicRead(T* const& address)
     return atomicAdd(address, 0);
 }
 
+template <typename T>
+__device__ __inline__ T* alienAtomicRead(T** const& address)
+{
+    static_assert(sizeof(unsigned long long) == sizeof(T*));
+    return reinterpret_cast<T*>(atomicAdd(reinterpret_cast<unsigned long long int*>(address), 0ull));
+}
+
 // CUDA headers use "unsigned long long" for 64bit types, which
 // may not be structurally equivalent to std::uint64_t
 //

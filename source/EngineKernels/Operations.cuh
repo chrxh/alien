@@ -28,7 +28,7 @@ union StructureOperationData
 
 struct StructuralOperation
 {
-    enum class Type : int
+    enum class Type : uint8_t
     {
         AddConnectionPair,
         DelConnection,
