@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include <Base/Definitions.h>
+#include <Base/GlobalSettings.h>
 
 #include <EngineInterface/Colors.h>
 #include <EngineInterface/Desc.h>
@@ -18,9 +19,87 @@ namespace
 {
     auto constexpr RightColumnWidth = 120.0f;
     auto constexpr MinColumnWidth = 300.0f;
+    auto constexpr SettingsPrefix = "dialogs.mass operations.";
 }
 
-void MassOperationsDialog::initIntern() {}
+void MassOperationsDialog::initIntern()
+{
+    auto& settings = GlobalSettings::get();
+    auto const settingsPrefix = std::string(SettingsPrefix);
+
+    _randomizeCellColors = settings.getValue(settingsPrefix + "randomize cell colors", _randomizeCellColors);
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        _checkedCellColors[i] = settings.getValue(settingsPrefix + "checked cell colors." + std::to_string(i), _checkedCellColors[i]);
+    }
+
+    _randomizeGenomeColors = settings.getValue(settingsPrefix + "randomize genome colors", _randomizeGenomeColors);
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        _checkedGenomeColors[i] = settings.getValue(settingsPrefix + "checked genome colors." + std::to_string(i), _checkedGenomeColors[i]);
+    }
+
+    _randomizeEnergies = settings.getValue(settingsPrefix + "randomize energies", _randomizeEnergies);
+    _minEnergy = settings.getValue(settingsPrefix + "minimum energy", _minEnergy);
+    _maxEnergy = settings.getValue(settingsPrefix + "maximum energy", _maxEnergy);
+
+    _randomizeAges = settings.getValue(settingsPrefix + "randomize ages", _randomizeAges);
+    _minAge = settings.getValue(settingsPrefix + "minimum age", _minAge);
+    _maxAge = settings.getValue(settingsPrefix + "maximum age", _maxAge);
+
+    _randomizeCountdowns = settings.getValue(settingsPrefix + "randomize countdowns", _randomizeCountdowns);
+    _minCountdown = settings.getValue(settingsPrefix + "minimum countdown", _minCountdown);
+    _maxCountdown = settings.getValue(settingsPrefix + "maximum countdown", _maxCountdown);
+
+    _randomizeLineageId = settings.getValue(settingsPrefix + "randomize lineage id", _randomizeLineageId);
+
+    _randomizeGlow = settings.getValue(settingsPrefix + "randomize glow", _randomizeGlow);
+    _minGlow = settings.getValue(settingsPrefix + "minimum glow", _minGlow);
+    _maxGlow = settings.getValue(settingsPrefix + "maximum glow", _maxGlow);
+
+    _randomizeMutationRates = settings.getValue(settingsPrefix + "randomize mutation rates", _randomizeMutationRates);
+    MutationRateDialog::get().loadSettings(_mutationRates, settingsPrefix + "mutation rates.");
+
+    _restrictToSelectedCreatures = settings.getValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
+    validateAndCorrect();
+}
+
+void MassOperationsDialog::shutdownIntern()
+{
+    auto& settings = GlobalSettings::get();
+    auto const settingsPrefix = std::string(SettingsPrefix);
+
+    settings.setValue(settingsPrefix + "randomize cell colors", _randomizeCellColors);
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        settings.setValue(settingsPrefix + "checked cell colors." + std::to_string(i), _checkedCellColors[i]);
+    }
+
+    settings.setValue(settingsPrefix + "randomize genome colors", _randomizeGenomeColors);
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        settings.setValue(settingsPrefix + "checked genome colors." + std::to_string(i), _checkedGenomeColors[i]);
+    }
+
+    settings.setValue(settingsPrefix + "randomize energies", _randomizeEnergies);
+    settings.setValue(settingsPrefix + "minimum energy", _minEnergy);
+    settings.setValue(settingsPrefix + "maximum energy", _maxEnergy);
+
+    settings.setValue(settingsPrefix + "randomize ages", _randomizeAges);
+    settings.setValue(settingsPrefix + "minimum age", _minAge);
+    settings.setValue(settingsPrefix + "maximum age", _maxAge);
+
+    settings.setValue(settingsPrefix + "randomize countdowns", _randomizeCountdowns);
+    settings.setValue(settingsPrefix + "minimum countdown", _minCountdown);
+    settings.setValue(settingsPrefix + "maximum countdown", _maxCountdown);
+
+    settings.setValue(settingsPrefix + "randomize lineage id", _randomizeLineageId);
+
+    settings.setValue(settingsPrefix + "randomize glow", _randomizeGlow);
+    settings.setValue(settingsPrefix + "minimum glow", _minGlow);
+    settings.setValue(settingsPrefix + "maximum glow", _maxGlow);
+
+    settings.setValue(settingsPrefix + "randomize mutation rates", _randomizeMutationRates);
+    MutationRateDialog::get().saveSettings(_mutationRates, settingsPrefix + "mutation rates.");
+
+    settings.setValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
+}
 
 void MassOperationsDialog::processIntern()
 {
