@@ -71,8 +71,6 @@ namespace
 std::unordered_set<unsigned int> AlienGui::_basicSilderExpanded;
 std::vector<ImGuiID> AlienGui::_treeNodeIdStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienGui::_treeNodeInfoById;
-std::unordered_map<unsigned int, int> AlienGui::_neuronSelectedInput;
-std::unordered_map<unsigned int, int> AlienGui::_neuronSelectedOutput;
 std::unordered_map<unsigned int, int> AlienGui::_signalMemorySelection;
 
 int AlienGui::_rotationStartIndex = 0;
