@@ -135,6 +135,7 @@ public:
         MEMBER(InputFloatParameters, std::optional<std::string>, infoLabel, std::nullopt);
     };
     static bool InputFloat(InputFloatParameters const& parameters, float& value);
+    static bool InputOptionalFloat(InputFloatParameters const& parameters, std::optional<float>& value);
 
     struct InputFloat2Parameters
     {

@@ -12,6 +12,7 @@
 #include "GenomeTabLayoutData.h"
 #include "LoginDialog.h"
 #include "NeuralNetEditorWidget.h"
+#include "SignalsBufferDialog.h"
 
 namespace
 {
@@ -595,13 +596,23 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
                     auto& signalRecorder = std::get<SignalRecorderGenomeDesc>(memory._mode);
                     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalRecorder._readOnly);
-                    AlienGui::SignalMemoryEditor(AlienGui::SignalMemoryEditorParameters().textWidth(rightColumnWidth), memory._signalEntries);
+                    if (AlienGui::Button(
+                            AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(rightColumnWidth))) {
+                        SignalsBufferDialog::get().open(
+                            memory._signalEntries,
+                            [&memory](std::vector<SignalEntryGenomeDesc> const& entries) { memory._signalEntries = entries; });
+                    }
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalStorage) {
                     AlienGui::BeginIndent();
                     auto& signalStorage = std::get<SignalStorageGenomeDesc>(memory._mode);
                     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalStorage._readOnly);
-                    AlienGui::SignalMemoryEditor(AlienGui::SignalMemoryEditorParameters().textWidth(rightColumnWidth), memory._signalEntries);
+                    if (AlienGui::Button(
+                            AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(rightColumnWidth))) {
+                        SignalsBufferDialog::get().open(
+                            memory._signalEntries,
+                            [&memory](std::vector<SignalEntryGenomeDesc> const& entries) { memory._signalEntries = entries; });
+                    }
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalIntegrator) {
                     AlienGui::BeginIndent();

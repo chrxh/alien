@@ -70,6 +70,7 @@
 #include "PreviewSettingsDialog.h"
 #include "ResetPasswordDialog.h"
 #include "SelectionWindow.h"
+#include "SignalsBufferDialog.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
@@ -158,6 +159,7 @@ _MainWindow::_MainWindow()
     ResetPasswordDialog::get().setup();
     GenericMessageDialog::get().setup();
     GenericFileDialog::get().setup();
+    SignalsBufferDialog::get().setup();
     DelayedExecutionController::get().setup();
     UiController::get().setup();
 

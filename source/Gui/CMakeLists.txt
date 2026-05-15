@@ -133,6 +133,8 @@ PUBLIC
     SelectionWindow.h
     Shader.cpp
     Shader.h
+    SignalsBufferDialog.cpp
+    SignalsBufferDialog.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp
