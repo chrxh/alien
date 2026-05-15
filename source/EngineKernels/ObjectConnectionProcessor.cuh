@@ -129,7 +129,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteObject(Simul
 
 __inline__ __device__ void ObjectConnectionProcessor::processAddOperations(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
@@ -151,7 +151,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObj
 
 __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObjectOperations_step1(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
@@ -197,7 +197,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObj
 
 __inline__ __device__ void ObjectConnectionProcessor::processDeleteObjectOperations(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
