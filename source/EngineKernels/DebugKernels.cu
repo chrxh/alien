@@ -1,4 +1,5 @@
 #include "DebugKernels.cuh"
+#include "ObjectConnectionProcessor.cuh"
 
 namespace
 {
