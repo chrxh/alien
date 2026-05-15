@@ -17,6 +17,7 @@ private:
     MassOperationsDialog();
 
     void initIntern() override;
+    void shutdownIntern() override;
     void processIntern() override;
 
     void colorCheckbox(std::string id, uint32_t cellColor, bool& check);
