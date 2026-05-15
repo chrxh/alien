@@ -25,9 +25,7 @@ void SignalsBufferDialog::shutdownIntern() {}
 
 void SignalsBufferDialog::openIntern() {}
 
-void SignalsBufferDialog::open(
-    std::vector<SignalEntryDesc> const& entries,
-    std::function<void(std::vector<SignalEntryDesc> const&)> const& onAdoptCallback)
+void SignalsBufferDialog::open(std::vector<SignalEntryDesc> const& entries, std::function<void(std::vector<SignalEntryDesc> const&)> const& onAdoptCallback)
 {
     _channelsBuffer.clear();
     _channelsBuffer.reserve(entries.size());

@@ -33,8 +33,7 @@ private:
     std::vector<std::vector<float>> _channelsBuffer;
     int _selectedEntry = 0;
 
-    using AdoptCallback = std::variant<
-        std::function<void(std::vector<SignalEntryDesc> const&)>,
-        std::function<void(std::vector<SignalEntryGenomeDesc> const&)>>;
+    using AdoptCallback =
+        std::variant<std::function<void(std::vector<SignalEntryDesc> const&)>, std::function<void(std::vector<SignalEntryGenomeDesc> const&)>>;
     std::optional<AdoptCallback> _onAdoptCallback;
 };

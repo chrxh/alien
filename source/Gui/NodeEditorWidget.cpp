@@ -596,22 +596,18 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
                     auto& signalRecorder = std::get<SignalRecorderGenomeDesc>(memory._mode);
                     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalRecorder._readOnly);
-                    if (AlienGui::Button(
-                            AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(rightColumnWidth))) {
+                    if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(rightColumnWidth))) {
                         SignalsBufferDialog::get().open(
-                            memory._signalEntries,
-                            [&memory](std::vector<SignalEntryGenomeDesc> const& entries) { memory._signalEntries = entries; });
+                            memory._signalEntries, [&memory](std::vector<SignalEntryGenomeDesc> const& entries) { memory._signalEntries = entries; });
                     }
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalStorage) {
                     AlienGui::BeginIndent();
                     auto& signalStorage = std::get<SignalStorageGenomeDesc>(memory._mode);
                     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalStorage._readOnly);
-                    if (AlienGui::Button(
-                            AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(rightColumnWidth))) {
+                    if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(rightColumnWidth))) {
                         SignalsBufferDialog::get().open(
-                            memory._signalEntries,
-                            [&memory](std::vector<SignalEntryGenomeDesc> const& entries) { memory._signalEntries = entries; });
+                            memory._signalEntries, [&memory](std::vector<SignalEntryGenomeDesc> const& entries) { memory._signalEntries = entries; });
                     }
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalIntegrator) {

@@ -29,6 +29,8 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/SerializerService.h>
 
+#include <EngineInterface/SimulationFacade.h>
+#include <PersisterInterface/PersisterFacade.h>
 #include "AboutDialog.h"
 #include "ActivateUserDialog.h"
 #include "AlienGui.h"
@@ -65,8 +67,6 @@
 #include "NewSimulationDialog.h"
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
-#include <EngineInterface/SimulationFacade.h>
-#include <PersisterInterface/PersisterFacade.h>
 #include "PreviewSettingsDialog.h"
 #include "ResetPasswordDialog.h"
 #include "SelectionWindow.h"
@@ -75,6 +75,7 @@
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
+#include "StartupCheckService.h"
 #include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
@@ -83,7 +84,6 @@
 #include "Viewport.h"
 #include "WindowController.h"
 #include "implot.h"
-#include "StartupCheckService.h"
 
 namespace
 {

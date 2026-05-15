@@ -67,8 +67,8 @@ PUBLIC
     HistogramLiveStatistics.h
     ImageToPatternDialog.cpp
     ImageToPatternDialog.h
-    InspectorWindow.cpp
-    InspectorWindow.h
+    InspectionWindow.cpp
+    InspectionWindow.h
     LastSessionBrowserData.cpp
     LastSessionBrowserData.h
     LayerColorPalette.cpp

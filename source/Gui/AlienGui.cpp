@@ -1617,20 +1617,10 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     auto borderColor = ImGui::GetColorU32(ImGuiCol_Border);
 
     // Draw background
-    drawList->AddRectFilled(
-        ImVec2(cursorPos.x, cursorPos.y),
-        ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
-        bgColor,
-        style.FrameRounding);
+    drawList->AddRectFilled(ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + width, cursorPos.y + boxHeight), bgColor, style.FrameRounding);
 
     // Draw frame border
-    drawList->AddRect(
-        ImVec2(cursorPos.x, cursorPos.y),
-        ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
-        borderColor,
-        style.FrameRounding,
-        0,
-        1.0f);
+    drawList->AddRect(ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + width, cursorPos.y + boxHeight), borderColor, style.FrameRounding, 0, 1.0f);
 
     // Draw items with disabled text color to match read-only fields
     ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + padding.x, cursorPos.y + padding.y));

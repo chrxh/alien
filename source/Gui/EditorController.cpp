@@ -183,7 +183,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> 
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
         windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 500.0f) + 40.0f;
-        _inspectorWindows.emplace_back(std::make_shared<_InspectorWindow>(id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
+        _inspectorWindows.emplace_back(std::make_shared<_InspectionWindow>(id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
     }
     return true;
 }
@@ -229,7 +229,7 @@ void EditorController::processInspectorWindows()
     }
 
     //inspector windows closed?
-    std::vector<InspectorWindow> inspectorWindows;
+    std::vector<InspectionWindow> inspectorWindows;
     std::vector<ExtendedObjectOrEnergyDesc> inspectedEntities;
     for (auto const& inspectorWindow : _inspectorWindows) {
         if (!inspectorWindow->isClosed()) {
