@@ -399,16 +399,18 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
 __global__ void cudaPrepareConnectionChanges(SimulationData data)
 {
     data.structuralOperations.saveNumEntries();
+    ObjectConnectionProcessor::processAddOperations(data);
+    ObjectConnectionProcessor::processDeleteConnectionObjectOperations_prepare(data);
 }
 
 __global__ void cudaProcessDeleteConnectionChanges(SimulationData data)
 {
-    ObjectConnectionProcessor::processDeleteConnectionOperations(data);
+    ObjectConnectionProcessor::processDeleteConnectionObjectOperations_step1(data);
 }
 
 __global__ void cudaProcessAddConnectionChanges(SimulationData data)
 {
-    ObjectConnectionProcessor::processAddOperations(data);
+    ObjectConnectionProcessor::processDeleteConnectionObjectOperations_step2(data);
 }
 
 __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
