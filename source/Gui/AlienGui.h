@@ -565,9 +565,6 @@ private:
 
     static int _rotationStartIndex;
 
-    static std::unordered_map<unsigned int, int> _neuronSelectedInput;
-    static std::unordered_map<unsigned int, int> _neuronSelectedOutput;
-
     static std::unordered_map<unsigned int, int> _signalMemorySelection;
 
     static bool _menuBarVisible;
