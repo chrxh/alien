@@ -575,7 +575,7 @@ struct Object
 
     float density;
     Object* nextObject;               // Linked list for finding all overlapping cells
-    int32_t scheduledOperationIndex;  // -1 = no operation scheduled
+    //int32_t scheduledOperationIndex;  // -1 = no operation scheduled
 
     __device__ __inline__ float& getRefDistance(Object* connectedObject)
     {

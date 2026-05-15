@@ -11,7 +11,8 @@ struct AddConnectionPairOperation
 
 struct DelConnectionOperation
 {
-    Object* connectedObject;
+    Object* object1;
+    Object* object2;
 };
 
 struct DelObjectOperation
@@ -36,7 +37,7 @@ struct StructuralOperation
     };
     Type type;
     StructureOperationData data;
-    int nextOperationIndex;  //linked list, = -1 end
+    //int nextOperationIndex;  //linked list, = -1 end
 };
 
 struct CellTypeOperation

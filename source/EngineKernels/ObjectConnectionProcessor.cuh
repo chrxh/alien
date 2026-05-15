@@ -11,8 +11,13 @@ public:
     __inline__ __device__ static void scheduleDeleteObject(SimulationData& data, uint64_t const& objectIndex);
 
     __inline__ __device__ static void processAddOperations(SimulationData& data);
+    __inline__ __device__ static void processDeleteConnectionObjectOperations_prepare(SimulationData& data);
+    __inline__ __device__ static void processDeleteConnectionObjectOperations_step1(SimulationData& data);
+    __inline__ __device__ static void processDeleteConnectionObjectOperations_step2(SimulationData& data);
+
+
     __inline__ __device__ static void processDeleteObjectOperations(SimulationData& data);
-    __inline__ __device__ static void processDeleteConnectionOperations(SimulationData& data);
+    //__inline__ __device__ static void processDeleteConnectionOperations(SimulationData& data);
 
     // angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
     // angle of object2 will be automatically determined by current geometry
@@ -47,7 +52,7 @@ public:
     static int constexpr MaxOperationsPerCell = 50;
 
 private:
-    __inline__ __device__ static void scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex);
+    //__inline__ __device__ static void scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex);
 
     __inline__ __device__ static void lockAndTryAddConnections(SimulationData& data, Object* object1, Object* object2);
 
@@ -81,50 +86,32 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleAddConnectionPair(
 
 __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteAllConnections(SimulationData& data, Object* object)
 {
-    auto index = data.structuralOperations.tryGetEntries(object->numConnections * 2);
+    auto index = data.structuralOperations.tryGetEntries(object->numConnections);
     if (index == -1) {
         return;
     }
 
     for (int i = 0; i < object->numConnections; ++i) {
         auto const& connectedObject = object->connections[i].object;
-        {
-            StructuralOperation& operation = data.structuralOperations.at(index);
-            operation.type = StructuralOperation::Type::DelConnection;
-            operation.data.delConnection.connectedObject = object;
-            operation.nextOperationIndex = -1;
-            scheduleOperationOnCell(data, connectedObject, index);
-            ++index;
-        }
-        {
-            StructuralOperation& operation = data.structuralOperations.at(index);
-            operation.type = StructuralOperation::Type::DelConnection;
-            operation.data.delConnection.connectedObject = connectedObject;
-            operation.nextOperationIndex = -1;
-            scheduleOperationOnCell(data, object, index);
-            ++index;
-        }
+        StructuralOperation& operation = data.structuralOperations.at(index);
+        operation.type = StructuralOperation::Type::DelConnection;
+        operation.data.delConnection.object1 = object;
+        operation.data.delConnection.object2 = connectedObject;
+        ++index;
     }
 }
 
 __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteConnectionPair(SimulationData& data, Object* object1, Object* object2)
 {
-    auto index = data.structuralOperations.tryGetEntries(2);
+    auto index = data.structuralOperations.tryGetEntries(1);
     if (index == -1) {
         return;
     }
 
     StructuralOperation& operation1 = data.structuralOperations.at(index);
     operation1.type = StructuralOperation::Type::DelConnection;
-    operation1.data.delConnection.connectedObject = object2;
-    operation1.nextOperationIndex = -1;
-    scheduleOperationOnCell(data, object1, index);
-    
-    StructuralOperation& operation2 = data.structuralOperations.at(index + 1);
-    operation2.type = StructuralOperation::Type::DelConnection;
-    operation2.data.delConnection.connectedObject = object1;
-    operation2.nextOperationIndex = -1;
-    scheduleOperationOnCell(data, object2, index + 1);
+    operation1.data.delConnection.object1 = object1;
+    operation1.data.delConnection.object2 = object2;
 }
 
 __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteObject(SimulationData& data, uint64_t const& objectIndex)
@@ -152,6 +139,62 @@ __inline__ __device__ void ObjectConnectionProcessor::processAddOperations(Simul
     }
 }
 
+__inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObjectOperations_prepare(SimulationData& data)
+{
+    auto partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = data.entities.objects.at(index);
+        object->tempValue1.as_uint32_float.uint32Part = 0;
+    }
+}
+
+__inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObjectOperations_step1(SimulationData& data)
+{
+    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto const& operation = data.structuralOperations.at(index);
+        if (StructuralOperation::Type::DelConnection == operation.type) {
+            auto const& delConnectionOperation = operation.data.delConnection;
+            auto const& object1 = delConnectionOperation.object1;
+            auto const& object2 = delConnectionOperation.object2;
+            auto connectionIndex1 = object1->getConnectionIndex(object2);
+            auto connectionIndex2 = object2->getConnectionIndex(object1);
+            alienAtomicOr32(&object1->tempValue1.as_uint32_float.uint32Part, 1u << connectionIndex1);
+            alienAtomicOr32(&object2->tempValue1.as_uint32_float.uint32Part, 1u << connectionIndex2);
+        }
+        if (StructuralOperation::Type::DelObject == operation.type) {
+            auto const& objectIndex = operation.data.delObject.objectIndex;
+            auto const& object = data.entities.objects.at(objectIndex);
+            for (int i = 0; i < object->numConnections; ++i) {
+                auto const& connectedObject = object->connections[i].object;
+                auto connectionIndex = connectedObject->getConnectionIndex(object);
+                alienAtomicOr32(&connectedObject->tempValue1.as_uint32_float.uint32Part, 1u << connectionIndex);
+            }
+        }
+    }
+}
+
+__inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObjectOperations_step2(SimulationData& data)
+{
+    auto partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = data.entities.objects.at(index);
+        auto const& connectionsToDeleteBitset = object->tempValue1.as_uint32_float.uint32Part;
+        if (connectionsToDeleteBitset == 0) {
+            continue;
+        }
+        for (int i = object->numConnections - 1; i >= 0; --i) {
+            auto deleteConnection= (connectionsToDeleteBitset >> i) & 1;
+            if (deleteConnection == 1) {
+                deleteConnectionOneWay(object, object->connections[i].object);
+            }
+        }
+    }
+}
+
 __inline__ __device__ void ObjectConnectionProcessor::processDeleteObjectOperations(SimulationData& data)
 {
     auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
@@ -161,61 +204,46 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteObjectOperati
         if (StructuralOperation::Type::DelObject == operation.type) {
             auto const& objectIndex = operation.data.delObject.objectIndex;
 
-            auto operationIndex = data.structuralOperations.tryGetEntries(MAX_OBJECT_CONNECTIONS);
-            if (operationIndex == -1) {
-                continue;
-            }
-
             Object* empty = nullptr;
             auto origObject = alienAtomicExch(&data.entities.objects.at(objectIndex), empty);
             if (origObject) {
                 EnergyProcessor::createEnergyParticle(data, origObject->pos, origObject->vel, origObject->color, origObject->getEnergy());
-
-                auto numConnections = origObject->numConnections;
-                for (int i = 0; i < numConnections; ++i) {
-                    StructuralOperation& delConnectionOperation = data.structuralOperations.at(operationIndex);
-                    delConnectionOperation.type = StructuralOperation::Type::DelConnection;
-                    delConnectionOperation.data.delConnection.connectedObject = origObject;
-                    delConnectionOperation.nextOperationIndex = -1;
-                    scheduleOperationOnCell(data, origObject->connections[i].object, operationIndex);
-                    ++operationIndex;
-                }
             }
         }
     }
 }
 
-__inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
-{
-    auto partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& object = data.entities.objects.at(index);
-        if (!object) {
-            continue;
-        }
-        auto scheduledOperationIndex = object->scheduledOperationIndex;
-        if (scheduledOperationIndex == -1) {
-            continue;
-        }
-
-        for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
-            auto const& operation = data.structuralOperations.at(scheduledOperationIndex);
-            switch (operation.type) {
-            case StructuralOperation::Type::DelConnection: {
-                deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
-            } break;
-            default:
-                break;
-            }
-            scheduledOperationIndex = operation.nextOperationIndex;
-            if (scheduledOperationIndex == -1) {
-                break;
-            }
-        }
-        object->scheduledOperationIndex = -1;
-    }
-}
+//__inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
+//{
+//    auto partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+//
+//    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+//        auto& object = data.entities.objects.at(index);
+//        if (!object) {
+//            continue;
+//        }
+//        auto scheduledOperationIndex = object->scheduledOperationIndex;
+//        if (scheduledOperationIndex == -1) {
+//            continue;
+//        }
+//
+//        for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+//            auto const& operation = data.structuralOperations.at(scheduledOperationIndex);
+//            switch (operation.type) {
+//            case StructuralOperation::Type::DelConnection: {
+//                deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
+//            } break;
+//            default:
+//                break;
+//            }
+//            scheduledOperationIndex = operation.nextOperationIndex;
+//            if (scheduledOperationIndex == -1) {
+//                break;
+//            }
+//        }
+//        object->scheduledOperationIndex = -1;
+//    }
+//}
 
 __inline__ __device__ bool
 ObjectConnectionProcessor::tryAddConnectionWithRelAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredRelAngle)
@@ -608,17 +636,17 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
     return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
-__inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex)
-{
-    auto origOperationIndex = atomicCAS(&object->scheduledOperationIndex, -1, operationIndex);
-    for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
-        if (origOperationIndex == -1) {
-            break;
-        }
-        auto& origOperation = data.structuralOperations.at(origOperationIndex);
-        origOperationIndex = atomicCAS(&origOperation.nextOperationIndex, -1, operationIndex);
-    }
-}
+//__inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex)
+//{
+//    auto origOperationIndex = atomicCAS(&object->scheduledOperationIndex, -1, operationIndex);
+//    for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
+//        if (origOperationIndex == -1) {
+//            break;
+//        }
+//        auto& origOperation = data.structuralOperations.at(origOperationIndex);
+//        origOperationIndex = atomicCAS(&origOperation.nextOperationIndex, -1, operationIndex);
+//    }
+//}
 
 __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject)
 {
