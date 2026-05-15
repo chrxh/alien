@@ -578,7 +578,7 @@ __inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData&
 __inline__ __device__ void ObjectProcessor::verletVelocityUpdate(SimulationData& data)
 {
     auto& objects = data.entities.objects;
-    auto const partition = calcSystemThreadPartition(objects.getNumOrigEntries());
+    auto const partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
