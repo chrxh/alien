@@ -15,9 +15,7 @@ public:
     __inline__ __device__ static void processDeleteConnectionObjectOperations_step1(SimulationData& data);
     __inline__ __device__ static void processDeleteConnectionObjectOperations_step2(SimulationData& data);
 
-
     __inline__ __device__ static void processDeleteObjectOperations(SimulationData& data);
-    //__inline__ __device__ static void processDeleteConnectionOperations(SimulationData& data);
 
     // angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
     // angle of object2 will be automatically determined by current geometry
