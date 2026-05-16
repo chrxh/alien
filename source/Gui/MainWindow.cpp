@@ -29,8 +29,6 @@
 #include <PersisterInterface/PersisterFacade.h>
 #include <PersisterInterface/SerializerService.h>
 
-#include <EngineInterface/SimulationFacade.h>
-#include <PersisterInterface/PersisterFacade.h>
 #include "AboutDialog.h"
 #include "ActivateUserDialog.h"
 #include "AlienGui.h"
