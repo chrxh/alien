@@ -159,6 +159,13 @@ __device__ __inline__ T alienAtomicAdd32(T* address, T value)
 }
 
 template <typename T>
+__device__ __inline__ T alienAtomicOr32(T* address, T value)
+{
+    static_assert(sizeof(unsigned int) == sizeof(T));
+    return reinterpret_cast<T>(atomicOr(reinterpret_cast<unsigned int*>(address), reinterpret_cast<unsigned int>(value)));
+}
+
+template <typename T>
 __device__ __inline__ T alienAtomicMin64(T* address, T const& value)
 {
     static_assert(sizeof(unsigned long long) == sizeof(T));
@@ -179,6 +186,15 @@ __device__ __inline__ T alienAtomicMax32(T* address, T const& value)
     return static_cast<T>(atomicMax(reinterpret_cast<unsigned int*>(address), static_cast<unsigned int>(value)));
 }
 
+__device__ __forceinline__ float alienAtomicMax(float* addr, float value)
+{
+    float old;
+    old = !signbit(value) ? __int_as_float(atomicMax((int*)addr, __float_as_int(value)))
+                          : __uint_as_float(atomicMin((unsigned int*)addr, __float_as_uint(value)));
+
+    return old;
+}
+
 template <typename T>
 __device__ __inline__ T alienAtomicExch64(T* address, T const& value)
 {
@@ -191,15 +207,6 @@ __device__ __inline__ T* alienAtomicExch(T** address, T* value)
 {
     static_assert(sizeof(unsigned long long) == sizeof(T*));
     return reinterpret_cast<T*>(atomicExch(reinterpret_cast<unsigned long long int*>(address), reinterpret_cast<unsigned long long int>(value)));
-}
-
-__device__ __forceinline__ float alienAtomicMax(float* addr, float value)
-{
-    float old;
-    old = !signbit(value) ? __int_as_float(atomicMax((int*)addr, __float_as_int(value)))
-                          : __uint_as_float(atomicMin((unsigned int*)addr, __float_as_uint(value)));
-
-    return old;
 }
 
 class SystemLock

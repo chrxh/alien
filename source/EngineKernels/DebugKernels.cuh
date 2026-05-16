@@ -8,5 +8,4 @@
 
 __global__ void DEBUG_checkAngles(SimulationData data);
 __global__ void DEBUG_checkCellsAndParticles(SimulationData data, float* sumEnergy, int location);
-__global__ void DEBUG_checkDelConnectionBalance(SimulationData data, int location);
 __global__ void DEBUG_kernel(SimulationData data, int location);

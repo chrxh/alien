@@ -267,6 +267,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, true);
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
+        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
 
@@ -313,6 +314,7 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data, true);
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
+        STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
 
