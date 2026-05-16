@@ -52,8 +52,6 @@ public:
     static int constexpr MaxOperationsPerCell = 50;
 
 private:
-    //__inline__ __device__ static void scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex);
-
     __inline__ __device__ static void lockAndTryAddConnections(SimulationData& data, Object* object1, Object* object2);
 
     // angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
@@ -604,18 +602,6 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
 
     return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
-
-//__inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Object* object, int operationIndex)
-//{
-//    auto origOperationIndex = atomicCAS(&object->scheduledOperationIndex, -1, operationIndex);
-//    for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
-//        if (origOperationIndex == -1) {
-//            break;
-//        }
-//        auto& origOperation = data.structuralOperations.at(origOperationIndex);
-//        origOperationIndex = atomicCAS(&origOperation.nextOperationIndex, -1, operationIndex);
-//    }
-//}
 
 __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject)
 {
