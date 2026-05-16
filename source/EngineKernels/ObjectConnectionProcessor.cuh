@@ -214,38 +214,6 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteObjectOperati
     }
 }
 
-//__inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
-//{
-//    auto partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
-//
-//    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-//        auto& object = data.entities.objects.at(index);
-//        if (!object) {
-//            continue;
-//        }
-//        auto scheduledOperationIndex = object->scheduledOperationIndex;
-//        if (scheduledOperationIndex == -1) {
-//            continue;
-//        }
-//
-//        for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
-//            auto const& operation = data.structuralOperations.at(scheduledOperationIndex);
-//            switch (operation.type) {
-//            case StructuralOperation::Type::DelConnection: {
-//                deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
-//            } break;
-//            default:
-//                break;
-//            }
-//            scheduledOperationIndex = operation.nextOperationIndex;
-//            if (scheduledOperationIndex == -1) {
-//                break;
-//            }
-//        }
-//        object->scheduledOperationIndex = -1;
-//    }
-//}
-
 __inline__ __device__ bool
 ObjectConnectionProcessor::tryAddConnectionWithRelAngle(SimulationData& data, Object* object1, Object* object2, float desiredDistance, float desiredRelAngle)
 {

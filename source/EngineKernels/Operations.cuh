@@ -37,7 +37,6 @@ struct StructuralOperation
     };
     Type type;
     StructureOperationData data;
-    //int nextOperationIndex;  //linked list, = -1 end
 };
 
 struct CellTypeOperation
