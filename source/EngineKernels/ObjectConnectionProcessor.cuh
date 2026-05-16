@@ -169,6 +169,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObj
             auto const& object = data.entities.objects.at(objectIndex);
             for (int i = 0; i < object->numConnections; ++i) {
                 auto const& connectedObject = object->connections[i].object;
+                alienAtomicOr32(&object->tempValue1.as_uint32_float.uint32Part, 1u << i);
                 auto connectionIndex = connectedObject->getConnectionIndex(object);
                 alienAtomicOr32(&connectedObject->tempValue1.as_uint32_float.uint32Part, 1u << connectionIndex);
             }
@@ -187,7 +188,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObj
             continue;
         }
         for (int i = object->numConnections - 1; i >= 0; --i) {
-            auto deleteConnection= (connectionsToDeleteBitset >> i) & 1;
+            auto deleteConnection = (connectionsToDeleteBitset >> i) & 1;
             if (deleteConnection == 1) {
                 deleteConnectionOneWay(object, object->connections[i].object);
             }
