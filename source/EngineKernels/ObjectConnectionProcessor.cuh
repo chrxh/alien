@@ -51,6 +51,7 @@ public:
 
 private:
     __inline__ __device__ static void lockAndTryAddConnections(SimulationData& data, Object* object1, Object* object2);
+    __inline__ __device__ static void markConnectionsForDeletion(Object* object, Object* connectedObject);
 
     // angle of object1 is given by desiredRelAngle with respect to the inserted connection and between [0, +360)
     __inline__ __device__ static bool tryAddConnectionWithRelAngle_oneWay(
@@ -155,10 +156,8 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObj
             auto const& delConnectionOperation = operation.data.delConnection;
             auto const& object1 = delConnectionOperation.object1;
             auto const& object2 = delConnectionOperation.object2;
-            auto connectionIndex1 = object1->getConnectionIndex(object2);
-            auto connectionIndex2 = object2->getConnectionIndex(object1);
-            alienAtomicOr32(&object1->tempValue1.as_uint32_float.uint32Part, 1u << connectionIndex1);
-            alienAtomicOr32(&object2->tempValue1.as_uint32_float.uint32Part, 1u << connectionIndex2);
+            markConnectionsForDeletion(object1, object2);
+            markConnectionsForDeletion(object2, object1);
         }
         if (StructuralOperation::Type::DelObject == operation.type) {
             auto const& objectIndex = operation.data.delObject.objectIndex;
@@ -166,8 +165,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionObj
             for (int i = 0; i < object->numConnections; ++i) {
                 auto const& connectedObject = object->connections[i].object;
                 alienAtomicOr32(&object->tempValue1.as_uint32_float.uint32Part, 1u << i);
-                auto connectionIndex = connectedObject->getConnectionIndex(object);
-                alienAtomicOr32(&connectedObject->tempValue1.as_uint32_float.uint32Part, 1u << connectionIndex);
+                markConnectionsForDeletion(connectedObject, object);
             }
         }
     }
@@ -291,6 +289,15 @@ __inline__ __device__ void ObjectConnectionProcessor::lockAndTryAddConnections(S
         }
 
         lock.releaseLock();
+    }
+}
+
+__inline__ __device__ void ObjectConnectionProcessor::markConnectionsForDeletion(Object* object, Object* connectedObject)
+{
+    for (int i = 0; i < object->numConnections; ++i) {
+        if (object->connections[i].object == connectedObject) {
+            alienAtomicOr32(&object->tempValue1.as_uint32_float.uint32Part, 1u << i);
+        }
     }
 }
 
