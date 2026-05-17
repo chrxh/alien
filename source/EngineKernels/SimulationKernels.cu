@@ -207,22 +207,23 @@ __global__ void cudaNextTimestep_physics_applyFriction(SimulationData data, bool
 
 __global__ void cudaNextTimestep_structuralOperations_substep1(SimulationData data)
 {
-    data.structuralOperations.saveNumEntries();
+    ObjectConnectionProcessor::processAddOperations(data);
+    ObjectConnectionProcessor::processDeleteConnectionObjectOperations_prepare(data);
 }
 
 __global__ void cudaNextTimestep_structuralOperations_substep2(SimulationData data)
 {
-    ObjectConnectionProcessor::processAddOperations(data);
+    ObjectConnectionProcessor::processDeleteConnectionObjectOperations_step1(data);
 }
 
 __global__ void cudaNextTimestep_structuralOperations_substep3(SimulationData data)
 {
-    ObjectConnectionProcessor::processDeleteObjectOperations(data);
+    ObjectConnectionProcessor::processDeleteConnectionObjectOperations_step2(data);
 }
 
 __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData data)
 {
-    ObjectConnectionProcessor::processDeleteConnectionOperations(data);
+    ObjectConnectionProcessor::processDeleteObjectOperations(data);
 }
 
 __global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData data)

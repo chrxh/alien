@@ -335,7 +335,6 @@ __inline__ __device__ Object* EntityFactory::createObjectFromTO(TOs const& to, i
     object->locked = 0;
     object->detached = 0;
     object->selected = 0;
-    object->scheduledOperationIndex = -1;
     object->numConnections = objectTO.numConnections;
     if (object->type == ObjectType_Cell) {
         auto const& genomeTO = to.creatures[objectTO.typeData.cell.creatureIndex];
@@ -645,7 +644,6 @@ __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2
     object->locked = 0;
     object->selected = 0;
     object->detached = 0;
-    object->scheduledOperationIndex = -1;
     object->color = 0;
     object->fixed = false;
     object->sticky = false;
@@ -724,7 +722,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     object->detached = 0;
     object->locked = 0;
     object->density = 1.0f;
-    object->scheduledOperationIndex = -1;
 
     auto& cell = object->typeData.cell;
     cell.frontAngle = VALUE_NOT_SET_FLOAT;
