@@ -280,6 +280,7 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 {
     auto& object = extendedObject.object;
     auto origObject = object;
+    applyPendingSignalEntries(extendedObject);
 
     AlienGui::DynamicTableLayout table(TableColumnWidth);
     if (table.begin()) {
@@ -323,6 +324,20 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
     if (object != origObject) {
         _SimulationFacade::get()->changeCell(extendedObject);
     }
+}
+
+void _InspectionWindow::applyPendingSignalEntries(ExtendedObjectDesc& extendedObject)
+{
+    if (!_pendingSignalEntries || extendedObject.object.getObjectType() != ObjectType_Cell) {
+        return;
+    }
+
+    auto& cell = extendedObject.object.getCellRef();
+    if (cell.getCellType() == CellType_Memory) {
+        auto& memory = std::get<MemoryDesc>(cell._cellType);
+        memory._signalEntries = *_pendingSignalEntries;
+    }
+    _pendingSignalEntries.reset();
 }
 
 void _InspectionWindow::processParticle(EnergyDesc particle)
@@ -764,7 +779,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
         }
         processMemoryChannelBits(memory._channelBitMask);
         if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(TextWidth))) {
-            SignalsBufferDialog::get().open(memory._signalEntries, [&memory](std::vector<SignalEntryDesc> const& entries) { memory._signalEntries = entries; });
+            SignalsBufferDialog::get().open(memory._signalEntries, [this](std::vector<SignalEntryDesc> const& entries) { _pendingSignalEntries = entries; });
         }
     } else if (cellType == CellType_Communicator) {
         auto& communicator = std::get<CommunicatorDesc>(cell._cellType);
