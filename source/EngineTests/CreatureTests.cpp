@@ -359,7 +359,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         }
     }
 
-    _simulationFacade->calcTimesteps(1500);
+    _simulationFacade->calcTimesteps(2000);
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescEditService::get().removeCell(actualData, 0);
