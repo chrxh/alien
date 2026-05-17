@@ -381,16 +381,17 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
         if (!object._connections.empty()) {
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connections").rank(AlienGui::TreeNodeRank::Default))) {
                 for (size_t i = 0; i < object._connections.size(); ++i) {
-                    ImGui::PushID(static_cast<int>(i));
                     auto& conn = object._connections.at(i);
-                    inspectorHexId("Connected id #" + std::to_string(i), conn._objectId);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Distance #" + std::to_string(i)).format("%.2f").textWidth(TextWidth).readOnly(true),
-                        conn._distance);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Ref angle #" + std::to_string(i)).format("%.2f").textWidth(TextWidth).readOnly(true),
-                        conn._angleFromPrevious);
-                    ImGui::PopID();
+                    auto const connectionNumber = i + 1;
+                    if (AlienGui::BeginTreeNode(
+                            AlienGui::TreeNodeParameters().name("Connection #" + std::to_string(connectionNumber)).rank(AlienGui::TreeNodeRank::Low))) {
+                        inspectorHexId("Connected id", conn._objectId);
+                        AlienGui::InputFloat(
+                            AlienGui::InputFloatParameters().name("Distance").format("%.2f").textWidth(TextWidth).readOnly(true), conn._distance);
+                        AlienGui::InputFloat(
+                            AlienGui::InputFloatParameters().name("Ref angle").format("%.2f").textWidth(TextWidth).readOnly(true), conn._angleFromPrevious);
+                    }
+                    AlienGui::EndTreeNode();
                 }
             }
             AlienGui::EndTreeNode();
