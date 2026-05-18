@@ -76,7 +76,7 @@ TEST_F(PreviewDescConverterServiceTests, convertEmptyCollection)
     EXPECT_TRUE(result.description._connections.empty());
 }
 
-TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation)
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
@@ -153,7 +153,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_smoothsVisualFro
     EXPECT_TRUE(TestHelper::approxCompareAngles(18.0f, result.visualFrontAngle.value()));
 }
 
-TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_nonRootGene)
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_nonRootGene)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().color(1)}),
@@ -187,7 +187,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_n
     checkConnections(result.description, {{object1._pos, object2._pos, 1.0f, 1.0f}});
 }
 
-TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withoutSeparation)
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_defaultGenome)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
@@ -261,104 +261,6 @@ TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
     checkConnections(result.description, {{object1._pos, object2._pos}, {object2._pos, cell3._pos}, {cell3._pos, object1._pos}});
 }
 
-TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_multipleNodes_multipleConcatenations)
-{
-    auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
-    });
-
-    Desc input;
-    input.addCreature(
-        {
-            ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-            ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-            ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-            ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-        },
-        CreatureDesc(),
-        genome);
-    for (int i = 0; i < 7; ++i) {
-        input.addConnection(i + 1, i + 2);
-    }
-
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
-
-    ASSERT_EQ(8, result.description._objects.size());
-    ASSERT_EQ(7, result.description._connections.size());
-
-    std::set<RealVector2D> actualPositions;
-    for (const auto& object : result.description._objects) {
-        actualPositions.insert(object._pos);
-    }
-    std::set<RealVector2D> expectedPositions = {
-        {-0.875000238, -2.62500000},
-        {0.124999769, -2.62500000},
-        {0.124999858, -1.62500000},
-        {0.124999948, -0.625000000},
-        {0.125000030, 0.375000000},
-        {0.125000119, 1.37500000},
-        {0.125000209, 2.37500000},
-        {0.125000298, 3.37500000},
-    };
-    ASSERT_EQ(expectedPositions.size(), actualPositions.size());
-    for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
-        EXPECT_TRUE(TestHelper::approxCompare(expectedPosition, actualPosition));
-    }
-}
-
-TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_oneNode_multipleConcatenations)
-{
-    auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc().color(2)}),
-    });
-
-    Desc input;
-    input.addCreature(
-        {
-            ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-        },
-        CreatureDesc(),
-        genome);
-    for (int i = 0; i < 7; ++i) {
-        input.addConnection(i + 1, i + 2);
-    }
-
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
-
-    ASSERT_EQ(8, result.description._objects.size());
-    ASSERT_EQ(7, result.description._connections.size());
-
-    std::set<RealVector2D> actualPositions;
-    for (const auto& object : result.description._objects) {
-        actualPositions.insert(object._pos);
-    }
-    std::set<RealVector2D> expectedPositions = {
-        {-0.875000238, -2.62500000},
-        {0.124999769, -2.62500000},
-        {0.124999858, -1.62500000},
-        {0.124999948, -0.625000000},
-        {0.125000030, 0.375000000},
-        {0.125000119, 1.37500000},
-        {0.125000209, 2.37500000},
-        {0.125000298, 3.37500000},
-    };
-    ASSERT_EQ(expectedPositions.size(), actualPositions.size());
-    for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
-        EXPECT_TRUE(TestHelper::approxCompare(expectedPosition, actualPosition));
-    }
-}
-
 TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multipleConcatenations)
 {
     auto genome = GenomeDesc().genes({
@@ -376,7 +278,10 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
             ObjectDesc().id(6).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
             ObjectDesc().id(7).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
             ObjectDesc().id(8).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-            ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).separation(false).numConcatenations(7))),
+            ObjectDesc()
+                .id(1)
+                .pos({11.0f, 10.0f})
+                .type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).separation(false).numConcatenations(7))),
         },
         CreatureDesc(),
         genome);
@@ -405,57 +310,60 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
     }
 }
 
-TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGenes_twoNode_multipleConcatenations)
+
+TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_multipleNodes_multipleConcatenations)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc().color(2).constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(4))}),
+        GeneDesc().nodes({NodeDesc().color(3), NodeDesc().color(4)}),
     });
 
     Desc input;
     input.addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(2).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-            ObjectDesc().id(3).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(4).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-            ObjectDesc().id(5).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(6).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
-            ObjectDesc().id(7).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(8).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(2).pos({10.0f, 3.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(3).pos({10.0f, 4.0f}).type(CellDesc().geneIndex(1).nodeIndex(1)),
+            ObjectDesc().id(4).pos({10.0f, 5.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(5).pos({10.0f, 6.0f}).type(CellDesc().geneIndex(1).nodeIndex(1)),
+            ObjectDesc().id(6).pos({10.0f, 7.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(7).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(1).nodeIndex(1)),
+            ObjectDesc().id(8).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
+            ObjectDesc().id(9).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(1)),
+            ObjectDesc()
+                .id(1)
+                .pos({11.0f, 10.0f})
+                .type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).separation(false).numConcatenations(4))),
         },
         CreatureDesc(),
         genome);
-    input.addConnection(1, 2);
-    input.addConnection(2, 3);
-    input.addConnection(3, 4);
-    input.addConnection(4, 5);
-    input.addConnection(5, 6);
-    input.addConnection(6, 7);
-    input.addConnection(7, 8);
+    for (int i = 2; i < 9; ++i) {
+        input.addConnection(i, i + 1);
+    }
+    input.addConnection(9, 1);
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(8, result.description._objects.size());
-    ASSERT_EQ(7, result.description._connections.size());
+    ASSERT_EQ(9, result.description._objects.size());
+    ASSERT_EQ(8, result.description._connections.size());
 
-    std::set<RealVector2D> actualPositions;
-    for (const auto& object : result.description._objects) {
-        actualPositions.insert(object._pos);
+    auto constructor = getPreviewCell(result.description, 0, 0);
+    EXPECT_EQ(2, constructor._color);
+    EXPECT_EQ(1, constructor._constructorGeneIndex);
+
+    int gene1Node0Count = 0;
+    int gene1Node1Count = 0;
+    for (auto const& object : result.description._objects) {
+        if (object._geneIndex == 1 && object._nodeIndex == 0) {
+            ++gene1Node0Count;
+            EXPECT_EQ(3, object._color);
+        }
+        if (object._geneIndex == 1 && object._nodeIndex == 1) {
+            ++gene1Node1Count;
+            EXPECT_EQ(4, object._color);
+        }
     }
-    std::set<RealVector2D> expectedPositions = {
-        {-0.875000238, -2.62500000},
-        {0.124999769, -2.62500000},
-        {0.124999858, -1.62500000},
-        {0.124999948, -0.625000000},
-        {0.125000030, 0.375000000},
-        {0.125000119, 1.37500000},
-        {0.125000209, 2.37500000},
-        {0.125000298, 3.37500000},
-    };
-    ASSERT_EQ(expectedPositions.size(), actualPositions.size());
-    for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
-        EXPECT_TRUE(TestHelper::approxCompare(expectedPosition, actualPosition));
-    }
+    EXPECT_EQ(4, gene1Node0Count);
+    EXPECT_EQ(4, gene1Node1Count);
 }
 
 TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation)
@@ -468,7 +376,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
     Desc inputCreature1;
     inputCreature1.addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2).separation(true))),
         },
         CreatureDesc(),
         genome);
@@ -476,7 +384,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
     Desc inputCreature2;
     inputCreature2.addCreature(
         {
-            ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2))),
+            ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(2).separation(true))),
         },
         CreatureDesc(),
         genome);

@@ -248,12 +248,11 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numBranches(2).numConcatenations(3)),
             NodeDesc(),
         }),
-        GeneDesc()
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+        }),
     });
     auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome);
 
@@ -271,31 +270,15 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true).numConcatenations(3)),
             NodeDesc(),
         }),
-        GeneDesc()
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            })
-            
-            ,
-    });
-    auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome);
-
-    EXPECT_EQ(2 + 2 + 3 * 3 + 3 * 3, result);
-}
-
-TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_onFirstGene)
-{
-    auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
+            NodeDesc(),
             NodeDesc(),
             NodeDesc(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome, 0, false, 5, 10);
+    auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome);
 
-    EXPECT_EQ(2 * 5 * 10, result);
+    EXPECT_EQ(2 + 2 + 3 * 3 + 3 * 3, result);
 }
 
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_nestedMultipleBranches)
@@ -588,7 +571,7 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_complexMixedSepar
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 3}, {2}, {4, 6, 5}}), result);
 }
 
-TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_separatingGenesWithNonSeparatingReferences)
+TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_nonSeparatingReferences)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({

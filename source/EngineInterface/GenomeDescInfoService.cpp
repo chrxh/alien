@@ -15,13 +15,7 @@ int GenomeDescInfoService::getNumberOfNodes(GenomeDesc const& genome) const
 
 namespace
 {
-    int countNodes(
-        GenomeDesc const& genome,
-        int geneIndex,
-        bool separation,
-        int numBranches,
-        int numConcatenations,
-        std::vector<int>& lastGenes)
+    int countNodes(GenomeDesc const& genome, int geneIndex, std::vector<int>& lastGenes)
     {
         if (std::ranges::find(lastGenes, geneIndex) != lastGenes.end()) {
             return -1;
@@ -32,22 +26,20 @@ namespace
         lastGenes.emplace_back(geneIndex);
 
         auto const& gene = genome._genes[geneIndex];
-        if (numConcatenations == std::numeric_limits<int>::max()) {
-            return -1;
-        }
-        auto effectiveNumBranches = separation ? 1 : numBranches;
-        auto result = gene._nodes.size() * numConcatenations * effectiveNumBranches;
+        int64_t result = gene._nodes.size();
         for (auto const& node : gene._nodes) {
             if (node._constructor.has_value()) {
                 auto const& constructor = node._constructor.value();
                 if (constructor._geneIndex != 0) {  // First gene is for self-replication and should not be counted
-                    auto numNodes = effectiveNumBranches
-                        * countNodes(
-                            genome, constructor._geneIndex, constructor._separation, constructor._numBranches, constructor._numConcatenations, lastGenes);
+                    auto numNodes = countNodes(genome, constructor._geneIndex, lastGenes);
                     if (numNodes == -1) {
                         return -1;  // Cycle detected
                     }
-                    result += numNodes;
+                    if (constructor._numConcatenations == std::numeric_limits<int>::max() && numNodes > 0) {
+                        return -1;
+                    }
+                    auto effectiveNumBranches = constructor._separation ? 1 : constructor._numBranches;
+                    result += effectiveNumBranches * constructor._numConcatenations * numNodes;
                 }
             }
         }
@@ -56,13 +48,13 @@ namespace
     }
 }
 
-int GenomeDescInfoService::getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex, bool separation, int numBranches, int numConcatenations) const
+int GenomeDescInfoService::getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex) const
 {
     if (genome._genes.empty()) {
         return 0;
     }
     std::vector<int> lastGenes;
-    return countNodes(genome, startGeneIndex, separation, numBranches, numConcatenations, lastGenes);
+    return countNodes(genome, startGeneIndex, lastGenes);
 }
 
 std::vector<int> GenomeDescInfoService::getReferences(GeneDesc const& gene) const

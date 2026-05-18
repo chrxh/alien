@@ -502,103 +502,94 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_separation)
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_withinLimit)
 {
-    // Create a genome that produces exactly PREVIEW_MAX_CELLS cells
-    // Gene 0: 10 nodes, PREVIEW_MAX_CELLS / 10 concatenations = PREVIEW_MAX_CELLS cells total
     auto genome = GenomeDesc().genes({
-        GeneDesc()
-            
-            
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS - 1)),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
     });
 
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
     EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // Should not be trimmed since it's exactly at the limit
-    ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_EQ(10, subGenome._genes.at(0)._nodes.size());
+    ASSERT_EQ(2, subGenome._genes.size());
+    ASSERT_EQ(1, subGenome._genes.at(0)._nodes.size());
+    ASSERT_TRUE(subGenome._genes.at(0)._nodes.at(0)._constructor.has_value());
+    EXPECT_EQ(PREVIEW_MAX_CELLS - 1, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
+    EXPECT_EQ(1, subGenome._genes.at(1)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(10, resultingCells);
+    EXPECT_EQ(PREVIEW_MAX_CELLS, resultingCells);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_concatenations)
 {
-    // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many concatenations
-    // Gene 0: 5 nodes, PREVIEW_MAX_CELLS / 5 + 1 concatenations = exceeds limit of PREVIEW_MAX_CELLS
     auto genome = GenomeDesc().genes({
-        GeneDesc()
-            
-            
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS / 5 + 1)),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+        }),
     });
 
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_FALSE(subGenomes.at(0).trimmed);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // Should be trimmed by reducing concatenations
-    ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_EQ(5, subGenome._genes.at(0)._nodes.size());
+    ASSERT_EQ(2, subGenome._genes.size());
+    ASSERT_EQ(1, subGenome._genes.at(0)._nodes.size());
+    ASSERT_TRUE(subGenome._genes.at(0)._nodes.at(0)._constructor.has_value());
+    EXPECT_EQ((PREVIEW_MAX_CELLS - 1) / 5, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
+    EXPECT_EQ(5, subGenome._genes.at(1)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(5, resultingCells);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_infiniteConcatenations)
 {
-    // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many concatenations
-    // Gene 0: 5 nodes, PREVIEW_MAX_CELLS / 5 + 1 concatenations = exceeds limit of PREVIEW_MAX_CELLS
     auto genome = GenomeDesc().genes({
-        GeneDesc()
-            
-            
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(std::numeric_limits<int>::max())),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+        }),
     });
 
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_FALSE(subGenomes.at(0).trimmed);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // Should be trimmed by reducing concatenations
-    ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_EQ(5, subGenome._genes.at(0)._nodes.size());
+    ASSERT_EQ(2, subGenome._genes.size());
+    ASSERT_EQ(1, subGenome._genes.at(0)._nodes.size());
+    ASSERT_TRUE(subGenome._genes.at(0)._nodes.at(0)._constructor.has_value());
+    EXPECT_EQ((PREVIEW_MAX_CELLS - 1) / 5, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
+    EXPECT_EQ(5, subGenome._genes.at(1)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(5, resultingCells);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_nodes)
@@ -723,28 +714,28 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_recursive
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS / 3 + 3)),
             NodeDesc(),
         }),
-        GeneDesc()
-            
-            
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+        }),
     });
 
     auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_FALSE(subGenomes.at(0).trimmed);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // The trimming should reduce gene 1's concatenations to fit within limit
+    // The trimming should reduce the referencing constructor's concatenations to fit within limit
     ASSERT_EQ(2, subGenome._genes.size());
     EXPECT_EQ(2, subGenome._genes.at(0)._nodes.size());
+    ASSERT_TRUE(subGenome._genes.at(0)._nodes.at(0)._constructor.has_value());
+    EXPECT_LE(subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations, PREVIEW_MAX_CELLS / 3 + 3);  // Should be reduced
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteConcatenationsWithReferences)
@@ -755,7 +746,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteC
     // With BFS trimming, both genes should get budget allocation
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(std::numeric_limits<int>::max())),
             NodeDesc(),
             NodeDesc(),
         }),
@@ -769,7 +760,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteC
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_FALSE(subGenomes.at(0).trimmed);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // Both genes should have nodes after trimming (BFS ensures fair distribution)
@@ -778,6 +769,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteC
     EXPECT_GT(subGenome._genes.at(1)._nodes.size(), 0);  // Gene 1 should also have nodes (this is the key test)
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneTree)
@@ -786,11 +778,11 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneT
     // Gene 0 -> Gene 1 -> Gene 2
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS / 2)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
             NodeDesc(),
         }),
         GeneDesc().nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
             NodeDesc(),
         }),
         GeneDesc().nodes({
@@ -803,7 +795,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneT
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_FALSE(subGenomes.at(0).trimmed);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // All three genes should be present with nodes (BFS ensures all depths get representation)
@@ -813,6 +805,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneT
     EXPECT_GT(subGenome._genes.at(2)._nodes.size(), 0);
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranchingTree)
@@ -820,9 +813,9 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranc
     // Test with wide branching: Gene 0 references genes 1, 2, and 3
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(false).numConcatenations(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
         }),
         GeneDesc().nodes({
             NodeDesc(),
@@ -839,7 +832,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranc
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_FALSE(subGenomes.at(0).trimmed);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // All four genes should be present (BFS processes all at same depth before moving deeper)
@@ -850,6 +843,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranc
     EXPECT_GT(subGenome._genes.at(3)._nodes.size(), 0);
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBranchingTree)
@@ -885,7 +879,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBr
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_FALSE(subGenomes.at(0).trimmed);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // All five genes should be present after BFS trimming
@@ -895,6 +889,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBr
     }
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudgetDistribution)
@@ -936,7 +931,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudge
     auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
-    EXPECT_FALSE(subGenomes.at(0).trimmed);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // All genes should have all their nodes (minimum guarantee)
@@ -946,16 +941,14 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudge
     EXPECT_EQ(5, subGenome._genes.at(2)._nodes.size());
 
     // Gene 0 should get roughly twice the budget of genes 1 and 2 (proportional to ideal size)
-    int cells0 = toInt(subGenome._genes.at(0)._nodes.size());
-    int cells1 = toInt(subGenome._genes.at(1)._nodes.size());
-    int cells2 = toInt(subGenome._genes.at(2)._nodes.size());
+    auto cells1 = toInt(subGenome._genes.at(1)._nodes.size()) * subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations;
+    auto cells2 = toInt(subGenome._genes.at(2)._nodes.size()) * subGenome._genes.at(0)._nodes.at(1)._constructor->_numConcatenations;
 
     // Budget should be roughly proportional (with some tolerance for rounding)
-    EXPECT_GT(cells0, cells1);  // Gene 0 should have more cells than gene 1
-    EXPECT_GT(cells0, cells2);  // Gene 0 should have more cells than gene 2
     EXPECT_NEAR(cells1, cells2, 10);  // Genes 1 and 2 should have similar allocations
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_emptySubGenomes)
