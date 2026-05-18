@@ -86,6 +86,9 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                                        .constructionAngle(25.0f)
                                        .provideEnergy(ProvideEnergy_FreeGeneration)
                                        .reservedEnergy(5.5f)
+                                       .separation(true)
+                                       .numBranches(4)
+                                       .numConcatenations(6)
                                        .currentOffspring(3))
                       .lastUpdate(7)
                       .concatenationIndex(3)
@@ -159,7 +162,10 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
                          .constructionActivationTime(95)
                          .constructionAngle(25.0f)
                          .provideEnergy(ProvideEnergy_FreeGeneration)
-                         .reservedEnergy(7.0f))
+                         .reservedEnergy(7.0f)
+                         .separation(true)
+                         .numBranches(3)
+                         .numConcatenations(5))
         .color(4)
         .referenceAngle(90.0f);
 }
@@ -183,9 +189,6 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                           GeneDesc()
                               .name("Test Gene")
                               .shape(ConstructorShape_Hexagon)
-                              .numBranches(4)
-                              .separation(true)
-                              .numConcatenations(6)
                               .stiffness(0.75f)
                               .connectionDistance(0.8f)
                               .nodes({

@@ -113,11 +113,8 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
         auto const& geneTO = geneTOs[i];
         auto& gene = genes[i];
         gene.shape = geneTO.shape;
-        gene.separation = geneTO.separation;
-        gene.numBranches = geneTO.numBranches;
         gene.stiffness = geneTO.stiffness;
         gene.connectionDistance = geneTO.connectionDistance;
-        gene.numConcatenations = geneTO.numConcatenations;
         gene.numNodes = geneTO.numNodes;
         for (int i = 0; i < sizeof(geneTO.name); ++i) {
             gene.name[i] = geneTO.name[i];
@@ -298,6 +295,9 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.constructor.constructionAngle = nodeTO.constructor.constructionAngle;
                 node.constructor.provideEnergy = nodeTO.constructor.provideEnergy;
                 node.constructor.reservedEnergy = nodeTO.constructor.reservedEnergy;
+                node.constructor.separation = nodeTO.constructor.separation;
+                node.constructor.numBranches = nodeTO.constructor.numBranches;
+                node.constructor.numConcatenations = nodeTO.constructor.numConcatenations;
             }
         }
     }
@@ -582,6 +582,9 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.constructionAngle = cellTO.constructor.constructionAngle;
             cell->constructor.provideEnergy = cellTO.constructor.provideEnergy;
             cell->constructor.reservedEnergy = cellTO.constructor.reservedEnergy;
+            cell->constructor.separation = cellTO.constructor.separation;
+            cell->constructor.numBranches = cellTO.constructor.numBranches;
+            cell->constructor.numConcatenations = cellTO.constructor.numConcatenations;
             cell->constructor.geneIndex = cellTO.constructor.geneIndex;
             cell->constructor.lastConstructedCellId = cellTO.constructor.lastConstructedCellId;
             cell->constructor.currentOffspring = cellTO.constructor.currentOffspring;
@@ -957,6 +960,9 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.constructionAngle = nodeConstructor.constructionAngle;
         constructor.provideEnergy = ProvideEnergy_CellOnly;
         constructor.reservedEnergy = nodeConstructor.reservedEnergy;
+        constructor.separation = nodeConstructor.separation;
+        constructor.numBranches = nodeConstructor.numBranches;
+        constructor.numConcatenations = nodeConstructor.numConcatenations;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
         constructor.currentOffspring = 0;

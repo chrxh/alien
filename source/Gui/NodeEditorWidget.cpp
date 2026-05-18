@@ -288,6 +288,24 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Reserved energy").textWidth(rightColumnWidth).format("%.1f"), constructor._reservedEnergy);
 
+                // Separation
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), constructor._separation);
+
+                // Number of branches
+                AlienGui::BeginIndent();
+                if (!constructor._separation) {
+                    auto numBranches = constructor._numBranches - 1;
+                    AlienGui::Switcher(
+                        AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth),
+                        numBranches);
+                    constructor._numBranches = numBranches + 1;
+                }
+                AlienGui::EndIndent();
+
+                // Concatenations
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), constructor._numConcatenations);
+
                 AlienGui::EndIndent();
                 ImGui::PopID();
             }

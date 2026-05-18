@@ -28,12 +28,12 @@ public:
             {
                 ObjectDesc()
                     .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
+                    .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).separation(true))),
             },
             CreatureDesc(),
             GenomeDesc().lineageId(0).prevLineageId(0).frontAngle(225.0f).genes({
                 GeneDesc()
-                    .separation(true)
+                    
                     .shape(ConstructorShape_Hexagon)
                     .nodes({
                         NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
@@ -41,7 +41,7 @@ public:
                         NodeDesc()
                             .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
                             .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
-                        NodeDesc().constructor(ConstructorGenomeDesc()),
+                        NodeDesc().constructor(ConstructorGenomeDesc().separation(true)),
                         NodeDesc().cellType(DigestorGenomeDesc()),
                         NodeDesc()
                             .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
@@ -67,12 +67,12 @@ public:
             {
                 ObjectDesc()
                     .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration))),
+                    .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).separation(true))),
             },
             CreatureDesc(),
             GenomeDesc().lineageId(1).prevLineageId(1).frontAngle(225.0f).genes({
                 GeneDesc()
-                    .separation(true)
+                    
                     .shape(ConstructorShape_Hexagon)
                     .nodes({
                         NodeDesc().cellType(AttackerGenomeDesc()),
@@ -91,7 +91,7 @@ public:
                             .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
                         NodeDesc().cellType(optionalDigestor),
                         NodeDesc().cellType(optionalDigestor),
-                        NodeDesc().cellType(optionalDigestor).constructor(ConstructorGenomeDesc()),
+                        NodeDesc().cellType(optionalDigestor).constructor(ConstructorGenomeDesc().separation(true)),
                         NodeDesc().cellType(optionalDigestor),
                         NodeDesc().cellType(optionalDigestor),
                         NodeDesc()

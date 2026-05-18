@@ -595,6 +595,9 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             constructor._constructionAngle = objectTO.typeData.cell.constructor.constructionAngle;
             constructor._provideEnergy = objectTO.typeData.cell.constructor.provideEnergy;
             constructor._reservedEnergy = objectTO.typeData.cell.constructor.reservedEnergy;
+            constructor._separation = objectTO.typeData.cell.constructor.separation;
+            constructor._numBranches = objectTO.typeData.cell.constructor.numBranches;
+            constructor._numConcatenations = objectTO.typeData.cell.constructor.numConcatenations;
             constructor._geneIndex = objectTO.typeData.cell.constructor.geneIndex;
             constructor._lastConstructedCellId = objectTO.typeData.cell.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
                 ? std::make_optional(objectTO.typeData.cell.constructor.lastConstructedCellId)
@@ -846,6 +849,9 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         constructorDesc._constructionAngle = nodeTO->constructor.constructionAngle;
         constructorDesc._provideEnergy = nodeTO->constructor.provideEnergy;
         constructorDesc._reservedEnergy = nodeTO->constructor.reservedEnergy;
+        constructorDesc._separation = nodeTO->constructor.separation;
+        constructorDesc._numBranches = nodeTO->constructor.numBranches;
+        constructorDesc._numConcatenations = nodeTO->constructor.numConcatenations;
         nodeDesc._constructor = constructorDesc;
     }
 
@@ -885,12 +891,9 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
 
         GeneDesc geneDesc;
         geneDesc._name = char64ToString(geneTO->name);
-        geneDesc._numBranches = geneTO->numBranches;
-        geneDesc._separation = geneTO->separation;
         geneDesc._shape = geneTO->shape;
         geneDesc._stiffness = geneTO->stiffness;
         geneDesc._connectionDistance = geneTO->connectionDistance;
-        geneDesc._numConcatenations = geneTO->numConcatenations;
 
         CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
         for (int k = 0; k < geneTO->numNodes; ++k) {
@@ -975,11 +978,8 @@ void DescConverterService::convertGenomeToTO(
 
         stringToChar64(geneTO.name, geneDesc._name);
         geneTO.shape = geneDesc._shape;
-        geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches);
-        geneTO.separation = geneDesc._separation;
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
-        geneTO.numConcatenations = geneDesc._numConcatenations;
         geneTO.numNodes = toInt(geneDesc._nodes.size());
 
         auto nodeArrayStartIndex = nodeTOs.size();
@@ -1191,6 +1191,9 @@ void DescConverterService::convertGenomeToTO(
                 nodeTO.constructor.constructionAngle = constructorDesc._constructionAngle;
                 nodeTO.constructor.provideEnergy = constructorDesc._provideEnergy;
                 nodeTO.constructor.reservedEnergy = constructorDesc._reservedEnergy;
+                nodeTO.constructor.separation = constructorDesc._separation;
+                nodeTO.constructor.numBranches = static_cast<uint8_t>(constructorDesc._numBranches);
+                nodeTO.constructor.numConcatenations = constructorDesc._numConcatenations;
             }
         }
     }
@@ -1512,6 +1515,9 @@ void DescConverterService::convertObjectToTO(
             constructorTO.constructionAngle = constructorDesc._constructionAngle;
             constructorTO.provideEnergy = constructorDesc._provideEnergy;
             constructorTO.reservedEnergy = constructorDesc._reservedEnergy;
+            constructorTO.separation = constructorDesc._separation;
+            constructorTO.numBranches = static_cast<uint8_t>(constructorDesc._numBranches);
+            constructorTO.numConcatenations = constructorDesc._numConcatenations;
             constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
             constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
             constructorTO.currentOffspring = static_cast<uint16_t>(constructorDesc._currentOffspring);

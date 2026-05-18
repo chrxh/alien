@@ -22,21 +22,21 @@ protected:
     GenomeDesc createGenome_complexCycles() const
     {
         return GenomeDesc().genes({
-            GeneDesc().separation(false).nodes({
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+            GeneDesc().nodes({
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
             }),
-            GeneDesc().separation(false).nodes({
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+            GeneDesc().nodes({
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
                 NodeDesc(),
             }),
-            GeneDesc().separation(false).nodes({
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+            GeneDesc().nodes({
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
                 NodeDesc(),
                 NodeDesc(),
             }),
@@ -47,7 +47,7 @@ protected:
 TEST_F(GenomeDescEditServiceTests, addEmptyGene_onEmptyGenome)
 {
     auto genome = GenomeDesc();
-    GenomeDescEditService::get().addGene(genome, 0, GeneDesc().separation(false));
+    GenomeDescEditService::get().addGene(genome, 0, GeneDesc());
 
     EXPECT_EQ(1, genome._genes.size());
 }
@@ -55,17 +55,17 @@ TEST_F(GenomeDescEditServiceTests, addEmptyGene_onEmptyGenome)
 TEST_F(GenomeDescEditServiceTests, addEmptyGene_onNonEmptyGenome_start)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
-    GenomeDescEditService::get().addGene(genome, 0, GeneDesc().separation(false));
+    GenomeDescEditService::get().addGene(genome, 0, GeneDesc());
 
     EXPECT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -76,17 +76,17 @@ TEST_F(GenomeDescEditServiceTests, addEmptyGene_onNonEmptyGenome_start)
 TEST_F(GenomeDescEditServiceTests, addEmptyGene_onNonEmptyGenome_end)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
-    GenomeDescEditService::get().addGene(genome, 2, GeneDesc().separation(false));
+    GenomeDescEditService::get().addGene(genome, 2, GeneDesc());
 
     ASSERT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -97,7 +97,7 @@ TEST_F(GenomeDescEditServiceTests, addEmptyGene_onNonEmptyGenome_end)
 TEST_F(GenomeDescEditServiceTests, addEmptyGene_withReferences)
 {
     auto genome = createGenome_complexCycles();
-    GenomeDescEditService::get().addGene(genome, 1, GeneDesc().separation(false));
+    GenomeDescEditService::get().addGene(genome, 1, GeneDesc());
 
     ASSERT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -170,7 +170,7 @@ TEST_F(GenomeDescEditServiceTests, swapGenes)
 
 TEST_F(GenomeDescEditServiceTests, addEmptyNode_start)
 {
-    auto gene = GeneDesc().separation(false).nodes({
+    auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
         NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
@@ -186,7 +186,7 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_start)
 
 TEST_F(GenomeDescEditServiceTests, addEmptyNode_middle)
 {
-    auto gene = GeneDesc().separation(false).nodes({
+    auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
         NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
@@ -202,7 +202,7 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_middle)
 
 TEST_F(GenomeDescEditServiceTests, addEmptyNode_end)
 {
-    auto gene = GeneDesc().separation(false).nodes({
+    auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
         NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
@@ -218,7 +218,7 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_end)
 
 TEST_F(GenomeDescEditServiceTests, removeNode_start)
 {
-    auto gene = GeneDesc().separation(false).nodes({
+    auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
         NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
@@ -232,7 +232,7 @@ TEST_F(GenomeDescEditServiceTests, removeNode_start)
 
 TEST_F(GenomeDescEditServiceTests, removeNode_middle)
 {
-    auto gene = GeneDesc().separation(false).nodes({
+    auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
         NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
@@ -246,7 +246,7 @@ TEST_F(GenomeDescEditServiceTests, removeNode_middle)
 
 TEST_F(GenomeDescEditServiceTests, removeNode_end)
 {
-    auto gene = GeneDesc().separation(false).nodes({
+    auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
         NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
@@ -260,7 +260,7 @@ TEST_F(GenomeDescEditServiceTests, removeNode_end)
 
 TEST_F(GenomeDescEditServiceTests, swapNodes)
 {
-    auto gene = GeneDesc().separation(false).nodes({
+    auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
         NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
@@ -284,7 +284,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_emptyGenome)
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_invalidGeneReference)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5)),  // Invalid reference beyond genome size
             NodeDesc(),
         }),
@@ -309,7 +309,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
     auto allParams = factory.getAllNodeParameters();
 
     std::vector<NodeDesc> nodes;
-    nodes.emplace_back(NodeDesc().constructor(ConstructorGenomeDesc()).neuralNetwork(NeuralNetGenomeDesc().weight(2, 3, 0.4f)));
+    nodes.emplace_back(NodeDesc().constructor(ConstructorGenomeDesc().separation(false)).neuralNetwork(NeuralNetGenomeDesc().weight(2, 3, 0.4f)));
 
     std::set<CellType> addedTypes;
     addedTypes.insert(CellType_Base);  // first node is Base
@@ -320,7 +320,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
         }
     }
 
-    auto genome = GenomeDesc().genes({GeneDesc().separation(false).nodes(nodes)});
+    auto genome = GenomeDesc().genes({GeneDesc().nodes(nodes)});
 
     auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
 
@@ -369,15 +369,15 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_complexCycles)
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_subCycle)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -425,15 +425,15 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_subCycle)
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_noCycles)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -463,11 +463,11 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_noCycles)
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_separation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
         }),
     });
     auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}, {1}}, false);
@@ -502,37 +502,27 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_separation)
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_withinLimit)
 {
-    // Create a genome that produces exactly PREVIEW_MAX_CELLS cells
-    // Gene 0: 10 nodes, PREVIEW_MAX_CELLS / 10 concatenations = PREVIEW_MAX_CELLS cells total
     auto genome = GenomeDesc().genes({
-        GeneDesc()
-            .separation(false)
-            .numConcatenations(PREVIEW_MAX_CELLS / 10)
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS - 1)),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
     });
 
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
     EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // Should not be trimmed since it's exactly at the limit
-    ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_EQ(10, subGenome._genes.at(0)._nodes.size());
-    EXPECT_EQ(PREVIEW_MAX_CELLS / 10, subGenome._genes.at(0)._numConcatenations);
+    ASSERT_EQ(2, subGenome._genes.size());
+    ASSERT_EQ(1, subGenome._genes.at(0)._nodes.size());
+    ASSERT_TRUE(subGenome._genes.at(0)._nodes.at(0)._constructor.has_value());
+    EXPECT_EQ(PREVIEW_MAX_CELLS - 1, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
+    EXPECT_EQ(1, subGenome._genes.at(1)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
     EXPECT_EQ(PREVIEW_MAX_CELLS, resultingCells);
@@ -540,68 +530,66 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_withinLim
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_concatenations)
 {
-    // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many concatenations
-    // Gene 0: 5 nodes, PREVIEW_MAX_CELLS / 5 + 1 concatenations = exceeds limit of PREVIEW_MAX_CELLS
     auto genome = GenomeDesc().genes({
-        GeneDesc()
-            .separation(false)
-            .numConcatenations(PREVIEW_MAX_CELLS / 5 + 1)
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS / 5 + 1)),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+        }),
     });
 
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
     EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // Should be trimmed by reducing concatenations
-    ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_EQ(5, subGenome._genes.at(0)._nodes.size());
-    EXPECT_EQ(PREVIEW_MAX_CELLS / 5, subGenome._genes.at(0)._numConcatenations);
+    ASSERT_EQ(2, subGenome._genes.size());
+    ASSERT_EQ(1, subGenome._genes.at(0)._nodes.size());
+    ASSERT_TRUE(subGenome._genes.at(0)._nodes.at(0)._constructor.has_value());
+    EXPECT_EQ((PREVIEW_MAX_CELLS - 1) / 5, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
+    EXPECT_EQ(5, subGenome._genes.at(1)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(PREVIEW_MAX_CELLS / 5 * 5, resultingCells);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_infiniteConcatenations)
 {
-    // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many concatenations
-    // Gene 0: 5 nodes, PREVIEW_MAX_CELLS / 5 + 1 concatenations = exceeds limit of PREVIEW_MAX_CELLS
     auto genome = GenomeDesc().genes({
-        GeneDesc()
-            .separation(false)
-            .numConcatenations(std::numeric_limits<int>::max())
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(std::numeric_limits<int>::max())),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+            NodeDesc(),
+        }),
     });
 
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
     EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // Should be trimmed by reducing concatenations
-    ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_EQ(5, subGenome._genes.at(0)._nodes.size());
-    EXPECT_EQ(PREVIEW_MAX_CELLS / 5, subGenome._genes.at(0)._numConcatenations);
+    ASSERT_EQ(2, subGenome._genes.size());
+    ASSERT_EQ(1, subGenome._genes.at(0)._nodes.size());
+    ASSERT_TRUE(subGenome._genes.at(0)._nodes.at(0)._constructor.has_value());
+    EXPECT_EQ((PREVIEW_MAX_CELLS - 1) / 5, subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations);
+    EXPECT_EQ(5, subGenome._genes.at(1)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(PREVIEW_MAX_CELLS / 5 * 5, resultingCells);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_nodes)
@@ -609,10 +597,10 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
     // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many nodes
     // Gene 0: PREVIEW_MAX_CELLS + 1 nodes, 1 concatenation
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(1),
+        GeneDesc(),
     });
 
-    // Add 100 nodes to exceed the limit
+    // Add PREVIEW_MAX_CELLS + 1 nodes to exceed the limit
     for (int i = 0; i < PREVIEW_MAX_CELLS + 1; ++i) {
         genome._genes[0]._nodes.emplace_back(NodeDesc());
     }
@@ -627,7 +615,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
     // Should be trimmed by reducing nodes
     ASSERT_EQ(1, subGenome._genes.size());
     EXPECT_EQ(PREVIEW_MAX_CELLS, subGenome._genes.at(0)._nodes.size());
-    EXPECT_EQ(1, subGenome._genes.at(0)._numConcatenations);
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
     EXPECT_EQ(PREVIEW_MAX_CELLS, resultingCells);
@@ -637,8 +624,8 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_construct
 {
     // Create a genome with constructor nodes that should be castrated during trimming
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(1),
-        GeneDesc().separation(false).numConcatenations(1).nodes({
+        GeneDesc(),
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -648,7 +635,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_construct
     for (int i = 0; i < PREVIEW_MAX_CELLS + 10; ++i) {
         if (i % 10 == 0) {
             // Add constructor nodes that reference gene 1
-            genome._genes[0]._nodes.emplace_back(NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)));
+            genome._genes[0]._nodes.emplace_back(NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(1)));
         } else {
             genome._genes[0]._nodes.emplace_back(NodeDesc());
         }
@@ -664,7 +651,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_construct
     // Should be trimmed to PREVIEW_MAX_CELLS nodes, constructor nodes should be castrated
     ASSERT_EQ(2, subGenome._genes.size());
     EXPECT_EQ(PREVIEW_MAX_CELLS, subGenome._genes.at(0)._nodes.size());
-    EXPECT_EQ(1, subGenome._genes.at(0)._numConcatenations);
 
     // Check that constructor nodes have been castrated (gene index set beyond genome size)
     bool foundCastratedConstructor = false;
@@ -686,8 +672,8 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_multipleS
     // Each gene has PREVIEW_MAX_CELLS / 2 + 2 nodes, 1 concatenation
     // Total: PREVIEW_MAX_CELLS + 4 exceeds limit
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).numConcatenations(1),
-        GeneDesc().separation(true).numConcatenations(1),
+        GeneDesc(),
+        GeneDesc(),
     });
 
     // Add PREVIEW_MAX_CELLS / 2 + 2 nodes to each gene
@@ -720,69 +706,38 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_multipleS
     }
 }
 
-TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_recursiveConstructors)
-{
-    // Create a genome with recursive constructor references that should be trimmed
-    auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(1).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc(),
-        }),
-        GeneDesc()
-            .separation(false)
-            .numConcatenations(PREVIEW_MAX_CELLS / 3 + 3)
-            .nodes({
-                NodeDesc(),
-                NodeDesc(),
-                NodeDesc(),
-            }),
-    });
-
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
-
-    ASSERT_EQ(1, subGenomes.size());
-    EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
-    auto const& subGenome = subGenomes.at(0).genome;
-
-    // The trimming should reduce gene 1's concatenations to fit within limit
-    ASSERT_EQ(2, subGenome._genes.size());
-    EXPECT_EQ(2, subGenome._genes.at(0)._nodes.size());
-    EXPECT_LE(subGenome._genes.at(1)._numConcatenations, PREVIEW_MAX_CELLS / 3 + 3);  // Should be reduced
-
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
-}
-
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteConcatenationsWithReferences)
 {
     // Test the original problem: main gene with infinite concatenations should still show referenced genes
-    // Gene 0: 3 nodes with infinite concatenations, references gene 1
-    // Gene 1: 2 nodes
-    // With BFS trimming, both genes should get budget allocation
+    // Gene 0: constructor node with infinite concatenations to gene 1
+    // Gene 1: constructor node with one concatenation to gene 2
+    // Gene 2: 2 nodes
+    // With BFS trimming, all genes should get budget allocation
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(std::numeric_limits<int>::max()).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc(),
-            NodeDesc(),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(std::numeric_limits<int>::max())),
         }),
-        GeneDesc().separation(false).numConcatenations(1).nodes({
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(1)),
+        }),
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
     });
 
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
     EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // Both genes should have nodes after trimming (BFS ensures fair distribution)
-    ASSERT_EQ(2, subGenome._genes.size());
+    // All genes should have nodes after trimming (BFS ensures fair distribution)
+    ASSERT_EQ(3, subGenome._genes.size());
     EXPECT_GT(subGenome._genes.at(0)._nodes.size(), 0);  // Gene 0 should have nodes
-    EXPECT_GT(subGenome._genes.at(1)._nodes.size(), 0);  // Gene 1 should also have nodes (this is the key test)
+    EXPECT_GT(subGenome._genes.at(1)._nodes.size(), 0);  // Gene 1 should also have nodes
+    EXPECT_GT(subGenome._genes.at(2)._nodes.size(), 0);  // Gene 2 should also have nodes (this is the key test)
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
@@ -793,15 +748,15 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneT
     // Test trimming with a deep gene reference tree (3 levels)
     // Gene 0 -> Gene 1 -> Gene 2
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(PREVIEW_MAX_CELLS / 2).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(PREVIEW_MAX_CELLS / 2).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(1).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -828,18 +783,18 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranc
 {
     // Test with wide branching: Gene 0 references genes 1, 2, and 3
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(PREVIEW_MAX_CELLS).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(false).numConcatenations(PREVIEW_MAX_CELLS)),
         }),
-        GeneDesc().separation(false).numConcatenations(1).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(1).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(1).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -871,22 +826,22 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBr
     //     |   |
     //     3   4
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(PREVIEW_MAX_CELLS / 4).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS / 4)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(PREVIEW_MAX_CELLS / 4)),
         }),
-        GeneDesc().separation(false).numConcatenations(PREVIEW_MAX_CELLS / 4).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(false).numConcatenations(1)),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(PREVIEW_MAX_CELLS / 4).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(false).numConcatenations(1)),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(1).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(1).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -911,14 +866,14 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBr
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudgetDistribution)
 {
     // Test that budget is distributed fairly: genes of different sizes should get proportional allocation
-    // Gene 0: 10 nodes, 100 concatenations = 1000 cells ideal
-    // Gene 1: 5 nodes, 100 concatenations = 500 cells ideal
-    // Gene 2: 5 nodes, 100 concatenations = 500 cells ideal
-    // Total ideal: 2000 cells, but limit is 500 - should get proportional distribution
+    // Gene 0: 10 nodes
+    // Gene 0 constructor to gene 1: 5 nodes, 100 concatenations = 500 cells ideal
+    // Gene 0 constructor to gene 2: 5 nodes, 100 concatenations = 500 cells ideal
+    // Total ideal: 1010 cells, but limit is 500 - should get proportional distribution
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(100).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(100)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(100)),
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
@@ -928,14 +883,14 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudge
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(100).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numConcatenations(100).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
@@ -957,13 +912,10 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudge
     EXPECT_EQ(5, subGenome._genes.at(2)._nodes.size());
 
     // Gene 0 should get roughly twice the budget of genes 1 and 2 (proportional to ideal size)
-    int cells0 = toInt(subGenome._genes.at(0)._nodes.size()) * subGenome._genes.at(0)._numConcatenations;
-    int cells1 = toInt(subGenome._genes.at(1)._nodes.size()) * subGenome._genes.at(1)._numConcatenations;
-    int cells2 = toInt(subGenome._genes.at(2)._nodes.size()) * subGenome._genes.at(2)._numConcatenations;
+    auto cells1 = toInt(subGenome._genes.at(1)._nodes.size()) * subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations;
+    auto cells2 = toInt(subGenome._genes.at(2)._nodes.size()) * subGenome._genes.at(0)._nodes.at(1)._constructor->_numConcatenations;
 
     // Budget should be roughly proportional (with some tolerance for rounding)
-    EXPECT_GT(cells0, cells1);  // Gene 0 should have more cells than gene 1
-    EXPECT_GT(cells0, cells2);  // Gene 0 should have more cells than gene 2
     EXPECT_NEAR(cells1, cells2, 10);  // Genes 1 and 2 should have similar allocations
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
@@ -983,7 +935,7 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_emptySubGenome
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_singleSubGenome_noCache)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -1022,7 +974,7 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_singleSubGenom
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_singleSubGenome_withCache)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -1082,7 +1034,7 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_singleSubGenom
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_singleSubGenome_withCache_offspringFirst)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -1138,12 +1090,12 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_singleSubGenom
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_multipleSubGenomes_noCache)
 {
     auto genome1 = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
     auto genome2 = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -1195,12 +1147,12 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_multipleSubGen
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_multipleSubGenomes_mixedCache)
 {
     auto genome1 = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
     auto genome2 = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -1278,12 +1230,12 @@ TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_multipleSubGen
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_multipleSubGenomes_allCached)
 {
     auto genome1 = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
     auto genome2 = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -1357,7 +1309,7 @@ TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_singleSeed_noOff
     // Create preview with a single seed creature (generation 0)
     Desc preview;
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -1392,7 +1344,7 @@ TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_singleSeed_withO
     // Create preview with seed and its offspring
     Desc preview;
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -1445,12 +1397,12 @@ TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_multipleSeeds_wi
     // Create preview with multiple seeds and their offspring
     Desc preview;
     auto genome1 = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
     auto genome2 = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
