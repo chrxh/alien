@@ -307,10 +307,6 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
                 processCreatureNode(extendedObject);
                 table.next();
             }
-            auto& cell = object.getCellRef();
-            processSignalsNode(cell);
-            table.next();
-            processNeuralNetNode(cell);
             break;
         }
         default:
@@ -490,6 +486,9 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
             }
             AlienGui::EndTreeNode();
         }
+
+        processSignalsNode(cell);
+        processNeuralNetNode(cell);
     }
     AlienGui::EndTreeNode();
 }
