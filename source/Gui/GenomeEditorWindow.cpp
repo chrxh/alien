@@ -289,8 +289,11 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
              .pos(pos)
              .stiffness(1.0f)
              .color(EditorModel::get().getDefaultColorCode())
-             .type(CellDesc().headCell(true).constructor(
-                 ConstructorDesc().autoTriggerInterval(50).provideEnergy(provideEnergy ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly).geneIndex(0)))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc()
+                                                             .autoTriggerInterval(50)
+                                                             .provideEnergy(provideEnergy ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly)
+                                                             .geneIndex(0)
+                                                             .separation(true)))},
         CreatureDesc(),
         genome);
 
