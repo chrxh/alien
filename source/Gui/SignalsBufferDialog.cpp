@@ -70,10 +70,6 @@ void SignalsBufferDialog::processIntern()
             AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(DialogTextWidth), _selectedEntry);
             _selectedEntry = std::clamp(_selectedEntry, 0, numEntries - 1);
 
-            ImGuiStyle& style = ImGui::GetStyle();
-            auto originalGrabMinSize = style.GrabMinSize;
-            style.GrabMinSize = scale(8.0f);
-
             AlienGui::BeginIndent();
             auto& channels = _channelsBuffer.at(_selectedEntry);
             if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
@@ -85,8 +81,6 @@ void SignalsBufferDialog::processIntern()
                     &channels.at(i));
             }
             AlienGui::EndIndent();
-
-            style.GrabMinSize = originalGrabMinSize;
         }
     }
     ImGui::EndChild();

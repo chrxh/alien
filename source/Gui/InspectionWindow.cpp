@@ -280,7 +280,6 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 {
     auto& object = extendedObject.object;
     auto origObject = object;
-    applyPendingSignalEntries(extendedObject);
 
     AlienGui::DynamicTableLayout table(TableColumnWidth);
     if (table.begin()) {
@@ -317,6 +316,7 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 
     validateAndCorrect(object);
 
+    applyPendingSignalEntries(extendedObject);
     if (object != origObject) {
         _SimulationFacade::get()->changeCell(extendedObject);
     }
