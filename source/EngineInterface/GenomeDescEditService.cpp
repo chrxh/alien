@@ -155,15 +155,17 @@ namespace
         // Collect all genes in breadth-first order
         auto genesInBFS = collectGenesInBFS(genome, startGeneIndex);
 
-        // Calculate total nodes needed (with bounded concatenations)
+        // Calculate total nodes needed (with bounded concatenations of the inner constructor reference)
+        // Note: After refactor, concatenations live on the constructor; for trimming purposes we estimate
+        // by summing nodes per gene without multiplication. We still allow constructors that reference
+        // genes to scale their own concatenations to fit the budget.
         int64_t totalNodesNeeded = 0;
         for (auto const& geneInfo : genesInBFS) {
             if (geneInfo.geneIndex >= genome._genes.size()) {
                 continue;
             }
             auto const& gene = genome._genes.at(geneInfo.geneIndex);
-            auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);  // Prevent overflow
-            totalNodesNeeded += static_cast<int64_t>(gene._nodes.size()) * truncatedNumConcatenations;
+            totalNodesNeeded += static_cast<int64_t>(gene._nodes.size());
         }
 
         // If we're under the limit, no trimming needed
@@ -201,27 +203,6 @@ namespace
             }
         }
 
-        // Then, distribute remaining budget proportionally
-        if (remainingBudget > 0) {
-            for (auto const& geneInfo : genesInBFS) {
-                if (geneInfo.geneIndex >= genome._genes.size()) {
-                    continue;
-                }
-
-                auto& gene = genome._genes.at(geneInfo.geneIndex);
-                if (gene._nodes.empty()) {
-                    continue;
-                }
-
-                // Calculate additional budget proportionally
-                auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);
-                int64_t idealNodes = static_cast<int64_t>(gene._nodes.size()) * truncatedNumConcatenations;
-                int64_t additionalBudget = (idealNodes * remainingBudget) / std::max(static_cast<int64_t>(1), totalNodesNeeded);
-
-                geneNodeBudget[geneInfo.geneIndex] += static_cast<int>(additionalBudget);
-            }
-        }
-
         // Apply the budget to each gene
         for (auto const& geneInfo : genesInBFS) {
             if (geneInfo.geneIndex >= genome._genes.size()) {
@@ -234,7 +215,6 @@ namespace
             if (budget == 0) {
                 // No budget for this gene - remove all nodes
                 gene._nodes.clear();
-                gene._numConcatenations = 1;
                 trimmed = true;
                 continue;
             }
@@ -244,13 +224,9 @@ namespace
                 continue;
             }
 
-            // Calculate how many concatenations we can afford
-            int affordableConcatenations = budget / nodesPerCopy;
-
             // If we can't afford even one full copy, trim nodes
-            if (affordableConcatenations == 0) {
+            if (budget < nodesPerCopy) {
                 gene._nodes.resize(budget);
-                gene._numConcatenations = 1;
                 trimmed = true;
 
                 // Castrate constructors in trimmed nodes
@@ -260,13 +236,9 @@ namespace
                         constructor._geneIndex = toInt(genome._genes.size());
                     }
                 }
-            } else if (affordableConcatenations < gene._numConcatenations) {
-                // Reduce concatenations to fit budget
-                gene._numConcatenations = affordableConcatenations;
-                trimmed = true;
             }
 
-            nodeCounter += toInt(gene._nodes.size()) * gene._numConcatenations;
+            nodeCounter += toInt(gene._nodes.size());
         }
 
         return trimmed;
@@ -424,7 +396,13 @@ Desc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome,
             .type(CellDesc()
                       .headCell(true)
                       .creatureId(creature._id)
-                      .constructor(ConstructorDesc().autoTriggerInterval(100).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))));
+                      .constructor(ConstructorDesc()
+                                       .autoTriggerInterval(100)
+                                       .provideEnergy(ProvideEnergy_FreeGeneration)
+                                       .geneIndex(subGenome.startIndex)
+                                       .separation(true)
+                                       .numBranches(1)
+                                       .numConcatenations(1))));
     return result;
 }
 
@@ -446,8 +424,7 @@ namespace
                     } else {
                         castrate(genome, constructor._geneIndex, inspectedGeneIndices);  // Inspect further gene
 
-                        auto& refGene = genome._genes.at(constructor._geneIndex);
-                        if (refGene._separation) {
+                        if (constructor._separation) {
                             constructor._geneIndex = genome._genes.size();  // Separated part => perform castration
                         }
                     }
@@ -508,9 +485,6 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
     if (!detailSimulation) {
         genome._frontAngle = 0;
     }
-    if (!genome._genes.empty()) {
-        genome._genes.at(startGeneIndex)._numBranches = 1;
-    }
     genome._lineageId = 0;
     genome._mutationRates._lineageMutationProbability = 0;
     genome._mutationRates._neuronMutation1 = NeuronMutationDesc();
@@ -518,6 +492,5 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
     genome._mutationRates._connectionMutation1 = ConnectionMutationDesc();
     genome._mutationRates._connectionMutation2 = ConnectionMutationDesc();
 
-    genome._genes.at(startGeneIndex)._separation = true;
     resetUnusedGenes(genome, geneIndices);
 }

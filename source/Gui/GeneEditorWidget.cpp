@@ -106,29 +106,6 @@ void _GeneEditorWidget::processHeaderData()
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
 
             table.next();
-
-            AlienGui::Group(AlienGui::GroupParameters().text("Multipliers"));
-
-            // Separation
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), gene._separation);
-
-            // Number of branches
-            AlienGui::BeginIndent();
-            if (!gene._separation) {
-                auto numBranches = gene._numBranches - 1;  // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
-                AlienGui::Switcher(
-                    AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth), numBranches);
-                gene._numBranches = numBranches + 1;  // Convert back to 1-based (index 0 -> 1 branch, index 1 -> 2 branches, etc.)
-            } /* else {
-                std::string text = "-";
-                AlienGui::InputText(AlienGui::InputTextParameters().name("Number of branches").textWidth(rightColumnWidth).readOnly(true), text);
-            }*/
-            AlienGui::EndIndent();
-
-            // Concatenations
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);
-
-            table.next();
             table.end();
         }
     }

@@ -129,14 +129,12 @@ void _GenomeEditorWidget::processGeneList()
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-        if (ImGui::BeginTable("Gene list", 8, flags, ImVec2(-1, -1), 0.0f)) {
+        if (ImGui::BeginTable("Gene list", 6, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("Gene", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
             ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
             ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
             ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(60.0f));
-            ImGui::TableSetupColumn("Branches", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(75.0f));
-            ImGui::TableSetupColumn("Concatenations", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
             ImGui::TableSetupColumn("Nodes", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(70.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
@@ -216,29 +214,7 @@ void _GenomeEditorWidget::processGeneList()
                     ImGui::TableNextColumn();
                     AlienGui::Text(Const::ConstructorShapeStrings.at(gene._shape));
 
-                    // Column 5: Branches
-                    ImGui::TableNextColumn();
-                    if (gene._separation) {
-                        AlienGui::Text("Separation");
-                    } else {
-                        auto const& numBranches = gene._numBranches;
-                        CHECK(numBranches >= 1 && numBranches <= 6);
-                        if (numBranches == 1) {
-                            AlienGui::Text("1 branch");
-                        } else {
-                            AlienGui::Text(std::to_string(gene._numBranches) + " branches");
-                        }
-                    }
-
-                    // Column 5: Concatenations
-                    ImGui::TableNextColumn();
-                    if (gene._numConcatenations != std::numeric_limits<int>::max()) {
-                        AlienGui::Text(std::to_string(gene._numConcatenations));
-                    } else {
-                        AlienGui::Text("Infinity");
-                    }
-
-                    // Column 6: Node count
+                    // Column 5: Node count
                     ImGui::TableNextColumn();
                     AlienGui::Text(std::to_string(gene._nodes.size()));
 
@@ -304,7 +280,7 @@ void _GenomeEditorWidget::onAddGene()
     auto& genome = _editData->genome;
     auto name = "Gene " + std::to_string(++_sequenceNumberForCreatedGenes);
     if (genome._genes.empty()) {
-        auto newGene = GeneDesc().name(name).separation(true).nodes({NodeDesc()}).shape(ConstructorShape_Segment);
+        auto newGene = GeneDesc().name(name).nodes({NodeDesc()}).shape(ConstructorShape_Segment);
         GenomeDescEditService::get().addGene(genome, 0, newGene);
         _editData->selectedGeneIndex = 0;
     } else {
@@ -315,7 +291,7 @@ void _GenomeEditorWidget::onAddGene()
             insertIndex = toInt(genome._genes.size()) - 1;
         }
 
-        auto newGene = GeneDesc().name(name).separation(false).numBranches(1).nodes({NodeDesc()}).shape(ConstructorShape_Segment);
+        auto newGene = GeneDesc().name(name).nodes({NodeDesc()}).shape(ConstructorShape_Segment);
         GenomeDescEditService::get().addGene(genome, insertIndex, newGene);
 
         // Adapt gene selection

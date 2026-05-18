@@ -61,6 +61,9 @@ struct ConstructorDesc
     MEMBER(ConstructorDesc, float, constructionAngle, 0.0f);
     MEMBER(ConstructorDesc, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
     MEMBER(ConstructorDesc, float, reservedEnergy, 0.0f);
+    MEMBER(ConstructorDesc, bool, separation, false);
+    MEMBER(ConstructorDesc, int, numBranches, 1);        // For separation = false
+    MEMBER(ConstructorDesc, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
 
     // Genome data
     MEMBER(ConstructorDesc, int, geneIndex, 0);
@@ -68,6 +71,8 @@ struct ConstructorDesc
     // Process data
     MEMBER(ConstructorDesc, std::optional<uint64_t>, lastConstructedCellId, std::nullopt);
     MEMBER(ConstructorDesc, int, currentOffspring, 0);
+
+    static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
 
 struct TelemetryDesc

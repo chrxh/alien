@@ -506,6 +506,14 @@ void _InspectionWindow::processConstructorSubNode(ConstructorDesc& constructor)
         constructor._provideEnergy = static_cast<ProvideEnergy>(providedEnergy);
     }
     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(TextWidth), constructor._reservedEnergy);
+    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth), constructor._separation);
+    if (!constructor._separation) {
+        auto numBranches = constructor._numBranches - 1;
+        AlienGui::Switcher(
+            AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
+        constructor._numBranches = numBranches + 1;
+    }
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(TextWidth), constructor._numConcatenations);
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), constructor._geneIndex);
 }
 
@@ -826,6 +834,8 @@ void _InspectionWindow::validateAndCorrect(ObjectDesc& object) const
                 c._autoTriggerInterval = std::max(0, c._autoTriggerInterval.value());
             }
             c._reservedEnergy = std::max(0.0f, c._reservedEnergy);
+            c._numBranches = std::clamp(c._numBranches, 1, 6);
+            c._numConcatenations = std::max(c._numConcatenations, 1);
         }
         if (cell.getCellType() == CellType_Sensor) {
             auto& sensor = std::get<SensorDesc>(cell._cellType);

@@ -58,11 +58,8 @@ namespace
                 auto& geneTO = to.genes[geneTOArrayStartIndex + i];
                 auto const& gene = genome->genes[i];
                 geneTO.shape = gene.shape;
-                geneTO.separation = gene.separation;
-                geneTO.numBranches = gene.numBranches;
                 geneTO.stiffness = gene.stiffness;
                 geneTO.connectionDistance = gene.connectionDistance;
-                geneTO.numConcatenations = gene.numConcatenations;
                 geneTO.numNodes = gene.numNodes;
                 for (int i = 0; i < sizeof(gene.name); ++i) {
                     geneTO.name[i] = gene.name[i];
@@ -243,6 +240,9 @@ namespace
                         nodeTO.constructor.constructionAngle = node.constructor.constructionAngle;
                         nodeTO.constructor.provideEnergy = node.constructor.provideEnergy;
                         nodeTO.constructor.reservedEnergy = node.constructor.reservedEnergy;
+                        nodeTO.constructor.separation = node.constructor.separation;
+                        nodeTO.constructor.numBranches = node.constructor.numBranches;
+                        nodeTO.constructor.numConcatenations = node.constructor.numConcatenations;
                     }
                 }
             }
@@ -534,6 +534,9 @@ namespace
                 cellTO.constructor.constructionAngle = cell.constructor.constructionAngle;
                 cellTO.constructor.provideEnergy = cell.constructor.provideEnergy;
                 cellTO.constructor.reservedEnergy = cell.constructor.reservedEnergy;
+                cellTO.constructor.separation = cell.constructor.separation;
+                cellTO.constructor.numBranches = cell.constructor.numBranches;
+                cellTO.constructor.numConcatenations = cell.constructor.numConcatenations;
                 cellTO.constructor.geneIndex = cell.constructor.geneIndex;
                 cellTO.constructor.lastConstructedCellId = cell.constructor.lastConstructedCellId;
                 cellTO.constructor.currentOffspring = cell.constructor.currentOffspring;

@@ -77,6 +77,9 @@ struct Constructor
     float constructionAngle;
     ProvideEnergy provideEnergy;
     float reservedEnergy;
+    bool separation;
+    uint8_t numBranches;  // For separation = false
+    int numConcatenations;
 
     // Genome data
     uint16_t geneIndex;

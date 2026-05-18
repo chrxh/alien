@@ -79,7 +79,7 @@ TEST_F(PreviewDescConverterServiceTests, convertEmptyCollection)
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc().color(2), NodeDesc().color(3)}),
+        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
     });
 
     Desc input;
@@ -112,7 +112,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation)
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_setsVisualFrontAngle)
 {
     auto genome = GenomeDesc().frontAngle(30.0f).genes({
-        GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
     Desc input;
@@ -134,7 +134,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_setsVisualFrontA
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_smoothsVisualFrontAngle)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
     Desc input;
@@ -156,8 +156,8 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_smoothsVisualFro
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_nonRootGene)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc().color(1)}),
-        GeneDesc().separation(true).nodes({NodeDesc().color(2), NodeDesc().color(3)}),
+        GeneDesc().nodes({NodeDesc().color(1)}),
+        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
     });
 
     Desc input;
@@ -190,7 +190,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withSeparation_n
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withoutSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({NodeDesc().color(2), NodeDesc().color(3)}),
+        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
     });
 
     Desc input;
@@ -223,7 +223,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_withoutSeparatio
 TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc().color(2), NodeDesc().color(3), NodeDesc().color(4)}),
+        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3), NodeDesc().color(4)}),
     });
 
     Desc input;
@@ -264,7 +264,7 @@ TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
 TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_multipleNodes_multipleConcatenations)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(4).nodes({NodeDesc().color(2), NodeDesc().color(3)}),
+        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
     });
 
     Desc input;
@@ -313,7 +313,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_multipleNodes_m
 TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_oneNode_multipleConcatenations)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(8).nodes({NodeDesc().color(2)}),
+        GeneDesc().nodes({NodeDesc().color(2)}),
     });
 
     Desc input;
@@ -362,8 +362,8 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGene_oneNode_multipl
 TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multipleConcatenations)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({NodeDesc().color(2).constructor(ConstructorGenomeDesc().geneIndex(1))}),
-        GeneDesc().separation(false).numConcatenations(7).nodes({NodeDesc().color(3)}),
+        GeneDesc().nodes({NodeDesc().color(2).constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(7))}),
+        GeneDesc().nodes({NodeDesc().color(3)}),
     });
 
     Desc input;
@@ -376,7 +376,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
             ObjectDesc().id(6).pos({10.0f, 8.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
             ObjectDesc().id(7).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
             ObjectDesc().id(8).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0)),
-            ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1))),
+            ObjectDesc().id(1).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).separation(false).numConcatenations(7))),
         },
         CreatureDesc(),
         genome);
@@ -408,7 +408,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
 TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGenes_twoNode_multipleConcatenations)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numConcatenations(4).nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
     Desc input;
@@ -461,8 +461,8 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_oneGenes_twoNode_multip
 TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
-        GeneDesc().separation(true).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true))}),
     });
 
     Desc inputCreature1;
@@ -503,15 +503,15 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
 TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withoutSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
-        GeneDesc().separation(false).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false))}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false))}),
     });
 
     Desc input;
     input.addCreature(
         {
-            ObjectDesc().id(0).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1))),
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(0).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).separation(false))),
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(1).nodeIndex(0).constructor(ConstructorDesc().geneIndex(0).separation(false))),
         },
         CreatureDesc(),
         genome);
@@ -532,7 +532,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withoutSeparat
 TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
     std::vector<float> signal{0.2f, 0.2f, 0.2f, 0.8f, 0.2f, -1.2f, 0.2f, -0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
@@ -564,7 +564,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_connectionWeight
     auto nn2 = NeuralNetGenomeDesc();
     nn2._connectionWeights.at(0) = 0.3f;
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc().color(2).neuralNetwork(nn1), NodeDesc().color(3).neuralNetwork(nn2)}),
+        GeneDesc().nodes({NodeDesc().color(2).neuralNetwork(nn1), NodeDesc().color(3).neuralNetwork(nn2)}),
     });
 
     Desc input;

@@ -299,11 +299,8 @@ namespace
 
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
-    auto constexpr Id_Gene_NumBranches = 2;
-    auto constexpr Id_Gene_Separation = 3;
     auto constexpr Id_Gene_Stiffness = 5;
     auto constexpr Id_Gene_ConnectionDistance = 6;
-    auto constexpr Id_Gene_NumRepetitions = 7;
 
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
@@ -324,6 +321,9 @@ namespace
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
     auto constexpr Id_ConstructorGenome_ReservedEnergy = 5;
+    auto constexpr Id_ConstructorGenome_Separation = 6;
+    auto constexpr Id_ConstructorGenome_NumBranches = 7;
+    auto constexpr Id_ConstructorGenome_NumConcatenations = 8;
 
     auto constexpr Id_SensorGenome_AutoTrigger = 0;
     auto constexpr Id_SensorGenome_MinRange = 1;
@@ -472,6 +472,9 @@ namespace cereal
         scope.addMember(Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         scope.addMember(Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
         scope.addMember(Id_ConstructorGenome_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
+        scope.addMember(Id_ConstructorGenome_Separation, data._separation, defaultObject._separation);
+        scope.addMember(Id_ConstructorGenome_NumBranches, data._numBranches, defaultObject._numBranches);
+        scope.addMember(Id_ConstructorGenome_NumConcatenations, data._numConcatenations, defaultObject._numConcatenations);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDesc)
 
@@ -847,11 +850,8 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Gene_Name, data._name, defaultObject._name);
         scope.addMember(Id_Gene_Shape, data._shape, defaultObject._shape);
-        scope.addMember(Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
-        scope.addMember(Id_Gene_Separation, data._separation, defaultObject._separation);
         scope.addMember(Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         scope.addMember(Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
-        scope.addMember(Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
         scope.addDesc(Id_Gene_Nodes, data._nodes);
     }
     SPLIT_SERIALIZATION(GeneDesc)
@@ -983,6 +983,9 @@ namespace
     auto constexpr Id_Constructor_ProvideEnergy = 8;
     auto constexpr Id_Constructor_CurrentOffspring = 9;
     auto constexpr Id_Constructor_ReservedEnergy = 10;
+    auto constexpr Id_Constructor_Separation = 11;
+    auto constexpr Id_Constructor_NumBranches = 12;
+    auto constexpr Id_Constructor_NumConcatenations = 13;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -1178,6 +1181,9 @@ namespace cereal
         scope.addMember(Id_Constructor_CurrentOffspring, data._currentOffspring, defaultObject._currentOffspring);
         scope.addMember(Id_Constructor_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
         scope.addMember(Id_Constructor_ReservedEnergy, data._reservedEnergy, defaultObject._reservedEnergy);
+        scope.addMember(Id_Constructor_Separation, data._separation, defaultObject._separation);
+        scope.addMember(Id_Constructor_NumBranches, data._numBranches, defaultObject._numBranches);
+        scope.addMember(Id_Constructor_NumConcatenations, data._numConcatenations, defaultObject._numConcatenations);
     }
     SPLIT_SERIALIZATION(ConstructorDesc)
 

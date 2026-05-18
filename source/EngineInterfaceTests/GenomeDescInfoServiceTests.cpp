@@ -30,13 +30,13 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_Empty)
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_oneReferencesOneSingleTimes)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -49,13 +49,13 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_oneReferencesOneSin
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_oneReferencesOneMultipleTimes)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -68,15 +68,15 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_oneReferencesOneMul
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_oneReferencesMany_depth1)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
@@ -91,35 +91,35 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_oneReferencesMany_d
 {
     auto genome = GenomeDesc().genes({
         // Level 0
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
         }),
         // Level 1
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(6)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(6).separation(true)),
             NodeDesc(),
         }),
         // Level 2
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -131,15 +131,15 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_oneReferencesMany_d
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_manyReferenceOne)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
@@ -153,10 +153,10 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_manyReferenceOne)
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_doNotCountUnreachable)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -168,8 +168,8 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_doNotCountUnreachab
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_doNotCountPrincipalReferencesPrincipal)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
             NodeDesc(),
             NodeDesc(),
         }),
@@ -182,13 +182,13 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_doNotCountPrincipal
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_doNotCountAuxiliaryReferencesPrincipal)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
             NodeDesc(),
         }),
     });
@@ -200,13 +200,13 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_doNotCountAuxiliary
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_infinity_1cycle)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
             NodeDesc(),
         }),
     });
@@ -218,17 +218,17 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_infinity_1cycle)
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_infinity_2cycle)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
             NodeDesc(),
         }),
     });
@@ -240,12 +240,12 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_infinity_2cycle)
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_withoutSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numBranches(2).numConcatenations(3)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numBranches(2).numConcatenations(3)),
             NodeDesc(),
         }),
         GeneDesc()
@@ -254,9 +254,9 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
                 NodeDesc(),
                 NodeDesc(),
             })
-            .separation(false)
-            .numBranches(2)
-            .numConcatenations(3),
+            
+            
+            ,
     });
     auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome);
 
@@ -266,12 +266,12 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_withSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true).numConcatenations(3)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true).numConcatenations(3)),
             NodeDesc(),
         }),
         GeneDesc()
@@ -280,8 +280,8 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
                 NodeDesc(),
                 NodeDesc(),
             })
-            .separation(true)
-            .numConcatenations(3),
+            
+            ,
     });
     auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome);
 
@@ -291,7 +291,7 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
 TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_onFirstGene)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numBranches(10).numConcatenations(5).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -305,12 +305,12 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_nestedMultipleBranc
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numBranches(2)),
         }),
-        GeneDesc().separation(false).numBranches(2).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numBranches(2)),
         }),
-        GeneDesc().separation(false).numBranches(2).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -322,15 +322,15 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_nestedMultipleBranc
 TEST_F(GenomeDescInfoServiceTests, getReferences)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -345,16 +345,16 @@ TEST_F(GenomeDescInfoServiceTests, getReferences)
 TEST_F(GenomeDescInfoServiceTests, getReferencedBy)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getReferencedBy(genome, 0);
@@ -375,20 +375,20 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_empty)
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_singleNonSeparatingHull)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
@@ -398,28 +398,28 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_singleNonSeparati
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_twoNonSeparatingHulls)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(false)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
@@ -429,28 +429,28 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_twoNonSeparatingH
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_threeNonSeparatingHulls)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(true)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
@@ -460,13 +460,13 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_threeNonSeparatin
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_onlySeparatingGenes)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -477,16 +477,16 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_onlySeparatingGen
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_disconnectedComponents)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -497,7 +497,7 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_disconnectedCompo
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_singleGeneGenome)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
         }),
@@ -509,9 +509,9 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_singleGeneGenome)
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_genesWithoutNodes)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false),
-        GeneDesc().separation(true),
-        GeneDesc().separation(false),
+        GeneDesc(),
+        GeneDesc(),
+        GeneDesc(),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2}}), result);
@@ -520,11 +520,11 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_genesWithoutNodes
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_selfReferencingGene)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
             NodeDesc(),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -535,11 +535,11 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_selfReferencingGe
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_referenceRootFromDifferentSubGenome)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
@@ -549,11 +549,11 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_referenceRootFrom
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_invalidGeneReferences)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5)),
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(10)),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(99)),
         }),
     });
@@ -564,27 +564,27 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_invalidGeneRefere
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_complexMixedSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(false)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(true)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(6)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(6).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5).separation(false)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
@@ -594,14 +594,14 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_complexMixedSepar
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_separatingGenesWithNonSeparatingReferences)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -612,35 +612,35 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_separatingGenesWi
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_largeGenomeWithManyReferences)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(true)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(5).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(6)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(6).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(7)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(7).separation(false)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(8)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(8).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -651,14 +651,14 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_largeGenomeWithMa
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_circularReferenceWithSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
@@ -668,14 +668,14 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_circularReference
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_circularReferenceWithoutSeparation)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
@@ -685,13 +685,13 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_circularReference
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_geneWithMultipleNodesAndDifferentCellTypes)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc().cellType(BaseGenomeDesc()),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
             NodeDesc().cellType(BaseGenomeDesc()),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc().cellType(BaseGenomeDesc()),
             NodeDesc().cellType(BaseGenomeDesc()),
         }),
@@ -703,12 +703,12 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_geneWithMultipleN
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_mixedReferencesNonConstructorAndConstructor)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
+        GeneDesc().nodes({
             NodeDesc().cellType(BaseGenomeDesc()),
         }),
     });
@@ -719,10 +719,10 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_mixedReferencesNo
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_emptyNodesInGenes)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({}),
-        GeneDesc().separation(true).nodes({}),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0)),
+        GeneDesc().nodes({}),
+        GeneDesc().nodes({}),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
         }),
     });
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
@@ -732,19 +732,19 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_emptyNodesInGenes
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_deepNestedReferences)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });
@@ -755,19 +755,19 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_deepNestedReferen
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_alternatingPattern)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(3).separation(true)),
         }),
-        GeneDesc().separation(true).nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4)),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(4).separation(false)),
         }),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
         }),
     });

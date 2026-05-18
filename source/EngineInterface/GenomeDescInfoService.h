@@ -14,7 +14,7 @@ class GenomeDescInfoService
 
 public:
     int getNumberOfNodes(GenomeDesc const& genome) const;
-    int getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex = 0) const;  // Returns -1 for infinite
+    int getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex = 0, bool separation = true, int numBranches = 1, int numConcatenations = 1) const;  // Returns -1 for infinite
     std::vector<int> getReferences(GeneDesc const& gene) const;
     std::vector<int> getReferencedBy(GenomeDesc const& genome, int geneIndex) const;
     bool isConnectedToRoot(GenomeDesc const& genome, int startGeneIndex) const;

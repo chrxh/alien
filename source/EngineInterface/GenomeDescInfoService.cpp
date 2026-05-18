@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <map>
 
 int GenomeDescInfoService::getNumberOfNodes(GenomeDesc const& genome) const
 {
@@ -14,7 +15,13 @@ int GenomeDescInfoService::getNumberOfNodes(GenomeDesc const& genome) const
 
 namespace
 {
-    int countNodes(GenomeDesc const& genome, int geneIndex, std::vector<int>& lastGenes)
+    int countNodes(
+        GenomeDesc const& genome,
+        int geneIndex,
+        bool separation,
+        int numBranches,
+        int numConcatenations,
+        std::vector<int>& lastGenes)
     {
         if (std::ranges::find(lastGenes, geneIndex) != lastGenes.end()) {
             return -1;
@@ -25,16 +32,18 @@ namespace
         lastGenes.emplace_back(geneIndex);
 
         auto const& gene = genome._genes[geneIndex];
-        if (gene._numConcatenations == std::numeric_limits<int>::max()) {
+        if (numConcatenations == std::numeric_limits<int>::max()) {
             return -1;
         }
-        auto numBranches = gene._separation ? 1 : gene._numBranches;
-        auto result = gene._nodes.size() * gene._numConcatenations * numBranches;
+        auto effectiveNumBranches = separation ? 1 : numBranches;
+        auto result = gene._nodes.size() * numConcatenations * effectiveNumBranches;
         for (auto const& node : gene._nodes) {
             if (node._constructor.has_value()) {
                 auto const& constructor = node._constructor.value();
                 if (constructor._geneIndex != 0) {  // First gene is for self-replication and should not be counted
-                    auto numNodes = numBranches * countNodes(genome, constructor._geneIndex, lastGenes);
+                    auto numNodes = effectiveNumBranches
+                        * countNodes(
+                            genome, constructor._geneIndex, constructor._separation, constructor._numBranches, constructor._numConcatenations, lastGenes);
                     if (numNodes == -1) {
                         return -1;  // Cycle detected
                     }
@@ -47,13 +56,13 @@ namespace
     }
 }
 
-int GenomeDescInfoService::getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex) const
+int GenomeDescInfoService::getNumberOfResultingCells(GenomeDesc const& genome, int startGeneIndex, bool separation, int numBranches, int numConcatenations) const
 {
     if (genome._genes.empty()) {
         return 0;
     }
     std::vector<int> lastGenes;
-    return countNodes(genome, startGeneIndex, lastGenes);
+    return countNodes(genome, startGeneIndex, separation, numBranches, numConcatenations, lastGenes);
 }
 
 std::vector<int> GenomeDescInfoService::getReferences(GeneDesc const& gene) const
@@ -200,38 +209,44 @@ auto GenomeDescInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDesc
     do {
         alreadyInspectedGeneIndices.insert(toInspectedGeneIndices.begin(), toInspectedGeneIndices.end());
 
-        std::set<int> newGeneIndices;
+        // Collect references along with their constructor separation flag
+        std::map<int, bool> newGeneSeparation;  // geneIndex -> isAnyNonSeparating
         for (auto const& geneIndex : toInspectedGeneIndices) {
             if (geneIndex >= genome._genes.size()) {
                 continue;
             }
-            auto referenced = getReferences(genome._genes.at(geneIndex));
-            newGeneIndices.insert(referenced.begin(), referenced.end());
+            auto const& gene = genome._genes.at(geneIndex);
+            for (auto const& node : gene._nodes) {
+                if (node._constructor.has_value()) {
+                    auto const& constructor = node._constructor.value();
+                    auto targetIndex = constructor._geneIndex;
+                    if (alreadyInspectedGeneIndices.contains(targetIndex)) {
+                        continue;
+                    }
+                    auto isNonSeparating = !constructor._separation;
+                    auto it = newGeneSeparation.find(targetIndex);
+                    if (it == newGeneSeparation.end()) {
+                        newGeneSeparation[targetIndex] = isNonSeparating;
+                    } else {
+                        it->second = it->second || isNonSeparating;  // Treat as non-separating if any reference is non-separating
+                    }
+                }
+            }
         }
-        toInspectedGeneIndices.clear();
-        std::set_difference(
-            newGeneIndices.begin(),
-            newGeneIndices.end(),
-            alreadyInspectedGeneIndices.begin(),
-            alreadyInspectedGeneIndices.end(),
-            std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
 
-        // Separate new genes into separating and non-separating
+        toInspectedGeneIndices.clear();
         std::set<int> newNonSeparatingGenes;
-        for (auto const& geneIndex : toInspectedGeneIndices) {
+        for (auto const& [geneIndex, isNonSeparating] : newGeneSeparation) {
             if (geneIndex < genome._genes.size()) {
-                if (genome._genes[geneIndex]._separation) {
-                    // This is a separating gene - add to separating list but don't traverse through it
+                if (!isNonSeparating) {
                     result.separatingGeneIndices.push_back(geneIndex);
                 } else {
-                    // This is a non-separating gene - add to non-separating list and continue traversal
                     result.nonSeparatingGeneIndices.push_back(geneIndex);
                     newNonSeparatingGenes.insert(geneIndex);
                 }
             }
         }
 
-        // Only add non-separating genes to continue traversal
         toInspectedGeneIndices = newNonSeparatingGenes;
     } while (!toInspectedGeneIndices.empty());
 

@@ -35,8 +35,6 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
     // Validate each gene
     for (auto& gene : genome._genes) {
         // Validate gene-level attributes
-        gene._numBranches = std::max(gene._numBranches, 1);
-        gene._numConcatenations = std::max(gene._numConcatenations, 1);
         gene._stiffness = std::max(gene._stiffness, 0.05f);
         gene._connectionDistance = std::clamp(gene._connectionDistance, 0.5f, 1.5f);
         gene._shape = std::clamp(gene._shape, 0, ConstructorShape_Count - 1);
@@ -228,6 +226,8 @@ void GenomeDescValidationService::validateAndCorrect(GenomeDesc& genome)
                 constructor._provideEnergy =
                     std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
                 constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
+                constructor._numBranches = std::clamp(constructor._numBranches, 1, 6);
+                constructor._numConcatenations = std::max(constructor._numConcatenations, 1);
             }
         }
     }
