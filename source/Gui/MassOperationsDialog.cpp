@@ -150,7 +150,7 @@ void MassOperationsDialog::processIntern()
 
             table.next();
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Randomize cell energies"));
+            AlienGui::Group(AlienGui::GroupParameters().text("Randomize energies"));
             ImGui::Checkbox("##energies", &_randomizeEnergies);
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
             auto posX = ImGui::GetCursorPos().x;

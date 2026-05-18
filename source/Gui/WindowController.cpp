@@ -190,7 +190,7 @@ void WindowController::updateWindowTitle(std::string const& projectName)
 {
     if (_lastProjectName != projectName) {
         _lastProjectName = projectName;
-        auto title = std::string("alien: ") + projectName;
+        auto title = std::string("Alien - Simulation: ") + projectName;
         glfwSetWindowTitle(_windowData.window, title.c_str());
     }
 }
