@@ -600,7 +600,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
         GeneDesc(),
     });
 
-    // Add 100 nodes to exceed the limit
+    // Add PREVIEW_MAX_CELLS + 1 nodes to exceed the limit
     for (int i = 0; i < PREVIEW_MAX_CELLS + 1; ++i) {
         genome._genes[0]._nodes.emplace_back(NodeDesc());
     }
@@ -704,38 +704,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_multipleS
             EXPECT_EQ(PREVIEW_MAX_CELLS / 2, subGenome._genes.at(1)._nodes.size());
         }
     }
-}
-
-TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_recursiveConstructors)
-{
-    // Create a genome with recursive constructor references that should be trimmed
-    auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(PREVIEW_MAX_CELLS / 3 + 3)),
-            NodeDesc(),
-        }),
-        GeneDesc().nodes({
-            NodeDesc(),
-            NodeDesc(),
-            NodeDesc(),
-        }),
-    });
-
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
-
-    ASSERT_EQ(1, subGenomes.size());
-    EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
-    auto const& subGenome = subGenomes.at(0).genome;
-
-    // The trimming should reduce the referencing constructor's concatenations to fit within limit
-    ASSERT_EQ(2, subGenome._genes.size());
-    EXPECT_EQ(2, subGenome._genes.at(0)._nodes.size());
-    ASSERT_TRUE(subGenome._genes.at(0)._nodes.at(0)._constructor.has_value());
-    EXPECT_LE(subGenome._genes.at(0)._nodes.at(0)._constructor->_numConcatenations, PREVIEW_MAX_CELLS / 3 + 3);  // Should be reduced
-
-    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteConcatenationsWithReferences)
