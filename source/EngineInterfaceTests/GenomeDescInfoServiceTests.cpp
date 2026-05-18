@@ -296,7 +296,7 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
             NodeDesc(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome);
+    auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome, 0, false, 5, 10);
 
     EXPECT_EQ(2 * 5 * 10, result);
 }

@@ -83,11 +83,11 @@ protected:
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
-                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).numBranches(2).numConcatenations(4)),
+                NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).numBranches(1).numConcatenations(2)),
                 NodeDesc().cellType(generator),
             }),
             GeneDesc().nodes(
-                {NodeDesc().color(1).cellType(muscleDesc), NodeDesc().color(1).constructor(ConstructorGenomeDesc().geneIndex(2).separation(true))}),
+                {NodeDesc().color(1).cellType(muscleDesc), NodeDesc().color(1).constructor(ConstructorGenomeDesc().geneIndex(2).numBranches(2).numConcatenations(1))}),
             GeneDesc().nodes({NodeDesc().color(2)}),
         });
     }
@@ -134,7 +134,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
         {ObjectDesc()
              .id(0)
              .pos({200.0f, 200.0f})
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0).separation(true)))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -217,7 +217,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
         {ObjectDesc()
              .id(0)
              .pos({200.0f, 200.0f})
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0).separation(true)))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -328,7 +328,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, direction);
     auto data = Desc().addCreature(
         {ObjectDesc().id(0).pos(refPoint).type(
-            CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0).separation(true)))},
+            CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -392,7 +392,7 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
         {ObjectDesc()
              .id(0)
              .pos({200.0f, 200.0f})
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0).separation(true)))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 
@@ -442,7 +442,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Desc().addCreature(
         {ObjectDesc().id(0).pos(refPoint).type(
-            CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0).separation(true)))},
+            CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(10).provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDesc(),
         genome);
 

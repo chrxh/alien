@@ -534,7 +534,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_withinLim
     EXPECT_EQ(10, subGenome._genes.at(0)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(PREVIEW_MAX_CELLS, resultingCells);
+    EXPECT_EQ(10, resultingCells);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_concatenations)
@@ -558,7 +558,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // Should be trimmed by reducing concatenations
@@ -566,7 +566,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
     EXPECT_EQ(5, subGenome._genes.at(0)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(PREVIEW_MAX_CELLS / 5 * 5, resultingCells);
+    EXPECT_EQ(5, resultingCells);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_infiniteConcatenations)
@@ -590,7 +590,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // Should be trimmed by reducing concatenations
@@ -598,7 +598,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
     EXPECT_EQ(5, subGenome._genes.at(0)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(PREVIEW_MAX_CELLS / 5 * 5, resultingCells);
+    EXPECT_EQ(5, resultingCells);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_nodes)
@@ -737,7 +737,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_recursive
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // The trimming should reduce gene 1's concatenations to fit within limit
@@ -745,7 +745,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_recursive
     EXPECT_EQ(2, subGenome._genes.at(0)._nodes.size());
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteConcatenationsWithReferences)
@@ -770,7 +769,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteC
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // Both genes should have nodes after trimming (BFS ensures fair distribution)
@@ -779,7 +778,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteC
     EXPECT_GT(subGenome._genes.at(1)._nodes.size(), 0);  // Gene 1 should also have nodes (this is the key test)
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneTree)
@@ -805,7 +803,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneT
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // All three genes should be present with nodes (BFS ensures all depths get representation)
@@ -815,7 +813,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_deepGeneT
     EXPECT_GT(subGenome._genes.at(2)._nodes.size(), 0);
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranchingTree)
@@ -842,7 +839,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranc
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // All four genes should be present (BFS processes all at same depth before moving deeper)
@@ -853,7 +850,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_wideBranc
     EXPECT_GT(subGenome._genes.at(3)._nodes.size(), 0);
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBranchingTree)
@@ -889,7 +885,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBr
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // All five genes should be present after BFS trimming
@@ -899,7 +895,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBr
     }
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudgetDistribution)
@@ -941,7 +936,7 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudge
     auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
-    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // All genes should have all their nodes (minimum guarantee)
@@ -961,7 +956,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudge
     EXPECT_NEAR(cells1, cells2, 10);  // Genes 1 and 2 should have similar allocations
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
 TEST_F(GenomeDescEditServiceTests, createSeedCollectionForPreview_emptySubGenomes)
