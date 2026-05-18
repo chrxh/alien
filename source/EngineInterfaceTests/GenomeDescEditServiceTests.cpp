@@ -172,7 +172,7 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_start)
 {
     auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
-        NodeDesc().constructor(ConstructorGenomeDesc().separation(false)),
+        NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
     });
     GenomeDescEditService::get().addNode(gene, 0, NodeDesc());
@@ -188,7 +188,7 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_middle)
 {
     auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
-        NodeDesc().constructor(ConstructorGenomeDesc().separation(false)),
+        NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
     });
     GenomeDescEditService::get().addNode(gene, 1, NodeDesc());
@@ -204,7 +204,7 @@ TEST_F(GenomeDescEditServiceTests, addEmptyNode_end)
 {
     auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
-        NodeDesc().constructor(ConstructorGenomeDesc().separation(false)),
+        NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
     });
     GenomeDescEditService::get().addNode(gene, 2, NodeDesc());
@@ -220,7 +220,7 @@ TEST_F(GenomeDescEditServiceTests, removeNode_start)
 {
     auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
-        NodeDesc().constructor(ConstructorGenomeDesc().separation(false)),
+        NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
     });
     GenomeDescEditService::get().removeNode(gene, 0);
@@ -234,7 +234,7 @@ TEST_F(GenomeDescEditServiceTests, removeNode_middle)
 {
     auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
-        NodeDesc().constructor(ConstructorGenomeDesc().separation(false)),
+        NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
     });
     GenomeDescEditService::get().removeNode(gene, 1);
@@ -248,7 +248,7 @@ TEST_F(GenomeDescEditServiceTests, removeNode_end)
 {
     auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
-        NodeDesc().constructor(ConstructorGenomeDesc().separation(false)),
+        NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
     });
     GenomeDescEditService::get().removeNode(gene, 2);
@@ -262,7 +262,7 @@ TEST_F(GenomeDescEditServiceTests, swapNodes)
 {
     auto gene = GeneDesc().nodes({
         NodeDesc().cellType(DepotGenomeDesc()),
-        NodeDesc().constructor(ConstructorGenomeDesc().separation(false)),
+        NodeDesc().constructor(ConstructorGenomeDesc()),
         NodeDesc().cellType(SensorGenomeDesc()),
     });
     GenomeDescEditService::get().swapNodes(gene, 1);
