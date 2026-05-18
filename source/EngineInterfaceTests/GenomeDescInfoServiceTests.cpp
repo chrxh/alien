@@ -241,7 +241,7 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numBranches(2).numConcatenations(3)),
         }),
         GeneDesc().nodes({
