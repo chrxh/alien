@@ -253,10 +253,7 @@ TEST_F(GenomeDescInfoServiceTests, getNumberOfResultingCells_multipleBranchesAnd
                 NodeDesc(),
                 NodeDesc(),
                 NodeDesc(),
-            })
-            
-            
-            ,
+            }),
     });
     auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome);
 
