@@ -709,14 +709,16 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_multipleS
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteConcatenationsWithReferences)
 {
     // Test the original problem: main gene with infinite concatenations should still show referenced genes
-    // Gene 0: 3 nodes with infinite concatenations, references gene 1
-    // Gene 1: 2 nodes
-    // With BFS trimming, both genes should get budget allocation
+    // Gene 0: constructor node with infinite concatenations to gene 1
+    // Gene 1: constructor node with one concatenation to gene 2
+    // Gene 2: 2 nodes
+    // With BFS trimming, all genes should get budget allocation
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(std::numeric_limits<int>::max())),
-            NodeDesc(),
-            NodeDesc(),
+        }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false).numConcatenations(1)),
         }),
         GeneDesc().nodes({
             NodeDesc(),
@@ -724,17 +726,18 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_infiniteC
         }),
     });
 
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
     EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
-    // Both genes should have nodes after trimming (BFS ensures fair distribution)
-    ASSERT_EQ(2, subGenome._genes.size());
+    // All genes should have nodes after trimming (BFS ensures fair distribution)
+    ASSERT_EQ(3, subGenome._genes.size());
     EXPECT_GT(subGenome._genes.at(0)._nodes.size(), 0);  // Gene 0 should have nodes
-    EXPECT_GT(subGenome._genes.at(1)._nodes.size(), 0);  // Gene 1 should also have nodes (this is the key test)
+    EXPECT_GT(subGenome._genes.at(1)._nodes.size(), 0);  // Gene 1 should also have nodes
+    EXPECT_GT(subGenome._genes.at(2)._nodes.size(), 0);  // Gene 2 should also have nodes (this is the key test)
 
     auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
@@ -863,10 +866,10 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_complexBr
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_fairBudgetDistribution)
 {
     // Test that budget is distributed fairly: genes of different sizes should get proportional allocation
-    // Gene 0: 10 nodes, 100 concatenations = 1000 cells ideal
-    // Gene 1: 5 nodes, 100 concatenations = 500 cells ideal
-    // Gene 2: 5 nodes, 100 concatenations = 500 cells ideal
-    // Total ideal: 2000 cells, but limit is 500 - should get proportional distribution
+    // Gene 0: 10 nodes
+    // Gene 0 constructor to gene 1: 5 nodes, 100 concatenations = 500 cells ideal
+    // Gene 0 constructor to gene 2: 5 nodes, 100 concatenations = 500 cells ideal
+    // Total ideal: 1010 cells, but limit is 500 - should get proportional distribution
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(100)),

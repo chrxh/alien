@@ -212,10 +212,9 @@ namespace
             }
 
             int nodesInGene = toInt(gene._nodes.size());
-            int nodesInGeneCopies = nodesInGene * geneInfo.numBranches;
-            if (remainingBudget >= nodesInGeneCopies) {
-                geneNodeBudget[geneInfo.geneIndex] = nodesInGeneCopies;
-                remainingBudget -= nodesInGeneCopies;
+            if (remainingBudget >= nodesInGene) {
+                geneNodeBudget[geneInfo.geneIndex] = nodesInGene;
+                remainingBudget -= nodesInGene;
             } else {
                 geneNodeBudget[geneInfo.geneIndex] = remainingBudget;
                 remainingBudget = 0;
@@ -255,9 +254,6 @@ namespace
             if (budget == 0) {
                 // No budget for this gene - remove all nodes
                 gene._nodes.clear();
-                if (geneInfo.parentGeneIndex != -1) {
-                    genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations = 1;
-                }
                 trimmed = true;
                 continue;
             }
