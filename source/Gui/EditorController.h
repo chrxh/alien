@@ -47,6 +47,6 @@ private:
 
     bool _on = false;
 
-    std::vector<InspectorWindow> _inspectorWindows;
+    std::vector<InspectionWindow> _inspectorWindows;
     Desc _drawing;
 };

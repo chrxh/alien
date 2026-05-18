@@ -135,6 +135,7 @@ public:
         MEMBER(InputFloatParameters, std::optional<std::string>, infoLabel, std::nullopt);
     };
     static bool InputFloat(InputFloatParameters const& parameters, float& value);
+    static bool InputOptionalFloat(InputFloatParameters const& parameters, std::optional<float>& value);
 
     struct InputFloat2Parameters
     {
@@ -416,7 +417,7 @@ public:
     {
         MEMBER(ListBoxParameters, std::vector<std::string>, items, std::vector<std::string>());
         MEMBER(ListBoxParameters, float, height, 0);  // 0 = auto-size based on items
-        MEMBER(ListBoxParameters, float, width, 0);  // 0 = use remaining width
+        MEMBER(ListBoxParameters, float, width, 0);   // 0 = use remaining width
     };
     static void ListBox(ListBoxParameters const& parameters);
 

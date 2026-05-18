@@ -67,8 +67,8 @@ PUBLIC
     HistogramLiveStatistics.h
     ImageToPatternDialog.cpp
     ImageToPatternDialog.h
-    InspectorWindow.cpp
-    InspectorWindow.h
+    InspectionWindow.cpp
+    InspectionWindow.h
     LastSessionBrowserData.cpp
     LastSessionBrowserData.h
     LayerColorPalette.cpp
@@ -133,6 +133,8 @@ PUBLIC
     SelectionWindow.h
     Shader.cpp
     Shader.h
+    SignalsBufferDialog.cpp
+    SignalsBufferDialog.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp

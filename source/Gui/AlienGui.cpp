@@ -312,6 +312,34 @@ bool AlienGui::InputOptionalInt(InputIntParameters const& parameters, std::optio
     return optionalWidgetAdaptor(parameters, optValue, 0, &AlienGui::InputInt);
 }
 
+bool AlienGui::InputOptionalFloat(InputFloatParameters const& parameters, std::optional<float>& optValue)
+{
+    auto enabled = optValue.has_value();
+    auto value = optValue.value_or(parameters._defaultValue.value_or(0.0f));
+
+    ImGui::PushID(parameters._id.c_str());
+    ImGui::PushID(parameters._name.c_str());
+    auto textWidth = StyleRepository::get().scale(parameters._textWidth);
+
+    ImGui::Checkbox("##optEnabled", &enabled);
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!enabled || parameters._readOnly);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    ImGuiInputTextFlags flags = (!enabled || parameters._readOnly) ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
+    auto result = ImGui::InputFloat(("##" + parameters._name).c_str(), &value, parameters._step, 0, parameters._format.c_str(), flags);
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    drawTextWithInfoLabel(parameters._name, parameters._infoLabel);
+    if (parameters._tooltip) {
+        HelpMarker(*parameters._tooltip);
+    }
+    ImGui::PopID();
+    ImGui::PopID();
+
+    optValue = enabled ? std::make_optional(value) : std::nullopt;
+    return result;
+}
+
 bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
 {
     ImGui::PushID(parameters._id.c_str());
@@ -1589,20 +1617,10 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     auto borderColor = ImGui::GetColorU32(ImGuiCol_Border);
 
     // Draw background
-    drawList->AddRectFilled(
-        ImVec2(cursorPos.x, cursorPos.y),
-        ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
-        bgColor,
-        style.FrameRounding);
+    drawList->AddRectFilled(ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + width, cursorPos.y + boxHeight), bgColor, style.FrameRounding);
 
     // Draw frame border
-    drawList->AddRect(
-        ImVec2(cursorPos.x, cursorPos.y),
-        ImVec2(cursorPos.x + width, cursorPos.y + boxHeight),
-        borderColor,
-        style.FrameRounding,
-        0,
-        1.0f);
+    drawList->AddRect(ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + width, cursorPos.y + boxHeight), borderColor, style.FrameRounding, 0, 1.0f);
 
     // Draw items with disabled text color to match read-only fields
     ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + padding.x, cursorPos.y + padding.y));

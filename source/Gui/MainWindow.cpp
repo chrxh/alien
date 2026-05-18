@@ -65,15 +65,15 @@
 #include "NewSimulationDialog.h"
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
-#include <EngineInterface/SimulationFacade.h>
-#include <PersisterInterface/PersisterFacade.h>
 #include "PreviewSettingsDialog.h"
 #include "ResetPasswordDialog.h"
 #include "SelectionWindow.h"
+#include "SignalsBufferDialog.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
 #include "SpatialControlWindow.h"
+#include "StartupCheckService.h"
 #include "StatisticsWindow.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
@@ -82,7 +82,6 @@
 #include "Viewport.h"
 #include "WindowController.h"
 #include "implot.h"
-#include "StartupCheckService.h"
 
 namespace
 {
@@ -158,6 +157,7 @@ _MainWindow::_MainWindow()
     ResetPasswordDialog::get().setup();
     GenericMessageDialog::get().setup();
     GenericFileDialog::get().setup();
+    SignalsBufferDialog::get().setup();
     DelayedExecutionController::get().setup();
     UiController::get().setup();
 

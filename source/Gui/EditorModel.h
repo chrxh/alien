@@ -7,7 +7,7 @@
 #include <EngineInterface/SelectionShallowData.h>
 
 #include "Definitions.h"
-#include "InspectorWindow.h"
+#include "InspectionWindow.h"
 
 class EditorModel
 {
