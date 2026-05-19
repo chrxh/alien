@@ -40,15 +40,14 @@ _CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesFor
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& previewGenome, float width)
+void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& genome, float width)
 {
     auto phenotypeWithoutSeed = phenotype;
     GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
 
     auto geneStartIndex = _subGenome.startIndex;
 
-    auto conversionResult =
-        PreviewDescConverterService::get().convertToPreviewDesc(previewGenome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
+    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
     _visualFrontAngle = conversionResult.visualFrontAngle;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
@@ -146,7 +145,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     auto const LineThickness = scale(1.0f);
     auto const cellSize = scale(_zoom);
     auto const& desc = conversionResult.description;
-    auto& selectedGene = _editData->selectedGeneIndex;
+    auto const& selectedGene = _editData->selectedGeneIndex;
     auto selectedNode = _editData->getSelectedNodeIndex();
     auto drawList = ImGui::GetWindowDrawList();
     auto& style = StyleRepository::get();
@@ -240,10 +239,17 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         if (clickedOnPreviewWindow) {
             if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
                 && mousePos.y <= cellPos.y + cellSize / 2) {
-                selectedGene = object._geneIndex;
-                selectedNode = object._nodeIndex;
-                _selectedNodeFromPreview = selectedNode;
-                _selectedCellIdFromPreview = object._id;
+                if (_editData->hasValidNodeIndex(object._geneIndex, object._nodeIndex)) {
+                    selectedNode = object._nodeIndex;
+                    _selectedNodeFromPreview = selectedNode;
+                    _selectedCellIdFromPreview = object._id;
+
+                    _editData->selectedGeneIndex = object._geneIndex;
+                    _editData->setSelectedNodeIndex(selectedNode);
+                } else {
+                    _selectedNodeFromPreview.reset();
+                    _selectedCellIdFromPreview.reset();
+                }
             }
         }
     }
@@ -351,8 +357,6 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             }
         }
     }
-
-    _editData->setSelectedNodeIndex(selectedNode);
 }
 
 void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult)

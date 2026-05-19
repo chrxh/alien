@@ -99,7 +99,6 @@ void _PreviewWidget::setupPreviewData(bool useCache)
     _SimulationFacade::get()->setPreviewData(preview.description);
     _SimulationFacade::get()->setCurrentTimestepForPreview(_currentTimestep);
     _genomeEditData->currentPreviewId = _editData->id;
-    _genomeForCurrentPreview = _editData->genome;
 
     setSeedCreatureIds(preview.seedCreatureIds);
 }
@@ -170,7 +169,7 @@ void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenom
 {
     ImGui::PushID(subGenomeIndex);
     auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
-    creatureWidget->process(phenotypeChanged, phenotype, _genomeForCurrentPreview.value_or(_editData->genome), width);
+    creatureWidget->process(phenotypeChanged, phenotype, _editData->genome, width);
     ImGui::PopID();
 }
 

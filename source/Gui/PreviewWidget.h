@@ -54,7 +54,6 @@ private:
     std::vector<Savepoint> _savepoints;
 
     std::optional<GenomeDesc> _genomeFromPreviousFrame;
-    std::optional<GenomeDesc> _genomeForCurrentPreview;  // Can be different from _editData->genome when simulation is paused
     std::optional<uint64_t> _sessionIdFromPreviousFrame;
 
     std::optional<uint64_t> _previewTimestepFromPreviousMeasure;

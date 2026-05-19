@@ -20,6 +20,13 @@ struct _GenomeTabEditData
     bool detailSimulation = false;
     bool showNodeIndex = true;  // true = show node index, false = show cell function
 
+    bool hasValidGeneIndex(int geneIndex) const { return geneIndex >= 0 && static_cast<size_t>(geneIndex) < genome._genes.size(); }
+
+    bool hasValidNodeIndex(int geneIndex, int nodeIndex) const
+    {
+        return hasValidGeneIndex(geneIndex) && nodeIndex >= 0 && static_cast<size_t>(nodeIndex) < genome._genes.at(geneIndex)._nodes.size();
+    }
+
     std::optional<int> getSelectedNodeIndex() const
     {
         if (!selectedGeneIndex.has_value()) {
@@ -27,11 +34,16 @@ struct _GenomeTabEditData
         }
 
         auto geneIndex = selectedGeneIndex.value();
-        if (!selectedNodeByGeneIndex.contains(geneIndex)) {
+        if (!hasValidGeneIndex(geneIndex) || !selectedNodeByGeneIndex.contains(geneIndex)) {
             return std::nullopt;
         }
 
-        return selectedNodeByGeneIndex.at(geneIndex);
+        auto nodeIndex = selectedNodeByGeneIndex.at(geneIndex);
+        if (!hasValidNodeIndex(geneIndex, nodeIndex)) {
+            return std::nullopt;
+        }
+
+        return nodeIndex;
     }
 
     void setSelectedNodeIndex(std::optional<int> value)
