@@ -3399,7 +3399,7 @@ TEST_F(ConstructorTests, externalEnergyInflowWorksAcrossRegularSimulationTimeste
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION + 1);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION * 2 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
 
