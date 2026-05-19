@@ -145,7 +145,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     auto const LineThickness = scale(1.0f);
     auto const cellSize = scale(_zoom);
     auto const& desc = conversionResult.description;
-    auto& selectedGene = _editData->selectedGeneIndex;
+    auto selectedGene = _editData->selectedGeneIndex;
     auto selectedNode = _editData->getSelectedNodeIndex();
     auto drawList = ImGui::GetWindowDrawList();
     auto& style = StyleRepository::get();
@@ -154,6 +154,13 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
     auto mousePos = ImGui::GetMousePos();
     auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+    auto isValidSelection = [&](std::optional<int> const& geneIndex, std::optional<int> const& nodeIndex) {
+        return geneIndex.has_value() && nodeIndex.has_value() && _editData->hasValidNodeIndex(geneIndex.value(), nodeIndex.value());
+    };
+
+    if (selectedGene.has_value() && !selectedNode.has_value()) {
+        selectedGene.reset();
+    }
 
     // Clear selection if another node has been selected outside of this widget or if cell id does not exist in preview
     auto selectedCellIdExists = false;
@@ -239,10 +246,15 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         if (clickedOnPreviewWindow) {
             if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
                 && mousePos.y <= cellPos.y + cellSize / 2) {
-                selectedGene = object._geneIndex;
-                selectedNode = object._nodeIndex;
-                _selectedNodeFromPreview = selectedNode;
-                _selectedCellIdFromPreview = object._id;
+                if (_editData->hasValidNodeIndex(object._geneIndex, object._nodeIndex)) {
+                    selectedGene = object._geneIndex;
+                    selectedNode = object._nodeIndex;
+                    _selectedNodeFromPreview = selectedNode;
+                    _selectedCellIdFromPreview = object._id;
+                } else {
+                    _selectedNodeFromPreview.reset();
+                    _selectedCellIdFromPreview.reset();
+                }
             }
         }
     }
@@ -351,7 +363,12 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
-    _editData->setSelectedNodeIndex(selectedNode);
+    if (isValidSelection(selectedGene, selectedNode)) {
+        _editData->selectedGeneIndex = selectedGene;
+        _editData->setSelectedNodeIndex(selectedNode);
+    } else {
+        _editData->selectedGeneIndex.reset();
+    }
 }
 
 void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult)
