@@ -40,15 +40,14 @@ _CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesFor
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& previewGenome, GenomeDesc const& displayGenome, float width)
+void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& genome, float width)
 {
     auto phenotypeWithoutSeed = phenotype;
     GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
 
     auto geneStartIndex = _subGenome.startIndex;
 
-    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(
-        previewGenome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle, &displayGenome);
+    auto conversionResult = PreviewDescConverterService::get().convertToPreviewDesc(genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
     _visualFrontAngle = conversionResult.visualFrontAngle;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);

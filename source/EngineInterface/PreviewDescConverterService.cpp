@@ -29,8 +29,7 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     GenomeDesc const& genome,
     int startGeneIndex,
     Desc&& phenotype,
-    std::optional<float> const& lastVisualFrontAngle,
-    GenomeDesc const* displayGenome) const
+    std::optional<float> const& lastVisualFrontAngle) const
 {
     ConversionResult result;
     result.frontAngle = genome._frontAngle;
@@ -91,37 +90,32 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     }
 
     // Create preview cells
-    auto getNode = [&](ObjectDesc const& object) -> NodeDesc const& {
-        return genome._genes.at(object.getCellRef()._geneIndex)._nodes.at(object.getCellRef()._nodeIndex);
-    };
-    auto getDisplayNode = [&](ObjectDesc const& object) -> NodeDesc const* {
+    auto getNode = [&](ObjectDesc const& object) -> NodeDesc const* {
         auto const& cell = object.getCellRef();
-        auto const& sourceGenome = displayGenome != nullptr ? *displayGenome : genome;
-        if (cell._geneIndex < 0 || static_cast<size_t>(cell._geneIndex) >= sourceGenome._genes.size()) {
+        if (cell._geneIndex < 0 || static_cast<size_t>(cell._geneIndex) >= genome._genes.size()) {
             return nullptr;
         }
-        auto const& nodes = sourceGenome._genes.at(cell._geneIndex)._nodes;
+        auto const& nodes = genome._genes.at(cell._geneIndex)._nodes;
         if (cell._nodeIndex < 0 || static_cast<size_t>(cell._nodeIndex) >= nodes.size()) {
             return nullptr;
         }
         return &nodes.at(cell._nodeIndex);
     };
     for (auto const& object : phenotype._objects) {
-        auto const& node = getNode(object);
-        auto const* displayNode = getDisplayNode(object);
-        auto const& color = object.getCellRef()._cellState == CellState_Ready ? node._color : -1;
+        auto const* node = getNode(object);
+        auto const& color = object.getCellRef()._cellState == CellState_Ready && node != nullptr ? node->_color : -1;
         auto previewCell = CellPreviewDesc()
                                .id(object._id)
                                .pos(object._pos)
                                .color(color)
                                .geneIndex(object.getCellRef()._geneIndex)
                                .nodeIndex(object.getCellRef()._nodeIndex)
-                               .cellType(displayNode != nullptr ? displayNode->getCellType() : node.getCellType());
+                               .cellType(node != nullptr ? node->getCellType() : CellType_Base);
 
         previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
-        if (node._constructor.has_value()) {
+        if (node != nullptr && node->_constructor.has_value()) {
             if (!genome._genes.empty()) {
-                auto nodeConstructor = node._constructor.value();
+                auto nodeConstructor = node->_constructor.value();
                 previewCell._constructorGeneIndex = nodeConstructor._geneIndex;
             }
         }
@@ -132,7 +126,11 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     auto getConnectionWeight = [&getNode](ObjectDesc const& sourceObject, uint64_t targetId) -> float {
         for (int i = 0, size = sourceObject._connections.size(); i < size; ++i) {
             if (sourceObject._connections.at(i)._objectId == targetId) {
-                auto const& cw = getNode(sourceObject)._neuralNetwork._connectionWeights;
+                auto const* node = getNode(sourceObject);
+                if (node == nullptr) {
+                    return 0.0f;
+                }
+                auto const& cw = node->_neuralNetwork._connectionWeights;
                 return cw.at(i);
             }
         }

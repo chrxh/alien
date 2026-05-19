@@ -109,12 +109,12 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature)
     checkConnections(result.description, {{object1._pos, object2._pos, 1.0f, 1.0f}});
 }
 
-TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesDisplayGenomeForCellTypes)
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesGenomeForCellTypes)
 {
-    auto genome = GenomeDesc().genes({
+    auto previewGenome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
     });
-    auto displayGenome = GenomeDesc().genes({
+    auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3).cellType(MuscleGenomeDesc())}),
     });
 
@@ -125,10 +125,10 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesDisplayGenom
             ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),
-        genome);
+        previewGenome);
     input.addConnection(1, 2);
 
-    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt, &displayGenome);
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
     ASSERT_EQ(2, result.description._objects.size());
 
