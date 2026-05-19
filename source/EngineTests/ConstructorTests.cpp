@@ -3393,16 +3393,20 @@ TEST_F(ConstructorTests, externalEnergyInflowWorksAcrossRegularSimulationTimeste
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(0).separation(true))),
+                .type(CellDesc()
+                          .headCell(true)
+                          .usableEnergy(normalEnergy)
+                          .constructor(ConstructorDesc().autoTriggerInterval(10).geneIndex(0).currentOffspring(0).separation(true))),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION * 2 + 1);
+    _simulationFacade->calcTimesteps(20);
 
     auto actualData = _simulationFacade->getSimulationData();
 
+    ASSERT_EQ(2, actualData.getNumObjects());
     ASSERT_EQ(2, actualData._creatures.size());
 }
 
