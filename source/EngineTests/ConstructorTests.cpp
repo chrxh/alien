@@ -3381,6 +3381,31 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffsprin
     ASSERT_EQ(2, actualData._creatures.size());
 }
 
+TEST_F(ConstructorTests, externalEnergyInflowWorksAcrossRegularSimulationTimesteps)
+{
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = Infinity<float>::value;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto normalEnergy = _parameters.normalCellEnergy.value[0];
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(0).separation(true))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION + 1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(2, actualData._creatures.size());
+}
+
 TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspring)
 {
     _parameters.externalEnergyControlToggle.value = true;
