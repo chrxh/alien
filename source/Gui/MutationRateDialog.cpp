@@ -17,14 +17,7 @@ namespace
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id(id)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters().name("Probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
                 &mutation._probability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
@@ -37,24 +30,10 @@ namespace
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id(id)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters().name("Probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
                 &mutation._probability);
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Weight sigma")
-                    .id(id)
-                    .min(0.0f)
-                    .max(2.0f)
-                    .logarithmic(true)
-                    .format("%.2f")
-                    .textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters().name("Weight sigma").id(id).min(0.0f).max(2.0f).logarithmic(true).format("%.2f").textWidth(rightColumnWidth),
                 &mutation._weightSigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Bias sigma").id(id).min(0.0f).max(2.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
