@@ -12,6 +12,86 @@ namespace
     auto constexpr HeaderMinRightColumnWidth = 160.0f;
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
     auto constexpr HeaderMinColumnWidth = 300.0f;
+
+    void processConnectionMutationRate(std::string const& name, std::string const& id, ConnectionMutationDesc& mutation, float rightColumnWidth)
+    {
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &mutation._probability);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
+                &mutation._sigma);
+        }
+        AlienGui::EndTreeNode();
+    }
+
+    void processNeuronMutationRate(std::string const& name, std::string const& id, NeuronMutationDesc& mutation, float rightColumnWidth)
+    {
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &mutation._probability);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Weight sigma")
+                    .id(id)
+                    .min(0.0f)
+                    .max(2.0f)
+                    .logarithmic(true)
+                    .format("%.2f")
+                    .textWidth(rightColumnWidth),
+                &mutation._weightSigma);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Bias sigma").id(id).min(0.0f).max(2.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
+                &mutation._biasSigma);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("ActFn probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &mutation._activationFunctionProbability);
+        }
+        AlienGui::EndTreeNode();
+    }
+
+    void processLineageMutationRate(float& probability, float rightColumnWidth)
+    {
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Lineage mutation rate").rank(AlienGui::TreeNodeRank::Default))) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Probability").min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
+                &probability);
+        }
+        AlienGui::EndTreeNode();
+    }
+
+    template <typename Func>
+    void processConcreteMutationRates(Func&& processMutationRates)
+    {
+        AlienGui::DynamicTableLayout table(HeaderMinColumnWidth);
+        if (table.begin()) {
+            processMutationRates(table);
+            table.end();
+        }
+    }
 }
 
 MutationRateDialog::MutationRateDialog()
@@ -79,121 +159,35 @@ void MutationRateDialog::processIntern()
     // Use a child window with scrolling for the content, reserving space for buttons
     auto buttonAreaHeight = scale(50.0f);
     if (ImGui::BeginChild("MutationRateContent", ImVec2(0, -buttonAreaHeight), false)) {
-        AlienGui::DynamicTableLayout table(HeaderMinColumnWidth);
-        if (table.begin()) {
-            auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
+        auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 1"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id("CMR1")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_mutation._connectionMutation1._probability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Sigma").id("CMR1").min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &_mutation._connectionMutation1._sigma);
-
-            AlienGui::Group(AlienGui::GroupParameters().text("Connection weight mutation rate 2"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id("CMR2")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_mutation._connectionMutation2._probability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Sigma").id("CMR2").min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &_mutation._connectionMutation2._sigma);
-            table.next();
-
-            AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 1"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id("NMR1")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_mutation._neuronMutation1._probability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Weight sigma")
-                    .id("NMR1")
-                    .min(0.0f)
-                    .max(2.0f)
-                    .logarithmic(true)
-                    .format("%.2f")
-                    .textWidth(rightColumnWidth),
-                &_mutation._neuronMutation1._weightSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Bias sigma").id("NMR1").min(0.0f).max(2.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &_mutation._neuronMutation1._biasSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("ActFn probability")
-                    .id("NMR1")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_mutation._neuronMutation1._activationFunctionProbability);
-            table.next();
-
-            AlienGui::Group(AlienGui::GroupParameters().text("Neuron weight mutation rate 2"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Probability")
-                    .id("NMR2")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_mutation._neuronMutation2._probability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Weight sigma")
-                    .id("NMR2")
-                    .min(0.0f)
-                    .max(2.0f)
-                    .logarithmic(true)
-                    .format("%.2f")
-                    .textWidth(rightColumnWidth),
-                &_mutation._neuronMutation2._weightSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Bias sigma").id("NMR2").min(0.0f).max(2.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &_mutation._neuronMutation2._biasSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("ActFn probability")
-                    .id("NMR2")
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &_mutation._neuronMutation2._activationFunctionProbability);
-            table.next();
-
-            AlienGui::Group(AlienGui::GroupParameters().text("Lineage mutation rate"));
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Probability").min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
-                &_mutation._lineageMutationProbability);
-            table.next();
-
-            table.end();
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connection mutations").rank(AlienGui::TreeNodeRank::High))) {
+            processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
+                processConnectionMutationRate("Connection weight mutation rate 1", "CMR1", _mutation._connectionMutation1, rightColumnWidth);
+                table.next();
+                processConnectionMutationRate("Connection weight mutation rate 2", "CMR2", _mutation._connectionMutation2, rightColumnWidth);
+                table.next();
+            });
         }
+        AlienGui::EndTreeNode();
+
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neuron mutations").rank(AlienGui::TreeNodeRank::High))) {
+            processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
+                processNeuronMutationRate("Neuron weight mutation rate 1", "NMR1", _mutation._neuronMutation1, rightColumnWidth);
+                table.next();
+                processNeuronMutationRate("Neuron weight mutation rate 2", "NMR2", _mutation._neuronMutation2, rightColumnWidth);
+                table.next();
+            });
+        }
+        AlienGui::EndTreeNode();
+
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Lineage mutation").rank(AlienGui::TreeNodeRank::High))) {
+            processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
+                processLineageMutationRate(_mutation._lineageMutationProbability, rightColumnWidth);
+                table.next();
+            });
+        }
+        AlienGui::EndTreeNode();
     }
     ImGui::EndChild();
 
