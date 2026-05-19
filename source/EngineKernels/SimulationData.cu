@@ -12,9 +12,13 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     energyMap.init(worldSize);
 
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
+    CudaMemoryManager::getInstance().acquireMemory<int>(1, constructorExternalEnergyInflowCellCount);
+    CudaMemoryManager::getInstance().acquireMemory<double>(1, constructorExternalEnergyInflowAvailable);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, timestep);
     copyToDevice(timestep, &timestep_);
     CHECK_FOR_CUDA_ERROR(cudaMemset(externalEnergy, 0, sizeof(double)));
+    CHECK_FOR_CUDA_ERROR(cudaMemset(constructorExternalEnergyInflowCellCount, 0, sizeof(int)));
+    CHECK_FOR_CUDA_ERROR(cudaMemset(constructorExternalEnergyInflowAvailable, 0, sizeof(double)));
 
     processMemory.init();
     primaryNumberGen.init(40312357);   //some array size for random numbers (~ 160 MB)
@@ -94,6 +98,8 @@ void SimulationData::free()
     secondaryNumberGen.free();
     processMemory.free();
     CudaMemoryManager::getInstance().freeMemory(externalEnergy);
+    CudaMemoryManager::getInstance().freeMemory(constructorExternalEnergyInflowCellCount);
+    CudaMemoryManager::getInstance().freeMemory(constructorExternalEnergyInflowAvailable);
     CudaMemoryManager::getInstance().freeMemory(timestep);
 
     structuralOperations.free();

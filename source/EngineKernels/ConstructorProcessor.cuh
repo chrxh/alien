@@ -44,10 +44,7 @@ private:
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
     __inline__ __device__ static bool isTriggered(SimulationData& data, Object* object, bool isPreview);
-    __inline__ __device__ static bool passesPreEnergyConstructionCheck(
-        SimulationData& data,
-        Object* hostObject,
-        ConstructionData const& constructionData);
+    __inline__ __device__ static bool passesPreEnergyConstructionCheck(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static float calcExternalEnergyInflowRequest(Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static float calcExternalEnergyInflowQuota(SimulationData const& data);
 
@@ -147,12 +144,12 @@ __inline__ __device__ Genome* ConstructorProcessor::getConstructionGenome(Object
 {
     auto& constructor = object->typeData.cell.constructor;
     if (constructor.offspring != nullptr) {
-        return &constructor.offspring->genome;
+        return constructor.offspring->genome;
     }
     if (auto lastConstructionCell = ConstructorHelper::getLastConstructedCell(object)) {
-        return &lastConstructionCell->typeData.cell.creature->genome;
+        return lastConstructionCell->typeData.cell.creature->genome;
     }
-    return &object->typeData.cell.creature->genome;
+    return object->typeData.cell.creature->genome;
 }
 
 __inline__ __device__ Creature* ConstructorProcessor::getConstructionCreature(Object* object)
@@ -295,13 +292,11 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
 __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Object* object)
 {
     auto& constructor = object->typeData.cell.constructor;
-    return createConstructionData(object, constructor.offspring, &constructor.offspring->genome);
+    return createConstructionData(object, constructor.offspring, constructor.offspring->genome);
 }
 
-__inline__ __device__ bool ConstructorProcessor::passesPreEnergyConstructionCheck(
-    SimulationData& data,
-    Object* hostObject,
-    ConstructionData const& constructionData)
+__inline__ __device__ bool
+ConstructorProcessor::passesPreEnergyConstructionCheck(SimulationData& data, Object* hostObject, ConstructionData const& constructionData)
 {
     if (constructionData.isFirstNodeOfFirstConcatenation) {
         if (hostObject->numConnections == MAX_OBJECT_CONNECTIONS) {
@@ -341,8 +336,7 @@ __inline__ __device__ float ConstructorProcessor::calcExternalEnergyInflowReques
     if (inflowFactor <= 0) {
         return 0.0f;
     }
-    if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value
-        && hostObject->typeData.cell.constructor.currentOffspring != 0) {
+    if (cudaSimulationParameters.externalEnergyInflowOnlyForFirstOffspring.value && hostObject->typeData.cell.constructor.currentOffspring != 0) {
         return 0.0f;
     }
     return requiredEnergy * inflowFactor;
