@@ -92,11 +92,11 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     // Create preview cells
     auto getNode = [&](ObjectDesc const& object) -> NodeDesc const* {
         auto const& cell = object.getCellRef();
-        if (cell._geneIndex < 0 || static_cast<size_t>(cell._geneIndex) >= genome._genes.size()) {
+        if (cell._geneIndex >= genome._genes.size()) {
             return nullptr;
         }
         auto const& nodes = genome._genes.at(cell._geneIndex)._nodes;
-        if (cell._nodeIndex < 0 || static_cast<size_t>(cell._nodeIndex) >= nodes.size()) {
+        if (cell._nodeIndex >= nodes.size()) {
             return nullptr;
         }
         return &nodes.at(cell._nodeIndex);
