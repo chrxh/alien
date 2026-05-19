@@ -294,26 +294,26 @@ template <typename T>
 inline T copyToHost(T* source)
 {
     T result;
-    CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&result, source, sizeof(T), cudaMemcpyDeviceToHost));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result, source, sizeof(T), cudaMemcpyDeviceToHost));
     return result;
 }
 
 template <typename T>
 inline void copyToHost(T* target, T* source, int count = 1)
 {
-    CHECK_FOR_DEVICE_ERROR(cudaMemcpy(target, source, sizeof(T) * count, cudaMemcpyDeviceToHost));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(target, source, sizeof(T) * count, cudaMemcpyDeviceToHost));
 }
 
 template <typename T>
 inline void copyToDevice(T* target, T* source, int count = 1)
 {
-    CHECK_FOR_DEVICE_ERROR(cudaMemcpy(target, source, sizeof(T) * count, cudaMemcpyHostToDevice));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(target, source, sizeof(T) * count, cudaMemcpyHostToDevice));
 }
 
 template <typename T>
 void setValueToDevice(T* target, T const& value)
 {
-    CHECK_FOR_DEVICE_ERROR(cudaMemcpy(target, &value, sizeof(T), cudaMemcpyHostToDevice));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(target, &value, sizeof(T), cudaMemcpyHostToDevice));
 }
 
 __device__ __inline__ int calcMod(char value, int count)

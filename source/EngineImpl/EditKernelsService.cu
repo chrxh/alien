@@ -190,17 +190,17 @@ void EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, S
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
 
     cudaDeviceSynchronize();
-    CHECK_FOR_DEVICE_ERROR(cudaGetLastError());
+    CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
 
     if (copyToHost(changeTO.numObjects) == 1) {
         KERNEL_CALL(cudaChangeObject, data, changeTO);
         cudaDeviceSynchronize();
-        CHECK_FOR_DEVICE_ERROR(cudaGetLastError());
+        CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
     }
     if (copyToHost(changeTO.numEnergyParticles) == 1) {
         KERNEL_CALL(cudaChangeParticle, data, changeTO);
         cudaDeviceSynchronize();
-        CHECK_FOR_DEVICE_ERROR(cudaGetLastError());
+        CHECK_FOR_DEVICE_ERRORS(cudaGetLastError());
     }
     cudaDeviceSynchronize();
 

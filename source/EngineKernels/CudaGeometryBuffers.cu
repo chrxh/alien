@@ -14,14 +14,14 @@ namespace
     cudaGraphicsResource* registerBufferResource(GLuint buffer)
     {
         cudaGraphicsResource* result = nullptr;
-        CHECK_FOR_DEVICE_ERROR(cudaGraphicsGLRegisterBuffer(&result, buffer, cudaGraphicsMapFlagsWriteDiscard));
+        CHECK_FOR_DEVICE_ERRORS(cudaGraphicsGLRegisterBuffer(&result, buffer, cudaGraphicsMapFlagsWriteDiscard));
 
         return result;
     }
 
     void unregisterBufferResource(cudaGraphicsResource* buffer)
     {
-        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnregisterResource(buffer));
+        CHECK_FOR_DEVICE_ERRORS(cudaGraphicsUnregisterResource(buffer));
     }
 }
 
@@ -187,27 +187,27 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
 {
     if (numObjects.objects > 0) {
         std::vector<ObjectVertexData> hostObjectBuffer(numObjects.objects);
-        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(hostObjectBuffer.data(), deviceObjectBuffer, numObjects.objects * sizeof(ObjectVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(hostObjectBuffer.data(), deviceObjectBuffer, numObjects.objects * sizeof(ObjectVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setCellData(hostObjectBuffer.data(), numObjects.objects);
     }
 
     if (numObjects.fluidParticles > 0) {
         std::vector<FluidParticleVertexData> hostFluidParticleBuffer(numObjects.fluidParticles);
-        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
             hostFluidParticleBuffer.data(), deviceFluidParticleBuffer, numObjects.fluidParticles * sizeof(FluidParticleVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setFluidParticleData(hostFluidParticleBuffer.data(), numObjects.fluidParticles);
     }
 
     if (numObjects.locations > 0) {
         std::vector<LocationVertexData> hostLocationBuffer(numObjects.locations);
-        CHECK_FOR_DEVICE_ERROR(
+        CHECK_FOR_DEVICE_ERRORS(
             cudaMemcpy(hostLocationBuffer.data(), deviceLocationBuffer, numObjects.locations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setLocationData(hostLocationBuffer.data(), numObjects.locations);
     }
 
     if (numObjects.selectedObjects > 0) {
         std::vector<SelectedObjectVertexData> hostSelectedObjectBuffer(numObjects.selectedObjects);
-        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
             hostSelectedObjectBuffer.data(),
             deviceSelectedObjectBuffer,
             numObjects.selectedObjects * sizeof(SelectedObjectVertexData),
@@ -217,21 +217,21 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
 
     if (numObjects.lineIndices > 0) {
         std::vector<unsigned int> hostLineIndexBuffer(numObjects.lineIndices);
-        CHECK_FOR_DEVICE_ERROR(
+        CHECK_FOR_DEVICE_ERRORS(
             cudaMemcpy(hostLineIndexBuffer.data(), deviceLineIndexBuffer, numObjects.lineIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
         geometryBuffers->setLineIndices(hostLineIndexBuffer.data(), numObjects.lineIndices);
     }
 
     if (numObjects.triangleIndices > 0) {
         std::vector<unsigned int> hostTriangleIndexBuffer(numObjects.triangleIndices);
-        CHECK_FOR_DEVICE_ERROR(
+        CHECK_FOR_DEVICE_ERRORS(
             cudaMemcpy(hostTriangleIndexBuffer.data(), deviceTriangleIndexBuffer, numObjects.triangleIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
         geometryBuffers->setTriangleIndices(hostTriangleIndexBuffer.data(), numObjects.triangleIndices);
     }
 
     if (numObjects.connectionArrowVertices > 0) {
         std::vector<ConnectionArrowVertexData> hostSelectedConnectionBuffer(numObjects.connectionArrowVertices);
-        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
             hostSelectedConnectionBuffer.data(),
             deviceSelectedConnectionBuffer,
             numObjects.connectionArrowVertices * sizeof(ConnectionArrowVertexData),
@@ -241,14 +241,14 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
 
     if (numObjects.attackEventVertices > 0) {
         std::vector<AttackEventVertexData> hostAttackEventBuffer(numObjects.attackEventVertices);
-        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
             hostAttackEventBuffer.data(), deviceAttackEventBuffer, numObjects.attackEventVertices * sizeof(AttackEventVertexData), cudaMemcpyDeviceToHost));
         geometryBuffers->setAttackEventData(hostAttackEventBuffer.data(), numObjects.attackEventVertices);
     }
 
     if (numObjects.detonationEventVertices > 0) {
         std::vector<DetonationEventVertexData> hostDetonationEventBuffer(numObjects.detonationEventVertices);
-        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(
             hostDetonationEventBuffer.data(),
             deviceDetonationEventBuffer,
             numObjects.detonationEventVertices * sizeof(DetonationEventVertexData),

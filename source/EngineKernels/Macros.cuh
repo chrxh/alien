@@ -74,7 +74,7 @@ void checkAndThrowError(T result)
     }
 }
 
-#define CHECK_FOR_DEVICE_ERROR(val) checkAndThrowError((val))
+#define CHECK_FOR_DEVICE_ERRORS(val) checkAndThrowError((val))
 
 #define ABORT() (*((int*)0) = 0)
 
@@ -93,7 +93,7 @@ void checkAndThrowError(T result)
 #define KERNEL_CALL(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
-        CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize()); \
+        CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
     } else { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
     }
@@ -101,7 +101,7 @@ void checkAndThrowError(T result)
 #define KERNEL_CALL_1_1(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
         func<<<1, 1>>>(__VA_ARGS__); \
-        CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize()); \
+        CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
     } else { \
         func<<<1, 1>>>(__VA_ARGS__); \
     }
@@ -109,7 +109,7 @@ void checkAndThrowError(T result)
 #define KERNEL_CALL_MOD(func, threadsPerBlock, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
-        CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize()); \
+        CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
     }
@@ -119,17 +119,17 @@ void checkAndThrowError(T result)
 #define STREAM_KERNEL_CALL(func, stream, numBlocks, ...) \
     func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
     if (GlobalSettings::get().isDebugMode()) { \
-        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(stream)); \
+        CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
     }
 
 #define STREAM_KERNEL_CALL_1_1(func, stream, ...) \
     func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
     if (GlobalSettings::get().isDebugMode()) { \
-        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(stream)); \
+        CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
     }
 
 #define STREAM_KERNEL_CALL_MOD(func, stream, numBlocks, threadsPerBlock, ...) \
     func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
     if (GlobalSettings::get().isDebugMode()) { \
-        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(stream)); \
+        CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
     }
