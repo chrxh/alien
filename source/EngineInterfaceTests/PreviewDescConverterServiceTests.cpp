@@ -109,6 +109,36 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature)
     checkConnections(result.description, {{object1._pos, object2._pos, 1.0f, 1.0f}});
 }
 
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesDisplayGenomeForCellTypes)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
+    });
+    auto displayGenome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3).cellType(MuscleGenomeDesc())}),
+    });
+
+    Desc input;
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+        },
+        CreatureDesc(),
+        genome);
+    input.addConnection(1, 2);
+
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input), std::nullopt, &displayGenome);
+
+    ASSERT_EQ(2, result.description._objects.size());
+
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    auto object2 = getPreviewCell(result.description, 0, 1);
+    EXPECT_EQ(CellType_Base, object1._cellType);
+    EXPECT_EQ(CellType_Muscle, object2._cellType);
+    EXPECT_EQ(3, object2._color);
+}
+
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_setsVisualFrontAngle)
 {
     auto genome = GenomeDesc().frontAngle(30.0f).genes({

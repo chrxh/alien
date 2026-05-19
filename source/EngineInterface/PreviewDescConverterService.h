@@ -19,6 +19,10 @@ class PreviewDescConverterService
     MAKE_SINGLETON(PreviewDescConverterService);
 
 public:
-    ConversionResult
-    convertToPreviewDesc(GenomeDesc const& genome, int startGeneIndex, Desc&& phenotype, std::optional<float> const& lastVisualFrontAngle = std::nullopt) const;
+    ConversionResult convertToPreviewDesc(
+        GenomeDesc const& genome,
+        int startGeneIndex,
+        Desc&& phenotype,
+        std::optional<float> const& lastVisualFrontAngle = std::nullopt,
+        GenomeDesc const* displayGenome = nullptr) const;
 };
