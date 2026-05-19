@@ -41,7 +41,7 @@ void main()
     gl_Position = vec4(ndc, aPos.z, 1.0);
 
     bool isIsolatedOrTail = ((state >> 16) & 0x1) == 1;
-    if (!isIsolatedOrTail && zoom < 10.0) {
+    if (!isIsolatedOrTail && zoom < 5.0) {
         // Discard cells that have connections when zoomed out to avoid Moire patterns
         gl_Position = vec4(-2.0, -2.0, -2.0, 1.0);
     }
