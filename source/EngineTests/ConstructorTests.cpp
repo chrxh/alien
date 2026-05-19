@@ -3373,10 +3373,11 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffsprin
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Construction should succeed because currentOffspring == 0 allows energy inflow
+    // Construction succeeds on the follow-up timestep after the constructor has been counted for external inflow.
     ASSERT_EQ(2, actualData._creatures.size());
 }
 
@@ -3448,4 +3449,48 @@ TEST_F(ConstructorTests, externalEnergyInflowIsDistributedEquallyAmongTriggeredC
     }
     EXPECT_EQ(4, totalNumObjects);
     EXPECT_EQ(2, numSingleCellCreatures);
+}
+
+TEST_F(ConstructorTests, externalEnergyInflowIgnoresFreeGenerationConstructors)
+{
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergyInflowOnlyForFirstOffspring.value = true;
+    _parameters.externalEnergy.value = 0;
+    _parameters.externalEnergyInflowFactor.value = ColorVector<float>::uniform(0.5f);
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto normalEnergy = _parameters.normalCellEnergy.value[0];
+    auto hostEnergy = normalEnergy * 1.5f;
+    auto data = Desc()
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(0)
+                                .pos({100.0f, 100.0f})
+                                .type(CellDesc()
+                                          .usableEnergy(normalEnergy)
+                                          .constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0).separation(true))),
+                        },
+                        CreatureDesc().id(0),
+                        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}))
+                    .addCreature(
+                        {
+                            ObjectDesc()
+                                .id(1)
+                                .pos({120.0f, 100.0f})
+                                .type(CellDesc().usableEnergy(hostEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
+                        },
+                        CreatureDesc().id(1),
+                        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+    _parameters.externalEnergy.value = _parameters.normalCellEnergy.value[0] / 2;
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+    ASSERT_EQ(4, actualData.getNumObjects());
 }

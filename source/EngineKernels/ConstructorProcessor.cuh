@@ -44,8 +44,6 @@ private:
         Object* objectsToConnect[3] = {};
         ObjectConnectionProcessor::ReferenceAndActualAngle anglesForNewConnection = {};
     };
-    __inline__ __device__ static Creature* getConstructionCreature(Object* object);
-    __inline__ __device__ static Genome* getConstructionGenome(Object* object);
     __inline__ __device__ static ConstructionData createConstructionData(Object* object, Creature* creature, Genome* genome);
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
@@ -135,30 +133,6 @@ __inline__ __device__ void ConstructorProcessor::evaluateExternalEnergyInflow(Si
         }
     }
     atomicAdd(data.constructorExternalEnergyInflowCellCountNext, numEnergyNeedingConstructors);
-}
-
-__inline__ __device__ Genome* ConstructorProcessor::getConstructionGenome(Object* object)
-{
-    auto& constructor = object->typeData.cell.constructor;
-    if (constructor.offspring != nullptr) {
-        return constructor.offspring->genome;
-    }
-    if (auto lastConstructionCell = ConstructorHelper::getLastConstructedCell(object)) {
-        return lastConstructionCell->typeData.cell.creature->genome;
-    }
-    return object->typeData.cell.creature->genome;
-}
-
-__inline__ __device__ Creature* ConstructorProcessor::getConstructionCreature(Object* object)
-{
-    auto& constructor = object->typeData.cell.constructor;
-    if (constructor.offspring != nullptr) {
-        return constructor.offspring;
-    }
-    if (auto lastConstructionCell = ConstructorHelper::getLastConstructedCell(object)) {
-        return lastConstructionCell->typeData.cell.creature;
-    }
-    return object->typeData.cell.creature;
 }
 
 __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Object* object, Creature* creature, Genome* genome)
@@ -332,6 +306,9 @@ __inline__ __device__ bool ConstructorProcessor::prepareConstruction(
 __inline__ __device__ float ConstructorProcessor::calcExternalEnergyInflowRequest(Object* hostObject, ConstructionData const& constructionData)
 {
     if (!cudaSimulationParameters.externalEnergyControlToggle.value) {
+        return 0.0f;
+    }
+    if (hostObject->typeData.cell.constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
         return 0.0f;
     }
     auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
