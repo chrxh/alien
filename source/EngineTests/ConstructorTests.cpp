@@ -3304,3 +3304,32 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
     // Construction should fail because currentOffspring > 0 blocks energy inflow and cell has insufficient energy
     ASSERT_EQ(1, actualData._creatures.size());
 }
+
+TEST_F(ConstructorTests, externalEnergyInflowIsDistributedEquallyAmongTriggeredConstructors)
+{
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = _parameters.normalCellEnergy.value[0] / 2;
+    _parameters.externalEnergyInflowFactor.value = ColorVector<float>::uniform(0.5f);
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto normalEnergy = _parameters.normalCellEnergy.value[0];
+    auto hostEnergy = normalEnergy * 1.75f;
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(hostEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
+            ObjectDesc().id(1).pos({120.0f, 100.0f}).type(CellDesc().usableEnergy(hostEnergy).constructor(ConstructorDesc().geneIndex(0).separation(true))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+    ASSERT_EQ(3, actualData._creatures.size());
+    EXPECT_EQ(2, actualData.getObjectsForCreature(0).size());
+    EXPECT_EQ(1, actualData.getObjectsForCreature(1).size());
+    EXPECT_EQ(1, actualData.getObjectsForCreature(2).size());
+}

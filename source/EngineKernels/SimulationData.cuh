@@ -32,6 +32,8 @@ struct SimulationData
     Heap processMemory;
     UnmanagedArray<StructuralOperation> structuralOperations;
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
+    int* constructorExternalEnergyInflowCellCount;
+    double* constructorExternalEnergyInflowAvailable;
 
     // Number generators
     CudaNumberGenerator primaryNumberGen;

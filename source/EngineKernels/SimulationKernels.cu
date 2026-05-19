@@ -31,6 +31,10 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     for (int i = CellType_Base; i < CellType_Count; ++i) {
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
+    data.constructorExternalEnergyInflowCellCount = data.processMemory.getTypedSubArray<int>(1);
+    data.constructorExternalEnergyInflowAvailable = data.processMemory.getTypedSubArray<double>(1);
+    *data.constructorExternalEnergyInflowCellCount = 0;
+    *data.constructorExternalEnergyInflowAvailable = 0;
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
 
     data.entities.saveNumEntries();
@@ -127,6 +131,11 @@ __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 __global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics)
 {
     GeneratorProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_constructor_prepare(SimulationData data, bool isPreview)
+{
+    ConstructorProcessor::prepareExternalEnergyInflow(data, isPreview);
 }
 
 __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStatistics statistics, bool isPreview)
