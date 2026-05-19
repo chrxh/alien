@@ -8,8 +8,8 @@
 class ConstructorProcessor
 {
 public:
-    __inline__ __device__ static void prepareExternalEnergyInflow(SimulationData& data, bool isPreview);
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics, bool isPreview);
+    __inline__ __device__ static void evaluateExternalEnergyInflow(SimulationData& data);
 
 private:
     struct ConstructionData
@@ -53,18 +53,29 @@ private:
     __inline__ __device__ static bool isTriggered(SimulationData& data, Object* object, bool isPreview);
     __inline__ __device__ static bool
     prepareConstruction(SimulationData& data, Object* hostObject, ConstructionData const& constructionData, ConstructionPreparationData& preparationData);
-    __inline__ __device__ static bool passesPreEnergyConstructionCheck(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static float calcExternalEnergyInflowRequest(Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static float calcExternalEnergyInflowQuota(SimulationData const& data);
 
-    __inline__ __device__ static Object*
-    tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
+    __inline__ __device__ static Object* tryConstructCell(
+        SimulationData& data,
+        SimulationStatistics& statistics,
+        Object* hostObject,
+        ConstructionData const& constructionData,
+        ConstructionPreparationData const& preparationData);
     __inline__ __device__ static void tryScheduleMutations(SimulationData& data, Object* hostObject);
 
-    __inline__ __device__ static Object*
-    startConstructionOnNewBranch(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
-    __inline__ __device__ static Object*
-    continueConstructionOnBranch(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
+    __inline__ __device__ static Object* startConstructionOnNewBranch(
+        SimulationData& data,
+        SimulationStatistics& statistics,
+        Object* hostObject,
+        ConstructionData const& constructionData,
+        ConstructionPreparationData preparationData);
+    __inline__ __device__ static Object* continueConstructionOnBranch(
+        SimulationData& data,
+        SimulationStatistics& statistics,
+        Object* hostObject,
+        ConstructionData const& constructionData,
+        ConstructionPreparationData const& preparationData);
 
     __inline__ __device__ static void getObjectsToConnect(
         Object* result[],
@@ -90,43 +101,6 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void ConstructorProcessor::prepareExternalEnergyInflow(SimulationData& data, bool isPreview)
-{
-    if (!cudaSimulationParameters.externalEnergyControlToggle.value) {
-        return;
-    }
-
-    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        auto object = data.entities.objects.at(i);
-        if (object->type != ObjectType_Cell) {
-            continue;
-        }
-        if (!object->typeData.cell.constructorAvailable) {
-            continue;
-        }
-        if (!CellProcessor::isCellReady(data, object)) {
-            continue;
-        }
-        if (!isTriggered(data, object, isPreview)) {
-            continue;
-        }
-
-        auto genome = getConstructionGenome(object);
-        if (genome == nullptr || ConstructorHelper::isFinished(object, *genome)) {
-            continue;
-        }
-
-        auto constructionData = createConstructionData(object, getConstructionCreature(object), genome);
-        if (!passesPreEnergyConstructionCheck(data, object, constructionData)) {
-            continue;
-        }
-        if (calcExternalEnergyInflowRequest(object, constructionData) <= 0) {
-            continue;
-        }
-        atomicAdd(data.constructorExternalEnergyInflowCellCount, 1);
-    }
-}
 
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
@@ -139,11 +113,28 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
         if (!object->typeData.cell.constructorAvailable) {
             continue;
         }
+        object->typeData.cell.constructor.energyNeeded = false;
         if (!CellProcessor::isCellReady(data, object)) {
             continue;
         }
         processCell(data, statistics, object, isPreview);
     }
+}
+
+__inline__ __device__ void ConstructorProcessor::evaluateExternalEnergyInflow(SimulationData& data)
+{
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
+    int numEnergyNeedingConstructors = 0;
+    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
+        auto object = data.entities.objects.at(i);
+        if (object->type != ObjectType_Cell || !object->typeData.cell.constructorAvailable) {
+            continue;
+        }
+        if (object->typeData.cell.constructor.energyNeeded) {
+            ++numEnergyNeedingConstructors;
+        }
+    }
+    atomicAdd(data.constructorExternalEnergyInflowCellCountNext, numEnergyNeedingConstructors);
 }
 
 __inline__ __device__ Genome* ConstructorProcessor::getConstructionGenome(Object* object)
@@ -235,7 +226,10 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         }
 
         auto constructionData = createConstructionData(object);
-        if (tryConstructCell(data, statistics, object, constructionData)) {
+        ConstructionPreparationData preparationData;
+        auto canConstruct = prepareConstruction(data, object, constructionData, preparationData);
+        constructor.energyNeeded = canConstruct && calcExternalEnergyInflowRequest(object, constructionData) > 0;
+        if (canConstruct && tryConstructCell(data, statistics, object, constructionData, preparationData)) {
             object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
             ++constructionData.creature->numCells;
@@ -301,13 +295,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     return createConstructionData(object, constructor.offspring, constructor.offspring->genome);
 }
 
-__inline__ __device__ bool
-ConstructorProcessor::passesPreEnergyConstructionCheck(SimulationData& data, Object* hostObject, ConstructionData const& constructionData)
-{
-    ConstructionPreparationData preparationData;
-    return prepareConstruction(data, hostObject, constructionData, preparationData);
-}
-
 __inline__ __device__ bool ConstructorProcessor::prepareConstruction(
     SimulationData& data,
     Object* hostObject,
@@ -368,21 +355,25 @@ __inline__ __device__ float ConstructorProcessor::calcExternalEnergyInflowQuota(
     if (eligibleCells <= 0) {
         return 0.0f;
     }
-    auto availableEnergy = alienAtomicRead(data.constructorExternalEnergyInflowQuota);
+    auto availableEnergy = alienAtomicRead(data.externalEnergy);
     if (availableEnergy == Infinity<float>::value) {
         return Infinity<float>::value;
     }
-    return max(0.0f, toFloat(availableEnergy));
+    return max(0.0f, toFloat(availableEnergy / static_cast<double>(eligibleCells)));
 }
 
-__inline__ __device__ Object*
-ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData)
+__inline__ __device__ Object* ConstructorProcessor::tryConstructCell(
+    SimulationData& data,
+    SimulationStatistics& statistics,
+    Object* hostObject,
+    ConstructionData const& constructionData,
+    ConstructionPreparationData const& preparationData)
 {
     if (!hostObject->tryLock()) {
         return nullptr;
     }
     if (constructionData.isFirstNodeOfFirstConcatenation) {
-        auto newObject = startConstructionOnNewBranch(data, statistics, hostObject, constructionData);
+        auto newObject = startConstructionOnNewBranch(data, statistics, hostObject, constructionData, preparationData);
 
         hostObject->releaseLock();
         return newObject;
@@ -391,7 +382,7 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
             hostObject->releaseLock();
             return nullptr;
         }
-        auto newObject = continueConstructionOnBranch(data, statistics, hostObject, constructionData);
+        auto newObject = continueConstructionOnBranch(data, statistics, hostObject, constructionData, preparationData);
 
         constructionData.lastConstructionObject->releaseLock();
         hostObject->releaseLock();
@@ -409,13 +400,9 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
     SimulationData& data,
     SimulationStatistics& statistics,
     Object* hostObject,
-    ConstructionData const& constructionData)
+    ConstructionData const& constructionData,
+    ConstructionPreparationData preparationData)
 {
-    ConstructionPreparationData preparationData;
-    if (!prepareConstruction(data, hostObject, constructionData, preparationData)) {
-        return nullptr;
-    }
-
     if (!checkAndReduceHostEnergy(data, hostObject, constructionData)) {
         return nullptr;
     }
@@ -464,12 +451,9 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     SimulationData& data,
     SimulationStatistics& statistics,
     Object* hostObject,
-    ConstructionData const& constructionData)
+    ConstructionData const& constructionData,
+    ConstructionPreparationData const& preparationData)
 {
-    ConstructionPreparationData preparationData;
-    if (!prepareConstruction(data, hostObject, constructionData, preparationData)) {
-        return nullptr;
-    }
     auto const& lastObject = constructionData.lastConstructionObject;
     auto desiredDistance = constructionData.gene->connectionDistance;
     //if (Math::length(posDelta) <= cudaSimulationParameters.minObjectDistance.value

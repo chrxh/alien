@@ -3410,7 +3410,7 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
 TEST_F(ConstructorTests, externalEnergyInflowIsDistributedEquallyAmongTriggeredConstructors)
 {
     _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = _parameters.normalCellEnergy.value[0] / 2;
+    _parameters.externalEnergy.value = 0;
     _parameters.externalEnergyInflowFactor.value = ColorVector<float>::uniform(0.5f);
     _simulationFacade->setSimulationParameters(_parameters);
 
@@ -3425,6 +3425,9 @@ TEST_F(ConstructorTests, externalEnergyInflowIsDistributedEquallyAmongTriggeredC
         GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+    _parameters.externalEnergy.value = _parameters.normalCellEnergy.value[0] / 2;
+    _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();
 
     auto actualData = _simulationFacade->getSimulationData();
