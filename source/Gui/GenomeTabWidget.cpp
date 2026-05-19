@@ -190,7 +190,7 @@ void _GenomeTabWidget::doLayout()
         auto width = ImGui::GetContentRegionAvail().x;
         auto height = ImGui::GetContentRegionAvail().y;
         _layoutData->genomeEditorWidth = width / 3;
-        _layoutData->geneEditorWidth = width / 3;
+        _layoutData->geneEditorWidth = width / 4;
         _layoutData->previewsHeight = height / 2;
         _layoutData->desiredConfigurationPreviewWidth = width / 2;
         _layoutData->geneListHeight = height / 4;
