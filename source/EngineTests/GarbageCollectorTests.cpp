@@ -69,7 +69,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
     auto cleanupAction = GetParam();
 
     // Create a genome with memory cell type nodes that have memory entries
-    auto genome = GenomeDesc().genes({GeneDesc().separation(true).nodes({
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({
         NodeDesc().cellType(MemoryGenomeDesc().signalEntries({SignalEntryGenomeDesc()})),
         NodeDesc().cellType(MemoryGenomeDesc().signalEntries({SignalEntryGenomeDesc(), SignalEntryGenomeDesc(), SignalEntryGenomeDesc()})),
     })});

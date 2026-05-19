@@ -81,6 +81,9 @@ struct ConstructorGenomeTO
     float constructionAngle;
     ProvideEnergy provideEnergy;
     float reservedEnergy;
+    bool separation;
+    uint8_t numBranches;  // For separation = false
+    int numConcatenations;
 };
 
 struct SquareSignalGenomeTO
@@ -335,11 +338,8 @@ struct GeneTO
 {
     Char64 name;
     ConstructorShape shape;
-    bool separation;
-    uint8_t numBranches;  // For separation = false
     float stiffness;
     float connectionDistance;
-    int numConcatenations;
 
     int numNodes;
     uint64_t nodeArrayIndex;

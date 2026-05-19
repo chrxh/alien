@@ -139,8 +139,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     // No separation => same creature
     auto& genome = object->typeData.cell.creature->genome;
     if (constructor.geneIndex < genome->numGenes) {
-        auto const& gene = ConstructorHelper::getCurrentGene(constructor, *genome);
-        if (!gene->separation) {
+        if (!constructor.separation) {
             return object->typeData.cell.creature;
         }
     }
@@ -169,13 +168,13 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.creature = constructor.offspring;
     result.gene = ConstructorHelper::getCurrentGene(constructor, *genome);
     result.node = &result.gene->nodes[result.currentNodeIndex];
-    result.isSeparation = result.gene->separation;
+    result.isSeparation = constructor.separation;
     result.isFirstNode = result.currentNodeIndex == 0;
     auto isFirstConcatenation = result.currentConcatenation == 0;
     result.isFirstNodeOfFirstConcatenation = result.isFirstNode && isFirstConcatenation;
     result.isLastNode = result.currentNodeIndex == result.gene->numNodes - 1;
-    result.isLastNodeOfLastConcatenation = result.isLastNode && result.currentConcatenation == result.gene->numConcatenations - 1;
-    result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
+    result.isLastNodeOfLastConcatenation = result.isLastNode && result.currentConcatenation == constructor.numConcatenations - 1;
+    result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(constructor);
     result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     result.neededReservedEnergy = result.node->constructorAvailable ? result.node->constructor.reservedEnergy : 0.0f;
@@ -515,8 +514,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         auto const& offspringConstructor = result->typeData.cell.constructor;
         auto const& offspringGenome = constructionData.creature->genome;
         if (offspringConstructor.geneIndex < offspringGenome->numGenes) {
-            auto const& offspringGene = offspringGenome->genes[offspringConstructor.geneIndex];
-            if (!offspringGene.separation) {
+            if (!offspringConstructor.separation) {
                 result->typeData.cell.constructor.provideEnergy = ProvideEnergy_FreeGeneration;
             }
         }

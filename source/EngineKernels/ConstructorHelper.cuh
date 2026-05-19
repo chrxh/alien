@@ -7,7 +7,7 @@ class ConstructorHelper
 public:
     __inline__ __device__ static bool isFinished(Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
-    __inline__ __device__ static bool hasInfiniteConcatenations(Gene* gene);
+    __inline__ __device__ static bool hasInfiniteConcatenations(Constructor const& constructor);
     __inline__ __device__ static void
     getConstructorIndices(uint16_t& currentNodeIndex, uint32_t& currentConcatenation, uint8_t& currentBranch, Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Object* getLastConstructedCell(Object* constructorCell);
@@ -36,13 +36,13 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Object* constructorCell
     if (currentNodeIndex >= gene->numNodes) {
         return true;
     }
-    if (currentConcatenation >= gene->numConcatenations) {
+    if (currentConcatenation >= constructor.numConcatenations) {
         return true;
     }
-    if (gene->separation) {
+    if (constructor.separation) {
         return false;
     }
-    return currentBranch >= gene->numBranches;
+    return currentBranch >= constructor.numBranches;
 }
 
 __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const& constructor, Genome const& genome)
@@ -51,9 +51,9 @@ __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const&
     return &genome.genes[constructor.geneIndex];
 }
 
-__inline__ __device__ bool ConstructorHelper::hasInfiniteConcatenations(Gene* gene)
+__inline__ __device__ bool ConstructorHelper::hasInfiniteConcatenations(Constructor const& constructor)
 {
-    return gene->numConcatenations == 0x7fffffff;
+    return constructor.numConcatenations == 0x7fffffff;
 }
 
 __inline__ __device__ void ConstructorHelper::getConstructorIndices(
@@ -75,7 +75,7 @@ __inline__ __device__ void ConstructorHelper::getConstructorIndices(
         if (currentNodeIndex >= gene->numNodes) {
             currentNodeIndex = 0;
             currentConcatenation++;
-            if (currentConcatenation >= gene->numConcatenations) {
+            if (currentConcatenation >= constructor.numConcatenations) {
                 currentConcatenation = 0;
                 currentBranch++;
             }

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <map>
 
 int GenomeDescInfoService::getNumberOfNodes(GenomeDesc const& genome) const
 {
@@ -25,20 +26,20 @@ namespace
         lastGenes.emplace_back(geneIndex);
 
         auto const& gene = genome._genes[geneIndex];
-        if (gene._numConcatenations == std::numeric_limits<int>::max()) {
-            return -1;
-        }
-        auto numBranches = gene._separation ? 1 : gene._numBranches;
-        auto result = gene._nodes.size() * gene._numConcatenations * numBranches;
+        int64_t result = gene._nodes.size();
         for (auto const& node : gene._nodes) {
             if (node._constructor.has_value()) {
                 auto const& constructor = node._constructor.value();
                 if (constructor._geneIndex != 0) {  // First gene is for self-replication and should not be counted
-                    auto numNodes = numBranches * countNodes(genome, constructor._geneIndex, lastGenes);
+                    auto numNodes = countNodes(genome, constructor._geneIndex, lastGenes);
                     if (numNodes == -1) {
                         return -1;  // Cycle detected
                     }
-                    result += numNodes;
+                    if (constructor._numConcatenations == std::numeric_limits<int>::max() && numNodes > 0) {
+                        return -1;
+                    }
+                    auto effectiveNumBranches = constructor._separation ? 1 : constructor._numBranches;
+                    result += effectiveNumBranches * constructor._numConcatenations * numNodes;
                 }
             }
         }
@@ -200,38 +201,44 @@ auto GenomeDescInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDesc
     do {
         alreadyInspectedGeneIndices.insert(toInspectedGeneIndices.begin(), toInspectedGeneIndices.end());
 
-        std::set<int> newGeneIndices;
+        // Collect references along with their constructor separation flag
+        std::map<int, bool> newGeneSeparation;  // geneIndex -> isAnyNonSeparating
         for (auto const& geneIndex : toInspectedGeneIndices) {
             if (geneIndex >= genome._genes.size()) {
                 continue;
             }
-            auto referenced = getReferences(genome._genes.at(geneIndex));
-            newGeneIndices.insert(referenced.begin(), referenced.end());
+            auto const& gene = genome._genes.at(geneIndex);
+            for (auto const& node : gene._nodes) {
+                if (node._constructor.has_value()) {
+                    auto const& constructor = node._constructor.value();
+                    auto targetIndex = constructor._geneIndex;
+                    if (alreadyInspectedGeneIndices.contains(targetIndex)) {
+                        continue;
+                    }
+                    auto isNonSeparating = !constructor._separation;
+                    auto it = newGeneSeparation.find(targetIndex);
+                    if (it == newGeneSeparation.end()) {
+                        newGeneSeparation[targetIndex] = isNonSeparating;
+                    } else {
+                        it->second = it->second || isNonSeparating;  // Treat as non-separating if any reference is non-separating
+                    }
+                }
+            }
         }
-        toInspectedGeneIndices.clear();
-        std::set_difference(
-            newGeneIndices.begin(),
-            newGeneIndices.end(),
-            alreadyInspectedGeneIndices.begin(),
-            alreadyInspectedGeneIndices.end(),
-            std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
 
-        // Separate new genes into separating and non-separating
+        toInspectedGeneIndices.clear();
         std::set<int> newNonSeparatingGenes;
-        for (auto const& geneIndex : toInspectedGeneIndices) {
+        for (auto const& [geneIndex, isNonSeparating] : newGeneSeparation) {
             if (geneIndex < genome._genes.size()) {
-                if (genome._genes[geneIndex]._separation) {
-                    // This is a separating gene - add to separating list but don't traverse through it
+                if (!isNonSeparating) {
                     result.separatingGeneIndices.push_back(geneIndex);
                 } else {
-                    // This is a non-separating gene - add to non-separating list and continue traversal
                     result.nonSeparatingGeneIndices.push_back(geneIndex);
                     newNonSeparatingGenes.insert(geneIndex);
                 }
             }
         }
 
-        // Only add non-separating genes to continue traversal
         toInspectedGeneIndices = newNonSeparatingGenes;
     } while (!toInspectedGeneIndices.empty());
 

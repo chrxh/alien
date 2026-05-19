@@ -59,6 +59,9 @@ struct std::hash<ConstructorGenomeDesc>
         hash_combine(seed, desc._geneIndex);
         hash_combine(seed, desc._constructionActivationTime);
         hash_combine(seed, desc._reservedEnergy);
+        hash_combine(seed, desc._separation);
+        hash_combine(seed, desc._numBranches);
+        hash_combine(seed, desc._numConcatenations);
         return seed;
     }
 };
@@ -521,9 +524,6 @@ struct std::hash<GeneDesc>
             hash_combine(seed, std::hash<NodeDesc>{}(node));
         }
         hash_combine(seed, static_cast<int>(desc._shape));
-        hash_combine(seed, desc._separation);
-        hash_combine(seed, desc._numBranches);
-        hash_combine(seed, desc._numConcatenations);
         hash_combine(seed, desc._stiffness);
         hash_combine(seed, desc._connectionDistance);
         return seed;

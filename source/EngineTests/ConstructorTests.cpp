@@ -44,12 +44,12 @@ TEST_F(ConstructorTests, alreadyFinished)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(false).numBranches(1))),
             ObjectDesc().id(1).pos({100.0f, 101.0f}).type(CellDesc()),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(false).numBranches(1).nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc()}),
         }));
     data.addConnection(0, 1);
 
@@ -103,10 +103,10 @@ TEST_F(ConstructorTests, emptyGene)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(true))),
         },
         CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(true)}));
+        GenomeDesc().genes({GeneDesc()}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();
@@ -132,10 +132,10 @@ TEST_F(ConstructorTests, insufficientEnergy)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0).separation(true))),
         },
         CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();
@@ -164,11 +164,11 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0))),  // Not enough energy
+                .type(CellDesc().constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).separation(true))),  // Not enough energy
             ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         },
         CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
@@ -196,11 +196,11 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).separation(false))),
             ObjectDesc().id(1).pos({101.0f, 100.0f}).type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
         },
         CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(false).nodes({NodeDesc()})}));
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
@@ -228,11 +228,11 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(std::nullopt).geneIndex(0).separation(false))),
             ObjectDesc().id(1).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(false).nodes({NodeDesc()})}));
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
@@ -262,10 +262,10 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(false).numBranches(1))),
         },
         CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(false).numBranches(1).nodes({NodeDesc()})}));
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();
@@ -296,11 +296,11 @@ TEST_F(ConstructorTests, DISABLED_insufficientSpace)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(true))),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc()}),
         }));
     data.addCreature(
         {
@@ -308,7 +308,7 @@ TEST_F(ConstructorTests, DISABLED_insufficientSpace)
         },
         CreatureDesc().id(1),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc()}),
         }));
     data.addConnection(0, 1);
 
@@ -338,7 +338,7 @@ TEST_F(ConstructorTests, DISABLED_insufficientSpace)
 TEST_F(ConstructorTests, crossingLinks_allowed)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc(), NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc(), NodeDesc()}),
     });
 
     auto data = Desc().addCreature(
@@ -346,7 +346,7 @@ TEST_F(ConstructorTests, crossingLinks_allowed)
             ObjectDesc()
                 .id(10)
                 .pos({10.0f, 10.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().lastConstructedCellId(3))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().lastConstructedCellId(3).separation(true))),
             ObjectDesc().id(3).pos({10.0f, 10.0f + 1.8f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(2)),
             ObjectDesc().id(2).pos({9.0f, 9.0f + 1.8f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(1)),
             ObjectDesc().id(1).pos({11.0f, 9.0f + 1.8f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
@@ -383,10 +383,10 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto randomNode = _descTestDataFactory->createNonDefaultNodeDesc(nodeParameter);
 
     auto data = Desc().addCreature(
-        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()))},
+        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().separation(true)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({randomNode}),
+            GeneDesc().nodes({randomNode}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -428,10 +428,10 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto randomNode = _descTestDataFactory->createNonDefaultNodeDesc(nodeParameter);
 
     auto data = Desc().addCreature(
-        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()))},
+        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().separation(true)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({randomNode}),
+            GeneDesc().nodes({randomNode}),
         }));
 
     _simulationFacade->setPreviewData(data);
@@ -468,10 +468,10 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     auto randomNode = _descTestDataFactory->createNonDefaultNodeDesc(NodeParameter{CellType_Base});
 
     auto data = Desc().addCreature(
-        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc()))},
+        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().separation(true)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({randomNode}),
+            GeneDesc().nodes({randomNode}),
         }));
 
     _simulationFacade->setPreviewData(data);
@@ -503,11 +503,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_1)
 {
     auto data = Desc().addCreature(
-        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1)))},
+        {ObjectDesc().pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).separation(true)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true),
-            GeneDesc().separation(true).nodes({NodeDesc()}),
+            GeneDesc(),
+            GeneDesc().nodes({NodeDesc()}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -541,7 +541,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__frontAngle_upperSide)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc().constructor(ConstructorGenomeDesc())}),
+        GeneDesc().shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc().constructor(ConstructorGenomeDesc().separation(true))}),
     });
     auto data = Desc()
                     .addCreature(
@@ -549,7 +549,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
                             ObjectDesc()
                                 .id(1)
                                 .pos({10.0f, 10.0f})
-                                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(2))),
+                                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(2).separation(true))),
                         },
                         CreatureDesc().id(0),
                         genome)
@@ -602,7 +602,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__frontAngle_lowerSide)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc().constructor(ConstructorGenomeDesc())}),
+        GeneDesc().shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc().constructor(ConstructorGenomeDesc().separation(true))}),
     });
     auto data = Desc()
                     .addCreature(
@@ -610,7 +610,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
                             ObjectDesc()
                                 .id(1)
                                 .pos({10.0f, 10.0f})
-                                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(2))),
+                                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(2).separation(true))),
                         },
                         CreatureDesc().id(0),
                         genome)
@@ -664,10 +664,10 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_0)
 {
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0)))},
+        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(false).numBranches(1)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(false).numBranches(1).nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc()}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -701,11 +701,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_1)
 {
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1)))},
+        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).separation(false).numBranches(1)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true),
-            GeneDesc().separation(false).numBranches(1).nodes({NodeDesc()}),
+            GeneDesc(),
+            GeneDesc().nodes({NodeDesc()}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -735,10 +735,10 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 {
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0)))},
+        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(false).numBranches(1).numConcatenations(1)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(false).numBranches(1).numConcatenations(1).nodes({NodeDesc(), NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc()}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -768,10 +768,10 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
 {
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0)))},
+        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(false).numBranches(1).numConcatenations(2)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc()}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -829,7 +829,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_3__node_0_1__concatenation_1_2_
             ObjectDesc()
                 .id(1)
                 .pos({100.0f, 101.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(3))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(3).separation(false).numBranches(1).numConcatenations(2))),
             ObjectDesc().id(2).pos({100.0f, 102.0f}).type(CellDesc()),
             ObjectDesc()
                 .id(3)
@@ -838,7 +838,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_3__node_0_1__concatenation_1_2_
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDesc().cellType(MuscleGenomeDesc())}),
+            GeneDesc().nodes({NodeDesc().cellType(MuscleGenomeDesc())}),
         }));
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -879,11 +879,11 @@ TEST_P(ConstructorTests_BendingMuscles, creature_3__node_0_1__concatenation_1_2_
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numBranches(2).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(false).numBranches(2))),
         },
         CreatureDesc().id(0),
         genome);
@@ -914,11 +914,11 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numBranches(2).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(false).numBranches(2))),
             ObjectDesc().id(1).pos({100.0f, 101.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -952,14 +952,14 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_1_2__branch_0_1)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
     auto data = Desc().addCreature(
         {
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(false).numBranches(1).numConcatenations(2))),
             ObjectDesc().id(1).pos({100.0f, 101.0f}).type(CellDesc().nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -993,12 +993,12 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(true))),
             ObjectDesc().id(1).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc()}),
         }));
     data.addConnection(0, 1);
 
@@ -1031,12 +1031,12 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
 {
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(false).numBranches(1))),
             ObjectDesc().id(1).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(false).numBranches(1).nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc()}),
         }));
     data.addConnection(0, 1);
 
@@ -1064,7 +1064,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
 TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numBranches(2).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
     auto data = Desc().addCreature(
         {
@@ -1073,7 +1073,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
                 .id(1)
                 .type(CellDesc()
                           .usableEnergy(getConstructorEnergy())
-                          .constructor(ConstructorDesc().geneIndex(0).constructionAngle(10.0f)))  // constructionAngle should be ignored for the second branch
+                          .constructor(ConstructorDesc().geneIndex(0).constructionAngle(10.0f).separation(false).numBranches(2)))  // constructionAngle should be ignored for the second branch
                 .pos({100.0f, 100.0f}),
             ObjectDesc().id(2).pos({99.0f, 100.0f}),
         },
@@ -1112,12 +1112,12 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(0).pos({101.0f, 100.0f}),
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(false).numBranches(1))),
             ObjectDesc().id(2).pos({100.0f, 101.0f}),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(false).numBranches(1).nodes({NodeDesc().referenceAngle(ConstructionAngle)}),
+            GeneDesc().nodes({NodeDesc().referenceAngle(ConstructionAngle)}),
         }));
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -1152,11 +1152,11 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(true))),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc()}),
         }));
     data.addCreature(
         {
@@ -1164,7 +1164,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
         },
         CreatureDesc().id(1),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc()}),
         }));
     data.addConnection(0, 1);
 
@@ -1197,14 +1197,14 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
 {
     auto const LastAngle = 45.0f;
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc(), NodeDesc().referenceAngle(LastAngle)}).separation(false).numBranches(1),
+        GeneDesc().nodes({NodeDesc(), NodeDesc().referenceAngle(LastAngle)}),
     });
     auto data = Desc().addCreature(
         {
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(false).numBranches(1))),
             ObjectDesc().id(1).pos({99.0f, 100.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -1248,7 +1248,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
     auto const MiddleAngle = 5.0f;
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc(), NodeDesc().referenceAngle(MiddleAngle)}).separation(false).numBranches(1),
+        GeneDesc().nodes({NodeDesc(), NodeDesc().referenceAngle(MiddleAngle)}),
     });
     auto data = Desc().addCreature(
         {
@@ -1256,7 +1256,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
             ObjectDesc()
                 .id(1)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(3))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(3).separation(false).numBranches(1))),
             ObjectDesc().id(2).pos({100.0f, 101.0f}),
             ObjectDesc()
                 .id(3)
@@ -1296,7 +1296,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
 {
     auto const MiddleAngle = 5.0f;
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc(), NodeDesc().referenceAngle(MiddleAngle)}).separation(false).numBranches(1),
+        GeneDesc().nodes({NodeDesc(), NodeDesc().referenceAngle(MiddleAngle)}),
     });
     auto data = Desc().addCreature(
         {
@@ -1304,7 +1304,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
             ObjectDesc()
                 .id(1)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(3))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(3).separation(false).numBranches(1))),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellState(CellState_Constructing)),
             ObjectDesc()
                 .id(3)
@@ -1348,11 +1348,11 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(true))),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc().referenceAngle(0.0f), NodeDesc().referenceAngle(45.0f), NodeDesc().referenceAngle(0.0f)}),
+            GeneDesc().nodes({NodeDesc().referenceAngle(0.0f), NodeDesc().referenceAngle(45.0f), NodeDesc().referenceAngle(0.0f)}),
         }));
     data.addCreature(
         {
@@ -1360,7 +1360,7 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
         },
         CreatureDesc().id(1),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc().referenceAngle(0.0f), NodeDesc().referenceAngle(45.0f), NodeDesc().referenceAngle(0.0f)}),
+            GeneDesc().nodes({NodeDesc().referenceAngle(0.0f), NodeDesc().referenceAngle(45.0f), NodeDesc().referenceAngle(0.0f)}),
         }));
     data.addConnection(0, 1);
 
@@ -1394,14 +1394,14 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
     auto const ConcatenationAngle = 20.0f;
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc().referenceAngle(ConcatenationAngle)}).numConcatenations(3).separation(false).numBranches(1),
+        GeneDesc().nodes({NodeDesc().referenceAngle(ConcatenationAngle)}),
     });
     auto data = Desc().addCreature(
         {
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(false).numBranches(1).numConcatenations(3))),
             ObjectDesc().id(1).pos({99.0f, 100.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -1435,11 +1435,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).numConcatenations(GeneDesc::NumConcatenations_Infinite).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).separation(true).numConcatenations(ConstructorDesc::NumConcatenations_Infinite))),
         },
         CreatureDesc().id(0),
         genome);
@@ -1473,11 +1473,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
             ObjectDesc()
                 .id(0)
                 .pos({100.0f, 100.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(0).lastConstructedCellId(1).separation(true).numConcatenations(ConstructorDesc::NumConcatenations_Infinite))),
         },
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).numConcatenations(GeneDesc::NumConcatenations_Infinite).nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc()}),
         }));
     data.addCreature(
         {
@@ -1485,7 +1485,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
         },
         CreatureDesc().id(1),
         GenomeDesc().genes({
-            GeneDesc().separation(true).numConcatenations(GeneDesc::NumConcatenations_Infinite).nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc()}),
         }));
     data.addConnection(0, 1);
 
@@ -1520,7 +1520,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
     auto const ConstructionAngle = 180.0f;
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc()}).separation(false).numBranches(1),
+        GeneDesc().nodes({NodeDesc()}),
     });
 
     auto data = Desc().addCreature(
@@ -1531,7 +1531,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
                 .pos({100.0f, 100.0f})
                 .type(CellDesc()
                           .usableEnergy(getConstructorEnergy())
-                          .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).autoTriggerInterval(100))),
+                          .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).autoTriggerInterval(100).separation(false).numBranches(1))),
             ObjectDesc().id(2).pos({100.1f, 101.0f}),
         },
         CreatureDesc().id(0),
@@ -1561,7 +1561,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
 TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__frontAngle_leftSide)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
 
     auto data = Desc().addCreature(
@@ -1570,7 +1570,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
             ObjectDesc()
                 .id(2)
                 .pos({9.0f, 10.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(1).geneIndex(0))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(1).geneIndex(0).separation(false))),
             ObjectDesc().id(3).pos({9.0f, 11.0f}),
         },
         CreatureDesc().id(0),
@@ -1598,7 +1598,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__frontAngle_rightSide)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
 
     auto data = Desc().addCreature(
@@ -1607,7 +1607,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
             ObjectDesc()
                 .id(2)
                 .pos({9.0f, 10.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(1).geneIndex(0))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().autoTriggerInterval(1).geneIndex(0).separation(false))),
             ObjectDesc().id(3).pos({9.0f, 11.0f}),
         },
         CreatureDesc().id(0),
@@ -1668,7 +1668,7 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
 
     auto [shape, type, connectionDistance] = GetParam();
 
-    auto gene = GeneDesc().separation(false).numBranches(1).shape(shape).connectionDistance(connectionDistance);
+    auto gene = GeneDesc().shape(shape).connectionDistance(connectionDistance);
     gene._nodes.emplace_back(NodeDesc());
     for (int i = 0; i < n - 2; ++i) {
         gene._nodes.emplace_back(NodeDesc());
@@ -1696,7 +1696,7 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
                     .type(CellDesc()
                               .headCell(true)
                               .usableEnergy(getConstructorEnergy() * n)
-                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(false).numBranches(1))),
                 ObjectDesc().id(11).pos({100.1f, 100.0f + 0.5f}),
                 ObjectDesc().id(12).pos({100.1f, 100.0f + 1.0f}),
                 ObjectDesc().id(13).pos({100.1f, 100.0f + 1.5f}),
@@ -1722,7 +1722,7 @@ TEST_P(ConstructorTests_AllShapes, generateShape_genericCheck)
                     .type(CellDesc()
                               .headCell(true)
                               .usableEnergy(getConstructorEnergy() * n)
-                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                              .constructor(ConstructorDesc().constructionAngle(ConstructionAngle).geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(false).numBranches(1))),
             },
             CreatureDesc().id(0),
             genome);
@@ -1819,7 +1819,7 @@ TEST_F(ConstructorTests, generateTriangle_67cells_withSeparation)
     auto const n = 67;
     auto const AutoTriggerInterval = 10;
 
-    auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Triangle);
+    auto gene = GeneDesc().shape(ConstructorShape_Triangle);
     for (int i = 0; i < n; ++i) {
         gene._nodes.emplace_back(NodeDesc());
     }
@@ -1833,7 +1833,7 @@ TEST_F(ConstructorTests, generateTriangle_67cells_withSeparation)
                 .type(CellDesc()
                           .headCell(true)
                           .usableEnergy(getConstructorEnergy() * n)
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(true).numBranches(1))),
         },
         CreatureDesc().id(0),
         genome);
@@ -1910,7 +1910,7 @@ TEST_F(ConstructorTests, generateRectangle_49cells_withSeparation)
     auto const n = 49;
     auto const AutoTriggerInterval = 10;
 
-    auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Rectangle);
+    auto gene = GeneDesc().shape(ConstructorShape_Rectangle);
     for (int i = 0; i < n; ++i) {
         gene._nodes.emplace_back(NodeDesc());
     }
@@ -1924,7 +1924,7 @@ TEST_F(ConstructorTests, generateRectangle_49cells_withSeparation)
                 .type(CellDesc()
                           .headCell(true)
                           .usableEnergy(getConstructorEnergy() * n)
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(true).numBranches(1))),
         },
         CreatureDesc().id(0),
         genome);
@@ -2070,7 +2070,7 @@ TEST_F(ConstructorTests, generateHexagon_61cells_withSeparation)
     auto const n = 61;
     auto const AutoTriggerInterval = 10;
 
-    auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Hexagon);
+    auto gene = GeneDesc().shape(ConstructorShape_Hexagon);
     for (int i = 0; i < n; ++i) {
         gene._nodes.emplace_back(NodeDesc());
     }
@@ -2084,7 +2084,7 @@ TEST_F(ConstructorTests, generateHexagon_61cells_withSeparation)
                 .type(CellDesc()
                           .headCell(true)
                           .usableEnergy(getConstructorEnergy() * n)
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(true).numBranches(1))),
         },
         CreatureDesc().id(0),
         genome);
@@ -2221,7 +2221,7 @@ TEST_F(ConstructorTests, generateTube_19cells_withSeparation)
     auto const n = 19;
     auto const AutoTriggerInterval = 10;
 
-    auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Tube);
+    auto gene = GeneDesc().shape(ConstructorShape_Tube);
     for (int i = 0; i < n; ++i) {
         gene._nodes.emplace_back(NodeDesc());
     }
@@ -2235,7 +2235,7 @@ TEST_F(ConstructorTests, generateTube_19cells_withSeparation)
                 .type(CellDesc()
                           .headCell(true)
                           .usableEnergy(getConstructorEnergy() * n)
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(true).numBranches(1))),
         },
         CreatureDesc().id(0),
         genome);
@@ -2386,7 +2386,7 @@ TEST_F(ConstructorTests, generateZigzag_24cells_withSeparation)
     auto const n = 24;
     auto const AutoTriggerInterval = 10;
 
-    auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_Zigzag);
+    auto gene = GeneDesc().shape(ConstructorShape_Zigzag);
     for (int i = 0; i < n; ++i) {
         gene._nodes.emplace_back(NodeDesc());
     }
@@ -2400,7 +2400,7 @@ TEST_F(ConstructorTests, generateZigzag_24cells_withSeparation)
                 .type(CellDesc()
                           .headCell(true)
                           .usableEnergy(getConstructorEnergy() * n)
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(true).numBranches(1))),
         },
         CreatureDesc().id(0),
         genome);
@@ -2517,7 +2517,7 @@ TEST_F(ConstructorTests, generateSmallLolli_19cells_withSeparation)
     auto const n = 19;
     auto const AutoTriggerInterval = 10;
 
-    auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_SmallLolli);
+    auto gene = GeneDesc().shape(ConstructorShape_SmallLolli);
     for (int i = 0; i < n; ++i) {
         gene._nodes.emplace_back(NodeDesc());
     }
@@ -2531,7 +2531,7 @@ TEST_F(ConstructorTests, generateSmallLolli_19cells_withSeparation)
                 .type(CellDesc()
                           .headCell(true)
                           .usableEnergy(getConstructorEnergy() * n)
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(true).numBranches(1))),
         },
         CreatureDesc().id(0),
         genome);
@@ -2600,7 +2600,7 @@ TEST_F(ConstructorTests, generateLargeLolli_25cells_withSeparation)
     auto const n = 25;
     auto const AutoTriggerInterval = 10;
 
-    auto gene = GeneDesc().separation(true).numBranches(1).shape(ConstructorShape_LargeLolli);
+    auto gene = GeneDesc().shape(ConstructorShape_LargeLolli);
     for (int i = 0; i < n; ++i) {
         gene._nodes.emplace_back(NodeDesc());
     }
@@ -2614,7 +2614,7 @@ TEST_F(ConstructorTests, generateLargeLolli_25cells_withSeparation)
                 .type(CellDesc()
                           .headCell(true)
                           .usableEnergy(getConstructorEnergy() * n)
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval))),
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(AutoTriggerInterval).separation(true).numBranches(1))),
         },
         CreatureDesc().id(0),
         genome);
@@ -2701,7 +2701,7 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearObjects)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({}),
-        GeneDesc().separation(false).shape(ConstructorShape_Hexagon).nodes({NodeDesc(), NodeDesc(), NodeDesc(), NodeDesc()}),
+        GeneDesc().shape(ConstructorShape_Hexagon).nodes({NodeDesc(), NodeDesc(), NodeDesc(), NodeDesc()}),
     });
 
     auto data = Desc().addCreature(
@@ -2710,12 +2710,12 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearObjects)
             ObjectDesc()
                 .id(2)
                 .pos({10.0f, 9.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(6))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(6).separation(false))),
             ObjectDesc().id(3).pos({11.0f, 9.0f}),
             ObjectDesc()
                 .id(4)
                 .pos({11.0f, 10.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(8))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(8).separation(false))),
             ObjectDesc().id(5).pos({10.0f, 9.0f - getOffspringDistance() - 1.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(1)),
             ObjectDesc().id(6).pos({10.0f, 9.0f - getOffspringDistance()}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(1).geneIndex(1)),
             ObjectDesc().id(7).pos({11.0f + getOffspringDistance() + 1.0f, 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0).geneIndex(1)),
@@ -2749,8 +2749,8 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({}),
-        GeneDesc().separation(false).shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
-        GeneDesc().separation(false).shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+        GeneDesc().shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+        GeneDesc().shape(ConstructorShape_Triangle).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
     });
 
     auto data = Desc().addCreature(
@@ -2758,11 +2758,11 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
             ObjectDesc()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(4))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).nodeIndex(0).constructor(ConstructorDesc().geneIndex(1).lastConstructedCellId(4).separation(false))),
             ObjectDesc()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .type(CellDesc().usableEnergy(getConstructorEnergy()).nodeIndex(1).constructor(ConstructorDesc().geneIndex(2).lastConstructedCellId(6))),
+                .type(CellDesc().usableEnergy(getConstructorEnergy()).nodeIndex(1).constructor(ConstructorDesc().geneIndex(2).lastConstructedCellId(6).separation(false))),
 
             ObjectDesc()
                 .id(3)
@@ -2845,12 +2845,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
     auto [provideEnergy, separation] = GetParam();
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(separation == Separation::Yes).numBranches(2).numConcatenations(3)),
             NodeDesc(),
         }),
-        GeneDesc().separation(separation == Separation::Yes).numBranches(2).numConcatenations(3).nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
@@ -2867,7 +2867,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
-                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1).separation(false))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -2911,12 +2911,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
         GTEST_SKIP() << "Skipping test because FreeGeneration always has enough energy.";
     }
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(separation == Separation::Yes).numBranches(2).numConcatenations(3)),
             NodeDesc(),
         }),
-        GeneDesc().separation(separation == Separation::Yes).numBranches(2).numConcatenations(3).nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
@@ -2928,7 +2928,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
-                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1).separation(false))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -2951,12 +2951,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     auto [provideEnergy, separation] = GetParam();
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(separation == Separation::Yes).numBranches(2).numConcatenations(std::numeric_limits<int>::max())),
             NodeDesc(),
         }),
-        GeneDesc().separation(separation == Separation::Yes).numBranches(2).numConcatenations(std::numeric_limits<int>::max()).nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
@@ -2974,7 +2974,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
-                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1).separation(false))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -3011,12 +3011,12 @@ TEST_F(ConstructorTests, constructConstructorNodeWithReservedEnergy)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto reservedEnergy = normalCellEnergy * 2 * 2 * 3;
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).reservedEnergy(reservedEnergy)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).reservedEnergy(reservedEnergy).separation(false).numBranches(2).numConcatenations(3)),
             NodeDesc(),
         }),
-        GeneDesc().separation(false).numBranches(2).numConcatenations(3).nodes({NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
 
     auto data = Desc().addCreature(
@@ -3026,7 +3026,7 @@ TEST_F(ConstructorTests, constructConstructorNodeWithReservedEnergy)
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(reservedEnergy + normalCellEnergy * 2 + 1.0f)
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1).separation(false))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -3058,10 +3058,10 @@ TEST_F(ConstructorTests, constructWithReservedEnergy)
              .pos({100.0f, 100.0f})
              .type(CellDesc()
                        .usableEnergy(normalCellEnergy * 1.5)
-                       .constructor(ConstructorDesc().autoTriggerInterval(3).reservedEnergy(normalCellEnergy / 2 + NEAR_ZERO)))},
+                       .constructor(ConstructorDesc().autoTriggerInterval(3).reservedEnergy(normalCellEnergy / 2 + NEAR_ZERO).separation(true)))},
         CreatureDesc().id(0),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc()}),
+            GeneDesc().nodes({NodeDesc()}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -3108,7 +3108,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     auto const InitialStoredUsableEnergy = 50.0f;
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc().cellType(DepotGenomeDesc().initialStoredUsableEnergy(InitialStoredUsableEnergy)),
             NodeDesc(),
@@ -3133,7 +3133,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
-                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1).separation(false))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -3174,7 +3174,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     auto const InitialStoredUsableEnergy = 50.0f;
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc().cellType(DepotGenomeDesc().initialStoredUsableEnergy(InitialStoredUsableEnergy)),
             NodeDesc(),
@@ -3193,7 +3193,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
                 .pos({10.0f, 10.0f})
                 .type(CellDesc()
                           .usableEnergy(constructorEnergy)
-                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1))),
+                          .constructor(ConstructorDesc().provideEnergy(provideEnergy).geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1).separation(false))),
             ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
         },
         CreatureDesc().id(0),
@@ -3219,8 +3219,8 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
 TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(true).nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
-        GeneDesc().separation(false).nodes({
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false))}),
+        GeneDesc().nodes({
             NodeDesc(),
             NodeDesc(),
             NodeDesc(),
@@ -3236,7 +3236,7 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
     std::vector<ObjectDesc> largeCreatureCells;
     for (int i = 0; i < 50; ++i) {
         largeCreatureCells.emplace_back(
-            ObjectDesc().id(i).pos({toFloat(i), 0.0f}).type(CellDesc().headCell(true).constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(30))));
+            ObjectDesc().id(i).pos({toFloat(i), 0.0f}).type(CellDesc().headCell(true).constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(30).separation(true))));
     }
     Desc largeCreatureData;
     largeCreatureData.addCreature(largeCreatureCells, CreatureDesc(), genome);
@@ -3267,10 +3267,10 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_firstOffsprin
     auto normalEnergy = _parameters.normalCellEnergy.value[0];
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(0))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(0).separation(true))),
         },
         CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();
@@ -3291,10 +3291,10 @@ TEST_F(ConstructorTests, externalEnergyInflowOnlyForFirstOffspring_secondOffspri
     auto normalEnergy = _parameters.normalCellEnergy.value[0];
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(1))),
+            ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(0).currentOffspring(1).separation(true))),
         },
         CreatureDesc().id(0),
-        GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc()})}));
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_calcTimestepWithCellFunctions();

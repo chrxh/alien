@@ -157,7 +157,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_noSelection)
 
     _simulationFacade->removeSelection();
 
-    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     auto result = _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     EXPECT_EQ(0, result);
@@ -183,7 +183,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_singleCreature)
 
     _simulationFacade->setSelection({49, 49}, {53, 51});
 
-    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     auto result = _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     EXPECT_EQ(1, result);
@@ -198,7 +198,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_multipleCreatures_onlySelected
 
     _simulationFacade->setSelection({49, 49}, {51, 51});
 
-    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     auto result = _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     EXPECT_EQ(1, result);
@@ -234,7 +234,7 @@ TEST_F(EditTests, injectGenomeToSelectedCreatures_allSelected)
 
     _simulationFacade->setSelection({49, 49}, {61, 51});
 
-    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     auto result = _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     EXPECT_EQ(2, result);

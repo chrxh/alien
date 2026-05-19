@@ -54,14 +54,14 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
 TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
 {
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numBranches(1).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
 
     std::vector<ObjectDesc> cells;
     for (int i = 0; i < 20; ++i) {
         auto object = ObjectDesc().id(i + 1).pos({100.0f + toFloat(i), 100.0f}).type(CellDesc().headCell(true));
         if (i == 19) {
-            object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0);
+            object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).separation(false).numBranches(1);
         }
         cells.push_back(object);
     }
@@ -98,7 +98,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
     auto constructorId2 = 20 + 19 + 1;
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().separation(false).numBranches(1).nodes({NodeDesc()}),
+        GeneDesc().nodes({NodeDesc()}),
     });
 
     std::vector<ObjectDesc> cells;
@@ -107,7 +107,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
             auto id = i + j * 20 + 1;
             auto object = ObjectDesc().id(id).pos({100.0f + toFloat(i), 100.0f}).type(CellDesc().headCell(true));
             if (id == constructorId1 || id == constructorId2) {
-                object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0);
+                object.getCellRef()._constructor = ConstructorDesc().geneIndex(0).autoTriggerInterval(0).separation(false).numBranches(1);
             }
             cells.push_back(object);
         }
@@ -208,7 +208,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsBranches)
 
 TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
 {
-    auto genome = GenomeDesc().genes({GeneDesc().separation(false).nodes({NodeDesc(), NodeDesc()})});
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Desc data;
@@ -216,11 +216,11 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0)).usableEnergy(normalCellEnergy * 10)),
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0).separation(false)).usableEnergy(normalCellEnergy * 10)),
          ObjectDesc()
              .id(2)
              .pos({100.0f + 1.0f, 100.0f})
-             .type(CellDesc().headCell(true).cellState(CellState_Constructing).constructor(ConstructorDesc()).usableEnergy(normalCellEnergy))},
+             .type(CellDesc().headCell(true).cellState(CellState_Constructing).constructor(ConstructorDesc().separation(false)).usableEnergy(normalCellEnergy))},
         CreatureDesc(),
         genome);
     data.addConnection(1, 2);
@@ -241,7 +241,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
 
 TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
 {
-    auto genome = GenomeDesc().genes({GeneDesc().separation(false).nodes({NodeDesc(), NodeDesc()})});
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Desc data;
@@ -249,11 +249,11 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0)).usableEnergy(normalCellEnergy * 10)),
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0).separation(false)).usableEnergy(normalCellEnergy * 10)),
          ObjectDesc()
              .id(2)
              .pos({101.0f, 100.0f})
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0)).usableEnergy(normalCellEnergy))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc().autoTriggerInterval(0).separation(false)).usableEnergy(normalCellEnergy))},
         CreatureDesc(),
         genome);
     data.addConnection(1, 2);

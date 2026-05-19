@@ -55,6 +55,9 @@ struct ConstructorGenomeDesc
     MEMBER(ConstructorGenomeDesc, float, constructionAngle, 0.0f);
     MEMBER(ConstructorGenomeDesc, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
     MEMBER(ConstructorGenomeDesc, float, reservedEnergy, 0.0f);
+    MEMBER(ConstructorGenomeDesc, bool, separation, false);
+    MEMBER(ConstructorGenomeDesc, int, numBranches, 1);        // For separation = false
+    MEMBER(ConstructorGenomeDesc, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
 };
 
 struct TelemetryGenomeDesc
@@ -404,13 +407,8 @@ struct GeneDesc
     MEMBER(GeneDesc, std::string, name, "");
     MEMBER(GeneDesc, std::vector<NodeDesc>, nodes, {});
     MEMBER(GeneDesc, ConstructorShape, shape, ConstructorShape_Segment);
-    MEMBER(GeneDesc, bool, separation, false);
-    MEMBER(GeneDesc, int, numBranches, 1);        // For separation = false
-    MEMBER(GeneDesc, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
     MEMBER(GeneDesc, float, stiffness, 1.0f);
     MEMBER(GeneDesc, float, connectionDistance, 1.0f);
-
-    static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
 
 struct NeuronMutationDesc

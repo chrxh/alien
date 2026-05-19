@@ -132,8 +132,8 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
         hexagon._objects,
         CreatureDesc(),
         GenomeDesc().genes({
-            GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()}),
-            GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc()}),
+            GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
         }));
 
     _simulationFacade->setSimulationData(data);
@@ -226,7 +226,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_singleCreature)
 
     _simulationFacade->setSelection({99, 99}, {101, 101});
 
-    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -253,7 +253,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_noSelection)
 
     _simulationFacade->removeSelection();
 
-    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -279,7 +279,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_multipleCreatures_only
 
     _simulationFacade->setSelection({99, 99}, {101, 101});
 
-    auto newGenome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
     auto actualData = _simulationFacade->getSimulationData();
@@ -304,7 +304,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
 {
     auto constexpr CreatureId1 = 1;
     auto constexpr CreatureId2 = 2;
-    auto genome = GenomeDesc().genes({GeneDesc().separation(true).nodes({NodeDesc(), NodeDesc()})});
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     auto genome2 = GenomeDesc();
 
     Desc data;
