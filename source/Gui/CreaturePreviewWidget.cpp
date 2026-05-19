@@ -31,6 +31,20 @@ namespace
     auto constexpr ZoomLevelForConnections = 8.0f;
     auto constexpr SignalTextWidth = 40.0f;
     auto constexpr MaxCellFunctionTextSize = 16.0f;
+
+    void updateDisplayedCellTypes(PreviewDesc& previewDesc, GenomeDesc const& displayGenome)
+    {
+        for (auto& object : previewDesc._objects) {
+            if (object._geneIndex < 0 || static_cast<size_t>(object._geneIndex) >= displayGenome._genes.size()) {
+                continue;
+            }
+            auto const& nodes = displayGenome._genes.at(object._geneIndex)._nodes;
+            if (object._nodeIndex < 0 || static_cast<size_t>(object._nodeIndex) >= nodes.size()) {
+                continue;
+            }
+            object._cellType = nodes.at(object._nodeIndex).getCellType();
+        }
+    }
 }
 
 
@@ -40,7 +54,7 @@ _CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesFor
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& previewGenome, float width)
+void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& previewGenome, GenomeDesc const& displayGenome, float width)
 {
     auto phenotypeWithoutSeed = phenotype;
     GenomeDescEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
@@ -49,6 +63,7 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, Ge
 
     auto conversionResult =
         PreviewDescConverterService::get().convertToPreviewDesc(previewGenome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
+    updateDisplayedCellTypes(conversionResult.description, displayGenome);
     _visualFrontAngle = conversionResult.visualFrontAngle;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);

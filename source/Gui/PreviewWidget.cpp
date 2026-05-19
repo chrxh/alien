@@ -170,7 +170,8 @@ void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenom
 {
     ImGui::PushID(subGenomeIndex);
     auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
-    creatureWidget->process(phenotypeChanged, phenotype, _genomeForCurrentPreview.value_or(_editData->genome), width);
+    auto const& previewGenome = _genomeForCurrentPreview.value_or(_editData->genome);
+    creatureWidget->process(phenotypeChanged, phenotype, previewGenome, _editData->genome, width);
     ImGui::PopID();
 }
 
