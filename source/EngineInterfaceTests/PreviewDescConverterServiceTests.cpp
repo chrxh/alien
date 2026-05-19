@@ -111,9 +111,6 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature)
 
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesGenomeForCellTypes)
 {
-    auto previewGenome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3)}),
-    });
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(3).cellType(MuscleGenomeDesc())}),
     });
@@ -125,7 +122,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesGenomeForCel
             ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
         },
         CreatureDesc(),
-        previewGenome);
+        genome);
     input.addConnection(1, 2);
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
