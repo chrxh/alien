@@ -16,7 +16,7 @@
 #include "SimulationKernels.cuh"
 #include "VoidProcessor.cuh"
 
-__global__ void cudaNextTimestep_prepare(SimulationData data)
+__global__ void cudaNextTimestep_prepare(SimulationData data, bool executeCellFunctions)
 {
     data.objectMap.reset();
     data.energyMap.reset();
@@ -31,8 +31,10 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
     for (int i = CellType_Base; i < CellType_Count; ++i) {
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
-    *data.constructorExternalEnergyInflowCellCount = *data.constructorExternalEnergyInflowCellCountNext;
-    *data.constructorExternalEnergyInflowCellCountNext = 0;
+    if (executeCellFunctions) {
+        *data.constructorExternalEnergyInflowCellCount = *data.constructorExternalEnergyInflowCellCountNext;
+        *data.constructorExternalEnergyInflowCellCountNext = 0;
+    }
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
 
     data.entities.saveNumEntries();

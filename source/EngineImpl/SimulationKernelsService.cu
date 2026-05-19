@@ -76,7 +76,7 @@ void SimulationKernelsService::launchTimestepKernels(
     bool considerInnerFriction = (config.timestepMod3 == 0);
     bool considerRigidityUpdate = (config.timestepMod3 == 0);
 
-    STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+    STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data, config.executeCellFunction);
 
     STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
@@ -238,7 +238,7 @@ void SimulationKernelsService::launchPreviewKernels(
     bool considerInnerFriction = (config.timestepMod3 == 0);
 
     if (!config.detailSimulation) {
-        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data, config.executeCellFunctions);
 
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
@@ -276,7 +276,7 @@ void SimulationKernelsService::launchPreviewKernels(
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
     } else {
-        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+        STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data, config.executeCellFunctions);
 
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);

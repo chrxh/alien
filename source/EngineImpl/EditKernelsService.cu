@@ -46,7 +46,7 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
     if (reconnectionRequired) {
         int counter = 10;
         do {
-            KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
+            KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, false);
 
             setValueToDevice(_cudaUpdateResult, 0);
             KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
@@ -86,7 +86,7 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
 
         int counter = 10;
         do {
-            KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
+            KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, false);
 
             setValueToDevice(_cudaUpdateResult, 0);
             KERNEL_CALL(cudaPrepareMapForReconnection, data);
@@ -153,7 +153,7 @@ void EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationDa
 {
     int counter = 10;
     do {
-        KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
+        KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, false);
 
         setValueToDevice(_cudaUpdateResult, 0);
         KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
@@ -167,7 +167,7 @@ void EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationDa
 
     counter = 10;
     do {
-        KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
+        KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, false);
 
         setValueToDevice(_cudaUpdateResult, 0);
         KERNEL_CALL(cudaPrepareMapForReconnection, data);
