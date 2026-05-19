@@ -33,7 +33,7 @@ struct SimulationData
     UnmanagedArray<StructuralOperation> structuralOperations;
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
     int* constructorExternalEnergyInflowCellCount;
-    double* constructorExternalEnergyInflowAvailable;
+    double* constructorExternalEnergyInflowQuota;
 
     // Number generators
     CudaNumberGenerator primaryNumberGen;

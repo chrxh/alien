@@ -32,7 +32,7 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
     *data.constructorExternalEnergyInflowCellCount = 0;
-    *data.constructorExternalEnergyInflowAvailable = 0;
+    *data.constructorExternalEnergyInflowQuota = 0;
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
 
     data.entities.saveNumEntries();
@@ -134,6 +134,22 @@ __global__ void cudaNextTimestep_cellType_generator(SimulationData data, Simulat
 __global__ void cudaNextTimestep_constructor_prepare(SimulationData data, bool isPreview)
 {
     ConstructorProcessor::prepareExternalEnergyInflow(data, isPreview);
+}
+
+__global__ void cudaNextTimestep_constructor_prepareQuota(SimulationData data)
+{
+    auto eligibleCells = alienAtomicRead(data.constructorExternalEnergyInflowCellCount);
+    if (eligibleCells <= 0) {
+        *data.constructorExternalEnergyInflowQuota = 0;
+        return;
+    }
+
+    auto availableEnergy = alienAtomicRead(data.externalEnergy);
+    if (availableEnergy == Infinity<float>::value) {
+        *data.constructorExternalEnergyInflowQuota = Infinity<float>::value;
+    } else {
+        *data.constructorExternalEnergyInflowQuota = max(0.0, availableEnergy / static_cast<double>(eligibleCells));
+    }
 }
 
 __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStatistics statistics, bool isPreview)
