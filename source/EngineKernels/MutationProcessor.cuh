@@ -32,7 +32,7 @@ private:
 /************************************************************************/
 __inline__ __device__ void MutationProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    CUDA_CHECK(blockDim.x == NEURONS_PER_CELL);
+    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
 
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();

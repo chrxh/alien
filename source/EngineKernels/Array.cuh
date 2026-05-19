@@ -34,10 +34,10 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _numOrigEntries);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _capacity);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_capacity, 0, sizeof(uint64_t)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_numEntries, 0, sizeof(uint64_t)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_capacity, 0, sizeof(uint64_t)));
     }
 
     __host__ __inline__ void init(uint64_t size)
@@ -49,10 +49,10 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _numOrigEntries);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _capacity);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_capacity, size, sizeof(uint64_t)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_numEntries, 0, sizeof(uint64_t)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_capacity, size, sizeof(uint64_t)));
     }
 
     __host__ __inline__ void free()
@@ -76,34 +76,34 @@ public:
         }
         if (size > 0) {
             T* data;
-            CHECK_FOR_CUDA_ERROR(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
+            CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&data, _data, sizeof(T*), cudaMemcpyDeviceToHost));
             CudaMemoryManager::getInstance().freeMemory(data);
         }
         T* newData;
         CudaMemoryManager::getInstance().acquireMemory<T>(newSize, newData);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &newData, sizeof(T*), cudaMemcpyHostToDevice));
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_capacity, &newSize, sizeof(uint64_t), cudaMemcpyHostToDevice));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(_data, &newData, sizeof(T*), cudaMemcpyHostToDevice));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(_capacity, &newSize, sizeof(uint64_t), cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ T* getArray_host() const
     {
         T* result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(T*), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&result, _data, sizeof(T*), cudaMemcpyDeviceToHost));
         return result;
     }
-    __host__ __inline__ void setArray_host(T* data) const { CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice)); }
+    __host__ __inline__ void setArray_host(T* data) const { CHECK_FOR_DEVICE_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice)); }
 
     __host__ __inline__ uint64_t getCapacity_host() const
     {
         uint64_t result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _capacity, sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&result, _capacity, sizeof(uint64_t), cudaMemcpyDeviceToHost));
         return result;
     }
 
     __host__ __inline__ uint64_t getNumEntries_host() const
     {
         uint64_t result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _numEntries, sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&result, _numEntries, sizeof(uint64_t), cudaMemcpyDeviceToHost));
         return result;
     }
     __host__ __inline__ void setNumEntries_host(uint64_t value) { checkCudaErrors(cudaMemcpy(_numEntries, &value, sizeof(uint64_t), cudaMemcpyHostToDevice)); }
@@ -226,9 +226,9 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _size);
         CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(int)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(int)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_size, 0, sizeof(int)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(int)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_numEntries, 0, sizeof(int)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_size, 0, sizeof(int)));
     }
 
     __host__ __inline__ void free()

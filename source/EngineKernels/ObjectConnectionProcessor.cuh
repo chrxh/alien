@@ -443,7 +443,7 @@ ObjectConnectionProcessor::tryAddConnectionWithAbsAngle_oneWay(Object* object1, 
         }
         summedAngle += angleFromPrevious;
     }
-    CUDA_CHECK(insertIndex > 0);
+    DEVICE_CHECK(insertIndex > 0);
 
     // Create new connection object
     ObjectConnection newConnection;

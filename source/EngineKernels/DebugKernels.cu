@@ -19,22 +19,22 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
 
             if (!isPointerValid(object, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                 printf("wrong cell pointer at %d\n", location);
-                CUDA_THROW_NOT_IMPLEMENTED();
+                DEVICE_THROW_NOT_IMPLEMENTED();
             }
 
             if (object->type == ObjectType_Cell) {
                 if (!isPointerValid(object->typeData.cell.creature, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                     printf("wrong creature pointer at %d\n", location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
                 if (!isPointerValid(object->typeData.cell.creature->genome, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                     printf("wrong genome pointer at %d\n", location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
                 if (object->typeData.cell.creature->genome->numGenes > 0) {
                     if (!isPointerValid(object->typeData.cell.creature->genome->genes, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                         printf("wrong genes pointer at %d\n", location);
-                        CUDA_THROW_NOT_IMPLEMENTED();
+                        DEVICE_THROW_NOT_IMPLEMENTED();
                     }
                 }
                 for (int i = 0; i < object->typeData.cell.creature->genome->numGenes; ++i) {
@@ -42,43 +42,43 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                     if (gene.numNodes > 0) {
                         if (!isPointerValid(gene.nodes, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                             printf("wrong nodes pointer at %d\n", location);
-                            CUDA_THROW_NOT_IMPLEMENTED();
+                            DEVICE_THROW_NOT_IMPLEMENTED();
                         }
                     }
                 }
                 if (!isEnergyValid(object->typeData.cell.usableEnergy)) {
                     printf("usable cell energy invalid at %d", location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
                 if (!isEnergyValid(object->typeData.cell.rawEnergy)) {
                     printf("raw cell energy invalid at %d", location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
                 if (object->typeData.cell.constructorAvailable && !isEnergyValid(object->typeData.cell.constructor.reservedEnergy)) {
                     printf("reserved cell energy invalid at %d", location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
                 if (object->typeData.cell.cellType == CellType_Depot && !isEnergyValid(object->typeData.cell.cellTypeData.depot.storedUsableEnergy)) {
                     printf("stored cell energy invalid at %d", location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
             }
             if (object->type == ObjectType_FreeCell) {
                 if (!isEnergyValid(object->typeData.freeCell.energy)) {
                     printf("raw cell energy invalid at %d", location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
             }
 
             if (object->numConnections > MAX_OBJECT_CONNECTIONS) {
                 printf("too much cell connections at %d\n", location);
-                CUDA_THROW_NOT_IMPLEMENTED();
+                DEVICE_THROW_NOT_IMPLEMENTED();
             }
             for (int i = 0; i < object->numConnections; ++i) {
                 auto connectedObject = object->connections[i].object;
                 if (!isPointerValid(connectedObject, data.entities.heap.getArray(), data.entities.heap.getCapacity())) {
                     printf("wrong connectedObject pointer (cell: %llu, numConnections: %d) at %d\n", object->id, object->numConnections, location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
 
                 auto displacement = connectedObject->pos - object->pos;
@@ -86,7 +86,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 auto actualDistance = Math::length(displacement);
                 if (actualDistance > 14) {
                     printf("distance too large at %d\n", location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
 
                 auto connectionOnOtherSideFound = false;
@@ -99,7 +99,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 }
                 if (!connectionOnOtherSideFound) {
                     printf("connection not found on other side, id=%llu, otherId=%llu,  %d\n", object->id, connectedObject->id, location);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
             }
             if (sumEnergy != nullptr) {
@@ -119,11 +119,11 @@ __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int
                 || reinterpret_cast<uint64_t>(particle) + sizeof(Energy)
                     >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                 printf("wrong particle pointer at %d\n", location);
-                CUDA_THROW_NOT_IMPLEMENTED();
+                DEVICE_THROW_NOT_IMPLEMENTED();
             }
             if (particle->energy < 0 || isnan(particle->energy)) {
                 printf("particle energy invalid at %d", location);
-                CUDA_THROW_NOT_IMPLEMENTED();
+                DEVICE_THROW_NOT_IMPLEMENTED();
             }
             if (sumEnergy != nullptr) {
                 atomicAdd(sumEnergy, particle->energy);
@@ -145,7 +145,7 @@ __global__ void DEBUG_checkAngles(SimulationData data)
                     sumAngles += object->connections[i].angleFromPrevious;
                     if (object->connections[i].angleFromPrevious < -NEAR_ZERO) {
                         printf("invalid angle: %f\n", object->connections[i].angleFromPrevious);
-                        CUDA_THROW_NOT_IMPLEMENTED();
+                        DEVICE_THROW_NOT_IMPLEMENTED();
                     }
                     if (object->connections[i].angleFromPrevious < NEAR_ZERO) {
                         printf("zero angle\n");
@@ -153,7 +153,7 @@ __global__ void DEBUG_checkAngles(SimulationData data)
                 }
                 if (abs(360.0f - sumAngles) > 0.1f) {
                     printf("invalid angle sum: %f\n", sumAngles);
-                    CUDA_THROW_NOT_IMPLEMENTED();
+                    DEVICE_THROW_NOT_IMPLEMENTED();
                 }
             }
         }

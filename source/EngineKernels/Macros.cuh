@@ -74,19 +74,19 @@ void checkAndThrowError(T result)
     }
 }
 
-#define CHECK_FOR_CUDA_ERROR(val) checkAndThrowError((val))
+#define CHECK_FOR_DEVICE_ERROR(val) checkAndThrowError((val))
 
 #define ABORT() (*((int*)0) = 0)
 
 #define NEAR_ZERO 1.0e-4f
 
-#define CUDA_CHECK(condition) \
+#define DEVICE_CHECK(condition) \
     if (!(condition)) { \
         printf("Check failed. File: %s, Line: %d\n", __FILE__, __LINE__); \
         ABORT(); \
     }
 
-#define CUDA_THROW_NOT_IMPLEMENTED() \
+#define DEVICE_THROW_NOT_IMPLEMENTED() \
     printf("Not implemented error. File: %s, Line: %d\n", __FILE__, __LINE__); \
     ABORT();
 

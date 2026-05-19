@@ -38,7 +38,7 @@ private:
 
 __device__ __inline__ void NeuronProcessor::calcSignal(SimulationData& data, SimulationStatistics& statistics)
 {
-    CUDA_CHECK(blockDim.x == BlockDim);
+    DEVICE_CHECK(blockDim.x == BlockDim);
 
     auto& objects = data.entities.objects;
     auto partition = calcBlockPartition(objects.getNumEntries());
@@ -89,7 +89,7 @@ __inline__ __device__ void NeuronProcessor::clearSignal(Object* object)
 
 __inline__ __device__ bool NeuronProcessor::isAutoTriggered(SimulationData& data, Object* object, uint32_t autoTriggerInterval, bool isPreview)
 {
-    CUDA_CHECK(object->type == ObjectType_Cell);
+    DEVICE_CHECK(object->type == ObjectType_Cell);
 
     auto triggerInterval = max(TIMESTEPS_PER_CELL_FUNCTION, autoTriggerInterval);
     if (isPreview) {

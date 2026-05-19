@@ -47,7 +47,7 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Object* constructorCell
 
 __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const& constructor, Genome const& genome)
 {
-    CUDA_CHECK(constructor.geneIndex < genome.numGenes);
+    DEVICE_CHECK(constructor.geneIndex < genome.numGenes);
     return &genome.genes[constructor.geneIndex];
 }
 

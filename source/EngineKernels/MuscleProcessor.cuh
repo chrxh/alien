@@ -63,7 +63,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
 
 __device__ __inline__ float MuscleProcessor::getInitialAngleFromPrevious(Object* object, int connectionIndex)
 {
-    CUDA_CHECK(connectionIndex < object->numConnections);
+    DEVICE_CHECK(connectionIndex < object->numConnections);
     for (int i = 0, j = object->numConnections; i < j; ++i) {
         auto connectedObject = object->connections[i].object;
         if (connectedObject->typeData.cell.cellType == CellType_Muscle

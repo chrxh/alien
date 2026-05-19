@@ -521,7 +521,7 @@ void _SimulationCudaFacade::newPreview(TOs const& to)
 
 void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation)
 {
-    CHECK_FOR_CUDA_ERROR(
+    CHECK_FOR_DEVICE_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
     auto startTimepoint = std::chrono::steady_clock::now();
@@ -534,13 +534,13 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
         ++_previewTimestep;  // SimulationData::timestep is already updated in the kernels
     } while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration);
 
-    CHECK_FOR_CUDA_ERROR(
+    CHECK_FOR_DEVICE_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
 void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSimulation)
 {
-    CHECK_FOR_CUDA_ERROR(
+    CHECK_FOR_DEVICE_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
     for (int i = 0; i < numSteps; ++i) {
@@ -551,7 +551,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSim
         ++_previewTimestep;  // SimulationData::timestep is already updated in the kernels
     }
 
-    CHECK_FOR_CUDA_ERROR(
+    CHECK_FOR_DEVICE_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
@@ -633,7 +633,7 @@ void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctions()
 
 void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation)
 {
-    CHECK_FOR_CUDA_ERROR(
+    CHECK_FOR_DEVICE_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
     SimulationKernelsService::get().calcTimestepForPreview(
@@ -642,7 +642,7 @@ void _SimulationCudaFacade::testOnly_calcTimestepWithCellTypeFunctionsForPreview
 
     ++_previewTimestep;  // SimulationData::timestep is already updated in the kernels
 
-    CHECK_FOR_CUDA_ERROR(
+    CHECK_FOR_DEVICE_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
@@ -671,7 +671,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     cachedResult = GpuInfo();
 
     int numberOfDevices;
-    CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
+    CHECK_FOR_DEVICE_ERROR(cudaGetDeviceCount(&numberOfDevices));
     if (numberOfDevices < 1) {
         throw std::runtime_error("No CUDA device found.");
     }
@@ -688,7 +688,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     int highestComputeCapability = 0;
     for (int deviceNumber = 0; deviceNumber < numberOfDevices; ++deviceNumber) {
         cudaDeviceProp prop;
-        CHECK_FOR_CUDA_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
+        CHECK_FOR_DEVICE_ERROR(cudaGetDeviceProperties(&prop, deviceNumber));
 
         std::stringstream stream;
         stream << "device " << deviceNumber << ": " << prop.name << " with compute capability " << prop.major << "." << prop.minor;
@@ -711,7 +711,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
 void _SimulationCudaFacade::syncAndCheck()
 {
     cudaDeviceSynchronize();
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    CHECK_FOR_DEVICE_ERROR(cudaGetLastError());
 }
 
 void _SimulationCudaFacade::copyDataTOtoGpu(TOs const& cudaTO, TOs const& to)
@@ -779,7 +779,7 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
             std::lock_guard lock(_mutexForSimulationParameters);
             if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(
                     _settings, _maxAgeBalancer, simulationData, getCurrentTimestep(), statistics)) {
-                CHECK_FOR_CUDA_ERROR(
+                CHECK_FOR_DEVICE_ERROR(
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
         }
@@ -816,7 +816,7 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpuEntities const& sizeDel
     auto particleArraySize = _cudaSimulationData->entities.energies.getCapacity_host();
     auto auxiliaryDataSize = _cudaSimulationData->entities.heap.getCapacity_host();
 
-    CHECK_FOR_CUDA_ERROR(cudaGetLastError());
+    CHECK_FOR_DEVICE_ERROR(cudaGetLastError());
 
     log(Priority::Unimportant, "cell array capacity: " + std::to_string(cellArraySize));
     log(Priority::Unimportant, "particle array capacity: " + std::to_string(particleArraySize));
@@ -832,7 +832,7 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
     if (_newSimulationParameters) {
         _settings.simulationParameters = SimulationParametersUpdateService::get().integrateChanges(
             _settings.simulationParameters, *_newSimulationParameters, _simulationParametersUpdateConfig);
-        CHECK_FOR_CUDA_ERROR(
+        CHECK_FOR_DEVICE_ERROR(
             cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         _newSimulationParameters.reset();
 

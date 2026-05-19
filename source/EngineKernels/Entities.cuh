@@ -584,7 +584,7 @@ struct Object
         auto index = getConnectionIndex(connectedObject);
         return connections[index].distance;
 
-        CUDA_CHECK(false);
+        DEVICE_CHECK(false);
         return tempValue1.as_uint32_float.floatPart;  // Return some dummy in order to prevent compile error
     }
 

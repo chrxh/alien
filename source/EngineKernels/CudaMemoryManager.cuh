@@ -26,7 +26,7 @@ public:
     template <typename T>
     void acquireMemory(uint64_t arraySize, T*& result)
     {
-        CHECK_FOR_CUDA_ERROR(cudaMalloc(&result, sizeof(T) * arraySize));
+        CHECK_FOR_DEVICE_ERROR(cudaMalloc(&result, sizeof(T) * arraySize));
         _bytes += sizeof(T) * arraySize;
         _pointerToSizeMap.emplace(reinterpret_cast<void*>(result), arraySize);
     }
@@ -41,7 +41,7 @@ public:
         auto findResult = _pointerToSizeMap.find(pointer);
         if (findResult != _pointerToSizeMap.end()) {
             if (!CudaContextState::get().isInvalid()) {
-                CHECK_FOR_CUDA_ERROR(cudaFree(memory));
+                CHECK_FOR_DEVICE_ERROR(cudaFree(memory));
             }
             _bytes -= sizeof(T) * findResult->second;
             _pointerToSizeMap.erase(findResult->first);

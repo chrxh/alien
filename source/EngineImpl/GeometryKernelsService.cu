@@ -133,85 +133,85 @@ void GeometryKernelsService::extractObjectData(
 
     if (useInterop) {
         // Interop mode: use CUDA-OpenGL interoperability
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
         ObjectVertexData* mappedCellBuffer;
         size_t bufferSize;
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedCellBuffer), &bufferSize, renderingData.vertexBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedCellBuffer), &bufferSize, renderingData.vertexBuffer));
         setValueToDevice(_numObjects, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractObjectData, data, mappedCellBuffer, _numObjects, context);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.fluidParticleBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.fluidParticleBuffer));
         FluidParticleVertexData* mappedFluidParticleBuffer;
         size_t fluidParticleBufferSize;
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedFluidParticleBuffer), &fluidParticleBufferSize, renderingData.fluidParticleBuffer));
         setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractFluidParticleData, data, mappedFluidParticleBuffer, _numFluidParticles, context);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.fluidParticleBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.fluidParticleBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
         LocationVertexData* mappedLocationBuffer;
         size_t locationBufferSize;
-        CHECK_FOR_CUDA_ERROR(
+        CHECK_FOR_DEVICE_ERROR(
             cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLocationBuffer), &locationBufferSize, renderingData.locationBuffer));
         setValueToDevice(_numLocations, static_cast<uint64_t>(0));
         KERNEL_CALL_1_1(cudaExtractLocationData, data, mappedLocationBuffer, _numLocations, visibleTopLeft);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedObjectBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedObjectBuffer));
         SelectedObjectVertexData* mappedSelectedObjectBuffer;
         size_t selectedObjectBufferSize;
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedSelectedObjectBuffer), &selectedObjectBufferSize, renderingData.selectedObjectBuffer));
         setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractSelectedObjectData, data, mappedSelectedObjectBuffer, _numSelectedObjects, context);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedObjectBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedObjectBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
         unsigned int* mappedLineIndexBuffer;
         size_t lineIndexBufferSize;
-        CHECK_FOR_CUDA_ERROR(
+        CHECK_FOR_DEVICE_ERROR(
             cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
         setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractLineIndices, data, mappedLineIndexBuffer, _numLineIndices, context);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.triangleIndexBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.triangleIndexBuffer));
         unsigned int* mappedTriangleIndexBuffer;
         size_t triangleIndexBufferSize;
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedTriangleIndexBuffer), &triangleIndexBufferSize, renderingData.triangleIndexBuffer));
         setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractTriangleIndices, data, mappedTriangleIndexBuffer, _numTriangleIndices, context);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedConnectionBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedConnectionBuffer));
         ConnectionArrowVertexData* mappedSelectedConnectionBuffer;
         size_t selectedConnectionBufferSize;
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedSelectedConnectionBuffer), &selectedConnectionBufferSize, renderingData.selectedConnectionBuffer));
         setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractSelectedConnectionData, data, mappedSelectedConnectionBuffer, _numSelectedConnectionVertices, context);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedConnectionBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedConnectionBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.attackEventBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.attackEventBuffer));
         AttackEventVertexData* mappedAttackEventBuffer;
         size_t attackEventBufferSize;
-        CHECK_FOR_CUDA_ERROR(
+        CHECK_FOR_DEVICE_ERROR(
             cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedAttackEventBuffer), &attackEventBufferSize, renderingData.attackEventBuffer));
         setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractAttackEventData, data, mappedAttackEventBuffer, _numAttackEventVertices, context);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.attackEventBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.attackEventBuffer));
 
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.detonationEventBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsMapResources(1, &renderingData.detonationEventBuffer));
         DetonationEventVertexData* mappedDetonationEventBuffer;
         size_t detonationEventBufferSize;
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedDetonationEventBuffer), &detonationEventBufferSize, renderingData.detonationEventBuffer));
         setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractDetonationEventData, data, mappedDetonationEventBuffer, _numDetonationEventVertices, context);
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
     } else {
         // No-interop mode: extract to device buffers
         setValueToDevice(_numObjects, static_cast<uint64_t>(0));

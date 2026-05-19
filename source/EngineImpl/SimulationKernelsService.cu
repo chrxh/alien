@@ -10,24 +10,25 @@
 
 #include "GarbageCollectorKernelsService.cuh"
 
+
 void SimulationKernelsService::init()
 {
     _graphCache.clear();
     _previewGraphCache.clear();
     _stream = nullptr;
-    CHECK_FOR_CUDA_ERROR(cudaStreamCreate(&_stream));
+    CHECK_FOR_DEVICE_ERROR(cudaStreamCreate(&_stream));
 }
 
 void SimulationKernelsService::shutdown()
 {
     for (cudaGraphExec_t& graphExec : _graphCache | std::views::values) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphExecDestroy(graphExec));
     }
     for (cudaGraphExec_t& graphExec : _previewGraphCache | std::views::values) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphExecDestroy(graphExec));
     }
     if (_stream) {
-        CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_stream));
+        CHECK_FOR_DEVICE_ERROR(cudaStreamDestroy(_stream));
     }
     _graphCache.clear();
     _previewGraphCache.clear();
@@ -159,15 +160,15 @@ cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
 {
     cudaGraph_t graph;
 
-    CHECK_FOR_CUDA_ERROR(cudaStreamBeginCapture(_stream, cudaStreamCaptureModeGlobal));
+    CHECK_FOR_DEVICE_ERROR(cudaStreamBeginCapture(_stream, cudaStreamCaptureModeGlobal));
 
     launchTimestepKernels(config, settings, data, statistics);
 
-    CHECK_FOR_CUDA_ERROR(cudaStreamEndCapture(_stream, &graph));
+    CHECK_FOR_DEVICE_ERROR(cudaStreamEndCapture(_stream, &graph));
 
     cudaGraphExec_t graphExec;
-    CHECK_FOR_CUDA_ERROR(cudaGraphInstantiate(&graphExec, graph, nullptr, nullptr, 0));
-    CHECK_FOR_CUDA_ERROR(cudaGraphDestroy(graph));
+    CHECK_FOR_DEVICE_ERROR(cudaGraphInstantiate(&graphExec, graph, nullptr, nullptr, 0));
+    CHECK_FOR_DEVICE_ERROR(cudaGraphDestroy(graph));
 
     _graphCache[config] = graphExec;
     return graphExec;
@@ -186,7 +187,7 @@ void SimulationKernelsService::calcTimestep(
     // In debug mode, bypass CUDA Graphs to get precise kernel crash information
     if (GlobalSettings::get().isDebugMode()) {
         launchTimestepKernels(config, settings, data, statistics);
-        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
+        CHECK_FOR_DEVICE_ERROR(cudaStreamSynchronize(_stream));
     } else {
         // Check if we have a cached graph for this configuration
         cudaGraphExec_t graphExec;
@@ -199,10 +200,10 @@ void SimulationKernelsService::calcTimestep(
         }
 
         // Execute the cached graph
-        CHECK_FOR_CUDA_ERROR(cudaGraphLaunch(graphExec, _stream));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphLaunch(graphExec, _stream));
 
         // Wait for the graph to complete before garbage collection
-        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
+        CHECK_FOR_DEVICE_ERROR(cudaStreamSynchronize(_stream));
     }
 
     // Garbage collection cannot be part of the graph due to dynamic behavior
@@ -332,15 +333,15 @@ cudaGraphExec_t SimulationKernelsService::capturePreviewGraph(
 {
     cudaGraph_t graph;
 
-    CHECK_FOR_CUDA_ERROR(cudaStreamBeginCapture(_stream, cudaStreamCaptureModeGlobal));
+    CHECK_FOR_DEVICE_ERROR(cudaStreamBeginCapture(_stream, cudaStreamCaptureModeGlobal));
 
     launchPreviewKernels(config, settings, data, statistics);
 
-    CHECK_FOR_CUDA_ERROR(cudaStreamEndCapture(_stream, &graph));
+    CHECK_FOR_DEVICE_ERROR(cudaStreamEndCapture(_stream, &graph));
 
     cudaGraphExec_t graphExec;
-    CHECK_FOR_CUDA_ERROR(cudaGraphInstantiate(&graphExec, graph, nullptr, nullptr, 0));
-    CHECK_FOR_CUDA_ERROR(cudaGraphDestroy(graph));
+    CHECK_FOR_DEVICE_ERROR(cudaGraphInstantiate(&graphExec, graph, nullptr, nullptr, 0));
+    CHECK_FOR_DEVICE_ERROR(cudaGraphDestroy(graph));
 
     _previewGraphCache[config] = graphExec;
     return graphExec;
@@ -360,7 +361,7 @@ void SimulationKernelsService::calcTimestepForPreview(
     // In debug mode, bypass CUDA Graphs to get precise kernel crash information
     if (GlobalSettings::get().isDebugMode()) {
         launchPreviewKernels(config, settings, data, statistics);
-        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
+        CHECK_FOR_DEVICE_ERROR(cudaStreamSynchronize(_stream));
     } else {
         // Check if we have a cached graph for this configuration
         cudaGraphExec_t graphExec;
@@ -373,10 +374,10 @@ void SimulationKernelsService::calcTimestepForPreview(
         }
 
         // Execute the cached graph
-        CHECK_FOR_CUDA_ERROR(cudaGraphLaunch(graphExec, _stream));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphLaunch(graphExec, _stream));
 
         // Wait for the graph to complete before garbage collection
-        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
+        CHECK_FOR_DEVICE_ERROR(cudaStreamSynchronize(_stream));
     }
 }
 
@@ -385,13 +386,13 @@ void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsFor
     // Invalidate graph cache when simulation parameters change
     // The cache will be rebuilt lazily on next calcTimestep call
     for (auto& pair : _graphCache) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(pair.second));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphExecDestroy(pair.second));
     }
     _graphCache.clear();
 
     // Also invalidate preview graph cache
     for (auto& pair : _previewGraphCache) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(pair.second));
+        CHECK_FOR_DEVICE_ERROR(cudaGraphExecDestroy(pair.second));
     }
     _previewGraphCache.clear();
 

@@ -22,15 +22,15 @@ public:
         CudaMemoryManager::getInstance().acquireMemory(size, _array);
         CudaMemoryManager::getInstance().acquireMemory(1, _ids);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_currentRandomNumberIndex, 0, sizeof(uint32_t)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_currentRandomNumberIndex, 0, sizeof(uint32_t)));
         std::vector<int> randomNumbers(size);
         for (int i = 0; i < size; ++i) {
             randomNumbers[i] = rand();
         }
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
 
         Ids hostIds;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_ids, &hostIds, sizeof(hostIds), cudaMemcpyHostToDevice));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(_ids, &hostIds, sizeof(hostIds), cudaMemcpyHostToDevice));
     }
 
     __host__ void free()
@@ -43,7 +43,7 @@ public:
     __host__ __inline__ Ids getIds_host()
     {
         Ids hostIds;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&hostIds, _ids, sizeof(hostIds), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&hostIds, _ids, sizeof(hostIds), cudaMemcpyDeviceToHost));
         return hostIds;
     }
 

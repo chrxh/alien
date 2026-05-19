@@ -12,7 +12,7 @@ public:
     {
         CudaMemoryManager::getInstance().acquireMemory<StatisticsRawData>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<MutantStatistics>(MutantToColorCountMapSize, _mutantToMutantStatisticsMap);
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(StatisticsRawData)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_data, 0, sizeof(StatisticsRawData)));
     }
 
     __host__ void free()
@@ -24,7 +24,7 @@ public:
     __host__ StatisticsRawData getStatistics()
     {
         StatisticsRawData result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&result, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
         return result;
     }
 
@@ -82,9 +82,9 @@ public:
     __host__ void resetAccumulatedStatistics()
     {
         StatisticsRawData hostData;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&hostData, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&hostData, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
         hostData.timeline.accumulated = AccumulatedStatistics();
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &hostData, sizeof(StatisticsRawData), cudaMemcpyHostToDevice));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(_data, &hostData, sizeof(StatisticsRawData), cudaMemcpyHostToDevice));
     }
 
     __inline__ __device__ void incNumCreatedCells(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numCreatedCells[color], uint64_t(1)); }

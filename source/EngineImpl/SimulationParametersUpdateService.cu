@@ -87,7 +87,7 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     externalEnergyPresent &= settings.simulationParameters.externalEnergyControlToggle.value;
     if (externalEnergyPresent) {
         double temp;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&temp, simulationData.externalEnergy, sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&temp, simulationData.externalEnergy, sizeof(double), cudaMemcpyDeviceToHost));
         settings.simulationParameters.externalEnergy.value = toFloat(temp);
         result = true;
     }

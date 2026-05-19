@@ -14,7 +14,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, timestep);
     copyToDevice(timestep, &timestep_);
-    CHECK_FOR_CUDA_ERROR(cudaMemset(externalEnergy, 0, sizeof(double)));
+    CHECK_FOR_DEVICE_ERROR(cudaMemset(externalEnergy, 0, sizeof(double)));
 
     processMemory.init();
     primaryNumberGen.init(40312357);   //some array size for random numbers (~ 160 MB)

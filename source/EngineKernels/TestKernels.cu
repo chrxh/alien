@@ -6,7 +6,7 @@
 
 __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
 {
-    CUDA_CHECK(blockDim.x == NEURONS_PER_CELL);
+    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
 
     auto block = cooperative_groups::this_thread_block();
     auto laneId = block.thread_rank();
@@ -19,7 +19,7 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
 
         __shared__ bool shouldMutate;
         if (laneId == 0) {
-            CUDA_CHECK(object->type == ObjectType_Cell);
+            DEVICE_CHECK(object->type == ObjectType_Cell);
             shouldMutate = (object->id == objectId);
         }
         block.sync();
@@ -33,7 +33,7 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
 
 __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1, uint64_t objectId2)
 {
-    CUDA_CHECK(blockDim.x == 1 && gridDim.x == 1);
+    DEVICE_CHECK(blockDim.x == 1 && gridDim.x == 1);
 
     auto& objects = data.entities.objects;
     auto partition = calcSystemThreadPartition(objects.getNumEntries());

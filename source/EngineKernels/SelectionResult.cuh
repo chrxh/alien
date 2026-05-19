@@ -10,7 +10,7 @@ public:
     __host__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<SelectionShallowData>(1, _selectionShallowData);
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_selectionShallowData, 0, sizeof(SelectionShallowData)));
+        CHECK_FOR_DEVICE_ERROR(cudaMemset(_selectionShallowData, 0, sizeof(SelectionShallowData)));
     }
 
     __host__ void free() { CudaMemoryManager::getInstance().freeMemory(_selectionShallowData); }
@@ -18,7 +18,7 @@ public:
     __host__ SelectionShallowData getSelectionShallowData()
     {
         SelectionShallowData result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _selectionShallowData, sizeof(SelectionShallowData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_DEVICE_ERROR(cudaMemcpy(&result, _selectionShallowData, sizeof(SelectionShallowData), cudaMemcpyDeviceToHost));
 
         return result;
     }
