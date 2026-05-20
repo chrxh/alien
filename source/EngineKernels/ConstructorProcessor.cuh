@@ -578,7 +578,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         // ... if not = > requesting external energy if possible
         if (isExternalEnergyInflowAllowed(hostObject)) {
             auto thresholdEnergy = requiredEnergy * cudaSimulationParameters.externalEnergyInflowThresholdFactor.value[hostObject->color];
-            if (availableEnergyForConstruction > thresholdEnergy) {
+            if (availableEnergyForConstruction >= thresholdEnergy) {
                 constructor.energyNeeded = true;
             }
         }
