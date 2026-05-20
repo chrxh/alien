@@ -122,7 +122,7 @@ __inline__ __device__ void ConstructorProcessor::countConstructorsNeedingEnergy(
 
     for (int color = 0; color < MAX_COLORS; ++color) {
         if (numConstructorsNeedingEnergyByColor[color] > 0) {
-            atomicAdd(&sharedNumConstructorsNeedingEnergyByColor[color], numConstructorsNeedingEnergyByColor[color]);
+            atomicAdd_block(&sharedNumConstructorsNeedingEnergyByColor[color], numConstructorsNeedingEnergyByColor[color]);
         }
     }
     __syncthreads();
