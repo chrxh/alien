@@ -81,9 +81,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(ColorSpec().member(&SimulationParameters::customizationColors))
                         .description("Defines the 10 standard customization colors used for cell rendering and color-based editing throughout the simulation."),
                     ParameterSpec()
-                        .name("Cell coloring")
+                        .name("Object coloring")
                         .reference(AlternativeSpec()
-                                       .member(&SimulationParameters::cellColoring)
+                                       .member(&SimulationParameters::objectColoring)
                                        .alternatives({{"Energy", {}}})
                                        .alternatives({
                                            {"Energy", {}},
