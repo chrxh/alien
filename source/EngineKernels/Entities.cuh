@@ -93,6 +93,7 @@ struct Constructor
 
     // Temp data
     Creature* offspring;  // Must be reset if separated construction is finished
+    bool energyNeeded;
 };
 
 struct Telemetry

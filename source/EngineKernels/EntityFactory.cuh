@@ -298,6 +298,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.constructor.separation = nodeTO.constructor.separation;
                 node.constructor.numBranches = nodeTO.constructor.numBranches;
                 node.constructor.numConcatenations = nodeTO.constructor.numConcatenations;
+                node.constructor.energyNeeded = false;
             }
         }
     }
@@ -589,6 +590,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.lastConstructedCellId = cellTO.constructor.lastConstructedCellId;
             cell->constructor.currentOffspring = cellTO.constructor.currentOffspring;
             cell->constructor.offspring = nullptr;
+            cell->constructor.energyNeeded = false;
         }
     }
 }
@@ -967,6 +969,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
         constructor.currentOffspring = 0;
         constructor.offspring = nullptr;
+        constructor.energyNeeded = false;
     }
 
     return object;

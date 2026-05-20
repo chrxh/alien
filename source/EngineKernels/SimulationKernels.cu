@@ -32,6 +32,10 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
         data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
     *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        data.numConstructorsNeedingEnergyByColor[i] = 0;
+        data.externalEnergyInflowPerConstructorByColor[i] = 0.0f;
+    }
 
     data.entities.saveNumEntries();
 }
@@ -132,6 +136,35 @@ __global__ void cudaNextTimestep_cellType_generator(SimulationData data, Simulat
 __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStatistics statistics, bool isPreview)
 {
     ConstructorProcessor::process(data, statistics, isPreview);
+}
+
+__global__ void cudaNextTimestep_constructor_countConstructorsNeedingEnergy(SimulationData data)
+{
+    ConstructorProcessor::countConstructorsNeedingEnergy(data);
+}
+
+__global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(SimulationData data)
+{
+    auto totalEnergyNeeded = 0.0;
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        totalEnergyNeeded += data.numConstructorsNeedingEnergyByColor[color] * 50.0 * cudaSimulationParameters.externalEnergyInflowFactor.value[color];
+    }
+    auto externalEnergy = alienAtomicRead(data.externalEnergy);
+    auto factor = 0.0;
+    if (totalEnergyNeeded > 0.0 && externalEnergy > 0.0) {
+        factor = externalEnergy == Infinity<float>::value ? 1.0 : min(1.0, externalEnergy / totalEnergyNeeded);
+    }
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        data.externalEnergyInflowPerConstructorByColor[color] = 50.0f * cudaSimulationParameters.externalEnergyInflowFactor.value[color] * factor;
+    }
+    if (factor > 0.0 && externalEnergy != Infinity<float>::value) {
+        *data.externalEnergy = max(0.0, externalEnergy - totalEnergyNeeded);
+    }
+}
+
+__global__ void cudaNextTimestep_constructor_provideExternalEnergy(SimulationData data)
+{
+    ConstructorProcessor::provideExternalEnergy(data);
 }
 
 __global__ void cudaNextTimestep_applyMutations(SimulationData data, SimulationStatistics statistics)

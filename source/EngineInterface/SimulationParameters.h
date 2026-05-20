@@ -178,7 +178,7 @@ struct SimulationParameters
     ExpertToggle externalEnergyControlToggle = {false};
     BaseParameter<float> externalEnergy = {0.0f};
     BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {ColorVector<float>::uniform(1.0f)};
-    BaseParameter<ColorVector<float>> externalEnergyConditionalInflowFactor = {ColorVector<float>::uniform(0.0f)};
+    BaseParameter<ColorVector<float>> externalEnergyInflowThresholdFactor = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<bool> externalEnergyInflowOnlyForFirstOffspring = {false};
     BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
