@@ -678,14 +678,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "energy "
                             "source."),
                     ParameterSpec()
-                        .name("Conditional inflow")
+                        .name("Inflow threshold")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::externalEnergyConditionalInflowFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
+                            FloatSpec().member(&SimulationParameters::externalEnergyInflowThresholdFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
                         .description(
-                            "Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
-                            "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
-                            "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
-                            "Otherwise, no energy will be transferred."),
+                            "Here one can specify the fraction of energy that constructor cells must provide by themselves before constructing with external "
+                            "energy inflow.\n\nFor example, a value of 0.6 means that a constructor cell needs energy amounting to at least 60% of the "
+                            "energy required to build the new cell by itself. Otherwise, external energy inflow is requested."),
                     ParameterSpec()
                         .name("Inflow only for first offspring")
                         .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForFirstOffspring))

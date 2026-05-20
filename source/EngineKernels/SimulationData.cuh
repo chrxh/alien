@@ -26,6 +26,8 @@ struct SimulationData
 
     // Additional data for cell functions
     double* externalEnergy;
+    uint32_t* numConstructorsNeedingEnergyByColor;
+    float* externalEnergyInflowPerConstructorByColor;
     PreprocessedSimulationData preprocessedSimulationData;
 
     // Temporary memory for operations
