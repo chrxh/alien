@@ -509,8 +509,7 @@ void _InspectionWindow::processConstructorSubNode(ConstructorDesc& constructor)
     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth), constructor._separation);
     if (!constructor._separation) {
         auto numBranches = constructor._numBranches - 1;
-        AlienGui::Switcher(
-            AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
+        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
         constructor._numBranches = numBranches + 1;
     }
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(TextWidth), constructor._numConcatenations);
