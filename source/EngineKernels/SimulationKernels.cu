@@ -149,13 +149,13 @@ __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(Simulat
     for (int color = 0; color < MAX_COLORS; ++color) {
         totalEnergyNeeded += data.numConstructorsNeedingEnergyByColor[color] * 50.0 * cudaSimulationParameters.externalEnergyInflowFactor.value[color];
     }
-    auto externalEnergy = alienAtomicRead(data.externalEnergy);
+    auto externalEnergy = *data.externalEnergy;
     auto factor = 0.0;
     if (totalEnergyNeeded > 0.0 && externalEnergy > 0.0) {
         factor = externalEnergy == Infinity<float>::value ? 1.0 : min(1.0, externalEnergy / totalEnergyNeeded);
     }
     for (int color = 0; color < MAX_COLORS; ++color) {
-        data.externalEnergyInflowPerConstructorByColor[color] = 50.0f * cudaSimulationParameters.externalEnergyInflowFactor.value[color] * factor;
+        data.externalEnergyInflowPerConstructorByColor[color] = 50.0f * toFloat(cudaSimulationParameters.externalEnergyInflowFactor.value[color] * factor);
     }
     if (factor > 0.0 && externalEnergy != Infinity<float>::value) {
         *data.externalEnergy = max(0.0, externalEnergy - totalEnergyNeeded);

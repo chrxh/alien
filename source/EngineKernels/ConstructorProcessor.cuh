@@ -69,7 +69,6 @@ private:
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static bool isExternalEnergyInflowAllowed(Object const* hostObject);
-    __inline__ __device__ static float getExternalEnergyInflowThresholdFactor(Object const* hostObject);
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
 };
@@ -98,7 +97,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 
 __inline__ __device__ void ConstructorProcessor::countConstructorsNeedingEnergy(SimulationData& data)
 {
-    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto object = data.entities.objects.at(i);
         if (object->type != ObjectType_Cell) {
@@ -113,7 +112,7 @@ __inline__ __device__ void ConstructorProcessor::countConstructorsNeedingEnergy(
 
 __inline__ __device__ void ConstructorProcessor::provideExternalEnergy(SimulationData& data)
 {
-    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
+    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto object = data.entities.objects.at(i);
         if (object->type != ObjectType_Cell) {
@@ -570,25 +569,26 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
     auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
-    auto hostReservedEnergy = 0.0f;
-    if (hostCell.constructorAvailable) {
-        hostReservedEnergy = hostCell.constructor.reservedEnergy;
-    }
+    auto hostReservedEnergy = hostReservedEnergy = hostCell.constructor.reservedEnergy;
+
+    // Check if enough energy available
     auto availableEnergyForConstruction = max(0.0f, hostCell.usableEnergy + hostReservedEnergy - normalCellEnergy);
-    auto thresholdEnergy = requiredEnergy * getExternalEnergyInflowThresholdFactor(hostObject);
     if (availableEnergyForConstruction < requiredEnergy) {
-        if (isExternalEnergyInflowAllowed(hostObject) && availableEnergyForConstruction < max(requiredEnergy, thresholdEnergy)) {
-            constructor.energyNeeded = true;
+
+        // ... if not = > requesting external energy if possible
+        if (isExternalEnergyInflowAllowed(hostObject)) {
+            auto thresholdEnergy = requiredEnergy * cudaSimulationParameters.externalEnergyInflowThresholdFactor.value[hostObject->color];
+            if (availableEnergyForConstruction > thresholdEnergy) {
+                constructor.energyNeeded = true;
+            }
         }
         return false;
     }
 
     // Reduce reserved energy
-    if (hostCell.constructorAvailable) {
-        auto energyNeededFromReserved = min(hostCell.constructor.reservedEnergy, requiredEnergy);
-        hostCell.constructor.reservedEnergy -= energyNeededFromReserved;
-        requiredEnergy -= energyNeededFromReserved;
-    }
+    auto energyNeededFromReserved = min(hostCell.constructor.reservedEnergy, requiredEnergy);
+    hostCell.constructor.reservedEnergy -= energyNeededFromReserved;
+    requiredEnergy -= energyNeededFromReserved;
 
     // Reduce usable energy
     hostCell.usableEnergy -= requiredEnergy;
@@ -604,14 +604,6 @@ __inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(O
         return false;
     }
     return true;
-}
-
-__inline__ __device__ float ConstructorProcessor::getExternalEnergyInflowThresholdFactor(Object const* hostObject)
-{
-    if (!isExternalEnergyInflowAllowed(hostObject)) {
-        return 0.0f;
-    }
-    return cudaSimulationParameters.externalEnergyInflowThresholdFactor.value[hostObject->color];
 }
 
 __inline__ __device__ void ConstructorProcessor::activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData)
