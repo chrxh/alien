@@ -25,7 +25,6 @@ private:
 
     void processObject(ExtendedObjectDesc& extendedObject);
     void processParticle(EnergyDesc particle);
-    void applyPendingSignalEntries(ExtendedObjectDesc& extendedObject);
 
     void processObjectNode(ObjectDesc& object);
     void processSolidNode(ObjectDesc& object);
@@ -40,14 +39,11 @@ private:
 
     float calcWindowWidth() const;
 
-    void validateAndCorrect(ObjectDesc& object) const;
-
     RealVector2D _initialPos;
 
     bool _on = true;
     uint64_t _entityId = 0;
     bool _selectGenomeTab = false;
-    std::optional<std::vector<SignalEntryDesc>> _pendingSignalEntries;
 
     NeuralNetEditorWidget _neuralNetWidget;
 };
