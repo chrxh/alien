@@ -578,7 +578,7 @@ struct Object
     TempValue tempValue2;
 
     float density;
-    Object* nextObject;               // Linked list for finding all overlapping cells
+    Object* nextObject;  // Linked list for finding all overlapping cells
 
     __device__ __inline__ float& getRefDistance(Object* connectedObject)
     {

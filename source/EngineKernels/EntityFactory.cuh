@@ -298,7 +298,6 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.constructor.separation = nodeTO.constructor.separation;
                 node.constructor.numBranches = nodeTO.constructor.numBranches;
                 node.constructor.numConcatenations = nodeTO.constructor.numConcatenations;
-                node.constructor.energyNeeded = false;
             }
         }
     }
