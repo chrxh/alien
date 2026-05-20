@@ -97,6 +97,17 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 
 __inline__ __device__ void ConstructorProcessor::countConstructorsNeedingEnergy(SimulationData& data)
 {
+    __shared__ uint32_t sharedNumConstructorsNeedingEnergyByColor[MAX_COLORS];
+    for (int color = threadIdx.x; color < MAX_COLORS; color += blockDim.x) {
+        sharedNumConstructorsNeedingEnergyByColor[color] = 0;
+    }
+    __syncthreads();
+
+    uint32_t numConstructorsNeedingEnergyByColor[MAX_COLORS];
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        numConstructorsNeedingEnergyByColor[color] = 0;
+    }
+
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto object = data.entities.objects.at(i);
@@ -105,7 +116,20 @@ __inline__ __device__ void ConstructorProcessor::countConstructorsNeedingEnergy(
         }
         auto const& cell = object->typeData.cell;
         if (cell.constructorAvailable && cell.constructor.energyNeeded) {
-            atomicAdd(&data.numConstructorsNeedingEnergyByColor[object->color], 1);
+            ++numConstructorsNeedingEnergyByColor[object->color];
+        }
+    }
+
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        if (numConstructorsNeedingEnergyByColor[color] > 0) {
+            atomicAdd(&sharedNumConstructorsNeedingEnergyByColor[color], numConstructorsNeedingEnergyByColor[color]);
+        }
+    }
+    __syncthreads();
+
+    for (int color = threadIdx.x; color < MAX_COLORS; color += blockDim.x) {
+        if (sharedNumConstructorsNeedingEnergyByColor[color] > 0) {
+            atomicAdd(&data.numConstructorsNeedingEnergyByColor[color], sharedNumConstructorsNeedingEnergyByColor[color]);
         }
     }
 }
