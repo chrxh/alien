@@ -262,9 +262,6 @@ void SimulationKernelsService::launchPreviewKernels(
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor_countConstructorsNeedingEnergy, _stream, numBlocks, 4, data);
-            STREAM_KERNEL_CALL_1_1(cudaNextTimestep_constructor_prepareExternalEnergyInflow, _stream, data);
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor_provideExternalEnergy, _stream, numBlocks, 4, data);
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
         }
 
@@ -311,9 +308,6 @@ void SimulationKernelsService::launchPreviewKernels(
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor_countConstructorsNeedingEnergy, _stream, numBlocks, 4, data);
-            STREAM_KERNEL_CALL_1_1(cudaNextTimestep_constructor_prepareExternalEnergyInflow, _stream, data);
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor_provideExternalEnergy, _stream, numBlocks, 4, data);
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
         }
