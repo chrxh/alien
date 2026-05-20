@@ -16,7 +16,7 @@ namespace
 }
 
 SignalsBufferDialog::SignalsBufferDialog()
-    : AlienDialog("Signal buffer", {500.0f, 500.0f})
+    : AlienDialog("Signal buffer", {300.0f, 500.0f})
 {}
 
 void SignalsBufferDialog::initIntern() {}
@@ -70,7 +70,6 @@ void SignalsBufferDialog::processIntern()
             AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(DialogTextWidth), _selectedEntry);
             _selectedEntry = std::clamp(_selectedEntry, 0, numEntries - 1);
 
-            AlienGui::BeginIndent();
             auto& channels = _channelsBuffer.at(_selectedEntry);
             if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
                 channels.resize(NEURONS_PER_CELL, 0.0f);
@@ -80,7 +79,6 @@ void SignalsBufferDialog::processIntern()
                     AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).format("%.2f").textWidth(DialogTextWidth).min(-2.0f).max(2.0f),
                     &channels.at(i));
             }
-            AlienGui::EndIndent();
         }
     }
     ImGui::EndChild();
