@@ -1,5 +1,6 @@
 #include "InspectionWindow.h"
 
+#include <iomanip>
 #include <sstream>
 #include <variant>
 
@@ -37,6 +38,12 @@ namespace
     void inspectorHexId(std::string const& name, uint64_t id, float textWidth = TextWidth)
     {
         auto text = toHex(id);
+        AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true), text);
+    }
+
+    void inspectorText(std::string const& name, std::string const& value, float textWidth = TextWidth)
+    {
+        auto text = value;
         AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true), text);
     }
 
@@ -475,16 +482,10 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
             }
         });
 
-        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type##Cell node").rank(AlienGui::TreeNodeRank::Default))) {
-            processCellTypeNode(cell);
-        }
-        AlienGui::EndTreeNode();
+        processCellTypeNode(cell);
 
         if (cell._constructor.has_value()) {
-            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor").rank(AlienGui::TreeNodeRank::Default))) {
-                processConstructorSubNode(cell._constructor.value());
-            }
-            AlienGui::EndTreeNode();
+            processConstructorNode(cell._constructor.value());
         }
 
         processSignalsNode(cell);
@@ -493,28 +494,33 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
     AlienGui::EndTreeNode();
 }
 
-void _InspectionWindow::processConstructorSubNode(ConstructorDesc& constructor)
+void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 {
-    AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(TextWidth), constructor._autoTriggerInterval);
-    AlienGui::InputInt(AlienGui::InputIntParameters().name("Construction activation time").textWidth(TextWidth), constructor._constructionActivationTime);
-    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Construction angle").format("%.2f").textWidth(TextWidth), constructor._constructionAngle);
-    static std::vector<std::string> const provideEnergyStrings = {"Cell only", "Free generation"};
-    AlienGui::ComboParameters provideParams;
-    provideParams.name("Provide energy").textWidth(TextWidth).values(provideEnergyStrings);
-    int providedEnergy = constructor._provideEnergy;
-    if (AlienGui::Combo(provideParams, providedEnergy)) {
-        constructor._provideEnergy = static_cast<ProvideEnergy>(providedEnergy);
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor").rank(AlienGui::TreeNodeRank::Default))) {
+        AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(TextWidth), constructor._autoTriggerInterval);
+        AlienGui::InputInt(AlienGui::InputIntParameters().name("Construction activation time").textWidth(TextWidth), constructor._constructionActivationTime);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Construction angle").format("%.2f").textWidth(TextWidth), constructor._constructionAngle);
+        static std::vector<std::string> const provideEnergyStrings = {"Cell only", "Free generation"};
+        AlienGui::ComboParameters provideParams;
+        provideParams.name("Provide energy").textWidth(TextWidth).values(provideEnergyStrings);
+        int providedEnergy = constructor._provideEnergy;
+        if (AlienGui::Combo(provideParams, providedEnergy)) {
+            constructor._provideEnergy = static_cast<ProvideEnergy>(providedEnergy);
+        }
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(TextWidth), constructor._reservedEnergy);
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth), constructor._separation);
+        if (!constructor._separation) {
+            auto numBranches = constructor._numBranches - 1;
+            AlienGui::Switcher(
+                AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
+            constructor._numBranches = numBranches + 1;
+        }
+        AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(TextWidth), constructor._numConcatenations);
+        AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), constructor._geneIndex);
     }
-    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(TextWidth), constructor._reservedEnergy);
-    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth), constructor._separation);
-    if (!constructor._separation) {
-        auto numBranches = constructor._numBranches - 1;
-        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
-        constructor._numBranches = numBranches + 1;
-    }
-    AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(TextWidth), constructor._numConcatenations);
-    AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), constructor._geneIndex);
+    AlienGui::EndTreeNode();
 }
+
 
 void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
 {
@@ -522,12 +528,14 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
         processPropertiesSubNode("Creature", [&] {
             auto& creature = extendedObject.creature.value();
             inspectorHexId("Creature id", creature._id);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Generation").textWidth(TextWidth).readOnly(true), creature._generation);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Num cells").textWidth(TextWidth).readOnly(true), creature._numCells);
+            inspectorText("Generation", std::to_string(creature._generation));
+            inspectorText("Num cells", std::to_string(creature._numCells));
             auto& genome = extendedObject.genome.value();
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(TextWidth).readOnly(true), genome._frontAngle);
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(TextWidth).readOnly(true), genome._name);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth).readOnly(true), genome._lineageId);
+            std::stringstream frontAngle;
+            frontAngle << std::fixed << std::setprecision(1) << genome._frontAngle;
+            inspectorText("Front angle", frontAngle.str());
+            inspectorText("Genome name", genome._name);
+            inspectorText("Lineage id", std::to_string(genome._lineageId));
             if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
                 GenomeEditorWindow::get().openTab(genome, false);
             }
@@ -538,29 +546,24 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
 
 void _InspectionWindow::processSignalsNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::High))) {
-        processPropertiesSubNode("Signals", [&] {
-            auto& channels = cell._signal._channels;
-            if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
-                channels.resize(NEURONS_PER_CELL, 0.0f);
-            }
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
-                AlienGui::SliderFloat(
-                    AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
-                    &channels.at(i));
-            }
-        });
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::Default))) {
+        auto& channels = cell._signal._channels;
+        if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
+            channels.resize(NEURONS_PER_CELL, 0.0f);
+        }
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth), &channels.at(i));
+        }
     }
     AlienGui::EndTreeNode();
 }
 
 void _InspectionWindow::processNeuralNetNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::High))) {
-        processPropertiesSubNode("Neural network", [&] {
-            _neuralNetWidget->process(
-                cell._neuralNetwork._weights, cell._neuralNetwork._biases, cell._neuralNetwork._activationFunctions, cell._neuralNetwork._connectionWeights);
-        });
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default))) {
+        _neuralNetWidget->process(
+            cell._neuralNetwork._weights, cell._neuralNetwork._biases, cell._neuralNetwork._activationFunctions, cell._neuralNetwork._connectionWeights);
     }
     AlienGui::EndTreeNode();
 }
@@ -590,222 +593,227 @@ namespace
 
 void _InspectionWindow::processCellTypeNode(CellDesc& cell)
 {
-    auto cellType = cell.getCellType();
-    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type##Cell node").rank(AlienGui::TreeNodeRank::Default))) {
+        auto cellType = cell.getCellType();
+        auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
-    if (cellType == CellType_Depot) {
-        auto& depot = std::get<DepotDesc>(cell._cellType);
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Storage limit").format("%.2f").textWidth(TextWidth), depot._storageLimit);
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stored usable energy").format("%.2f").textWidth(TextWidth), depot._storedUsableEnergy);
-    } else if (cellType == CellType_Sensor) {
-        auto& sensor = std::get<SensorDesc>(cell._cellType);
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Auto trigger").textWidth(TextWidth), sensor._autoTrigger);
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Tag for attackers").textWidth(TextWidth), sensor._tagForAttackers);
-        auto mode = sensor.getMode();
-        AlienGui::ComboParameters modeParams;
-        modeParams.name("Mode").textWidth(TextWidth).values(Const::SensorModeStrings);
-        if (AlienGui::Combo(modeParams, mode)) {
-            sensor._mode = createSensorModeDesc(mode);
-        }
-        if (mode == SensorMode_DetectEnergy) {
-            auto& m = std::get<DetectEnergyDesc>(sensor._mode);
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(TextWidth), m._minDensity);
-        } else if (mode == SensorMode_DetectFreeCell) {
-            auto& m = std::get<DetectFreeCellDesc>(sensor._mode);
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(TextWidth), m._minDensity);
-            AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
-                m._restrictToColors);
-        } else if (mode == SensorMode_DetectCreature) {
-            auto& m = std::get<DetectCreatureDesc>(sensor._mode);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(TextWidth), m._minNumCells);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(TextWidth), m._maxNumCells);
-            AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
-                m._restrictToColors);
-            AlienGui::ComboParameters lineageParams;
-            lineageParams.name("Restrict to lineage").textWidth(TextWidth).values({"No", "Same lineage", "Other lineage"});
-            AlienGui::Combo(lineageParams, m._restrictToLineage);
-        }
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Min range").textWidth(TextWidth), sensor._minRange);
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(TextWidth), sensor._maxRange);
-    } else if (cellType == CellType_Generator) {
-        auto& generator = std::get<GeneratorDesc>(cell._cellType);
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(TextWidth), generator._additive);
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Value offset").step(0.05f).format("%.2f").textWidth(TextWidth), generator._valueOffset);
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Time offset").textWidth(TextWidth), generator._timeOffset);
-        auto mode = generator.getMode();
-        AlienGui::ComboParameters modeParams;
-        modeParams.name("Mode").textWidth(TextWidth).values(Const::GeneratorModeStrings);
-        if (AlienGui::Combo(modeParams, mode)) {
-            generator._mode = createGeneratorModeDesc(mode);
-        }
-        if (mode == GeneratorMode_SquareSignal) {
-            auto& m = std::get<SquareSignalDesc>(generator._mode);
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Amplitude").step(0.05f).format("%.2f").textWidth(TextWidth), m._amplitude);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(TextWidth), m._period);
-        } else if (mode == GeneratorMode_SawtoothSignal) {
-            auto& m = std::get<SawtoothSignalDesc>(generator._mode);
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Amplitude").step(0.05f).format("%.2f").textWidth(TextWidth), m._amplitude);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(TextWidth), m._period);
-        }
-    } else if (cellType == CellType_Attacker) {
-        auto& attacker = std::get<AttackerDesc>(cell._cellType);
-        auto mode = attacker.getMode();
-        AlienGui::ComboParameters modeParams;
-        modeParams.name("Mode").textWidth(TextWidth).values(Const::AttackerModeStrings);
-        if (AlienGui::Combo(modeParams, mode)) {
-            attacker._mode = createAttackerModeDesc(mode);
-        }
-        if (mode == AttackerMode_FreeCell) {
-            auto& m = std::get<AttackFreeCellDesc>(attacker._mode);
-            AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
-                m._restrictToColors);
-        }
-    } else if (cellType == CellType_Injector) {
-        auto& injector = std::get<InjectorDesc>(cell._cellType);
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), injector._geneIndex);
-    } else if (cellType == CellType_Muscle) {
-        auto& muscle = std::get<MuscleDesc>(cell._cellType);
-        auto mode = muscle.getMode();
-        AlienGui::ComboParameters modeParams;
-        modeParams.name("Mode").textWidth(TextWidth).values(Const::MuscleModeStrings);
-        if (AlienGui::Combo(modeParams, mode)) {
-            muscle._mode = createMuscleModeDesc(mode);
-        }
-        if (mode == MuscleMode_AutoBending) {
-            auto& m = std::get<AutoBendingDesc>(muscle._mode);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
-        } else if (mode == MuscleMode_ManualBending) {
-            auto& m = std::get<ManualBendingDesc>(muscle._mode);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
-        } else if (mode == MuscleMode_AngleBending) {
-            auto& m = std::get<AngleBendingDesc>(muscle._mode);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Attraction repulsion ratio").step(0.05f).format("%.2f").textWidth(TextWidth),
-                m._attractionRepulsionRatio);
-        } else if (mode == MuscleMode_AutoCrawling) {
-            auto& m = std::get<AutoCrawlingDesc>(muscle._mode);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Max distance deviation").step(0.01f).format("%.2f").textWidth(TextWidth), m._maxDistanceDeviation);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
-        } else if (mode == MuscleMode_ManualCrawling) {
-            auto& m = std::get<ManualCrawlingDesc>(muscle._mode);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Max distance deviation").step(0.01f).format("%.2f").textWidth(TextWidth), m._maxDistanceDeviation);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
-        }
-    } else if (cellType == CellType_Defender) {
-        auto& defender = std::get<DefenderDesc>(cell._cellType);
-        int defMode = defender._mode;
-        AlienGui::ComboParameters modeParams;
-        modeParams.name("Mode").textWidth(TextWidth).values(Const::DefenderModeStrings);
-        if (AlienGui::Combo(modeParams, defMode)) {
-            defender._mode = static_cast<DefenderMode>(defMode);
-        }
-    } else if (cellType == CellType_Reconnector) {
-        auto& reconnector = std::get<ReconnectorDesc>(cell._cellType);
-        auto mode = reconnector.getMode();
-        AlienGui::ComboParameters modeParams;
-        modeParams.name("Mode").textWidth(TextWidth).values(Const::ReconnectorModeStrings);
-        if (AlienGui::Combo(modeParams, mode)) {
-            reconnector._mode = createReconnectorModeDesc(mode);
-        }
-        if (mode == ReconnectorMode_FreeCell) {
-            auto& m = std::get<ReconnectFreeCellDesc>(reconnector._mode);
-            AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
-                m._restrictToColors);
-        } else if (mode == ReconnectorMode_Creature) {
-            auto& m = std::get<ReconnectCreatureDesc>(reconnector._mode);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(TextWidth), m._minNumCells);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(TextWidth), m._maxNumCells);
-            AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
-                m._restrictToColors);
-            AlienGui::ComboParameters lineageParams;
-            lineageParams.name("Restrict to lineage").textWidth(TextWidth).values({"No", "Same lineage", "Other lineage"});
-            AlienGui::Combo(lineageParams, m._restrictToLineage);
-        }
-    } else if (cellType == CellType_Detonator) {
-        auto& detonator = std::get<DetonatorDesc>(cell._cellType);
-        static std::vector<std::string> const detonatorStateStrings = {"Ready", "Activated", "Exploded"};
-        int state = detonator._state;
-        AlienGui::ComboParameters stateParams;
-        stateParams.name("State").textWidth(TextWidth).values(detonatorStateStrings);
-        if (AlienGui::Combo(stateParams, state)) {
-            detonator._state = static_cast<DetonatorState>(state);
-        }
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(TextWidth), detonator._countdown);
-    } else if (cellType == CellType_Digestor) {
-        auto& digestor = std::get<DigestorDesc>(cell._cellType);
-        AlienGui::SliderFloat(
-            AlienGui::SliderFloatParameters().name("Raw energy conductivity").max(1.0f).format("%.2f").textWidth(TextWidth), &digestor._rawEnergyConductivity);
-        auto conversion = digestor.getRawEnergyConversionRate();
-        AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Energy conversion").max(1.0f).format("%.2f").textWidth(TextWidth), &conversion);
-        digestor.setRawEnergyConversionRate(conversion);
-    } else if (cellType == CellType_Memory) {
-        auto& memory = std::get<MemoryDesc>(cell._cellType);
-        auto mode = memory.getMode();
-        AlienGui::ComboParameters modeParams;
-        modeParams.name("Mode").textWidth(TextWidth).values(Const::MemoryModeStrings);
-        if (AlienGui::Combo(modeParams, mode)) {
-            memory._mode = createMemoryModeDesc(mode);
-            if (mode == MemoryMode_SignalRecorder || mode == MemoryMode_SignalStorage) {
-                memory._signalEntries.resize(8, SignalEntryDesc());
+        if (cellType == CellType_Depot) {
+            auto& depot = std::get<DepotDesc>(cell._cellType);
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Storage limit").format("%.2f").textWidth(TextWidth), depot._storageLimit);
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stored usable energy").format("%.2f").textWidth(TextWidth), depot._storedUsableEnergy);
+        } else if (cellType == CellType_Sensor) {
+            auto& sensor = std::get<SensorDesc>(cell._cellType);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Auto trigger").textWidth(TextWidth), sensor._autoTrigger);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Tag for attackers").textWidth(TextWidth), sensor._tagForAttackers);
+            auto mode = sensor.getMode();
+            AlienGui::ComboParameters modeParams;
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::SensorModeStrings);
+            if (AlienGui::Combo(modeParams, mode)) {
+                sensor._mode = createSensorModeDesc(mode);
+            }
+            if (mode == SensorMode_DetectEnergy) {
+                auto& m = std::get<DetectEnergyDesc>(sensor._mode);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(TextWidth), m._minDensity);
+            } else if (mode == SensorMode_DetectFreeCell) {
+                auto& m = std::get<DetectFreeCellDesc>(sensor._mode);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(TextWidth), m._minDensity);
+                AlienGui::ColorCheckboxes(
+                    AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
+                    m._restrictToColors);
+            } else if (mode == SensorMode_DetectCreature) {
+                auto& m = std::get<DetectCreatureDesc>(sensor._mode);
+                AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(TextWidth), m._minNumCells);
+                AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(TextWidth), m._maxNumCells);
+                AlienGui::ColorCheckboxes(
+                    AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
+                    m._restrictToColors);
+                AlienGui::ComboParameters lineageParams;
+                lineageParams.name("Restrict to lineage").textWidth(TextWidth).values({"No", "Same lineage", "Other lineage"});
+                AlienGui::Combo(lineageParams, m._restrictToLineage);
+            }
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Min range").textWidth(TextWidth), sensor._minRange);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(TextWidth), sensor._maxRange);
+        } else if (cellType == CellType_Generator) {
+            auto& generator = std::get<GeneratorDesc>(cell._cellType);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(TextWidth), generator._additive);
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Value offset").step(0.05f).format("%.2f").textWidth(TextWidth), generator._valueOffset);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Time offset").textWidth(TextWidth), generator._timeOffset);
+            auto mode = generator.getMode();
+            AlienGui::ComboParameters modeParams;
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::GeneratorModeStrings);
+            if (AlienGui::Combo(modeParams, mode)) {
+                generator._mode = createGeneratorModeDesc(mode);
+            }
+            if (mode == GeneratorMode_SquareSignal) {
+                auto& m = std::get<SquareSignalDesc>(generator._mode);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Amplitude").step(0.05f).format("%.2f").textWidth(TextWidth), m._amplitude);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(TextWidth), m._period);
+            } else if (mode == GeneratorMode_SawtoothSignal) {
+                auto& m = std::get<SawtoothSignalDesc>(generator._mode);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Amplitude").step(0.05f).format("%.2f").textWidth(TextWidth), m._amplitude);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(TextWidth), m._period);
+            }
+        } else if (cellType == CellType_Attacker) {
+            auto& attacker = std::get<AttackerDesc>(cell._cellType);
+            auto mode = attacker.getMode();
+            AlienGui::ComboParameters modeParams;
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::AttackerModeStrings);
+            if (AlienGui::Combo(modeParams, mode)) {
+                attacker._mode = createAttackerModeDesc(mode);
+            }
+            if (mode == AttackerMode_FreeCell) {
+                auto& m = std::get<AttackFreeCellDesc>(attacker._mode);
+                AlienGui::ColorCheckboxes(
+                    AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
+                    m._restrictToColors);
+            }
+        } else if (cellType == CellType_Injector) {
+            auto& injector = std::get<InjectorDesc>(cell._cellType);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), injector._geneIndex);
+        } else if (cellType == CellType_Muscle) {
+            auto& muscle = std::get<MuscleDesc>(cell._cellType);
+            auto mode = muscle.getMode();
+            AlienGui::ComboParameters modeParams;
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::MuscleModeStrings);
+            if (AlienGui::Combo(modeParams, mode)) {
+                muscle._mode = createMuscleModeDesc(mode);
+            }
+            if (mode == MuscleMode_AutoBending) {
+                auto& m = std::get<AutoBendingDesc>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
+            } else if (mode == MuscleMode_ManualBending) {
+                auto& m = std::get<ManualBendingDesc>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
+            } else if (mode == MuscleMode_AngleBending) {
+                auto& m = std::get<AngleBendingDesc>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Attraction repulsion ratio").step(0.05f).format("%.2f").textWidth(TextWidth),
+                    m._attractionRepulsionRatio);
+            } else if (mode == MuscleMode_AutoCrawling) {
+                auto& m = std::get<AutoCrawlingDesc>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max distance deviation").step(0.01f).format("%.2f").textWidth(TextWidth), m._maxDistanceDeviation);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
+            } else if (mode == MuscleMode_ManualCrawling) {
+                auto& m = std::get<ManualCrawlingDesc>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max distance deviation").step(0.01f).format("%.2f").textWidth(TextWidth), m._maxDistanceDeviation);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
+            }
+        } else if (cellType == CellType_Defender) {
+            auto& defender = std::get<DefenderDesc>(cell._cellType);
+            int defMode = defender._mode;
+            AlienGui::ComboParameters modeParams;
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::DefenderModeStrings);
+            if (AlienGui::Combo(modeParams, defMode)) {
+                defender._mode = static_cast<DefenderMode>(defMode);
+            }
+        } else if (cellType == CellType_Reconnector) {
+            auto& reconnector = std::get<ReconnectorDesc>(cell._cellType);
+            auto mode = reconnector.getMode();
+            AlienGui::ComboParameters modeParams;
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::ReconnectorModeStrings);
+            if (AlienGui::Combo(modeParams, mode)) {
+                reconnector._mode = createReconnectorModeDesc(mode);
+            }
+            if (mode == ReconnectorMode_FreeCell) {
+                auto& m = std::get<ReconnectFreeCellDesc>(reconnector._mode);
+                AlienGui::ColorCheckboxes(
+                    AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
+                    m._restrictToColors);
+            } else if (mode == ReconnectorMode_Creature) {
+                auto& m = std::get<ReconnectCreatureDesc>(reconnector._mode);
+                AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(TextWidth), m._minNumCells);
+                AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(TextWidth), m._maxNumCells);
+                AlienGui::ColorCheckboxes(
+                    AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
+                    m._restrictToColors);
+                AlienGui::ComboParameters lineageParams;
+                lineageParams.name("Restrict to lineage").textWidth(TextWidth).values({"No", "Same lineage", "Other lineage"});
+                AlienGui::Combo(lineageParams, m._restrictToLineage);
+            }
+        } else if (cellType == CellType_Detonator) {
+            auto& detonator = std::get<DetonatorDesc>(cell._cellType);
+            static std::vector<std::string> const detonatorStateStrings = {"Ready", "Activated", "Exploded"};
+            int state = detonator._state;
+            AlienGui::ComboParameters stateParams;
+            stateParams.name("State").textWidth(TextWidth).values(detonatorStateStrings);
+            if (AlienGui::Combo(stateParams, state)) {
+                detonator._state = static_cast<DetonatorState>(state);
+            }
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(TextWidth), detonator._countdown);
+        } else if (cellType == CellType_Digestor) {
+            auto& digestor = std::get<DigestorDesc>(cell._cellType);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Raw energy conductivity").max(1.0f).format("%.2f").textWidth(TextWidth),
+                &digestor._rawEnergyConductivity);
+            auto conversion = digestor.getRawEnergyConversionRate();
+            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().name("Energy conversion").max(1.0f).format("%.2f").textWidth(TextWidth), &conversion);
+            digestor.setRawEnergyConversionRate(conversion);
+        } else if (cellType == CellType_Memory) {
+            auto& memory = std::get<MemoryDesc>(cell._cellType);
+            auto mode = memory.getMode();
+            AlienGui::ComboParameters modeParams;
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::MemoryModeStrings);
+            if (AlienGui::Combo(modeParams, mode)) {
+                memory._mode = createMemoryModeDesc(mode);
+                if (mode == MemoryMode_SignalRecorder || mode == MemoryMode_SignalStorage) {
+                    memory._signalEntries.resize(8, SignalEntryDesc());
+                }
+            }
+            if (mode == MemoryMode_SignalDelay) {
+                auto& m = std::get<SignalDelayDesc>(memory._mode);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Delay").textWidth(TextWidth), m._delay);
+            } else if (mode == MemoryMode_SignalRecorder) {
+                auto& m = std::get<SignalRecorderDesc>(memory._mode);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth), m._readOnly);
+            } else if (mode == MemoryMode_SignalStorage) {
+                auto& m = std::get<SignalStorageDesc>(memory._mode);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth), m._readOnly);
+            } else if (mode == MemoryMode_SignalIntegrator) {
+                auto& m = std::get<SignalIntegratorDesc>(memory._mode);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("New signal weight").max(1.0f).format("%.2f").textWidth(TextWidth), &m._newSignalWeight);
+            }
+            processMemoryChannelBits(memory._channelBitMask);
+            if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(TextWidth))) {
+                SignalsBufferDialog::get().open(
+                    memory._signalEntries, [this](std::vector<SignalEntryDesc> const& entries) { _pendingSignalEntries = entries; });
+            }
+        } else if (cellType == CellType_Communicator) {
+            auto& communicator = std::get<CommunicatorDesc>(cell._cellType);
+            auto mode = communicator.getMode();
+            AlienGui::ComboParameters modeParams;
+            modeParams.name("Mode").textWidth(TextWidth).values(Const::CommunicatorModeStrings);
+            if (AlienGui::Combo(modeParams, mode)) {
+                communicator._mode = createCommunicatorModeDesc(mode);
+            }
+            if (mode == CommunicatorMode_Sender) {
+                auto& m = std::get<SenderDesc>(communicator._mode);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Range").textWidth(TextWidth), m._range);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Max times sent").textWidth(TextWidth), m._maxTimesSent);
+            } else if (mode == CommunicatorMode_Receiver) {
+                auto& m = std::get<ReceiverDesc>(communicator._mode);
+                AlienGui::ColorCheckboxes(
+                    AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
+                    m._restrictToColors);
+                AlienGui::ComboParameters lineageParams;
+                lineageParams.name("Restrict to lineage").textWidth(TextWidth).values({"No", "Same lineage", "Other lineage"});
+                AlienGui::Combo(lineageParams, m._restrictToLineage);
             }
         }
-        if (mode == MemoryMode_SignalDelay) {
-            auto& m = std::get<SignalDelayDesc>(memory._mode);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Delay").textWidth(TextWidth), m._delay);
-        } else if (mode == MemoryMode_SignalRecorder) {
-            auto& m = std::get<SignalRecorderDesc>(memory._mode);
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth), m._readOnly);
-        } else if (mode == MemoryMode_SignalStorage) {
-            auto& m = std::get<SignalStorageDesc>(memory._mode);
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(TextWidth), m._readOnly);
-        } else if (mode == MemoryMode_SignalIntegrator) {
-            auto& m = std::get<SignalIntegratorDesc>(memory._mode);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("New signal weight").max(1.0f).format("%.2f").textWidth(TextWidth), &m._newSignalWeight);
-        }
-        processMemoryChannelBits(memory._channelBitMask);
-        if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Signal buffer").textWidth(TextWidth))) {
-            SignalsBufferDialog::get().open(memory._signalEntries, [this](std::vector<SignalEntryDesc> const& entries) { _pendingSignalEntries = entries; });
-        }
-    } else if (cellType == CellType_Communicator) {
-        auto& communicator = std::get<CommunicatorDesc>(cell._cellType);
-        auto mode = communicator.getMode();
-        AlienGui::ComboParameters modeParams;
-        modeParams.name("Mode").textWidth(TextWidth).values(Const::CommunicatorModeStrings);
-        if (AlienGui::Combo(modeParams, mode)) {
-            communicator._mode = createCommunicatorModeDesc(mode);
-        }
-        if (mode == CommunicatorMode_Sender) {
-            auto& m = std::get<SenderDesc>(communicator._mode);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Range").textWidth(TextWidth), m._range);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Max times sent").textWidth(TextWidth), m._maxTimesSent);
-        } else if (mode == CommunicatorMode_Receiver) {
-            auto& m = std::get<ReceiverDesc>(communicator._mode);
-            AlienGui::ColorCheckboxes(
-                AlienGui::ColorCheckboxesParameters().customizationColors(customizationColors).name("Restrict to colors").textWidth(TextWidth),
-                m._restrictToColors);
-            AlienGui::ComboParameters lineageParams;
-            lineageParams.name("Restrict to lineage").textWidth(TextWidth).values({"No", "Same lineage", "Other lineage"});
-            AlienGui::Combo(lineageParams, m._restrictToLineage);
-        }
     }
+    AlienGui::EndTreeNode();
 }
 
 float _InspectionWindow::calcWindowWidth() const
