@@ -174,6 +174,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     auto forwardBackwardRatio = isLeftSide(object) ? bending.forwardBackwardRatio : 1.0f - bending.forwardBackwardRatio;
 
     auto bendingInfo = getBendingInfo(object);
+    inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
 
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
     auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
@@ -285,6 +286,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
 
     // Process manual bending
     auto bendingInfo = getBendingInfo(object);
+    inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
 
     // Change bending direction
@@ -358,6 +360,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
 
     // Process angle bending
     auto bendingInfo = getBendingInfo(object);
+    inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
     auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
     auto targetAngleRelToConnection0 = Math::getNormalizedAngle(object->typeData.cell.frontAngle + 180.0f + targetAngle, -180.0f);
@@ -675,6 +678,9 @@ __inline__ __device__ bool MuscleProcessor::inheritInitialAngleFromPivot(float& 
         inheritedInitialAngle = pivotMuscle.modeData.angleBending.initialAngle;
     }
     if (inheritedInitialAngle == VALUE_NOT_SET_FLOAT) {
+        return false;
+    }
+    if (abs(inheritedInitialAngle - initialAngle) < NEAR_ZERO) {
         return false;
     }
 
