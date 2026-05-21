@@ -542,18 +542,16 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
 
 void _InspectionWindow::processSignalsNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::High))) {
-        processPropertiesSubNode("Signals", [&] {
-            auto& channels = cell._signal._channels;
-            if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
-                channels.resize(NEURONS_PER_CELL, 0.0f);
-            }
-            for (int i = 0; i < NEURONS_PER_CELL; ++i) {
-                AlienGui::SliderFloat(
-                    AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
-                    &channels.at(i));
-            }
-        });
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::Default))) {
+        auto& channels = cell._signal._channels;
+        if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
+            channels.resize(NEURONS_PER_CELL, 0.0f);
+        }
+        for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
+                &channels.at(i));
+        }
     }
     AlienGui::EndTreeNode();
 }
