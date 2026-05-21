@@ -40,7 +40,6 @@ private:
         ObjectConnection* connectionNext;
     };
     __inline__ __device__ static BendingInfo getBendingInfo(Object* object);
-    __inline__ __device__ static bool inheritInitialAngleFromPivot(float& initialAngle, BendingInfo const& bendingInfo, Object* object);
 
     __inline__ __device__ static bool isLeftSide(Object* object);
 
@@ -148,7 +147,6 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
 
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
         auto pivotCell = bendingInfo.pivotCell;
-        inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
         for (int k = 0, l = pivotCell->numConnections; k < l; ++k) {
             auto connectedObject = pivotCell->connections[k].object;
             if (connectedObject->typeData.cell.cellType == CellType_Muscle
@@ -174,7 +172,6 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     auto forwardBackwardRatio = isLeftSide(object) ? bending.forwardBackwardRatio : 1.0f - bending.forwardBackwardRatio;
 
     auto bendingInfo = getBendingInfo(object);
-    inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
 
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
     auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
@@ -261,7 +258,6 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (bending.initialAngle == VALUE_NOT_SET_FLOAT) {
         auto bendingInfo = getBendingInfo(object);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
-        inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
         auto pivotCell = bendingInfo.pivotCell;
         for (int k = 0, l = pivotCell->numConnections; k < l; ++k) {
             auto connectedObject = pivotCell->connections[k].object;
@@ -286,7 +282,6 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
 
     // Process manual bending
     auto bendingInfo = getBendingInfo(object);
-    inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
 
     // Change bending direction
@@ -355,12 +350,10 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     if (bending.initialAngle == VALUE_NOT_SET_FLOAT) {
         auto bendingInfo = getBendingInfo(object);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
-        inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
     }
 
     // Process angle bending
     auto bendingInfo = getBendingInfo(object);
-    inheritInitialAngleFromPivot(bending.initialAngle, bendingInfo, object);
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
     auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
     auto targetAngleRelToConnection0 = Math::getNormalizedAngle(object->typeData.cell.frontAngle + 180.0f + targetAngle, -180.0f);
@@ -656,43 +649,6 @@ __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingIn
         }
     }
     return result;
-}
-
-__inline__ __device__ bool MuscleProcessor::inheritInitialAngleFromPivot(float& initialAngle, BendingInfo const& bendingInfo, Object* object)
-{
-    if (object->numConnections != 1) {
-        return false;
-    }
-    auto const& pivotCell = bendingInfo.pivotCell;
-    if (pivotCell->typeData.cell.cellType != CellType_Muscle) {
-        return false;
-    }
-
-    auto const& pivotMuscle = pivotCell->typeData.cell.cellTypeData.muscle;
-    auto inheritedInitialAngle = VALUE_NOT_SET_FLOAT;
-    if (pivotMuscle.mode == MuscleMode_AutoBending) {
-        inheritedInitialAngle = pivotMuscle.modeData.autoBending.initialAngle;
-    } else if (pivotMuscle.mode == MuscleMode_ManualBending) {
-        inheritedInitialAngle = pivotMuscle.modeData.manualBending.initialAngle;
-    } else if (pivotMuscle.mode == MuscleMode_AngleBending) {
-        inheritedInitialAngle = pivotMuscle.modeData.angleBending.initialAngle;
-    }
-    if (inheritedInitialAngle == VALUE_NOT_SET_FLOAT) {
-        return false;
-    }
-    if (abs(inheritedInitialAngle - initialAngle) < NEAR_ZERO) {
-        return false;
-    }
-
-    initialAngle = inheritedInitialAngle;
-    auto& angle = bendingInfo.connection->angleFromPrevious;
-    auto& nextAngle = bendingInfo.connectionNext->angleFromPrevious;
-    auto diff = initialAngle - angle;
-    if (!(diff > 0 && nextAngle <= diff)) {
-        angle = initialAngle;
-        nextAngle -= diff;
-    }
-    return true;
 }
 
 __inline__ __device__ bool MuscleProcessor::isLeftSide(Object* object)

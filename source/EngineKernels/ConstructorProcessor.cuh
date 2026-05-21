@@ -397,8 +397,10 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     }
     if (hostObject->typeData.cell.cellType == CellType_Muscle && hostObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
         hostObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
-        auto connectionIndex = lastObject->getConnectionIndex(hostObject);
-        MuscleProcessor::restoreInitialAngleFromPrevious(hostObject, lastObject, connectionIndex);
+        if (hostObject->connections[0].object == lastObject) {
+            auto connectionIndex = lastObject->getConnectionIndex(hostObject);
+            MuscleProcessor::restoreInitialAngleFromPrevious(hostObject, lastObject, connectionIndex);
+        }
     }
 
     uint64_t cellPointerIndex;
