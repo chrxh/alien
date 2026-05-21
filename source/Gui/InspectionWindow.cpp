@@ -544,8 +544,7 @@ void _InspectionWindow::processSignalsNode(CellDesc& cell)
         }
         for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth),
-                &channels.at(i));
+                AlienGui::SliderFloatParameters().name("#" + std::to_string(i + 1)).min(-2.0f).max(2.0f).format("%.2f").textWidth(TextWidth), &channels.at(i));
         }
     }
     AlienGui::EndTreeNode();
