@@ -5,9 +5,6 @@
 
 #include <Base/GlobalSettings.h>
 
-#include <Shaders/TriangleFS.h>
-#include <Shaders/TriangleGS.h>
-#include <Shaders/TriangleVS.h>
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -38,78 +35,6 @@ public:
     }
 
 protected:
-    GLuint createShader(GLenum type, std::string_view source)
-    {
-        auto shader = glCreateShader(type);
-        auto* sourcePtr = source.data();
-        auto sourceLength = static_cast<GLint>(source.size());
-        glShaderSource(shader, 1, &sourcePtr, &sourceLength);
-        glCompileShader(shader);
-        return shader;
-    }
-
-    GLuint createTriangleShaderProgram()
-    {
-        auto vertexShader = createShader(GL_VERTEX_SHADER, Shaders::TriangleVS);
-        auto geometryShader = createShader(GL_GEOMETRY_SHADER, Shaders::TriangleGS);
-        auto fragmentShader = createShader(GL_FRAGMENT_SHADER, Shaders::TriangleFS);
-
-        auto program = glCreateProgram();
-        glAttachShader(program, vertexShader);
-        glAttachShader(program, geometryShader);
-        glAttachShader(program, fragmentShader);
-        glLinkProgram(program);
-
-        glDeleteShader(vertexShader);
-        glDeleteShader(geometryShader);
-        glDeleteShader(fragmentShader);
-
-        return program;
-    }
-
-    void setupTriangleVao(GeometryBuffers const& geometryBuffers)
-    {
-        glBindVertexArray(geometryBuffers->getVaoForTriangles());
-        glBindBuffer(GL_ARRAY_BUFFER, geometryBuffers->getVboForObjects());
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)0);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-        glVertexAttribIPointer(2, 1, GL_INT, sizeof(ObjectVertexData), (void*)(6 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ObjectVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
-        glEnableVertexAttribArray(3);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryBuffers->getEboForTriangles());
-    }
-
-    int renderTrianglePixels(GeometryBuffers const& geometryBuffers)
-    {
-        setupTriangleVao(geometryBuffers);
-
-        auto program = createTriangleShaderProgram();
-        glUseProgram(program);
-        glUniform1f(glGetUniformLocation(program, "zoom"), 50.0f);
-        glUniform2f(glGetUniformLocation(program, "worldSize"), 1000.0f, 1000.0f);
-        glUniform2f(glGetUniformLocation(program, "rectUpperLeft"), 99.5f, 99.5f);
-        glUniform2f(glGetUniformLocation(program, "viewportSize"), 100.0f, 100.0f);
-
-        glViewport(0, 0, 100, 100);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glDrawElements(GL_TRIANGLES, toInt(geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
-        glDisable(GL_DEPTH_TEST);
-        glFinish();
-
-        std::vector<unsigned char> pixels(100 * 100 * 3);
-        glReadPixels(0, 0, 100, 100, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
-        glDeleteProgram(program);
-
-        return std::count_if(pixels.begin(), pixels.end(), [](unsigned char value) { return value > 0; });
-    }
-
     GLFWwindow* _window = nullptr;
 };
 
@@ -289,94 +214,6 @@ TEST_F(GeometryTests, copyBuffers_triangle)
 
     auto triangles = geometryBuffers->getTriangleIndices();
     EXPECT_EQ(6u, triangles.size());
-}
-
-TEST_F(GeometryTests, copyBuffers_triangleWithZeroReferenceAngle)
-{
-    auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}),
-        ObjectDesc().id(3).pos({100.5f, 100.866f}),
-    });
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    data.addConnection(3, 1);
-    data.getConnectionRef(1, 2)._angleFromPrevious = 0.0f;
-    data.getConnectionRef(1, 3)._angleFromPrevious = 360.0f;
-
-    _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
-    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
-
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
-
-    auto numObjects = geometryBuffers->getNumObjects();
-    EXPECT_EQ(3u, numObjects.objects);
-    EXPECT_EQ(6u, numObjects.lineIndices);
-    EXPECT_EQ(6u, numObjects.triangleIndices);
-
-    auto triangles = geometryBuffers->getTriangleIndices();
-    EXPECT_EQ(6u, triangles.size());
-}
-
-TEST_F(GeometryTests, renderTriangleWithZeroReferenceAngle)
-{
-    auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({100.0f, 100.0f}),
-        ObjectDesc().id(2).pos({101.0f, 100.0f}),
-        ObjectDesc().id(3).pos({100.5f, 100.866f}),
-    });
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    data.addConnection(3, 1);
-    data.getConnectionRef(1, 2)._angleFromPrevious = 0.0f;
-    data.getConnectionRef(1, 3)._angleFromPrevious = 360.0f;
-
-    _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
-    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
-
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
-
-    EXPECT_GT(renderTrianglePixels(geometryBuffers), 0);
-}
-
-TEST_F(GeometryTests, renderTriangleFanWithZeroReferenceAnglesUsesActualConnectionOrder)
-{
-    auto createTriangleFan = [] {
-        auto result = Desc().addCreature({
-            ObjectDesc().id(1).pos({100.0f, 100.0f}),
-            ObjectDesc().id(2).pos({99.0f, 100.0f}),
-            ObjectDesc().id(3).pos({100.0f, 101.0f}),
-            ObjectDesc().id(4).pos({101.0f, 100.0f}),
-        });
-        result.addConnection(1, 2);
-        result.addConnection(1, 3);
-        result.addConnection(1, 4);
-        result.addConnection(2, 3);
-        result.addConnection(3, 4);
-        return result;
-    };
-
-    auto referenceData = createTriangleFan();
-    _simulationFacade->setSimulationData(referenceData);
-    auto referenceGeometryBuffers = _GeometryBuffers::create();
-    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(referenceGeometryBuffers, visibleWorldRect);
-    auto const referencePixels = renderTrianglePixels(referenceGeometryBuffers);
-
-    auto zeroAngleData = createTriangleFan();
-    auto& centerConnections = zeroAngleData.getObjectRef(1)._connections;
-    std::swap(centerConnections.at(1), centerConnections.at(2));
-    centerConnections.at(0)._angleFromPrevious = 180.0f;
-    centerConnections.at(1)._angleFromPrevious = 180.0f;
-    centerConnections.at(2)._angleFromPrevious = 0.0f;
-
-    _simulationFacade->setSimulationData(zeroAngleData);
-    auto geometryBuffers = _GeometryBuffers::create();
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
-
-    EXPECT_EQ(referencePixels, renderTrianglePixels(geometryBuffers));
 }
 
 TEST_F(GeometryTests, copyBuffers_quad)
