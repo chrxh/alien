@@ -1,5 +1,6 @@
 #include "InspectionWindow.h"
 
+#include <iomanip>
 #include <sstream>
 #include <variant>
 
@@ -37,6 +38,12 @@ namespace
     void inspectorHexId(std::string const& name, uint64_t id, float textWidth = TextWidth)
     {
         auto text = toHex(id);
+        AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true), text);
+    }
+
+    void inspectorText(std::string const& name, std::string const& value, float textWidth = TextWidth)
+    {
+        auto text = value;
         AlienGui::InputText(AlienGui::InputTextParameters().name(name).textWidth(textWidth).readOnly(true), text);
     }
 
@@ -521,12 +528,14 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
         processPropertiesSubNode("Creature", [&] {
             auto& creature = extendedObject.creature.value();
             inspectorHexId("Creature id", creature._id);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Generation").textWidth(TextWidth).readOnly(true), creature._generation);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Num cells").textWidth(TextWidth).readOnly(true), creature._numCells);
+            inspectorText("Generation", std::to_string(creature._generation));
+            inspectorText("Num cells", std::to_string(creature._numCells));
             auto& genome = extendedObject.genome.value();
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(TextWidth).readOnly(true), genome._frontAngle);
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(TextWidth).readOnly(true), genome._name);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth).readOnly(true), genome._lineageId);
+            std::stringstream frontAngle;
+            frontAngle << std::fixed << std::setprecision(1) << genome._frontAngle;
+            inspectorText("Front angle", frontAngle.str());
+            inspectorText("Genome name", genome._name);
+            inspectorText("Lineage id", std::to_string(genome._lineageId));
             if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
                 GenomeEditorWindow::get().openTab(genome, false);
             }
