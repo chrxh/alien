@@ -125,48 +125,29 @@ namespace
             && pos.y >= context.visibleTopLeft.y - context.cullingMargin && pos.y <= context.visibleBottomRight.y + context.cullingMargin;
     }
 
-    __device__ __inline__ float getActualConnectionAngle(SimulationData const& data, Object* object, int connectionIndex)
+    __device__ __inline__ int getPreviousConnectionIndexWithNonZeroAngle(Object* object, int connectionIndex)
     {
-        auto displacement = data.objectMap.getCorrectedDirection(object->connections[connectionIndex].object->pos - object->pos);
-        return Math::angleOfVector(displacement);
+        auto result = (connectionIndex + object->numConnections - 1) % object->numConnections;
+        for (int i = 0; i < object->numConnections - 1; ++i) {
+            auto angleToCurrent = object->connections[(result + 1) % object->numConnections].angleFromPrevious;
+            if (angleToCurrent >= NEAR_ZERO) {
+                return result;
+            }
+            result = (result + object->numConnections - 1) % object->numConnections;
+        }
+        return connectionIndex;
     }
 
-    __device__ __inline__ void
-    getSortedConnectionIndicesByActualAngle(SimulationData const& data, Object* object, int sortedConnectionIndices[MAX_OBJECT_CONNECTIONS])
+    __device__ __inline__ int getNextConnectionIndexWithNonZeroAngle(Object* object, int connectionIndex)
     {
-        for (int i = 0; i < object->numConnections; ++i) {
-            sortedConnectionIndices[i] = i;
-        }
-        for (int i = 1; i < object->numConnections; ++i) {
-            auto currentConnectionIndex = sortedConnectionIndices[i];
-            auto currentAngle = getActualConnectionAngle(data, object, currentConnectionIndex);
-            auto currentObjectId = object->connections[currentConnectionIndex].object->id;
-
-            auto insertIndex = i;
-            while (insertIndex > 0) {
-                auto previousConnectionIndex = sortedConnectionIndices[insertIndex - 1];
-                auto previousAngle = getActualConnectionAngle(data, object, previousConnectionIndex);
-                auto previousObjectId = object->connections[previousConnectionIndex].object->id;
-                if (previousAngle < currentAngle || (fabsf(previousAngle - currentAngle) < NEAR_ZERO && previousObjectId < currentObjectId)) {
-                    break;
-                }
-                sortedConnectionIndices[insertIndex] = previousConnectionIndex;
-                --insertIndex;
+        auto result = (connectionIndex + 1) % object->numConnections;
+        for (int i = 0; i < object->numConnections - 1; ++i) {
+            if (object->connections[result].angleFromPrevious >= NEAR_ZERO) {
+                return result;
             }
-            sortedConnectionIndices[insertIndex] = currentConnectionIndex;
+            result = (result + 1) % object->numConnections;
         }
-    }
-
-    __device__ __inline__ int
-    getSortedConnectionPosition(SimulationData const& data, Object* object, Object* connectedObject, int sortedConnectionIndices[MAX_OBJECT_CONNECTIONS])
-    {
-        getSortedConnectionIndicesByActualAngle(data, object, sortedConnectionIndices);
-        for (int sortedIndex = 0; sortedIndex < object->numConnections; ++sortedIndex) {
-            if (object->connections[sortedConnectionIndices[sortedIndex]].object == connectedObject) {
-                return sortedIndex;
-            }
-        }
-        return 0;
+        return connectionIndex;
     }
 }
 
@@ -311,38 +292,32 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         if (object->numConnections <= 1) {
             continue;
         }
-        int sortedConnectionIndices[MAX_OBJECT_CONNECTIONS];
-        getSortedConnectionIndicesByActualAngle(data, object, sortedConnectionIndices);
-        for (int sortedIndex = 0, numConnections = object->numConnections; sortedIndex < numConnections; ++sortedIndex) {
-            auto connectionIndex = sortedConnectionIndices[sortedIndex];
-            auto prevIndex = sortedConnectionIndices[(sortedIndex + numConnections - 1) % numConnections];
+        for (int connectionIndex = 0, numConnections = object->numConnections; connectionIndex < numConnections; ++connectionIndex) {
+            auto prevIndex = getPreviousConnectionIndexWithNonZeroAngle(object, connectionIndex);
+            if (prevIndex == connectionIndex) {
+                continue;
+            }
             auto const& connectedObject = object->connections[connectionIndex].object;
             auto const& prevConnectedObject = object->connections[prevIndex].object;
 
-            int connectedSortedConnectionIndices[MAX_OBJECT_CONNECTIONS];
-            auto backIndex = getSortedConnectionPosition(data, connectedObject, object, connectedSortedConnectionIndices);
-            int prevConnectedSortedConnectionIndices[MAX_OBJECT_CONNECTIONS];
-            auto prevBackIndex = getSortedConnectionPosition(data, prevConnectedObject, object, prevConnectedSortedConnectionIndices);
+            auto backIndex = connectedObject->getConnectionIndex(object);
+            auto prevBackIndex = prevConnectedObject->getConnectionIndex(object);
+            auto connectedNextIndex = getNextConnectionIndexWithNonZeroAngle(connectedObject, backIndex);
+            auto prevConnectedPrevIndex = getPreviousConnectionIndexWithNonZeroAngle(prevConnectedObject, prevBackIndex);
+            if (connectedNextIndex == backIndex || prevConnectedPrevIndex == prevBackIndex) {
+                continue;
+            }
 
             // Triangle?
-            if (prevConnectedObject
-                    ->connections
-                        [prevConnectedSortedConnectionIndices[(prevBackIndex + prevConnectedObject->numConnections - 1) % prevConnectedObject->numConnections]]
-                    .object
-                == connectedObject) {
+            if (prevConnectedObject->connections[prevConnectedPrevIndex].object == connectedObject) {
                 if (object->id < connectedObject->id && object->id < prevConnectedObject->id) {
                     addTriangle(object, object->tempValue1.as_uint64, prevConnectedObject, connectedObject);
                 }
             }
 
             // Rectangle?
-            auto fourthCellCandidate1 =
-                connectedObject->connections[connectedSortedConnectionIndices[(backIndex + 1) % connectedObject->numConnections]].object;
-            auto fourthCellCandidate2 =
-                prevConnectedObject
-                    ->connections
-                        [prevConnectedSortedConnectionIndices[(prevBackIndex + prevConnectedObject->numConnections - 1) % prevConnectedObject->numConnections]]
-                    .object;
+            auto fourthCellCandidate1 = connectedObject->connections[connectedNextIndex].object;
+            auto fourthCellCandidate2 = prevConnectedObject->connections[prevConnectedPrevIndex].object;
             if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
                 && connectedObject != prevConnectedObject) {
                 if (object->id < connectedObject->id && object->id < prevConnectedObject->id && object->id < fourthCellCandidate2->id) {
