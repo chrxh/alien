@@ -307,6 +307,55 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(1)._angleFromPrevious));
 }
 
+TEST_F(CreatureTests, constructMusclesVoidsCreature)
+{
+    auto const AutoTriggerInterval = 100;
+
+    Desc data;
+    data.addCreature(
+        {
+            ObjectDesc()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .type(CellDesc().headCell(true).constructor(
+                    ConstructorDesc().autoTriggerInterval(AutoTriggerInterval).provideEnergy(ProvideEnergy_FreeGeneration).separation(true))),
+        },
+        CreatureDesc().id(0),
+        GenomeDesc().genes({
+            GeneDesc()
+                .shape(ConstructorShape_Hexagon)
+                .nodes({
+                    NodeDesc(),
+                    NodeDesc().cellType(VoidGenomeDesc()),
+                    NodeDesc()
+                        .cellType(MuscleGenomeDesc().mode(AutoBendingGenomeDesc()))
+                        .constructor(ConstructorGenomeDesc().autoTriggerInterval(AutoTriggerInterval).geneIndex(1).separation(false)),
+                    NodeDesc().cellType(VoidGenomeDesc()),
+                    NodeDesc(),
+                    NodeDesc(),
+                    NodeDesc(),
+                }),
+            GeneDesc().nodes({
+                NodeDesc().cellType(MuscleGenomeDesc().mode(AutoBendingGenomeDesc())),
+                NodeDesc().cellType(MuscleGenomeDesc().mode(AutoBendingGenomeDesc())),
+                NodeDesc().cellType(MuscleGenomeDesc().mode(AutoBendingGenomeDesc())),
+            }),
+        }));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1500);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(9, actualData._objects.size());
+
+    auto cellIt = std::ranges::find_if(
+        actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 1 && object.getCellRef()._parentNodeIndex == 2; });
+    ASSERT_NE(cellIt, actualData._objects.end());
+    auto cell1 = *cellIt;
+    EXPECT_TRUE(approxCompare(180.0f, cell1._connections.at(0)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(180.0f, cell1._connections.at(1)._angleFromPrevious));
+}
+
 class CreatureTests_BendingMuscles_TwoDirections
     : public CreatureTests
     , public testing::WithParamInterface<std::pair<MuscleMode, Direction>>
