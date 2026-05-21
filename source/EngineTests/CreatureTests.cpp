@@ -373,20 +373,23 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
 {
     auto [muscleMode, direction] = GetParam();
-    RealVector2D refPoint{500.0f, 500.0f};
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, direction);
     auto data = Desc().addCreature(
-        {ObjectDesc().id(0).pos(refPoint).type(
+        {ObjectDesc()
+             .id(0)
+             .pos({500.0f, 500.0f})
+             .type(
             CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0).separation(true)))},
         CreatureDesc(),
         genome);
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(2000);
+    _simulationFacade->calcTimesteps(1000);
 
     RealVector2D movementDirection;
+    RealVector2D refPoint;
     {
         auto actualData = _simulationFacade->getSimulationData();
         for (auto& object : actualData._objects) {
@@ -407,9 +410,10 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         if (direction == Direction::Backward) {
             movementDirection = -movementDirection;
         }
+        refPoint = cells.at(0)._pos;
     }
 
-    _simulationFacade->calcTimesteps(2000);
+    _simulationFacade->calcTimesteps(1000);
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescEditService::get().removeCell(actualData, 0);
