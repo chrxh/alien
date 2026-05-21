@@ -498,7 +498,7 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 {
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor").rank(AlienGui::TreeNodeRank::Default))) {
         AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(TextWidth), constructor._autoTriggerInterval);
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Construction activation time").textWidth(TextWidth), constructor._constructionActivationTime);
+        AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation time").textWidth(TextWidth), constructor._constructionActivationTime);
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Construction angle").format("%.2f").textWidth(TextWidth), constructor._constructionAngle);
         static std::vector<std::string> const provideEnergyStrings = {"Cell only", "Free generation"};
         AlienGui::ComboParameters provideParams;
