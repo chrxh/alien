@@ -36,7 +36,7 @@ private:
     void processSignalsNode(CellDesc& cell);
     void processNeuralNetNode(CellDesc& cell);
     void processCellTypeNode(CellDesc& cell);
-    void processConstructorSubNode(ConstructorDesc& constructor);
+    void processConstructorNode(ConstructorDesc& constructor);
 
     float calcWindowWidth() const;
 
