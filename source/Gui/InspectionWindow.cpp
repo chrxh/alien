@@ -524,13 +524,12 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
             inspectorHexId("Creature id", creature._id);
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Generation").textWidth(TextWidth).readOnly(true), creature._generation);
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Num cells").textWidth(TextWidth).readOnly(true), creature._numCells);
-            if (extendedObject.genome.has_value()) {
-                auto& genome = extendedObject.genome.value();
-                AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(TextWidth).readOnly(true), genome._name);
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth).readOnly(true), genome._lineageId);
-                if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
-                    GenomeEditorWindow::get().openTab(genome, false);
-                }
+            auto& genome = extendedObject.genome.value();
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(TextWidth).readOnly(true), genome._frontAngle);
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(TextWidth).readOnly(true), genome._name);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth).readOnly(true), genome._lineageId);
+            if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
+                GenomeEditorWindow::get().openTab(genome, false);
             }
         });
     }
