@@ -13,7 +13,7 @@ public:
     __inline__ __device__ static float getInitialAngleFromPrevious(
         Object* object,
         int connectionIndex);  // Return the angleFromPrevious without muscle distortions
-    __inline__ __device__ static void restoreInitialAngleFromPrevious(Object* muscleCell, Object* affectedCell, int connectionIndex);
+    __inline__ __device__ static void restoreInitialAngleFromPrevious(Object* muscleCell, Object* affectedCell);
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
@@ -24,7 +24,7 @@ private:
     __inline__ __device__ static void autoCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void manualCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void directMovement(SimulationData& data, SimulationStatistics& statistics, Object* object);
-    __inline__ __device__ static void restoreInitialAngleFromPreviousIntern(float& initialAngle, Object* muscleCell, Object* affectedCell, int connectionIndex);
+    __inline__ __device__ static void restoreInitialAngleFromPreviousIntern(float& initialAngle, Object* muscleObject, Object* pivotObject);
 
     __inline__ __device__ static void radiate(SimulationData& data, Object* object, float activation);
 
@@ -87,15 +87,15 @@ __device__ __inline__ float MuscleProcessor::getInitialAngleFromPrevious(Object*
     return object->connections[connectionIndex].angleFromPrevious;
 }
 
-__device__ __inline__ void MuscleProcessor::restoreInitialAngleFromPrevious(Object* muscleCell, Object* affectedCell, int connectionIndex)
+__device__ __inline__ void MuscleProcessor::restoreInitialAngleFromPrevious(Object* muscleCell, Object* affectedCell)
 {
     auto& muscle = muscleCell->typeData.cell.cellTypeData.muscle;
     if (muscle.mode == MuscleMode_AutoBending) {
-        restoreInitialAngleFromPreviousIntern(muscle.modeData.autoBending.initialAngle, muscleCell, affectedCell, connectionIndex);
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.autoBending.initialAngle, muscleCell, affectedCell);
     } else if (muscle.mode == MuscleMode_ManualBending) {
-        restoreInitialAngleFromPreviousIntern(muscle.modeData.manualBending.initialAngle, muscleCell, affectedCell, connectionIndex);
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.manualBending.initialAngle, muscleCell, affectedCell);
     } else if (muscle.mode == MuscleMode_AngleBending) {
-        restoreInitialAngleFromPreviousIntern(muscle.modeData.angleBending.initialAngle, muscleCell, affectedCell, connectionIndex);
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.angleBending.initialAngle, muscleCell, affectedCell);
     }
 }
 
@@ -549,12 +549,20 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
     radiate(data, object, activation);
 }
 
-__inline__ __device__ void
-MuscleProcessor::restoreInitialAngleFromPreviousIntern(float& initialAngle, Object* muscleCell, Object* affectedCell, int connectionIndex)
+__inline__ __device__ void MuscleProcessor::restoreInitialAngleFromPreviousIntern(float& initialAngle, Object* muscleObject, Object* pivotObject)
 {
-    if (initialAngle != VALUE_NOT_SET_FLOAT) {
-        auto& angle = affectedCell->connections[connectionIndex].angleFromPrevious;
-        auto& nextAngle = affectedCell->connections[(connectionIndex + 1) % affectedCell->numConnections].angleFromPrevious;
+    if (initialAngle == VALUE_NOT_SET_FLOAT) {
+        return;
+    }
+
+    for (int retry = 0; retry < 20; ++retry) {
+        if (!pivotObject->tryLock()) {
+            continue;
+        }
+
+        auto connectionIndex = pivotObject->getConnectionIndex(muscleObject);
+        auto& angle = pivotObject->connections[connectionIndex].angleFromPrevious;
+        auto& nextAngle = pivotObject->connections[(connectionIndex + 1) % pivotObject->numConnections].angleFromPrevious;
         auto diff = initialAngle - angle;
 
         // Check for enough angle space
@@ -563,6 +571,9 @@ MuscleProcessor::restoreInitialAngleFromPreviousIntern(float& initialAngle, Obje
             nextAngle -= diff;
         }
         initialAngle = VALUE_NOT_SET_FLOAT;
+
+        pivotObject->releaseLock();
+        break;
     }
 }
 

@@ -116,11 +116,12 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteObject(Simul
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::DelObject;
     operation.data.delObject.objectIndex = objectIndex;
-    if (data.structuralOperations.tryAddEntry(operation) != -1) {
-        auto object = data.entities.objects.at(objectIndex);
-        if (object->type == ObjectType_Cell) {
-            atomicSub(&object->typeData.cell.creature->numCells, 1u);
-        }
+    if (data.structuralOperations.tryAddEntry(operation) == -1) {
+        return;
+    }
+    auto object = data.entities.objects.at(objectIndex);
+    if (object->type == ObjectType_Cell) {
+        atomicSub(&object->typeData.cell.creature->numCells, 1u);
     }
 }
 

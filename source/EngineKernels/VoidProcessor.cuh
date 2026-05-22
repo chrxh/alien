@@ -54,4 +54,18 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
     }
 
     object->typeData.cell.cellState = CellState_InstantDying;
+
+    // Structural changes => restore initial angles from connected muscle cells
+    for (int i = 0, j = object->numConnections; i < j; ++i) {
+        auto& connectedObject = object->connections[i].object;
+        if (connectedObject->type != ObjectType_Cell) {
+            continue;
+        }
+        auto connectedCell = &connectedObject->typeData.cell;
+        if (connectedCell->cellType != CellType_Muscle) {
+            continue;
+        }
+        auto pivotObject = connectedObject->connections[0].object;
+        MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject, pivotObject);
+    }
 }

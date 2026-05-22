@@ -330,7 +330,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
         }
         if (connectedObject->typeData.cell.cellType == CellType_Muscle && connectedObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
             connectedObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
-            MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject, hostObject, i);
+            MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject, hostObject);
 
             // Update newObject position and direction for corrected angle
             anglesForNewConnection = ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostObject, constructionData.shapeResult.angle);
@@ -392,15 +392,13 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     // For bending muscle cells: Reset front angle and restore initial angle
     if (lastObject->typeData.cell.cellType == CellType_Muscle && lastObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
         lastObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
-        auto connectionIndex = hostObject->getConnectionIndex(lastObject);
-        MuscleProcessor::restoreInitialAngleFromPrevious(lastObject, hostObject, connectionIndex);
+        MuscleProcessor::restoreInitialAngleFromPrevious(lastObject, hostObject);
     }
     if (hostObject->typeData.cell.cellType == CellType_Muscle && hostObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
         hostObject->typeData.cell.frontAngle = VALUE_NOT_SET_FLOAT;
         // If lastObject is also pivot object of hostObject => also restore initial angle on lastObject
         if (hostObject->connections[0].object == lastObject) {
-            auto connectionIndex = lastObject->getConnectionIndex(hostObject);
-            MuscleProcessor::restoreInitialAngleFromPrevious(hostObject, lastObject, connectionIndex);
+            MuscleProcessor::restoreInitialAngleFromPrevious(hostObject, lastObject);
         }
     }
 
