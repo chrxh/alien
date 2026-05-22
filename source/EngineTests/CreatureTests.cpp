@@ -467,7 +467,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         auto cells = actualData.getObjectsForCreature(creature._id);
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        movementDirection = Math::getNormalized(cells.at(5)._pos - cells.at(0)._pos);
+        movementDirection = Math::getNormalized(cells.at(3)._pos - cells.at(0)._pos);
         if (direction == Direction::Backward) {
             movementDirection = -movementDirection;
         }
