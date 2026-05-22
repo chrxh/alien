@@ -351,8 +351,8 @@ void _InspectionWindow::processParticle(EnergyDesc particle)
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Energy particle").rank(AlienGui::TreeNodeRank::High))) {
             processPropertiesSubNode("Energy particle", [&] {
                 inspectorHexId("Particle id", particle._id);
-                AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Position").format("%.2f").textWidth(TextWidth), particle._pos.x, particle._pos.y);
-                AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Velocity").format("%.2f").textWidth(TextWidth), particle._vel.x, particle._vel.y);
+                AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Position").format("%.3f").textWidth(TextWidth), particle._pos.x, particle._pos.y);
+                AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Velocity").format("%.3f").textWidth(TextWidth), particle._vel.x, particle._vel.y);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth), particle._energy);
                 AlienGui::ComboColor(
                     AlienGui::ComboColorParameters()
