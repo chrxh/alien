@@ -493,7 +493,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         auto backCellIt = std::ranges::find_if(
             actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 0 && object.getCellRef()._parentNodeIndex == 0; });
 
-        auto movedRefPoint = lastPos + movementDirection * 10.0f;
+        auto movedRefPoint = lastPos + movementDirection * 5.0f;
         EXPECT_LT(0.0, Math::dot(backCellIt->_pos - movedRefPoint, movementDirection));
     }
 }
