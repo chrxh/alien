@@ -450,7 +450,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
     _simulationFacade->calcTimesteps(1000);
 
     RealVector2D movementDirection;
-    RealVector2D refPoint;
+    RealVector2D lastPos;
     {
         auto actualData = _simulationFacade->getSimulationData();
         for (auto& object : actualData._objects) {
@@ -465,13 +465,18 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         ASSERT_EQ(6 + 4 + 4, actualData.getObjectsForCreature(creature._id).size());
 
         auto cells = actualData.getObjectsForCreature(creature._id);
-        std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        movementDirection = Math::getNormalized(cells.at(3)._pos - cells.at(0)._pos);
+        auto backCellIt = std::ranges::find_if(
+            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 0 && object.getCellRef()._parentNodeIndex== 0; });
+
+        auto frontCellIt = std::ranges::find_if(
+            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 5 && object.getCellRef()._parentNodeIndex == 0; });
+
+        movementDirection = Math::getNormalized(frontCellIt->_pos - backCellIt->_pos);
         if (direction == Direction::Backward) {
             movementDirection = -movementDirection;
         }
-        refPoint = cells.at(0)._pos;
+        lastPos = backCellIt->_pos;
     }
 
     _simulationFacade->calcTimesteps(1500);
@@ -484,10 +489,12 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         ASSERT_EQ(6 + 4 + 4, actualData.getObjectsForCreature(creature._id).size());
 
         auto cells = actualData.getObjectsForCreature(creature._id);
-        std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        auto movedRefPoint = refPoint + movementDirection * 10.0f;
-        EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, movementDirection));
+        auto backCellIt = std::ranges::find_if(
+            actualData._objects, [](ObjectDesc const& object) { return object.getCellRef()._nodeIndex == 0 && object.getCellRef()._parentNodeIndex == 0; });
+
+        auto movedRefPoint = lastPos + movementDirection * 10.0f;
+        EXPECT_LT(0.0, Math::dot(backCellIt->_pos - movedRefPoint, movementDirection));
     }
 }
 
