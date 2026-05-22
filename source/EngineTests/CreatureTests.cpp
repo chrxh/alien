@@ -725,13 +725,14 @@ TEST_F(CreatureTests, muscleSeed)
         }));
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(250);
+    _simulationFacade->calcTimesteps(401);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(4, actualData._objects.size());
+    ASSERT_EQ(5, actualData._objects.size());
 
     auto cellIt = std::ranges::find_if(
         actualData._objects, [](ObjectDesc const& object) { return object.getObjectType() == ObjectType_Cell && object.getCellRef()._nodeIndex == 1; });
+
     ASSERT_NE(cellIt, actualData._objects.end());
     auto cell1 = *cellIt;
     EXPECT_TRUE(approxCompare(240.0f, cell1._connections.at(0)._angleFromPrevious));
