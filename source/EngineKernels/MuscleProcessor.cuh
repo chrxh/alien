@@ -555,26 +555,17 @@ __inline__ __device__ void MuscleProcessor::restoreInitialAngleFromPreviousInter
         return;
     }
 
-    for (int retry = 0; retry < 20; ++retry) {
-        if (!pivotObject->tryLock()) {
-            continue;
-        }
+    auto connectionIndex = pivotObject->getConnectionIndex(muscleObject);
+    auto& angle = pivotObject->connections[connectionIndex].angleFromPrevious;
+    auto& nextAngle = pivotObject->connections[(connectionIndex + 1) % pivotObject->numConnections].angleFromPrevious;
+    auto diff = initialAngle - angle;
 
-        auto connectionIndex = pivotObject->getConnectionIndex(muscleObject);
-        auto& angle = pivotObject->connections[connectionIndex].angleFromPrevious;
-        auto& nextAngle = pivotObject->connections[(connectionIndex + 1) % pivotObject->numConnections].angleFromPrevious;
-        auto diff = initialAngle - angle;
-
-        // Check for enough angle space
-        if (!(diff > 0 && nextAngle <= diff)) {
-            angle = initialAngle;
-            nextAngle -= diff;
-        }
-        initialAngle = VALUE_NOT_SET_FLOAT;
-
-        pivotObject->releaseLock();
-        break;
+    // Check for enough angle space
+    if (!(diff > 0 && nextAngle <= diff)) {
+        angle = initialAngle;
+        nextAngle -= diff;
     }
+    initialAngle = VALUE_NOT_SET_FLOAT;
 }
 
 __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object* object, float activation)

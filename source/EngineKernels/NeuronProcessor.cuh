@@ -72,6 +72,7 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
         }
 
         float channelZeroDeviation = abs(cell.signal.channels[0] - cell.futureSignal.channels[0]);
+        channelZeroDeviation += abs(cell.signal.channels[Channels::AttackerNotify] - cell.futureSignal.channels[Channels::AttackerNotify]);
         cell.signalChanges = static_cast<uint8_t>(min(255.0f, channelZeroDeviation * 255 / 2));
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);

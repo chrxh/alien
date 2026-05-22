@@ -66,6 +66,14 @@ __device__ __inline__ void VoidProcessor::processCell(SimulationData& data, Simu
             continue;
         }
         auto pivotObject = connectedObject->connections[0].object;
-        MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject, pivotObject);
+
+        for (int retry = 0; retry < 20; ++retry) {
+            if (!pivotObject->tryLock()) {
+                continue;
+            }
+            MuscleProcessor::restoreInitialAngleFromPrevious(connectedObject, pivotObject);
+            pivotObject->releaseLock();
+            break;
+        }
     }
 }

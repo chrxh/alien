@@ -35,7 +35,7 @@ public:
 
 private:
     float _zoomFactor = 1.0f;
-    float _zoomSensitivity = 1.07f;
+    float _zoomSensitivity = 1.04f;
     RealVector2D _centerInWorldPos;
     IntVector2D _viewSize;
 };
