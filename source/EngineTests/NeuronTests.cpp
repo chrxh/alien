@@ -235,9 +235,6 @@ struct ApplyNeuralNetParameter
     float inputValue;
 };
 
-constexpr float ApplyNeuralNetWeight = 0.8f;
-constexpr float ApplyNeuralNetBias = 0.15f;
-
 inline std::vector<ApplyNeuralNetParameter> generateApplyNeuralNetParameters()
 {
     std::vector<ApplyNeuralNetParameter> params;
@@ -263,6 +260,9 @@ INSTANTIATE_TEST_SUITE_P(NeuronTests_ApplyNeuralNet, NeuronTests_ApplyNeuralNet,
 
 TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
 {
+    auto constexpr ApplyNeuralNetWeight = 0.8f;
+    auto constexpr ApplyNeuralNetBias = 0.15f;
+
     auto param = GetParam();
 
     // Non-trivial weight and bias values for the test
