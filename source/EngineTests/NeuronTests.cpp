@@ -21,6 +21,7 @@ public:
 protected:
     float activationTanh(float value) const { return std::tanh(value); }
     float binaryStep(float value) const { return value >= NEAR_ZERO ? 1.0f : 0.0f; }
+    float mod(float value) const { return std::fmod(std::fmod(value + 1.0f, 2.0f) + 2.0f, 2.0f) - 1.0f; }
 
     float applyActivationFunction(ActivationFunction af, float value)
     {
@@ -39,6 +40,9 @@ protected:
             break;
         case ActivationFunction_Gaussian:
             return expf(-2 * value * value);
+            break;
+        case ActivationFunction_Mod:
+            return mod(value);
             break;
         default:
             THROW_NOT_IMPLEMENTED();
@@ -256,20 +260,20 @@ INSTANTIATE_TEST_SUITE_P(NeuronTests_ApplyNeuralNet, NeuronTests_ApplyNeuralNet,
 
 TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
 {
+    auto constexpr ApplyNeuralNetWeight = 0.8f;
+    auto constexpr ApplyNeuralNetBias = 0.15f;
+
     auto param = GetParam();
 
     // Non-trivial weight and bias values for the test
-    constexpr float weight = 0.8f;  // Non-trivial weight (different from default 1.0)
-    constexpr float bias = 0.15f;   // Non-trivial bias (different from default 0.0)
-
     // Setup neural network with non-trivial weight matrix and bias vector:
     // - Channel 'c' uses the specified activation function with custom weight and bias
     // - All other channels use Identity activation with identity weight (1.0) and zero bias
     NeuralNetDesc nn;
     for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         nn._activationFunctions[i] = (i == param.channelIndex) ? param.activationFunction : ActivationFunction_Identity;
-        nn.weight(i, i, (i == param.channelIndex) ? weight : 1.0f);
-        nn._biases[i] = (i == param.channelIndex) ? bias : 0.0f;
+        nn.weight(i, i, (i == param.channelIndex) ? ApplyNeuralNetWeight : 1.0f);
+        nn._biases[i] = (i == param.channelIndex) ? ApplyNeuralNetBias : 0.0f;
     }
 
     nn._connectionWeights[0] = 1.0f;  // Enable input signal reception from connected cell
@@ -299,7 +303,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     // All other channels: Identity(0) = 0
     std::vector<float> expected(NEURONS_PER_CELL, 0.0f);
 
-    float preActivation = weight * param.inputValue + bias;
+    float preActivation = ApplyNeuralNetWeight * param.inputValue + ApplyNeuralNetBias;
     float rawOutput = applyActivationFunction(param.activationFunction, preActivation);
     expected[param.channelIndex] = std::clamp(rawOutput, -2.0f, 2.0f);
 

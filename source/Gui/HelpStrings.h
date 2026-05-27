@@ -149,7 +149,8 @@ namespace Const
         " considering the weights and bias in order to calculate the neuron's output, i.e., output_j = sigma(sum_i (input_i * weight_ji) + bias_j), where sigma"
         " denotes the activation function. The following choices for sigma are available:\n\n" ICON_FA_CHEVRON_RIGHT
         " Tanh(x) := tanh(x)\n\n" ICON_FA_CHEVRON_RIGHT " Binary step(x) := 1 if x >= 0 and 0 if x < 0\n\n" ICON_FA_CHEVRON_RIGHT
-        " Identity(x) := x\n\n" ICON_FA_CHEVRON_RIGHT " Abs(x) := x if x >= 0 and -x if x < 0\n\n" ICON_FA_CHEVRON_RIGHT " Gaussian(x) := exp(-2 * x * x)";
+        " Identity(x) := x\n\n" ICON_FA_CHEVRON_RIGHT " Abs(x) := x if x >= 0 and -x if x < 0\n\n" ICON_FA_CHEVRON_RIGHT
+        " Gaussian(x) := exp(-2 * x * x)\n\n" ICON_FA_CHEVRON_RIGHT " Mod(x) := x modulo 2 in range [-1, 1)";
 
     std::string const GenomeNeuronWeightAndBiasTooltip =
         "Each neuron has 8 input channels and produces an output by the formula output_j = sigma((sum_i (input_i * weight_ji) + "

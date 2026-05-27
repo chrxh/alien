@@ -202,6 +202,9 @@ void _NeuralNetEditorWidget::processActivationFunctions(std::vector<ActivationFu
         case ActivationFunction_Gaussian:
             value = Math::gaussian(x);
             break;
+        case ActivationFunction_Mod:
+            value = Math::modulo(x + 1.0f, 2.0f) - 1.0f;
+            break;
         }
         return RealVector2D{refPos.x + plotSize.x / 2 + x * plotSize.x / 8, refPos.y - value * plotSize.y / 2};
     };
