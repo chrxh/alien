@@ -251,12 +251,6 @@ inline std::vector<ApplyNeuralNetParameter> generateApplyNeuralNetParameters()
         }
     }
 
-    for (int c = 0; c < NEURONS_PER_CELL; ++c) {
-        for (float preActivation : {1.0f, -1.5f, 1.5f}) {
-            params.push_back({ActivationFunction_Mod, c, (preActivation - ApplyNeuralNetBias) / ApplyNeuralNetWeight});
-        }
-    }
-
     return params;
 }
 
