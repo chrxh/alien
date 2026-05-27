@@ -140,11 +140,11 @@ find source -name "*.cpp" -o -name "*.h" | xargs clang-format --style=file:sourc
 
 ### InspectionWindow Tree Node Behavior
 The InspectionWindow uses tree nodes to display object/cell/particle properties. The tree node open/close states follow these rules:
-- **First open ever**: Only the "Object" (or "Energy particle") node is fully expanded (including children). All other nodes (e.g., "Cell", "Creature", "Signals", etc.) are collapsed.
-- **Subsequent opens** (same or different object): The last tree node states are restored. If a tree node name matches a previously opened node, it retains its last open/close state. Otherwise, it defaults to collapsed.
+- **First open ever**: Only the "Object" (or "Energy particle") node is fully expanded (including children). All other nodes (e.g., "Cell", "Creature", "Signals", etc.) are collapsed via `defaultOpen(false)`.
+- **Subsequent opens** (same or different object): The last tree node states are restored. If a tree node name matches a previously opened node, it retains its last open/close state. Otherwise, it defaults to the `defaultOpen` parameter.
 - **Scroll position**: The scroll position is also persisted and restored across window reopens.
 
-Implementation: Static state is stored in `_InspectionWindow::_savedTreeNodeStates` and `_InspectionWindow::_savedScrollY`. The helper methods `applyTreeNodeState()` and `saveTreeNodeState()` manage state before/after each `AlienGui::BeginTreeNode()` call.
+Implementation: `AlienGui::BeginTreeNode` generically saves/restores each tree node's open/close state by name via the static `_savedTreeNodeStatesByName` map. On first encounter of a new ImGui ID, it applies any previously saved state; otherwise it uses the `defaultOpen` parameter.
 
 ### Command-Line Interface (CLI)
 The project includes a CLI for headless simulation execution:
