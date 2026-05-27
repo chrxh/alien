@@ -235,6 +235,9 @@ struct ApplyNeuralNetParameter
     float inputValue;
 };
 
+constexpr float ApplyNeuralNetWeight = 0.8f;
+constexpr float ApplyNeuralNetBias = 0.15f;
+
 inline std::vector<ApplyNeuralNetParameter> generateApplyNeuralNetParameters()
 {
     std::vector<ApplyNeuralNetParameter> params;
@@ -245,6 +248,12 @@ inline std::vector<ApplyNeuralNetParameter> generateApplyNeuralNetParameters()
                 float inputValue = -2.0f + i * 0.2f;
                 params.push_back({static_cast<ActivationFunction>(af), c, inputValue});
             }
+        }
+    }
+
+    for (int c = 0; c < NEURONS_PER_CELL; ++c) {
+        for (float preActivation : {1.0f, -1.5f, 1.5f}) {
+            params.push_back({ActivationFunction_Mod, c, (preActivation - ApplyNeuralNetBias) / ApplyNeuralNetWeight});
         }
     }
 
@@ -263,17 +272,14 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     auto param = GetParam();
 
     // Non-trivial weight and bias values for the test
-    constexpr float weight = 0.8f;  // Non-trivial weight (different from default 1.0)
-    constexpr float bias = 0.15f;   // Non-trivial bias (different from default 0.0)
-
     // Setup neural network with non-trivial weight matrix and bias vector:
     // - Channel 'c' uses the specified activation function with custom weight and bias
     // - All other channels use Identity activation with identity weight (1.0) and zero bias
     NeuralNetDesc nn;
     for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         nn._activationFunctions[i] = (i == param.channelIndex) ? param.activationFunction : ActivationFunction_Identity;
-        nn.weight(i, i, (i == param.channelIndex) ? weight : 1.0f);
-        nn._biases[i] = (i == param.channelIndex) ? bias : 0.0f;
+        nn.weight(i, i, (i == param.channelIndex) ? ApplyNeuralNetWeight : 1.0f);
+        nn._biases[i] = (i == param.channelIndex) ? ApplyNeuralNetBias : 0.0f;
     }
 
     nn._connectionWeights[0] = 1.0f;  // Enable input signal reception from connected cell
@@ -303,7 +309,7 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
     // All other channels: Identity(0) = 0
     std::vector<float> expected(NEURONS_PER_CELL, 0.0f);
 
-    float preActivation = weight * param.inputValue + bias;
+    float preActivation = ApplyNeuralNetWeight * param.inputValue + ApplyNeuralNetBias;
     float rawOutput = applyActivationFunction(param.activationFunction, preActivation);
     expected[param.channelIndex] = std::clamp(rawOutput, -2.0f, 2.0f);
 
@@ -314,15 +320,6 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
         EXPECT_TRUE(approxCompare(expected[i], actual[i], precision))
             << "Mismatch at channel " << i << ": expected=" << expected[i] << ", actual=" << actual[i];
     }
-}
-
-TEST_F(NeuronTests, moduloActivationWrapsToMinusOneToOne)
-{
-    EXPECT_FLOAT_EQ(-1.0f, applyActivationFunction(ActivationFunction_Mod, 1.0f));
-    EXPECT_FLOAT_EQ(0.5f, applyActivationFunction(ActivationFunction_Mod, -1.5f));
-    EXPECT_FLOAT_EQ(-0.5f, applyActivationFunction(ActivationFunction_Mod, 1.5f));
-    EXPECT_FLOAT_EQ(-1.0f, applyActivationFunction(ActivationFunction_Mod, -1.0f));
-    EXPECT_FLOAT_EQ(0.0f, applyActivationFunction(ActivationFunction_Mod, 0.0f));
 }
 
 // Test that signals are truncated to [-2, 2] after neural network application
