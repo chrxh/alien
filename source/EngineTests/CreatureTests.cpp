@@ -447,7 +447,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(1500);
 
     RealVector2D movementDirection;
     RealVector2D lastPos;
