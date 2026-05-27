@@ -138,6 +138,14 @@ find source -name "*.cpp" -o -name "*.h" | xargs clang-format --style=file:sourc
 
 ## Common Development Tasks
 
+### InspectionWindow Tree Node Behavior
+The InspectionWindow uses tree nodes to display object/cell/particle properties. The tree node open/close states follow these rules:
+- **First open ever**: Only the "Object" (or "Energy particle") node is fully expanded (including children). All other nodes (e.g., "Cell", "Creature", "Signals", etc.) are collapsed.
+- **Subsequent opens** (same or different object): The last tree node states are restored. If a tree node name matches a previously opened node, it retains its last open/close state. Otherwise, it defaults to collapsed.
+- **Scroll position**: The scroll position is also persisted and restored across window reopens.
+
+Implementation: Static state is stored in `_InspectionWindow::_savedTreeNodeStates` and `_InspectionWindow::_savedScrollY`. The helper methods `applyTreeNodeState()` and `saveTreeNodeState()` manage state before/after each `AlienGui::BeginTreeNode()` call.
+
 ### Command-Line Interface (CLI)
 The project includes a CLI for headless simulation execution:
 ```bash

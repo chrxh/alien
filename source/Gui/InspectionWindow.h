@@ -1,6 +1,8 @@
 #pragma once
 
 #include <optional>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <EngineInterface/Definitions.h>
@@ -42,12 +44,20 @@ private:
 
     void validateAndCorrect(ObjectDesc& object) const;
 
+    void applyTreeNodeState(std::string const& name, bool defaultOpen);
+    void saveTreeNodeState(std::string const& name, bool isOpen);
+
     RealVector2D _initialPos;
 
     bool _on = true;
     uint64_t _entityId = 0;
     bool _selectGenomeTab = false;
+    bool _isFirstFrame = true;
     std::optional<std::vector<SignalEntryDesc>> _pendingSignalEntries;
 
     NeuralNetEditorWidget _neuralNetWidget;
+
+    static bool _hasEverOpened;
+    static std::unordered_map<std::string, bool> _savedTreeNodeStates;
+    static float _savedScrollY;
 };

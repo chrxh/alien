@@ -21,6 +21,10 @@
 
 using namespace std::string_literals;
 
+bool _InspectionWindow::_hasEverOpened = false;
+std::unordered_map<std::string, bool> _InspectionWindow::_savedTreeNodeStates;
+float _InspectionWindow::_savedScrollY = 0;
+
 namespace
 {
     auto constexpr CellWindowWidth = 420.0f;
@@ -223,6 +227,24 @@ _InspectionWindow::_InspectionWindow(uint64_t entityId, RealVector2D const& init
 
 _InspectionWindow::~_InspectionWindow() {}
 
+void _InspectionWindow::applyTreeNodeState(std::string const& name, bool defaultOpen)
+{
+    if (_isFirstFrame) {
+        if (_hasEverOpened) {
+            auto it = _savedTreeNodeStates.find(name);
+            bool open = (it != _savedTreeNodeStates.end()) ? it->second : false;
+            ImGui::SetNextItemOpen(open);
+        } else {
+            ImGui::SetNextItemOpen(defaultOpen);
+        }
+    }
+}
+
+void _InspectionWindow::saveTreeNodeState(std::string const& name, bool isOpen)
+{
+    _savedTreeNodeStates[name] = isOpen;
+}
+
 void _InspectionWindow::process()
 {
     if (!_on) {
@@ -236,6 +258,9 @@ void _InspectionWindow::process()
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
     if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
+        if (_isFirstFrame && _hasEverOpened) {
+            ImGui::SetScrollY(_savedScrollY);
+        }
         auto windowPos = ImGui::GetWindowPos();
         if (isObject()) {
             auto extendedObject = std::get<ExtendedObjectDesc>(entity);
@@ -243,6 +268,9 @@ void _InspectionWindow::process()
         } else {
             processParticle(std::get<EnergyDesc>(entity));
         }
+        _savedScrollY = ImGui::GetScrollY();
+        _hasEverOpened = true;
+        _isFirstFrame = false;
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescEditService::get().getPos(entity), borderlessRendering);
         auto factor = StyleRepository::get().scale(1);
@@ -348,7 +376,10 @@ void _InspectionWindow::processParticle(EnergyDesc particle)
     auto origParticle = particle;
     AlienGui::DynamicTableLayout table(TableColumnWidth);
     if (table.begin()) {
-        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Energy particle").rank(AlienGui::TreeNodeRank::High))) {
+        applyTreeNodeState("Energy particle", true);
+        auto energyParticleOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Energy particle").rank(AlienGui::TreeNodeRank::High));
+        saveTreeNodeState("Energy particle", energyParticleOpen);
+        if (energyParticleOpen) {
             processPropertiesSubNode("Energy particle", [&] {
                 inspectorHexId("Particle id", particle._id);
                 AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Position").format("%.3f").textWidth(TextWidth), particle._pos.x, particle._pos.y);
@@ -373,7 +404,10 @@ void _InspectionWindow::processParticle(EnergyDesc particle)
 
 void _InspectionWindow::processObjectNode(ObjectDesc& object)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Object").rank(AlienGui::TreeNodeRank::High))) {
+    applyTreeNodeState("Object", true);
+    auto objectOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Object").rank(AlienGui::TreeNodeRank::High));
+    saveTreeNodeState("Object", objectOpen);
+    if (objectOpen) {
         processPropertiesSubNode("Object", [&] {
             inspectorHexId("Object id", object._id);
             AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Position").format("%.2f").textWidth(TextWidth), object._pos.x, object._pos.y);
@@ -397,7 +431,10 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
         });
 
         if (!object._connections.empty()) {
-            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connections").rank(AlienGui::TreeNodeRank::Default))) {
+            applyTreeNodeState("Connections", true);
+            auto connectionsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connections").rank(AlienGui::TreeNodeRank::Default));
+            saveTreeNodeState("Connections", connectionsOpen);
+            if (connectionsOpen) {
                 for (size_t i = 0; i < object._connections.size(); ++i) {
                     auto& conn = object._connections.at(i);
                     auto const connectionNumber = i + 1;
@@ -420,7 +457,10 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
 
 void _InspectionWindow::processSolidNode(ObjectDesc& object)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Solid").rank(AlienGui::TreeNodeRank::High))) {
+    applyTreeNodeState("Solid", false);
+    auto solidOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Solid").rank(AlienGui::TreeNodeRank::High));
+    saveTreeNodeState("Solid", solidOpen);
+    if (solidOpen) {
         processPropertiesSubNode("Solid", [&] {
             auto& solid = object.getSolidRef();
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth), solid._energy);
@@ -431,7 +471,10 @@ void _InspectionWindow::processSolidNode(ObjectDesc& object)
 
 void _InspectionWindow::processFluidNode(ObjectDesc& object)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Fluid").rank(AlienGui::TreeNodeRank::High))) {
+    applyTreeNodeState("Fluid", false);
+    auto fluidOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Fluid").rank(AlienGui::TreeNodeRank::High));
+    saveTreeNodeState("Fluid", fluidOpen);
+    if (fluidOpen) {
         processPropertiesSubNode("Fluid", [&] {
             auto& fluid = object.getFluidRef();
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth), fluid._energy);
@@ -443,7 +486,10 @@ void _InspectionWindow::processFluidNode(ObjectDesc& object)
 
 void _InspectionWindow::processFreeCellNode(ObjectDesc& object)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Free cell").rank(AlienGui::TreeNodeRank::High))) {
+    applyTreeNodeState("Free cell", false);
+    auto freeCellOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Free cell").rank(AlienGui::TreeNodeRank::High));
+    saveTreeNodeState("Free cell", freeCellOpen);
+    if (freeCellOpen) {
         processPropertiesSubNode("Free cell", [&] {
             auto& freeCell = object.getFreeCellRef();
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth), freeCell._energy);
@@ -455,7 +501,10 @@ void _InspectionWindow::processFreeCellNode(ObjectDesc& object)
 
 void _InspectionWindow::processCellNode(ObjectDesc& object)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell").rank(AlienGui::TreeNodeRank::High))) {
+    applyTreeNodeState("Cell", false);
+    auto cellOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell").rank(AlienGui::TreeNodeRank::High));
+    saveTreeNodeState("Cell", cellOpen);
+    if (cellOpen) {
         auto& cell = object.getCellRef();
         processPropertiesSubNode("Cell", [&] {
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Usable energy").format("%.2f").textWidth(TextWidth), cell._usableEnergy);
@@ -496,7 +545,10 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
 
 void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor").rank(AlienGui::TreeNodeRank::Default))) {
+    applyTreeNodeState("Constructor", false);
+    auto constructorOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor").rank(AlienGui::TreeNodeRank::Default));
+    saveTreeNodeState("Constructor", constructorOpen);
+    if (constructorOpen) {
         AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(TextWidth), constructor._autoTriggerInterval);
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation time").textWidth(TextWidth), constructor._constructionActivationTime);
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Construction angle").format("%.2f").textWidth(TextWidth), constructor._constructionAngle);
@@ -524,7 +576,10 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 
 void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Creature").rank(AlienGui::TreeNodeRank::High))) {
+    applyTreeNodeState("Creature", false);
+    auto creatureOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Creature").rank(AlienGui::TreeNodeRank::High));
+    saveTreeNodeState("Creature", creatureOpen);
+    if (creatureOpen) {
         processPropertiesSubNode("Creature", [&] {
             auto& creature = extendedObject.creature.value();
             inspectorHexId("Creature id", creature._id);
@@ -546,7 +601,10 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
 
 void _InspectionWindow::processSignalsNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::Default))) {
+    applyTreeNodeState("Signals", false);
+    auto signalsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::Default));
+    saveTreeNodeState("Signals", signalsOpen);
+    if (signalsOpen) {
         auto& channels = cell._signal._channels;
         if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
             channels.resize(NEURONS_PER_CELL, 0.0f);
@@ -561,7 +619,10 @@ void _InspectionWindow::processSignalsNode(CellDesc& cell)
 
 void _InspectionWindow::processNeuralNetNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default))) {
+    applyTreeNodeState("Neural network", false);
+    auto neuralNetOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default));
+    saveTreeNodeState("Neural network", neuralNetOpen);
+    if (neuralNetOpen) {
         _neuralNetWidget->process(
             cell._neuralNetwork._weights, cell._neuralNetwork._biases, cell._neuralNetwork._activationFunctions, cell._neuralNetwork._connectionWeights);
     }
@@ -593,7 +654,10 @@ namespace
 
 void _InspectionWindow::processCellTypeNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type##Cell node").rank(AlienGui::TreeNodeRank::Default))) {
+    applyTreeNodeState("Cell type##Cell node", false);
+    auto cellTypeOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type##Cell node").rank(AlienGui::TreeNodeRank::Default));
+    saveTreeNodeState("Cell type##Cell node", cellTypeOpen);
+    if (cellTypeOpen) {
         auto cellType = cell.getCellType();
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
