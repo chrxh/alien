@@ -106,6 +106,7 @@ public:
     // Only for tests
     void testOnly_mutate(uint64_t objectId);
     void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2);
+    void testOnly_createConnectionWithAbsAngle(uint64_t objectId1, uint64_t objectId2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta);

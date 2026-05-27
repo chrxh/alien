@@ -122,6 +122,8 @@ public:
     //****************
     virtual void testOnly_mutate(uint64_t objectId) = 0;
     virtual void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) = 0;
+    virtual void
+    testOnly_createConnectionWithAbsAngle(uint64_t objectId1, uint64_t objectId2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2) = 0;
     virtual void testOnly_cleanupAfterTimestep() = 0;
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
     virtual void testOnly_resizeArrays(ArraySizesForGpuEntities const& sizeDelta) = 0;

@@ -472,6 +472,17 @@ void EngineWorker::testOnly_createConnection(uint64_t objectId1, uint64_t object
     _simulationCudaFacade->testOnly_createConnection(objectId1, objectId2);
 }
 
+void EngineWorker::testOnly_createConnectionWithAbsAngle(
+    uint64_t objectId1,
+    uint64_t objectId2,
+    float desiredDistance,
+    float desiredAbsAngle1,
+    float desiredAbsAngle2)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_createConnectionWithAbsAngle(objectId1, objectId2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
+}
+
 void EngineWorker::testOnly_cleanupAfterTimestep()
 {
     EngineWorkerGuard access(this);

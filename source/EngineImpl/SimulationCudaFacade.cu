@@ -595,6 +595,19 @@ void _SimulationCudaFacade::testOnly_createConnection(uint64_t objectId1, uint64
     syncAndCheck();
 }
 
+void _SimulationCudaFacade::testOnly_createConnectionWithAbsAngle(
+    uint64_t objectId1,
+    uint64_t objectId2,
+    float desiredDistance,
+    float desiredAbsAngle1,
+    float desiredAbsAngle2)
+{
+    checkAndProcessSimulationParameterChanges();
+    TestKernelsService::get().testOnly_createConnectionWithAbsAngle(
+        _settings.cudaSettings, getSimulationDataPtrCopy(), objectId1, objectId2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
+    syncAndCheck();
+}
+
 void _SimulationCudaFacade::testOnly_cleanupAfterTimestep()
 {
     checkAndProcessSimulationParameterChanges();
