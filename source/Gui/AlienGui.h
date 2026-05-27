@@ -560,6 +560,7 @@ private:
         std::optional<std::string> const& highlightedSubString = std::nullopt);
 
     static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
+    static std::unordered_map<std::string, bool> _savedTreeNodeStatesByName;
     static std::vector<unsigned int> _treeNodeIdStack;
 
     static std::unordered_set<unsigned int> _basicSilderExpanded;

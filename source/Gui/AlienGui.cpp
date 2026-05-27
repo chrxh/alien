@@ -71,6 +71,7 @@ namespace
 std::unordered_set<unsigned int> AlienGui::_basicSilderExpanded;
 std::vector<ImGuiID> AlienGui::_treeNodeIdStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienGui::_treeNodeInfoById;
+std::unordered_map<std::string, bool> AlienGui::_savedTreeNodeStatesByName;
 std::unordered_map<unsigned int, int> AlienGui::_signalMemorySelection;
 
 int AlienGui::_rotationStartIndex = 0;
@@ -1782,9 +1783,16 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     ImGui::PushID(id);
     id = ImGui::GetID("");
 
+    auto isFirstEncounter = _treeNodeInfoById.find(id) == _treeNodeInfoById.end();
     auto& treeNodeInfo = _treeNodeInfoById[id];
     if (parameters._startBlinking) {
         treeNodeInfo.startBlinkingTimepoint = std::chrono::steady_clock::now();
+    }
+
+    if (isFirstEncounter) {
+        auto it = _savedTreeNodeStatesByName.find(parameters._name);
+        bool open = (it != _savedTreeNodeStatesByName.end()) ? it->second : parameters._defaultOpen;
+        ImGui::SetNextItemOpen(open);
     }
 
     int highlightCountdown = 0;
@@ -1847,6 +1855,7 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     ImGui::PopStyleColor(3);
 
     treeNodeInfo.isOpen = result;
+    _savedTreeNodeStatesByName[parameters._name] = result;
 
     // Store the ID on the stack so EndTreeNode can retrieve it
     _treeNodeIdStack.push_back(id);
