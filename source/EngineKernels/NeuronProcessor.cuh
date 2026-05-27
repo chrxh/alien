@@ -216,6 +216,8 @@ __inline__ __device__ float NeuronProcessor::applyActivationFunction(ActivationF
         return abs(x);
     case ActivationFunction_Gaussian:
         return __expf(-2 * x * x);
+    case ActivationFunction_Mod:
+        return fmodf(fmodf(x + 1.0f, 2.0f) + 2.0f, 2.0f) - 1.0f;
     }
     return 0;
 }

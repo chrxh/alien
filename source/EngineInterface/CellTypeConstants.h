@@ -86,12 +86,13 @@ enum ActivationFunction_
     ActivationFunction_Identity,
     ActivationFunction_Abs,
     ActivationFunction_Gaussian,
+    ActivationFunction_Mod,
     ActivationFunction_Count,
 };
 
 namespace Const
 {
-    std::vector<std::string> const ActivationFunctionStrings = {"Tanh", "Binary step", "Identity", "Absolute value", "Gaussian"};
+    std::vector<std::string> const ActivationFunctionStrings = {"Tanh", "Binary step", "Identity", "Absolute value", "Gaussian", "Mod"};
 }
 
 using CellEvent = uint8_t;

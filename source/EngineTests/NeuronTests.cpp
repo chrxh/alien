@@ -21,6 +21,7 @@ public:
 protected:
     float activationTanh(float value) const { return std::tanh(value); }
     float binaryStep(float value) const { return value >= NEAR_ZERO ? 1.0f : 0.0f; }
+    float mod(float value) const { return std::fmod(std::fmod(value + 1.0f, 2.0f) + 2.0f, 2.0f) - 1.0f; }
 
     float applyActivationFunction(ActivationFunction af, float value)
     {
@@ -39,6 +40,9 @@ protected:
             break;
         case ActivationFunction_Gaussian:
             return expf(-2 * value * value);
+            break;
+        case ActivationFunction_Mod:
+            return mod(value);
             break;
         default:
             THROW_NOT_IMPLEMENTED();
@@ -310,6 +314,15 @@ TEST_P(NeuronTests_ApplyNeuralNet, applyNeuralNet)
         EXPECT_TRUE(approxCompare(expected[i], actual[i], precision))
             << "Mismatch at channel " << i << ": expected=" << expected[i] << ", actual=" << actual[i];
     }
+}
+
+TEST_F(NeuronTests, moduloActivationWrapsToMinusOneToOne)
+{
+    EXPECT_FLOAT_EQ(-1.0f, applyActivationFunction(ActivationFunction_Mod, 1.0f));
+    EXPECT_FLOAT_EQ(0.5f, applyActivationFunction(ActivationFunction_Mod, -1.5f));
+    EXPECT_FLOAT_EQ(-0.5f, applyActivationFunction(ActivationFunction_Mod, 1.5f));
+    EXPECT_FLOAT_EQ(-1.0f, applyActivationFunction(ActivationFunction_Mod, -1.0f));
+    EXPECT_FLOAT_EQ(0.0f, applyActivationFunction(ActivationFunction_Mod, 0.0f));
 }
 
 // Test that signals are truncated to [-2, 2] after neural network application
