@@ -21,7 +21,7 @@
 
 using namespace std::string_literals;
 
-float _InspectionWindow::_savedScrollY = 0;
+std::optional<float> _InspectionWindow::_savedScrollY;
 
 namespace
 {
@@ -238,8 +238,8 @@ void _InspectionWindow::process()
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
     if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
-        if (_isFirstFrame && _savedScrollY > 0) {
-            ImGui::SetScrollY(_savedScrollY);
+        if (_isFirstFrame && _savedScrollY) {
+            ImGui::SetScrollY(*_savedScrollY);
         }
         auto windowPos = ImGui::GetWindowPos();
         if (isObject()) {

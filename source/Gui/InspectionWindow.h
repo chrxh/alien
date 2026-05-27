@@ -53,5 +53,5 @@ private:
 
     NeuralNetEditorWidget _neuralNetWidget;
 
-    static float _savedScrollY;
+    static std::optional<float> _savedScrollY;
 };
