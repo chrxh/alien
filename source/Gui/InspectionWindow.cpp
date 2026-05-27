@@ -355,8 +355,7 @@ void _InspectionWindow::processParticle(EnergyDesc particle)
     auto origParticle = particle;
     AlienGui::DynamicTableLayout table(TableColumnWidth);
     if (table.begin()) {
-        auto energyParticleOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Energy particle").rank(AlienGui::TreeNodeRank::High));
-        if (energyParticleOpen) {
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Energy particle").rank(AlienGui::TreeNodeRank::High))) {
             processPropertiesSubNode("Energy particle", [&] {
                 inspectorHexId("Particle id", particle._id);
                 AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Position").format("%.3f").textWidth(TextWidth), particle._pos.x, particle._pos.y);
@@ -381,8 +380,7 @@ void _InspectionWindow::processParticle(EnergyDesc particle)
 
 void _InspectionWindow::processObjectNode(ObjectDesc& object)
 {
-    auto objectOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Object").rank(AlienGui::TreeNodeRank::High));
-    if (objectOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Object").rank(AlienGui::TreeNodeRank::High))) {
         processPropertiesSubNode("Object", [&] {
             inspectorHexId("Object id", object._id);
             AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name("Position").format("%.2f").textWidth(TextWidth), object._pos.x, object._pos.y);
@@ -406,8 +404,7 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
         });
 
         if (!object._connections.empty()) {
-            auto connectionsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connections").rank(AlienGui::TreeNodeRank::Default));
-            if (connectionsOpen) {
+            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connections").rank(AlienGui::TreeNodeRank::Default))) {
                 for (size_t i = 0; i < object._connections.size(); ++i) {
                     auto& conn = object._connections.at(i);
                     auto const connectionNumber = i + 1;
@@ -430,8 +427,7 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
 
 void _InspectionWindow::processSolidNode(ObjectDesc& object)
 {
-    auto solidOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Solid").rank(AlienGui::TreeNodeRank::High).defaultOpen(false));
-    if (solidOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Solid").rank(AlienGui::TreeNodeRank::High).defaultOpen(false))) {
         processPropertiesSubNode("Solid", [&] {
             auto& solid = object.getSolidRef();
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth), solid._energy);
@@ -442,8 +438,7 @@ void _InspectionWindow::processSolidNode(ObjectDesc& object)
 
 void _InspectionWindow::processFluidNode(ObjectDesc& object)
 {
-    auto fluidOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Fluid").rank(AlienGui::TreeNodeRank::High).defaultOpen(false));
-    if (fluidOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Fluid").rank(AlienGui::TreeNodeRank::High).defaultOpen(false))) {
         processPropertiesSubNode("Fluid", [&] {
             auto& fluid = object.getFluidRef();
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth), fluid._energy);
@@ -455,8 +450,7 @@ void _InspectionWindow::processFluidNode(ObjectDesc& object)
 
 void _InspectionWindow::processFreeCellNode(ObjectDesc& object)
 {
-    auto freeCellOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Free cell").rank(AlienGui::TreeNodeRank::High).defaultOpen(false));
-    if (freeCellOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Free cell").rank(AlienGui::TreeNodeRank::High).defaultOpen(false))) {
         processPropertiesSubNode("Free cell", [&] {
             auto& freeCell = object.getFreeCellRef();
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(TextWidth), freeCell._energy);
@@ -468,8 +462,7 @@ void _InspectionWindow::processFreeCellNode(ObjectDesc& object)
 
 void _InspectionWindow::processCellNode(ObjectDesc& object)
 {
-    auto cellOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell").rank(AlienGui::TreeNodeRank::High).defaultOpen(false));
-    if (cellOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell").rank(AlienGui::TreeNodeRank::High).defaultOpen(false))) {
         auto& cell = object.getCellRef();
         processPropertiesSubNode("Cell", [&] {
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Usable energy").format("%.2f").textWidth(TextWidth), cell._usableEnergy);
@@ -510,8 +503,7 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
 
 void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 {
-    auto constructorOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false));
-    if (constructorOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(TextWidth), constructor._autoTriggerInterval);
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation time").textWidth(TextWidth), constructor._constructionActivationTime);
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Construction angle").format("%.2f").textWidth(TextWidth), constructor._constructionAngle);
@@ -539,8 +531,7 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 
 void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
 {
-    auto creatureOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Creature").rank(AlienGui::TreeNodeRank::High).defaultOpen(false));
-    if (creatureOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Creature").rank(AlienGui::TreeNodeRank::High).defaultOpen(false))) {
         processPropertiesSubNode("Creature", [&] {
             auto& creature = extendedObject.creature.value();
             inspectorHexId("Creature id", creature._id);
@@ -562,8 +553,7 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
 
 void _InspectionWindow::processSignalsNode(CellDesc& cell)
 {
-    auto signalsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false));
-    if (signalsOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Signals").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         auto& channels = cell._signal._channels;
         if (static_cast<int>(channels.size()) < NEURONS_PER_CELL) {
             channels.resize(NEURONS_PER_CELL, 0.0f);
@@ -578,8 +568,7 @@ void _InspectionWindow::processSignalsNode(CellDesc& cell)
 
 void _InspectionWindow::processNeuralNetNode(CellDesc& cell)
 {
-    auto neuralNetOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false));
-    if (neuralNetOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neural network").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         _neuralNetWidget->process(
             cell._neuralNetwork._weights, cell._neuralNetwork._biases, cell._neuralNetwork._activationFunctions, cell._neuralNetwork._connectionWeights);
     }
@@ -611,8 +600,7 @@ namespace
 
 void _InspectionWindow::processCellTypeNode(CellDesc& cell)
 {
-    auto cellTypeOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type##Cell node").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false));
-    if (cellTypeOpen) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type##Cell node").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         auto cellType = cell.getCellType();
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
