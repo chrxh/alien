@@ -25,6 +25,18 @@ void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettin
     KERNEL_CALL_1_1(cudaTestCreateConnection, data, objectId1, objectId2);
 }
 
+void TestKernelsService::testOnly_createConnectionWithAbsAngle(
+    CudaSettings const& gpuSettings,
+    SimulationData const& data,
+    uint64_t objectId1,
+    uint64_t objectId2,
+    float desiredDistance,
+    float desiredAbsAngle1,
+    float desiredAbsAngle2)
+{
+    KERNEL_CALL_1_1(cudaTestCreateConnectionWithAbsAngle, data, objectId1, objectId2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
+}
+
 bool TestKernelsService::testOnly_isDataValid(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     setValueToDevice(_cudaBoolResult, true);

@@ -124,31 +124,6 @@ namespace
         return pos.x >= context.visibleTopLeft.x - context.cullingMargin && pos.x <= context.visibleBottomRight.x + context.cullingMargin
             && pos.y >= context.visibleTopLeft.y - context.cullingMargin && pos.y <= context.visibleBottomRight.y + context.cullingMargin;
     }
-
-    __device__ __inline__ int getPreviousConnectionIndexWithNonZeroAngle(Object* object, int connectionIndex)
-    {
-        auto result = (connectionIndex + object->numConnections - 1) % object->numConnections;
-        for (int i = 0; i < object->numConnections - 1; ++i) {
-            auto angleToCurrent = object->connections[(result + 1) % object->numConnections].angleFromPrevious;
-            if (angleToCurrent >= NEAR_ZERO) {
-                return result;
-            }
-            result = (result + object->numConnections - 1) % object->numConnections;
-        }
-        return connectionIndex;
-    }
-
-    __device__ __inline__ int getNextConnectionIndexWithNonZeroAngle(Object* object, int connectionIndex)
-    {
-        auto result = (connectionIndex + 1) % object->numConnections;
-        for (int i = 0; i < object->numConnections - 1; ++i) {
-            if (object->connections[result].angleFromPrevious >= NEAR_ZERO) {
-                return result;
-            }
-            result = (result + 1) % object->numConnections;
-        }
-        return connectionIndex;
-    }
 }
 
 __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* objectData, uint64_t* numObjects, GeometryExtractionContext context)
@@ -292,32 +267,31 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         if (object->numConnections <= 1) {
             continue;
         }
-        for (int connectionIndex = 0, numConnections = object->numConnections; connectionIndex < numConnections; ++connectionIndex) {
-            auto prevIndex = getPreviousConnectionIndexWithNonZeroAngle(object, connectionIndex);
-            if (prevIndex == connectionIndex) {
-                continue;
-            }
+        bool first = true;
+        int backIndices[MAX_OBJECT_CONNECTIONS];
+        for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
+            auto connectionIndex = i % numConnections;
             auto const& connectedObject = object->connections[connectionIndex].object;
-            auto const& prevConnectedObject = object->connections[prevIndex].object;
-
             auto backIndex = connectedObject->getConnectionIndex(object);
-            auto prevBackIndex = prevConnectedObject->getConnectionIndex(object);
-            auto connectedNextIndex = getNextConnectionIndexWithNonZeroAngle(connectedObject, backIndex);
-            auto prevConnectedPrevIndex = getPreviousConnectionIndexWithNonZeroAngle(prevConnectedObject, prevBackIndex);
-            if (connectedNextIndex == backIndex || prevConnectedPrevIndex == prevBackIndex) {
+            backIndices[connectionIndex] = backIndex;
+            if (first) {
+                first = false;
                 continue;
             }
+            auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
+            auto const& prevConnectedObject = object->connections[prevIndex].object;
+            auto prevBackIndex = backIndices[prevIndex];
 
             // Triangle?
-            if (prevConnectedObject->connections[prevConnectedPrevIndex].object == connectedObject) {
+            if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
                 if (object->id < connectedObject->id && object->id < prevConnectedObject->id) {
                     addTriangle(object, object->tempValue1.as_uint64, prevConnectedObject, connectedObject);
                 }
             }
 
             // Rectangle?
-            auto fourthCellCandidate1 = connectedObject->connections[connectedNextIndex].object;
-            auto fourthCellCandidate2 = prevConnectedObject->connections[prevConnectedPrevIndex].object;
+            auto fourthCellCandidate1 = connectedObject->getConnectedObject(backIndex + 1);
+            auto fourthCellCandidate2 = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
             if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
                 && connectedObject != prevConnectedObject) {
                 if (object->id < connectedObject->id && object->id < prevConnectedObject->id && object->id < fourthCellCandidate2->id) {

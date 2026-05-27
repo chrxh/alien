@@ -387,6 +387,16 @@ void _SimulationFacadeImpl::testOnly_createConnection(uint64_t objectId1, uint64
     _worker.testOnly_createConnection(objectId1, objectId2);
 }
 
+void _SimulationFacadeImpl::testOnly_createConnectionWithAbsAngle(
+    uint64_t objectId1,
+    uint64_t objectId2,
+    float desiredDistance,
+    float desiredAbsAngle1,
+    float desiredAbsAngle2)
+{
+    _worker.testOnly_createConnectionWithAbsAngle(objectId1, objectId2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
+}
+
 void _SimulationFacadeImpl::testOnly_cleanupAfterTimestep()
 {
     _worker.testOnly_cleanupAfterTimestep();

@@ -435,14 +435,19 @@ ObjectConnectionProcessor::tryAddConnectionWithAbsAngle_oneWay(Object* object1, 
     auto insertIndex = 0;
     auto summedAngle = 0.0f;
     desiredAbsAngle = Math::getNormalizedAngle(desiredAbsAngle, 0.0f);
+    if (desiredAbsAngle < NEAR_ZERO) {
+        desiredAbsAngle = 360.0f;
+    }
     for (int i = 1; i <= n; ++i) {
         auto const& angleFromPrevious = object1->getConnection(i).angleFromPrevious;
+        auto nextSummedAngle = summedAngle + angleFromPrevious;
 
-        if (desiredAbsAngle >= summedAngle - NEAR_ZERO && desiredAbsAngle < summedAngle + angleFromPrevious) {
+        if (desiredAbsAngle > summedAngle + NEAR_ZERO && desiredAbsAngle <= nextSummedAngle + NEAR_ZERO) {
             insertIndex = i;
+            desiredAbsAngle = min(desiredAbsAngle, nextSummedAngle);
             break;
         }
-        summedAngle += angleFromPrevious;
+        summedAngle = nextSummedAngle;
     }
     DEVICE_CHECK(insertIndex > 0);
 

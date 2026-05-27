@@ -71,6 +71,35 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1
     }
 }
 
+__global__ void cudaTestCreateConnectionWithAbsAngle(
+    SimulationData data,
+    uint64_t objectId1,
+    uint64_t objectId2,
+    float desiredDistance,
+    float desiredAbsAngle1,
+    float desiredAbsAngle2)
+{
+    DEVICE_CHECK(blockDim.x == 1 && gridDim.x == 1);
+
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
+    Object* object1 = nullptr;
+    Object* object2 = nullptr;
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+        auto& object = objects.at(index);
+        if (object->id == objectId1) {
+            object1 = object;
+        }
+        if (object->id == objectId2) {
+            object2 = object;
+        }
+    }
+
+    if (object1 != nullptr && object2 != nullptr) {
+        ObjectConnectionProcessor::tryAddConnectionWithAbsAngle(data, object1, object2, desiredDistance, desiredAbsAngle1, desiredAbsAngle2);
+    }
+}
+
 namespace
 {
     __device__ bool isEnergyValid(float energy)
