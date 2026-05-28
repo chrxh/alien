@@ -315,10 +315,7 @@ TEST_F(AttackerTests, attackDrainsDepotStoredUsableEnergy)
 {
     auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
     data.addCreature(
-        {ObjectDesc()
-             .id(100)
-             .pos({100.0f, 103.0f})
-             .type(CellDesc().usableEnergy(0.0f).cellType(DepotDesc().storedUsableEnergy(100.0f)))},
+        {ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(0.0f).cellType(DepotDesc().storedUsableEnergy(100.0f)))},
         CreatureDesc().id(2));
 
     _simulationFacade->setSimulationData(data);
@@ -337,10 +334,7 @@ TEST_F(AttackerTests, attackDrainsConstructorReservedEnergy)
 {
     auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
     data.addCreature(
-        {ObjectDesc()
-             .id(100)
-             .pos({100.0f, 103.0f})
-             .type(CellDesc().usableEnergy(0.0f).constructor(ConstructorDesc().reservedEnergy(100.0f)))},
+        {ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(0.0f).constructor(ConstructorDesc().reservedEnergy(100.0f)))},
         CreatureDesc().id(2));
 
     _simulationFacade->setSimulationData(data);
