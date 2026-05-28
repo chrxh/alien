@@ -315,7 +315,7 @@ TEST_F(AttackerTests, attackDrainsDepotStoredUsableEnergy)
 {
     auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
     data.addCreature(
-        {ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(0.0f).cellType(DepotDesc().storedUsableEnergy(100.0f)))},
+        {ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).cellType(DepotDesc().storedUsableEnergy(100.0f)))},
         CreatureDesc().id(2));
 
     _simulationFacade->setSimulationData(data);
@@ -325,7 +325,7 @@ TEST_F(AttackerTests, attackDrainsDepotStoredUsableEnergy)
     auto actualAttacker = actualData.getObjectRef(1);
     auto actualTarget = actualData.getObjectRef(100);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualTarget.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(100.0f, actualTarget.getCellRef()._usableEnergy));
     EXPECT_TRUE(std::get<DepotDesc>(actualTarget.getCellRef()._cellType)._storedUsableEnergy < 100.0f - NEAR_ZERO);
     EXPECT_TRUE(actualAttacker.getCellRef()._rawEnergy > NEAR_ZERO);
 }
@@ -334,7 +334,7 @@ TEST_F(AttackerTests, attackDrainsConstructorReservedEnergy)
 {
     auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
     data.addCreature(
-        {ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(0.0f).constructor(ConstructorDesc().reservedEnergy(100.0f)))},
+        {ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f).constructor(ConstructorDesc().reservedEnergy(100.0f)))},
         CreatureDesc().id(2));
 
     _simulationFacade->setSimulationData(data);
@@ -344,7 +344,7 @@ TEST_F(AttackerTests, attackDrainsConstructorReservedEnergy)
     auto actualAttacker = actualData.getObjectRef(1);
     auto actualTarget = actualData.getObjectRef(100);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualTarget.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(100.0f, actualTarget.getCellRef()._usableEnergy));
     EXPECT_TRUE(actualTarget.getCellRef()._constructor->_reservedEnergy < 100.0f - NEAR_ZERO);
     EXPECT_TRUE(actualAttacker.getCellRef()._rawEnergy > NEAR_ZERO);
 }

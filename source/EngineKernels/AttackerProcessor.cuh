@@ -247,31 +247,34 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
 __inline__ __device__ float AttackerProcessor::calcAttackableEnergy(Cell* cell)
 {
-    auto result = atomicAdd(&cell->usableEnergy, 0);
+    auto result = alienAtomicRead(&cell->usableEnergy);
     if (cell->cellType == CellType_Depot) {
-        result += atomicAdd(&cell->cellTypeData.depot.storedUsableEnergy, 0);
+        result += alienAtomicRead(&cell->cellTypeData.depot.storedUsableEnergy);
     }
     if (cell->constructorAvailable) {
-        result += atomicAdd(&cell->constructor.reservedEnergy, 0);
+        result += alienAtomicRead(&cell->constructor.reservedEnergy);
     }
     return result;
 }
 
 __inline__ __device__ float AttackerProcessor::absorbAttackableEnergy(Cell* cell, float energy)
 {
-    auto result = absorbEnergy(&cell->usableEnergy, energy);
-    if (result < energy && cell->cellType == CellType_Depot) {
-        result += absorbEnergy(&cell->cellTypeData.depot.storedUsableEnergy, energy - result);
+    auto result = 0.0f;
+    if (cell->cellType == CellType_Depot) {
+        result += absorbEnergy(&cell->cellTypeData.depot.storedUsableEnergy, energy);
     }
     if (result < energy && cell->constructorAvailable) {
         result += absorbEnergy(&cell->constructor.reservedEnergy, energy - result);
+    }
+    if (result < energy) {
+        result += absorbEnergy(&cell->usableEnergy, energy - result);
     }
     return result;
 }
 
 __inline__ __device__ float AttackerProcessor::absorbEnergy(float* energy, float maxEnergy)
 {
-    auto energyToTransfer = min(atomicAdd(energy, 0), maxEnergy);
+    auto energyToTransfer = min(alienAtomicRead(energy), maxEnergy);
     if (energyToTransfer <= NEAR_ZERO) {
         return 0.0f;
     }
