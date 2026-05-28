@@ -15,6 +15,10 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
+    __inline__ __device__ static float calcAttackableEnergy(Cell* cell);
+    __inline__ __device__ static float absorbAttackableEnergy(Cell* cell, float energy);
+    __inline__ __device__ static float absorbEnergy(float* energy, float maxEnergy);
+
     __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static bool isContainedInSensorMatches(
@@ -188,7 +192,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                     // Calculate energy gain
                     auto energyToTransfer =
-                        atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
+                        calcAttackableEnergy(otherCell) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
 
                     auto color = calcMod(object->color, MAX_COLORS);
                     auto otherColor = calcMod(otherObject->color, MAX_COLORS);
@@ -217,14 +221,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                         otherCell->eventPos = object->pos;
 
                         // Absorb energy from attacked cell
-                        auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
-                        if (origEnergy > energyToTransfer) {
-                            sumEnergyToTransfer += energyToTransfer;
-                        }
-                        // Revert
-                        else {
-                            atomicAdd(&otherCell->usableEnergy, energyToTransfer);
-                        }
+                        sumEnergyToTransfer += absorbAttackableEnergy(otherCell, energyToTransfer);
                     }
                 }
             });
@@ -246,6 +243,45 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         // Output (signal is already present since attacker can only be manually triggered)
         cell->signal.channels[Channels::AttackerSuccess] = min(1.0f, max(0.0f, sumEnergyToTransfer / 10));
     }
+}
+
+__inline__ __device__ float AttackerProcessor::calcAttackableEnergy(Cell* cell)
+{
+    auto result = atomicAdd(&cell->usableEnergy, 0);
+    if (cell->cellType == CellType_Depot) {
+        result += atomicAdd(&cell->cellTypeData.depot.storedUsableEnergy, 0);
+    }
+    if (cell->constructorAvailable) {
+        result += atomicAdd(&cell->constructor.reservedEnergy, 0);
+    }
+    return result;
+}
+
+__inline__ __device__ float AttackerProcessor::absorbAttackableEnergy(Cell* cell, float energy)
+{
+    auto result = absorbEnergy(&cell->usableEnergy, energy);
+    if (result < energy && cell->cellType == CellType_Depot) {
+        result += absorbEnergy(&cell->cellTypeData.depot.storedUsableEnergy, energy - result);
+    }
+    if (result < energy && cell->constructorAvailable) {
+        result += absorbEnergy(&cell->constructor.reservedEnergy, energy - result);
+    }
+    return result;
+}
+
+__inline__ __device__ float AttackerProcessor::absorbEnergy(float* energy, float maxEnergy)
+{
+    auto energyToTransfer = min(atomicAdd(energy, 0), maxEnergy);
+    if (energyToTransfer <= NEAR_ZERO) {
+        return 0.0f;
+    }
+    auto origEnergy = atomicAdd(energy, -energyToTransfer);
+    if (origEnergy > energyToTransfer) {
+        return energyToTransfer;
+    }
+
+    atomicAdd(energy, energyToTransfer);
+    return 0.0f;
 }
 
 __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatistics& statistics, Object* object)

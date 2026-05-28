@@ -311,6 +311,50 @@ TEST_F(AttackerTests, attackOnNonOffspring)
     EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
+TEST_F(AttackerTests, attackDrainsDepotStoredUsableEnergy)
+{
+    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
+    data.addCreature(
+        {ObjectDesc()
+             .id(100)
+             .pos({100.0f, 103.0f})
+             .type(CellDesc().usableEnergy(0.0f).cellType(DepotDesc().storedUsableEnergy(100.0f)))},
+        CreatureDesc().id(2));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualAttacker = actualData.getObjectRef(1);
+    auto actualTarget = actualData.getObjectRef(100);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualTarget.getCellRef()._usableEnergy));
+    EXPECT_TRUE(std::get<DepotDesc>(actualTarget.getCellRef()._cellType)._storedUsableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualAttacker.getCellRef()._rawEnergy > NEAR_ZERO);
+}
+
+TEST_F(AttackerTests, attackDrainsConstructorReservedEnergy)
+{
+    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
+    data.addCreature(
+        {ObjectDesc()
+             .id(100)
+             .pos({100.0f, 103.0f})
+             .type(CellDesc().usableEnergy(0.0f).constructor(ConstructorDesc().reservedEnergy(100.0f)))},
+        CreatureDesc().id(2));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualAttacker = actualData.getObjectRef(1);
+    auto actualTarget = actualData.getObjectRef(100);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualTarget.getCellRef()._usableEnergy));
+    EXPECT_TRUE(actualTarget.getCellRef()._constructor->_reservedEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualAttacker.getCellRef()._rawEnergy > NEAR_ZERO);
+}
+
 /**
  * Test: No attacking of fixed cells
  * Cells with fixed=true should not be attacked
