@@ -632,6 +632,8 @@ struct Object
     {
         if (type == ObjectType_Fluid) {
             return 0.1f;
+        } else if (type == ObjectType_Solid) {
+            return 2.0f;
         } else {
             return 1.0f;
         }
