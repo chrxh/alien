@@ -87,6 +87,7 @@ namespace
                         break;
                     case CellType_Depot:
                         nodeTO.cellTypeData.depot.storageLimit = node.cellTypeData.depot.storageLimit;
+                        nodeTO.cellTypeData.depot.initialStoredUsableEnergy = node.cellTypeData.depot.initialStoredUsableEnergy;
                         break;
                     case CellType_Sensor:
                         nodeTO.cellTypeData.sensor.autoTrigger = node.cellTypeData.sensor.autoTrigger;
