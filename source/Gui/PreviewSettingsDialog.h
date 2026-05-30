@@ -16,6 +16,8 @@ private:
     PreviewSettingsDialog();
 
     void processIntern() override;
+    void openIntern() override;
 
     GenomeWindowEditData _editData;
+    bool _showNodeIndex = true;
 };

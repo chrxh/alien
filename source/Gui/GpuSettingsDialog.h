@@ -22,5 +22,5 @@ private:
 
     void validateAndCorrect(CudaSettings& settings) const;
 
-    CudaSettings _gpuSettings;
+    CudaSettings _pendingGpuSettings;
 };
