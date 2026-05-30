@@ -492,6 +492,13 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
 
         processCellTypeNode(cell);
 
+        bool hasConstructor = cell._constructor.has_value();
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(TextWidth), hasConstructor);
+        if (hasConstructor && !cell._constructor.has_value()) {
+            cell._constructor = ConstructorDesc();
+        } else if (!hasConstructor && cell._constructor.has_value()) {
+            cell._constructor = std::nullopt;
+        }
         if (cell._constructor.has_value()) {
             processConstructorNode(cell._constructor.value());
         }
@@ -514,12 +521,16 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
         }
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(TextWidth), constructor._reservedEnergy);
         AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth), constructor._separation);
-        if (!constructor._separation) {
-            auto numBranches = constructor._numBranches - 1;
-            AlienGui::Switcher(
-                AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
-            constructor._numBranches = numBranches + 1;
+        auto numBranches = constructor._numBranches - 1;
+        if (constructor._separation) {
+            ImGui::BeginDisabled();
         }
+        AlienGui::Switcher(
+            AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
+        if (constructor._separation) {
+            ImGui::EndDisabled();
+        }
+        constructor._numBranches = numBranches + 1;
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(TextWidth), constructor._numConcatenations);
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), constructor._geneIndex);
     }
