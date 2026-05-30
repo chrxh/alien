@@ -282,6 +282,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             auto font = style.getSmallBoldFont();
             auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text.c_str());
             AlienGui::AddTextWithSubpixelAccuracy(
+                drawList, font, fontSize, {cellPos.x - textSize.x / 2 + 1, cellPos.y - textSize.y / 2 + 1}, ImColor::HSV(0, 0, 0, 0.7f), text.c_str());
+            AlienGui::AddTextWithSubpixelAccuracy(
                 drawList, font, fontSize, {cellPos.x - textSize.x / 2, cellPos.y - textSize.y / 2}, ImColor::HSV(0, 0, 1.0f, 0.7f), text.c_str());
         }
     }
