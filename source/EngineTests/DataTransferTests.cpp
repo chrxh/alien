@@ -398,3 +398,51 @@ TEST_F(DataTransferTests, adaptIdGenerator_genomes)
     auto newId = NumberGenerator::get().createEntityId();
     EXPECT_TRUE(newId > HighId);
 }
+
+TEST_F(DataTransferTests, adaptIdGenerator_objects_descriptionToTO)
+{
+    auto constexpr HighId = 1000000;
+    auto data = Desc().objects({ObjectDesc().id(HighId).type(SolidDesc())});
+
+    NumberGenerator::get().setIds({1});
+    _simulationFacade->setSimulationData(data);
+
+    auto newId = NumberGenerator::get().createEntityId();
+    EXPECT_TRUE(newId > HighId);
+}
+
+TEST_F(DataTransferTests, adaptIdGenerator_energyParticles_descriptionToTO)
+{
+    auto constexpr HighId = 1000000;
+    auto data = Desc().energies({EnergyDesc().id(HighId)});
+
+    NumberGenerator::get().setIds({1});
+    _simulationFacade->setSimulationData(data);
+
+    auto newId = NumberGenerator::get().createEntityId();
+    EXPECT_TRUE(newId > HighId);
+}
+
+TEST_F(DataTransferTests, adaptIdGenerator_creatures_descriptionToTO)
+{
+    auto constexpr HighId = 1000000;
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().id(HighId));
+
+    NumberGenerator::get().setIds({1});
+    _simulationFacade->setSimulationData(data);
+
+    auto newId = NumberGenerator::get().createEntityId();
+    EXPECT_TRUE(newId > HighId);
+}
+
+TEST_F(DataTransferTests, adaptIdGenerator_genomes_descriptionToTO)
+{
+    auto constexpr HighId = 1000000;
+    auto data = Desc().addCreature({ObjectDesc().id(2)}, CreatureDesc().id(1), GenomeDesc().id(HighId));
+
+    NumberGenerator::get().setIds({1});
+    _simulationFacade->setSimulationData(data);
+
+    auto newId = NumberGenerator::get().createEntityId();
+    EXPECT_TRUE(newId > HighId);
+}
