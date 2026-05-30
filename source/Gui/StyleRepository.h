@@ -96,9 +96,10 @@ namespace Const
     ImColor const CursorColor = ImColor::HSV(0, 0.0f, 1.0f, 1.0f);
 
     ImColor const GenomePreviewConnectionColor = ImColor::HSV(0, 0, 0.5f);
+    ImColor const GenomePreviewInactiveColor = ImColor::HSV(0, 0, 0.15f);
     ImColor const GenomePreviewDotSymbolColor = ImColor::HSV(0, 0, 0.7f);
-    ImColor const GenomePreviewLinkToGeneBackgroundColor1 = ImColor::HSV(0, 0, 1.0f);
-    ImColor const GenomePreviewLinkToGeneBackgroundColor2 = ImColor::HSV(0, 0, 0.6f);
+    ImColor const GenomePreviewGeneRefBackgroundColor1 = ImColor::HSV(0, 0, 1.0f);
+    ImColor const GenomePreviewGeneRefBackgroundColor2 = ImColor::HSV(0, 0, 0.6f);
     ImColor const GenomePreviewLinkToGeneTextColor = ImColor::HSV(0, 0, 0);
     ImColor const GenomePreviewStartColor = ImColor::HSV(0.58f, 0.8f, 1.0f, 1.0f);
     ImColor const GenomePreviewEndColor = ImColor::HSV(0.0f, 0.8f, 1.0f, 1.0f);

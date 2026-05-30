@@ -50,8 +50,8 @@ void AutosaveWindow::initIntern()
     _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", (std::filesystem::current_path() / Const::AutosavePath).string());
     _directory = _origDirectory;
 
-    _origCatchPeaks = GlobalSettings::get().getValue("windows.autosave.catch peaks", _origCatchPeaks);
-    _catchPeaks = _origCatchPeaks;
+    //_origCatchPeaks = GlobalSettings::get().getValue("windows.autosave.catch peaks", _origCatchPeaks);
+    //_catchPeaks = _origCatchPeaks;
 
     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     _lastPeakTimepoint = std::chrono::steady_clock::now();
@@ -148,11 +148,11 @@ void AutosaveWindow::processTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Save files", 4, flags, ImVec2(-1, -1), 0.0f)) {
+    if (ImGui::BeginTable("Save files", 3, flags, ImVec2(-1, -1), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Time step", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
-        ImGui::TableSetupColumn("Peak value", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
+        //ImGui::TableSetupColumn("Peak value", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -214,13 +214,13 @@ void AutosaveWindow::processTable()
                 }
 
                 // peak
-                ImGui::TableNextColumn();
-                AlienGui::Text(entry->peak);
+                //ImGui::TableNextColumn();
+                //AlienGui::Text(entry->peak);
 
-                if (!entry->peakType.empty()) {
-                    ImGui::SameLine();
-                    AlienGui::Text(AlienGui::TextParameters().text(" (" + entry->peakType + ")").style(AlienGui::TextStyle::Decent));
-                }
+                //if (!entry->peakType.empty()) {
+                //    ImGui::SameLine();
+                //    AlienGui::Text(AlienGui::TextParameters().text(" (" + entry->peakType + ")").style(AlienGui::TextStyle::Decent));
+                //}
 
                 ImGui::PopID();
             }
@@ -248,21 +248,21 @@ void AutosaveWindow::processSettings()
                     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
                 }
             }
-            if (AlienGui::Switcher(
-                    AlienGui::SwitcherParameters()
-                        .name("Catch peaks")
-                        .textWidth(RightColumnWidth)
-                        .defaultValue(_origCatchPeaks)
-                        .readOnly(!_autosaveEnabled)
-                        .values({
-                            "None",
-                            "Genome complexity variance",
-                        })
-                        .tooltip("If activated, the simulation is monitored continuously. When the autosave interval expires, the time at which the selected "
-                                 "measured value was particularly high is saved."),
-                    _catchPeaks)) {
-                _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
-            }
+            //if (AlienGui::Switcher(
+            //        AlienGui::SwitcherParameters()
+            //            .name("Catch peaks")
+            //            .textWidth(RightColumnWidth)
+            //            .defaultValue(_origCatchPeaks)
+            //            .readOnly(!_autosaveEnabled)
+            //            .values({
+            //                "None",
+            //                "Genome complexity variance",
+            //            })
+            //            .tooltip("If activated, the simulation is monitored continuously. When the autosave interval expires, the time at which the selected "
+            //                     "measured value was particularly high is saved."),
+            //        _catchPeaks)) {
+            //    _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
+            //}
 
             if (AlienGui::InputText(
                     AlienGui::InputTextParameters()

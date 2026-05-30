@@ -136,14 +136,15 @@ enum ConstructorShape_
 using ProvideEnergy = uint8_t;
 enum ProvideEnergy_
 {
-    ProvideEnergy_CellOnly = 0,
-    ProvideEnergy_FreeGeneration = 1,
+    ProvideEnergy_FromConstructor = 0,
+    ProvideEnergy_Free = 1,
     ProvideEnergy_Count = 2,
 };
 
 namespace Const
 {
     std::vector<std::string> const ConstructorShapeStrings = {"Segment", "Triangle", "Rectangle", "Hexagon", "Tube", "Large Lolli", "Small Lolli", "Zigzag"};
+    std::vector<std::string> const ProvideEnergyStrings = {"From constructor", "Free"};
 }
 
 //**********************

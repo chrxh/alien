@@ -262,7 +262,6 @@ void SimulationKernelsService::launchPreviewKernels(
             STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
 
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, true);
-            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_void, _stream, numBlocks, data, statistics);
         }
 
         if (considerInnerFriction) {

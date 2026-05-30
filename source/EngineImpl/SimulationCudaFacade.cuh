@@ -113,6 +113,7 @@ public:
     bool testOnly_isDataValid();
     void testOnly_calcTimestepWithCellTypeFunctions();
     void testOnly_calcTimestepWithCellTypeFunctionsForPreview(bool detailSimulation);
+    void testOnly_zeroTransferData();
 
 private:
     void initCuda();

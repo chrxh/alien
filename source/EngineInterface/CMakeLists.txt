@@ -3,7 +3,6 @@ add_library(EngineInterface
     ArraySizesForGpuEntities.h
     ArraySizesForTOs.h
     CellTypeConstants.h
-    CellTypeStrings.h
     Colors.h
     CudaSettings.h
     DataPointCollection.cpp
@@ -21,8 +20,8 @@ add_library(EngineInterface
     GenomeDescHash.h
     GenomeDescInfoService.cpp
     GenomeDescInfoService.h
-    GenomeDescValidationService.cpp
-    GenomeDescValidationService.h
+    DescValidationService.cpp
+    DescValidationService.h
     GeometryBuffers.cpp
     GeometryBuffers.h
     Ids.h

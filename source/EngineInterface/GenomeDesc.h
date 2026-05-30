@@ -53,7 +53,7 @@ struct ConstructorGenomeDesc
     MEMBER(ConstructorGenomeDesc, int, geneIndex, 0);
     MEMBER(ConstructorGenomeDesc, int, constructionActivationTime, 100);
     MEMBER(ConstructorGenomeDesc, float, constructionAngle, 0.0f);
-    MEMBER(ConstructorGenomeDesc, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
+    MEMBER(ConstructorGenomeDesc, ProvideEnergy, provideEnergy, ProvideEnergy_FromConstructor);
     MEMBER(ConstructorGenomeDesc, float, reservedEnergy, 0.0f);
     MEMBER(ConstructorGenomeDesc, bool, separation, false);
     MEMBER(ConstructorGenomeDesc, int, numBranches, 1);        // For separation = false

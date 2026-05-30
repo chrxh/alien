@@ -14,23 +14,23 @@ public:
     {
         _parameters.innerFriction.value = 0;
         _parameters.friction.baseValue = 0;
+        _parameters.attackerStrength.value = 0.1f;
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.attackerEnergyCost.baseValue[i] = 0;
-            _parameters.attackerStrength.value[i] = 0.1f;
             _parameters.attackerRadius.value[i] = 3.5f;
         }
         _simulationFacade->setSimulationParameters(_parameters);
     }
 
-    ~AttackerTests() = default;
+    ~AttackerTests() override = default;
 
 protected:
     // Helper to create an attacker creature with neural net bias for activation and a sensor cell with lastMatch
     // For creature attack mode, the sensor's lastMatch.creatureId should match the lower 16 bits of the target creature's id
     Desc createAttacker(
-        RealVector2D const& attackerPos,
-        RealVector2D const& targetPos,
+        const RealVector2D& attackerPos,
+        const RealVector2D& targetPos,
         uint64_t targetCreatureId = 2,
         float attackerRawEnergy = 0.0f,
         int attackerColor = 0,
@@ -42,21 +42,22 @@ protected:
 
         // Create a sensor with lastMatch pointing to the target creature
         SensorLastMatchDesc lastMatch;
-        lastMatch._creatureIdPart = targetCreatureId & 0xffff;  // Sensor stores only lower 16 bits
+        lastMatch._creatureIdPart = targetCreatureId & 0xffff; // Sensor stores only lower 16 bits
         lastMatch._pos = targetPos;
 
         auto data = Desc().addCreature(
             {
                 ObjectDesc()
-                    .id(1)
-                    .pos(attackerPos)
-                    .color(attackerColor)
-                    .type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).rawEnergy(attackerRawEnergy).neuralNetwork(nn)),
+                .id(1)
+                .pos(attackerPos)
+                .color(attackerColor)
+                .type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).rawEnergy(attackerRawEnergy).neuralNetwork(nn)),
                 ObjectDesc()
-                    .id(2)
-                    .pos({attackerPos.x + 1.0f, attackerPos.y})
-                    .color(attackerColor)
-                    .type(CellDesc().cellType(
+                .id(2)
+                .pos({attackerPos.x + 1.0f, attackerPos.y})
+                .color(attackerColor)
+                .type(
+                    CellDesc().cellType(
                         SensorDesc().autoTrigger(false).mode(DetectCreatureDesc().restrictToColors(sensorRestrictToColors)).lastMatch(lastMatch))),
             },
             CreatureDesc().id(1));
@@ -65,7 +66,7 @@ protected:
     }
 
     // Helper to create a target creature at a given position
-    Desc createTargetCreature(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f, bool fixed = false)
+    Desc createTargetCreature(const RealVector2D& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f, bool fixed = false)
     {
         auto data = Desc().addCreature(
             {
@@ -162,8 +163,8 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
     _parameters.attackerFoodChainColorMatrix.baseValue[0][1] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0);  // Color 0 attacker
-    data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);               // Color 1 target
+    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0); // Color 0 attacker
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);              // Color 1 target
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -173,7 +174,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
 
     // Attack should happen at full strength
     EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
-    EXPECT_EQ(1.0f, actualTarget.getCellRef()._signal._channels.at(Channels::AttackerNotify));  // Notify attacked cell
+    EXPECT_EQ(1.0f, actualTarget.getCellRef()._signal._channels.at(Channels::AttackerNotify)); // Notify attacked cell
 }
 
 TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
@@ -182,8 +183,8 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
     _parameters.attackerFoodChainColorMatrix.baseValue[0][1] = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0);  // Color 0 attacker
-    data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);               // Color 1 target
+    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2, 0.0f, 0); // Color 0 attacker
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);              // Color 1 target
 
     auto origTarget = data.getObjectRef(100);
 
@@ -199,7 +200,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
 
 TEST_F(AttackerTests, outputSignal_noTarget)
 {
-    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 999);  // Sensor targets non-existent creature
+    auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 999); // Sensor targets non-existent creature
 
     // No target creature - nothing to attack
 
@@ -225,7 +226,7 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
 
     // Create a sensor with lastMatch pointing to creature 1 (same creature)
     SensorLastMatchDesc lastMatch;
-    lastMatch._creatureIdPart = 1;  // Same creature id
+    lastMatch._creatureIdPart = 1; // Same creature id
     lastMatch._pos = {100.0f, 103.0f};
 
     // Create a single creature with attacker, sensor, and potential targets
@@ -233,8 +234,8 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
         {
             ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(AttackerDesc().mode(AttackCreatureDesc())).neuralNetwork(nn)),
             ObjectDesc().id(2).pos({101.0f, 100.0f}).type(CellDesc().cellType(SensorDesc().autoTrigger(false).lastMatch(lastMatch))),
-            ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),  // Same creature, in attack range
-            ObjectDesc().id(4).pos({100.5f, 103.0f}).type(CellDesc().usableEnergy(100.0f)),  // Same creature, in attack range
+            ObjectDesc().id(3).pos({100.0f, 103.0f}).type(CellDesc().usableEnergy(100.0f)), // Same creature, in attack range
+            ObjectDesc().id(4).pos({100.5f, 103.0f}).type(CellDesc().usableEnergy(100.0f)), // Same creature, in attack range
         },
         CreatureDesc().id(1));
     data.addConnection(1, 2);
@@ -356,7 +357,7 @@ TEST_F(AttackerTests, attackDrainsConstructorReservedEnergy)
 TEST_F(AttackerTests, noAttackOnFixedCells)
 {
     auto data = createAttacker({100.0f, 100.0f}, {100.0f, 103.0f}, 2);
-    data.add(createTargetCreature({100.0f, 103.0f}, 2, 0, 100.0f, true), false);  // fixed=true
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 0, 100.0f, true), false); // fixed=true
 
     auto origTarget = data.getObjectRef(100);
 
@@ -673,7 +674,8 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
         CreatureDesc().id(1));
 
     // Add a free cell (not part of a creature) - using FreeCellDesc
-    data.addObjects({
+    data.addObjects(
+    {
         ObjectDesc().id(100).pos({100.0f, 103.0f}).type(FreeCellDesc()),
     });
 
@@ -697,15 +699,16 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     auto data = Desc().addCreature(
         {
             ObjectDesc()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .color(0)
-                .type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColors(1 << 1))).neuralNetwork(nn)),
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .color(0)
+            .type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColors(1 << 1))).neuralNetwork(nn)),
         },
         CreatureDesc().id(1));
 
     // Add a free cell with matching color (color 1)
-    data.addObjects({
+    data.addObjects(
+    {
         ObjectDesc().id(100).pos({100.0f, 103.0f}).color(1).type(FreeCellDesc()),
     });
 
@@ -729,15 +732,16 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_mismatchingColor)
     auto data = Desc().addCreature(
         {
             ObjectDesc()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .color(0)
-                .type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColors(1 << 1))).neuralNetwork(nn)),
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .color(0)
+            .type(CellDesc().cellType(AttackerDesc().mode(AttackFreeCellDesc().restrictToColors(1 << 1))).neuralNetwork(nn)),
         },
         CreatureDesc().id(1));
 
     // Add a free cell with non-matching color (color 0)
-    data.addObjects({
+    data.addObjects(
+    {
         ObjectDesc().id(100).pos({100.0f, 103.0f}).color(0).type(FreeCellDesc()),
     });
 
@@ -926,7 +930,8 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
         CreatureDesc().id(1));
 
     // Add a free cell (not part of a creature)
-    data.addObjects({
+    data.addObjects(
+    {
         ObjectDesc().id(100).pos({100.0f, 103.0f}).type(FreeCellDesc()),
     });
 

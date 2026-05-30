@@ -10,12 +10,12 @@ class PreviewSettingsDialog : public AlienDialog
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(PreviewSettingsDialog);
 
 public:
-    void setEditData(GenomeTabEditData const& editData);
+    void setEditData(GenomeWindowEditData const& editData);
 
 private:
     PreviewSettingsDialog();
 
     void processIntern() override;
 
-    GenomeTabEditData _editData;
+    GenomeWindowEditData _editData;
 };

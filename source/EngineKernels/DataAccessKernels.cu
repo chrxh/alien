@@ -114,6 +114,8 @@ namespace
                         break;
                     case CellType_Generator:
                         nodeTO.cellTypeData.generator.additive = node.cellTypeData.generator.additive;
+                        nodeTO.cellTypeData.generator.valueOffset = node.cellTypeData.generator.valueOffset;
+                        nodeTO.cellTypeData.generator.timeOffset = node.cellTypeData.generator.timeOffset;
                         nodeTO.cellTypeData.generator.mode = node.cellTypeData.generator.mode;
                         if (node.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
                             nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude = node.cellTypeData.generator.modeData.squareSignal.amplitude;
@@ -168,6 +170,7 @@ namespace
                         case MuscleMode_DirectMovement:
                             break;
                         }
+                        break;
                     case CellType_Defender:
                         nodeTO.cellTypeData.defender.mode = node.cellTypeData.defender.mode;
                         break;

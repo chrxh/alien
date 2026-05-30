@@ -519,6 +519,12 @@ void EngineWorker::testOnly_calcTimestepWithCellFunctionsForPreview(bool detailS
     _simulationCudaFacade->testOnly_calcTimestepWithCellTypeFunctionsForPreview(detailSimulation);
 }
 
+void EngineWorker::testOnly_zeroTransferData()
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_zeroTransferData();
+}
+
 void EngineWorker::resetTimeIntervalStatistics()
 {
     _simulationCudaFacade->resetTimeIntervalStatistics();

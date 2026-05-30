@@ -452,7 +452,7 @@ Desc GenomeDescEditService::createSeedForPreview(SubGenomeDesc const& subGenome,
                                                .creatureId(creature._id)
                                                .constructor(ConstructorDesc()
                                                                 .autoTriggerInterval(100)
-                                                                .provideEnergy(ProvideEnergy_FreeGeneration)
+                                                                .provideEnergy(ProvideEnergy_Free)
                                                                 .geneIndex(subGenome.startIndex)
                                                                 .separation(true)
                                                                 .numBranches(1)

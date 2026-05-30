@@ -14,10 +14,10 @@ public:
     {
         _parameters.innerFriction.value = 0;
         _parameters.friction.baseValue = 0;
+        _parameters.attackerStrength.value = 0.1f;
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.attackerEnergyCost.baseValue[i] = 0;
-            _parameters.attackerStrength.value[i] = 0.1f;
             _parameters.attackerRadius.value[i] = 3.5f;
             _parameters.defenderAntiAttackerStrength.value[i] = 1000.0f;
             _parameters.injectorEnergyCost.value[i] = 40.0f;

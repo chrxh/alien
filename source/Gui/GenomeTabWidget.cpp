@@ -6,7 +6,7 @@
 
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/GenomeDescValidationService.h>
+#include <EngineInterface/DescValidationService.h>
 
 #include "AlienGui.h"
 #include "GeneEditorWidget.h"
@@ -32,7 +32,7 @@ void _GenomeTabWidget::process()
 
         if (ImGui::BeginChild("Editors", ImVec2(0, ImGui::GetContentRegionAvail().y - _layoutData->previewsHeight), 0)) {
             processEditors();
-            GenomeDescValidationService::get().validateAndCorrect(_editData->genome);
+            DescValidationService::get().validateAndCorrect(_editData->genome);
         }
         ImGui::EndChild();
 
@@ -132,7 +132,7 @@ _GenomeTabWidget::_GenomeTabWidget(
     _editData->id = ++_sequence;
 
     auto validatedGenome = genome;
-    GenomeDescValidationService::get().validateAndCorrect(validatedGenome);
+    DescValidationService::get().validateAndCorrect(validatedGenome);
 
     _editData->genome = validatedGenome;
     _editData->origGenome = validatedGenome;

@@ -765,6 +765,18 @@ void _SimulationCudaFacade::copyDataTOtoHost(TOs const& to, TOs const& cudaTO)
     copyToHost(to.heap, cudaTO.heap, *to.heapSize);
 }
 
+void _SimulationCudaFacade::testOnly_zeroTransferData()
+{
+    auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(cudaTO.objects, 0, sizeof(ObjectTO) * cudaTO.capacities.objects));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(cudaTO.energyParticles, 0, sizeof(EnergyTO) * cudaTO.capacities.energyParticles));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(cudaTO.creatures, 0, sizeof(CreatureTO) * cudaTO.capacities.creatures));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(cudaTO.genomes, 0, sizeof(GenomeTO) * cudaTO.capacities.genomes));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(cudaTO.genes, 0, sizeof(GeneTO) * cudaTO.capacities.genes));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(cudaTO.nodes, 0, sizeof(NodeTO) * cudaTO.capacities.nodes));
+    CHECK_FOR_DEVICE_ERRORS(cudaMemset(cudaTO.heap, 0, sizeof(uint8_t) * cudaTO.capacities.heap));
+}
+
 void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool forceUpdateStatistics, bool forceCellFunctionExecution)
 {
     static int counter = 0;

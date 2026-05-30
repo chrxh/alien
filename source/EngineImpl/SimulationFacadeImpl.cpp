@@ -2,6 +2,7 @@
 
 #include <EngineInterface/Desc.h>
 #include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/NumberGenerator.h>
 
 void _SimulationFacadeImpl::set(SimulationFacade const& instance)
 {
@@ -14,6 +15,9 @@ void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& 
     _origSettings.worldSizeX = worldSize.x;
     _origSettings.worldSizeY = worldSize.y;
     _origSettings.simulationParameters = parameters;
+
+    NumberGenerator::get().setIds(Ids());
+
     _worker.newSimulation(timestep, _origSettings);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
@@ -426,4 +430,9 @@ void _SimulationFacadeImpl::testOnly_calcTimestepWithCellFunctions()
 void _SimulationFacadeImpl::testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation)
 {
     _worker.testOnly_calcTimestepWithCellFunctionsForPreview(detailSimulation);
+}
+
+void _SimulationFacadeImpl::testOnly_zeroTransferData()
+{
+    _worker.testOnly_zeroTransferData();
 }

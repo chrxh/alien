@@ -114,7 +114,7 @@ struct SimulationParameters
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = ColorVector<float>::uniform(0.0f)};
     BaseLayerParameter<ColorMatrix<float>> attackerFoodChainColorMatrix = {.baseValue = ColorMatrix<float>::uniform(1.0f)};
     BaseParameter<ColorVector<float>> attackerRelatedLineageProtection = {ColorVector<float>::uniform(0.0f)};
-    BaseParameter<ColorVector<float>> attackerStrength = {ColorVector<float>::uniform(0.05f)};
+    BaseParameter<float> attackerStrength = {0.05f};
     BaseParameter<ColorVector<float>> attackerRadius = {ColorVector<float>::uniform(2.0f)};
     static float constexpr attackerMaxRawEnergyThreshold = 2.0f;
     static float constexpr attackerCreatureSensorRange = 5.0f;

@@ -16,9 +16,10 @@ class BalanceTests : public IntegrationTestFramework
 public:
     BalanceTests()
         : IntegrationTestFramework({200, 200})
-    {}
+    {
+    }
 
-    ~BalanceTests() = default;
+    ~BalanceTests() override = default;
 
     Desc createSmallCreatureSeed()
     {
@@ -27,27 +28,29 @@ public:
         return Desc().addCreature(
             {
                 ObjectDesc()
-                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).separation(true))),
+                .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
+                .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_Free).separation(true))),
             },
             CreatureDesc(),
-            GenomeDesc().lineageId(0).prevLineageId(0).frontAngle(225.0f).genes({
+            GenomeDesc().lineageId(0).prevLineageId(0).frontAngle(225.0f).genes(
+            {
                 GeneDesc()
-                    
-                    .shape(ConstructorShape_Hexagon)
-                    .nodes({
-                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc()
-                            .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
-                            .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
-                        NodeDesc().constructor(ConstructorGenomeDesc().separation(true)),
-                        NodeDesc().cellType(DigestorGenomeDesc()),
-                        NodeDesc()
-                            .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
-                            .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                    }),
+
+                .shape(ConstructorShape_Hexagon)
+                .nodes(
+                {
+                    NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
+                    NodeDesc().cellType(AttackerGenomeDesc()),
+                    NodeDesc()
+                    .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
+                    .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
+                    NodeDesc().constructor(ConstructorGenomeDesc().separation(true)),
+                    NodeDesc().cellType(DigestorGenomeDesc()),
+                    NodeDesc()
+                    .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
+                    .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
+                    NodeDesc().cellType(AttackerGenomeDesc()),
+                }),
             }));
     }
 
@@ -56,7 +59,8 @@ public:
         Low,
         High
     };
-    Desc createLargeCreatureSeed(DigestionCapability const& digestionCapability)
+
+    Desc createLargeCreatureSeed(const DigestionCapability& digestionCapability)
     {
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto& numberGen = NumberGenerator::get();
@@ -66,39 +70,41 @@ public:
         return Desc().addCreature(
             {
                 ObjectDesc()
-                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_FreeGeneration).separation(true))),
+                .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
+                .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_Free).separation(true))),
             },
             CreatureDesc(),
-            GenomeDesc().lineageId(1).prevLineageId(1).frontAngle(225.0f).genes({
+            GenomeDesc().lineageId(1).prevLineageId(1).frontAngle(225.0f).genes(
+            {
                 GeneDesc()
-                    
-                    .shape(ConstructorShape_Hexagon)
-                    .nodes({
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
-                        NodeDesc().cellType(obligatoryDigestor),
-                        NodeDesc().cellType(optionalDigestor),
-                        NodeDesc().cellType(obligatoryDigestor),
-                        NodeDesc().cellType(obligatoryDigestor),
-                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                        NodeDesc().cellType(obligatoryDigestor),
-                        NodeDesc()
-                            .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
-                            .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
-                        NodeDesc().cellType(optionalDigestor),
-                        NodeDesc().cellType(optionalDigestor),
-                        NodeDesc().cellType(optionalDigestor).constructor(ConstructorGenomeDesc().separation(true)),
-                        NodeDesc().cellType(optionalDigestor),
-                        NodeDesc().cellType(optionalDigestor),
-                        NodeDesc()
-                            .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
-                            .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
-                        NodeDesc().cellType(AttackerGenomeDesc()),
-                    }),
+
+                .shape(ConstructorShape_Hexagon)
+                .nodes(
+                {
+                    NodeDesc().cellType(AttackerGenomeDesc()),
+                    NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
+                    NodeDesc().cellType(obligatoryDigestor),
+                    NodeDesc().cellType(optionalDigestor),
+                    NodeDesc().cellType(obligatoryDigestor),
+                    NodeDesc().cellType(obligatoryDigestor),
+                    NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
+                    NodeDesc().cellType(AttackerGenomeDesc()),
+                    NodeDesc().cellType(SensorGenomeDesc().mode(DetectCreatureGenomeDesc().restrictToLineage(LineageRestriction_UnrelatedLineage))),
+                    NodeDesc().cellType(AttackerGenomeDesc()),
+                    NodeDesc().cellType(obligatoryDigestor),
+                    NodeDesc()
+                    .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
+                    .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
+                    NodeDesc().cellType(optionalDigestor),
+                    NodeDesc().cellType(optionalDigestor),
+                    NodeDesc().cellType(optionalDigestor).constructor(ConstructorGenomeDesc().separation(true)),
+                    NodeDesc().cellType(optionalDigestor),
+                    NodeDesc().cellType(optionalDigestor),
+                    NodeDesc()
+                    .cellType(MuscleGenomeDesc().mode(DirectMovementGenomeDesc()))
+                    .neuralNetwork(NeuralNetGenomeDesc().bias(0, 0.1f).connectionWeight(0, 0)),
+                    NodeDesc().cellType(AttackerGenomeDesc()),
+                }),
             }));
     }
 };
@@ -124,13 +130,13 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
 
     // Create a map of genomeId to lineageId
     std::unordered_map<uint64_t, int> genomeIdToLineageId;
-    for (auto const& genome : actualData._genomes) {
+    for (const auto& genome : actualData._genomes) {
         genomeIdToLineageId[genome._id] = genome._lineageId;
     }
 
     int numSmallCreatures = 0;
     int numLargeCreatures = 0;
-    for (auto const& creature : actualData._creatures) {
+    for (const auto& creature : actualData._creatures) {
         auto lineageId = genomeIdToLineageId.at(creature._genomeId);
         if (lineageId == 0) {
             ++numSmallCreatures;
@@ -167,13 +173,13 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
 
     // Create a map of genomeId to lineageId
     std::unordered_map<uint64_t, int> genomeIdToLineageId;
-    for (auto const& genome : actualData._genomes) {
+    for (const auto& genome : actualData._genomes) {
         genomeIdToLineageId[genome._id] = genome._lineageId;
     }
 
     int numSmallCreatures = 0;
     int numLargeCreatures = 0;
-    for (auto const& creature : actualData._creatures) {
+    for (const auto& creature : actualData._creatures) {
         auto lineageId = genomeIdToLineageId.at(creature._genomeId);
         if (lineageId == 0) {
             ++numSmallCreatures;

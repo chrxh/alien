@@ -140,7 +140,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                     // Calc base energy for attacking
                     auto energyToTransfer =
-                        atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
+                        atomicAdd(&otherFreeCell->energy, 0) * cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION;
 
                     if (energyToTransfer < 0) {
                         return;
@@ -192,7 +192,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
                     // Calculate energy gain
                     auto energyToTransfer =
-                        calcAttackableEnergy(otherCell) * cudaSimulationParameters.attackerStrength.value[object->color] * TIMESTEPS_PER_CELL_FUNCTION;
+                        calcAttackableEnergy(otherCell) * cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION;
 
                     auto color = calcMod(object->color, MAX_COLORS);
                     auto otherColor = calcMod(otherObject->color, MAX_COLORS);

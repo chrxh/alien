@@ -375,10 +375,12 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 // Minimum range
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Min range").textWidth(rightColumnWidth), sensor._minRange);
+                AlienGui::SliderInt(
+                    AlienGui::SliderIntParameters().name("Min range").min(0).max(512).textWidth(rightColumnWidth), &sensor._minRange);
 
                 // Maximum range
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
+                AlienGui::SliderInt(
+                    AlienGui::SliderIntParameters().name("Max range").min(0).max(512).textWidth(rightColumnWidth), &sensor._maxRange);
 
                 ImGui::PopID();
 
@@ -669,7 +671,8 @@ void _NodeEditorWidget::processNodeAttributes()
                 if (mode == CommunicatorMode_Sender) {
                     AlienGui::BeginIndent();
                     auto& sender = std::get<SenderGenomeDesc>(communicator._mode);
-                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Range").textWidth(rightColumnWidth), sender._range);
+                    AlienGui::SliderInt(
+                        AlienGui::SliderIntParameters().name("Range").min(0).max(20).textWidth(rightColumnWidth), &sender._range);
                     AlienGui::InputInt(AlienGui::InputIntParameters().name("Max times sent").textWidth(rightColumnWidth), sender._maxTimesSent);
                     AlienGui::EndIndent();
                 } else if (mode == CommunicatorMode_Receiver) {

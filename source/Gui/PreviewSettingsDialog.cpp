@@ -3,13 +3,13 @@
 #include <imgui.h>
 
 #include "AlienGui.h"
-#include "GenomeTabEditData.h"
+#include "GenomeWindowEditData.h"
 
 PreviewSettingsDialog::PreviewSettingsDialog()
     : AlienDialog("Preview settings")
 {}
 
-void PreviewSettingsDialog::setEditData(GenomeTabEditData const& editData)
+void PreviewSettingsDialog::setEditData(GenomeWindowEditData const& editData)
 {
     _editData = editData;
 }

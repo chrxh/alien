@@ -41,8 +41,6 @@ private:
 
     float calcWindowWidth() const;
 
-    void validateAndCorrect(ObjectDesc& object) const;
-
     RealVector2D _initialPos;
 
     bool _on = true;

@@ -9,6 +9,8 @@
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
+#include "EngineInterface/NumberGenerator.h"
+
 IntegrationTestFramework::TestSuiteContext IntegrationTestFramework::_globalContext;
 
 void IntegrationTestFramework::TestSuiteContext::cleanup()
@@ -39,6 +41,7 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& worldSize)
         }
         _simulationFacade->newSimulation(0, _worldSize, _parameters);
     } else {
+        NumberGenerator::get().setIds(Ids());
         _simulationFacade->clear();
         _simulationFacade->setPreviewData(Desc());
         _simulationFacade->setCurrentTimestepForPreview(0);

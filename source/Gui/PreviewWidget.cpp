@@ -70,7 +70,7 @@ void _PreviewWidget::createSubGenomesForPreview()
     if (_creatureWidgets.size() != subGenomesForPreview.size()) {
         _creatureWidgets.clear();
         for (auto const& [geneIndices, subGenome] : boost::combine(geneIndicesForSubGenomes, subGenomesForPreview)) {
-            _creatureWidgets.emplace_back(_CreaturePreviewWidget::create(_editData, geneIndices, subGenome));
+            _creatureWidgets.emplace_back(_CreaturePreviewWidget::create(_genomeEditData, _editData, geneIndices, subGenome));
         }
     } else {
 
@@ -185,7 +185,7 @@ void _PreviewWidget::processActionBar()
 
     ImGui::SameLine();
     if (AlienGui::Button(ICON_FA_COG, 25.0f)) {
-        PreviewSettingsDialog::get().setEditData(_editData);
+        PreviewSettingsDialog::get().setEditData(_genomeEditData);
         PreviewSettingsDialog::get().open();
     }
     AlienGui::Tooltip("Preview settings");

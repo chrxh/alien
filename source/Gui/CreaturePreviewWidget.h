@@ -9,7 +9,7 @@ class _CreaturePreviewWidget
 {
 public:
     static CreaturePreviewWidget
-    create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
+    create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
     void process(bool& phenotypeChanged, Desc& phenotype, GenomeDesc const& genome, float width);
 
@@ -25,7 +25,7 @@ public:
     void resetVisualFrontAngle();
 
 private:
-    _CreaturePreviewWidget(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
+    _CreaturePreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDesc const& genomeWithStartIndex);
 
     void processMouseNavigation();
     void processCellGraphAndSelection(ConversionResult const& conversionResult);
@@ -42,6 +42,7 @@ private:
 
     SimulationScrollbars _scrollbars;
 
+    GenomeWindowEditData _genomeEditData;
     GenomeTabEditData _editData;
     GeneIndicesForSubGenome _geneIndices;
     SubGenomeDesc _subGenome;

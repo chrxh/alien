@@ -455,7 +455,7 @@ struct Creature
     MutationState mutationState;
 
     // Process data
-    uint32_t headUpdateId;
+    uint32_t headUpdateId;  // Will be updated regularly to trigger head updates
 
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
@@ -517,7 +517,7 @@ struct Cell
     Constructor constructor;    // Optional constructor data
     Signal signal;
     uint32_t activationTime;
-    uint8_t lastUpdate;
+    uint8_t lastUpdate;  // Timestep since last head update, cell will die if it exceeds threshold
 
     // Process data
     Signal futureSignal;

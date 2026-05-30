@@ -21,7 +21,8 @@ struct CellPreviewDesc
 
     MEMBER(CellPreviewDesc, uint64_t, id, 0);
     MEMBER(CellPreviewDesc, RealVector2D, pos, {});
-    MEMBER(CellPreviewDesc, int, color, 0);  // -1 if cell is not in ready state
+    MEMBER(CellPreviewDesc, int, color, 0);
+    MEMBER(CellPreviewDesc, bool, inactive, false);
     MEMBER(CellPreviewDesc, int, geneIndex, 0);
     MEMBER(CellPreviewDesc, int, nodeIndex, 0);
     MEMBER(CellPreviewDesc, int, cellType, 0);
@@ -33,8 +34,9 @@ struct ConnectionPreviewDesc
 {
     auto operator<=>(ConnectionPreviewDesc const&) const = default;
 
-    MEMBER(ConnectionPreviewDesc, RealVector2D, object1, {});
-    MEMBER(ConnectionPreviewDesc, RealVector2D, object2, {});
+    MEMBER(ConnectionPreviewDesc, RealVector2D, cell1, {});
+    MEMBER(ConnectionPreviewDesc, RealVector2D, cell2, {});
+    MEMBER(ConnectionPreviewDesc, bool, inactive, false);
     MEMBER(ConnectionPreviewDesc, float, connectionWeightToObject1, 0.0f);
     MEMBER(ConnectionPreviewDesc, float, connectionWeightToObject2, 0.0f);
 };
@@ -43,6 +45,6 @@ struct PreviewDesc
 {
     auto operator<=>(PreviewDesc const&) const = default;
 
-    MEMBER(PreviewDesc, std::vector<CellPreviewDesc>, objects, {});
+    MEMBER(PreviewDesc, std::vector<CellPreviewDesc>, cells, {});
     MEMBER(PreviewDesc, std::vector<ConnectionPreviewDesc>, connections, {});
 };

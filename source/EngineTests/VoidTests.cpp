@@ -67,8 +67,8 @@ TEST_F(VoidTests, destroyWhenReady_singleCell)
 enum class VoidSimulationMode
 {
     Normal,
-    Preview,
-    NonDetailPreview
+    DetailPreview,
+    Preview
 };
 
 class VoidTests_SimulationMode
@@ -84,7 +84,7 @@ public:
             _simulationFacade->calcTimesteps(timesteps);
         } else {
             _simulationFacade->setPreviewData(data);
-            _simulationFacade->calcTimestepsForPreview(timesteps, mode == VoidSimulationMode::Preview);
+            _simulationFacade->calcTimestepsForPreview(timesteps, mode == VoidSimulationMode::DetailPreview);
         }
     }
 
@@ -102,7 +102,7 @@ public:
 INSTANTIATE_TEST_SUITE_P(
     VoidTests_SimulationMode,
     VoidTests_SimulationMode,
-    ::testing::Values(VoidSimulationMode::Normal, VoidSimulationMode::Preview, VoidSimulationMode::NonDetailPreview));
+    ::testing::Values(VoidSimulationMode::Normal, VoidSimulationMode::Preview, VoidSimulationMode::DetailPreview));
 
 TEST_P(VoidTests_SimulationMode, destroyWhenReady_neighborsNotDetaching)
 {
@@ -119,7 +119,7 @@ TEST_P(VoidTests_SimulationMode, destroyWhenReady_neighborsNotDetaching)
     runTimesteps(data, TIMESTEPS_PER_CELL_FUNCTION);
 
     auto actualData = getResult();
-    EXPECT_EQ(2, actualData._objects.size());
+    ASSERT_EQ(GetParam() == VoidSimulationMode::Preview ? 3 : 2, actualData._objects.size());
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
     EXPECT_EQ(CellState_Ready, actualData.getObjectRef(3).getCellRef()._cellState);
 

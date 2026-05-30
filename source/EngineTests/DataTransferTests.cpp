@@ -50,6 +50,7 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes)
     }
 
     _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(compare(data, actualData));
@@ -68,6 +69,7 @@ TEST_P(DataTransferTests_AllObjectTypes, objectsWithEmptyGenomes_preview)
     }
 
     _simulationFacade->setPreviewData(data);
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getPreviewData();
 
     // Preview mode resets lastUpdate to 0
@@ -103,6 +105,7 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode)
     data.addCreature({ObjectDesc()}, creature2, genome2);
 
     _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(compare(data, actualData));
@@ -118,6 +121,7 @@ TEST_P(DataTransferTests_AllNodeTypes, objectsWithNonEmptyGenomes_oneNode_previe
     data.addCreature({ObjectDesc()}, creature, genome);
 
     _simulationFacade->setPreviewData(data);
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getPreviewData();
 
     EXPECT_TRUE(compare(data, actualData));
@@ -137,6 +141,7 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
         }));
 
     _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(compare(data, actualData));
@@ -152,6 +157,7 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->setSimulationData(data);
 
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> expectedCellIds;
@@ -195,6 +201,7 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> actualCellIds;
@@ -229,6 +236,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_singleCreature)
     auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData._creatures.size());
@@ -256,6 +264,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_noSelection)
     auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData._creatures.size());
@@ -282,6 +291,7 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_multipleCreatures_only
     auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
     _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData._creatures.size());
@@ -315,6 +325,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     data.addConnection(2, 3);
     _simulationFacade->setSimulationData(data);
 
+    _simulationFacade->testOnly_zeroTransferData();
     auto inspectedData = _simulationFacade->getInspectedSimulationData({1, 2});
     ASSERT_EQ(2, inspectedData._creatures.size());
 
@@ -339,6 +350,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_objects)
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     auto newId = NumberGenerator::get().createEntityId();
@@ -352,6 +364,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_energyParticles)
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     auto newId = NumberGenerator::get().createEntityId();
@@ -365,6 +378,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_creatures)
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     auto newId = NumberGenerator::get().createEntityId();
@@ -378,6 +392,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_genomes)
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
+    _simulationFacade->testOnly_zeroTransferData();
     auto actualData = _simulationFacade->getSimulationData();
 
     auto newId = NumberGenerator::get().createEntityId();

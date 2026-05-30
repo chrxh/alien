@@ -8,6 +8,7 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/DescEditService.h>
+#include <EngineInterface/DescValidationService.h>
 #include <EngineInterface/EngineConstants.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -328,7 +329,7 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
         table.end();
     }
 
-    validateAndCorrect(object);
+    DescValidationService::get().validateAndCorrect(object);
 
     applyPendingSignalEntries(extendedObject);
     if (object != origObject) {
@@ -507,11 +508,8 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
         AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(TextWidth), constructor._autoTriggerInterval);
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation time").textWidth(TextWidth), constructor._constructionActivationTime);
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Construction angle").format("%.2f").textWidth(TextWidth), constructor._constructionAngle);
-        static std::vector<std::string> const provideEnergyStrings = {"Cell only", "Free generation"};
-        AlienGui::ComboParameters provideParams;
-        provideParams.name("Provide energy").textWidth(TextWidth).values(provideEnergyStrings);
         int providedEnergy = constructor._provideEnergy;
-        if (AlienGui::Combo(provideParams, providedEnergy)) {
+        if (AlienGui::Combo(AlienGui::ComboParameters().name("Provide energy").textWidth(TextWidth).values(Const::ProvideEnergyStrings), providedEnergy)) {
             constructor._provideEnergy = static_cast<ProvideEnergy>(providedEnergy);
         }
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(TextWidth), constructor._reservedEnergy);
@@ -638,8 +636,8 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
                 lineageParams.name("Restrict to lineage").textWidth(TextWidth).values({"No", "Same lineage", "Other lineage"});
                 AlienGui::Combo(lineageParams, m._restrictToLineage);
             }
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Min range").textWidth(TextWidth), sensor._minRange);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(TextWidth), sensor._maxRange);
+            AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Min range").min(0).max(255).textWidth(TextWidth), &sensor._minRange);
+            AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Max range").min(0).max(255).textWidth(TextWidth), &sensor._maxRange);
         } else if (cellType == CellType_Generator) {
             auto& generator = std::get<GeneratorDesc>(cell._cellType);
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(TextWidth), generator._additive);
@@ -807,7 +805,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
             }
             if (mode == CommunicatorMode_Sender) {
                 auto& m = std::get<SenderDesc>(communicator._mode);
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Range").textWidth(TextWidth), m._range);
+                AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Range").min(0).max(20).textWidth(TextWidth), &m._range);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Max times sent").textWidth(TextWidth), m._maxTimesSent);
             } else if (mode == CommunicatorMode_Receiver) {
                 auto& m = std::get<ReceiverDesc>(communicator._mode);
@@ -829,41 +827,4 @@ float _InspectionWindow::calcWindowWidth() const
         return StyleRepository::get().scale(CellWindowWidth);
     }
     return StyleRepository::get().scale(ParticleWindowWidth);
-}
-
-void _InspectionWindow::validateAndCorrect(ObjectDesc& object) const
-{
-    object._stiffness = std::clamp(object._stiffness, 0.0f, 1.0f);
-    if (object.getObjectType() == ObjectType_Cell) {
-        auto& cell = object.getCellRef();
-        cell._usableEnergy = std::max(0.0f, cell._usableEnergy);
-        cell._rawEnergy = std::max(0.0f, cell._rawEnergy);
-        cell._age = std::max(0, cell._age);
-        if (cell._constructor.has_value()) {
-            auto& c = cell._constructor.value();
-            if (c._autoTriggerInterval.has_value()) {
-                c._autoTriggerInterval = std::max(0, c._autoTriggerInterval.value());
-            }
-            c._reservedEnergy = std::max(0.0f, c._reservedEnergy);
-            c._numBranches = std::clamp(c._numBranches, 1, 6);
-            c._numConcatenations = std::max(c._numConcatenations, 1);
-        }
-        if (cell.getCellType() == CellType_Sensor) {
-            auto& sensor = std::get<SensorDesc>(cell._cellType);
-            sensor._minRange = std::clamp(sensor._minRange, 0, 255);
-            sensor._maxRange = std::clamp(sensor._maxRange, 0, 255);
-        }
-        if (cell.getCellType() == CellType_Generator) {
-            auto& generator = std::get<GeneratorDesc>(cell._cellType);
-            if (auto* sq = std::get_if<SquareSignalDesc>(&generator._mode)) {
-                sq->_period = std::max(1, sq->_period);
-            } else if (auto* sw = std::get_if<SawtoothSignalDesc>(&generator._mode)) {
-                sw->_period = std::max(1, sw->_period);
-            }
-        }
-        if (cell.getCellType() == CellType_Detonator) {
-            auto& detonator = std::get<DetonatorDesc>(cell._cellType);
-            detonator._countdown = std::clamp(detonator._countdown, 0, 0xffff);
-        }
-    }
 }

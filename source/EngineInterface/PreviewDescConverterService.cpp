@@ -101,13 +101,21 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
         }
         return &nodes.at(cell._nodeIndex);
     };
+    auto isPreviewInactive = [&](ObjectDesc const& object) {
+        auto const* node = getNode(object);
+        return node == nullptr || node->getCellType() == CellType_Void || object.getCellRef()._cellState != CellState_Ready;
+    };
+    auto getPreviewColor = [&](ObjectDesc const& object) {
+        auto const* node = getNode(object);
+        return node != nullptr ? node->_color : 0;
+    };
     for (auto const& object : phenotype._objects) {
         auto const* node = getNode(object);
-        auto const& color = object.getCellRef()._cellState == CellState_Ready && node != nullptr ? node->_color : -1;
         auto previewCell = CellPreviewDesc()
                                .id(object._id)
                                .pos(object._pos)
-                               .color(color)
+                                .color(getPreviewColor(object))
+                                .inactive(isPreviewInactive(object))
                                .geneIndex(object.getCellRef()._geneIndex)
                                .nodeIndex(object.getCellRef()._nodeIndex)
                                .cellType(node != nullptr ? node->getCellType() : CellType_Base);
@@ -119,7 +127,7 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
                 previewCell._constructorGeneIndex = nodeConstructor._geneIndex;
             }
         }
-        result.description._objects.emplace_back(previewCell);
+        result.description._cells.emplace_back(previewCell);
     }
 
     // Helper to find the connection weight from genome for a given connection
@@ -154,8 +162,9 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
             auto const& object2 = phenotype.getObjectRef(objectId2, cache);
 
             auto previewConnection = ConnectionPreviewDesc()
-                                         .object1(object1._pos)
-                                         .object2(object2._pos)
+                                         .cell1(object1._pos)
+                                         .cell2(object2._pos)
+                                         .inactive(isPreviewInactive(object1) || isPreviewInactive(object2))
                                          .connectionWeightToObject1(getConnectionWeight(object1, objectId2))
                                          .connectionWeightToObject2(getConnectionWeight(object2, objectId1));
             result.description._connections.push_back(previewConnection);

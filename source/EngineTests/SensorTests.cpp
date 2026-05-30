@@ -1045,10 +1045,10 @@ TEST_P(SensorTests_AllDetectionModesExceptSolid, relocation_targetBlocked)
     // Add solid cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 30; ++i) {
-        actualData._objects.emplace_back(ObjectDesc().id(50 + i).pos({85.0f + i, 70.0f}).type(SolidDesc()));
+        actualData._objects.emplace_back(ObjectDesc().id(5000 + i).pos({85.0f + i, 70.0f}).type(SolidDesc()));
     }
     for (int i = 0; i < 29; ++i) {
-        actualData.addConnection(50 + i, 50 + i + 1);
+        actualData.addConnection(5000 + i, 5000 + i + 1);
     }
     _simulationFacade->setSimulationData(actualData);
 

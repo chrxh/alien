@@ -127,6 +127,7 @@ public:
     bool testOnly_isDataValid();
     void testOnly_calcTimestepWithCellFunctions();
     void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation);
+    void testOnly_zeroTransferData();
 
 private:
     void resetTimeIntervalStatistics();

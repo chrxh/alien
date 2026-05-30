@@ -427,7 +427,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     auto newConstructor = newObject.getCellRef()._constructor.value();
-    EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
+    EXPECT_EQ(ProvideEnergy_FromConstructor, newConstructor._provideEnergy);
 
     // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
@@ -471,7 +471,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     auto newConstructor = newObject.getCellRef()._constructor.value();
-    EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
+    EXPECT_EQ(ProvideEnergy_FromConstructor, newConstructor._provideEnergy);
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview_detail)
@@ -2919,10 +2919,10 @@ INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_ProvideEnergy,
     ConstructorTests_ProvideEnergy_Separation,
     ::testing::Values(
-        std::make_pair(ProvideEnergy_CellOnly, Separation::No),
-        std::make_pair(ProvideEnergy_FreeGeneration, Separation::No),
-        std::make_pair(ProvideEnergy_CellOnly, Separation::Yes),
-        std::make_pair(ProvideEnergy_FreeGeneration, Separation::Yes)));
+        std::make_pair(ProvideEnergy_FromConstructor, Separation::No),
+        std::make_pair(ProvideEnergy_Free, Separation::No),
+        std::make_pair(ProvideEnergy_FromConstructor, Separation::Yes),
+        std::make_pair(ProvideEnergy_Free, Separation::Yes)));
 
 TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy)
 {
@@ -2939,7 +2939,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto constructorEnergy = [&] {
-        if (provideEnergy == ProvideEnergy_FreeGeneration) {
+        if (provideEnergy == ProvideEnergy_Free) {
             return normalCellEnergy;
         }
         return normalCellEnergy * 2 + 1.0f;
@@ -2972,15 +2972,15 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
     auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
     EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell.getCellRef()._usableEnergy));
 
-    if (provideEnergy == ProvideEnergy_FreeGeneration) {
+    if (provideEnergy == ProvideEnergy_Free) {
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
         EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
         EXPECT_TRUE(approxCompare(0.0f, getReservedEnergy(actualConstructedCell.getCellRef())));
         auto newConstructor = actualConstructedCell.getCellRef()._constructor.value();
         if (separation == Separation::Yes) {
-            EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
+            EXPECT_EQ(ProvideEnergy_FromConstructor, newConstructor._provideEnergy);
         } else {
-            EXPECT_EQ(ProvideEnergy_FreeGeneration, newConstructor._provideEnergy);
+            EXPECT_EQ(ProvideEnergy_Free, newConstructor._provideEnergy);
         }
     } else {
         EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell.getCellRef()._rawEnergy));
@@ -2992,7 +2992,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
 {
     auto [provideEnergy, separation] = GetParam();
 
-    if (provideEnergy == ProvideEnergy_FreeGeneration) {
+    if (provideEnergy == ProvideEnergy_Free) {
         GTEST_SKIP() << "Skipping test because FreeGeneration always has enough energy.";
     }
     auto genome = GenomeDesc().genes({
@@ -3051,7 +3051,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto constructorEnergy = [&] {
-        if (provideEnergy == ProvideEnergy_FreeGeneration) {
+        if (provideEnergy == ProvideEnergy_Free) {
             return normalCellEnergy;
         }
         return normalCellEnergy * 2 + 1.0f;
@@ -3089,7 +3089,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     EXPECT_TRUE(approxCompare(0, actualData.getObjectRef(0).getCellRef()._rawEnergy));
     EXPECT_TRUE(approxCompare(0, getReservedEnergy(actualData.getObjectRef(0).getCellRef())));
 
-    if (provideEnergy == ProvideEnergy_FreeGeneration) {
+    if (provideEnergy == ProvideEnergy_Free) {
         EXPECT_TRUE(approxCompare(0, getReservedEnergy(actualConstructedCell.getCellRef())));
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
     } else {
@@ -3190,7 +3190,7 @@ class ConstructorTests_ProvideEnergy
 INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_ProvideEnergy,
     ConstructorTests_ProvideEnergy,
-    ::testing::Values(ProvideEnergy_CellOnly, ProvideEnergy_FreeGeneration));
+    ::testing::Values(ProvideEnergy_FromConstructor, ProvideEnergy_Free));
 
 TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnergy_sufficientEnergy)
 {
@@ -3210,7 +3210,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
 
     // Calculate required energy: normalCellEnergy + InitialStoredUsableEnergy for depot cell
     auto constructorEnergy = [&] {
-        if (provideEnergy == ProvideEnergy_FreeGeneration) {
+        if (provideEnergy == ProvideEnergy_Free) {
             return normalCellEnergy;
         }
 
@@ -3250,7 +3250,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     EXPECT_EQ(CellType_Depot, actualConstructedCell.getCellRef().getCellType());
     auto const& depot = std::get<DepotDesc>(actualConstructedCell.getCellRef()._cellType);
     EXPECT_TRUE(approxCompare(InitialStoredUsableEnergy, depot._storedUsableEnergy));
-    if (provideEnergy != ProvideEnergy_FreeGeneration) {
+    if (provideEnergy != ProvideEnergy_Free) {
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     }
 }
@@ -3259,7 +3259,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
 {
     auto provideEnergy = GetParam();
 
-    if (provideEnergy == ProvideEnergy_FreeGeneration) {
+    if (provideEnergy == ProvideEnergy_Free) {
         GTEST_SKIP() << "Skipping test because FreeGeneration always has enough energy.";
     }
 
@@ -3304,7 +3304,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());  // Host + previously constructed, no new cell
 
-    if (provideEnergy != ProvideEnergy_FreeGeneration) {
+    if (provideEnergy != ProvideEnergy_Free) {
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     }
 }

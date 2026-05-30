@@ -6,6 +6,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/GenomeDescInfoService.h>
@@ -68,12 +69,16 @@ void GenomeEditorWindow::initIntern()
     MutationRateDialog::get().setup();
 
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
+    _genomeEditData->showNodeIndex = GlobalSettings::get().getValue(_settingsNode  + ".show node index", true);
 
     // Initialize the first tab with default genome
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
 }
 
-void GenomeEditorWindow::shutdownIntern() {}
+void GenomeEditorWindow::shutdownIntern()
+{
+    GlobalSettings::get().setValue(_settingsNode + ".show node index", _genomeEditData->showNodeIndex);
+}
 
 void GenomeEditorWindow::processIntern()
 {
@@ -291,7 +296,7 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
              .color(EditorModel::get().getDefaultColorCode())
              .type(CellDesc().headCell(true).constructor(ConstructorDesc()
                                                              .autoTriggerInterval(50)
-                                                             .provideEnergy(provideEnergy ? ProvideEnergy_FreeGeneration : ProvideEnergy_CellOnly)
+                                                             .provideEnergy(provideEnergy ? ProvideEnergy_Free : ProvideEnergy_FromConstructor)
                                                              .geneIndex(0)
                                                              .separation(true)))},
         CreatureDesc(),

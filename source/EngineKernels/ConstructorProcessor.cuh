@@ -169,8 +169,8 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             if (constructionData.isLastNodeOfLastConcatenation) {
                 if (constructionData.isSeparation) {
                     ++constructor.currentOffspring;
-                    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
-                        constructor.provideEnergy = ProvideEnergy_CellOnly;
+                    if (constructor.provideEnergy == ProvideEnergy_Free) {
+                        constructor.provideEnergy = ProvideEnergy_FromConstructor;
                     }
                     constructor.offspring = nullptr;
 
@@ -569,12 +569,12 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
     constructor.lastConstructedCellId = result->id;
 
     // Inherit free energy provision from parent in case that offspring constructs a non-separating gene
-    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration && result->typeData.cell.constructorAvailable) {
+    if (constructor.provideEnergy == ProvideEnergy_Free && result->typeData.cell.constructorAvailable) {
         auto const& offspringConstructor = result->typeData.cell.constructor;
         auto const& offspringGenome = constructionData.creature->genome;
         if (offspringConstructor.geneIndex < offspringGenome->numGenes) {
             if (!offspringConstructor.separation) {
-                result->typeData.cell.constructor.provideEnergy = ProvideEnergy_FreeGeneration;
+                result->typeData.cell.constructor.provideEnergy = ProvideEnergy_Free;
             }
         }
     }
@@ -588,7 +588,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 {
     auto& hostCell = hostObject->typeData.cell;
     auto& constructor = hostCell.constructor;
-    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
+    if (constructor.provideEnergy == ProvideEnergy_Free) {
         return true;
     }
 

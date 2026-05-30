@@ -112,9 +112,11 @@ namespace
             auto lineageId = object->typeData.cell.creature->genome->lineageId;
             uint32_t hash1 = lineageId * 2654435761u;
             uint32_t hash2 = lineageId * 2246822519u;
+            uint32_t hash3 = lineageId * 3266489917u;
             float h = static_cast<float>(hash1 & 0xFFFFu) / 65535.0f;
-            float s = 0.5f + 0.5f * (static_cast<float>(hash2 & 0xFFFFu) / 65535.0f);
-            return hsvToRgb(h, s, 1.0f);
+            float s = 0.7f + 0.3f * (static_cast<float>(hash2 & 0xFFFFu) / 65535.0f);
+            float v = 0.7f + 0.3f * (static_cast<float>(hash3 & 0xFFFFu) / 65535.0f);
+            return hsvToRgb(h, s, v);
         }
         return getCellColorByCode(object->color);
     }

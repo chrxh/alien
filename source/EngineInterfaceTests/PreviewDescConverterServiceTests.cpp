@@ -20,7 +20,7 @@ public:
 
     CellPreviewDesc const& getPreviewCell(PreviewDesc const& preview, int geneIndex, int nodeIndex)
     {
-        for (auto const& object : preview._objects) {
+        for (auto const& object : preview._cells) {
             if (object._geneIndex == geneIndex && object._nodeIndex == nodeIndex) {
                 return object;
             }
@@ -40,8 +40,8 @@ public:
         for (auto const& expectedConnection : expectedConnections) {
             auto found = false;
             for (auto const& connection : preview._connections) {
-                if (TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._object1)
-                    && TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._object2)
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._cell1)
+                    && TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._cell2)
                     && (!expectedConnection.connectionWeightToObject1.has_value()
                         || expectedConnection.connectionWeightToObject1.value() == connection._connectionWeightToObject1)
                     && (!expectedConnection.connectionWeightToObject2.has_value()
@@ -49,8 +49,8 @@ public:
                     found = true;
                     break;
                 }
-                if (TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._object1)
-                    && TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._object2)
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._cell1)
+                    && TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._cell2)
                     && (!expectedConnection.connectionWeightToObject2.has_value()
                         || expectedConnection.connectionWeightToObject2.value() == connection._connectionWeightToObject1)
                     && (!expectedConnection.connectionWeightToObject1.has_value()
@@ -72,7 +72,7 @@ TEST_F(PreviewDescConverterServiceTests, convertEmptyCollection)
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(GenomeDesc(), 0, std::move(input));
 
-    EXPECT_TRUE(result.description._objects.empty());
+    EXPECT_TRUE(result.description._cells.empty());
     EXPECT_TRUE(result.description._connections.empty());
 }
 
@@ -94,19 +94,50 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature)
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(2, result.description._objects.size());
+    ASSERT_EQ(2, result.description._cells.size());
     ASSERT_EQ(1, result.description._connections.size());
 
     auto object1 = getPreviewCell(result.description, 0, 0);
     auto object2 = getPreviewCell(result.description, 0, 1);
     EXPECT_EQ(2, object1._color);
     EXPECT_EQ(3, object2._color);
+    EXPECT_FALSE(object1._inactive);
+    EXPECT_FALSE(object2._inactive);
 
     auto expectedCell1_pos = RealVector2D{0, 0.5f};
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
     checkConnections(result.description, {{object1._pos, object2._pos, 1.0f, 1.0f}});
+}
+
+TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_marksConnectionInactiveForVoidCell)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({NodeDesc().color(2), NodeDesc().cellType(VoidGenomeDesc())}),
+    });
+
+    Desc input;
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+        },
+        CreatureDesc(),
+        genome);
+    input.addConnection(1, 2);
+
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
+
+    ASSERT_EQ(2, result.description._cells.size());
+    ASSERT_EQ(1, result.description._connections.size());
+
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    auto object2 = getPreviewCell(result.description, 0, 1);
+    EXPECT_EQ(2, object1._color);
+    EXPECT_FALSE(object1._inactive);
+    EXPECT_TRUE(object2._inactive);
+    EXPECT_TRUE(result.description._connections.at(0)._inactive);
 }
 
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesGenomeForCellTypes)
@@ -127,7 +158,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesGenomeForCel
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(2, result.description._objects.size());
+    ASSERT_EQ(2, result.description._cells.size());
 
     auto object1 = getPreviewCell(result.description, 0, 0);
     auto object2 = getPreviewCell(result.description, 0, 1);
@@ -199,7 +230,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_nonRootGene)
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 1, std::move(input));
 
-    ASSERT_EQ(2, result.description._objects.size());
+    ASSERT_EQ(2, result.description._cells.size());
     ASSERT_EQ(1, result.description._connections.size());
 
     auto object1 = getPreviewCell(result.description, 1, 0);
@@ -232,7 +263,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_defaultGenome)
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(2, result.description._objects.size());
+    ASSERT_EQ(2, result.description._cells.size());
     ASSERT_EQ(1, result.description._connections.size());
 
     auto object1 = getPreviewCell(result.description, 0, 0);
@@ -268,7 +299,7 @@ TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature)
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(3, result.description._objects.size());
+    ASSERT_EQ(3, result.description._cells.size());
     ASSERT_EQ(3, result.description._connections.size());
 
     auto object1 = getPreviewCell(result.description, 0, 0);
@@ -322,11 +353,11 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_oneNode_multip
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(8, result.description._objects.size());
+    ASSERT_EQ(8, result.description._cells.size());
     ASSERT_EQ(7, result.description._connections.size());
 
     std::set<RealVector2D> actualPositions;
-    for (const auto& object : result.description._objects) {
+    for (const auto& object : result.description._cells) {
         actualPositions.insert(object._pos);
     }
     std::set<RealVector2D> expectedPositions = {
@@ -370,7 +401,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_multipleNodes_
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(9, result.description._objects.size());
+    ASSERT_EQ(9, result.description._cells.size());
     ASSERT_EQ(8, result.description._connections.size());
 
     auto constructor = getPreviewCell(result.description, 0, 0);
@@ -379,7 +410,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreature_twoGenes_multipleNodes_
 
     int gene1Node0Count = 0;
     int gene1Node1Count = 0;
-    for (auto const& object : result.description._objects) {
+    for (auto const& object : result.description._cells) {
         if (object._geneIndex == 1 && object._nodeIndex == 0) {
             ++gene1Node0Count;
             EXPECT_EQ(3, object._color);
@@ -418,7 +449,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
     {
         auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(inputCreature1));
 
-        ASSERT_EQ(1, result.description._objects.size());
+        ASSERT_EQ(1, result.description._cells.size());
         ASSERT_EQ(0, result.description._connections.size());
 
         auto object1 = getPreviewCell(result.description, 0, 0);
@@ -427,7 +458,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withSeparation
     {
         auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 1, std::move(inputCreature2));
 
-        ASSERT_EQ(1, result.description._objects.size());
+        ASSERT_EQ(1, result.description._cells.size());
         ASSERT_EQ(0, result.description._connections.size());
 
         auto object1 = getPreviewCell(result.description, 1, 0);
@@ -454,7 +485,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCastratedCreature_withoutSeparat
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(2, result.description._objects.size());
+    ASSERT_EQ(2, result.description._cells.size());
     ASSERT_EQ(1, result.description._connections.size());
 
     auto object1 = getPreviewCell(result.description, 0, 0);
@@ -484,7 +515,7 @@ TEST_F(PreviewDescConverterServiceTests, convertCreatureWithSignals)
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(2, result.description._objects.size());
+    ASSERT_EQ(2, result.description._cells.size());
     ASSERT_EQ(1, result.description._connections.size());
 
     auto object1 = getPreviewCell(result.description, 0, 0);
@@ -514,7 +545,7 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_connectionWeight
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(2, result.description._objects.size());
+    ASSERT_EQ(2, result.description._cells.size());
     ASSERT_EQ(1, result.description._connections.size());
 
     auto object1 = getPreviewCell(result.description, 0, 0);

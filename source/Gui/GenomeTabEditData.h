@@ -18,7 +18,6 @@ struct _GenomeTabEditData
     bool scheduleReload = false;
     int simulationSpeed = 50;  // In percent of full speed
     bool detailSimulation = false;
-    bool showNodeIndex = true;  // true = show node index, false = show cell function
 
     bool hasValidGeneIndex(int geneIndex) const { return geneIndex >= 0 && static_cast<size_t>(geneIndex) < genome._genes.size(); }
 
