@@ -30,54 +30,48 @@ DisplaySettingsDialog::DisplaySettingsDialog()
 
 void DisplaySettingsDialog::processIntern()
 {
-    auto isFullscreen = !WindowController::get().isWindowedMode();
+    auto isFullscreen = _pendingIsFullscreen;
 
     if (AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Full screen"), isFullscreen)) {
-        if (isFullscreen) {
-            setFullscreen(_selectionIndex);
-        } else {
-            _origSelectionIndex = _selectionIndex;
-            WindowController::get().setWindowedMode();
-        }
+        _pendingIsFullscreen = isFullscreen;
     }
 
-    ImGui::BeginDisabled(!isFullscreen);
+    ImGui::BeginDisabled(!_pendingIsFullscreen);
 
-    if (AlienGui::Combo(
-            AlienGui::ComboParameters().name("Resolution").textWidth(RightColumnWidth).defaultValue(_origSelectionIndex).values(_videoModeStrings),
-            _selectionIndex)) {
+    AlienGui::Combo(
+        AlienGui::ComboParameters().name("Resolution").textWidth(RightColumnWidth).defaultValue(_origSelectionIndex).values(_videoModeStrings),
+        _pendingSelectionIndex);
 
-        setFullscreen(_selectionIndex);
-    }
     ImGui::EndDisabled();
 
-    auto fps = WindowController::get().getFps();
-    if (AlienGui::SliderInt(
-            AlienGui::SliderIntParameters()
-                .name("Frames per second")
-                .textWidth(RightColumnWidth)
-                .defaultValue(&_origFps)
-                .min(20)
-                .max(100)
-                .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
-            &fps)) {
-        WindowController::get().setFps(fps);
-    }
+    AlienGui::SliderInt(
+        AlienGui::SliderIntParameters()
+            .name("Frames per second")
+            .textWidth(RightColumnWidth)
+            .defaultValue(&_origFps)
+            .min(20)
+            .max(100)
+            .tooltip("A high frame rate leads to a greater GPU workload for rendering and thus lowers the simulation speed (time steps per second)."),
+        &_pendingFps);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button("Adopt")) {
         close();
+        if (_pendingIsFullscreen) {
+            setFullscreen(_pendingSelectionIndex);
+        } else {
+            WindowController::get().setWindowedMode();
+        }
+        WindowController::get().setFps(_pendingFps);
+        _selectionIndex = _pendingSelectionIndex;
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
     if (AlienGui::Button("Cancel")) {
         close();
-        WindowController::get().setMode(_origMode);
-        WindowController::get().setFps(_origFps);
-        _selectionIndex = _origSelectionIndex;
     }
 }
 
@@ -85,8 +79,10 @@ void DisplaySettingsDialog::openIntern()
 {
     _selectionIndex = getSelectionIndex();
     _origSelectionIndex = _selectionIndex;
-    _origMode = WindowController::get().getMode();
     _origFps = WindowController::get().getFps();
+    _pendingIsFullscreen = !WindowController::get().isWindowedMode();
+    _pendingSelectionIndex = _selectionIndex;
+    _pendingFps = _origFps;
 }
 
 void DisplaySettingsDialog::setFullscreen(int selectionIndex)

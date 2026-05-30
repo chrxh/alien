@@ -22,10 +22,13 @@ private:
     int getSelectionIndex() const;
     std::vector<std::string> createVideoModeStrings() const;
 
-    std::string _origMode;
     int _origSelectionIndex = 0;
     int _selectionIndex = 0;
     int _origFps = 33;
+
+    bool _pendingIsFullscreen = false;
+    int _pendingSelectionIndex = 0;
+    int _pendingFps = 33;
 
     int _videoModesCount = 0;
     GLFWvidmode const* _videoModes = nullptr;

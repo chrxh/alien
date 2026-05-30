@@ -25,7 +25,7 @@ void NetworkSettingsDialog::processIntern()
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button("Adopt")) {
         close();
         onChangeSettings();
     }
