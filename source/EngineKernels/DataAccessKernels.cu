@@ -1012,14 +1012,6 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TOs to)
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& object = to.objects[index];
             maxIds.entityId = max(maxIds.entityId, object.id);
-
-            if (object.type == ObjectType_Cell) {
-                auto const& creature = to.creatures[object.typeData.cell.creatureIndex];
-                maxIds.entityId = max(maxIds.entityId, creature.id);
-
-                auto const& genome = to.genomes[creature.genomeArrayIndex];
-                maxIds.lineageId = max(maxIds.lineageId, genome.lineageId);
-            }
         }
     }
     {
@@ -1028,6 +1020,14 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TOs to)
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = to.energyParticles[index];
             maxIds.entityId = max(maxIds.entityId, particle.id);
+        }
+    }
+    {
+        auto const partition = calcSystemThreadPartition(*to.numCreatures);
+
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            auto const& creature = to.creatures[index];
+            maxIds.entityId = max(maxIds.entityId, creature.id);
         }
     }
     {
