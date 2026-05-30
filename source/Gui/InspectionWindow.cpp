@@ -598,8 +598,9 @@ namespace
 
 void _InspectionWindow::processCellTypeNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type##Cell node").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
-        auto cellType = cell.getCellType();
+    auto cellType = cell.getCellType();
+    auto cellTypeName = Const::CellTypeStrings.at(cellType) + " properties";
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(cellTypeName + "##Cell node").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
         if (cellType == CellType_Depot) {
