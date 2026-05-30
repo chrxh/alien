@@ -525,6 +525,13 @@ void EngineWorker::testOnly_zeroTransferData()
     _simulationCudaFacade->testOnly_zeroTransferData();
 }
 
+void EngineWorker::testOnly_syncNumberGenerator()
+{
+    EngineWorkerGuard access(this);
+    auto maxIds = _simulationCudaFacade->getMaxIds();
+    NumberGenerator::get().adaptMaxIds(maxIds);
+}
+
 void EngineWorker::resetTimeIntervalStatistics()
 {
     _simulationCudaFacade->resetTimeIntervalStatistics();

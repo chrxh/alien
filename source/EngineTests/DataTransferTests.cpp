@@ -398,3 +398,24 @@ TEST_F(DataTransferTests, adaptIdGenerator_genomes)
     auto newId = NumberGenerator::get().createEntityId();
     EXPECT_TRUE(newId > HighId);
 }
+
+TEST_F(DataTransferTests, adaptIdGenerator_injectGenomeToSelectedCreatures)
+{
+    auto constexpr CreatureId = 1;
+    auto constexpr HighId = 1000000;
+
+    auto data = Desc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), GenomeDesc());
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->setSelection({99, 99}, {101, 101});
+
+    // Force the injected genome to receive a high id from the number generator
+    NumberGenerator::get().setIds({HighId});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
+    _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
+
+    // Sync host number generator from GPU; the injected genome's id must have been registered on the GPU during injection
+    _simulationFacade->testOnly_syncNumberGenerator();
+
+    auto newId = NumberGenerator::get().createEntityId();
+    EXPECT_TRUE(newId > HighId);
+}

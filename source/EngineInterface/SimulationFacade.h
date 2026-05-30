@@ -131,6 +131,7 @@ public:
     virtual void testOnly_calcTimestepWithCellFunctions() = 0;
     virtual void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation = false) = 0;
     virtual void testOnly_zeroTransferData() = 0;
+    virtual void testOnly_syncNumberGenerator() = 0;
 
 protected:
     static SimulationFacade _instance;

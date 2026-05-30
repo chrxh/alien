@@ -436,3 +436,8 @@ void _SimulationFacadeImpl::testOnly_zeroTransferData()
 {
     _worker.testOnly_zeroTransferData();
 }
+
+void _SimulationFacadeImpl::testOnly_syncNumberGenerator()
+{
+    _worker.testOnly_syncNumberGenerator();
+}
