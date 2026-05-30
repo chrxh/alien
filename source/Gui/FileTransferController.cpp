@@ -51,7 +51,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
                 _SimulationFacade::get()->setSimulationData(data.deserializedSimulation.mainData);
                 _SimulationFacade::get()->setStatisticsHistory(data.deserializedSimulation.statistics);
                 _SimulationFacade::get()->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
-            } catch (CudaMemoryAllocationException const& exception) {
+            } catch (AlienException const& exception) {
                 errorMessage = exception.what();
             } catch (...) {
                 errorMessage = "Failed to load simulation.";

@@ -131,7 +131,7 @@ void EngineWorker::addAndSelectSimulationData(Desc&& dataToUpdate)
 void EngineWorker::setSimulationData(Desc const& dataToUpdate)
 {
     if (!dataToUpdate.hasUniqueIds()) {
-        throw std::runtime_error("Object ids are not unique.");
+        throw AlienException("Object ids are not unique.");
     }
 
     EngineWorkerGuard access(this);
