@@ -209,6 +209,7 @@ void EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, S
 
 int EditKernelsService::injectGenomeToSelectedCreatures(CudaSettings const& gpuSettings, SimulationData const& data, TOs const& to)
 {
+    KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, to);
     KERNEL_CALL_1_1(cudaCreateGenomeFromTO, data, to, _genomePtr);
     setValueToDevice(_cudaInjectResult, 0);
     KERNEL_CALL(cudaInjectGenomeToSelectedCreatures, data, _genomePtr, _cudaInjectResult);

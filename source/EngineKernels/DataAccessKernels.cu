@@ -45,8 +45,10 @@ namespace
                 genome->mutationRates.neuronMutation2.weightSigma,
                 genome->mutationRates.neuronMutation2.biasSigma,
                 genome->mutationRates.neuronMutation2.activationFunctionProbability};
-            genomeTO.mutationRates.connectionMutation1 = {genome->mutationRates.connectionMutation1.probability, genome->mutationRates.connectionMutation1.sigma};
-            genomeTO.mutationRates.connectionMutation2 = {genome->mutationRates.connectionMutation2.probability, genome->mutationRates.connectionMutation2.sigma};
+            genomeTO.mutationRates.connectionMutation1 = {
+                genome->mutationRates.connectionMutation1.probability, genome->mutationRates.connectionMutation1.sigma};
+            genomeTO.mutationRates.connectionMutation2 = {
+                genome->mutationRates.connectionMutation2.probability, genome->mutationRates.connectionMutation2.sigma};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];
@@ -1026,6 +1028,15 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TOs to)
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = to.energyParticles[index];
             maxIds.entityId = max(maxIds.entityId, particle.id);
+        }
+    }
+    {
+        auto const partition = calcSystemThreadPartition(*to.numGenomes);
+
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+            auto const& genome = to.genomes[index];
+            maxIds.entityId = max(maxIds.entityId, genome.id);
+            maxIds.lineageId = max(maxIds.lineageId, genome.lineageId);
         }
     }
     numberGen.adaptMaxIds(maxIds);

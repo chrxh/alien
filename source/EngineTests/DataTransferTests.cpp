@@ -399,49 +399,25 @@ TEST_F(DataTransferTests, adaptIdGenerator_genomes)
     EXPECT_TRUE(newId > HighId);
 }
 
-TEST_F(DataTransferTests, adaptIdGenerator_objects_descriptionToTO)
+TEST_F(DataTransferTests, adaptIdGenerator_injectGenomeToSelectedCreatures)
 {
+    auto constexpr CreatureId = 1;
     auto constexpr HighId = 1000000;
-    auto data = Desc().objects({ObjectDesc().id(HighId).type(SolidDesc())});
 
-    NumberGenerator::get().setIds({1});
+    auto data = Desc().addCreature({ObjectDesc().pos({100, 100})}, CreatureDesc().id(CreatureId), GenomeDesc());
     _simulationFacade->setSimulationData(data);
+    _simulationFacade->setSelection({99, 99}, {101, 101});
 
-    auto newId = NumberGenerator::get().createEntityId();
-    EXPECT_TRUE(newId > HighId);
-}
+    // Force the injected genome to receive a high id from the number generator
+    NumberGenerator::get().setIds({HighId});
+    auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
+    _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
-TEST_F(DataTransferTests, adaptIdGenerator_energyParticles_descriptionToTO)
-{
-    auto constexpr HighId = 1000000;
-    auto data = Desc().energies({EnergyDesc().id(HighId)});
-
+    // Reset the host number generator and sync it from the GPU number generator;
+    // the injected genome's id must have been registered on the GPU during injection
     NumberGenerator::get().setIds({1});
-    _simulationFacade->setSimulationData(data);
-
-    auto newId = NumberGenerator::get().createEntityId();
-    EXPECT_TRUE(newId > HighId);
-}
-
-TEST_F(DataTransferTests, adaptIdGenerator_creatures_descriptionToTO)
-{
-    auto constexpr HighId = 1000000;
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().id(HighId));
-
-    NumberGenerator::get().setIds({1});
-    _simulationFacade->setSimulationData(data);
-
-    auto newId = NumberGenerator::get().createEntityId();
-    EXPECT_TRUE(newId > HighId);
-}
-
-TEST_F(DataTransferTests, adaptIdGenerator_genomes_descriptionToTO)
-{
-    auto constexpr HighId = 1000000;
-    auto data = Desc().addCreature({ObjectDesc().id(2)}, CreatureDesc().id(1), GenomeDesc().id(HighId));
-
-    NumberGenerator::get().setIds({1});
-    _simulationFacade->setSimulationData(data);
+    auto dataToAdd = Desc().objects({ObjectDesc().pos({500, 500}).type(SolidDesc())});
+    _simulationFacade->addAndSelectSimulationData(std::move(dataToAdd));
 
     auto newId = NumberGenerator::get().createEntityId();
     EXPECT_TRUE(newId > HighId);
