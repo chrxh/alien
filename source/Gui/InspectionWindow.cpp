@@ -246,6 +246,7 @@ void _InspectionWindow::process()
         if (isObject()) {
             auto extendedObject = std::get<ExtendedObjectDesc>(entity);
             processObject(extendedObject);
+            EditorModel::get().addInspectedEntity(extendedObject);
         } else {
             processParticle(std::get<EnergyDesc>(entity));
         }
@@ -488,6 +489,14 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
             if (AlienGui::Combo(cellTypeParams, cellType)) {
                 cell._cellType = createCellTypeDesc(cellType);
             }
+
+            bool hasConstructor = cell._constructor.has_value();
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(TextWidth), hasConstructor);
+            if (hasConstructor && !cell._constructor.has_value()) {
+                cell._constructor = ConstructorDesc();
+            } else if (!hasConstructor && cell._constructor.has_value()) {
+                cell._constructor = std::nullopt;
+            }
         });
 
         processCellTypeNode(cell);
@@ -514,12 +523,16 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
         }
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Reserved energy").format("%.2f").textWidth(TextWidth), constructor._reservedEnergy);
         AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(TextWidth), constructor._separation);
-        if (!constructor._separation) {
-            auto numBranches = constructor._numBranches - 1;
-            AlienGui::Switcher(
-                AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
-            constructor._numBranches = numBranches + 1;
+        auto numBranches = constructor._numBranches - 1;
+        if (constructor._separation) {
+            ImGui::BeginDisabled();
         }
+        AlienGui::Switcher(
+            AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
+        if (constructor._separation) {
+            ImGui::EndDisabled();
+        }
+        constructor._numBranches = numBranches + 1;
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(TextWidth), constructor._numConcatenations);
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(TextWidth), constructor._geneIndex);
     }
@@ -598,8 +611,9 @@ namespace
 
 void _InspectionWindow::processCellTypeNode(CellDesc& cell)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type##Cell node").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
-        auto cellType = cell.getCellType();
+    auto cellType = cell.getCellType();
+    auto cellTypeName = Const::CellTypeStrings.at(cellType) + " properties";
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(cellTypeName + "##Cell node").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
         if (cellType == CellType_Depot) {
