@@ -413,11 +413,8 @@ TEST_F(DataTransferTests, adaptIdGenerator_injectGenomeToSelectedCreatures)
     auto newGenome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
     _simulationFacade->injectGenomeToSelectedCreatures(newGenome);
 
-    // Reset the host number generator and sync it from the GPU number generator;
-    // the injected genome's id must have been registered on the GPU during injection
-    NumberGenerator::get().setIds({1});
-    auto dataToAdd = Desc().objects({ObjectDesc().pos({500, 500}).type(SolidDesc())});
-    _simulationFacade->addAndSelectSimulationData(std::move(dataToAdd));
+    // Sync host number generator from GPU; the injected genome's id must have been registered on the GPU during injection
+    _simulationFacade->testOnly_syncNumberGenerator();
 
     auto newId = NumberGenerator::get().createEntityId();
     EXPECT_TRUE(newId > HighId);

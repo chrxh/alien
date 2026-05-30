@@ -128,6 +128,7 @@ public:
     void testOnly_calcTimestepWithCellFunctions();
     void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation);
     void testOnly_zeroTransferData();
+    void testOnly_syncNumberGenerator();
 
 private:
     void resetTimeIntervalStatistics();

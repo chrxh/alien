@@ -117,6 +117,7 @@ public:
     void testOnly_calcTimestepWithCellFunctions() override;
     void testOnly_calcTimestepWithCellFunctionsForPreview(bool detailSimulation = false) override;
     void testOnly_zeroTransferData() override;
+    void testOnly_syncNumberGenerator() override;
 
 private:
     bool _selectionNeedsUpdate = false;
