@@ -9,8 +9,11 @@ _FileLogger::_FileLogger()
 {
     LoggingService::get().registerCallBack(this);
 
-    std::filesystem::remove(Const::LogFilename);
-    _outfile.open(Const::LogFilename, std::ios_base::app);
+    try {
+        std::filesystem::remove(Const::LogFilename);
+        _outfile.open(Const::LogFilename, std::ios_base::app);
+    } catch (...) {
+    }
 }
 
 _FileLogger::~_FileLogger()
@@ -20,5 +23,7 @@ _FileLogger::~_FileLogger()
 
 void _FileLogger::newLogMessage(Priority priority, std::string const& message)
 {
-    _outfile << message << std::endl;
+    if (_outfile.is_open()) {
+        _outfile << message << std::endl;
+    }
 }
