@@ -47,7 +47,7 @@ ExtendedObjectOrEnergyDesc EditorModel::getInspectedEntity(uint64_t id) const
 
 void EditorModel::addInspectedEntity(ExtendedObjectOrEnergyDesc const& entity)
 {
-    _inspectedEntityById.emplace(DescEditService::get().getId(entity), entity);
+    _inspectedEntityById.insert_or_assign(DescEditService::get().getId(entity), entity);
 }
 
 void EditorModel::setInspectedEntities(std::vector<ExtendedObjectOrEnergyDesc> const& inspectedEntities)

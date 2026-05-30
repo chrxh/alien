@@ -246,6 +246,7 @@ void _InspectionWindow::process()
         if (isObject()) {
             auto extendedObject = std::get<ExtendedObjectDesc>(entity);
             processObject(extendedObject);
+            EditorModel::get().addInspectedEntity(extendedObject);
         } else {
             processParticle(std::get<EnergyDesc>(entity));
         }
@@ -488,17 +489,18 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
             if (AlienGui::Combo(cellTypeParams, cellType)) {
                 cell._cellType = createCellTypeDesc(cellType);
             }
+
+            bool hasConstructor = cell._constructor.has_value();
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(TextWidth), hasConstructor);
+            if (hasConstructor && !cell._constructor.has_value()) {
+                cell._constructor = ConstructorDesc();
+            } else if (!hasConstructor && cell._constructor.has_value()) {
+                cell._constructor = std::nullopt;
+            }
         });
 
         processCellTypeNode(cell);
 
-        bool hasConstructor = cell._constructor.has_value();
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(TextWidth), hasConstructor);
-        if (hasConstructor && !cell._constructor.has_value()) {
-            cell._constructor = ConstructorDesc();
-        } else if (!hasConstructor && cell._constructor.has_value()) {
-            cell._constructor = std::nullopt;
-        }
         if (cell._constructor.has_value()) {
             processConstructorNode(cell._constructor.value());
         }
