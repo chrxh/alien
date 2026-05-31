@@ -730,12 +730,20 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
         if (isUniform()) {
             return getValueText(value[0]);
         }
-        std::string result;
+        std::vector<std::string> uniqueValues;
         for (int color = 0; color < MAX_COLORS; ++color) {
-            if (color > 0) {
+            auto valueText = getValueText(value[color]);
+            if (std::ranges::find(uniqueValues, valueText) == uniqueValues.end()) {
+                uniqueValues.emplace_back(std::move(valueText));
+            }
+        }
+
+        std::string result;
+        for (auto const& valueText : uniqueValues) {
+            if (!result.empty()) {
                 result += ", ";
             }
-            result += getValueText(value[color]);
+            result += valueText;
         }
         return result;
     };
@@ -769,7 +777,7 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
         }
 
         auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-        auto textWidth = color == 0 ? parameters._textWidth : 0.0f;
+        auto textWidth = parameters._colorDependence && isExpanded ? parameters._textWidth : color == 0 ? parameters._textWidth : 0.0f;
         auto textAndButtonWidth = scale(textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 2;
         auto switcherWidth = width - textAndButtonWidth;
 
@@ -2354,12 +2362,12 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         auto pinnedButtonWidth = pinned ? scale(PinnedButtonWidth) + ImGui::GetStyle().FramePadding.x : 0.0f;
 
         auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-        ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - pinnedButtonWidth);
         if (parameters._colorDependence && isExpanded) {
             AlienGui::ColorField(parameters._customizationColors[color].toRgbColor(), 0);
             ImGui::SameLine();
-            ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
         }
+        auto sliderOffset = ImGui::GetCursorPosX() - sliderPosX;
+        ImGui::SetNextItemWidth(width - sliderOffset - scale(parameters._textWidth) - pinnedButtonWidth);
 
         //slider
         T sliderValue;
