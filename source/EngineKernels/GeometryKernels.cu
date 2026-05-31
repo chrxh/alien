@@ -101,7 +101,7 @@ namespace
 
     __device__ __inline__ uint32_t getCellColor(Object* object)
     {
-        auto coloring = cudaSimulationParameters.objectColoring.value;
+        auto coloring = cudaSimulationParameters.objectColoring.value[calcMod(object->color, MAX_COLORS)];
         if (coloring == CellColoring_None) {
             return 0xffffff;
         }

@@ -68,7 +68,7 @@ namespace
     }
 }
 
-std::unordered_set<unsigned int> AlienGui::_basicSilderExpanded;
+std::unordered_set<unsigned int> AlienGui::_expandedColorControlIds;
 std::vector<ImGuiID> AlienGui::_treeNodeIdStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienGui::_treeNodeInfoById;
 std::unordered_map<std::string, bool> AlienGui::_savedTreeNodeStatesByName;
@@ -659,7 +659,7 @@ bool AlienGui::ComboOptional(ComboParameters& parameters, std::optional<int>& va
     return optionalWidgetAdaptor(parameters, value, 0, &AlienGui::Combo);
 }
 
-bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enabled /*= nullptr*/)
+bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enabled /*= nullptr*/)
 {
     ImGui::PushID(parameters._name.c_str());
 
@@ -674,44 +674,185 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enable
         ImGui::SameLine();
     }
 
-    static auto constexpr buttonWidth = 22.0f;
-    auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-    auto textAndButtonWidth = scale(parameters._textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 2;
-    auto switcherWidth = width - textAndButtonWidth;
+    //color dependent button
+    auto toggleButtonId = ImGui::GetID("expanded");
+    auto isExpanded = parameters._colorDependence && _expandedColorControlIds.contains(toggleButtonId);
+    if (parameters._colorDependence) {
+        auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
+        if (buttonResult) {
+            if (isExpanded) {
+                _expandedColorControlIds.erase(toggleButtonId);
+                isExpanded = false;
+            } else {
+                _expandedColorControlIds.insert(toggleButtonId);
+                isExpanded = true;
+            }
+        }
+        ImGui::SameLine();
+    }
 
+    static auto constexpr buttonWidth = 22.0f;
     auto result = false;
     auto numValues = toInt(parameters._values.size());
-
-    std::string text = parameters._values[value];
-
-    static char buffer[1024];
-    StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
-
-    ImGui::SetNextItemWidth(switcherWidth);
-    ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
-
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
-    if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(scale(buttonWidth), 0))) {
-        value = (value + numValues - 1) % numValues;
-        result = true;
+    if (numValues == 0) {
+        if (enabled) {
+            ImGui::EndDisabled();
+        }
+        if (parameters._readOnly) {
+            ImGui::EndDisabled();
+        }
+        ImGui::PopID();
+        return false;
     }
 
-    ImGui::SameLine();
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
-    if (ImGui::Button(ICON_FA_CARET_RIGHT, ImVec2(scale(buttonWidth), 0))) {
-        value = (value + 1) % numValues;
-        result = true;
-    }
+    auto getSwitcherValueText = [&](int valueIndex) { return parameters._values[valueIndex]; };
+    auto isUniform = [&] {
+        if (!parameters._colorDependence) {
+            return true;
+        }
+        for (int color = 1; color < MAX_COLORS; ++color) {
+            if (value[color] != value[0]) {
+                return false;
+            }
+        }
+        return true;
+    };
+    auto getCollapsedText = [&] {
+        if (isUniform()) {
+            return getSwitcherValueText(value[0]);
+        }
+        std::vector<std::string> uniqueValues;
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            auto valueText = getSwitcherValueText(value[color]);
+            if (std::ranges::find(uniqueValues, valueText) == uniqueValues.end()) {
+                uniqueValues.emplace_back(std::move(valueText));
+            }
+        }
 
-    ImGui::SameLine();
-    if (parameters._defaultValue) {
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (RevertButton(parameters._name)) {
-            value = *parameters._defaultValue;
+        std::string result;
+        for (auto const& valueText : uniqueValues) {
+            if (!result.empty()) {
+                result += ", ";
+            }
+            result += valueText;
+        }
+        return result;
+    };
+    auto setAllSwitcherValues = [&](int newValue) {
+        auto numRows = parameters._colorDependence ? MAX_COLORS : 1;
+        for (int row = 0; row < numRows; ++row) {
+            value[row] = newValue;
+        }
+    };
+    auto getDefaultValues = [&]() -> int const* {
+        if (parameters._defaultValues) {
+            return parameters._defaultValues;
+        }
+        return parameters._defaultValue ? &*parameters._defaultValue : nullptr;
+    };
+
+    int switcherPosX = 0;
+    auto numRows = parameters._colorDependence && isExpanded ? MAX_COLORS : 1;
+    for (int color = 0; color < numRows; ++color) {
+        if (color == 0) {
+            switcherPosX = toInt(ImGui::GetCursorPosX());
+        } else {
+            ImGui::SetCursorPosX(static_cast<float>(switcherPosX));
+        }
+        ImGui::PushID(color);
+
+        if (parameters._colorDependence && isExpanded) {
+            AlienGui::ColorField(parameters._customizationColors[color].toRgbColor(), 0);
+            ImGui::SameLine();
+        }
+
+        auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
+        auto textWidth = parameters._colorDependence && isExpanded ? parameters._textWidth : color == 0 ? parameters._textWidth : 0.0f;
+        auto textAndButtonWidth = scale(textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 2;
+        auto switcherWidth = width - textAndButtonWidth;
+
+        std::string text = parameters._colorDependence && !isExpanded ? getCollapsedText() : getSwitcherValueText(value[color]);
+
+        static char buffer[1024];
+        StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
+
+        ImGui::SetNextItemWidth(switcherWidth);
+        ImGui::InputText("##switcher", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
+        if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(scale(buttonWidth), 0))) {
+            if (parameters._colorDependence && !isExpanded) {
+                auto minValue = value[0];
+                for (int i = 1; i < MAX_COLORS; ++i) {
+                    minValue = std::min(minValue, value[i]);
+                }
+                setAllSwitcherValues(minValue > 0 ? minValue - 1 : numValues - 1);
+            } else {
+                value[color] = value[color] > 0 ? value[color] - 1 : numValues - 1;
+            }
             result = true;
         }
-        ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
+        if (ImGui::Button(ICON_FA_CARET_RIGHT, ImVec2(scale(buttonWidth), 0))) {
+            if (parameters._colorDependence && !isExpanded) {
+                auto maxValue = value[0];
+                for (int i = 1; i < MAX_COLORS; ++i) {
+                    maxValue = std::max(maxValue, value[i]);
+                }
+                setAllSwitcherValues(maxValue + 1 < numValues ? maxValue + 1 : 0);
+            } else {
+                value[color] = value[color] + 1 < numValues ? value[color] + 1 : 0;
+            }
+            result = true;
+        }
+
+        ImGui::PopID();
+
+        if (color == 0) {
+            ImGui::SameLine();
+            if (auto defaultValues = getDefaultValues()) {
+                auto equal = true;
+                auto numDefaultRows = parameters._colorDependence ? MAX_COLORS : 1;
+                for (int row = 0; row < numDefaultRows; ++row) {
+                    if (value[row] != defaultValues[row]) {
+                        equal = false;
+                        break;
+                    }
+                }
+                ImGui::BeginDisabled(equal);
+                if (RevertButton(parameters._name)) {
+                    for (int row = 0; row < numDefaultRows; ++row) {
+                        value[row] = defaultValues[row];
+                    }
+                    result = true;
+                }
+                ImGui::EndDisabled();
+                ImGui::SameLine();
+            }
+
+            if (enabled) {
+                ImGui::EndDisabled();
+            }
+            if (parameters._readOnly) {
+                ImGui::EndDisabled();
+            }
+
+            AlienGui::Text(TextParameters().text(parameters._name).highlightedSubString(parameters._highlightedSubString));
+
+            if (parameters._tooltip) {
+                AlienGui::HelpMarker(*parameters._tooltip);
+            }
+
+            if (parameters._readOnly) {
+                ImGui::BeginDisabled();
+            }
+            if (enabled) {
+                ImGui::BeginDisabled(!(*enabled));
+            }
+        }
     }
 
     if (enabled) {
@@ -719,13 +860,6 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enable
     }
     if (parameters._readOnly) {
         ImGui::EndDisabled();
-    }
-
-    ImGui::SameLine();
-    AlienGui::Text(TextParameters().text(parameters._name).highlightedSubString(parameters._highlightedSubString));
-
-    if (parameters._tooltip) {
-        AlienGui::HelpMarker(*parameters._tooltip);
     }
 
     ImGui::PopID();
@@ -2064,7 +2198,7 @@ void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters
         auto selectedEntry = _signalMemorySelection.contains(id) ? _signalMemorySelection.at(id) : 0;
         selectedEntry = std::min(selectedEntry, numEntries);
 
-        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(parameters._textWidth), selectedEntry);
+        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(parameters._textWidth), &selectedEntry);
 
         _signalMemorySelection.insert_or_assign(id, selectedEntry);
 
@@ -2183,14 +2317,14 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
 
     //color dependent button
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
+    auto isExpanded = _expandedColorControlIds.contains(toggleButtonId);
     if (parameters._colorDependence) {
         auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
         if (buttonResult) {
             if (isExpanded) {
-                _basicSilderExpanded.erase(toggleButtonId);
+                _expandedColorControlIds.erase(toggleButtonId);
             } else {
-                _basicSilderExpanded.insert(toggleButtonId);
+                _expandedColorControlIds.insert(toggleButtonId);
             }
         }
         ImGui::SameLine();
@@ -2218,12 +2352,12 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         auto pinnedButtonWidth = pinned ? scale(PinnedButtonWidth) + ImGui::GetStyle().FramePadding.x : 0.0f;
 
         auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-        ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - pinnedButtonWidth);
         if (parameters._colorDependence && isExpanded) {
             AlienGui::ColorField(parameters._customizationColors[color].toRgbColor(), 0);
             ImGui::SameLine();
-            ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
         }
+        auto sliderOffset = ImGui::GetCursorPosX() - sliderPosX;
+        ImGui::SetNextItemWidth(width - sliderOffset - scale(parameters._textWidth) - pinnedButtonWidth);
 
         //slider
         T sliderValue;
@@ -2386,13 +2520,13 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     }
 
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
+    auto isExpanded = _expandedColorControlIds.contains(toggleButtonId);
     auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
     if (buttonResult) {
         if (isExpanded) {
-            _basicSilderExpanded.erase(toggleButtonId);
+            _expandedColorControlIds.erase(toggleButtonId);
         } else {
-            _basicSilderExpanded.insert(toggleButtonId);
+            _expandedColorControlIds.insert(toggleButtonId);
         }
     }
     auto textWidth = scale(parameters._textWidth);
@@ -2468,7 +2602,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
             static bool test = false;
             ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
             if (ImGui::Button("Define matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-                _basicSilderExpanded.insert(toggleButtonId);
+                _expandedColorControlIds.insert(toggleButtonId);
             }
             ImGui::PopStyleVar();
         } else {

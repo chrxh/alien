@@ -19,7 +19,7 @@ void PreviewSettingsDialog::processIntern()
     // Convert boolean to switcher index: 0 = Node index, 1 = Cell type
     int displayMode = _showNodeIndex ? 0 : 1;
 
-    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Display mode").textWidth(scale(120.0f)).values({"Node index", "Cell type"}), displayMode);
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Display mode").textWidth(scale(120.0f)).values({"Node index", "Cell type"}), &displayMode);
 
     // Convert switcher index back to boolean
     _showNodeIndex = (displayMode == 0);

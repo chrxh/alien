@@ -397,7 +397,7 @@ void BrowserWindow::processWorkspaceSelectionAndFilter()
                     .textWidth(48.0f)
                     .tooltip(Const::BrowserWorkspaceTooltip)
                     .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
-                workspaceType_reordered)) {
+                &workspaceType_reordered)) {
             _selectedTreeTO = nullptr;
         }
         _currentWorkspace.workspaceType = 2 - workspaceType_reordered;
@@ -877,8 +877,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
                 ImGui::PushID(emojiType);
                 ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() - scale(3.0f));
-                if (ImGui::ImageButton(
-                        "reaction_emoji", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1, 1))) {
+                if (ImGui::ImageButton("reaction_emoji", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1, 1))) {
                     toggleEmojiType = emojiType;
                 }
                 bool isLiked = _ownEmojiTypeBySimId.contains(leaf.rawTO->id) && _ownEmojiTypeBySimId.at(leaf.rawTO->id) == emojiType;

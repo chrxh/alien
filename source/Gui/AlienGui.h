@@ -245,13 +245,16 @@ public:
         MEMBER(SwitcherParameters, float, width, 0);
         MEMBER(SwitcherParameters, float, textWidth, 100);
         MEMBER(SwitcherParameters, bool, readOnly, false);
+        MEMBER(SwitcherParameters, bool, colorDependence, false);
+        MEMBER(SwitcherParameters, ColorVector<FloatColorRGB>, customizationColors, getDefaultCustomizationColorVector());
         MEMBER(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER(SwitcherParameters, int const*, defaultValues, nullptr);
         MEMBER(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER(SwitcherParameters, std::optional<int>, disabledValue, std::nullopt);
         MEMBER(SwitcherParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool Switcher(SwitcherParameters& parameters, int& value, bool* enabled = nullptr);
+    static bool Switcher(SwitcherParameters& parameters, int* value, bool* enabled = nullptr);
 
     struct ComboColorParameters
     {
@@ -563,7 +566,7 @@ private:
     static std::unordered_map<std::string, bool> _savedTreeNodeStatesByName;
     static std::vector<unsigned int> _treeNodeIdStack;
 
-    static std::unordered_set<unsigned int> _basicSilderExpanded;
+    static std::unordered_set<unsigned int> _expandedColorControlIds;
 
     static int _rotationStartIndex;
 

@@ -1,7 +1,5 @@
 #include "SettingsParserService.h"
 
-#include <ranges>
-
 #include <Base/Resources.h>
 
 #include <EngineInterface/ParametersValidationService.h>
