@@ -68,7 +68,7 @@ namespace
     }
 }
 
-std::unordered_set<unsigned int> AlienGui::_basicSilderExpanded;
+std::unordered_set<unsigned int> AlienGui::_expandedColorControlIds;
 std::vector<ImGuiID> AlienGui::_treeNodeIdStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienGui::_treeNodeInfoById;
 std::unordered_map<std::string, bool> AlienGui::_savedTreeNodeStatesByName;
@@ -676,15 +676,15 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
 
     //color dependent button
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = parameters._colorDependence && _basicSilderExpanded.contains(toggleButtonId);
+    auto isExpanded = parameters._colorDependence && _expandedColorControlIds.contains(toggleButtonId);
     if (parameters._colorDependence) {
         auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
         if (buttonResult) {
             if (isExpanded) {
-                _basicSilderExpanded.erase(toggleButtonId);
+                _expandedColorControlIds.erase(toggleButtonId);
                 isExpanded = false;
             } else {
-                _basicSilderExpanded.insert(toggleButtonId);
+                _expandedColorControlIds.insert(toggleButtonId);
                 isExpanded = true;
             }
         }
@@ -705,11 +705,7 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
         return false;
     }
 
-    auto calcWrappedIndex = [&](int entry) {
-        auto result = entry % numValues;
-        return result < 0 ? result + numValues : result;
-    };
-    auto getValueText = [&](int entry) { return parameters._values[calcWrappedIndex(entry)]; };
+    auto getSwitcherValueText = [&](int valueIndex) { return parameters._values[valueIndex]; };
     auto isUniform = [&] {
         if (!parameters._colorDependence) {
             return true;
@@ -723,11 +719,11 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
     };
     auto getCollapsedText = [&] {
         if (isUniform()) {
-            return getValueText(value[0]);
+            return getSwitcherValueText(value[0]);
         }
         std::vector<std::string> uniqueValues;
         for (int color = 0; color < MAX_COLORS; ++color) {
-            auto valueText = getValueText(value[color]);
+            auto valueText = getSwitcherValueText(value[color]);
             if (std::ranges::find(uniqueValues, valueText) == uniqueValues.end()) {
                 uniqueValues.emplace_back(std::move(valueText));
             }
@@ -742,11 +738,10 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
         }
         return result;
     };
-    auto setAllValues = [&](int newValue) {
-        auto normalizedValue = calcWrappedIndex(newValue);
+    auto setAllSwitcherValues = [&](int newValue) {
         auto numRows = parameters._colorDependence ? MAX_COLORS : 1;
         for (int row = 0; row < numRows; ++row) {
-            value[row] = normalizedValue;
+            value[row] = newValue;
         }
     };
     auto getDefaultValues = [&]() -> int const* {
@@ -776,7 +771,7 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
         auto textAndButtonWidth = scale(textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 2;
         auto switcherWidth = width - textAndButtonWidth;
 
-        std::string text = parameters._colorDependence && !isExpanded ? getCollapsedText() : getValueText(value[color]);
+        std::string text = parameters._colorDependence && !isExpanded ? getCollapsedText() : getSwitcherValueText(value[color]);
 
         static char buffer[1024];
         StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
@@ -792,9 +787,9 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
                 for (int i = 1; i < MAX_COLORS; ++i) {
                     minValue = std::min(minValue, value[i]);
                 }
-                setAllValues(minValue - 1);
+                setAllSwitcherValues(minValue > 0 ? minValue - 1 : numValues - 1);
             } else {
-                value[color] = calcWrappedIndex(value[color] + numValues - 1);
+                value[color] = value[color] > 0 ? value[color] - 1 : numValues - 1;
             }
             result = true;
         }
@@ -807,9 +802,9 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enable
                 for (int i = 1; i < MAX_COLORS; ++i) {
                     maxValue = std::max(maxValue, value[i]);
                 }
-                setAllValues(maxValue + 1);
+                setAllSwitcherValues(maxValue + 1 < numValues ? maxValue + 1 : 0);
             } else {
-                value[color] = calcWrappedIndex(value[color] + 1);
+                value[color] = value[color] + 1 < numValues ? value[color] + 1 : 0;
             }
             result = true;
         }
@@ -2322,14 +2317,14 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
 
     //color dependent button
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
+    auto isExpanded = _expandedColorControlIds.contains(toggleButtonId);
     if (parameters._colorDependence) {
         auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
         if (buttonResult) {
             if (isExpanded) {
-                _basicSilderExpanded.erase(toggleButtonId);
+                _expandedColorControlIds.erase(toggleButtonId);
             } else {
-                _basicSilderExpanded.insert(toggleButtonId);
+                _expandedColorControlIds.insert(toggleButtonId);
             }
         }
         ImGui::SameLine();
@@ -2525,13 +2520,13 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     }
 
     auto toggleButtonId = ImGui::GetID("expanded");
-    auto isExpanded = _basicSilderExpanded.contains(toggleButtonId);
+    auto isExpanded = _expandedColorControlIds.contains(toggleButtonId);
     auto buttonResult = Button(isExpanded ? ICON_FA_MINUS_SQUARE "##toggle" : ICON_FA_PLUS_SQUARE "##toggle");
     if (buttonResult) {
         if (isExpanded) {
-            _basicSilderExpanded.erase(toggleButtonId);
+            _expandedColorControlIds.erase(toggleButtonId);
         } else {
-            _basicSilderExpanded.insert(toggleButtonId);
+            _expandedColorControlIds.insert(toggleButtonId);
         }
     }
     auto textWidth = scale(parameters._textWidth);
@@ -2607,7 +2602,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
             static bool test = false;
             ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
             if (ImGui::Button("Define matrix", ImVec2(ImGui::GetContentRegionAvail().x - textWidth, 0))) {
-                _basicSilderExpanded.insert(toggleButtonId);
+                _expandedColorControlIds.insert(toggleButtonId);
             }
             ImGui::PopStyleVar();
         } else {
