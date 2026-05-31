@@ -1,7 +1,5 @@
 #include "SettingsParserService.h"
 
-#include <ranges>
-
 #include <Base/Resources.h>
 
 #include <EngineInterface/ParametersValidationService.h>
@@ -44,21 +42,8 @@ namespace
             if (ref.colorDependence == ColorDependence::None) {
                 ParameterParser::encodeDecode(tree, *ref.value, *defaultRef.value, nodeBase + ".Value", parserTask);
             } else if (ref.colorDependence == ColorDependence::ColorVector) {
-                auto allColorValuesDefaulted = true;
                 for (int i = 0; i < MAX_COLORS; ++i) {
-                    allColorValuesDefaulted &=
-                        ParameterParser::encodeDecode(tree, ref.value[i], defaultRef.value[i], nodeBase + ".Color " + std::to_string(i), parserTask);
-                }
-                using Value = std::remove_pointer_t<decltype(ref.value)>;
-                if constexpr (!std::is_array_v<Value>) {
-                    if (parserTask == ParserTask::Decode && allColorValuesDefaulted) {
-                        auto legacyValue = defaultRef.value[0];
-                        if (!ParameterParser::encodeDecode(tree, legacyValue, defaultRef.value[0], nodeBase + ".Value", parserTask)) {
-                            for (int i = 0; i < MAX_COLORS; ++i) {
-                                ref.value[i] = legacyValue;
-                            }
-                        }
-                    }
+                    ParameterParser::encodeDecode(tree, ref.value[i], defaultRef.value[i], nodeBase + ".Color " + std::to_string(i), parserTask);
                 }
             } else if (ref.colorDependence == ColorDependence::ColorMatrix) {
                 for (int i = 0; i < MAX_COLORS; ++i) {

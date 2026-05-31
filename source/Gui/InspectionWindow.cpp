@@ -527,8 +527,7 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
         if (constructor._separation) {
             ImGui::BeginDisabled();
         }
-        AlienGui::Switcher(
-            AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), numBranches);
+        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(TextWidth), &numBranches);
         if (constructor._separation) {
             ImGui::EndDisabled();
         }

@@ -254,7 +254,6 @@ public:
         MEMBER(SwitcherParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool Switcher(SwitcherParameters& parameters, int& value, bool* enabled = nullptr);
     static bool Switcher(SwitcherParameters& parameters, int* value, bool* enabled = nullptr);
 
     struct ComboColorParameters

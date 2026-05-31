@@ -125,7 +125,7 @@ void CreatorWindow::processIntern()
                 .textWidth(RightColumnWidth)
                 .values({"Solid", "Fluid", "Free cells", "Energy particles"})
                 .tooltip(Const::CreatorDrawingTypeTooltip),
-            _material);
+            &_material);
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
         if (_material == CreationMaterial_Fluid) {

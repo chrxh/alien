@@ -135,9 +135,9 @@ void StatisticsWindow::processTimelinesTab()
 {
     ImGui::Spacing();
 
-    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").textWidth(RightColumnWidth).values({"Real-time plots", "Entire history plots"}), _plotMode);
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").textWidth(RightColumnWidth).values({"Real-time plots", "Entire history plots"}), &_plotMode);
 
-    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Plot type").textWidth(RightColumnWidth).values(createPlotTypeStrings()), _plotType);
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Plot type").textWidth(RightColumnWidth).values(createPlotTypeStrings()), &_plotType);
 
     if (ImGui::BeginChild("##plots", ImVec2(0, 0), false)) {
         processTimelineStatistics();
@@ -285,7 +285,7 @@ void StatisticsWindow::processSettings()
 
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Plot height").min(MinPlotHeight).max(1000.0f).format("%.0f").textWidth(RightColumnWidth), &_plotHeight);
-            AlienGui::Switcher(AlienGui::SwitcherParameters().name("Scale").textWidth(RightColumnWidth).values({"Linear", "Logarithmic"}), _plotScale);
+            AlienGui::Switcher(AlienGui::SwitcherParameters().name("Scale").textWidth(RightColumnWidth).values({"Linear", "Logarithmic"}), &_plotScale);
         }
         ImGui::EndChild();
     }

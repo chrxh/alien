@@ -12,14 +12,14 @@
 #include <PersisterInterface/SerializerService.h>
 #include <PersisterInterface/TaskProcessor.h>
 
+#include <EngineInterface/SimulationFacade.h>
+#include <PersisterInterface/PersisterFacade.h>
 #include "AlienGui.h"
 #include "FileTransferController.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include <EngineInterface/SimulationFacade.h>
-#include <PersisterInterface/PersisterFacade.h>
 
 namespace
 {
@@ -281,7 +281,7 @@ void AutosaveWindow::processSettings()
                     .values({"Limited save files", "Unlimited save files"})
                     .textWidth(RightColumnWidth)
                     .defaultValue(_origSaveMode),
-                _saveMode);
+                &_saveMode);
             if (_saveMode == SaveMode_Circular) {
                 AlienGui::InputInt(
                     AlienGui::InputIntParameters().name("Number of files").textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), _numberOfFiles);

@@ -297,7 +297,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     auto numBranches = constructor._numBranches - 1;
                     AlienGui::Switcher(
                         AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth),
-                        numBranches);
+                        &numBranches);
                     constructor._numBranches = numBranches + 1;
                 }
                 AlienGui::EndIndent();
@@ -375,12 +375,10 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 // Minimum range
-                AlienGui::SliderInt(
-                    AlienGui::SliderIntParameters().name("Min range").min(0).max(512).textWidth(rightColumnWidth), &sensor._minRange);
+                AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Min range").min(0).max(512).textWidth(rightColumnWidth), &sensor._minRange);
 
                 // Maximum range
-                AlienGui::SliderInt(
-                    AlienGui::SliderIntParameters().name("Max range").min(0).max(512).textWidth(rightColumnWidth), &sensor._maxRange);
+                AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Max range").min(0).max(512).textWidth(rightColumnWidth), &sensor._maxRange);
 
                 ImGui::PopID();
 
@@ -671,8 +669,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 if (mode == CommunicatorMode_Sender) {
                     AlienGui::BeginIndent();
                     auto& sender = std::get<SenderGenomeDesc>(communicator._mode);
-                    AlienGui::SliderInt(
-                        AlienGui::SliderIntParameters().name("Range").min(0).max(20).textWidth(rightColumnWidth), &sender._range);
+                    AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Range").min(0).max(20).textWidth(rightColumnWidth), &sender._range);
                     AlienGui::InputInt(AlienGui::InputIntParameters().name("Max times sent").textWidth(rightColumnWidth), sender._maxTimesSent);
                     AlienGui::EndIndent();
                 } else if (mode == CommunicatorMode_Receiver) {

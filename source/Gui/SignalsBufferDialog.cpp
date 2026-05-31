@@ -67,7 +67,7 @@ void SignalsBufferDialog::processIntern()
             }
             _selectedEntry = std::clamp(_selectedEntry, 0, numEntries - 1);
 
-            AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(DialogTextWidth), _selectedEntry);
+            AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(DialogTextWidth), &_selectedEntry);
             _selectedEntry = std::clamp(_selectedEntry, 0, numEntries - 1);
 
             auto& channels = _channelsBuffer.at(_selectedEntry);

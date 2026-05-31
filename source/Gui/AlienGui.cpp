@@ -659,11 +659,6 @@ bool AlienGui::ComboOptional(ComboParameters& parameters, std::optional<int>& va
     return optionalWidgetAdaptor(parameters, value, 0, &AlienGui::Combo);
 }
 
-bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enabled /*= nullptr*/)
-{
-    return Switcher(parameters, &value, enabled);
-}
-
 bool AlienGui::Switcher(SwitcherParameters& parameters, int* value, bool* enabled /*= nullptr*/)
 {
     ImGui::PushID(parameters._name.c_str());
@@ -2208,7 +2203,7 @@ void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters
         auto selectedEntry = _signalMemorySelection.contains(id) ? _signalMemorySelection.at(id) : 0;
         selectedEntry = std::min(selectedEntry, numEntries);
 
-        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(parameters._textWidth), selectedEntry);
+        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(parameters._textWidth), &selectedEntry);
 
         _signalMemorySelection.insert_or_assign(id, selectedEntry);
 
