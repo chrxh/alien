@@ -49,11 +49,14 @@ namespace
                     allColorValuesDefaulted &=
                         ParameterParser::encodeDecode(tree, ref.value[i], defaultRef.value[i], nodeBase + ".Color " + std::to_string(i), parserTask);
                 }
-                if (parserTask == ParserTask::Decode && allColorValuesDefaulted) {
-                    auto legacyValue = defaultRef.value[0];
-                    if (!ParameterParser::encodeDecode(tree, legacyValue, defaultRef.value[0], nodeBase + ".Value", parserTask)) {
-                        for (int i = 0; i < MAX_COLORS; ++i) {
-                            ref.value[i] = legacyValue;
+                using Value = std::remove_pointer_t<decltype(ref.value)>;
+                if constexpr (!std::is_array_v<Value>) {
+                    if (parserTask == ParserTask::Decode && allColorValuesDefaulted) {
+                        auto legacyValue = defaultRef.value[0];
+                        if (!ParameterParser::encodeDecode(tree, legacyValue, defaultRef.value[0], nodeBase + ".Value", parserTask)) {
+                            for (int i = 0; i < MAX_COLORS; ++i) {
+                                ref.value[i] = legacyValue;
+                            }
                         }
                     }
                 }
