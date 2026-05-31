@@ -44,7 +44,7 @@ using _IntSourceMember = SourceParameter<int> SimulationParameters::*;
 using IntSourceMember = std::shared_ptr<_IntSourceMember>;
 using IntMemberVariant =
     std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember, IntLayerMember, IntSourceMember>;
-using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntLayerMember, IntEnableableLayerMember, IntSourceMember>;
+using AlternativeMemberVariant = std::variant<std::monostate, IntMember, ColorVectorIntMember, IntLayerMember, IntEnableableLayerMember, IntSourceMember>;
 
 using _FloatMember = BaseParameter<float> SimulationParameters::*;
 using FloatMember = std::shared_ptr<_FloatMember>;
@@ -194,6 +194,7 @@ struct ParameterSpec;
 struct AlternativeSpec
 {
     SETTER_SHARED_PTR(AlternativeSpec, IntMember, member);
+    SETTER_SHARED_PTR(AlternativeSpec, ColorVectorIntMember, member);
     SETTER_SHARED_PTR(AlternativeSpec, IntLayerMember, member);
     SETTER_SHARED_PTR(AlternativeSpec, IntEnableableLayerMember, member);
     SETTER_SHARED_PTR(AlternativeSpec, IntSourceMember, member);

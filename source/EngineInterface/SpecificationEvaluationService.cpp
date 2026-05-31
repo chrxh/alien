@@ -195,6 +195,8 @@ ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant co
 
     if (locationType == LocationType::Base && std::holds_alternative<IntMember>(member)) {
         return ValueRef{.value = &(parameters.**std::get<IntMember>(member)).value};
+    } else if (locationType == LocationType::Base && std::holds_alternative<ColorVectorIntMember>(member)) {
+        return ValueRef{.value = (parameters.**std::get<ColorVectorIntMember>(member)).value.values, .colorDependence = ColorDependence::ColorVector};
     } else if (locationType == LocationType::Layer && std::holds_alternative<IntLayerMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<IntLayerMember>(member)).layerValues[index]};
@@ -303,7 +305,7 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
             }
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
             auto const& alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
-            if (std::holds_alternative<IntMember>(alternativeSpec._member)) {
+            if (std::holds_alternative<IntMember>(alternativeSpec._member) || std::holds_alternative<ColorVectorIntMember>(alternativeSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {

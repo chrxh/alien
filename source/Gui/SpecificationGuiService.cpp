@@ -435,12 +435,14 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
         AlienGui::SwitcherParameters()
             .name(parameterSpec._name)
             .textWidth(TextColumnWidth)
-            .defaultValue(*origValue)
+            .colorDependence(valueType == ColorDependence::ColorVector)
+            .customizationColors(parameters.customizationColors.value)
+            .defaultValues(origValue)
             .values(values)
             .readOnly(!enabled)
             .highlightedSubString(filter.containedText)
             .tooltip(parameterSpec._description),
-        *value,
+        value,
         enabledValue);
 
     auto const& parametersForAlternative = alternativeSpec._alternatives.at(*value).second;

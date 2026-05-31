@@ -100,8 +100,11 @@ void ParametersValidationService::validateAndCorrectIntern(
             auto const& valueSpec = std::get<AlternativeSpec>(parameterSpec._reference);
             auto ref = evaluationService.getRef(valueSpec._member, parameters, orderNumber);
             if (ref.value) {
-                auto max = toInt(valueSpec._alternatives.size());
-                *ref.value = std::clamp(*ref.value, 0, max);
+                auto max = toInt(valueSpec._alternatives.size()) - 1;
+                auto arraySize = getArraySize(ref.colorDependence);
+                for (int i = 0; i < arraySize; ++i) {
+                    ref.value[i] = std::clamp(ref.value[i], 0, max);
+                }
             }
             for (auto const& parameterSpecs : valueSpec._alternatives | std::views::values) {
                 validateAndCorrectIntern(config, parameterSpecs, parameters, orderNumber);

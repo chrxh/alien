@@ -44,8 +44,18 @@ namespace
             if (ref.colorDependence == ColorDependence::None) {
                 ParameterParser::encodeDecode(tree, *ref.value, *defaultRef.value, nodeBase + ".Value", parserTask);
             } else if (ref.colorDependence == ColorDependence::ColorVector) {
+                auto allColorValuesDefaulted = true;
                 for (int i = 0; i < MAX_COLORS; ++i) {
-                    ParameterParser::encodeDecode(tree, ref.value[i], defaultRef.value[i], nodeBase + ".Color " + std::to_string(i), parserTask);
+                    allColorValuesDefaulted &=
+                        ParameterParser::encodeDecode(tree, ref.value[i], defaultRef.value[i], nodeBase + ".Color " + std::to_string(i), parserTask);
+                }
+                if (parserTask == ParserTask::Decode && allColorValuesDefaulted) {
+                    auto legacyValue = defaultRef.value[0];
+                    if (!ParameterParser::encodeDecode(tree, legacyValue, defaultRef.value[0], nodeBase + ".Value", parserTask)) {
+                        for (int i = 0; i < MAX_COLORS; ++i) {
+                            ref.value[i] = legacyValue;
+                        }
+                    }
                 }
             } else if (ref.colorDependence == ColorDependence::ColorMatrix) {
                 for (int i = 0; i < MAX_COLORS; ++i) {
