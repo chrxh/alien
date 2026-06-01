@@ -403,16 +403,15 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         case CellType_Generator: {
             GeneratorDesc generator;
             generator._additive = objectTO.typeData.cell.cellTypeData.generator.additive;
-            generator._valueOffset = objectTO.typeData.cell.cellTypeData.generator.valueOffset;
+            generator._minValue = objectTO.typeData.cell.cellTypeData.generator.minValue;
+            generator._maxValue = objectTO.typeData.cell.cellTypeData.generator.maxValue;
             generator._timeOffset = objectTO.typeData.cell.cellTypeData.generator.timeOffset;
             if (objectTO.typeData.cell.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
                 SquareSignalDesc squareSignal;
-                squareSignal._amplitude = objectTO.typeData.cell.cellTypeData.generator.modeData.squareSignal.amplitude;
                 squareSignal._period = objectTO.typeData.cell.cellTypeData.generator.modeData.squareSignal.period;
                 generator._mode = squareSignal;
             } else if (objectTO.typeData.cell.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
                 SawtoothSignalDesc sawtoothSignal;
-                sawtoothSignal._amplitude = objectTO.typeData.cell.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
                 sawtoothSignal._period = objectTO.typeData.cell.cellTypeData.generator.modeData.sawtoothSignal.period;
                 generator._mode = sawtoothSignal;
             }
@@ -682,16 +681,15 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
     case CellType_Generator: {
         GeneratorGenomeDesc generatorDesc;
         generatorDesc._additive = nodeTO->cellTypeData.generator.additive;
-        generatorDesc._valueOffset = nodeTO->cellTypeData.generator.valueOffset;
+        generatorDesc._minValue = nodeTO->cellTypeData.generator.minValue;
+        generatorDesc._maxValue = nodeTO->cellTypeData.generator.maxValue;
         generatorDesc._timeOffset = nodeTO->cellTypeData.generator.timeOffset;
         if (nodeTO->cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
             SquareSignalGenomeDesc squareSignal;
-            squareSignal._amplitude = nodeTO->cellTypeData.generator.modeData.squareSignal.amplitude;
             squareSignal._period = nodeTO->cellTypeData.generator.modeData.squareSignal.period;
             generatorDesc._mode = squareSignal;
         } else if (nodeTO->cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
             SawtoothSignalGenomeDesc sawtoothSignal;
-            sawtoothSignal._amplitude = nodeTO->cellTypeData.generator.modeData.sawtoothSignal.amplitude;
             sawtoothSignal._period = nodeTO->cellTypeData.generator.modeData.sawtoothSignal.period;
             generatorDesc._mode = sawtoothSignal;
         }
@@ -1037,16 +1035,15 @@ void DescConverterService::convertGenomeToTO(
                 auto const& generatorDesc = std::get<GeneratorGenomeDesc>(nodeDesc._cellType);
                 auto& generatorTO = nodeTO.cellTypeData.generator;
                 generatorTO.additive = generatorDesc._additive;
-                generatorTO.valueOffset = generatorDesc._valueOffset;
+                generatorTO.minValue = generatorDesc._minValue;
+                generatorTO.maxValue = generatorDesc._maxValue;
                 generatorTO.timeOffset = generatorDesc._timeOffset;
                 generatorTO.mode = generatorDesc.getMode();
                 if (generatorTO.mode == GeneratorMode_SquareSignal) {
                     auto const& squareSignalDesc = std::get<SquareSignalGenomeDesc>(generatorDesc._mode);
-                    generatorTO.modeData.squareSignal.amplitude = squareSignalDesc._amplitude;
                     generatorTO.modeData.squareSignal.period = squareSignalDesc._period;
                 } else if (generatorTO.mode == GeneratorMode_SawtoothSignal) {
                     auto const& sawtoothSignalDesc = std::get<SawtoothSignalGenomeDesc>(generatorDesc._mode);
-                    generatorTO.modeData.sawtoothSignal.amplitude = sawtoothSignalDesc._amplitude;
                     generatorTO.modeData.sawtoothSignal.period = sawtoothSignalDesc._period;
                 }
             } break;
@@ -1350,16 +1347,15 @@ void DescConverterService::convertObjectToTO(
             auto const& generatorDesc = std::get<GeneratorDesc>(cellDesc._cellType);
             GeneratorTO& generatorTO = objectTO.typeData.cell.cellTypeData.generator;
             generatorTO.additive = generatorDesc._additive;
-            generatorTO.valueOffset = generatorDesc._valueOffset;
+            generatorTO.minValue = generatorDesc._minValue;
+            generatorTO.maxValue = generatorDesc._maxValue;
             generatorTO.timeOffset = generatorDesc._timeOffset;
             generatorTO.mode = generatorDesc.getMode();
             if (generatorTO.mode == GeneratorMode_SquareSignal) {
                 auto const& squareSignalDesc = std::get<SquareSignalDesc>(generatorDesc._mode);
-                generatorTO.modeData.squareSignal.amplitude = squareSignalDesc._amplitude;
                 generatorTO.modeData.squareSignal.period = squareSignalDesc._period;
             } else if (generatorTO.mode == GeneratorMode_SawtoothSignal) {
                 auto const& sawtoothSignalDesc = std::get<SawtoothSignalDesc>(generatorDesc._mode);
-                generatorTO.modeData.sawtoothSignal.amplitude = sawtoothSignalDesc._amplitude;
                 generatorTO.modeData.sawtoothSignal.period = sawtoothSignalDesc._period;
             }
             generatorTO.numPulses = generatorDesc._numPulses;

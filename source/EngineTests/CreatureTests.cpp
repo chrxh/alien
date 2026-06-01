@@ -47,8 +47,8 @@ protected:
                 CHECK(false);
             }
         }();
-        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
-                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(1)).minValue(1.0f).maxValue(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(30 * 20)).minValue(-1.0f).maxValue(1.0f);
         return GenomeDesc().genes({
             GeneDesc().nodes({
                 NodeDesc(),
@@ -75,8 +75,8 @@ protected:
                 CHECK(false);
             }
         }();
-        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(1)).valueOffset(1.0f)
-                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20));
+        auto generator = muscleMode == MuscleMode_AutoBending ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(1)).minValue(1.0f).maxValue(1.0f)
+                                                              : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(30 * 20)).minValue(-1.0f).maxValue(1.0f);
         return GenomeDesc().genes({
             GeneDesc().nodes({
                 NodeDesc(),
@@ -99,8 +99,8 @@ protected:
             ? MuscleGenomeDesc().mode(AutoCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
             : MuscleGenomeDesc().mode(ManualCrawlingGenomeDesc().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
         auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(0.0f).period(TIMESTEPS_PER_CELL_FUNCTION)).valueOffset(1.0f)
-            : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().amplitude(1.0f).period(30 * 20 * TIMESTEPS_PER_CELL_FUNCTION));
+            ? GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(TIMESTEPS_PER_CELL_FUNCTION)).minValue(1.0f).maxValue(1.0f)
+            : GeneratorGenomeDesc().mode(SquareSignalGenomeDesc().period(30 * 20 * TIMESTEPS_PER_CELL_FUNCTION)).minValue(-1.0f).maxValue(1.0f);
         return GenomeDesc()
             .frontAngle(frontAngle)
             .genes({

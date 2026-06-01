@@ -139,14 +139,12 @@ struct SensorDesc
 struct SquareSignalDesc
 {
     auto operator<=>(SquareSignalDesc const&) const = default;
-    MEMBER(SquareSignalDesc, float, amplitude, 1.0f);
     MEMBER(SquareSignalDesc, int, period, 100);
 };
 
 struct SawtoothSignalDesc
 {
     auto operator<=>(SawtoothSignalDesc const&) const = default;
-    MEMBER(SawtoothSignalDesc, float, amplitude, 1.0f);
     MEMBER(SawtoothSignalDesc, int, period, 100);
 };
 
@@ -158,7 +156,8 @@ struct GeneratorDesc
 
     // Fixed data
     MEMBER(GeneratorDesc, bool, additive, false);
-    MEMBER(GeneratorDesc, float, valueOffset, 0);
+    MEMBER(GeneratorDesc, float, minValue, -1.0f);
+    MEMBER(GeneratorDesc, float, maxValue, 1.0f);
     MEMBER(GeneratorDesc, int, timeOffset, 0);
     MEMBER(GeneratorDesc, GeneratorModeDesc, mode, SquareSignalDesc());
 

@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <Base/Resources.h>
 #include <EngineTestData/DescTestDataFactory.h>
 
 #include <PersisterInterface/SerializerService.h>
-
 
 class SerializerServiceTests : public ::testing::Test
 {

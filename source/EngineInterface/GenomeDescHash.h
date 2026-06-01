@@ -113,7 +113,6 @@ struct std::hash<SquareSignalGenomeDesc>
     std::size_t operator()(SquareSignalGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        hash_combine(seed, desc._amplitude);
         hash_combine(seed, desc._period);
         return seed;
     }
@@ -125,7 +124,6 @@ struct std::hash<SawtoothSignalGenomeDesc>
     std::size_t operator()(SawtoothSignalGenomeDesc const& desc) const
     {
         std::size_t seed = 0;
-        hash_combine(seed, desc._amplitude);
         hash_combine(seed, desc._period);
         return seed;
     }
@@ -144,7 +142,8 @@ struct std::hash<GeneratorGenomeDesc>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._additive);
-        hash_combine(seed, desc._valueOffset);
+        hash_combine(seed, desc._minValue);
+        hash_combine(seed, desc._maxValue);
         hash_combine(seed, desc._timeOffset);
         hash_combine(seed, std::hash<GeneratorModeGenomeDesc>{}(desc._mode));
         return seed;

@@ -114,14 +114,12 @@ struct SensorGenomeDesc
 struct SquareSignalGenomeDesc
 {
     auto operator<=>(SquareSignalGenomeDesc const&) const = default;
-    MEMBER(SquareSignalGenomeDesc, float, amplitude, 1.0f);
     MEMBER(SquareSignalGenomeDesc, int, period, 100);
 };
 
 struct SawtoothSignalGenomeDesc
 {
     auto operator<=>(SawtoothSignalGenomeDesc const&) const = default;
-    MEMBER(SawtoothSignalGenomeDesc, float, amplitude, 1.0f);
     MEMBER(SawtoothSignalGenomeDesc, int, period, 100);
 };
 
@@ -132,7 +130,8 @@ struct GeneratorGenomeDesc
     auto operator<=>(GeneratorGenomeDesc const&) const = default;
 
     MEMBER(GeneratorGenomeDesc, bool, additive, false);
-    MEMBER(GeneratorGenomeDesc, float, valueOffset, 0);
+    MEMBER(GeneratorGenomeDesc, float, minValue, -1.0f);
+    MEMBER(GeneratorGenomeDesc, float, maxValue, 1.0f);
     MEMBER(GeneratorGenomeDesc, int, timeOffset, 0);
     MEMBER(GeneratorGenomeDesc, GeneratorModeGenomeDesc, mode, SquareSignalGenomeDesc());
 

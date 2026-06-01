@@ -654,7 +654,8 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
         } else if (cellType == CellType_Generator) {
             auto& generator = std::get<GeneratorDesc>(cell._cellType);
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(TextWidth), generator._additive);
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Value offset").step(0.05f).format("%.2f").textWidth(TextWidth), generator._valueOffset);
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min value").step(0.05f).format("%.2f").textWidth(TextWidth), generator._minValue);
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Max value").step(0.05f).format("%.2f").textWidth(TextWidth), generator._maxValue);
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Time offset").textWidth(TextWidth), generator._timeOffset);
             auto mode = generator.getMode();
             AlienGui::ComboParameters modeParams;
@@ -664,11 +665,9 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
             }
             if (mode == GeneratorMode_SquareSignal) {
                 auto& m = std::get<SquareSignalDesc>(generator._mode);
-                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Amplitude").step(0.05f).format("%.2f").textWidth(TextWidth), m._amplitude);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(TextWidth), m._period);
             } else if (mode == GeneratorMode_SawtoothSignal) {
                 auto& m = std::get<SawtoothSignalDesc>(generator._mode);
-                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Amplitude").step(0.05f).format("%.2f").textWidth(TextWidth), m._amplitude);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(TextWidth), m._period);
             }
         } else if (cellType == CellType_Attacker) {
