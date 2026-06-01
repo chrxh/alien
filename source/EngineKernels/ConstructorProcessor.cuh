@@ -194,10 +194,10 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
         return constructor.offspring;
     }
 
-    // No separation => same creature
+    // No separation for non-root genes => same creature
     auto& genome = object->typeData.cell.creature->genome;
     if (constructor.geneIndex < genome->numGenes) {
-        if (!constructor.separation) {
+        if (!constructor.separation && constructor.geneIndex != 0) {
             return object->typeData.cell.creature;
         }
     }
