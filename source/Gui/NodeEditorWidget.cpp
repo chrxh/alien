@@ -462,12 +462,12 @@ void _NodeEditorWidget::processNodeAttributes()
                     auto& autoBending = std::get<AutoBendingGenomeDesc>(muscle._mode);
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        autoBending._maxAngleDeviation);
+                        &autoBending._maxAngleDeviation);
 
                     // Front back ratio
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        autoBending._forwardBackwardRatio);
+                        &autoBending._forwardBackwardRatio);
 
                     AlienGui::EndIndent();
 
@@ -478,12 +478,12 @@ void _NodeEditorWidget::processNodeAttributes()
                     auto& manualBending = std::get<ManualBendingGenomeDesc>(muscle._mode);
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        manualBending._maxAngleDeviation);
+                        &manualBending._maxAngleDeviation);
 
                     // Front back ratio
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        manualBending._forwardBackwardRatio);
+                        &manualBending._forwardBackwardRatio);
 
                     AlienGui::EndIndent();
 
@@ -494,7 +494,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     auto& angleBending = std::get<AngleBendingGenomeDesc>(muscle._mode);
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        angleBending._maxAngleDeviation);
+                        &angleBending._maxAngleDeviation);
 
                     // Front back ratio
                     AlienGui::InputFloat(
@@ -510,12 +510,12 @@ void _NodeEditorWidget::processNodeAttributes()
                     auto& autoCrawling = std::get<AutoCrawlingGenomeDesc>(muscle._mode);
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Max distance deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        autoCrawling._maxDistanceDeviation);
+                        &autoCrawling._maxDistanceDeviation);
 
                     // Front back ratio
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        autoCrawling._forwardBackwardRatio);
+                        &autoCrawling._forwardBackwardRatio);
 
                     AlienGui::EndIndent();
 
@@ -526,12 +526,12 @@ void _NodeEditorWidget::processNodeAttributes()
                     auto& manualCrawling = std::get<ManualCrawlingGenomeDesc>(muscle._mode);
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Max distance deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        manualCrawling._maxDistanceDeviation);
+                        &manualCrawling._maxDistanceDeviation);
 
                     // Front back ratio
                     AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
-                        manualCrawling._forwardBackwardRatio);
+                        &manualCrawling._forwardBackwardRatio);
 
                     AlienGui::EndIndent();
 
