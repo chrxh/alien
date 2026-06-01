@@ -165,7 +165,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         if (tryConstructCell(data, statistics, object, constructionData)) {
             object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
-            ++constructionData.creature->numCells;
+            alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
             if (constructionData.isLastNodeOfLastConcatenation) {
                 if (constructionData.isSeparation) {
                     ++constructor.currentOffspring;

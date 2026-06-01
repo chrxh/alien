@@ -159,6 +159,13 @@ __device__ __inline__ T alienAtomicAdd32(T* address, T value)
 }
 
 template <typename T>
+__device__ __inline__ T alienAtomicSub32(T* address, T value)
+{
+    static_assert(sizeof(unsigned int) == sizeof(T));
+    return reinterpret_cast<T>(atomicSub(reinterpret_cast<unsigned int*>(address), reinterpret_cast<unsigned int>(value)));
+}
+
+template <typename T>
 __device__ __inline__ T alienAtomicOr32(T* address, T value)
 {
     static_assert(sizeof(unsigned int) == sizeof(T));

@@ -121,7 +121,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteObject(Simul
     }
     auto object = data.entities.objects.at(objectIndex);
     if (object->type == ObjectType_Cell) {
-        atomicSub(&object->typeData.cell.creature->numCells, 1u);
+        alienAtomicSub32(&object->typeData.cell.creature->numCells, static_cast<uint32_t>(1));
     }
 }
 
