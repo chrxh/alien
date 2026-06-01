@@ -2159,7 +2159,15 @@ void SerializerService::deserializeDescription(Desc& description, std::istream& 
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
-    archive(version);
+    try {
+        archive(version);
+    } catch (std::exception const&) {
+        stream.clear();
+        stream.seekg(0);
+        cereal::PortableBinaryInputArchive legacyArchive(stream);
+        legacyArchive(description);
+        return;
+    }
 
     if (!VersionParserService::get().isVersionValid(version)) {
         throw std::runtime_error("No version detected.");

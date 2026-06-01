@@ -1,8 +1,14 @@
 #include <gtest/gtest.h>
 
+#include <cereal/archives/portable_binary.hpp>
+#include <Base/Resources.h>
 #include <EngineTestData/DescTestDataFactory.h>
 
 #include <PersisterInterface/SerializerService.h>
+
+#include <iterator>
+#include <sstream>
+#include <zstr.hpp>
 
 
 class SerializerServiceTests : public ::testing::Test
@@ -37,6 +43,47 @@ TEST_F(SerializerServiceTests, singleEnergyParticle)
     data._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
 
     testSerializationAndDeserialization(data);
+}
+
+TEST_F(SerializerServiceTests, legacyArchiveWithoutVersionHeader)
+{
+    Desc data;
+    data._energies.emplace_back(_descTestDataFactory->createNonDefaultEnergyDesc());
+
+    DeserializedSimulation deserializedSimulationBefore{.mainData = data};
+    SerializedSimulation serializedSimulation;
+    ASSERT_TRUE(_serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore));
+
+    std::string rawArchive;
+    {
+        std::stringstream compressedInput(serializedSimulation.mainData);
+        zstr::istream decompressedInput(compressedInput, std::ios::binary);
+        rawArchive.assign(std::istreambuf_iterator<char>(decompressedInput), std::istreambuf_iterator<char>());
+    }
+
+    std::string versionPrefix;
+    {
+        std::stringstream versionStream;
+        cereal::PortableBinaryOutputArchive archive(versionStream);
+        archive(Const::ProgramVersion);
+        versionPrefix = versionStream.str();
+    }
+    ASSERT_GE(rawArchive.size(), versionPrefix.size());
+    ASSERT_EQ(rawArchive.substr(0, versionPrefix.size()), versionPrefix);
+
+    SerializedSimulation legacySerializedSimulation = serializedSimulation;
+    {
+        std::stringstream compressedOutput;
+        zstr::ostream compressedArchive(compressedOutput, std::ios::binary);
+        auto const legacyRawArchive = rawArchive.substr(versionPrefix.size());
+        compressedArchive.write(legacyRawArchive.data(), static_cast<std::streamsize>(legacyRawArchive.size()));
+        compressedArchive.flush();
+        legacySerializedSimulation.mainData = compressedOutput.str();
+    }
+
+    DeserializedSimulation deserializedSimulationAfter;
+    EXPECT_TRUE(_serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, legacySerializedSimulation));
+    EXPECT_TRUE(_descTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
 }
 
 using ObjectParameter = DescTestDataFactory::ObjectParameter;
