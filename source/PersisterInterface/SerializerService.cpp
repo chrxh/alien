@@ -219,6 +219,39 @@ namespace cereal
             }
         }
 
+        template <typename T, typename OnLoadRaw>
+        void addDesc(int key, T& value, OnLoadRaw onLoadRaw)
+        {
+            if (_task == SerializationTask::Save) {
+                addDesc(key, value);
+            } else {
+                // Defer the load operation
+                addDeferredDescOp(key, [this, &value, onLoadRaw]() mutable {
+                    // Read size-prefixed data
+                    uint64_t dataSize = 0;
+                    _ar(dataSize);
+
+                    // Read serialized data into buffer
+                    std::string serializedData(dataSize, '\0');
+                    _ar(cereal::binary_data(serializedData.data(), dataSize));
+
+                    // Optionally inspect raw attributes for legacy conversion
+                    {
+                        std::istringstream rawSs(serializedData, std::ios::binary);
+                        cereal::PortableBinaryInputArchive rawAr(rawSs);
+                        AttributeMap rawAttributes;
+                        rawAr(rawAttributes);
+                        onLoadRaw(rawAttributes);
+                    }
+
+                    // Deserialize from buffer
+                    std::istringstream ss(std::move(serializedData), std::ios::binary);
+                    cereal::PortableBinaryInputArchive bufferAr(ss);
+                    bufferAr(value);
+                });
+            }
+        }
+
         // Specialized overload for std::vector<NeuralNetWeight> - converts to/from std::vector<int8_t> for serialization
         void addMember(int key, std::vector<NeuralNetWeight>& value, std::vector<NeuralNetWeight> const& defaultValue)
         {
@@ -358,6 +391,8 @@ namespace
     auto constexpr Id_GeneratorGenome_Additive = 0;
     auto constexpr Id_GeneratorGenome_ValueOffset = 1;
     auto constexpr Id_GeneratorGenome_TimeOffset = 2;
+    auto constexpr Id_GeneratorGenome_MinValue = 4;
+    auto constexpr Id_GeneratorGenome_MaxValue = 5;
 
     auto constexpr Id_GeneratorModeGenome_SquareSignal_Amplitude = 0;
     auto constexpr Id_GeneratorModeGenome_SquareSignal_Period = 1;
@@ -542,7 +577,6 @@ namespace cereal
     {
         SquareSignalGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_GeneratorModeGenome_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
         scope.addMember(Id_GeneratorModeGenome_SquareSignal_Period, data._period, defaultObject._period);
     }
     SPLIT_SERIALIZATION(SquareSignalGenomeDesc)
@@ -552,7 +586,6 @@ namespace cereal
     {
         SawtoothSignalGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_GeneratorModeGenome_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
         scope.addMember(Id_GeneratorModeGenome_SawtoothSignal_Period, data._period, defaultObject._period);
     }
     SPLIT_SERIALIZATION(SawtoothSignalGenomeDesc)
@@ -561,11 +594,67 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, GeneratorGenomeDesc& data)
     {
         GeneratorGenomeDesc defaultObject;
-        auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
-        scope.addMember(Id_GeneratorGenome_ValueOffset, data._valueOffset, defaultObject._valueOffset);
-        scope.addMember(Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
-        scope.addDesc(Id_GeneratorGenome_Mode, data._mode);
+        std::optional<float> legacyValueOffset;
+        std::optional<float> legacyAmplitude;
+        bool hasMinValue = false;
+        bool hasMaxValue = false;
+        {
+            auto scope = getSerializationScope(task, ar);
+            scope.addMember(Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
+
+            auto& attributes = static_cast<AttributeMap&>(scope);
+            hasMinValue = attributes.find(Id_GeneratorGenome_MinValue) != attributes.end();
+            hasMaxValue = attributes.find(Id_GeneratorGenome_MaxValue) != attributes.end();
+
+            scope.addMember(Id_GeneratorGenome_MinValue, data._minValue, defaultObject._minValue);
+            scope.addMember(Id_GeneratorGenome_MaxValue, data._maxValue, defaultObject._maxValue);
+            scope.addMember(Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
+
+            if (auto it = attributes.find(Id_GeneratorGenome_ValueOffset); it != attributes.end()) {
+                legacyValueOffset = std::get<float>(it->second);
+            }
+
+            if (hasMinValue && hasMaxValue) {
+                scope.addDesc(Id_GeneratorGenome_Mode, data._mode);
+            } else {
+                scope.addDesc(Id_GeneratorGenome_Mode, data._mode, [&](AttributeMap const& rawAttributes) {
+                    if (auto it = rawAttributes.find(Id_GeneratorModeGenome_SquareSignal_Amplitude); it != rawAttributes.end()) {
+                        legacyAmplitude = std::get<float>(it->second);
+                    } else if (auto it = rawAttributes.find(Id_GeneratorModeGenome_SawtoothSignal_Amplitude); it != rawAttributes.end()) {
+                        legacyAmplitude = std::get<float>(it->second);
+                    }
+                });
+            }
+        }
+
+        if ((!hasMinValue || !hasMaxValue) && legacyValueOffset.has_value() && legacyAmplitude.has_value()) {
+            auto const minValue = [&]() {
+                switch (data.getMode()) {
+                case GeneratorMode_SquareSignal:
+                    return legacyValueOffset.value() - legacyAmplitude.value();
+                case GeneratorMode_SawtoothSignal:
+                    return legacyValueOffset.value();
+                default:
+                    return defaultObject._minValue;
+                }
+            }();
+            auto const maxValue = [&]() {
+                switch (data.getMode()) {
+                case GeneratorMode_SquareSignal:
+                    return legacyValueOffset.value() + legacyAmplitude.value();
+                case GeneratorMode_SawtoothSignal:
+                    return legacyValueOffset.value() + legacyAmplitude.value();
+                default:
+                    return defaultObject._maxValue;
+                }
+            }();
+            if (!hasMinValue) {
+                data._minValue = minValue;
+            }
+            if (!hasMaxValue) {
+                data._maxValue = maxValue;
+            }
+        }
     }
     SPLIT_SERIALIZATION(GeneratorGenomeDesc)
 
@@ -1024,6 +1113,8 @@ namespace
     auto constexpr Id_Generator_NumPulses = 1;
     auto constexpr Id_Generator_ValueOffset = 2;
     auto constexpr Id_Generator_TimeOffset = 3;
+    auto constexpr Id_Generator_MinValue = 5;
+    auto constexpr Id_Generator_MaxValue = 6;
 
     auto constexpr Id_GeneratorMode_SquareSignal_Amplitude = 0;
     auto constexpr Id_GeneratorMode_SquareSignal_Period = 1;
@@ -1262,7 +1353,6 @@ namespace cereal
     {
         SquareSignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_GeneratorMode_SquareSignal_Amplitude, data._amplitude, defaultObject._amplitude);
         scope.addMember(Id_GeneratorMode_SquareSignal_Period, data._period, defaultObject._period);
     }
     SPLIT_SERIALIZATION(SquareSignalDesc)
@@ -1272,7 +1362,6 @@ namespace cereal
     {
         SawtoothSignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_GeneratorMode_SawtoothSignal_Amplitude, data._amplitude, defaultObject._amplitude);
         scope.addMember(Id_GeneratorMode_SawtoothSignal_Period, data._period, defaultObject._period);
     }
     SPLIT_SERIALIZATION(SawtoothSignalDesc)
@@ -1281,12 +1370,68 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, GeneratorDesc& data)
     {
         GeneratorDesc defaultObject;
-        auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_Generator_Additive, data._additive, defaultObject._additive);
-        scope.addMember(Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
-        scope.addMember(Id_Generator_ValueOffset, data._valueOffset, defaultObject._valueOffset);
-        scope.addMember(Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
-        scope.addDesc(Id_Generator_Mode, data._mode);
+        std::optional<float> legacyValueOffset;
+        std::optional<float> legacyAmplitude;
+        bool hasMinValue = false;
+        bool hasMaxValue = false;
+        {
+            auto scope = getSerializationScope(task, ar);
+            scope.addMember(Id_Generator_Additive, data._additive, defaultObject._additive);
+            scope.addMember(Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
+
+            auto& attributes = static_cast<AttributeMap&>(scope);
+            hasMinValue = attributes.find(Id_Generator_MinValue) != attributes.end();
+            hasMaxValue = attributes.find(Id_Generator_MaxValue) != attributes.end();
+
+            scope.addMember(Id_Generator_MinValue, data._minValue, defaultObject._minValue);
+            scope.addMember(Id_Generator_MaxValue, data._maxValue, defaultObject._maxValue);
+            scope.addMember(Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
+
+            if (auto it = attributes.find(Id_Generator_ValueOffset); it != attributes.end()) {
+                legacyValueOffset = std::get<float>(it->second);
+            }
+
+            if (hasMinValue && hasMaxValue) {
+                scope.addDesc(Id_Generator_Mode, data._mode);
+            } else {
+                scope.addDesc(Id_Generator_Mode, data._mode, [&](AttributeMap const& rawAttributes) {
+                    if (auto it = rawAttributes.find(Id_GeneratorMode_SquareSignal_Amplitude); it != rawAttributes.end()) {
+                        legacyAmplitude = std::get<float>(it->second);
+                    } else if (auto it = rawAttributes.find(Id_GeneratorMode_SawtoothSignal_Amplitude); it != rawAttributes.end()) {
+                        legacyAmplitude = std::get<float>(it->second);
+                    }
+                });
+            }
+        }
+
+        if ((!hasMinValue || !hasMaxValue) && legacyValueOffset.has_value() && legacyAmplitude.has_value()) {
+            auto const minValue = [&]() {
+                switch (data.getMode()) {
+                case GeneratorMode_SquareSignal:
+                    return legacyValueOffset.value() - legacyAmplitude.value();
+                case GeneratorMode_SawtoothSignal:
+                    return legacyValueOffset.value();
+                default:
+                    return defaultObject._minValue;
+                }
+            }();
+            auto const maxValue = [&]() {
+                switch (data.getMode()) {
+                case GeneratorMode_SquareSignal:
+                    return legacyValueOffset.value() + legacyAmplitude.value();
+                case GeneratorMode_SawtoothSignal:
+                    return legacyValueOffset.value() + legacyAmplitude.value();
+                default:
+                    return defaultObject._maxValue;
+                }
+            }();
+            if (!hasMinValue) {
+                data._minValue = minValue;
+            }
+            if (!hasMaxValue) {
+                data._maxValue = maxValue;
+            }
+        }
     }
     SPLIT_SERIALIZATION(GeneratorDesc)
 

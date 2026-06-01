@@ -88,13 +88,11 @@ struct ConstructorGenome
 
 struct SquareSignalGenome
 {
-    float amplitude;
     int period;
 };
 
 struct SawtoothSignalGenome
 {
-    float amplitude;
     int period;
 };
 
@@ -107,7 +105,8 @@ union GeneratorModeGenome
 struct GeneratorGenome
 {
     bool additive;
-    float valueOffset;
+    float minValue;
+    float maxValue;
     int timeOffset;
     GeneratorMode mode;
     GeneratorModeGenome modeData;

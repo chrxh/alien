@@ -389,9 +389,11 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Additive
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(rightColumnWidth), generator._additive);
 
-                // Value offset
+                // Value range
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Value offset").format("%.2f").step(0.05f).textWidth(rightColumnWidth), generator._valueOffset);
+                    AlienGui::InputFloatParameters().name("Min value").format("%.2f").step(0.05f).textWidth(rightColumnWidth), generator._minValue);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max value").format("%.2f").step(0.05f).textWidth(rightColumnWidth), generator._maxValue);
 
                 // Time offset
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Time offset").textWidth(rightColumnWidth), generator._timeOffset);
@@ -406,8 +408,6 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
 
                     auto& squareSignal = std::get<SquareSignalGenomeDesc>(generator._mode);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(rightColumnWidth), squareSignal._amplitude);
                     AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(rightColumnWidth), squareSignal._period);
 
                     AlienGui::EndIndent();
@@ -415,8 +415,6 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
 
                     auto& sawtoothSignal = std::get<SawtoothSignalGenomeDesc>(generator._mode);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Amplitude").format("%.2f").step(0.05f).textWidth(rightColumnWidth), sawtoothSignal._amplitude);
                     AlienGui::InputInt(AlienGui::InputIntParameters().name("Period").textWidth(rightColumnWidth), sawtoothSignal._period);
 
                     AlienGui::EndIndent();

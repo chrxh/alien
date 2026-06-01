@@ -328,7 +328,10 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
         if (generator._additive != nodeGenerator._additive) {
             return false;
         }
-        if (generator._valueOffset != nodeGenerator._valueOffset) {
+        if (generator._minValue != nodeGenerator._minValue) {
+            return false;
+        }
+        if (generator._maxValue != nodeGenerator._maxValue) {
             return false;
         }
         if (generator._timeOffset != nodeGenerator._timeOffset) {
@@ -343,9 +346,6 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
         case GeneratorMode_SquareSignal: {
             auto const& squareSignal = std::get<SquareSignalDesc>(generator._mode);
             auto const& nodeSquareSignal = std::get<SquareSignalGenomeDesc>(nodeGenerator._mode);
-            if (squareSignal._amplitude != nodeSquareSignal._amplitude) {
-                return false;
-            }
             if (squareSignal._period != nodeSquareSignal._period) {
                 return false;
             }
@@ -353,9 +353,6 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
         case GeneratorMode_SawtoothSignal: {
             auto const& sawtoothSignal = std::get<SawtoothSignalDesc>(generator._mode);
             auto const& nodeSawtoothSignal = std::get<SawtoothSignalGenomeDesc>(nodeGenerator._mode);
-            if (sawtoothSignal._amplitude != nodeSawtoothSignal._amplitude) {
-                return false;
-            }
             if (sawtoothSignal._period != nodeSawtoothSignal._period) {
                 return false;
             }
@@ -701,16 +698,16 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
         GeneratorModeDesc generatorModeDesc;
         switch (generatorMode) {
         case GeneratorMode_SquareSignal:
-            generatorModeDesc = SquareSignalDesc().amplitude(0.8f).period(80);
+            generatorModeDesc = SquareSignalDesc().period(80);
             break;
         case GeneratorMode_SawtoothSignal:
-            generatorModeDesc = SawtoothSignalDesc().amplitude(0.6f).period(120);
+            generatorModeDesc = SawtoothSignalDesc().period(120);
             break;
         default:
             generatorModeDesc = GeneratorModeDesc();
             break;
         }
-        return GeneratorDesc().additive(true).valueOffset(0.3f).timeOffset(7).mode(generatorModeDesc).numPulses(5);
+        return GeneratorDesc().additive(true).minValue(-0.5f).maxValue(1.3f).timeOffset(7).mode(generatorModeDesc).numPulses(5);
     }
     case CellType_Attacker:
         return AttackerDesc().mode(AttackCreatureDesc());
@@ -868,16 +865,16 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
         GeneratorModeGenomeDesc generatorModeDesc;
         switch (generatorMode) {
         case GeneratorMode_SquareSignal:
-            generatorModeDesc = SquareSignalGenomeDesc().amplitude(0.8f).period(80);
+            generatorModeDesc = SquareSignalGenomeDesc().period(80);
             break;
         case GeneratorMode_SawtoothSignal:
-            generatorModeDesc = SawtoothSignalGenomeDesc().amplitude(0.6f).period(120);
+            generatorModeDesc = SawtoothSignalGenomeDesc().period(120);
             break;
         default:
             generatorModeDesc = GeneratorModeGenomeDesc();
             break;
         }
-        return GeneratorGenomeDesc().additive(true).valueOffset(0.3f).timeOffset(7).mode(generatorModeDesc);
+        return GeneratorGenomeDesc().additive(true).minValue(-0.5f).maxValue(1.3f).timeOffset(7).mode(generatorModeDesc);
     }
     case CellType_Attacker:
         return AttackerGenomeDesc().mode(AttackCreatureGenomeDesc());

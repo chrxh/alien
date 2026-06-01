@@ -94,18 +94,20 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
 
             } else if (nodeType == CellType_Generator) {
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
-                generator._valueOffset = std::clamp(generator._valueOffset, -2.0f, 2.0f);
+                generator._minValue = std::clamp(generator._minValue, -2.0f, 2.0f);
+                generator._maxValue = std::clamp(generator._maxValue, -2.0f, 2.0f);
+                if (generator._minValue > generator._maxValue) {
+                    std::swap(generator._minValue, generator._maxValue);
+                }
                 generator._timeOffset = std::max(generator._timeOffset, 0);
                 // Validate mode-specific data
                 auto generatorMode = generator.getMode();
                 if (generatorMode == GeneratorMode_SquareSignal) {
                     auto& squareSignal = std::get<SquareSignalGenomeDesc>(generator._mode);
                     squareSignal._period = std::max(squareSignal._period, 1);
-                    squareSignal._amplitude = std::clamp(squareSignal._amplitude, 0.0f, 2.0f);
                 } else if (generatorMode == GeneratorMode_SawtoothSignal) {
                     auto& sawtoothSignal = std::get<SawtoothSignalGenomeDesc>(generator._mode);
                     sawtoothSignal._period = std::max(sawtoothSignal._period, 1);
-                    sawtoothSignal._amplitude = std::clamp(sawtoothSignal._amplitude, 0.0f, 4.0f);
                 }
 
             } else if (nodeType == CellType_Attacker) {
@@ -294,17 +296,19 @@ void DescValidationService::validateAndCorrect(ObjectDesc& object)
 
         } else if (cellType == CellType_Generator) {
             auto& generator = std::get<GeneratorDesc>(cell._cellType);
-            generator._valueOffset = std::clamp(generator._valueOffset, -2.0f, 2.0f);
+            generator._minValue = std::clamp(generator._minValue, -2.0f, 2.0f);
+            generator._maxValue = std::clamp(generator._maxValue, -2.0f, 2.0f);
+            if (generator._minValue > generator._maxValue) {
+                std::swap(generator._minValue, generator._maxValue);
+            }
             generator._timeOffset = std::max(generator._timeOffset, 0);
             auto generatorMode = generator.getMode();
             if (generatorMode == GeneratorMode_SquareSignal) {
                 auto& squareSignal = std::get<SquareSignalDesc>(generator._mode);
                 squareSignal._period = std::max(squareSignal._period, 1);
-                squareSignal._amplitude = std::clamp(squareSignal._amplitude, 0.0f, 2.0f);
             } else if (generatorMode == GeneratorMode_SawtoothSignal) {
                 auto& sawtoothSignal = std::get<SawtoothSignalDesc>(generator._mode);
                 sawtoothSignal._period = std::max(sawtoothSignal._period, 1);
-                sawtoothSignal._amplitude = std::clamp(sawtoothSignal._amplitude, 0.0f, 4.0f);
             }
 
         } else if (cellType == CellType_Attacker) {

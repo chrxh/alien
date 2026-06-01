@@ -152,13 +152,11 @@ struct Sensor
 
 struct SquareSignal
 {
-    float amplitude;
     int period;
 };
 
 struct SawtoothSignal
 {
-    float amplitude;
     int period;
 };
 
@@ -171,7 +169,8 @@ union GeneratorModeData
 struct Generator
 {
     bool additive;
-    float valueOffset;
+    float minValue;
+    float maxValue;
     int timeOffset;
     GeneratorMode mode;
     GeneratorModeData modeData;

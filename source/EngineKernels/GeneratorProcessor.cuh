@@ -35,21 +35,17 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
         float outputValue = 0.0f;
 
         if (generator.mode == GeneratorMode_SquareSignal) {
-            auto& squareSignal = generator.modeData.squareSignal;
             auto halfPeriod = period / 2;
 
             if (timestepInPeriod < halfPeriod) {
-                outputValue = squareSignal.amplitude;
+                outputValue = generator.maxValue;
             } else {
-                outputValue = -squareSignal.amplitude;
+                outputValue = generator.minValue;
             }
         } else if (generator.mode == GeneratorMode_SawtoothSignal) {
-            auto& sawtoothSignal = generator.modeData.sawtoothSignal;
-
-            // Linear increase from 0 to amplitude over the period
-            outputValue = sawtoothSignal.amplitude * toFloat(timestepInPeriod) / toFloat(period);
+            // Linear increase from minValue to maxValue over the period
+            outputValue = generator.minValue + (generator.maxValue - generator.minValue) * toFloat(timestepInPeriod) / toFloat(period);
         }
-        outputValue += generator.valueOffset;
 
         // Set the output signal
 

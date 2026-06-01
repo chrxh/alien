@@ -116,14 +116,13 @@ namespace
                         break;
                     case CellType_Generator:
                         nodeTO.cellTypeData.generator.additive = node.cellTypeData.generator.additive;
-                        nodeTO.cellTypeData.generator.valueOffset = node.cellTypeData.generator.valueOffset;
+                        nodeTO.cellTypeData.generator.minValue = node.cellTypeData.generator.minValue;
+                        nodeTO.cellTypeData.generator.maxValue = node.cellTypeData.generator.maxValue;
                         nodeTO.cellTypeData.generator.timeOffset = node.cellTypeData.generator.timeOffset;
                         nodeTO.cellTypeData.generator.mode = node.cellTypeData.generator.mode;
                         if (node.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
-                            nodeTO.cellTypeData.generator.modeData.squareSignal.amplitude = node.cellTypeData.generator.modeData.squareSignal.amplitude;
                             nodeTO.cellTypeData.generator.modeData.squareSignal.period = node.cellTypeData.generator.modeData.squareSignal.period;
                         } else if (node.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
-                            nodeTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude = node.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
                             nodeTO.cellTypeData.generator.modeData.sawtoothSignal.period = node.cellTypeData.generator.modeData.sawtoothSignal.period;
                         }
                         break;
@@ -406,14 +405,13 @@ namespace
             } break;
             case CellType_Generator: {
                 cellTO.cellTypeData.generator.additive = cell.cellTypeData.generator.additive;
-                cellTO.cellTypeData.generator.valueOffset = cell.cellTypeData.generator.valueOffset;
+                cellTO.cellTypeData.generator.minValue = cell.cellTypeData.generator.minValue;
+                cellTO.cellTypeData.generator.maxValue = cell.cellTypeData.generator.maxValue;
                 cellTO.cellTypeData.generator.timeOffset = cell.cellTypeData.generator.timeOffset;
                 cellTO.cellTypeData.generator.mode = cell.cellTypeData.generator.mode;
                 if (cell.cellTypeData.generator.mode == GeneratorMode_SquareSignal) {
-                    cellTO.cellTypeData.generator.modeData.squareSignal.amplitude = cell.cellTypeData.generator.modeData.squareSignal.amplitude;
                     cellTO.cellTypeData.generator.modeData.squareSignal.period = cell.cellTypeData.generator.modeData.squareSignal.period;
                 } else if (cell.cellTypeData.generator.mode == GeneratorMode_SawtoothSignal) {
-                    cellTO.cellTypeData.generator.modeData.sawtoothSignal.amplitude = cell.cellTypeData.generator.modeData.sawtoothSignal.amplitude;
                     cellTO.cellTypeData.generator.modeData.sawtoothSignal.period = cell.cellTypeData.generator.modeData.sawtoothSignal.period;
                 }
                 cellTO.cellTypeData.generator.numPulses = cell.cellTypeData.generator.numPulses;
