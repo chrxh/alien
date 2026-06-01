@@ -698,35 +698,35 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
             }
             if (mode == MuscleMode_AutoBending) {
                 auto& m = std::get<AutoBendingDesc>(muscle._mode);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._maxAngleDeviation);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._forwardBackwardRatio);
             } else if (mode == MuscleMode_ManualBending) {
                 auto& m = std::get<ManualBendingDesc>(muscle._mode);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._maxAngleDeviation);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._forwardBackwardRatio);
             } else if (mode == MuscleMode_AngleBending) {
                 auto& m = std::get<AngleBendingDesc>(muscle._mode);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Max angle deviation").step(0.05f).format("%.2f").textWidth(TextWidth), m._maxAngleDeviation);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._maxAngleDeviation);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Attraction repulsion ratio").step(0.05f).format("%.2f").textWidth(TextWidth),
                     m._attractionRepulsionRatio);
             } else if (mode == MuscleMode_AutoCrawling) {
                 auto& m = std::get<AutoCrawlingDesc>(muscle._mode);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Max distance deviation").step(0.01f).format("%.2f").textWidth(TextWidth), m._maxDistanceDeviation);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Max distance deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._maxDistanceDeviation);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._forwardBackwardRatio);
             } else if (mode == MuscleMode_ManualCrawling) {
                 auto& m = std::get<ManualCrawlingDesc>(muscle._mode);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Max distance deviation").step(0.01f).format("%.2f").textWidth(TextWidth), m._maxDistanceDeviation);
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Forward backward ratio").step(0.05f).format("%.2f").textWidth(TextWidth), m._forwardBackwardRatio);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Max distance deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._maxDistanceDeviation);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(TextWidth), &m._forwardBackwardRatio);
             }
         } else if (cellType == CellType_Defender) {
             auto& defender = std::get<DefenderDesc>(cell._cellType);

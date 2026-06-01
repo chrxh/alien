@@ -460,13 +460,13 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     // Max angle deviation
                     auto& autoBending = std::get<AutoBendingGenomeDesc>(muscle._mode);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         autoBending._maxAngleDeviation);
 
                     // Front back ratio
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Forward backward ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         autoBending._forwardBackwardRatio);
 
                     AlienGui::EndIndent();
@@ -476,13 +476,13 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     // Max angle deviation
                     auto& manualBending = std::get<ManualBendingGenomeDesc>(muscle._mode);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         manualBending._maxAngleDeviation);
 
                     // Front back ratio
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Forward backward ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         manualBending._forwardBackwardRatio);
 
                     AlienGui::EndIndent();
@@ -492,8 +492,8 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     // Max angle deviation
                     auto& angleBending = std::get<AngleBendingGenomeDesc>(muscle._mode);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Max angle deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         angleBending._maxAngleDeviation);
 
                     // Front back ratio
@@ -508,13 +508,13 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     // Max angle deviation
                     auto& autoCrawling = std::get<AutoCrawlingGenomeDesc>(muscle._mode);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.01f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Max distance deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         autoCrawling._maxDistanceDeviation);
 
                     // Front back ratio
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Forward backward ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         autoCrawling._forwardBackwardRatio);
 
                     AlienGui::EndIndent();
@@ -524,13 +524,13 @@ void _NodeEditorWidget::processNodeAttributes()
 
                     // Max angle deviation
                     auto& manualCrawling = std::get<ManualCrawlingGenomeDesc>(muscle._mode);
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.01f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Max distance deviation").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         manualCrawling._maxDistanceDeviation);
 
                     // Front back ratio
-                    AlienGui::InputFloat(
-                        AlienGui::InputFloatParameters().name("Forward backward ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("Forward backward ratio").min(0.0f).max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                         manualCrawling._forwardBackwardRatio);
 
                     AlienGui::EndIndent();
