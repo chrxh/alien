@@ -15,7 +15,8 @@ public:
         std::vector<NeuralNetWeight>& weights,
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions,
-        std::vector<float>& connectionWeights);
+        std::vector<float>& connectionWeights,
+        bool fixedHeight = false);
 
 private:
     _NeuralNetEditorWidget();

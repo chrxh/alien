@@ -30,11 +30,12 @@ void _NeuralNetEditorWidget::process(
     std::vector<NeuralNetWeight>& weights,
     std::vector<float>& biases,
     std::vector<ActivationFunction>& activationFunctions,
-    std::vector<float>& connectionWeights)
+    std::vector<float>& connectionWeights,
+    bool fixedHeight)
 {
     auto& selectionData = getValueRef(_dataById);
 
-    if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+    if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, fixedHeight ? scale(335.0f) : 0.0f), 0, 0 /*ImGuiWindowFlags_AlwaysVerticalScrollbar*/)) {
         auto drawList = ImGui::GetWindowDrawList();
 
         LayoutData layout;
