@@ -359,10 +359,6 @@ namespace
     auto constexpr Id_GeneratorGenome_MinValue = 4;
     auto constexpr Id_GeneratorGenome_MaxValue = 5;
     auto constexpr Id_GeneratorGenome_TimeOffset = 2;
-    auto constexpr Id_Generator_Additive = 0;
-    auto constexpr Id_Generator_MinValue = 5;
-    auto constexpr Id_Generator_MaxValue = 6;
-    auto constexpr Id_Generator_TimeOffset = 3;
 
     auto constexpr Id_GeneratorModeGenome_SquareSignal_Amplitude = 0;
     auto constexpr Id_GeneratorModeGenome_SquareSignal_Period = 1;
@@ -564,14 +560,12 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, GeneratorGenomeDesc& data)
     {
         GeneratorGenomeDesc defaultObject;
-        {
-            auto scope = getSerializationScope(task, ar);
-            scope.addMember(Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
-            scope.addMember(Id_GeneratorGenome_MinValue, data._minValue, defaultObject._minValue);
-            scope.addMember(Id_GeneratorGenome_MaxValue, data._maxValue, defaultObject._maxValue);
-            scope.addMember(Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
-            scope.addDesc(Id_GeneratorGenome_Mode, data._mode);
-        }
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_GeneratorGenome_Additive, data._additive, defaultObject._additive);
+        scope.addMember(Id_GeneratorGenome_MinValue, data._minValue, defaultObject._minValue);
+        scope.addMember(Id_GeneratorGenome_MaxValue, data._maxValue, defaultObject._maxValue);
+        scope.addMember(Id_GeneratorGenome_TimeOffset, data._timeOffset, defaultObject._timeOffset);
+        scope.addDesc(Id_GeneratorGenome_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(GeneratorGenomeDesc)
 
@@ -1029,11 +1023,10 @@ namespace
     auto constexpr Id_Generator_Additive = 0;
     auto constexpr Id_Generator_NumPulses = 1;
     auto constexpr Id_Generator_TimeOffset = 3;
-
-    auto constexpr Id_GeneratorMode_SquareSignal_Amplitude = 0;
+    auto constexpr Id_Generator_MinValue = 5;
+    auto constexpr Id_Generator_MaxValue = 6;
+    
     auto constexpr Id_GeneratorMode_SquareSignal_Period = 1;
-
-    auto constexpr Id_GeneratorMode_SawtoothSignal_Amplitude = 0;
     auto constexpr Id_GeneratorMode_SawtoothSignal_Period = 1;
 
     auto constexpr Id_AttackerMode_FreeCell_RestrictToColor = 0;
@@ -1284,15 +1277,13 @@ namespace cereal
     void loadSave(SerializationTask task, Archive& ar, GeneratorDesc& data)
     {
         GeneratorDesc defaultObject;
-        {
-            auto scope = getSerializationScope(task, ar);
-            scope.addMember(Id_Generator_Additive, data._additive, defaultObject._additive);
-            scope.addMember(Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
-            scope.addMember(Id_Generator_MinValue, data._minValue, defaultObject._minValue);
-            scope.addMember(Id_Generator_MaxValue, data._maxValue, defaultObject._maxValue);
-            scope.addMember(Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
-            scope.addDesc(Id_Generator_Mode, data._mode);
-        }
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_Generator_Additive, data._additive, defaultObject._additive);
+        scope.addMember(Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
+        scope.addMember(Id_Generator_MinValue, data._minValue, defaultObject._minValue);
+        scope.addMember(Id_Generator_MaxValue, data._maxValue, defaultObject._maxValue);
+        scope.addMember(Id_Generator_TimeOffset, data._timeOffset, defaultObject._timeOffset);
+        scope.addDesc(Id_Generator_Mode, data._mode);
     }
     SPLIT_SERIALIZATION(GeneratorDesc)
 
