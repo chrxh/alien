@@ -654,11 +654,18 @@ TEST_F(MutationTests, accumulatedMutations_createsNewLineageId)
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
+    bool changed = false;
+    GenomeDesc actualGenome;
     for (int i = 0; i < 1000; ++i) {
         _simulationFacade->testOnly_mutate(1);
+        actualGenome = getMutatedGenome();
+        if (actualGenome._lineageId != 42) {
+            changed = true;
+            break;
+        }
     }
 
-    auto actualGenome = getMutatedGenome();
+    ASSERT_TRUE(changed);
     ASSERT_TRUE(actualGenome._prevLineageId.has_value());
     EXPECT_EQ(*actualGenome._prevLineageId, 42);
     EXPECT_GT(actualGenome._lineageId, 42);
