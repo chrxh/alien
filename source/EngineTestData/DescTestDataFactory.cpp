@@ -173,7 +173,6 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
 std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
 {
     auto mutation = MutationRatesDesc()
-                        .accumulatedMutations(0.05f)
                         .neuronMutation1(NeuronMutationDesc().probability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f))
                         .neuronMutation2(NeuronMutationDesc().probability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f))
                         .connectionMutation1(ConnectionMutationDesc().probability(0.6f).sigma(0.7f))
@@ -184,6 +183,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                       .lineageId(502)
                       .prevLineageId(501)
                       .frontAngle(270.0f)
+                      .accumulatedMutations(0.05f)
                       .mutationRates(mutation)
                       .genes({
                           GeneDesc()

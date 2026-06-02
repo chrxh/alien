@@ -88,7 +88,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->lineageId = genomeTO.lineageId;
     genome->prevLineageId = genomeTO.prevLineageId;
     genome->frontAngle = genomeTO.frontAngle;
-    genome->mutationRates.accumulatedMutations = genomeTO.mutationRates.accumulatedMutations;
+    genome->accumulatedMutations = genomeTO.accumulatedMutations;
     genome->mutationRates.neuronMutation1 = {
         genomeTO.mutationRates.neuronMutation1.probability,
         genomeTO.mutationRates.neuronMutation1.weightSigma,

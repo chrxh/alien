@@ -360,7 +360,6 @@ struct ConnectionMutationTO
 
 struct MutationRatesTO
 {
-    float accumulatedMutations;
     NeuronMutationTO neuronMutation1;
     NeuronMutationTO neuronMutation2;
     ConnectionMutationTO connectionMutation1;
@@ -377,6 +376,7 @@ struct GenomeTO
     uint32_t lineageId;
     uint32_t prevLineageId;
     float frontAngle;
+    float accumulatedMutations;
     MutationRatesTO mutationRates;
 
     // Temporary data

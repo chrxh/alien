@@ -281,12 +281,11 @@ namespace cereal
 /************************************************************************/
 namespace
 {
-    auto constexpr Id_Mutations_AccumulatedMutations = 0;
-
     auto constexpr Id_Genome_Id = 0;
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
     auto constexpr Id_Genome_LineageId = 3;
+    auto constexpr Id_Genome_AccumulatedMutations = 4;
     auto constexpr Id_Genome_PrevLineageId = 5;
 
     auto constexpr Id_NeuronMutation_Probability = 0;
@@ -884,7 +883,6 @@ namespace cereal
     {
         MutationRatesDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_Mutations_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
         scope.addDesc(Id_MutationRates_NeuronMutation1, data._neuronMutation1);
         scope.addDesc(Id_MutationRates_NeuronMutation2, data._neuronMutation2);
         scope.addDesc(Id_MutationRates_ConnectionMutation1, data._connectionMutation1);
@@ -900,6 +898,7 @@ namespace cereal
         scope.addMember(Id_Genome_Id, data._id, defaultObject._id);
         scope.addMember(Id_Genome_Name, data._name, defaultObject._name);
         scope.addMember(Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
+        scope.addMember(Id_Genome_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
         scope.addMember(Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
         scope.addMember(Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         scope.addDesc(Id_Genome_Genes, data._genes);

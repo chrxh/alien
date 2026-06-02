@@ -89,6 +89,15 @@ void _GenomeEditorWidget::processHeaderData()
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth),
                 &_editData->genome._frontAngle);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Accumulated mutations")
+                    .format("%.5f")
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .textWidth(rightColumnWidth),
+                &_editData->genome._accumulatedMutations);
 
             table.next();
 
