@@ -21,7 +21,7 @@ public:
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
-    __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
@@ -95,10 +95,12 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     }
     block.sync();
 
-    applyMutations_meta(data, genome);
+    applyMutations_meta(data, genome, accumulatedMutations);
+    block.sync();
     applyMutations_neurons(data, genome, accumulatedMutations);
     applyMutations_connections(data, genome, accumulatedMutations);
 
+    block.sync();
     updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
 }
 
@@ -180,7 +182,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
@@ -188,7 +190,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         // Meta-mutate neuron mutation rates
         float neuronSigma = cudaSimulationParameters.metaMutationNeuronsSigma.value;
         if (neuronSigma > 0) {
-            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * neuronSigma)); };
+            auto mutateFloat = [&](float& val) {
+                auto delta = generateGaussian(data) * neuronSigma;
+                val = min(1.0f, max(0.0f, val + delta));
+                accumulatedMutations += abs(delta);
+            };
             mutateFloat(genome->mutationRates.neuronMutation1.probability);
             mutateFloat(genome->mutationRates.neuronMutation1.weightSigma);
             mutateFloat(genome->mutationRates.neuronMutation1.biasSigma);
@@ -202,7 +208,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         // Meta-mutate connection mutation rates
         float connSigma = cudaSimulationParameters.metaMutationConnectionsSigma.value;
         if (connSigma > 0) {
-            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * connSigma)); };
+            auto mutateFloat = [&](float& val) {
+                auto delta = generateGaussian(data) * connSigma;
+                val = min(1.0f, max(0.0f, val + delta));
+                accumulatedMutations += abs(delta);
+            };
             mutateFloat(genome->mutationRates.connectionMutation1.probability);
             mutateFloat(genome->mutationRates.connectionMutation1.sigma);
             mutateFloat(genome->mutationRates.connectionMutation2.probability);
@@ -216,10 +226,8 @@ __inline__ __device__ void MutationProcessor::updateAccumulatedMutationsAndLinea
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     if (laneId == 0) {
         auto numNodes = getNumberOfNodes(genome);
-        if (numNodes == 0) {
-            return;
-        }
-        genome->accumulatedMutations += accumulatedMutations / toFloat(numNodes);
+        auto const denominator = numNodes > 0 ? toFloat(numNodes) : 1.0f;
+        genome->accumulatedMutations += accumulatedMutations / denominator;
         if (genome->accumulatedMutations > cudaSimulationParameters.accumulatedMutationsForNewLineage.value) {
             genome->prevLineageId = genome->lineageId;
             genome->lineageId = data.primaryNumberGen.createLineageId();

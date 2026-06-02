@@ -101,6 +101,14 @@ protected:
         reset(actual);
         return expected == actual;
     }
+
+    GenomeDesc getMutatedGenome(uint64_t objectId = 1) const
+    {
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualCell = actualData.getObjectRef(objectId).getCellRef();
+        auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
+        return actualData.getGenomeRef(actualCreature._genomeId);
+    }
 };
 
 TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
@@ -133,7 +141,7 @@ TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
@@ -605,4 +613,53 @@ TEST_F(MutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
     EXPECT_EQ(actualGenome._mutationRates._connectionMutation1._sigma, 0.5f);
     EXPECT_EQ(actualGenome._mutationRates._connectionMutation2._probability, 0.5f);
     EXPECT_EQ(actualGenome._mutationRates._connectionMutation2._sigma, 0.5f);
+}
+
+TEST_F(MutationTests, accumulatedMutations_increases_forMetaMutation)
+{
+    auto genome = GenomeDesc().lineageId(42).prevLineageId(41);
+    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().probability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().probability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().probability(0.0f).sigma(0.0f);
+    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().probability(0.0f).sigma(0.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationNeuronsSigma.value = 1.0f;
+    _parameters.metaMutationConnectionsSigma.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_GT(actualGenome._accumulatedMutations, genome._accumulatedMutations);
+}
+
+TEST_F(MutationTests, accumulatedMutations_createsNewLineageId)
+{
+    auto genome = GenomeDesc().lineageId(42).prevLineageId(41);
+    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().probability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().probability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().probability(0.0f).sigma(0.0f);
+    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().probability(0.0f).sigma(0.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationNeuronsSigma.value = 1.0f;
+    _parameters.metaMutationConnectionsSigma.value = 1.0f;
+    _parameters.accumulatedMutationsForNewLineage.value = 0.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 1000; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    ASSERT_TRUE(actualGenome._prevLineageId.has_value());
+    EXPECT_EQ(*actualGenome._prevLineageId, 42);
+    EXPECT_GT(actualGenome._lineageId, 42);
 }
