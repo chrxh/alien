@@ -19,12 +19,14 @@ public:
     __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
 private:
-    __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
-    __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
-    __inline__ __device__ static void checkForNewLineageId(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
+
+    __inline__ __device__ static int getNumberOfNodes(Genome* genome);
 };
 
 /************************************************************************/
@@ -84,14 +86,23 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
 {
-    applyMutations_meta(data, genome);
-    applyMutations_neurons(data, genome);
-    applyMutations_connections(data, genome);
+    __shared__ float accumulatedMutations;
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
 
-    checkForNewLineageId(data, genome);
+    if (laneId == 0) {
+        accumulatedMutations = 0.0f;
+    }
+    block.sync();
+
+    applyMutations_meta(data, genome);
+    applyMutations_neurons(data, genome, accumulatedMutations);
+    applyMutations_connections(data, genome, accumulatedMutations);
+
+    updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
@@ -112,20 +123,25 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                         if (rate.weightSigma > 0) {
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
                                 auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
-                                float newValue = weight.getValue() + generateGaussian(data) * rate.weightSigma;
+                                auto delta = generateGaussian(data) * rate.weightSigma;
+                                float newValue = weight.getValue() + delta;
                                 newValue = max(-2.0f, min(2.0f, newValue));
                                 weight = NeuralNetWeight(newValue);
+                                atomicAdd_block(&accumulatedMutations, abs(delta));
                             }
                         }
                         if (rate.biasSigma > 0) {
                             auto& bias = node.neuralNetwork.biases[neuronIndex];
-                            float newBias = bias + generateGaussian(data) * rate.biasSigma;
+                            auto delta = generateGaussian(data) * rate.biasSigma;
+                            float newBias = bias + delta;
                             newBias = max(-2.0f, min(2.0f, newBias));
                             bias = newBias;
+                            atomicAdd_block(&accumulatedMutations, abs(delta));
                         }
                         if (rate.activationFunctionProbability > 0 && data.primaryNumberGen.random() < rate.activationFunctionProbability) {
                             node.neuralNetwork.activationFunctions[neuronIndex] =
                                 static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
+                            atomicAdd_block(&accumulatedMutations, 1.0f);
                         }
                     }
                 }
@@ -134,7 +150,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_connections(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
@@ -152,9 +168,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
                 if (laneId < MAX_OBJECT_CONNECTIONS) {
                     if (data.primaryNumberGen.random() < rate.probability) {
                         auto& weight = node.neuralNetwork.connectionWeights[laneId];
-                        float newValue = weight + generateGaussian(data) * rate.sigma;
+                        auto delta = generateGaussian(data) * rate.sigma;
+                        float newValue = weight + delta;
                         newValue = max(-2.0f, min(2.0f, newValue));
                         weight = newValue;
+                        atomicAdd_block(&accumulatedMutations, abs(delta));
                     }
                 }
             }
@@ -193,15 +211,19 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
     }
 }
 
-__inline__ __device__ void MutationProcessor::checkForNewLineageId(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
-
-    if (laneId == 0 /*&& genome->accumulatedMutations > 0*/) {
-        //if (data.primaryNumberGen.random() < genome->accumulatedMutations) {
-        //    genome->prevLineageId = genome->lineageId;
-        //    genome->lineageId = data.primaryNumberGen.createLineageId();
-        //}
+    if (laneId == 0) {
+        auto numNodes = getNumberOfNodes(genome);
+        if (numNodes == 0) {
+            return;
+        }
+        genome->accumulatedMutations += accumulatedMutations / toFloat(numNodes);
+        if (genome->accumulatedMutations > cudaSimulationParameters.accumulatedMutationsForNewLineage.value) {
+            genome->prevLineageId = genome->lineageId;
+            genome->lineageId = data.primaryNumberGen.createLineageId();
+        }
     }
 }
 
@@ -220,4 +242,13 @@ __inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data
     } else {
         return data.primaryNumberGen.random() < probability * 1000 && data.secondaryNumberGen.random() < 0.001f;
     }
+}
+
+__inline__ __device__ int MutationProcessor::getNumberOfNodes(Genome* genome)
+{
+    auto totalNodes = 0;
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        totalNodes += genome->genes[geneIndex].numNodes;
+    }
+    return totalNodes;
 }

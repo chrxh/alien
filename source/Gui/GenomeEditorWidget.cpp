@@ -94,7 +94,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .name("Accumulated mutations")
                     .format("%.5f")
                     .min(0.0f)
-                    .max(1.0f)
+                    .max(10000.0f)
                     .logarithmic(true)
                     .textWidth(rightColumnWidth),
                 &_editData->genome._accumulatedMutations);

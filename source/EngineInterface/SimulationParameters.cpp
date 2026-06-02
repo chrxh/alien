@@ -464,7 +464,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                             FloatSpec().member(&SimulationParameters::metaMutationConnectionsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
                         .name("Lineage mutations sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::metaMutationLineagesSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::accumulatedMutationsForNewLineage).min(0.0f).max(10000.0f).logarithmic(true).format("%.5f")),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")
