@@ -197,8 +197,8 @@ __inline__ __device__ void MutationProcessor::checkForNewLineageId(SimulationDat
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
-    if (laneId == 0 /*&& genome->mutationRates.accumulatedMutations > 0*/) {
-        //if (data.primaryNumberGen.random() < genome->mutationRates.accumulatedMutations) {
+    if (laneId == 0 /*&& genome->accumulatedMutations > 0*/) {
+        //if (data.primaryNumberGen.random() < genome->accumulatedMutations) {
         //    genome->prevLineageId = genome->lineageId;
         //    genome->lineageId = data.primaryNumberGen.createLineageId();
         //}

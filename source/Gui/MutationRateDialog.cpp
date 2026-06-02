@@ -75,8 +75,6 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
 {
     auto& settings = GlobalSettings::get();
 
-    mutationRates._accumulatedMutations = settings.getValue(settingsPrefix + "lineage mutation probability", mutationRates._accumulatedMutations);
-
     mutationRates._connectionMutation1._probability =
         settings.getValue(settingsPrefix + "connection mutation 1.probability", mutationRates._connectionMutation1._probability);
     mutationRates._connectionMutation1._sigma = settings.getValue(settingsPrefix + "connection mutation 1.sigma", mutationRates._connectionMutation1._sigma);
