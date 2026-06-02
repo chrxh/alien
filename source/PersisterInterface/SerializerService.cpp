@@ -281,7 +281,7 @@ namespace cereal
 /************************************************************************/
 namespace
 {
-    auto constexpr Id_Mutations_LineageMutationProbability = 0;
+    auto constexpr Id_Mutations_AccumulatedMutations = 0;
 
     auto constexpr Id_Genome_Id = 0;
     auto constexpr Id_Genome_Name = 1;
@@ -884,7 +884,7 @@ namespace cereal
     {
         MutationRatesDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_Mutations_LineageMutationProbability, data._lineageMutationProbability, defaultObject._lineageMutationProbability);
+        scope.addMember(Id_Mutations_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
         scope.addDesc(Id_MutationRates_NeuronMutation1, data._neuronMutation1);
         scope.addDesc(Id_MutationRates_NeuronMutation2, data._neuronMutation2);
         scope.addDesc(Id_MutationRates_ConnectionMutation1, data._connectionMutation1);

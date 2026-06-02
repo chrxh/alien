@@ -355,7 +355,7 @@ struct ConnectionMutation
 
 struct MutationRates
 {
-    float lineageMutationProbability;
+    float accumulatedMutations;
     NeuronMutation neuronMutation1;
     NeuronMutation neuronMutation2;
     ConnectionMutation connectionMutation1;

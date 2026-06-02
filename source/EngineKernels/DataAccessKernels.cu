@@ -34,7 +34,7 @@ namespace
             genomeTO.lineageId = genome->lineageId;
             genomeTO.prevLineageId = genome->prevLineageId;
             genomeTO.frontAngle = genome->frontAngle;
-            genomeTO.mutationRates.lineageMutationProbability = genome->mutationRates.lineageMutationProbability;
+            genomeTO.mutationRates.accumulatedMutations = genome->mutationRates.accumulatedMutations;
             genomeTO.mutationRates.neuronMutation1 = {
                 genome->mutationRates.neuronMutation1.probability,
                 genome->mutationRates.neuronMutation1.weightSigma,

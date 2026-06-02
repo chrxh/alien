@@ -868,7 +868,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     NumberGenerator::get().adaptMaxLineageId(genomeTO.lineageId);
     result._prevLineageId = genomeTO.prevLineageId != 0 ? std::make_optional(genomeTO.prevLineageId) : std::nullopt;
     result._frontAngle = genomeTO.frontAngle;
-    result._mutationRates._lineageMutationProbability = genomeTO.mutationRates.lineageMutationProbability;
+    result._mutationRates._accumulatedMutations = genomeTO.mutationRates.accumulatedMutations;
     result._mutationRates._neuronMutation1._probability = genomeTO.mutationRates.neuronMutation1.probability;
     result._mutationRates._neuronMutation1._weightSigma = genomeTO.mutationRates.neuronMutation1.weightSigma;
     result._mutationRates._neuronMutation1._biasSigma = genomeTO.mutationRates.neuronMutation1.biasSigma;
@@ -954,7 +954,7 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.lineageId = genome._lineageId;
     genomeTO.prevLineageId = genome._prevLineageId.value_or(0);
     genomeTO.frontAngle = genome._frontAngle;
-    genomeTO.mutationRates.lineageMutationProbability = genome._mutationRates._lineageMutationProbability;
+    genomeTO.mutationRates.accumulatedMutations = genome._mutationRates._accumulatedMutations;
     genomeTO.mutationRates.neuronMutation1 = {
         genome._mutationRates._neuronMutation1._probability,
         genome._mutationRates._neuronMutation1._weightSigma,

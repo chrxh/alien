@@ -360,7 +360,7 @@ struct ConnectionMutationTO
 
 struct MutationRatesTO
 {
-    float lineageMutationProbability;
+    float accumulatedMutations;
     NeuronMutationTO neuronMutation1;
     NeuronMutationTO neuronMutation2;
     ConnectionMutationTO connectionMutation1;

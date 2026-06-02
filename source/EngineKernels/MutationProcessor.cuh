@@ -21,8 +21,8 @@ public:
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome);
-    __inline__ __device__ static void applyMutations_lineages(SimulationData& data, Genome* genome);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void checkForNewLineageId(SimulationData& data, Genome* genome);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 };
@@ -87,7 +87,8 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_meta(data, genome);
     applyMutations_neurons(data, genome);
     applyMutations_connections(data, genome);
-    applyMutations_lineages(data, genome);
+
+    checkForNewLineageId(data, genome);
 }
 
 __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome)
@@ -161,18 +162,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_lineages(SimulationData& data, Genome* genome)
-{
-    auto laneId = cg_mutation::this_thread_block().thread_rank();
-
-    if (laneId == 0 && genome->mutationRates.lineageMutationProbability > 0) {
-        if (data.primaryNumberGen.random() < genome->mutationRates.lineageMutationProbability) {
-            genome->prevLineageId = genome->lineageId;
-            genome->lineageId = data.primaryNumberGen.createLineageId();
-        }
-    }
-}
-
 __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
@@ -201,13 +190,18 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             mutateFloat(genome->mutationRates.connectionMutation2.probability);
             mutateFloat(genome->mutationRates.connectionMutation2.sigma);
         }
+    }
+}
 
-        // Meta-mutate lineage mutation probability
-        float lineageSigma = cudaSimulationParameters.metaMutationLineagesSigma.value;
-        if (lineageSigma > 0) {
-            genome->mutationRates.lineageMutationProbability =
-                min(1.0f, max(0.0f, genome->mutationRates.lineageMutationProbability + generateGaussian(data) * lineageSigma));
-        }
+__inline__ __device__ void MutationProcessor::checkForNewLineageId(SimulationData& data, Genome* genome)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+
+    if (laneId == 0 /*&& genome->mutationRates.accumulatedMutations > 0*/) {
+        //if (data.primaryNumberGen.random() < genome->mutationRates.accumulatedMutations) {
+        //    genome->prevLineageId = genome->lineageId;
+        //    genome->lineageId = data.primaryNumberGen.createLineageId();
+        //}
     }
 }
 
