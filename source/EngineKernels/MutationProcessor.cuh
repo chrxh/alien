@@ -21,7 +21,7 @@ public:
 private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
-    __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
     __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
@@ -95,8 +95,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     }
     block.sync();
 
-    applyMutations_meta(data, genome, accumulatedMutations);
-    block.sync();
+    applyMutations_meta(data, genome);
     applyMutations_neurons(data, genome, accumulatedMutations);
     applyMutations_connections(data, genome, accumulatedMutations);
 
@@ -182,7 +181,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome, float& accumulatedMutations)
+__inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
@@ -193,7 +192,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             auto mutateFloat = [&](float& val) {
                 auto delta = generateGaussian(data) * neuronSigma;
                 val = min(1.0f, max(0.0f, val + delta));
-                accumulatedMutations += abs(delta);
             };
             mutateFloat(genome->mutationRates.neuronMutation1.probability);
             mutateFloat(genome->mutationRates.neuronMutation1.weightSigma);
@@ -211,7 +209,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             auto mutateFloat = [&](float& val) {
                 auto delta = generateGaussian(data) * connSigma;
                 val = min(1.0f, max(0.0f, val + delta));
-                accumulatedMutations += abs(delta);
             };
             mutateFloat(genome->mutationRates.connectionMutation1.probability);
             mutateFloat(genome->mutationRates.connectionMutation1.sigma);
