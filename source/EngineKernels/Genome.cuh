@@ -341,7 +341,7 @@ struct Gene
 
 struct NeuronMutation
 {
-    float probability;
+    float eventProbability;
     float weightSigma;
     float biasSigma;
     float activationFunctionProbability;
@@ -349,7 +349,7 @@ struct NeuronMutation
 
 struct ConnectionMutation
 {
-    float probability;
+    float eventProbability;
     float sigma;
 };
 

@@ -36,19 +36,19 @@ namespace
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.accumulatedMutations = genome->accumulatedMutations;
             genomeTO.mutationRates.neuronMutation1 = {
-                genome->mutationRates.neuronMutation1.probability,
+                genome->mutationRates.neuronMutation1.eventProbability,
                 genome->mutationRates.neuronMutation1.weightSigma,
                 genome->mutationRates.neuronMutation1.biasSigma,
                 genome->mutationRates.neuronMutation1.activationFunctionProbability};
             genomeTO.mutationRates.neuronMutation2 = {
-                genome->mutationRates.neuronMutation2.probability,
+                genome->mutationRates.neuronMutation2.eventProbability,
                 genome->mutationRates.neuronMutation2.weightSigma,
                 genome->mutationRates.neuronMutation2.biasSigma,
                 genome->mutationRates.neuronMutation2.activationFunctionProbability};
             genomeTO.mutationRates.connectionMutation1 = {
-                genome->mutationRates.connectionMutation1.probability, genome->mutationRates.connectionMutation1.sigma};
+                genome->mutationRates.connectionMutation1.eventProbability, genome->mutationRates.connectionMutation1.sigma};
             genomeTO.mutationRates.connectionMutation2 = {
-                genome->mutationRates.connectionMutation2.probability, genome->mutationRates.connectionMutation2.sigma};
+                genome->mutationRates.connectionMutation2.eventProbability, genome->mutationRates.connectionMutation2.sigma};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];

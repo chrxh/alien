@@ -53,10 +53,10 @@ GenomeDesc GenomeDesc::id(uint64_t id)
 std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
 {
     std::vector<std::string> activeMutations;
-    if (_connectionMutation1._probability > 0.0f || _connectionMutation2._probability > 0.0f) {
+    if (_connectionMutation1._eventProbability > 0.0f || _connectionMutation2._eventProbability > 0.0f) {
         activeMutations.push_back("Connection mutations");
     }
-    if (_neuronMutation1._probability > 0.0f || _neuronMutation2._probability > 0.0f) {
+    if (_neuronMutation1._eventProbability > 0.0f || _neuronMutation2._eventProbability > 0.0f) {
         activeMutations.push_back("Neuron mutations");
     }
     return activeMutations;

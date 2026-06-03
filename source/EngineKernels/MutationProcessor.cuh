@@ -112,7 +112,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.probability <= 0 || (rate.weightSigma <= 0 && rate.biasSigma <= 0 && rate.activationFunctionProbability <= 0)) {
+        if (rate.eventProbability <= 0 || (rate.weightSigma <= 0 && rate.biasSigma <= 0 && rate.activationFunctionProbability <= 0)) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -122,7 +122,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                 if (laneId < NEURONS_PER_CELL) {
                     int neuronIndex = laneId;
                     atomicAdd_block(&numValuesToMutate, NEURONS_PER_CELL + 2);
-                    if (data.primaryNumberGen.random() < rate.probability) {
+                    if (data.primaryNumberGen.random() < rate.eventProbability) {
                         if (rate.weightSigma > 0) {
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
                                 auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
@@ -162,7 +162,7 @@ MutationProcessor::applyMutations_connections(SimulationData& data, Genome* geno
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.probability <= 0 || rate.sigma <= 0) {
+        if (rate.eventProbability <= 0 || rate.sigma <= 0) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -171,7 +171,7 @@ MutationProcessor::applyMutations_connections(SimulationData& data, Genome* geno
                 auto& node = gene.nodes[nodeIndex];
                 if (laneId < MAX_OBJECT_CONNECTIONS) {
                     atomicAdd_block(&numValuesToMutate, 1);
-                    if (data.primaryNumberGen.random() < rate.probability) {
+                    if (data.primaryNumberGen.random() < rate.eventProbability) {
                         auto& weight = node.neuralNetwork.connectionWeights[laneId];
                         auto delta = generateGaussian(data) * rate.sigma;
                         float newValue = weight + delta;
@@ -194,11 +194,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         float neuronSigma = cudaSimulationParameters.metaMutationNeuronsSigma.value;
         if (neuronSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * neuronSigma)); };
-            mutateFloat(genome->mutationRates.neuronMutation1.probability);
+            mutateFloat(genome->mutationRates.neuronMutation1.eventProbability);
             mutateFloat(genome->mutationRates.neuronMutation1.weightSigma);
             mutateFloat(genome->mutationRates.neuronMutation1.biasSigma);
             mutateFloat(genome->mutationRates.neuronMutation1.activationFunctionProbability);
-            mutateFloat(genome->mutationRates.neuronMutation2.probability);
+            mutateFloat(genome->mutationRates.neuronMutation2.eventProbability);
             mutateFloat(genome->mutationRates.neuronMutation2.weightSigma);
             mutateFloat(genome->mutationRates.neuronMutation2.biasSigma);
             mutateFloat(genome->mutationRates.neuronMutation2.activationFunctionProbability);
@@ -208,9 +208,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         float connSigma = cudaSimulationParameters.metaMutationConnectionsSigma.value;
         if (connSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * connSigma)); };
-            mutateFloat(genome->mutationRates.connectionMutation1.probability);
+            mutateFloat(genome->mutationRates.connectionMutation1.eventProbability);
             mutateFloat(genome->mutationRates.connectionMutation1.sigma);
-            mutateFloat(genome->mutationRates.connectionMutation2.probability);
+            mutateFloat(genome->mutationRates.connectionMutation2.eventProbability);
             mutateFloat(genome->mutationRates.connectionMutation2.sigma);
         }
     }

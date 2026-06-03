@@ -860,7 +860,7 @@ namespace cereal
     {
         NeuronMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_NeuronMutation_Probability, data._probability, defaultObject._probability);
+        scope.addMember(Id_NeuronMutation_Probability, data._eventProbability, defaultObject._eventProbability);
         scope.addMember(Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
         scope.addMember(Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
         scope.addMember(
@@ -873,7 +873,7 @@ namespace cereal
     {
         ConnectionMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_ConnectionMutation_Probability, data._probability, defaultObject._probability);
+        scope.addMember(Id_ConnectionMutation_Probability, data._eventProbability, defaultObject._eventProbability);
         scope.addMember(Id_ConnectionMutation_Sigma, data._sigma, defaultObject._sigma);
     }
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
