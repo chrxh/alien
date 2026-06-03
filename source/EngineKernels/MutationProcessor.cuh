@@ -226,6 +226,7 @@ MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, 
             + NEURONS_PER_CELL                              // For ActFn mutation
             + MAX_OBJECT_CONNECTIONS                        // For connection mutation
             ;
+        denominator *= 2;                                   // 2 mutations for each type
 
         genome->accumulatedMutations += accumulatedMutations / denominator;
         if (genome->accumulatedMutations > cudaSimulationParameters.newLineageThreshold.value) {
