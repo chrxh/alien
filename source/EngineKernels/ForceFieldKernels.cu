@@ -123,12 +123,6 @@ namespace
             return {0, 0};
         }
     }
-
-    __device__ __inline__ float2 zeroForceFieldAcceleration()
-    {
-        return {0, 0};
-    }
-
 }
 
 __global__ void cudaApplyForceFields(SimulationData data)
@@ -143,7 +137,7 @@ __global__ void cudaApplyForceFields(SimulationData data)
             if (enabled[i]) {
                 accelerations[i] = calcAcceleration(data.objectMap, pos, mass, i, timestep);
             } else {
-                accelerations[i] = zeroForceFieldAcceleration();
+                accelerations[i] = {0, 0};
             }
         }
         return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, enabled, data, pos);
