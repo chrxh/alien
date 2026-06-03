@@ -136,7 +136,7 @@ __global__ void cudaApplyForceFields(SimulationData data)
             if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
                 accelerations[i] = calcAcceleration(data.objectMap, pos, mass, i, timestep);
             } else {
-                accelerations[i] = float2{0, 0};
+                accelerations[i] = i == 0 ? float2{0, 0} : accelerations[i - 1];
             }
         }
         return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, pos);
