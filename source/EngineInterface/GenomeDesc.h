@@ -414,7 +414,7 @@ struct NeuronMutationDesc
 {
     auto operator<=>(NeuronMutationDesc const&) const = default;
 
-    MEMBER(NeuronMutationDesc, float, probability, 0.0f);
+    MEMBER(NeuronMutationDesc, float, eventProbability, 0.0f);
     MEMBER(NeuronMutationDesc, float, weightSigma, 0.0f);
     MEMBER(NeuronMutationDesc, float, biasSigma, 0.0f);
     MEMBER(NeuronMutationDesc, float, activationFunctionProbability, 0.0f);
@@ -424,7 +424,7 @@ struct ConnectionMutationDesc
 {
     auto operator<=>(ConnectionMutationDesc const&) const = default;
 
-    MEMBER(ConnectionMutationDesc, float, probability, 0.0f);
+    MEMBER(ConnectionMutationDesc, float, eventProbability, 0.0f);
     MEMBER(ConnectionMutationDesc, float, sigma, 0.0f);
 };
 

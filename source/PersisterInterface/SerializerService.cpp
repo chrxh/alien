@@ -288,12 +288,12 @@ namespace
     auto constexpr Id_Genome_AccumulatedMutations = 4;
     auto constexpr Id_Genome_PrevLineageId = 5;
 
-    auto constexpr Id_NeuronMutation_Probability = 0;
+    auto constexpr Id_NeuronMutation_EventProbability = 0;
     auto constexpr Id_NeuronMutation_WeightSigma = 1;
     auto constexpr Id_NeuronMutation_BiasSigma = 2;
     auto constexpr Id_NeuronMutation_ActivationFunctionProbability = 3;
 
-    auto constexpr Id_ConnectionMutation_Probability = 0;
+    auto constexpr Id_ConnectionMutation_EventProbability = 0;
     auto constexpr Id_ConnectionMutation_Sigma = 1;
 
     auto constexpr Id_Gene_Name = 0;
@@ -860,7 +860,7 @@ namespace cereal
     {
         NeuronMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_NeuronMutation_Probability, data._probability, defaultObject._probability);
+        scope.addMember(Id_NeuronMutation_EventProbability, data._eventProbability, defaultObject._eventProbability);
         scope.addMember(Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
         scope.addMember(Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
         scope.addMember(
@@ -873,7 +873,7 @@ namespace cereal
     {
         ConnectionMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_ConnectionMutation_Probability, data._probability, defaultObject._probability);
+        scope.addMember(Id_ConnectionMutation_EventProbability, data._eventProbability, defaultObject._eventProbability);
         scope.addMember(Id_ConnectionMutation_Sigma, data._sigma, defaultObject._sigma);
     }
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
