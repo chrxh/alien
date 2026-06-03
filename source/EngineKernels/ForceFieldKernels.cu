@@ -124,6 +124,11 @@ namespace
         }
     }
 
+    __device__ __inline__ float2 zeroForceFieldAcceleration()
+    {
+        return {0, 0};
+    }
+
 }
 
 __global__ void cudaApplyForceFields(SimulationData data)
@@ -136,10 +141,10 @@ __global__ void cudaApplyForceFields(SimulationData data)
             if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
                 accelerations[i] = calcAcceleration(data.objectMap, pos, mass, i, timestep);
             } else {
-                accelerations[i] = i == 0 ? float2{0, 0} : accelerations[i - 1];
+                accelerations[i] = zeroForceFieldAcceleration();
             }
         }
-        return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, pos);
+        return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, cudaSimulationParameters.layerForceFieldType, data, pos);
     };
     {
         auto& objects = data.entities.objects;
