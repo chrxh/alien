@@ -19,15 +19,15 @@ public:
     __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
 private:
-    __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate);
-    __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate);
+    __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
-    __inline__ __device__ static void
-    updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate);
+    __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 
     __inline__ __device__ static bool hasMinimalEnergyForConstruction(Object* object);
+    __inline__ __device__ static int getNumberOfNodes(Genome* genome);
 };
 
 /************************************************************************/
@@ -86,25 +86,23 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
 __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
 {
     __shared__ float accumulatedMutations;
-    __shared__ int numValuesToMutate;
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
 
     if (laneId == 0) {
         accumulatedMutations = 0.0f;
-        numValuesToMutate = 0;
     }
     block.sync();
 
     applyMutations_meta(data, genome);
-    applyMutations_neurons(data, genome, accumulatedMutations, numValuesToMutate);
-    applyMutations_connections(data, genome, accumulatedMutations, numValuesToMutate);
+    applyMutations_neurons(data, genome, accumulatedMutations);
+    applyMutations_connections(data, genome, accumulatedMutations);
 
     block.sync();
-    updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations, numValuesToMutate);
+    updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate)
+__inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
@@ -121,7 +119,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                 auto& node = gene.nodes[nodeIndex];
                 if (laneId < NEURONS_PER_CELL) {
                     int neuronIndex = laneId;
-                    atomicAdd_block(&numValuesToMutate, NEURONS_PER_CELL + 2);
                     if (data.primaryNumberGen.random() < rate.eventProbability) {
                         if (rate.weightSigma > 0) {
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
@@ -154,7 +151,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 }
 
 __inline__ __device__ void
-MutationProcessor::applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate)
+MutationProcessor::applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
@@ -170,7 +167,6 @@ MutationProcessor::applyMutations_connections(SimulationData& data, Genome* geno
             for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
                 auto& node = gene.nodes[nodeIndex];
                 if (laneId < MAX_OBJECT_CONNECTIONS) {
-                    atomicAdd_block(&numValuesToMutate, 1);
                     if (data.primaryNumberGen.random() < rate.eventProbability) {
                         auto& weight = node.neuralNetwork.connectionWeights[laneId];
                         auto delta = generateGaussian(data) * rate.sigma;
@@ -217,11 +213,20 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
 }
 
 __inline__ __device__ void
-MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate)
+MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     if (laneId == 0) {
-        auto const denominator = numValuesToMutate > 0 ? toFloat(numValuesToMutate) : 1.0f;
+        auto numberOfNodes = getNumberOfNodes(genome);
+        auto denominator = numberOfNodes > 0 ? toFloat(numberOfNodes) : 1.0f;
+
+        // Normalization
+        denominator *= NEURONS_PER_CELL * NEURONS_PER_CELL  // For weight mutation
+            + NEURONS_PER_CELL                              // For bias mutation
+            + NEURONS_PER_CELL                              // For ActFn mutation
+            + MAX_OBJECT_CONNECTIONS                        // For connection mutation
+            ;
+
         genome->accumulatedMutations += accumulatedMutations / denominator;
         if (genome->accumulatedMutations > cudaSimulationParameters.newLineageThreshold.value) {
             genome->prevLineageId = genome->lineageId;
@@ -260,4 +265,13 @@ __inline__ __device__ bool MutationProcessor::hasMinimalEnergyForConstruction(Ob
     auto availableEnergyForConstruction = cell.usableEnergy + constructor.reservedEnergy - normalCellEnergy;
 
     return availableEnergyForConstruction >= normalCellEnergy - NEAR_ZERO;
+}
+
+__inline__ __device__ int MutationProcessor::getNumberOfNodes(Genome* genome)
+{
+    auto totalNodes = 0;
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        totalNodes += genome->genes[geneIndex].numNodes;
+    }
+    return totalNodes;
 }
