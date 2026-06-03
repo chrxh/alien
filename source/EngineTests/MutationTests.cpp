@@ -49,6 +49,10 @@ protected:
     bool compareAllExceptNeuronWeights(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
+            genome._mutationRates = MutationRatesDesc();
+            genome._lineageId = 0;
+            genome._prevLineageId = std::nullopt;
+            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._weights.begin(), node._neuralNetwork._weights.end(), 0.0f);
@@ -63,6 +67,10 @@ protected:
     bool compareAllExceptNeuronBiases(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
+            genome._mutationRates = MutationRatesDesc();
+            genome._lineageId = 0;
+            genome._prevLineageId = std::nullopt;
+            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._biases.begin(), node._neuralNetwork._biases.end(), 0.0f);
@@ -77,6 +85,10 @@ protected:
     bool compareAllExceptActivationFunctions(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
+            genome._mutationRates = MutationRatesDesc();
+            genome._lineageId = 0;
+            genome._prevLineageId = std::nullopt;
+            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._activationFunctions.begin(), node._neuralNetwork._activationFunctions.end(), ActivationFunction_Identity);
@@ -91,6 +103,10 @@ protected:
     bool compareAllExceptConnectionWeights(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
+            genome._mutationRates = MutationRatesDesc();
+            genome._lineageId = 0;
+            genome._prevLineageId = std::nullopt;
+            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._connectionWeights.begin(), node._neuralNetwork._connectionWeights.end(), 0.0f);
@@ -625,7 +641,9 @@ TEST_F(MutationTests, accumulatedMutations_increases_forGeneMutation)
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    _simulationFacade->setSimulationParameters(_parameters);
+    auto parameters = _parameters;
+    parameters.newLineageThreshold.value = 1000.0f;
+    _simulationFacade->setSimulationParameters(parameters);
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
