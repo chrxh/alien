@@ -28,7 +28,6 @@ private:
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 
     __inline__ __device__ static bool hasMinimalEnergyForConstruction(Object* object);
-    __inline__ __device__ static int getNumberOfNodes(Genome* genome);
 };
 
 /************************************************************************/
@@ -261,13 +260,4 @@ __inline__ __device__ bool MutationProcessor::hasMinimalEnergyForConstruction(Ob
     auto availableEnergyForConstruction = cell.usableEnergy + constructor.reservedEnergy - normalCellEnergy;
 
     return availableEnergyForConstruction >= normalCellEnergy - NEAR_ZERO;
-}
-
-__inline__ __device__ int MutationProcessor::getNumberOfNodes(Genome* genome)
-{
-    auto totalNodes = 0;
-    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
-        totalNodes += genome->genes[geneIndex].numNodes;
-    }
-    return totalNodes;
 }
