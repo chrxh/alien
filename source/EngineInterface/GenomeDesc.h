@@ -428,6 +428,15 @@ struct ConnectionMutationDesc
     MEMBER(ConnectionMutationDesc, float, sigma, 0.0f);
 };
 
+struct CellTypePropertiesMutationDesc
+{
+    auto operator<=>(CellTypePropertiesMutationDesc const&) const = default;
+
+    MEMBER(CellTypePropertiesMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(CellTypePropertiesMutationDesc, float, sigma, 0.0f);
+    MEMBER(CellTypePropertiesMutationDesc, float, probability, 0.0f);
+};
+
 struct MutationRatesDesc
 {
     auto operator<=>(MutationRatesDesc const&) const = default;
@@ -436,6 +445,7 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation2, NeuronMutationDesc());
     MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation1, ConnectionMutationDesc());
     MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation2, ConnectionMutationDesc());
+    MEMBER(MutationRatesDesc, CellTypePropertiesMutationDesc, cellTypePropertiesMutation, CellTypePropertiesMutationDesc());
 
     std::vector<std::string> getActiveMutationTypes() const;
 };

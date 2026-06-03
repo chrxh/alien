@@ -108,6 +108,7 @@ struct SimulationParameters
     // Meta mutations
     BaseParameter<float> metaMutationNeuronsSigma = {0};
     BaseParameter<float> metaMutationConnectionsSigma = {0};
+    BaseParameter<float> metaMutationCellTypePropertiesSigma = {0};
     BaseParameter<float> newLineageThreshold = {0.1f};
 
     // Cell type: Attacker

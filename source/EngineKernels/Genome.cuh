@@ -353,12 +353,20 @@ struct ConnectionMutation
     float sigma;
 };
 
+struct CellTypePropertiesMutation
+{
+    float eventProbability;
+    float sigma;
+    float probability;
+};
+
 struct MutationRates
 {
     NeuronMutation neuronMutation1;
     NeuronMutation neuronMutation2;
     ConnectionMutation connectionMutation1;
     ConnectionMutation connectionMutation2;
+    CellTypePropertiesMutation cellTypePropertiesMutation;
 };
 
 struct Genome

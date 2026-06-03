@@ -176,7 +176,9 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                         .neuronMutation1(NeuronMutationDesc().eventProbability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f))
                         .neuronMutation2(NeuronMutationDesc().eventProbability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f))
                         .connectionMutation1(ConnectionMutationDesc().eventProbability(0.6f).sigma(0.7f))
-                        .connectionMutation2(ConnectionMutationDesc().eventProbability(0.8f).sigma(0.9f));
+                        .connectionMutation2(ConnectionMutationDesc().eventProbability(0.8f).sigma(0.9f))
+                        .cellTypePropertiesMutation(
+                            CellTypePropertiesMutationDesc().eventProbability(0.45f).sigma(0.55f).probability(0.65f));
 
     auto genome = GenomeDesc()
                       .name("Test Genome")

@@ -121,6 +121,19 @@ protected:
         auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
         return actualData.getGenomeRef(actualCreature._genomeId);
     }
+
+    template <typename Predicate>
+    NodeDesc const* findNode(GenomeDesc const& genome, Predicate&& predicate) const
+    {
+        for (auto const& gene : genome._genes) {
+            for (auto const& node : gene._nodes) {
+                if (predicate(node)) {
+                    return &node;
+                }
+            }
+        }
+        return nullptr;
+    }
 };
 
 TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
@@ -502,6 +515,160 @@ TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
     EXPECT_TRUE(compareAllExceptConnectionWeights(genome, actualGenome));
 }
 
+TEST_F(MutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumProperties)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypePropertiesMutation =
+        CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(100.0f).probability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+
+    auto originalDigestor = findNode(genome, [](NodeDesc const& node) { return std::holds_alternative<DigestorGenomeDesc>(node._cellType); });
+    auto actualDigestor = findNode(actualGenome, [](NodeDesc const& node) { return std::holds_alternative<DigestorGenomeDesc>(node._cellType); });
+    ASSERT_NE(originalDigestor, nullptr);
+    ASSERT_NE(actualDigestor, nullptr);
+    EXPECT_NE(std::get<DigestorGenomeDesc>(originalDigestor->_cellType)._rawEnergyConductivity,
+        std::get<DigestorGenomeDesc>(actualDigestor->_cellType)._rawEnergyConductivity);
+
+    auto originalMemory = findNode(genome, [](NodeDesc const& node) {
+        return std::holds_alternative<MemoryGenomeDesc>(node._cellType)
+            && std::holds_alternative<SignalStorageGenomeDesc>(std::get<MemoryGenomeDesc>(node._cellType)._mode);
+    });
+    auto actualMemory = findNode(actualGenome, [](NodeDesc const& node) {
+        return std::holds_alternative<MemoryGenomeDesc>(node._cellType)
+            && std::holds_alternative<SignalStorageGenomeDesc>(std::get<MemoryGenomeDesc>(node._cellType)._mode);
+    });
+    ASSERT_NE(originalMemory, nullptr);
+    ASSERT_NE(actualMemory, nullptr);
+    EXPECT_NE(
+        std::get<SignalStorageGenomeDesc>(std::get<MemoryGenomeDesc>(originalMemory->_cellType)._mode)._readOnly,
+        std::get<SignalStorageGenomeDesc>(std::get<MemoryGenomeDesc>(actualMemory->_cellType)._mode)._readOnly);
+
+    auto originalCommunicator = findNode(genome, [](NodeDesc const& node) {
+        return std::holds_alternative<CommunicatorGenomeDesc>(node._cellType)
+            && std::holds_alternative<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(node._cellType)._mode);
+    });
+    auto actualCommunicator = findNode(actualGenome, [](NodeDesc const& node) {
+        return std::holds_alternative<CommunicatorGenomeDesc>(node._cellType)
+            && std::holds_alternative<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(node._cellType)._mode);
+    });
+    ASSERT_NE(originalCommunicator, nullptr);
+    ASSERT_NE(actualCommunicator, nullptr);
+    EXPECT_NE(
+        std::get<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(originalCommunicator->_cellType)._mode)._restrictToLineage,
+        std::get<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(actualCommunicator->_cellType)._mode)._restrictToLineage);
+}
+
+TEST_F(MutationTests, cellTypePropertiesMutation_doesNotSwitchModes)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypePropertiesMutation =
+        CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(100.0f).probability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+
+    auto originalSensor = findNode(genome, [](NodeDesc const& node) {
+        return std::holds_alternative<SensorGenomeDesc>(node._cellType);
+    });
+    auto actualSensor = findNode(actualGenome, [](NodeDesc const& node) {
+        return std::holds_alternative<SensorGenomeDesc>(node._cellType);
+    });
+    ASSERT_NE(originalSensor, nullptr);
+    ASSERT_NE(actualSensor, nullptr);
+    EXPECT_EQ(std::get<SensorGenomeDesc>(originalSensor->_cellType).getMode(), std::get<SensorGenomeDesc>(actualSensor->_cellType).getMode());
+
+    auto originalMuscle = findNode(genome, [](NodeDesc const& node) {
+        return std::holds_alternative<MuscleGenomeDesc>(node._cellType);
+    });
+    auto actualMuscle = findNode(actualGenome, [](NodeDesc const& node) {
+        return std::holds_alternative<MuscleGenomeDesc>(node._cellType);
+    });
+    ASSERT_NE(originalMuscle, nullptr);
+    ASSERT_NE(actualMuscle, nullptr);
+    EXPECT_EQ(std::get<MuscleGenomeDesc>(originalMuscle->_cellType).getMode(), std::get<MuscleGenomeDesc>(actualMuscle->_cellType).getMode());
+}
+
+TEST_F(MutationTests, cellTypePropertiesMutation_valuesStayWithinBounds)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypePropertiesMutation =
+        CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(25.0f).probability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 20; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+
+    for (auto const& gene : actualGenome._genes) {
+        for (auto const& node : gene._nodes) {
+            if (auto const* digestor = std::get_if<DigestorGenomeDesc>(&node._cellType)) {
+                EXPECT_GE(digestor->_rawEnergyConductivity, 0.0f);
+                EXPECT_LE(digestor->_rawEnergyConductivity, 1.0f);
+            } else if (auto const* generator = std::get_if<GeneratorGenomeDesc>(&node._cellType)) {
+                EXPECT_GE(generator->_minValue, -2.0f);
+                EXPECT_LE(generator->_minValue, 2.0f);
+                EXPECT_GE(generator->_maxValue, -2.0f);
+                EXPECT_LE(generator->_maxValue, 2.0f);
+                EXPECT_LE(generator->_minValue, generator->_maxValue);
+            } else if (auto const* sensor = std::get_if<SensorGenomeDesc>(&node._cellType)) {
+                EXPECT_GE(sensor->_minRange, 0);
+                EXPECT_LE(sensor->_minRange, 512);
+                EXPECT_GE(sensor->_maxRange, 0);
+                EXPECT_LE(sensor->_maxRange, 512);
+            } else if (auto const* memory = std::get_if<MemoryGenomeDesc>(&node._cellType)) {
+                EXPECT_LE(memory->_channelBitMask, 0xffff);
+                if (std::holds_alternative<SignalRecorderGenomeDesc>(memory->_mode)) {
+                    auto const& mode = std::get<SignalRecorderGenomeDesc>(memory->_mode);
+                    EXPECT_GE(mode._numWrittenSignalEntries, 0);
+                    EXPECT_LE(mode._numWrittenSignalEntries, static_cast<int>(memory->_signalEntries.size()));
+                }
+            } else if (auto const* communicator = std::get_if<CommunicatorGenomeDesc>(&node._cellType)) {
+                if (std::holds_alternative<SenderGenomeDesc>(communicator->_mode)) {
+                    auto const& mode = std::get<SenderGenomeDesc>(communicator->_mode);
+                    EXPECT_GE(mode._range, 0);
+                    EXPECT_LE(mode._range, 20);
+                    EXPECT_GE(mode._maxTimesSent, 0);
+                }
+            }
+        }
+    }
+}
+
+TEST_F(MutationTests, accumulatedMutations_increases_forCellTypePropertyMutation)
+{
+    auto genome = createTestGenome().lineageId(42).prevLineageId(41);
+    genome._mutationRates._cellTypePropertiesMutation =
+        CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    auto parameters = _parameters;
+    parameters.newLineageThreshold.value = 1000.0f;
+    _simulationFacade->setSimulationParameters(parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_GT(actualGenome._accumulatedMutations, genome._accumulatedMutations);
+}
+
 TEST_F(MutationTests, metaMutation_neuronRatesActuallyChange)
 {
     auto genome = createTestGenome();
@@ -627,6 +794,55 @@ TEST_F(MutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
     EXPECT_EQ(actualGenome._mutationRates._connectionMutation2._sigma, 0.5f);
 }
 
+TEST_F(MutationTests, metaMutation_cellTypePropertyRatesActuallyChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypePropertiesMutation =
+        CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationCellTypePropertiesSigma.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+
+    bool anyChanged = actualGenome._mutationRates._cellTypePropertiesMutation._eventProbability != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutation._sigma != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutation._probability != 0.5f;
+    EXPECT_TRUE(anyChanged);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation._probability, 0.0f);
+}
+
+TEST_F(MutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypePropertiesMutation =
+        CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationCellTypePropertiesSigma.value = 0.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation._eventProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation._sigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation._probability, 0.5f);
+}
+
 TEST_F(MutationTests, accumulatedMutations_increases_forGeneMutation)
 {
     auto genome = createTestGenome().lineageId(42).prevLineageId(41);
@@ -658,6 +874,7 @@ TEST_F(MutationTests, metaMutation_doesNotIncreaseAccumulatedMutations)
 
     _parameters.metaMutationNeuronsSigma.value = 1.0f;
     _parameters.metaMutationConnectionsSigma.value = 1.0f;
+    _parameters.metaMutationCellTypePropertiesSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);

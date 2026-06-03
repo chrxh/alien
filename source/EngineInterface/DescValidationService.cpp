@@ -31,6 +31,10 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
     genome._mutationRates._connectionMutation1._sigma = std::max(genome._mutationRates._connectionMutation1._sigma, 0.0f);
     genome._mutationRates._connectionMutation2._eventProbability = std::clamp(genome._mutationRates._connectionMutation2._eventProbability, 0.0f, 1.0f);
     genome._mutationRates._connectionMutation2._sigma = std::max(genome._mutationRates._connectionMutation2._sigma, 0.0f);
+    genome._mutationRates._cellTypePropertiesMutation._eventProbability =
+        std::clamp(genome._mutationRates._cellTypePropertiesMutation._eventProbability, 0.0f, 1.0f);
+    genome._mutationRates._cellTypePropertiesMutation._sigma = std::max(genome._mutationRates._cellTypePropertiesMutation._sigma, 0.0f);
+    genome._mutationRates._cellTypePropertiesMutation._probability = std::clamp(genome._mutationRates._cellTypePropertiesMutation._probability, 0.0f, 1.0f);
 
     // Validate each gene
     for (auto& gene : genome._genes) {

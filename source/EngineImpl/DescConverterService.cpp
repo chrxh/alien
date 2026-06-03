@@ -881,6 +881,9 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._mutationRates._connectionMutation1._sigma = genomeTO.mutationRates.connectionMutation1.sigma;
     result._mutationRates._connectionMutation2._eventProbability = genomeTO.mutationRates.connectionMutation2.eventProbability;
     result._mutationRates._connectionMutation2._sigma = genomeTO.mutationRates.connectionMutation2.sigma;
+    result._mutationRates._cellTypePropertiesMutation._eventProbability = genomeTO.mutationRates.cellTypePropertiesMutation.eventProbability;
+    result._mutationRates._cellTypePropertiesMutation._sigma = genomeTO.mutationRates.cellTypePropertiesMutation.sigma;
+    result._mutationRates._cellTypePropertiesMutation._probability = genomeTO.mutationRates.cellTypePropertiesMutation.probability;
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -967,6 +970,10 @@ void DescConverterService::convertGenomeToTO(
         genome._mutationRates._neuronMutation2._activationFunctionProbability};
     genomeTO.mutationRates.connectionMutation1 = {genome._mutationRates._connectionMutation1._eventProbability, genome._mutationRates._connectionMutation1._sigma};
     genomeTO.mutationRates.connectionMutation2 = {genome._mutationRates._connectionMutation2._eventProbability, genome._mutationRates._connectionMutation2._sigma};
+    genomeTO.mutationRates.cellTypePropertiesMutation = {
+        genome._mutationRates._cellTypePropertiesMutation._eventProbability,
+        genome._mutationRates._cellTypePropertiesMutation._sigma,
+        genome._mutationRates._cellTypePropertiesMutation._probability};
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;

@@ -545,6 +545,7 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
     genome._mutationRates._neuronMutation2 = NeuronMutationDesc();
     genome._mutationRates._connectionMutation1 = ConnectionMutationDesc();
     genome._mutationRates._connectionMutation2 = ConnectionMutationDesc();
+    genome._mutationRates._cellTypePropertiesMutation = CellTypePropertiesMutationDesc();
 
     resetUnusedGenes(genome, geneIndices);
 }

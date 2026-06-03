@@ -463,6 +463,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::metaMutationConnectionsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
+                        .name("Cell type property mutations sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::metaMutationCellTypePropertiesSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
                         .name("New lineage threshold")
                         .reference(
                             FloatSpec().member(&SimulationParameters::newLineageThreshold).min(0.0f).max(10000.0f).logarithmic(true).format("%.5f")),

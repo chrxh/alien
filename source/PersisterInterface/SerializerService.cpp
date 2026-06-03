@@ -296,6 +296,10 @@ namespace
     auto constexpr Id_ConnectionMutation_EventProbability = 0;
     auto constexpr Id_ConnectionMutation_Sigma = 1;
 
+    auto constexpr Id_CellTypePropertiesMutation_EventProbability = 0;
+    auto constexpr Id_CellTypePropertiesMutation_Sigma = 1;
+    auto constexpr Id_CellTypePropertiesMutation_Probability = 2;
+
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
     auto constexpr Id_Gene_Stiffness = 5;
@@ -415,6 +419,7 @@ namespace
     auto constexpr Id_MutationRates_NeuronMutation2 = 2;
     auto constexpr Id_MutationRates_ConnectionMutation1 = 3;
     auto constexpr Id_MutationRates_ConnectionMutation2 = 4;
+    auto constexpr Id_MutationRates_CellTypePropertiesMutation = 5;
 
     auto constexpr Id_Genome_Genes = 6;
     auto constexpr Id_Genome_MutationRates = 7;
@@ -879,6 +884,17 @@ namespace cereal
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, CellTypePropertiesMutationDesc& data)
+    {
+        CellTypePropertiesMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_CellTypePropertiesMutation_EventProbability, data._eventProbability, defaultObject._eventProbability);
+        scope.addMember(Id_CellTypePropertiesMutation_Sigma, data._sigma, defaultObject._sigma);
+        scope.addMember(Id_CellTypePropertiesMutation_Probability, data._probability, defaultObject._probability);
+    }
+    SPLIT_SERIALIZATION(CellTypePropertiesMutationDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MutationRatesDesc& data)
     {
         MutationRatesDesc defaultObject;
@@ -887,6 +903,7 @@ namespace cereal
         scope.addDesc(Id_MutationRates_NeuronMutation2, data._neuronMutation2);
         scope.addDesc(Id_MutationRates_ConnectionMutation1, data._connectionMutation1);
         scope.addDesc(Id_MutationRates_ConnectionMutation2, data._connectionMutation2);
+        scope.addDesc(Id_MutationRates_CellTypePropertiesMutation, data._cellTypePropertiesMutation);
     }
     SPLIT_SERIALIZATION(MutationRatesDesc)
 
