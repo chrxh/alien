@@ -13,14 +13,10 @@ public:
     calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color);
     __device__ __inline__ static float
     calcParameter(BaseLayerParameter<ColorMatrix<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color1, int color2);
-    __device__ __inline__ static float2
-    calcParameter(
-        float2 const& baseValue,
-        float2 (&layerValues)[MAX_LAYERS],
-        bool (&enabled)[MAX_LAYERS],
-        SimulationData const& data,
-        float2 const& worldPos);
     __device__ __inline__ static FloatColorRGB calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos);
+
+    __device__ __inline__ static float2
+    calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], bool (&enabled)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos);
 
     //return -1 for base
     template <typename T>
