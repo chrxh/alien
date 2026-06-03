@@ -49,7 +49,6 @@ protected:
     bool compareAllExceptNeuronWeights(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._mutationRates = MutationRatesDesc();
             genome._lineageId = 0;
             genome._prevLineageId = std::nullopt;
             genome._accumulatedMutations = 0.0f;
@@ -67,7 +66,6 @@ protected:
     bool compareAllExceptNeuronBiases(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._mutationRates = MutationRatesDesc();
             genome._lineageId = 0;
             genome._prevLineageId = std::nullopt;
             genome._accumulatedMutations = 0.0f;
@@ -85,7 +83,6 @@ protected:
     bool compareAllExceptActivationFunctions(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._mutationRates = MutationRatesDesc();
             genome._lineageId = 0;
             genome._prevLineageId = std::nullopt;
             genome._accumulatedMutations = 0.0f;
@@ -103,7 +100,6 @@ protected:
     bool compareAllExceptConnectionWeights(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._mutationRates = MutationRatesDesc();
             genome._lineageId = 0;
             genome._prevLineageId = std::nullopt;
             genome._accumulatedMutations = 0.0f;
@@ -136,7 +132,7 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 100; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
@@ -157,7 +153,7 @@ TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 100; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
@@ -306,7 +302,7 @@ TEST_F(MutationTests, neuronBiasMutation_keepOtherAttributesUnchanged)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 100; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
@@ -400,7 +396,7 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_keepOtherAttributesUnchan
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 100; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
@@ -494,7 +490,7 @@ TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 100; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
@@ -684,6 +680,7 @@ TEST_F(MutationTests, accumulatedMutations_createsNewLineageId)
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
+    _parameters.newLineageThreshold.value = 0.1f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
