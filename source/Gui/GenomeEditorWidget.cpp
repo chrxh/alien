@@ -104,6 +104,16 @@ void _GenomeEditorWidget::processHeaderData()
                     _editData->genome._mutationRates, [this](MutationRatesDesc const& mutationRates) { _editData->genome._mutationRates = mutationRates; });
             }
 
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Accumulated mutations")
+                    .format("%.5f")
+                    .min(0.0f)
+                    .max(10000.0f)
+                    .logarithmic(true)
+                    .textWidth(rightColumnWidth),
+                &_editData->genome._accumulatedMutations);
+
             table.next();
 
             table.end();

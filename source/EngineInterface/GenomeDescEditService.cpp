@@ -540,7 +540,7 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
         genome._frontAngle = 0;
     }
     genome._lineageId = 0;
-    genome._mutationRates._lineageMutationProbability = 0;
+    genome._accumulatedMutations = 0;
     genome._mutationRates._neuronMutation1 = NeuronMutationDesc();
     genome._mutationRates._neuronMutation2 = NeuronMutationDesc();
     genome._mutationRates._connectionMutation1 = ConnectionMutationDesc();

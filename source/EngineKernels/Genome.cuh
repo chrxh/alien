@@ -355,7 +355,6 @@ struct ConnectionMutation
 
 struct MutationRates
 {
-    float lineageMutationProbability;
     NeuronMutation neuronMutation1;
     NeuronMutation neuronMutation2;
     ConnectionMutation connectionMutation1;
@@ -372,6 +371,7 @@ struct Genome
     uint32_t lineageId;
     uint32_t prevLineageId;
     float frontAngle;
+    float accumulatedMutations;
     MutationRates mutationRates;
 
     // Temporary data

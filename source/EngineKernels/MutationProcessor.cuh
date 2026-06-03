@@ -19,12 +19,15 @@ public:
     __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
 private:
-    __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome);
-    __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome);
-    __inline__ __device__ static void applyMutations_lineages(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate);
+    __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void
+    updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
+
+    __inline__ __device__ static bool hasMinimalEnergyForConstruction(Object* object);
 };
 
 /************************************************************************/
@@ -46,24 +49,22 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& object = objects.at(index);
 
-        __shared__ bool mutationNeeded;
-        if (laneId == 0) {
-            mutationNeeded = data.primaryNumberGen.random() < 0.1f;
-        }
-        block.sync();
-        if (mutationNeeded == false) {
-            continue;
-        }
-
         __shared__ Genome* clonedGenome;
 
         if (laneId == 0) {
             clonedGenome = nullptr;
             if (object->type == ObjectType_Cell) {
-                auto& creature = object->typeData.cell.creature;
-                int origMutationState = atomicCAS(&creature->mutationState, MutationState_MutationInProgress, MutationState_Mutated);
-                if (origMutationState == MutationState_MutationInProgress) {
-                    clonedGenome = factory.cloneGenome(creature->genome);
+                auto const& cell = object->typeData.cell;
+                // Performance optimization:
+                // Only mutate genome if it has a constructor for new offspring and a minimal amount of energy for construction
+                // (=> prevents creation of genomes which are not used)
+                if (cell.constructorAvailable && (cell.constructor.geneIndex == 0 || cell.constructor.separation) && cell.constructor.offspring == nullptr
+                    && hasMinimalEnergyForConstruction(object)) {
+                    auto& creature = object->typeData.cell.creature;
+                    int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
+                    if (origMutationState == MutationState_NotMutated) {
+                        clonedGenome = factory.cloneGenome(creature->genome);
+                    }
                 }
             }
         }
@@ -84,13 +85,26 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
 {
+    __shared__ float accumulatedMutations;
+    __shared__ int numValuesToMutate;
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    if (laneId == 0) {
+        accumulatedMutations = 0.0f;
+        numValuesToMutate = 0;
+    }
+    block.sync();
+
     applyMutations_meta(data, genome);
-    applyMutations_neurons(data, genome);
-    applyMutations_connections(data, genome);
-    applyMutations_lineages(data, genome);
+    applyMutations_neurons(data, genome, accumulatedMutations, numValuesToMutate);
+    applyMutations_connections(data, genome, accumulatedMutations, numValuesToMutate);
+
+    block.sync();
+    updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations, numValuesToMutate);
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
@@ -107,24 +121,30 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                 auto& node = gene.nodes[nodeIndex];
                 if (laneId < NEURONS_PER_CELL) {
                     int neuronIndex = laneId;
+                    atomicAdd_block(&numValuesToMutate, NEURONS_PER_CELL + 2);
                     if (data.primaryNumberGen.random() < rate.probability) {
                         if (rate.weightSigma > 0) {
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
                                 auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
-                                float newValue = weight.getValue() + generateGaussian(data) * rate.weightSigma;
+                                auto delta = generateGaussian(data) * rate.weightSigma;
+                                float newValue = weight.getValue() + delta;
                                 newValue = max(-2.0f, min(2.0f, newValue));
                                 weight = NeuralNetWeight(newValue);
+                                atomicAdd_block(&accumulatedMutations, abs(delta));
                             }
                         }
                         if (rate.biasSigma > 0) {
                             auto& bias = node.neuralNetwork.biases[neuronIndex];
-                            float newBias = bias + generateGaussian(data) * rate.biasSigma;
+                            auto delta = generateGaussian(data) * rate.biasSigma;
+                            float newBias = bias + delta;
                             newBias = max(-2.0f, min(2.0f, newBias));
                             bias = newBias;
+                            atomicAdd_block(&accumulatedMutations, abs(delta));
                         }
                         if (rate.activationFunctionProbability > 0 && data.primaryNumberGen.random() < rate.activationFunctionProbability) {
                             node.neuralNetwork.activationFunctions[neuronIndex] =
                                 static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
+                            atomicAdd_block(&accumulatedMutations, 1.0f);
                         }
                     }
                 }
@@ -133,7 +153,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_connections(SimulationData& data, Genome* genome)
+__inline__ __device__ void
+MutationProcessor::applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
@@ -149,26 +170,17 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
             for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
                 auto& node = gene.nodes[nodeIndex];
                 if (laneId < MAX_OBJECT_CONNECTIONS) {
+                    atomicAdd_block(&numValuesToMutate, 1);
                     if (data.primaryNumberGen.random() < rate.probability) {
                         auto& weight = node.neuralNetwork.connectionWeights[laneId];
-                        float newValue = weight + generateGaussian(data) * rate.sigma;
+                        auto delta = generateGaussian(data) * rate.sigma;
+                        float newValue = weight + delta;
                         newValue = max(-2.0f, min(2.0f, newValue));
                         weight = newValue;
+                        atomicAdd_block(&accumulatedMutations, abs(delta));
                     }
                 }
             }
-        }
-    }
-}
-
-__inline__ __device__ void MutationProcessor::applyMutations_lineages(SimulationData& data, Genome* genome)
-{
-    auto laneId = cg_mutation::this_thread_block().thread_rank();
-
-    if (laneId == 0 && genome->mutationRates.lineageMutationProbability > 0) {
-        if (data.primaryNumberGen.random() < genome->mutationRates.lineageMutationProbability) {
-            genome->prevLineageId = genome->lineageId;
-            genome->lineageId = data.primaryNumberGen.createLineageId();
         }
     }
 }
@@ -201,12 +213,20 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             mutateFloat(genome->mutationRates.connectionMutation2.probability);
             mutateFloat(genome->mutationRates.connectionMutation2.sigma);
         }
+    }
+}
 
-        // Meta-mutate lineage mutation probability
-        float lineageSigma = cudaSimulationParameters.metaMutationLineagesSigma.value;
-        if (lineageSigma > 0) {
-            genome->mutationRates.lineageMutationProbability =
-                min(1.0f, max(0.0f, genome->mutationRates.lineageMutationProbability + generateGaussian(data) * lineageSigma));
+__inline__ __device__ void
+MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations, int& numValuesToMutate)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    if (laneId == 0) {
+        auto const denominator = numValuesToMutate > 0 ? toFloat(numValuesToMutate) : 1.0f;
+        genome->accumulatedMutations += accumulatedMutations / denominator;
+        if (genome->accumulatedMutations > cudaSimulationParameters.newLineageThreshold.value) {
+            genome->prevLineageId = genome->lineageId;
+            genome->lineageId = data.primaryNumberGen.createLineageId();
+            genome->accumulatedMutations = 0;
         }
     }
 }
@@ -226,4 +246,18 @@ __inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data
     } else {
         return data.primaryNumberGen.random() < probability * 1000 && data.secondaryNumberGen.random() < 0.001f;
     }
+}
+
+__inline__ __device__ bool MutationProcessor::hasMinimalEnergyForConstruction(Object* object)
+{
+    auto& cell = object->typeData.cell;
+    auto& constructor = cell.constructor;
+    if (constructor.provideEnergy == ProvideEnergy_Free) {
+        return true;
+    }
+
+    auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
+    auto availableEnergyForConstruction = cell.usableEnergy + constructor.reservedEnergy - normalCellEnergy;
+
+    return availableEnergyForConstruction >= normalCellEnergy - NEAR_ZERO;
 }

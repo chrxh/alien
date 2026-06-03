@@ -52,16 +52,6 @@ namespace
         AlienGui::EndTreeNode();
     }
 
-    void processLineageMutationRate(float& probability, float rightColumnWidth)
-    {
-        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Lineage mutation rate").rank(AlienGui::TreeNodeRank::Default))) {
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Probability").min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
-                &probability);
-        }
-        AlienGui::EndTreeNode();
-    }
-
     template <typename Func>
     void processConcreteMutationRates(Func&& processMutationRates)
     {
@@ -84,8 +74,6 @@ void MutationRateDialog::shutdownIntern() {}
 void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix) const
 {
     auto& settings = GlobalSettings::get();
-
-    mutationRates._lineageMutationProbability = settings.getValue(settingsPrefix + "lineage mutation probability", mutationRates._lineageMutationProbability);
 
     mutationRates._connectionMutation1._probability =
         settings.getValue(settingsPrefix + "connection mutation 1.probability", mutationRates._connectionMutation1._probability);
@@ -114,8 +102,6 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
 void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
 {
     auto& settings = GlobalSettings::get();
-
-    settings.setValue(settingsPrefix + "lineage mutation probability", mutationRates._lineageMutationProbability);
 
     settings.setValue(settingsPrefix + "connection mutation 1.probability", mutationRates._connectionMutation1._probability);
     settings.setValue(settingsPrefix + "connection mutation 1.sigma", mutationRates._connectionMutation1._sigma);
@@ -155,14 +141,6 @@ void MutationRateDialog::processIntern()
                 processNeuronMutationRate("Neuron weight mutation rate 1", "NMR1", _mutation._neuronMutation1, rightColumnWidth);
                 table.next();
                 processNeuronMutationRate("Neuron weight mutation rate 2", "NMR2", _mutation._neuronMutation2, rightColumnWidth);
-                table.next();
-            });
-        }
-        AlienGui::EndTreeNode();
-
-        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Lineage mutation").rank(AlienGui::TreeNodeRank::High))) {
-            processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processLineageMutationRate(_mutation._lineageMutationProbability, rightColumnWidth);
                 table.next();
             });
         }

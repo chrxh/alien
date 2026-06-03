@@ -582,7 +582,7 @@ struct CreatureDesc
     MEMBER(CreatureDesc, int, generation, 0);
     MEMBER(CreatureDesc, int, numCells, 0);
     MEMBER(CreatureDesc, uint64_t, genomeId, 0);
-    MEMBER(CreatureDesc, MutationState, mutationState, MutationState_NotMutated);
+    MEMBER(CreatureDesc, MutationState, mutationState, MutationState_Mutated);
 
     // Process data
     MEMBER(CreatureDesc, int, headUpdateId, 0);

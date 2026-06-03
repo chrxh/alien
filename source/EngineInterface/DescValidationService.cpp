@@ -18,7 +18,7 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
     if (genome._prevLineageId.has_value()) {
         genome._prevLineageId = std::max(genome._prevLineageId.value(), 0);
     }
-    genome._mutationRates._lineageMutationProbability = std::clamp(genome._mutationRates._lineageMutationProbability, 0.0f, 1.0f);
+    genome._accumulatedMutations = std::max(genome._accumulatedMutations, 0.0f);
     genome._mutationRates._neuronMutation1._probability = std::clamp(genome._mutationRates._neuronMutation1._probability, 0.0f, 1.0f);
     genome._mutationRates._neuronMutation1._weightSigma = std::max(genome._mutationRates._neuronMutation1._weightSigma, 0.0f);
     genome._mutationRates._neuronMutation1._biasSigma = std::max(genome._mutationRates._neuronMutation1._biasSigma, 0.0f);

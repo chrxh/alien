@@ -44,7 +44,6 @@ private:
 
     __inline__ __device__ static Object*
     tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
-    __inline__ __device__ static void tryScheduleMutations(SimulationData& data, Object* hostObject);
 
     __inline__ __device__ static Object*
     startConstructionOnNewBranch(SimulationData& data, SimulationStatistics& statistics, Object* hostObject, ConstructionData const& constructionData);
@@ -153,7 +152,6 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 {
     auto& constructor = object->typeData.cell.constructor;
     if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
-        tryScheduleMutations(data, object);  // TODO only when energy for new cell is available
 
         constructor.offspring = findOrCreateNewCreature(data, object);
 
@@ -213,6 +211,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     factory.init(&data);
     auto result = factory.cloneCreature(object->typeData.cell.creature);
     result->numCells = 0;
+
     return result;
 }
 
@@ -291,12 +290,6 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
         hostObject->releaseLock();
         return newObject;
     }
-}
-
-__inline__ __device__ void ConstructorProcessor::tryScheduleMutations(SimulationData& data, Object* hostObject)
-{
-    atomicCAS(&hostObject->typeData.cell.creature->mutationState, MutationState_NotMutated, MutationState_MutationInProgress);
-    hostObject->typeData.cell.constructor.offspring = nullptr;
 }
 
 __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch(
