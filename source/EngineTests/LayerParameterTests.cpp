@@ -469,3 +469,40 @@ TEST_F(LayerParameterTests, movingRectangularZone_cellsAffectedByMovingZone)
     EXPECT_TRUE(foundCaughtSurvivor);
     EXPECT_TRUE(foundOutsideSurvivor);
 }
+
+TEST_F(LayerParameterTests, disabledForceFieldLayer_doesNotOverwritePreviousLayer)
+{
+    _parameters.numLayers = 3;
+
+    setupCircularLayer(0, {500.0f, 500.0f}, 200.0f, 0.0f);
+    setupCircularLayer(1, {500.0f, 500.0f}, 200.0f, 0.0f);
+    setupCircularLayer(2, {500.0f, 500.0f}, 200.0f, 0.0f);
+
+    _parameters.layerOpacity.layerValues[0] = 0.5f;
+    _parameters.layerOpacity.layerValues[1] = 0.5f;
+    _parameters.layerOpacity.layerValues[2] = 0.5f;
+
+    _parameters.layerForceFieldType.layerValues[0] = {ForceField_Linear, true};
+    _parameters.layerLinearForceFieldAngle.layerValues[0] = 90.0f;
+    _parameters.layerLinearForceFieldStrength.layerValues[0] = 1.0f;
+
+    _parameters.layerForceFieldType.layerValues[1] = {ForceField_None, false};
+    _parameters.layerForceFieldType.layerValues[2] = {ForceField_None, false};
+
+    _parameters.friction.baseValue = 0.0f;
+    _parameters.innerFriction.value = 0.0f;
+
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto data = Desc().energies({EnergyDesc().pos({500.0f, 500.0f}).vel({0.0f, 0.0f}).energy(10.0f).color(0)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto resultData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(1, resultData._energies.size());
+
+    auto const& particle = resultData._energies.at(0);
+    EXPECT_TRUE(approxCompare(0.5f, particle._vel.x, 0.001f));
+    EXPECT_TRUE(approxCompare(0.0f, particle._vel.y, 0.001f));
+}

@@ -13,9 +13,10 @@ public:
     calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color);
     __device__ __inline__ static float
     calcParameter(BaseLayerParameter<ColorMatrix<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color1, int color2);
-    __device__ __inline__ static float2
-    calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos);
     __device__ __inline__ static FloatColorRGB calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos);
+
+    __device__ __inline__ static float2
+    calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], bool (&enabled)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos);
 
     //return -1 for base
     template <typename T>
@@ -82,14 +83,21 @@ __device__ __inline__ float ParameterCalculator::calcParameter(
 }
 
 __device__ __inline__ float2
-ParameterCalculator::calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos)
+ParameterCalculator::calcParameter(
+    float2 const& baseValue,
+    float2 (&layerValues)[MAX_LAYERS],
+    bool (&enabled)[MAX_LAYERS],
+    SimulationData const& data,
+    float2 const& worldPos)
 {
     auto result = baseValue;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-        float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
-        auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
-        auto weight = calcWeight(delta, i);
-        result = result * weight + layerValues[i] * (1.0f - weight);
+        if (enabled[i]) {
+            float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
+            auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
+            auto weight = calcWeight(delta, i);
+            result = result * weight + layerValues[i] * (1.0f - weight);
+        }
     }
     return result;
 }
