@@ -134,17 +134,19 @@ namespace
 __global__ void cudaApplyForceFields(SimulationData data)
 {
     float2 accelerations[MAX_LAYERS];
+    bool enabled[MAX_LAYERS];
 
     auto calcResultingAcceleration = [&](float2 const& pos, float const& mass) {
         auto timestep = *data.timestep;
         for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-            if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
+            enabled[i] = cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled;
+            if (enabled[i]) {
                 accelerations[i] = calcAcceleration(data.objectMap, pos, mass, i, timestep);
             } else {
                 accelerations[i] = zeroForceFieldAcceleration();
             }
         }
-        return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, cudaSimulationParameters.layerForceFieldType, data, pos);
+        return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, enabled, data, pos);
     };
     {
         auto& objects = data.entities.objects;

@@ -17,7 +17,7 @@ public:
     calcParameter(
         float2 const& baseValue,
         float2 (&layerValues)[MAX_LAYERS],
-        EnableableLayerParameter<ForceField> const& enabledValues,
+        bool (&enabled)[MAX_LAYERS],
         SimulationData const& data,
         float2 const& worldPos);
     __device__ __inline__ static FloatColorRGB calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos);
@@ -90,13 +90,13 @@ __device__ __inline__ float2
 ParameterCalculator::calcParameter(
     float2 const& baseValue,
     float2 (&layerValues)[MAX_LAYERS],
-    EnableableLayerParameter<ForceField> const& enabledValues,
+    bool (&enabled)[MAX_LAYERS],
     SimulationData const& data,
     float2 const& worldPos)
 {
     auto result = baseValue;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-        if (enabledValues.layerValues[i].enabled) {
+        if (enabled[i]) {
             float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
             auto delta = data.objectMap.getCorrectedDirection(layerPos - worldPos);
             auto weight = calcWeight(delta, i);
