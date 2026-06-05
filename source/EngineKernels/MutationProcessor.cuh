@@ -248,60 +248,60 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     break;
                 case CellType_Depot:
                     mutateNumber(
-                        node.cellTypeData.depot.storageLimit, CellTypePropertyLimits::DepotStorageLimit_Min, CellTypePropertyLimits::DepotStorageLimit_Max);
+                        node.cellTypeData.depot.storageLimit, Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
                     mutateNumber(
                         node.cellTypeData.depot.initialStoredUsableEnergy,
-                        CellTypePropertyLimits::DepotInitialStoredUsableEnergy_Min,
+                        Const::DepotInitialStoredUsableEnergy_Min,
                         node.cellTypeData.depot.storageLimit);
                     break;
                 case CellType_Sensor:
                     mutateBoolField(node.cellTypeData.sensor.autoTrigger);
                     mutateBoolField(node.cellTypeData.sensor.tagForAttackers);
-                    mutateNumber(node.cellTypeData.sensor.minRange, CellTypePropertyLimits::SensorRange_Min, CellTypePropertyLimits::SensorRange_Max);
-                    mutateNumber(node.cellTypeData.sensor.maxRange, CellTypePropertyLimits::SensorRange_Min, CellTypePropertyLimits::SensorRange_Max);
+                    mutateNumber(node.cellTypeData.sensor.minRange, Const::SensorRange_Min, Const::SensorRange_Max);
+                    mutateNumber(node.cellTypeData.sensor.maxRange, Const::SensorRange_Min, Const::SensorRange_Max);
                     switch (node.cellTypeData.sensor.mode) {
                     case SensorMode_Telemetry:
                         break;
                     case SensorMode_DetectEnergy:
                         mutateNumber(
                             node.cellTypeData.sensor.modeData.detectEnergy.minDensity,
-                            CellTypePropertyLimits::DetectEnergyMinDensity_Min,
-                            CellTypePropertyLimits::DetectEnergyMinDensity_Max);
+                            Const::DetectEnergyMinDensity_Min,
+                            Const::DetectEnergyMinDensity_Max);
                         break;
                     case SensorMode_DetectSolid:
                         break;
                     case SensorMode_DetectFreeCell:
                         mutateNumber(
                             node.cellTypeData.sensor.modeData.detectFreeCell.minDensity,
-                            CellTypePropertyLimits::DetectFreeCellMinDensity_Min,
-                            CellTypePropertyLimits::DetectFreeCellMinDensity_Max);
+                            Const::DetectFreeCellMinDensity_Min,
+                            Const::DetectFreeCellMinDensity_Max);
                         mutateNumber(
                             node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors,
-                            CellTypePropertyLimits::RestrictToColors_Min,
-                            CellTypePropertyLimits::RestrictToColors_Max);
+                            Const::RestrictToColors_Min,
+                            Const::RestrictToColors_Max);
                         break;
                     case SensorMode_DetectCreature:
-                        mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.minNumCells, CellTypePropertyLimits::CreatureNumCells_Min, 100);
-                        mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.maxNumCells, CellTypePropertyLimits::CreatureNumCells_Min, 100);
+                        mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.minNumCells, Const::CreatureNumCells_Min, 100);
+                        mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.maxNumCells, Const::CreatureNumCells_Min, 100);
                         mutateNumber(
                             node.cellTypeData.sensor.modeData.detectCreature.restrictToColors,
-                            CellTypePropertyLimits::RestrictToColors_Min,
-                            CellTypePropertyLimits::RestrictToColors_Max);
+                            Const::RestrictToColors_Min,
+                            Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage, LineageRestriction_Count);
                         break;
                     }
                     break;
                 case CellType_Generator:
                     mutateBoolField(node.cellTypeData.generator.additive);
-                    mutateNumber(node.cellTypeData.generator.minValue, CellTypePropertyLimits::GeneratorValue_Min, CellTypePropertyLimits::GeneratorValue_Max);
-                    mutateNumber(node.cellTypeData.generator.maxValue, CellTypePropertyLimits::GeneratorValue_Min, CellTypePropertyLimits::GeneratorValue_Max);
-                    mutateNumber(node.cellTypeData.generator.timeOffset, CellTypePropertyLimits::GeneratorTimeOffset_Min, 100);
+                    mutateNumber(node.cellTypeData.generator.minValue, Const::GeneratorValue_Min, Const::GeneratorValue_Max);
+                    mutateNumber(node.cellTypeData.generator.maxValue, Const::GeneratorValue_Min, Const::GeneratorValue_Max);
+                    mutateNumber(node.cellTypeData.generator.timeOffset, Const::GeneratorTimeOffset_Min, 100);
                     switch (node.cellTypeData.generator.mode) {
                     case GeneratorMode_SquareSignal:
-                        mutateNumber(node.cellTypeData.generator.modeData.squareSignal.period, CellTypePropertyLimits::GeneratorPeriod_Min, 100);
+                        mutateNumber(node.cellTypeData.generator.modeData.squareSignal.period, Const::GeneratorPeriod_Min, 100);
                         break;
                     case GeneratorMode_SawtoothSignal:
-                        mutateNumber(node.cellTypeData.generator.modeData.sawtoothSignal.period, CellTypePropertyLimits::GeneratorPeriod_Min, 100);
+                        mutateNumber(node.cellTypeData.generator.modeData.sawtoothSignal.period, Const::GeneratorPeriod_Min, 100);
                         break;
                     }
                     if (node.cellTypeData.generator.minValue > node.cellTypeData.generator.maxValue) {
@@ -315,8 +315,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     case AttackerMode_FreeCell:
                         mutateNumber(
                             node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors,
-                            CellTypePropertyLimits::RestrictToColors_Min,
-                            CellTypePropertyLimits::RestrictToColors_Max);
+                            Const::RestrictToColors_Min,
+                            Const::RestrictToColors_Max);
                         break;
                     case AttackerMode_Creature:
                         break;
@@ -330,52 +330,52 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     case MuscleMode_AutoBending:
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_ManualBending:
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_AngleBending:
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_AutoCrawling:
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_ManualCrawling:
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         mutateNumber(
                             node.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio,
-                            CellTypePropertyLimits::MuscleModeRatio_Min,
-                            CellTypePropertyLimits::MuscleModeRatio_Max);
+                            Const::MuscleModeRatio_Min,
+                            Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_DirectMovement:
                         break;
@@ -390,41 +390,41 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     case ReconnectorMode_FreeCell:
                         mutateNumber(
                             node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors,
-                            CellTypePropertyLimits::RestrictToColors_Min,
-                            CellTypePropertyLimits::RestrictToColors_Max);
+                            Const::RestrictToColors_Min,
+                            Const::RestrictToColors_Max);
                         break;
                     case ReconnectorMode_Creature:
-                        mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells, CellTypePropertyLimits::CreatureNumCells_Min, 100);
-                        mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells, CellTypePropertyLimits::CreatureNumCells_Min, 100);
+                        mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells, Const::CreatureNumCells_Min, 100);
+                        mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells, Const::CreatureNumCells_Min, 100);
                         mutateNumber(
                             node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors,
-                            CellTypePropertyLimits::RestrictToColors_Min,
-                            CellTypePropertyLimits::RestrictToColors_Max);
+                            Const::RestrictToColors_Min,
+                            Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage, LineageRestriction_Count);
                         break;
                     }
                     break;
                 case CellType_Detonator:
                     mutateNumber(
-                        node.cellTypeData.detonator.countdown, CellTypePropertyLimits::DetonatorCountdown_Min, CellTypePropertyLimits::DetonatorCountdown_Max);
+                        node.cellTypeData.detonator.countdown, Const::DetonatorCountdown_Min, 100);
                     break;
                 case CellType_Digestor:
                     mutateNumber(
                         node.cellTypeData.digestor.rawEnergyConductivity,
-                        CellTypePropertyLimits::DigestorRawEnergyConductivity_Min,
-                        CellTypePropertyLimits::DigestorRawEnergyConductivity_Max);
+                        Const::DigestorRawEnergyConductivity_Min,
+                        Const::DigestorRawEnergyConductivity_Max);
                     break;
                 case CellType_Memory:
                     mutateNumber(
                         node.cellTypeData.memory.channelBitMask,
-                        CellTypePropertyLimits::MemoryChannelBitMask_Min,
-                        CellTypePropertyLimits::MemoryChannelBitMask_Max);
+                        Const::MemoryChannelBitMask_Min,
+                        Const::MemoryChannelBitMask_Max);
                     switch (node.cellTypeData.memory.mode) {
                     case MemoryMode_SignalDelay:
                         mutateNumber(
                             node.cellTypeData.memory.modeData.signalDelay.delay,
-                            CellTypePropertyLimits::SignalDelay_Min,
-                            CellTypePropertyLimits::SignalDelay_Max);
+                            Const::SignalDelay_Min,
+                            Const::SignalDelay_Max);
                         break;
                     case MemoryMode_SignalRecorder:
                         mutateBoolField(node.cellTypeData.memory.modeData.signalRecorder.readOnly);
@@ -439,8 +439,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     case MemoryMode_SignalIntegrator:
                         mutateNumber(
                             node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight,
-                            CellTypePropertyLimits::SignalIntegratorNewSignalWeight_Min,
-                            CellTypePropertyLimits::SignalIntegratorNewSignalWeight_Max);
+                            Const::SignalIntegratorNewSignalWeight_Min,
+                            Const::SignalIntegratorNewSignalWeight_Max);
                         break;
                     }
                     break;
@@ -449,15 +449,15 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     case CommunicatorMode_Sender:
                         mutateNumber(
                             node.cellTypeData.communicator.modeData.sender.range,
-                            CellTypePropertyLimits::CommunicatorRange_Min,
-                            CellTypePropertyLimits::CommunicatorRange_Max);
-                        mutateNumber(node.cellTypeData.communicator.modeData.sender.maxTimesSent, CellTypePropertyLimits::CommunicatorMaxTimesSent_Min, 10);
+                            Const::CommunicatorRange_Min,
+                            Const::CommunicatorRange_Max);
+                        mutateNumber(node.cellTypeData.communicator.modeData.sender.maxTimesSent, Const::CommunicatorMaxTimesSent_Min, 10);
                         break;
                     case CommunicatorMode_Receiver:
                         mutateNumber(
                             node.cellTypeData.communicator.modeData.receiver.restrictToColors,
-                            CellTypePropertyLimits::RestrictToColors_Min,
-                            CellTypePropertyLimits::RestrictToColors_Max);
+                            Const::RestrictToColors_Min,
+                            Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.communicator.modeData.receiver.restrictToLineage, LineageRestriction_Count);
                         break;
                     }

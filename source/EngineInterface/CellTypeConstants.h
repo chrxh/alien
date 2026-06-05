@@ -168,6 +168,13 @@ namespace Channels
 {
     auto constexpr GeneratorOutput = 0;
 }
+namespace Const
+{
+    auto constexpr GeneratorValue_Min = -2.0f;
+    auto constexpr GeneratorValue_Max = 2.0f;
+    auto constexpr GeneratorTimeOffset_Min = 0;
+    auto constexpr GeneratorPeriod_Min = 1;
+}
 
 using GeneratorMode = int;
 enum GeneratorMode_
@@ -185,7 +192,7 @@ namespace Const
 //*******************
 //* Depot constants *
 //*******************
-namespace CellTypePropertyLimits
+namespace Const
 {
     auto constexpr DepotStorageLimit_Min = 0.0f;
     auto constexpr DepotStorageLimit_Max = 1000.0f;
@@ -205,6 +212,18 @@ namespace Channels
     auto constexpr SensorTelemetryCellEnergy = 1;
     auto constexpr SensorTelemetryCellVelAngle = 2;
     auto constexpr SensorTelemetryCellVelStrength = 3;
+}
+namespace Const
+{
+    auto constexpr SensorRange_Min = 0;
+    auto constexpr SensorRange_Max = 512;
+    auto constexpr DetectEnergyMinDensity_Min = 0.0f;
+    auto constexpr DetectEnergyMinDensity_Max = 1.0f;
+    auto constexpr DetectFreeCellMinDensity_Min = 0.0f;
+    auto constexpr DetectFreeCellMinDensity_Max = 1.0f;
+    auto constexpr RestrictToColors_Min = 0;
+    auto constexpr RestrictToColors_Max = (1 << MAX_COLORS) - 1;
+    auto constexpr CreatureNumCells_Min = 0;
 }
 
 using LineageRestriction = int;
@@ -232,33 +251,17 @@ namespace Const
     std::vector<std::string> const SensorModeStrings = {"Telemetry", "Detect energy", "Detect solid", "Detect free cell", "Detect creature"};
 }
 
-namespace CellTypePropertyLimits
-{
-    auto constexpr SensorRange_Min = 0;
-    auto constexpr SensorRange_Max = 512;
-    auto constexpr DetectEnergyMinDensity_Min = 0.0f;
-    auto constexpr DetectEnergyMinDensity_Max = 1.0f;
-    auto constexpr DetectFreeCellMinDensity_Min = 0.0f;
-    auto constexpr DetectFreeCellMinDensity_Max = 1.0f;
-    auto constexpr RestrictToColors_Min = 0;
-    auto constexpr RestrictToColors_Max = (1 << MAX_COLORS) - 1;
-    auto constexpr CreatureNumCells_Min = 0;
-}
-
-namespace CellTypePropertyLimits
-{
-    auto constexpr GeneratorValue_Min = -2.0f;
-    auto constexpr GeneratorValue_Max = 2.0f;
-    auto constexpr GeneratorTimeOffset_Min = 0;
-    auto constexpr GeneratorPeriod_Min = 1;
-}
-
 //********************
 //* Muscle constants *
 //********************
 namespace Channels
 {
     auto constexpr MuscleAngle = 1;
+}
+namespace Const
+{
+    auto constexpr MuscleModeRatio_Min = 0.0f;
+    auto constexpr MuscleModeRatio_Max = 1.0f;
 }
 
 using MuscleMode = int;
@@ -277,12 +280,6 @@ namespace Const
 {
     std::vector<std::string> const MuscleModeStrings =
         {"Auto bending", "Manual bending", "Angle bending", "Auto crawling", "Manual crawling", "Direct movement"};
-}
-
-namespace CellTypePropertyLimits
-{
-    auto constexpr MuscleModeRatio_Min = 0.0f;
-    auto constexpr MuscleModeRatio_Max = 1.0f;
 }
 
 //**********************
@@ -347,10 +344,9 @@ namespace Const
 //***********************
 //* Detonator constants *
 //***********************
-namespace CellTypePropertyLimits
+namespace Const
 {
     auto constexpr DetonatorCountdown_Min = 1;
-    auto constexpr DetonatorCountdown_Max = 100;
 }
 
 using DetonatorState = int;
@@ -364,6 +360,11 @@ enum DetonatorState_
 //*************************
 //* Reconnector constants *
 //*************************
+namespace Channels
+{
+    auto constexpr ReconnectorSuccess = 2;
+}
+
 using ReconnectorMode = int;
 enum ReconnectorMode_
 {
@@ -378,15 +379,14 @@ namespace Const
     std::vector<std::string> const ReconnectorModeStrings = {"Solid", "Free cell", "Creature"};
 }
 
-namespace Channels
-{
-    auto constexpr ReconnectorSuccess = 2;
-}
-
 //********************
 //* Memory constants *
 //********************
-namespace CellTypePropertyLimits
+namespace Channels
+{
+    auto constexpr MemoryReadWriteAction = 0;
+}
+namespace Const
 {
     auto constexpr DigestorRawEnergyConductivity_Min = 0.0f;
     auto constexpr DigestorRawEnergyConductivity_Max = 1.0f;
@@ -396,11 +396,6 @@ namespace CellTypePropertyLimits
     auto constexpr SignalDelay_Max = MAX_CELL_MEMORY_ENTRIES;
     auto constexpr SignalIntegratorNewSignalWeight_Min = 0.0f;
     auto constexpr SignalIntegratorNewSignalWeight_Max = 1.0f;
-}
-
-namespace Channels
-{
-    auto constexpr MemoryReadWriteAction = 0;
 }
 
 using MemoryMode = int;
@@ -433,6 +428,12 @@ namespace Channels
 {
     auto constexpr CommunicatorAngle = 1;
 }
+namespace Const
+{
+    auto constexpr CommunicatorRange_Min = 0;
+    auto constexpr CommunicatorRange_Max = 20;
+    auto constexpr CommunicatorMaxTimesSent_Min = 0;
+}
 
 using CommunicatorMode = int;
 enum CommunicatorMode_
@@ -445,11 +446,4 @@ enum CommunicatorMode_
 namespace Const
 {
     std::vector<std::string> const CommunicatorModeStrings = {"Send", "Receive"};
-}
-
-namespace CellTypePropertyLimits
-{
-    auto constexpr CommunicatorRange_Min = 0;
-    auto constexpr CommunicatorRange_Max = 20;
-    auto constexpr CommunicatorMaxTimesSent_Min = 0;
 }

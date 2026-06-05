@@ -25,7 +25,6 @@ struct VoidGenome
 
 struct DepotGenome
 {
-
     float storageLimit;
     float initialStoredUsableEnergy;
 };
@@ -35,7 +34,6 @@ struct TelemetryGenome
 
 struct DetectEnergyGenome
 {
-
     float minDensity;
 };
 
@@ -44,14 +42,12 @@ struct DetectSolidGenome
 
 struct DetectFreeCellGenome
 {
-
     float minDensity;
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct DetectCreatureGenome
 {
-
     uint32_t minNumCells;       // 0 = no restriction
     uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
@@ -69,7 +65,6 @@ union SensorModeGenome
 
 struct SensorGenome
 {
-
     bool autoTrigger;
     bool tagForAttackers;
     SensorMode mode;
@@ -93,13 +88,11 @@ struct ConstructorGenome
 
 struct SquareSignalGenome
 {
-
     int period;
 };
 
 struct SawtoothSignalGenome
 {
-
     int period;
 };
 
@@ -111,7 +104,6 @@ union GeneratorModeGenome
 
 struct GeneratorGenome
 {
-
     bool additive;
     float minValue;
     float maxValue;
@@ -122,7 +114,6 @@ struct GeneratorGenome
 
 struct AttackFreeCellGenome
 {
-
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
@@ -148,35 +139,30 @@ struct InjectorGenome
 
 struct AutoBendingGenome
 {
-
     float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct ManualBendingGenome
 {
-
     float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct AngleBendingGenome
 {
-
     float maxAngleDeviation;         // Between 0 and 1
     float attractionRepulsionRatio;  // Between 0 and 1
 };
 
 struct AutoCrawlingGenome
 {
-
     float maxDistanceDeviation;  // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct ManualCrawlingGenome
 {
-
     float maxDistanceDeviation;  // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 };
@@ -210,13 +196,11 @@ struct ReconnectSolidGenome
 
 struct ReconnectFreeCellGenome
 {
-
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
 };
 
 struct ReconnectCreatureGenome
 {
-
     uint32_t minNumCells;       // 0 = no restriction
     uint32_t maxNumCells;       // 0 = no restriction
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
@@ -238,19 +222,16 @@ struct ReconnectorGenome
 
 struct DetonatorGenome
 {
-
     int32_t countdown;
 };
 
 struct DigestorGenome
 {
-
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
 struct SignalDelayGenome
 {
-
     uint8_t delay;
 };
 
@@ -267,7 +248,6 @@ struct SignalStorageGenome
 
 struct SignalIntegratorGenome
 {
-
     float newSignalWeight;  // Between 0 and 1
 };
 
@@ -286,7 +266,6 @@ struct SignalEntryGenome
 
 struct MemoryGenome
 {
-
     MemoryMode mode;
     MemoryModeDataGenome modeData;
 
@@ -297,14 +276,12 @@ struct MemoryGenome
 
 struct SenderGenome
 {
-
     uint8_t range;
     int maxTimesSent;
 };
 
 struct ReceiverGenome
 {
-
     uint16_t restrictToColors;  // bitset: bit i set = color i allowed, 0x3ff = all colors
     LineageRestriction restrictToLineage;
 };
