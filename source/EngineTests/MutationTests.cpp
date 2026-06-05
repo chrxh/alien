@@ -516,7 +516,7 @@ TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
     EXPECT_TRUE(compareAllExceptConnectionWeights(genome, actualGenome));
 }
 
-TEST_F(MutationTests, cellTypePropertiesMutation1_changesScalarBoolAndEnumProperties)
+TEST_F(MutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumProperties)
 {
     auto genome = createTestGenome();
     genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
@@ -565,10 +565,60 @@ TEST_F(MutationTests, cellTypePropertiesMutation1_changesScalarBoolAndEnumProper
         std::get<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(actualCommunicator->_cellType)._mode)._restrictToLineage);
 }
 
-TEST_F(MutationTests, cellTypePropertiesMutation1_doesNotSwitchModes)
+TEST_F(MutationTests, cellTypePropertiesMutation_changesBitsetPropertiesBitwise)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).probability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+
+    auto originalSensor = findNode(genome, [](NodeDesc const& node) {
+        return std::holds_alternative<SensorGenomeDesc>(node._cellType)
+            && std::holds_alternative<DetectFreeCellGenomeDesc>(std::get<SensorGenomeDesc>(node._cellType)._mode);
+    });
+    auto actualSensor = findNode(actualGenome, [](NodeDesc const& node) {
+        return std::holds_alternative<SensorGenomeDesc>(node._cellType)
+            && std::holds_alternative<DetectFreeCellGenomeDesc>(std::get<SensorGenomeDesc>(node._cellType)._mode);
+    });
+    ASSERT_TRUE(originalSensor);
+    ASSERT_TRUE(actualSensor);
+    EXPECT_EQ(
+        (std::get<DetectFreeCellGenomeDesc>(std::get<SensorGenomeDesc>(originalSensor->_cellType)._mode)._restrictToColors ^ Const::RestrictToColors_Max),
+        std::get<DetectFreeCellGenomeDesc>(std::get<SensorGenomeDesc>(actualSensor->_cellType)._mode)._restrictToColors);
+
+    auto originalMemory = findNode(genome, [](NodeDesc const& node) { return std::holds_alternative<MemoryGenomeDesc>(node._cellType); });
+    auto actualMemory = findNode(actualGenome, [](NodeDesc const& node) { return std::holds_alternative<MemoryGenomeDesc>(node._cellType); });
+    ASSERT_TRUE(originalMemory);
+    ASSERT_TRUE(actualMemory);
+    EXPECT_EQ(
+        static_cast<uint16_t>(std::get<MemoryGenomeDesc>(originalMemory->_cellType)._channelBitMask ^ Const::MemoryChannelBitMask_Max),
+        std::get<MemoryGenomeDesc>(actualMemory->_cellType)._channelBitMask);
+
+    auto originalCommunicator = findNode(genome, [](NodeDesc const& node) {
+        return std::holds_alternative<CommunicatorGenomeDesc>(node._cellType)
+            && std::holds_alternative<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(node._cellType)._mode);
+    });
+    auto actualCommunicator = findNode(actualGenome, [](NodeDesc const& node) {
+        return std::holds_alternative<CommunicatorGenomeDesc>(node._cellType)
+            && std::holds_alternative<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(node._cellType)._mode);
+    });
+    ASSERT_TRUE(originalCommunicator);
+    ASSERT_TRUE(actualCommunicator);
+    EXPECT_EQ(
+        (std::get<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(originalCommunicator->_cellType)._mode)._restrictToColors ^ Const::RestrictToColors_Max),
+        std::get<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(actualCommunicator->_cellType)._mode)._restrictToColors);
+}
+
+TEST_F(MutationTests, cellTypePropertiesMutation_doesNotSwitchModes)
 {
     auto genome = createTestGenome();
     genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutation2 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

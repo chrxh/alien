@@ -197,11 +197,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
             continue;
         }
 
-        auto nodeOrdinal = 0;
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
             auto& gene = genome->genes[geneIndex];
-            for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex, ++nodeOrdinal) {
-                if (nodeOrdinal % blockDim.x != laneId || data.primaryNumberGen.random() >= rate.eventProbability) {
+            for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+                if (data.primaryNumberGen.random() >= rate.eventProbability) {
                     continue;
                 }
                 auto& node = gene.nodes[nodeIndex];
@@ -224,15 +223,32 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 };
 
                 auto mutateBoolField = [&](bool& value) {
-                    if (rate.probability > 0 && data.primaryNumberGen.random() < rate.probability) {
+                    if (data.primaryNumberGen.random() < rate.probability) {
                         value = !value;
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
+                    }
+                };
+
+                auto mutateBitset = [&](auto& value, auto mask) {
+                    using ValueType = std::decay_t<decltype(value)>;
+                    using UnsignedType = std::make_unsigned_t<ValueType>;
+                    auto newValue = static_cast<UnsignedType>(value);
+                    auto const maskValue = static_cast<UnsignedType>(mask);
+                    for (int bitIndex = 0; bitIndex < sizeof(UnsignedType) * 8; ++bitIndex) {
+                        auto const bit = UnsignedType{1} << bitIndex;
+                        if ((maskValue & bit) != 0 && data.primaryNumberGen.random() < rate.probability) {
+                            newValue ^= bit;
+                        }
+                    }
+                    if (newValue != static_cast<UnsignedType>(value)) {
+                        value = static_cast<ValueType>(newValue);
                         atomicAdd_block(&accumulatedMutations, 1.0f);
                     }
                 };
 
                 auto mutateEnumField = [&](auto& value, int count) {
                     using ValueType = std::decay_t<decltype(value)>;
-                    if (rate.probability > 0 && count > 1 && data.primaryNumberGen.random() < rate.probability) {
+                    if (count > 1 && data.primaryNumberGen.random() < rate.probability) {
                         auto currentValue = static_cast<int>(value);
                         auto newValue = data.primaryNumberGen.random(count - 2);
                         if (newValue >= currentValue) {
@@ -275,17 +291,15 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                             node.cellTypeData.sensor.modeData.detectFreeCell.minDensity,
                             Const::DetectFreeCellMinDensity_Min,
                             Const::DetectFreeCellMinDensity_Max);
-                        mutateNumber(
+                        mutateBitset(
                             node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors,
-                            Const::RestrictToColors_Min,
                             Const::RestrictToColors_Max);
                         break;
                     case SensorMode_DetectCreature:
                         mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.minNumCells, Const::CreatureNumCells_Min, 100);
                         mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.maxNumCells, Const::CreatureNumCells_Min, 100);
-                        mutateNumber(
+                        mutateBitset(
                             node.cellTypeData.sensor.modeData.detectCreature.restrictToColors,
-                            Const::RestrictToColors_Min,
                             Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage, LineageRestriction_Count);
                         break;
@@ -313,9 +327,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 case CellType_Attacker:
                     switch (node.cellTypeData.attacker.mode) {
                     case AttackerMode_FreeCell:
-                        mutateNumber(
+                        mutateBitset(
                             node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors,
-                            Const::RestrictToColors_Min,
                             Const::RestrictToColors_Max);
                         break;
                     case AttackerMode_Creature:
@@ -388,17 +401,15 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     case ReconnectorMode_Solid:
                         break;
                     case ReconnectorMode_FreeCell:
-                        mutateNumber(
+                        mutateBitset(
                             node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors,
-                            Const::RestrictToColors_Min,
                             Const::RestrictToColors_Max);
                         break;
                     case ReconnectorMode_Creature:
                         mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells, Const::CreatureNumCells_Min, 100);
                         mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells, Const::CreatureNumCells_Min, 100);
-                        mutateNumber(
+                        mutateBitset(
                             node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors,
-                            Const::RestrictToColors_Min,
                             Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage, LineageRestriction_Count);
                         break;
@@ -415,9 +426,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         Const::DigestorRawEnergyConductivity_Max);
                     break;
                 case CellType_Memory:
-                    mutateNumber(
+                    mutateBitset(
                         node.cellTypeData.memory.channelBitMask,
-                        Const::MemoryChannelBitMask_Min,
                         Const::MemoryChannelBitMask_Max);
                     switch (node.cellTypeData.memory.mode) {
                     case MemoryMode_SignalDelay:
@@ -454,9 +464,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         mutateNumber(node.cellTypeData.communicator.modeData.sender.maxTimesSent, Const::CommunicatorMaxTimesSent_Min, 10);
                         break;
                     case CommunicatorMode_Receiver:
-                        mutateNumber(
+                        mutateBitset(
                             node.cellTypeData.communicator.modeData.receiver.restrictToColors,
-                            Const::RestrictToColors_Min,
                             Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.communicator.modeData.receiver.restrictToLineage, LineageRestriction_Count);
                         break;
