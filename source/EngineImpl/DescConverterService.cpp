@@ -881,9 +881,12 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._mutationRates._connectionMutation1._sigma = genomeTO.mutationRates.connectionMutation1.sigma;
     result._mutationRates._connectionMutation2._eventProbability = genomeTO.mutationRates.connectionMutation2.eventProbability;
     result._mutationRates._connectionMutation2._sigma = genomeTO.mutationRates.connectionMutation2.sigma;
-    result._mutationRates._cellTypePropertiesMutation._eventProbability = genomeTO.mutationRates.cellTypePropertiesMutation.eventProbability;
-    result._mutationRates._cellTypePropertiesMutation._sigma = genomeTO.mutationRates.cellTypePropertiesMutation.sigma;
-    result._mutationRates._cellTypePropertiesMutation._probability = genomeTO.mutationRates.cellTypePropertiesMutation.probability;
+    result._mutationRates._cellTypePropertiesMutation1._eventProbability = genomeTO.mutationRates.cellTypePropertiesMutation1.eventProbability;
+    result._mutationRates._cellTypePropertiesMutation1._sigma = genomeTO.mutationRates.cellTypePropertiesMutation1.sigma;
+    result._mutationRates._cellTypePropertiesMutation1._probability = genomeTO.mutationRates.cellTypePropertiesMutation1.probability;
+    result._mutationRates._cellTypePropertiesMutation2._eventProbability = genomeTO.mutationRates.cellTypePropertiesMutation2.eventProbability;
+    result._mutationRates._cellTypePropertiesMutation2._sigma = genomeTO.mutationRates.cellTypePropertiesMutation2.sigma;
+    result._mutationRates._cellTypePropertiesMutation2._probability = genomeTO.mutationRates.cellTypePropertiesMutation2.probability;
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -968,12 +971,18 @@ void DescConverterService::convertGenomeToTO(
         genome._mutationRates._neuronMutation2._weightSigma,
         genome._mutationRates._neuronMutation2._biasSigma,
         genome._mutationRates._neuronMutation2._activationFunctionProbability};
-    genomeTO.mutationRates.connectionMutation1 = {genome._mutationRates._connectionMutation1._eventProbability, genome._mutationRates._connectionMutation1._sigma};
-    genomeTO.mutationRates.connectionMutation2 = {genome._mutationRates._connectionMutation2._eventProbability, genome._mutationRates._connectionMutation2._sigma};
-    genomeTO.mutationRates.cellTypePropertiesMutation = {
-        genome._mutationRates._cellTypePropertiesMutation._eventProbability,
-        genome._mutationRates._cellTypePropertiesMutation._sigma,
-        genome._mutationRates._cellTypePropertiesMutation._probability};
+    genomeTO.mutationRates.connectionMutation1 = {
+        genome._mutationRates._connectionMutation1._eventProbability, genome._mutationRates._connectionMutation1._sigma};
+    genomeTO.mutationRates.connectionMutation2 = {
+        genome._mutationRates._connectionMutation2._eventProbability, genome._mutationRates._connectionMutation2._sigma};
+    genomeTO.mutationRates.cellTypePropertiesMutation1 = {
+        genome._mutationRates._cellTypePropertiesMutation1._eventProbability,
+        genome._mutationRates._cellTypePropertiesMutation1._sigma,
+        genome._mutationRates._cellTypePropertiesMutation1._probability};
+    genomeTO.mutationRates.cellTypePropertiesMutation2 = {
+        genome._mutationRates._cellTypePropertiesMutation2._eventProbability,
+        genome._mutationRates._cellTypePropertiesMutation2._sigma,
+        genome._mutationRates._cellTypePropertiesMutation2._probability};
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;

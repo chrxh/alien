@@ -135,7 +135,7 @@ namespace cereal
                 auto deferredOpIndex = 0;
                 auto deferredOpSize = _deferredDescOps.size();
                 for (int savedId : savedIds) {
-                    // deferredOpIndex is an optimization to avoid 
+                    // deferredOpIndex is an optimization to avoid
                     // `std::find_if(_deferredDescOps.begin(), _deferredDescOps.end(), [id](const auto& op) { return op.id == id; });`
                     // for each savedId (savedIds and _deferredDescOps are sorted)
                     while (deferredOpIndex < deferredOpSize && _deferredDescOps.at(deferredOpIndex).id < savedId) {
@@ -419,7 +419,8 @@ namespace
     auto constexpr Id_MutationRates_NeuronMutation2 = 2;
     auto constexpr Id_MutationRates_ConnectionMutation1 = 3;
     auto constexpr Id_MutationRates_ConnectionMutation2 = 4;
-    auto constexpr Id_MutationRates_CellTypePropertiesMutation = 5;
+    auto constexpr Id_MutationRates_CellTypePropertiesMutation1 = 5;
+    auto constexpr Id_MutationRates_CellTypePropertiesMutation2 = 6;
 
     auto constexpr Id_Genome_Genes = 6;
     auto constexpr Id_Genome_MutationRates = 7;
@@ -634,8 +635,7 @@ namespace cereal
         AngleBendingGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_MuscleModeGenome_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        scope.addMember(
-            Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
+        scope.addMember(Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
     }
     SPLIT_SERIALIZATION(AngleBendingGenomeDesc)
 
@@ -868,8 +868,7 @@ namespace cereal
         scope.addMember(Id_NeuronMutation_EventProbability, data._eventProbability, defaultObject._eventProbability);
         scope.addMember(Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
         scope.addMember(Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
-        scope.addMember(
-            Id_NeuronMutation_ActivationFunctionProbability, data._activationFunctionProbability, defaultObject._activationFunctionProbability);
+        scope.addMember(Id_NeuronMutation_ActivationFunctionProbability, data._activationFunctionProbability, defaultObject._activationFunctionProbability);
     }
     SPLIT_SERIALIZATION(NeuronMutationDesc)
 
@@ -903,7 +902,8 @@ namespace cereal
         scope.addDesc(Id_MutationRates_NeuronMutation2, data._neuronMutation2);
         scope.addDesc(Id_MutationRates_ConnectionMutation1, data._connectionMutation1);
         scope.addDesc(Id_MutationRates_ConnectionMutation2, data._connectionMutation2);
-        scope.addDesc(Id_MutationRates_CellTypePropertiesMutation, data._cellTypePropertiesMutation);
+        scope.addDesc(Id_MutationRates_CellTypePropertiesMutation1, data._cellTypePropertiesMutation1);
+        scope.addDesc(Id_MutationRates_CellTypePropertiesMutation2, data._cellTypePropertiesMutation2);
     }
     SPLIT_SERIALIZATION(MutationRatesDesc)
 
@@ -1041,7 +1041,7 @@ namespace
     auto constexpr Id_Generator_TimeOffset = 3;
     auto constexpr Id_Generator_MinValue = 5;
     auto constexpr Id_Generator_MaxValue = 6;
-    
+
     auto constexpr Id_GeneratorMode_SquareSignal_Period = 1;
     auto constexpr Id_GeneratorMode_SawtoothSignal_Period = 1;
 

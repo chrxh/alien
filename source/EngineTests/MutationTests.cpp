@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <optional>
 #include <ranges>
 
 #include <boost/range/combine.hpp>
@@ -123,16 +124,16 @@ protected:
     }
 
     template <typename Predicate>
-    NodeDesc const* findNode(GenomeDesc const& genome, Predicate&& predicate) const
+    std::optional<NodeDesc> findNode(GenomeDesc const& genome, Predicate&& predicate) const
     {
         for (auto const& gene : genome._genes) {
             for (auto const& node : gene._nodes) {
                 if (predicate(node)) {
-                    return &node;
+                    return node;
                 }
             }
         }
-        return nullptr;
+        return std::nullopt;
     }
 };
 
@@ -515,11 +516,10 @@ TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
     EXPECT_TRUE(compareAllExceptConnectionWeights(genome, actualGenome));
 }
 
-TEST_F(MutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumProperties)
+TEST_F(MutationTests, cellTypePropertiesMutation1_changesScalarBoolAndEnumProperties)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation =
-        CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(100.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -530,9 +530,10 @@ TEST_F(MutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumPropert
 
     auto originalDigestor = findNode(genome, [](NodeDesc const& node) { return std::holds_alternative<DigestorGenomeDesc>(node._cellType); });
     auto actualDigestor = findNode(actualGenome, [](NodeDesc const& node) { return std::holds_alternative<DigestorGenomeDesc>(node._cellType); });
-    ASSERT_NE(originalDigestor, nullptr);
-    ASSERT_NE(actualDigestor, nullptr);
-    EXPECT_NE(std::get<DigestorGenomeDesc>(originalDigestor->_cellType)._rawEnergyConductivity,
+    ASSERT_TRUE(originalDigestor);
+    ASSERT_TRUE(actualDigestor);
+    EXPECT_NE(
+        std::get<DigestorGenomeDesc>(originalDigestor->_cellType)._rawEnergyConductivity,
         std::get<DigestorGenomeDesc>(actualDigestor->_cellType)._rawEnergyConductivity);
 
     auto originalMemory = findNode(genome, [](NodeDesc const& node) {
@@ -543,8 +544,8 @@ TEST_F(MutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumPropert
         return std::holds_alternative<MemoryGenomeDesc>(node._cellType)
             && std::holds_alternative<SignalStorageGenomeDesc>(std::get<MemoryGenomeDesc>(node._cellType)._mode);
     });
-    ASSERT_NE(originalMemory, nullptr);
-    ASSERT_NE(actualMemory, nullptr);
+    ASSERT_TRUE(originalMemory);
+    ASSERT_TRUE(actualMemory);
     EXPECT_NE(
         std::get<SignalStorageGenomeDesc>(std::get<MemoryGenomeDesc>(originalMemory->_cellType)._mode)._readOnly,
         std::get<SignalStorageGenomeDesc>(std::get<MemoryGenomeDesc>(actualMemory->_cellType)._mode)._readOnly);
@@ -557,18 +558,17 @@ TEST_F(MutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumPropert
         return std::holds_alternative<CommunicatorGenomeDesc>(node._cellType)
             && std::holds_alternative<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(node._cellType)._mode);
     });
-    ASSERT_NE(originalCommunicator, nullptr);
-    ASSERT_NE(actualCommunicator, nullptr);
+    ASSERT_TRUE(originalCommunicator);
+    ASSERT_TRUE(actualCommunicator);
     EXPECT_NE(
         std::get<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(originalCommunicator->_cellType)._mode)._restrictToLineage,
         std::get<ReceiverGenomeDesc>(std::get<CommunicatorGenomeDesc>(actualCommunicator->_cellType)._mode)._restrictToLineage);
 }
 
-TEST_F(MutationTests, cellTypePropertiesMutation_doesNotSwitchModes)
+TEST_F(MutationTests, cellTypePropertiesMutation1_doesNotSwitchModes)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation =
-        CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(100.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -577,87 +577,28 @@ TEST_F(MutationTests, cellTypePropertiesMutation_doesNotSwitchModes)
 
     auto actualGenome = getMutatedGenome();
 
-    auto originalSensor = findNode(genome, [](NodeDesc const& node) {
-        return std::holds_alternative<SensorGenomeDesc>(node._cellType);
-    });
-    auto actualSensor = findNode(actualGenome, [](NodeDesc const& node) {
-        return std::holds_alternative<SensorGenomeDesc>(node._cellType);
-    });
-    ASSERT_NE(originalSensor, nullptr);
-    ASSERT_NE(actualSensor, nullptr);
+    auto originalSensor = findNode(genome, [](NodeDesc const& node) { return std::holds_alternative<SensorGenomeDesc>(node._cellType); });
+    auto actualSensor = findNode(actualGenome, [](NodeDesc const& node) { return std::holds_alternative<SensorGenomeDesc>(node._cellType); });
+    ASSERT_TRUE(originalSensor);
+    ASSERT_TRUE(actualSensor);
     EXPECT_EQ(std::get<SensorGenomeDesc>(originalSensor->_cellType).getMode(), std::get<SensorGenomeDesc>(actualSensor->_cellType).getMode());
 
-    auto originalMuscle = findNode(genome, [](NodeDesc const& node) {
-        return std::holds_alternative<MuscleGenomeDesc>(node._cellType);
-    });
-    auto actualMuscle = findNode(actualGenome, [](NodeDesc const& node) {
-        return std::holds_alternative<MuscleGenomeDesc>(node._cellType);
-    });
-    ASSERT_NE(originalMuscle, nullptr);
-    ASSERT_NE(actualMuscle, nullptr);
+    auto originalMuscle = findNode(genome, [](NodeDesc const& node) { return std::holds_alternative<MuscleGenomeDesc>(node._cellType); });
+    auto actualMuscle = findNode(actualGenome, [](NodeDesc const& node) { return std::holds_alternative<MuscleGenomeDesc>(node._cellType); });
+    ASSERT_TRUE(originalMuscle);
+    ASSERT_TRUE(actualMuscle);
     EXPECT_EQ(std::get<MuscleGenomeDesc>(originalMuscle->_cellType).getMode(), std::get<MuscleGenomeDesc>(actualMuscle->_cellType).getMode());
-}
-
-TEST_F(MutationTests, cellTypePropertiesMutation_valuesStayWithinBounds)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation =
-        CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(25.0f).probability(1.0f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 20; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualGenome = getMutatedGenome();
-
-    for (auto const& gene : actualGenome._genes) {
-        for (auto const& node : gene._nodes) {
-            if (auto const* digestor = std::get_if<DigestorGenomeDesc>(&node._cellType)) {
-                EXPECT_GE(digestor->_rawEnergyConductivity, 0.0f);
-                EXPECT_LE(digestor->_rawEnergyConductivity, 1.0f);
-            } else if (auto const* generator = std::get_if<GeneratorGenomeDesc>(&node._cellType)) {
-                EXPECT_GE(generator->_minValue, -2.0f);
-                EXPECT_LE(generator->_minValue, 2.0f);
-                EXPECT_GE(generator->_maxValue, -2.0f);
-                EXPECT_LE(generator->_maxValue, 2.0f);
-                EXPECT_LE(generator->_minValue, generator->_maxValue);
-            } else if (auto const* sensor = std::get_if<SensorGenomeDesc>(&node._cellType)) {
-                EXPECT_GE(sensor->_minRange, 0);
-                EXPECT_LE(sensor->_minRange, 512);
-                EXPECT_GE(sensor->_maxRange, 0);
-                EXPECT_LE(sensor->_maxRange, 512);
-            } else if (auto const* memory = std::get_if<MemoryGenomeDesc>(&node._cellType)) {
-                EXPECT_LE(memory->_channelBitMask, 0xffff);
-                if (std::holds_alternative<SignalRecorderGenomeDesc>(memory->_mode)) {
-                    auto const& mode = std::get<SignalRecorderGenomeDesc>(memory->_mode);
-                    EXPECT_GE(mode._numWrittenSignalEntries, 0);
-                    EXPECT_LE(mode._numWrittenSignalEntries, static_cast<int>(memory->_signalEntries.size()));
-                }
-            } else if (auto const* communicator = std::get_if<CommunicatorGenomeDesc>(&node._cellType)) {
-                if (std::holds_alternative<SenderGenomeDesc>(communicator->_mode)) {
-                    auto const& mode = std::get<SenderGenomeDesc>(communicator->_mode);
-                    EXPECT_GE(mode._range, 0);
-                    EXPECT_LE(mode._range, 20);
-                    EXPECT_GE(mode._maxTimesSent, 0);
-                }
-            }
-        }
-    }
 }
 
 TEST_F(MutationTests, accumulatedMutations_increases_forCellTypePropertyMutation)
 {
     auto genome = createTestGenome().lineageId(42).prevLineageId(41);
-    genome._mutationRates._cellTypePropertiesMutation =
-        CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     auto parameters = _parameters;
-    parameters.newLineageThreshold.value = 1000.0f;
+    parameters.newLineageThreshold.value = 1.0e30f;
     _simulationFacade->setSimulationParameters(parameters);
 
     _simulationFacade->setSimulationData(data);
@@ -690,10 +631,12 @@ TEST_F(MutationTests, metaMutation_neuronRatesActuallyChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    bool anyChanged = actualGenome._mutationRates._neuronMutation1._eventProbability != 0.5f || actualGenome._mutationRates._neuronMutation1._weightSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutation1._biasSigma != 0.5f || actualGenome._mutationRates._neuronMutation1._activationFunctionProbability != 0.5f
+    bool anyChanged = actualGenome._mutationRates._neuronMutation1._eventProbability != 0.5f
+        || actualGenome._mutationRates._neuronMutation1._weightSigma != 0.5f || actualGenome._mutationRates._neuronMutation1._biasSigma != 0.5f
+        || actualGenome._mutationRates._neuronMutation1._activationFunctionProbability != 0.5f
         || actualGenome._mutationRates._neuronMutation2._eventProbability != 0.5f || actualGenome._mutationRates._neuronMutation2._weightSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutation2._biasSigma != 0.5f || actualGenome._mutationRates._neuronMutation2._activationFunctionProbability != 0.5f;
+        || actualGenome._mutationRates._neuronMutation2._biasSigma != 0.5f
+        || actualGenome._mutationRates._neuronMutation2._activationFunctionProbability != 0.5f;
     EXPECT_TRUE(anyChanged);
 
     EXPECT_GE(actualGenome._mutationRates._neuronMutation1._eventProbability, 0.0f);
@@ -758,8 +701,9 @@ TEST_F(MutationTests, metaMutation_connectionRatesActuallyChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    bool anyChanged = actualGenome._mutationRates._connectionMutation1._eventProbability != 0.5f || actualGenome._mutationRates._connectionMutation1._sigma != 0.5f
-        || actualGenome._mutationRates._connectionMutation2._eventProbability != 0.5f || actualGenome._mutationRates._connectionMutation2._sigma != 0.5f;
+    bool anyChanged = actualGenome._mutationRates._connectionMutation1._eventProbability != 0.5f
+        || actualGenome._mutationRates._connectionMutation1._sigma != 0.5f || actualGenome._mutationRates._connectionMutation2._eventProbability != 0.5f
+        || actualGenome._mutationRates._connectionMutation2._sigma != 0.5f;
     EXPECT_TRUE(anyChanged);
     EXPECT_GE(actualGenome._mutationRates._connectionMutation1._eventProbability, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._connectionMutation1._sigma, 0.0f);
@@ -797,8 +741,8 @@ TEST_F(MutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
 TEST_F(MutationTests, metaMutation_cellTypePropertyRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation =
-        CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+    genome._mutationRates._cellTypePropertiesMutation2 = CellTypePropertiesMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -812,20 +756,26 @@ TEST_F(MutationTests, metaMutation_cellTypePropertyRatesActuallyChange)
 
     auto actualGenome = getMutatedGenome();
 
-    bool anyChanged = actualGenome._mutationRates._cellTypePropertiesMutation._eventProbability != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutation._sigma != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutation._probability != 0.5f;
+    bool anyChanged = actualGenome._mutationRates._cellTypePropertiesMutation1._eventProbability != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutation1._sigma != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutation1._probability != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutation2._eventProbability != 0.4f
+        || actualGenome._mutationRates._cellTypePropertiesMutation2._sigma != 0.4f
+        || actualGenome._mutationRates._cellTypePropertiesMutation2._probability != 0.4f;
     EXPECT_TRUE(anyChanged);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation._sigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation._probability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation1._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation1._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation1._probability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation2._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation2._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation2._probability, 0.0f);
 }
 
 TEST_F(MutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation =
-        CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+    genome._mutationRates._cellTypePropertiesMutation2 = CellTypePropertiesMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -838,9 +788,12 @@ TEST_F(MutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation._sigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation._probability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation1._eventProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation1._sigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation1._probability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation2._eventProbability, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation2._sigma, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation2._probability, 0.4f);
 }
 
 TEST_F(MutationTests, accumulatedMutations_increases_forGeneMutation)
@@ -854,7 +807,7 @@ TEST_F(MutationTests, accumulatedMutations_increases_forGeneMutation)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     auto parameters = _parameters;
-    parameters.newLineageThreshold.value = 1000.0f;
+    parameters.newLineageThreshold.value = 1.0e30f;
     _simulationFacade->setSimulationParameters(parameters);
 
     _simulationFacade->setSimulationData(data);

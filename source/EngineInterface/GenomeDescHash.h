@@ -553,9 +553,12 @@ struct std::hash<GenomeDesc>
         hash_combine(seed, desc._mutationRates._connectionMutation1._sigma);
         hash_combine(seed, desc._mutationRates._connectionMutation2._eventProbability);
         hash_combine(seed, desc._mutationRates._connectionMutation2._sigma);
-        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation._eventProbability);
-        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation._sigma);
-        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation._probability);
+        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation1._eventProbability);
+        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation1._sigma);
+        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation1._probability);
+        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation2._eventProbability);
+        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation2._sigma);
+        hash_combine(seed, desc._mutationRates._cellTypePropertiesMutation2._probability);
         return seed;
     }
 };

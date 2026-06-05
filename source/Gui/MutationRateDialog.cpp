@@ -17,7 +17,14 @@ namespace
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Event probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters()
+                    .name("Event probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
                 &mutation._eventProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
@@ -30,7 +37,14 @@ namespace
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Event probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters()
+                    .name("Event probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
                 &mutation._eventProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Weight sigma").id(id).min(0.0f).max(2.0f).logarithmic(true).format("%.2f").textWidth(rightColumnWidth),
@@ -52,15 +66,21 @@ namespace
         AlienGui::EndTreeNode();
     }
 
-    void processCellTypePropertiesMutationRate(
-        std::string const& name, std::string const& id, CellTypePropertiesMutationDesc& mutation, float rightColumnWidth)
+    void processCellTypePropertiesMutationRate(std::string const& name, std::string const& id, CellTypePropertiesMutationDesc& mutation, float rightColumnWidth)
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Event probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters()
+                    .name("Event probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
                 &mutation._eventProbability);
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(2.0f).logarithmic(true).format("%.2f").textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
                 &mutation._sigma);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
@@ -114,12 +134,18 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
     mutationRates._neuronMutation2._biasSigma = settings.getValue(settingsPrefix + "neuron mutation 2.bias sigma", mutationRates._neuronMutation2._biasSigma);
     mutationRates._neuronMutation2._activationFunctionProbability =
         settings.getValue(settingsPrefix + "neuron mutation 2.activation function probability", mutationRates._neuronMutation2._activationFunctionProbability);
-    mutationRates._cellTypePropertiesMutation._eventProbability =
-        settings.getValue(settingsPrefix + "cell type property mutation.probability", mutationRates._cellTypePropertiesMutation._eventProbability);
-    mutationRates._cellTypePropertiesMutation._sigma =
-        settings.getValue(settingsPrefix + "cell type property mutation.sigma", mutationRates._cellTypePropertiesMutation._sigma);
-    mutationRates._cellTypePropertiesMutation._probability =
-        settings.getValue(settingsPrefix + "cell type property mutation.value probability", mutationRates._cellTypePropertiesMutation._probability);
+    mutationRates._cellTypePropertiesMutation1._eventProbability =
+        settings.getValue(settingsPrefix + "cell type property mutation.probability", mutationRates._cellTypePropertiesMutation1._eventProbability);
+    mutationRates._cellTypePropertiesMutation1._sigma =
+        settings.getValue(settingsPrefix + "cell type property mutation.sigma", mutationRates._cellTypePropertiesMutation1._sigma);
+    mutationRates._cellTypePropertiesMutation1._probability =
+        settings.getValue(settingsPrefix + "cell type property mutation.value probability", mutationRates._cellTypePropertiesMutation1._probability);
+    mutationRates._cellTypePropertiesMutation2._eventProbability =
+        settings.getValue(settingsPrefix + "cell type property mutation 2.probability", mutationRates._cellTypePropertiesMutation2._eventProbability);
+    mutationRates._cellTypePropertiesMutation2._sigma =
+        settings.getValue(settingsPrefix + "cell type property mutation 2.sigma", mutationRates._cellTypePropertiesMutation2._sigma);
+    mutationRates._cellTypePropertiesMutation2._probability =
+        settings.getValue(settingsPrefix + "cell type property mutation 2.value probability", mutationRates._cellTypePropertiesMutation2._probability);
 }
 
 void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
@@ -140,9 +166,12 @@ void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, st
     settings.setValue(settingsPrefix + "neuron mutation 2.weight sigma", mutationRates._neuronMutation2._weightSigma);
     settings.setValue(settingsPrefix + "neuron mutation 2.bias sigma", mutationRates._neuronMutation2._biasSigma);
     settings.setValue(settingsPrefix + "neuron mutation 2.activation function probability", mutationRates._neuronMutation2._activationFunctionProbability);
-    settings.setValue(settingsPrefix + "cell type property mutation.probability", mutationRates._cellTypePropertiesMutation._eventProbability);
-    settings.setValue(settingsPrefix + "cell type property mutation.sigma", mutationRates._cellTypePropertiesMutation._sigma);
-    settings.setValue(settingsPrefix + "cell type property mutation.value probability", mutationRates._cellTypePropertiesMutation._probability);
+    settings.setValue(settingsPrefix + "cell type property mutation.probability", mutationRates._cellTypePropertiesMutation1._eventProbability);
+    settings.setValue(settingsPrefix + "cell type property mutation.sigma", mutationRates._cellTypePropertiesMutation1._sigma);
+    settings.setValue(settingsPrefix + "cell type property mutation.value probability", mutationRates._cellTypePropertiesMutation1._probability);
+    settings.setValue(settingsPrefix + "cell type property mutation 2.probability", mutationRates._cellTypePropertiesMutation2._eventProbability);
+    settings.setValue(settingsPrefix + "cell type property mutation 2.sigma", mutationRates._cellTypePropertiesMutation2._sigma);
+    settings.setValue(settingsPrefix + "cell type property mutation 2.value probability", mutationRates._cellTypePropertiesMutation2._probability);
 }
 
 void MutationRateDialog::processIntern()
@@ -174,7 +203,9 @@ void MutationRateDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type property mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processCellTypePropertiesMutationRate("Cell type property mutation", "CTPM", _mutation._cellTypePropertiesMutation, rightColumnWidth);
+                processCellTypePropertiesMutationRate("Cell type property mutation rate 1", "CTPM1", _mutation._cellTypePropertiesMutation1, rightColumnWidth);
+                table.next();
+                processCellTypePropertiesMutationRate("Cell type property mutation rate 2", "CTPM2", _mutation._cellTypePropertiesMutation2, rightColumnWidth);
                 table.next();
             });
         }

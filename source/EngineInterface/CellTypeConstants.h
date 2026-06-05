@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "EngineConstants.h"
+
 using namespace std::string_literals;
 
 //***********
@@ -116,7 +118,7 @@ enum SignalOrigin_
 //*************************
 namespace Channels
 {
-    auto constexpr ConstructorSuccess = 4;
+    auto constexpr ConstructorSuccess = 1;
 }
 
 using ConstructorShape = int;
@@ -183,6 +185,12 @@ namespace Const
 //*******************
 //* Depot constants *
 //*******************
+namespace CellTypePropertyLimits
+{
+    auto constexpr DepotStorageLimit_Min = 0.0f;
+    auto constexpr DepotStorageLimit_Max = 1000.0f;
+    auto constexpr DepotInitialStoredUsableEnergy_Min = 0.0f;
+}
 
 //********************
 //* Sensor constants *
@@ -224,6 +232,27 @@ namespace Const
     std::vector<std::string> const SensorModeStrings = {"Telemetry", "Detect energy", "Detect solid", "Detect free cell", "Detect creature"};
 }
 
+namespace CellTypePropertyLimits
+{
+    auto constexpr SensorRange_Min = 0;
+    auto constexpr SensorRange_Max = 512;
+    auto constexpr DetectEnergyMinDensity_Min = 0.0f;
+    auto constexpr DetectEnergyMinDensity_Max = 1.0e30f;
+    auto constexpr DetectFreeCellMinDensity_Min = 0.0f;
+    auto constexpr DetectFreeCellMinDensity_Max = 1.0f;
+    auto constexpr RestrictToColors_Min = 0;
+    auto constexpr RestrictToColors_Max = (1 << MAX_COLORS) - 1;
+    auto constexpr CreatureNumCells_Min = 0;
+}
+
+namespace CellTypePropertyLimits
+{
+    auto constexpr GeneratorValue_Min = -2.0f;
+    auto constexpr GeneratorValue_Max = 2.0f;
+    auto constexpr GeneratorTimeOffset_Min = 0;
+    auto constexpr GeneratorPeriod_Min = 1;
+}
+
 //********************
 //* Muscle constants *
 //********************
@@ -248,6 +277,12 @@ namespace Const
 {
     std::vector<std::string> const MuscleModeStrings =
         {"Auto bending", "Manual bending", "Angle bending", "Auto crawling", "Manual crawling", "Direct movement"};
+}
+
+namespace CellTypePropertyLimits
+{
+    auto constexpr MuscleModeRatio_Min = 0.0f;
+    auto constexpr MuscleModeRatio_Max = 1.0f;
 }
 
 //**********************
@@ -312,6 +347,12 @@ namespace Const
 //***********************
 //* Detonator constants *
 //***********************
+namespace CellTypePropertyLimits
+{
+    auto constexpr DetonatorCountdown_Min = 1;
+    auto constexpr DetonatorCountdown_Max = 100;
+}
+
 using DetonatorState = int;
 enum DetonatorState_
 {
@@ -345,6 +386,18 @@ namespace Channels
 //********************
 //* Memory constants *
 //********************
+namespace CellTypePropertyLimits
+{
+    auto constexpr DigestorRawEnergyConductivity_Min = 0.0f;
+    auto constexpr DigestorRawEnergyConductivity_Max = 1.0f;
+    auto constexpr MemoryChannelBitMask_Min = uint16_t{0};
+    auto constexpr MemoryChannelBitMask_Max = uint16_t{0xffff};
+    auto constexpr SignalDelay_Min = 0;
+    auto constexpr SignalDelay_Max = MAX_CELL_MEMORY_ENTRIES;
+    auto constexpr SignalIntegratorNewSignalWeight_Min = 0.0f;
+    auto constexpr SignalIntegratorNewSignalWeight_Max = 1.0f;
+}
+
 namespace Channels
 {
     auto constexpr MemoryReadWriteAction = 0;
@@ -392,4 +445,11 @@ enum CommunicatorMode_
 namespace Const
 {
     std::vector<std::string> const CommunicatorModeStrings = {"Send", "Receive"};
+}
+
+namespace CellTypePropertyLimits
+{
+    auto constexpr CommunicatorRange_Min = 0;
+    auto constexpr CommunicatorRange_Max = 20;
+    auto constexpr CommunicatorMaxTimesSent_Min = 0;
 }

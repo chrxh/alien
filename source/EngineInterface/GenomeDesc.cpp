@@ -59,7 +59,7 @@ std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
     if (_neuronMutation1._eventProbability > 0.0f || _neuronMutation2._eventProbability > 0.0f) {
         activeMutations.push_back("Neuron mutations");
     }
-    if (_cellTypePropertiesMutation._eventProbability > 0.0f) {
+    if (_cellTypePropertiesMutation1._eventProbability > 0.0f || _cellTypePropertiesMutation2._eventProbability > 0.0f) {
         activeMutations.push_back("Cell type property mutations");
     }
     return activeMutations;

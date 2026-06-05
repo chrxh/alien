@@ -49,10 +49,14 @@ namespace
                 genome->mutationRates.connectionMutation1.eventProbability, genome->mutationRates.connectionMutation1.sigma};
             genomeTO.mutationRates.connectionMutation2 = {
                 genome->mutationRates.connectionMutation2.eventProbability, genome->mutationRates.connectionMutation2.sigma};
-            genomeTO.mutationRates.cellTypePropertiesMutation = {
-                genome->mutationRates.cellTypePropertiesMutation.eventProbability,
-                genome->mutationRates.cellTypePropertiesMutation.sigma,
-                genome->mutationRates.cellTypePropertiesMutation.probability};
+            genomeTO.mutationRates.cellTypePropertiesMutation1 = {
+                genome->mutationRates.cellTypePropertiesMutation1.eventProbability,
+                genome->mutationRates.cellTypePropertiesMutation1.sigma,
+                genome->mutationRates.cellTypePropertiesMutation1.probability};
+            genomeTO.mutationRates.cellTypePropertiesMutation2 = {
+                genome->mutationRates.cellTypePropertiesMutation2.eventProbability,
+                genome->mutationRates.cellTypePropertiesMutation2.sigma,
+                genome->mutationRates.cellTypePropertiesMutation2.probability};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];

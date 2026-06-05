@@ -22,19 +22,24 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
     genome._mutationRates._neuronMutation1._eventProbability = std::clamp(genome._mutationRates._neuronMutation1._eventProbability, 0.0f, 1.0f);
     genome._mutationRates._neuronMutation1._weightSigma = std::max(genome._mutationRates._neuronMutation1._weightSigma, 0.0f);
     genome._mutationRates._neuronMutation1._biasSigma = std::max(genome._mutationRates._neuronMutation1._biasSigma, 0.0f);
-    genome._mutationRates._neuronMutation1._activationFunctionProbability = std::clamp(genome._mutationRates._neuronMutation1._activationFunctionProbability, 0.0f, 1.0f);
+    genome._mutationRates._neuronMutation1._activationFunctionProbability =
+        std::clamp(genome._mutationRates._neuronMutation1._activationFunctionProbability, 0.0f, 1.0f);
     genome._mutationRates._neuronMutation2._eventProbability = std::clamp(genome._mutationRates._neuronMutation2._eventProbability, 0.0f, 1.0f);
     genome._mutationRates._neuronMutation2._weightSigma = std::max(genome._mutationRates._neuronMutation2._weightSigma, 0.0f);
     genome._mutationRates._neuronMutation2._biasSigma = std::max(genome._mutationRates._neuronMutation2._biasSigma, 0.0f);
-    genome._mutationRates._neuronMutation2._activationFunctionProbability = std::clamp(genome._mutationRates._neuronMutation2._activationFunctionProbability, 0.0f, 1.0f);
+    genome._mutationRates._neuronMutation2._activationFunctionProbability =
+        std::clamp(genome._mutationRates._neuronMutation2._activationFunctionProbability, 0.0f, 1.0f);
     genome._mutationRates._connectionMutation1._eventProbability = std::clamp(genome._mutationRates._connectionMutation1._eventProbability, 0.0f, 1.0f);
     genome._mutationRates._connectionMutation1._sigma = std::max(genome._mutationRates._connectionMutation1._sigma, 0.0f);
     genome._mutationRates._connectionMutation2._eventProbability = std::clamp(genome._mutationRates._connectionMutation2._eventProbability, 0.0f, 1.0f);
     genome._mutationRates._connectionMutation2._sigma = std::max(genome._mutationRates._connectionMutation2._sigma, 0.0f);
-    genome._mutationRates._cellTypePropertiesMutation._eventProbability =
-        std::clamp(genome._mutationRates._cellTypePropertiesMutation._eventProbability, 0.0f, 1.0f);
-    genome._mutationRates._cellTypePropertiesMutation._sigma = std::max(genome._mutationRates._cellTypePropertiesMutation._sigma, 0.0f);
-    genome._mutationRates._cellTypePropertiesMutation._probability = std::clamp(genome._mutationRates._cellTypePropertiesMutation._probability, 0.0f, 1.0f);
+    auto validateCellTypePropertiesMutation = [](CellTypePropertiesMutationDesc& mutation) {
+        mutation._eventProbability = std::clamp(mutation._eventProbability, 0.0f, 1.0f);
+        mutation._sigma = std::clamp(mutation._sigma, 0.0f, 1.0f);
+        mutation._probability = std::clamp(mutation._probability, 0.0f, 1.0f);
+    };
+    validateCellTypePropertiesMutation(genome._mutationRates._cellTypePropertiesMutation1);
+    validateCellTypePropertiesMutation(genome._mutationRates._cellTypePropertiesMutation2);
 
     // Validate each gene
     for (auto& gene : genome._genes) {
@@ -65,53 +70,59 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
 
             if (nodeType == CellType_Depot) {
                 auto& depot = std::get<DepotGenomeDesc>(node._cellType);
-                depot._storageLimit = std::clamp(depot._storageLimit, 0.0f, 1000.0f);
-                depot._initialStoredUsableEnergy = std::clamp(depot._initialStoredUsableEnergy, 0.0f, depot._storageLimit);
+                depot._storageLimit =
+                    std::clamp(depot._storageLimit, CellTypePropertyLimits::DepotStorageLimit_Min, CellTypePropertyLimits::DepotStorageLimit_Max);
+                depot._initialStoredUsableEnergy =
+                    std::clamp(depot._initialStoredUsableEnergy, CellTypePropertyLimits::DepotInitialStoredUsableEnergy_Min, depot._storageLimit);
 
             } else if (nodeType == CellType_Sensor) {
                 auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
-                sensor._minRange = std::max(0, std::min(512, sensor._minRange));
-                sensor._maxRange = std::max(0, std::min(512, sensor._maxRange));
+                sensor._minRange = std::clamp(sensor._minRange, CellTypePropertyLimits::SensorRange_Min, CellTypePropertyLimits::SensorRange_Max);
+                sensor._maxRange = std::clamp(sensor._maxRange, CellTypePropertyLimits::SensorRange_Min, CellTypePropertyLimits::SensorRange_Max);
 
                 // Validate mode-specific data
                 auto mode = sensor.getMode();
                 if (mode == SensorMode_DetectEnergy) {
                     auto& detectEnergy = std::get<DetectEnergyGenomeDesc>(sensor._mode);
-                    detectEnergy._minDensity = std::max(detectEnergy._minDensity, 0.0f);
+                    detectEnergy._minDensity = std::clamp(
+                        detectEnergy._minDensity, CellTypePropertyLimits::DetectEnergyMinDensity_Min, CellTypePropertyLimits::DetectEnergyMinDensity_Max);
                 } else if (mode == SensorMode_DetectFreeCell) {
                     auto& detectFreeCell = std::get<DetectFreeCellGenomeDesc>(sensor._mode);
-                    detectFreeCell._minDensity = std::clamp(detectFreeCell._minDensity, 0.0f, 1.0f);
-                    detectFreeCell._restrictToColors &= (1 << MAX_COLORS) - 1;
+                    detectFreeCell._minDensity = std::clamp(
+                        detectFreeCell._minDensity, CellTypePropertyLimits::DetectFreeCellMinDensity_Min, CellTypePropertyLimits::DetectFreeCellMinDensity_Max);
+                    detectFreeCell._restrictToColors = std::clamp(
+                        detectFreeCell._restrictToColors, CellTypePropertyLimits::RestrictToColors_Min, CellTypePropertyLimits::RestrictToColors_Max);
                 } else if (mode == SensorMode_DetectCreature) {
                     auto& detectCreature = std::get<DetectCreatureGenomeDesc>(sensor._mode);
                     if (detectCreature._minNumCells.has_value()) {
                         auto& value = detectCreature._minNumCells.value();
-                        value = std::max(value, 0);
+                        value = std::clamp(value, CellTypePropertyLimits::CreatureNumCells_Min, 100);
                     }
                     if (detectCreature._maxNumCells.has_value()) {
                         auto& value = detectCreature._maxNumCells.value();
-                        value = std::max(value, 0);
+                        value = std::clamp(value, CellTypePropertyLimits::CreatureNumCells_Min, 100);
                     }
-                    detectCreature._restrictToColors &= (1 << MAX_COLORS) - 1;
+                    detectCreature._restrictToColors = std::clamp(
+                        detectCreature._restrictToColors, CellTypePropertyLimits::RestrictToColors_Min, CellTypePropertyLimits::RestrictToColors_Max);
                     detectCreature._restrictToLineage = std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellType_Generator) {
                 auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
-                generator._minValue = std::clamp(generator._minValue, -2.0f, 2.0f);
-                generator._maxValue = std::clamp(generator._maxValue, -2.0f, 2.0f);
+                generator._minValue = std::clamp(generator._minValue, CellTypePropertyLimits::GeneratorValue_Min, CellTypePropertyLimits::GeneratorValue_Max);
+                generator._maxValue = std::clamp(generator._maxValue, CellTypePropertyLimits::GeneratorValue_Min, CellTypePropertyLimits::GeneratorValue_Max);
                 if (generator._minValue > generator._maxValue) {
                     std::swap(generator._minValue, generator._maxValue);
                 }
-                generator._timeOffset = std::max(generator._timeOffset, 0);
+                generator._timeOffset = std::clamp(generator._timeOffset, CellTypePropertyLimits::GeneratorTimeOffset_Min, 100);
                 // Validate mode-specific data
                 auto generatorMode = generator.getMode();
                 if (generatorMode == GeneratorMode_SquareSignal) {
                     auto& squareSignal = std::get<SquareSignalGenomeDesc>(generator._mode);
-                    squareSignal._period = std::max(squareSignal._period, 1);
+                    squareSignal._period = std::clamp(squareSignal._period, CellTypePropertyLimits::GeneratorPeriod_Min, 100);
                 } else if (generatorMode == GeneratorMode_SawtoothSignal) {
                     auto& sawtoothSignal = std::get<SawtoothSignalGenomeDesc>(generator._mode);
-                    sawtoothSignal._period = std::max(sawtoothSignal._period, 1);
+                    sawtoothSignal._period = std::clamp(sawtoothSignal._period, CellTypePropertyLimits::GeneratorPeriod_Min, 100);
                 }
 
             } else if (nodeType == CellType_Attacker) {
@@ -119,7 +130,8 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 auto attackerMode = attacker.getMode();
                 if (attackerMode == AttackerMode_FreeCell) {
                     auto& freeCell = std::get<AttackFreeCellGenomeDesc>(attacker._mode);
-                    freeCell._restrictToColors &= (1 << MAX_COLORS) - 1;
+                    freeCell._restrictToColors =
+                        std::clamp(freeCell._restrictToColors, CellTypePropertyLimits::RestrictToColors_Min, CellTypePropertyLimits::RestrictToColors_Max);
                 }
 
             } else if (nodeType == CellType_Injector) {
@@ -132,28 +144,38 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 // Validate muscle mode based on its variant type
                 if (std::holds_alternative<AutoBendingGenomeDesc>(muscle._mode)) {
                     auto& mode = std::get<AutoBendingGenomeDesc>(muscle._mode);
-                    mode._maxAngleDeviation = std::clamp(mode._maxAngleDeviation, 0.0f, 1.0f);
-                    mode._forwardBackwardRatio = std::clamp(mode._forwardBackwardRatio, 0.0f, 1.0f);
+                    mode._maxAngleDeviation =
+                        std::clamp(mode._maxAngleDeviation, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
+                    mode._forwardBackwardRatio =
+                        std::clamp(mode._forwardBackwardRatio, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
 
                 } else if (std::holds_alternative<ManualBendingGenomeDesc>(muscle._mode)) {
                     auto& mode = std::get<ManualBendingGenomeDesc>(muscle._mode);
-                    mode._maxAngleDeviation = std::clamp(mode._maxAngleDeviation, 0.0f, 1.0f);
-                    mode._forwardBackwardRatio = std::clamp(mode._forwardBackwardRatio, 0.0f, 1.0f);
+                    mode._maxAngleDeviation =
+                        std::clamp(mode._maxAngleDeviation, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
+                    mode._forwardBackwardRatio =
+                        std::clamp(mode._forwardBackwardRatio, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
 
                 } else if (std::holds_alternative<AngleBendingGenomeDesc>(muscle._mode)) {
                     auto& mode = std::get<AngleBendingGenomeDesc>(muscle._mode);
-                    mode._maxAngleDeviation = std::clamp(mode._maxAngleDeviation, 0.0f, 1.0f);
-                    mode._attractionRepulsionRatio = std::clamp(mode._attractionRepulsionRatio, 0.0f, 1.0f);
+                    mode._maxAngleDeviation =
+                        std::clamp(mode._maxAngleDeviation, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
+                    mode._attractionRepulsionRatio =
+                        std::clamp(mode._attractionRepulsionRatio, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
 
                 } else if (std::holds_alternative<AutoCrawlingGenomeDesc>(muscle._mode)) {
                     auto& mode = std::get<AutoCrawlingGenomeDesc>(muscle._mode);
-                    mode._maxDistanceDeviation = std::clamp(mode._maxDistanceDeviation, 0.0f, 1.0f);
-                    mode._forwardBackwardRatio = std::clamp(mode._forwardBackwardRatio, 0.0f, 1.0f);
+                    mode._maxDistanceDeviation =
+                        std::clamp(mode._maxDistanceDeviation, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
+                    mode._forwardBackwardRatio =
+                        std::clamp(mode._forwardBackwardRatio, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
 
                 } else if (std::holds_alternative<ManualCrawlingGenomeDesc>(muscle._mode)) {
                     auto& mode = std::get<ManualCrawlingGenomeDesc>(muscle._mode);
-                    mode._maxDistanceDeviation = std::clamp(mode._maxDistanceDeviation, 0.0f, 1.0f);
-                    mode._forwardBackwardRatio = std::clamp(mode._forwardBackwardRatio, 0.0f, 1.0f);
+                    mode._maxDistanceDeviation =
+                        std::clamp(mode._maxDistanceDeviation, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
+                    mode._forwardBackwardRatio =
+                        std::clamp(mode._forwardBackwardRatio, CellTypePropertyLimits::MuscleModeRatio_Min, CellTypePropertyLimits::MuscleModeRatio_Max);
                 }
                 // DirectMovementGenomeDesc has no attributes to validate
 
@@ -166,31 +188,42 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 auto reconnectorMode = reconnector.getMode();
                 if (reconnectorMode == ReconnectorMode_FreeCell) {
                     auto& freeCell = std::get<ReconnectFreeCellGenomeDesc>(reconnector._mode);
-                    freeCell._restrictToColors &= (1 << MAX_COLORS) - 1;
+                    freeCell._restrictToColors =
+                        std::clamp(freeCell._restrictToColors, CellTypePropertyLimits::RestrictToColors_Min, CellTypePropertyLimits::RestrictToColors_Max);
                 } else if (reconnectorMode == ReconnectorMode_Creature) {
                     auto& creature = std::get<ReconnectCreatureGenomeDesc>(reconnector._mode);
                     if (creature._minNumCells.has_value()) {
                         auto& value = creature._minNumCells.value();
-                        value = std::max(value, 0);
+                        value = std::clamp(value, CellTypePropertyLimits::CreatureNumCells_Min, 100);
                     }
                     if (creature._maxNumCells.has_value()) {
                         auto& value = creature._maxNumCells.value();
-                        value = std::max(value, 0);
+                        value = std::clamp(value, CellTypePropertyLimits::CreatureNumCells_Min, 100);
                     }
-                    creature._restrictToColors &= (1 << MAX_COLORS) - 1;
+                    creature._restrictToColors =
+                        std::clamp(creature._restrictToColors, CellTypePropertyLimits::RestrictToColors_Min, CellTypePropertyLimits::RestrictToColors_Max);
                     creature._restrictToLineage = std::clamp(creature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellType_Detonator) {
                 auto& detonator = std::get<DetonatorGenomeDesc>(node._cellType);
-                detonator._countdown = std::max(detonator._countdown, 1);
+                detonator._countdown =
+                    std::clamp(detonator._countdown, CellTypePropertyLimits::DetonatorCountdown_Min, CellTypePropertyLimits::DetonatorCountdown_Max);
 
+            } else if (nodeType == CellType_Digestor) {
+                auto& digestor = std::get<DigestorGenomeDesc>(node._cellType);
+                digestor._rawEnergyConductivity = std::clamp(
+                    digestor._rawEnergyConductivity,
+                    CellTypePropertyLimits::DigestorRawEnergyConductivity_Min,
+                    CellTypePropertyLimits::DigestorRawEnergyConductivity_Max);
             } else if (nodeType == CellType_Memory) {
                 auto& memory = std::get<MemoryGenomeDesc>(node._cellType);
+                memory._channelBitMask =
+                    std::clamp(memory._channelBitMask, CellTypePropertyLimits::MemoryChannelBitMask_Min, CellTypePropertyLimits::MemoryChannelBitMask_Max);
                 auto memoryMode = memory.getMode();
                 if (memoryMode == MemoryMode_SignalDelay) {
                     auto& signalDelay = std::get<SignalDelayGenomeDesc>(memory._mode);
-                    signalDelay._delay = std::clamp(signalDelay._delay, 0, MAX_CELL_MEMORY_ENTRIES);
+                    signalDelay._delay = std::clamp(signalDelay._delay, CellTypePropertyLimits::SignalDelay_Min, CellTypePropertyLimits::SignalDelay_Max);
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
                     auto& signalRecorder = std::get<SignalRecorderGenomeDesc>(memory._mode);
                     signalRecorder._numWrittenSignalEntries =
@@ -198,7 +231,10 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 } else if (memoryMode == MemoryMode_SignalStorage) {
                 } else if (memoryMode == MemoryMode_SignalIntegrator) {
                     auto& signalIntegrator = std::get<SignalIntegratorGenomeDesc>(memory._mode);
-                    signalIntegrator._newSignalWeight = std::clamp(signalIntegrator._newSignalWeight, 0.0f, 1.0f);
+                    signalIntegrator._newSignalWeight = std::clamp(
+                        signalIntegrator._newSignalWeight,
+                        CellTypePropertyLimits::SignalIntegratorNewSignalWeight_Min,
+                        CellTypePropertyLimits::SignalIntegratorNewSignalWeight_Max);
                 }
                 // Validate number of memory entries
                 auto numEntries = memory._signalEntries.size();
@@ -211,11 +247,12 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 auto communicatorMode = communicator.getMode();
                 if (communicatorMode == CommunicatorMode_Sender) {
                     auto& sender = std::get<SenderGenomeDesc>(communicator._mode);
-                    sender._range = std::clamp(sender._range, 0, 20);
-                    sender._maxTimesSent = std::max(sender._maxTimesSent, 0);
+                    sender._range = std::clamp(sender._range, CellTypePropertyLimits::CommunicatorRange_Min, CellTypePropertyLimits::CommunicatorRange_Max);
+                    sender._maxTimesSent = std::clamp(sender._maxTimesSent, CellTypePropertyLimits::CommunicatorMaxTimesSent_Min, 10);
                 } else if (communicatorMode == CommunicatorMode_Receiver) {
                     auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);
-                    receiver._restrictToColors &= (1 << MAX_COLORS) - 1;
+                    receiver._restrictToColors =
+                        std::clamp(receiver._restrictToColors, CellTypePropertyLimits::RestrictToColors_Min, CellTypePropertyLimits::RestrictToColors_Max);
                     receiver._restrictToLineage = std::clamp(receiver._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
             }

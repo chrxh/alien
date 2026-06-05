@@ -101,10 +101,14 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
         genomeTO.mutationRates.neuronMutation2.activationFunctionProbability};
     genome->mutationRates.connectionMutation1 = {genomeTO.mutationRates.connectionMutation1.eventProbability, genomeTO.mutationRates.connectionMutation1.sigma};
     genome->mutationRates.connectionMutation2 = {genomeTO.mutationRates.connectionMutation2.eventProbability, genomeTO.mutationRates.connectionMutation2.sigma};
-    genome->mutationRates.cellTypePropertiesMutation = {
-        genomeTO.mutationRates.cellTypePropertiesMutation.eventProbability,
-        genomeTO.mutationRates.cellTypePropertiesMutation.sigma,
-        genomeTO.mutationRates.cellTypePropertiesMutation.probability};
+    genome->mutationRates.cellTypePropertiesMutation1 = {
+        genomeTO.mutationRates.cellTypePropertiesMutation1.eventProbability,
+        genomeTO.mutationRates.cellTypePropertiesMutation1.sigma,
+        genomeTO.mutationRates.cellTypePropertiesMutation1.probability};
+    genome->mutationRates.cellTypePropertiesMutation2 = {
+        genomeTO.mutationRates.cellTypePropertiesMutation2.eventProbability,
+        genomeTO.mutationRates.cellTypePropertiesMutation2.sigma,
+        genomeTO.mutationRates.cellTypePropertiesMutation2.probability};
     genome->numGenes = genomeTO.numGenes;
     for (int i = 0; i < sizeof(genomeTO.name); ++i) {
         genome->name[i] = genomeTO.name[i];

@@ -445,7 +445,8 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation2, NeuronMutationDesc());
     MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation1, ConnectionMutationDesc());
     MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation2, ConnectionMutationDesc());
-    MEMBER(MutationRatesDesc, CellTypePropertiesMutationDesc, cellTypePropertiesMutation, CellTypePropertiesMutationDesc());
+    MEMBER(MutationRatesDesc, CellTypePropertiesMutationDesc, cellTypePropertiesMutation1, CellTypePropertiesMutationDesc());
+    MEMBER(MutationRatesDesc, CellTypePropertiesMutationDesc, cellTypePropertiesMutation2, CellTypePropertiesMutationDesc());
 
     std::vector<std::string> getActiveMutationTypes() const;
 };
