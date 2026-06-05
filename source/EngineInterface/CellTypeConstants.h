@@ -116,7 +116,7 @@ enum SignalOrigin_
 //*************************
 namespace Channels
 {
-    auto constexpr ConstructorSuccess = 1;
+    auto constexpr ConstructorSuccess = 4;
 }
 
 using ConstructorShape = int;
