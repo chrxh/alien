@@ -84,8 +84,8 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 auto mode = sensor.getMode();
                 if (mode == SensorMode_DetectEnergy) {
                     auto& detectEnergy = std::get<DetectEnergyGenomeDesc>(sensor._mode);
-                    detectEnergy._minDensity = std::clamp(
-                        detectEnergy._minDensity, CellTypePropertyLimits::DetectEnergyMinDensity_Min, CellTypePropertyLimits::DetectEnergyMinDensity_Max);
+                    detectEnergy._minDensity = std::max(
+                        detectEnergy._minDensity, CellTypePropertyLimits::DetectEnergyMinDensity_Min);
                 } else if (mode == SensorMode_DetectFreeCell) {
                     auto& detectFreeCell = std::get<DetectFreeCellGenomeDesc>(sensor._mode);
                     detectFreeCell._minDensity = std::clamp(

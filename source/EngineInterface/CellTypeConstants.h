@@ -118,7 +118,7 @@ enum SignalOrigin_
 //*************************
 namespace Channels
 {
-    auto constexpr ConstructorSuccess = 1;
+    auto constexpr ConstructorSuccess = 4;
 }
 
 using ConstructorShape = int;
@@ -237,7 +237,7 @@ namespace CellTypePropertyLimits
     auto constexpr SensorRange_Min = 0;
     auto constexpr SensorRange_Max = 512;
     auto constexpr DetectEnergyMinDensity_Min = 0.0f;
-    auto constexpr DetectEnergyMinDensity_Max = 1.0e30f;
+    auto constexpr DetectEnergyMinDensity_Max = 1.0f;
     auto constexpr DetectFreeCellMinDensity_Min = 0.0f;
     auto constexpr DetectFreeCellMinDensity_Max = 1.0f;
     auto constexpr RestrictToColors_Min = 0;
