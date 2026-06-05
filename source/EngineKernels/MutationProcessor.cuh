@@ -111,7 +111,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
-    NeuronMutation rates[2] = {genome->mutationRates.neuronMutation1, genome->mutationRates.neuronMutation2};
+    NeuronMutation rates[2] = {genome->mutationRates.neuronMutations[0], genome->mutationRates.neuronMutations[1]};
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
@@ -159,7 +159,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
 
-    ConnectionMutation rates[2] = {genome->mutationRates.connectionMutation1, genome->mutationRates.connectionMutation2};
+    ConnectionMutation rates[2] = {genome->mutationRates.connectionMutations[0], genome->mutationRates.connectionMutations[1]};
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
@@ -189,7 +189,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
 {
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
-    CellTypePropertiesMutation rates[2] = {genome->mutationRates.cellTypePropertiesMutation1, genome->mutationRates.cellTypePropertiesMutation2};
+    CellTypePropertiesMutation rates[2] = {genome->mutationRates.cellTypePropertiesMutations[0], genome->mutationRates.cellTypePropertiesMutations[1]};
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
@@ -488,35 +488,32 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         float neuronSigma = cudaSimulationParameters.metaMutationNeuronsSigma.value;
         if (neuronSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * neuronSigma)); };
-            mutateFloat(genome->mutationRates.neuronMutation1.eventProbability);
-            mutateFloat(genome->mutationRates.neuronMutation1.weightSigma);
-            mutateFloat(genome->mutationRates.neuronMutation1.biasSigma);
-            mutateFloat(genome->mutationRates.neuronMutation1.activationFunctionProbability);
-            mutateFloat(genome->mutationRates.neuronMutation2.eventProbability);
-            mutateFloat(genome->mutationRates.neuronMutation2.weightSigma);
-            mutateFloat(genome->mutationRates.neuronMutation2.biasSigma);
-            mutateFloat(genome->mutationRates.neuronMutation2.activationFunctionProbability);
+            for (int i = 0; i < 2; ++i) {
+                mutateFloat(genome->mutationRates.neuronMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.neuronMutations[i].weightSigma);
+                mutateFloat(genome->mutationRates.neuronMutations[i].biasSigma);
+                mutateFloat(genome->mutationRates.neuronMutations[i].activationFunctionProbability);
+            }
         }
 
         // Meta-mutate connection mutation rates
         float connSigma = cudaSimulationParameters.metaMutationConnectionsSigma.value;
         if (connSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * connSigma)); };
-            mutateFloat(genome->mutationRates.connectionMutation1.eventProbability);
-            mutateFloat(genome->mutationRates.connectionMutation1.sigma);
-            mutateFloat(genome->mutationRates.connectionMutation2.eventProbability);
-            mutateFloat(genome->mutationRates.connectionMutation2.sigma);
+            for (int i = 0; i < 2; ++i) {
+                mutateFloat(genome->mutationRates.connectionMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.connectionMutations[i].sigma);
+            }
         }
 
         float cellTypeSigma = cudaSimulationParameters.metaMutationCellTypePropertiesSigma.value;
         if (cellTypeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeSigma)); };
-            mutateFloat(genome->mutationRates.cellTypePropertiesMutation1.eventProbability);
-            mutateFloat(genome->mutationRates.cellTypePropertiesMutation1.sigma);
-            mutateFloat(genome->mutationRates.cellTypePropertiesMutation1.probability);
-            mutateFloat(genome->mutationRates.cellTypePropertiesMutation2.eventProbability);
-            mutateFloat(genome->mutationRates.cellTypePropertiesMutation2.sigma);
-            mutateFloat(genome->mutationRates.cellTypePropertiesMutation2.probability);
+            for (int i = 0; i < 2; ++i) {
+                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].sigma);
+                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].probability);
+            }
         }
     }
 }

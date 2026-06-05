@@ -367,12 +367,9 @@ struct CellTypePropertiesMutationTO
 
 struct MutationRatesTO
 {
-    NeuronMutationTO neuronMutation1;
-    NeuronMutationTO neuronMutation2;
-    ConnectionMutationTO connectionMutation1;
-    ConnectionMutationTO connectionMutation2;
-    CellTypePropertiesMutationTO cellTypePropertiesMutation1;
-    CellTypePropertiesMutationTO cellTypePropertiesMutation2;
+    NeuronMutationTO neuronMutations[2];
+    ConnectionMutationTO connectionMutations[2];
+    CellTypePropertiesMutationTO cellTypePropertiesMutations[2];
 };
 
 struct GenomeTO

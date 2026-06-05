@@ -869,24 +869,17 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._prevLineageId = genomeTO.prevLineageId != 0 ? std::make_optional(genomeTO.prevLineageId) : std::nullopt;
     result._frontAngle = genomeTO.frontAngle;
     result._accumulatedMutations = genomeTO.accumulatedMutations;
-    result._mutationRates._neuronMutation1._eventProbability = genomeTO.mutationRates.neuronMutation1.eventProbability;
-    result._mutationRates._neuronMutation1._weightSigma = genomeTO.mutationRates.neuronMutation1.weightSigma;
-    result._mutationRates._neuronMutation1._biasSigma = genomeTO.mutationRates.neuronMutation1.biasSigma;
-    result._mutationRates._neuronMutation1._activationFunctionProbability = genomeTO.mutationRates.neuronMutation1.activationFunctionProbability;
-    result._mutationRates._neuronMutation2._eventProbability = genomeTO.mutationRates.neuronMutation2.eventProbability;
-    result._mutationRates._neuronMutation2._weightSigma = genomeTO.mutationRates.neuronMutation2.weightSigma;
-    result._mutationRates._neuronMutation2._biasSigma = genomeTO.mutationRates.neuronMutation2.biasSigma;
-    result._mutationRates._neuronMutation2._activationFunctionProbability = genomeTO.mutationRates.neuronMutation2.activationFunctionProbability;
-    result._mutationRates._connectionMutation1._eventProbability = genomeTO.mutationRates.connectionMutation1.eventProbability;
-    result._mutationRates._connectionMutation1._sigma = genomeTO.mutationRates.connectionMutation1.sigma;
-    result._mutationRates._connectionMutation2._eventProbability = genomeTO.mutationRates.connectionMutation2.eventProbability;
-    result._mutationRates._connectionMutation2._sigma = genomeTO.mutationRates.connectionMutation2.sigma;
-    result._mutationRates._cellTypePropertiesMutation1._eventProbability = genomeTO.mutationRates.cellTypePropertiesMutation1.eventProbability;
-    result._mutationRates._cellTypePropertiesMutation1._sigma = genomeTO.mutationRates.cellTypePropertiesMutation1.sigma;
-    result._mutationRates._cellTypePropertiesMutation1._probability = genomeTO.mutationRates.cellTypePropertiesMutation1.probability;
-    result._mutationRates._cellTypePropertiesMutation2._eventProbability = genomeTO.mutationRates.cellTypePropertiesMutation2.eventProbability;
-    result._mutationRates._cellTypePropertiesMutation2._sigma = genomeTO.mutationRates.cellTypePropertiesMutation2.sigma;
-    result._mutationRates._cellTypePropertiesMutation2._probability = genomeTO.mutationRates.cellTypePropertiesMutation2.probability;
+    for (int i = 0; i < 2; ++i) {
+        result._mutationRates._neuronMutations[i]._eventProbability = genomeTO.mutationRates.neuronMutations[i].eventProbability;
+        result._mutationRates._neuronMutations[i]._weightSigma = genomeTO.mutationRates.neuronMutations[i].weightSigma;
+        result._mutationRates._neuronMutations[i]._biasSigma = genomeTO.mutationRates.neuronMutations[i].biasSigma;
+        result._mutationRates._neuronMutations[i]._activationFunctionProbability = genomeTO.mutationRates.neuronMutations[i].activationFunctionProbability;
+        result._mutationRates._connectionMutations[i]._eventProbability = genomeTO.mutationRates.connectionMutations[i].eventProbability;
+        result._mutationRates._connectionMutations[i]._sigma = genomeTO.mutationRates.connectionMutations[i].sigma;
+        result._mutationRates._cellTypePropertiesMutations[i]._eventProbability = genomeTO.mutationRates.cellTypePropertiesMutations[i].eventProbability;
+        result._mutationRates._cellTypePropertiesMutations[i]._sigma = genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma;
+        result._mutationRates._cellTypePropertiesMutations[i]._probability = genomeTO.mutationRates.cellTypePropertiesMutations[i].probability;
+    }
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -961,28 +954,19 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.prevLineageId = genome._prevLineageId.value_or(0);
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.accumulatedMutations = genome._accumulatedMutations;
-    genomeTO.mutationRates.neuronMutation1 = {
-        genome._mutationRates._neuronMutation1._eventProbability,
-        genome._mutationRates._neuronMutation1._weightSigma,
-        genome._mutationRates._neuronMutation1._biasSigma,
-        genome._mutationRates._neuronMutation1._activationFunctionProbability};
-    genomeTO.mutationRates.neuronMutation2 = {
-        genome._mutationRates._neuronMutation2._eventProbability,
-        genome._mutationRates._neuronMutation2._weightSigma,
-        genome._mutationRates._neuronMutation2._biasSigma,
-        genome._mutationRates._neuronMutation2._activationFunctionProbability};
-    genomeTO.mutationRates.connectionMutation1 = {
-        genome._mutationRates._connectionMutation1._eventProbability, genome._mutationRates._connectionMutation1._sigma};
-    genomeTO.mutationRates.connectionMutation2 = {
-        genome._mutationRates._connectionMutation2._eventProbability, genome._mutationRates._connectionMutation2._sigma};
-    genomeTO.mutationRates.cellTypePropertiesMutation1 = {
-        genome._mutationRates._cellTypePropertiesMutation1._eventProbability,
-        genome._mutationRates._cellTypePropertiesMutation1._sigma,
-        genome._mutationRates._cellTypePropertiesMutation1._probability};
-    genomeTO.mutationRates.cellTypePropertiesMutation2 = {
-        genome._mutationRates._cellTypePropertiesMutation2._eventProbability,
-        genome._mutationRates._cellTypePropertiesMutation2._sigma,
-        genome._mutationRates._cellTypePropertiesMutation2._probability};
+    for (int i = 0; i < 2; ++i) {
+        genomeTO.mutationRates.neuronMutations[i] = {
+            genome._mutationRates._neuronMutations[i]._eventProbability,
+            genome._mutationRates._neuronMutations[i]._weightSigma,
+            genome._mutationRates._neuronMutations[i]._biasSigma,
+            genome._mutationRates._neuronMutations[i]._activationFunctionProbability};
+        genomeTO.mutationRates.connectionMutations[i] = {
+            genome._mutationRates._connectionMutations[i]._eventProbability, genome._mutationRates._connectionMutations[i]._sigma};
+        genomeTO.mutationRates.cellTypePropertiesMutations[i] = {
+            genome._mutationRates._cellTypePropertiesMutations[i]._eventProbability,
+            genome._mutationRates._cellTypePropertiesMutations[i]._sigma,
+            genome._mutationRates._cellTypePropertiesMutations[i]._probability};
+    }
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;

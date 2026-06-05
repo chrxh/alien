@@ -140,8 +140,8 @@ protected:
 TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -161,8 +161,8 @@ TEST_F(MutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -206,8 +206,8 @@ TEST_F(MutationTests, neuronWeightMutation_weightsActuallyChange)
 TEST_F(MutationTests, neuronWeightMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(0.0f).weightSigma(1.0f).biasSigma(1.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(0.0f).weightSigma(1.0f).biasSigma(1.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(0.0f).weightSigma(1.0f).biasSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.0f).weightSigma(1.0f).biasSigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -237,8 +237,8 @@ TEST_F(MutationTests, neuronWeightMutation_zeroProbabilityNoChange)
 TEST_F(MutationTests, neuronBiasMutation_biasesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).weightSigma(0.0f).biasSigma(1.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).weightSigma(0.0f).biasSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -282,8 +282,8 @@ TEST_F(MutationTests, neuronBiasMutation_biasesActuallyChange)
 TEST_F(MutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).weightSigma(0.0f).biasSigma(0.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(1.0f).weightSigma(0.0f).biasSigma(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).weightSigma(0.0f).biasSigma(0.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(1.0f).weightSigma(0.0f).biasSigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -310,8 +310,8 @@ TEST_F(MutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
 TEST_F(MutationTests, neuronBiasMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).biasSigma(1.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(1.0f).biasSigma(1.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).biasSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(1.0f).biasSigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -331,8 +331,8 @@ TEST_F(MutationTests, neuronBiasMutation_keepOtherAttributesUnchanged)
 TEST_F(MutationTests, neuronActivationFunctionMutation_activationFunctionsActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(1.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.0f).activationFunctionProbability(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -376,8 +376,8 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_activationFunctionsActual
 TEST_F(MutationTests, neuronActivationFunctionMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(0.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -404,8 +404,8 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_zeroProbabilityNoChange)
 TEST_F(MutationTests, neuronActivationFunctionMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(1.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(1.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(1.0f).activationFunctionProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -425,8 +425,8 @@ TEST_F(MutationTests, neuronActivationFunctionMutation_keepOtherAttributesUnchan
 TEST_F(MutationTests, connectionWeightMutation_weightsActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
-    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -470,8 +470,8 @@ TEST_F(MutationTests, connectionWeightMutation_weightsActuallyChange)
 TEST_F(MutationTests, connectionWeightMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().eventProbability(0.0f).sigma(1.0f);
-    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().eventProbability(0.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(0.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.0f).sigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -498,8 +498,8 @@ TEST_F(MutationTests, connectionWeightMutation_zeroProbabilityNoChange)
 TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
-    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -519,7 +519,7 @@ TEST_F(MutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
 TEST_F(MutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumProperties)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -568,7 +568,7 @@ TEST_F(MutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumPropert
 TEST_F(MutationTests, cellTypePropertiesMutation_changesBitsetPropertiesBitwise)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -617,8 +617,8 @@ TEST_F(MutationTests, cellTypePropertiesMutation_changesBitsetPropertiesBitwise)
 TEST_F(MutationTests, cellTypePropertiesMutation_doesNotSwitchModes)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
-    genome._mutationRates._cellTypePropertiesMutation2 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -643,7 +643,7 @@ TEST_F(MutationTests, cellTypePropertiesMutation_doesNotSwitchModes)
 TEST_F(MutationTests, accumulatedMutations_increases_forCellTypePropertyMutation)
 {
     auto genome = createTestGenome().lineageId(42).prevLineageId(41);
-    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -663,8 +663,8 @@ TEST_F(MutationTests, accumulatedMutations_increases_forCellTypePropertyMutation
 TEST_F(MutationTests, metaMutation_neuronRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -681,29 +681,29 @@ TEST_F(MutationTests, metaMutation_neuronRatesActuallyChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    bool anyChanged = actualGenome._mutationRates._neuronMutation1._eventProbability != 0.5f
-        || actualGenome._mutationRates._neuronMutation1._weightSigma != 0.5f || actualGenome._mutationRates._neuronMutation1._biasSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutation1._activationFunctionProbability != 0.5f
-        || actualGenome._mutationRates._neuronMutation2._eventProbability != 0.5f || actualGenome._mutationRates._neuronMutation2._weightSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutation2._biasSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutation2._activationFunctionProbability != 0.5f;
+    bool anyChanged = actualGenome._mutationRates._neuronMutations[0]._eventProbability != 0.5f
+        || actualGenome._mutationRates._neuronMutations[0]._weightSigma != 0.5f || actualGenome._mutationRates._neuronMutations[0]._biasSigma != 0.5f
+        || actualGenome._mutationRates._neuronMutations[0]._activationFunctionProbability != 0.5f
+        || actualGenome._mutationRates._neuronMutations[1]._eventProbability != 0.5f || actualGenome._mutationRates._neuronMutations[1]._weightSigma != 0.5f
+        || actualGenome._mutationRates._neuronMutations[1]._biasSigma != 0.5f
+        || actualGenome._mutationRates._neuronMutations[1]._activationFunctionProbability != 0.5f;
     EXPECT_TRUE(anyChanged);
 
-    EXPECT_GE(actualGenome._mutationRates._neuronMutation1._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutation1._weightSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutation1._biasSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutation1._activationFunctionProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutation2._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutation2._weightSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutation2._biasSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutation2._activationFunctionProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._weightSigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._biasSigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._activationFunctionProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._weightSigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._biasSigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._activationFunctionProbability, 0.0f);
 }
 
 TEST_F(MutationTests, metaMutation_neuronRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -720,21 +720,21 @@ TEST_F(MutationTests, metaMutation_neuronRatesZeroSigmaNoChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutation1._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutation1._weightSigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutation1._biasSigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutation1._activationFunctionProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutation2._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutation2._weightSigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutation2._biasSigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutation2._activationFunctionProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._eventProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._weightSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._biasSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._activationFunctionProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._eventProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._weightSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._biasSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._activationFunctionProbability, 0.5f);
 }
 
 TEST_F(MutationTests, metaMutation_connectionRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
-    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -751,21 +751,21 @@ TEST_F(MutationTests, metaMutation_connectionRatesActuallyChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    bool anyChanged = actualGenome._mutationRates._connectionMutation1._eventProbability != 0.5f
-        || actualGenome._mutationRates._connectionMutation1._sigma != 0.5f || actualGenome._mutationRates._connectionMutation2._eventProbability != 0.5f
-        || actualGenome._mutationRates._connectionMutation2._sigma != 0.5f;
+    bool anyChanged = actualGenome._mutationRates._connectionMutations[0]._eventProbability != 0.5f
+        || actualGenome._mutationRates._connectionMutations[0]._sigma != 0.5f || actualGenome._mutationRates._connectionMutations[1]._eventProbability != 0.5f
+        || actualGenome._mutationRates._connectionMutations[1]._sigma != 0.5f;
     EXPECT_TRUE(anyChanged);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutation1._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutation1._sigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutation2._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutation2._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._connectionMutations[0]._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._connectionMutations[0]._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._connectionMutations[1]._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._connectionMutations[1]._sigma, 0.0f);
 }
 
 TEST_F(MutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
-    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -782,17 +782,17 @@ TEST_F(MutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    EXPECT_EQ(actualGenome._mutationRates._connectionMutation1._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._connectionMutation1._sigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._connectionMutation2._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._connectionMutation2._sigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[0]._eventProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[0]._sigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[1]._eventProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[1]._sigma, 0.5f);
 }
 
 TEST_F(MutationTests, metaMutation_cellTypePropertyRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
-    genome._mutationRates._cellTypePropertiesMutation2 = CellTypePropertiesMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -806,26 +806,26 @@ TEST_F(MutationTests, metaMutation_cellTypePropertyRatesActuallyChange)
 
     auto actualGenome = getMutatedGenome();
 
-    bool anyChanged = actualGenome._mutationRates._cellTypePropertiesMutation1._eventProbability != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutation1._sigma != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutation1._probability != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutation2._eventProbability != 0.4f
-        || actualGenome._mutationRates._cellTypePropertiesMutation2._sigma != 0.4f
-        || actualGenome._mutationRates._cellTypePropertiesMutation2._probability != 0.4f;
+    bool anyChanged = actualGenome._mutationRates._cellTypePropertiesMutations[0]._eventProbability != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutations[0]._sigma != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutations[0]._probability != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._eventProbability != 0.4f
+        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._sigma != 0.4f
+        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._probability != 0.4f;
     EXPECT_TRUE(anyChanged);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation1._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation1._sigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation1._probability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation2._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation2._sigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutation2._probability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._probability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._probability, 0.0f);
 }
 
 TEST_F(MutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutation1 = CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
-    genome._mutationRates._cellTypePropertiesMutation2 = CellTypePropertiesMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -838,21 +838,21 @@ TEST_F(MutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation1._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation1._sigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation1._probability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation2._eventProbability, 0.4f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation2._sigma, 0.4f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutation2._probability, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[0]._eventProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[0]._sigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[0]._probability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._eventProbability, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._sigma, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._probability, 0.4f);
 }
 
 TEST_F(MutationTests, accumulatedMutations_increases_forGeneMutation)
 {
     auto genome = createTestGenome().lineageId(42).prevLineageId(41);
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f).biasSigma(1.0f).activationFunctionProbability(1.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
-    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
-    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f).biasSigma(1.0f).activationFunctionProbability(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -893,10 +893,10 @@ TEST_F(MutationTests, accumulatedMutations_createsNewLineageId)
 {
     auto genome = createTestGenome().lineageId(42).prevLineageId(41);
     genome._accumulatedMutations = 11.0f;
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
-    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
-    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

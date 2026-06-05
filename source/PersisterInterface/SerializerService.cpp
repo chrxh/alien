@@ -898,12 +898,12 @@ namespace cereal
     {
         MutationRatesDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addDesc(Id_MutationRates_NeuronMutation1, data._neuronMutation1);
-        scope.addDesc(Id_MutationRates_NeuronMutation2, data._neuronMutation2);
-        scope.addDesc(Id_MutationRates_ConnectionMutation1, data._connectionMutation1);
-        scope.addDesc(Id_MutationRates_ConnectionMutation2, data._connectionMutation2);
-        scope.addDesc(Id_MutationRates_CellTypePropertiesMutation1, data._cellTypePropertiesMutation1);
-        scope.addDesc(Id_MutationRates_CellTypePropertiesMutation2, data._cellTypePropertiesMutation2);
+        scope.addDesc(Id_MutationRates_NeuronMutation1, data._neuronMutations[0]);
+        scope.addDesc(Id_MutationRates_NeuronMutation2, data._neuronMutations[1]);
+        scope.addDesc(Id_MutationRates_ConnectionMutation1, data._connectionMutations[0]);
+        scope.addDesc(Id_MutationRates_ConnectionMutation2, data._connectionMutations[1]);
+        scope.addDesc(Id_MutationRates_CellTypePropertiesMutation1, data._cellTypePropertiesMutations[0]);
+        scope.addDesc(Id_MutationRates_CellTypePropertiesMutation2, data._cellTypePropertiesMutations[1]);
     }
     SPLIT_SERIALIZATION(MutationRatesDesc)
 

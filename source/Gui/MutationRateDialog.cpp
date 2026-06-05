@@ -112,66 +112,66 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
 {
     auto& settings = GlobalSettings::get();
 
-    mutationRates._connectionMutation1._eventProbability =
-        settings.getValue(settingsPrefix + "connection mutation 1.probability", mutationRates._connectionMutation1._eventProbability);
-    mutationRates._connectionMutation1._sigma = settings.getValue(settingsPrefix + "connection mutation 1.sigma", mutationRates._connectionMutation1._sigma);
-    mutationRates._connectionMutation2._eventProbability =
-        settings.getValue(settingsPrefix + "connection mutation 2.probability", mutationRates._connectionMutation2._eventProbability);
-    mutationRates._connectionMutation2._sigma = settings.getValue(settingsPrefix + "connection mutation 2.sigma", mutationRates._connectionMutation2._sigma);
+    mutationRates._connectionMutations[0]._eventProbability =
+        settings.getValue(settingsPrefix + "connection mutation 1.probability", mutationRates._connectionMutations[0]._eventProbability);
+    mutationRates._connectionMutations[0]._sigma = settings.getValue(settingsPrefix + "connection mutation 1.sigma", mutationRates._connectionMutations[0]._sigma);
+    mutationRates._connectionMutations[1]._eventProbability =
+        settings.getValue(settingsPrefix + "connection mutation 2.probability", mutationRates._connectionMutations[1]._eventProbability);
+    mutationRates._connectionMutations[1]._sigma = settings.getValue(settingsPrefix + "connection mutation 2.sigma", mutationRates._connectionMutations[1]._sigma);
 
-    mutationRates._neuronMutation1._eventProbability =
-        settings.getValue(settingsPrefix + "neuron mutation 1.probability", mutationRates._neuronMutation1._eventProbability);
-    mutationRates._neuronMutation1._weightSigma =
-        settings.getValue(settingsPrefix + "neuron mutation 1.weight sigma", mutationRates._neuronMutation1._weightSigma);
-    mutationRates._neuronMutation1._biasSigma = settings.getValue(settingsPrefix + "neuron mutation 1.bias sigma", mutationRates._neuronMutation1._biasSigma);
-    mutationRates._neuronMutation1._activationFunctionProbability =
-        settings.getValue(settingsPrefix + "neuron mutation 1.activation function probability", mutationRates._neuronMutation1._activationFunctionProbability);
+    mutationRates._neuronMutations[0]._eventProbability =
+        settings.getValue(settingsPrefix + "neuron mutation 1.probability", mutationRates._neuronMutations[0]._eventProbability);
+    mutationRates._neuronMutations[0]._weightSigma =
+        settings.getValue(settingsPrefix + "neuron mutation 1.weight sigma", mutationRates._neuronMutations[0]._weightSigma);
+    mutationRates._neuronMutations[0]._biasSigma = settings.getValue(settingsPrefix + "neuron mutation 1.bias sigma", mutationRates._neuronMutations[0]._biasSigma);
+    mutationRates._neuronMutations[0]._activationFunctionProbability =
+        settings.getValue(settingsPrefix + "neuron mutation 1.activation function probability", mutationRates._neuronMutations[0]._activationFunctionProbability);
 
-    mutationRates._neuronMutation2._eventProbability =
-        settings.getValue(settingsPrefix + "neuron mutation 2.probability", mutationRates._neuronMutation2._eventProbability);
-    mutationRates._neuronMutation2._weightSigma =
-        settings.getValue(settingsPrefix + "neuron mutation 2.weight sigma", mutationRates._neuronMutation2._weightSigma);
-    mutationRates._neuronMutation2._biasSigma = settings.getValue(settingsPrefix + "neuron mutation 2.bias sigma", mutationRates._neuronMutation2._biasSigma);
-    mutationRates._neuronMutation2._activationFunctionProbability =
-        settings.getValue(settingsPrefix + "neuron mutation 2.activation function probability", mutationRates._neuronMutation2._activationFunctionProbability);
-    mutationRates._cellTypePropertiesMutation1._eventProbability =
-        settings.getValue(settingsPrefix + "cell type property mutation.probability", mutationRates._cellTypePropertiesMutation1._eventProbability);
-    mutationRates._cellTypePropertiesMutation1._sigma =
-        settings.getValue(settingsPrefix + "cell type property mutation.sigma", mutationRates._cellTypePropertiesMutation1._sigma);
-    mutationRates._cellTypePropertiesMutation1._probability =
-        settings.getValue(settingsPrefix + "cell type property mutation.value probability", mutationRates._cellTypePropertiesMutation1._probability);
-    mutationRates._cellTypePropertiesMutation2._eventProbability =
-        settings.getValue(settingsPrefix + "cell type property mutation 2.probability", mutationRates._cellTypePropertiesMutation2._eventProbability);
-    mutationRates._cellTypePropertiesMutation2._sigma =
-        settings.getValue(settingsPrefix + "cell type property mutation 2.sigma", mutationRates._cellTypePropertiesMutation2._sigma);
-    mutationRates._cellTypePropertiesMutation2._probability =
-        settings.getValue(settingsPrefix + "cell type property mutation 2.value probability", mutationRates._cellTypePropertiesMutation2._probability);
+    mutationRates._neuronMutations[1]._eventProbability =
+        settings.getValue(settingsPrefix + "neuron mutation 2.probability", mutationRates._neuronMutations[1]._eventProbability);
+    mutationRates._neuronMutations[1]._weightSigma =
+        settings.getValue(settingsPrefix + "neuron mutation 2.weight sigma", mutationRates._neuronMutations[1]._weightSigma);
+    mutationRates._neuronMutations[1]._biasSigma = settings.getValue(settingsPrefix + "neuron mutation 2.bias sigma", mutationRates._neuronMutations[1]._biasSigma);
+    mutationRates._neuronMutations[1]._activationFunctionProbability =
+        settings.getValue(settingsPrefix + "neuron mutation 2.activation function probability", mutationRates._neuronMutations[1]._activationFunctionProbability);
+    mutationRates._cellTypePropertiesMutations[0]._eventProbability =
+        settings.getValue(settingsPrefix + "cell type property mutation.probability", mutationRates._cellTypePropertiesMutations[0]._eventProbability);
+    mutationRates._cellTypePropertiesMutations[0]._sigma =
+        settings.getValue(settingsPrefix + "cell type property mutation.sigma", mutationRates._cellTypePropertiesMutations[0]._sigma);
+    mutationRates._cellTypePropertiesMutations[0]._probability =
+        settings.getValue(settingsPrefix + "cell type property mutation.value probability", mutationRates._cellTypePropertiesMutations[0]._probability);
+    mutationRates._cellTypePropertiesMutations[1]._eventProbability =
+        settings.getValue(settingsPrefix + "cell type property mutation 2.probability", mutationRates._cellTypePropertiesMutations[1]._eventProbability);
+    mutationRates._cellTypePropertiesMutations[1]._sigma =
+        settings.getValue(settingsPrefix + "cell type property mutation 2.sigma", mutationRates._cellTypePropertiesMutations[1]._sigma);
+    mutationRates._cellTypePropertiesMutations[1]._probability =
+        settings.getValue(settingsPrefix + "cell type property mutation 2.value probability", mutationRates._cellTypePropertiesMutations[1]._probability);
 }
 
 void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
 {
     auto& settings = GlobalSettings::get();
 
-    settings.setValue(settingsPrefix + "connection mutation 1.probability", mutationRates._connectionMutation1._eventProbability);
-    settings.setValue(settingsPrefix + "connection mutation 1.sigma", mutationRates._connectionMutation1._sigma);
-    settings.setValue(settingsPrefix + "connection mutation 2.probability", mutationRates._connectionMutation2._eventProbability);
-    settings.setValue(settingsPrefix + "connection mutation 2.sigma", mutationRates._connectionMutation2._sigma);
+    settings.setValue(settingsPrefix + "connection mutation 1.probability", mutationRates._connectionMutations[0]._eventProbability);
+    settings.setValue(settingsPrefix + "connection mutation 1.sigma", mutationRates._connectionMutations[0]._sigma);
+    settings.setValue(settingsPrefix + "connection mutation 2.probability", mutationRates._connectionMutations[1]._eventProbability);
+    settings.setValue(settingsPrefix + "connection mutation 2.sigma", mutationRates._connectionMutations[1]._sigma);
 
-    settings.setValue(settingsPrefix + "neuron mutation 1.probability", mutationRates._neuronMutation1._eventProbability);
-    settings.setValue(settingsPrefix + "neuron mutation 1.weight sigma", mutationRates._neuronMutation1._weightSigma);
-    settings.setValue(settingsPrefix + "neuron mutation 1.bias sigma", mutationRates._neuronMutation1._biasSigma);
-    settings.setValue(settingsPrefix + "neuron mutation 1.activation function probability", mutationRates._neuronMutation1._activationFunctionProbability);
+    settings.setValue(settingsPrefix + "neuron mutation 1.probability", mutationRates._neuronMutations[0]._eventProbability);
+    settings.setValue(settingsPrefix + "neuron mutation 1.weight sigma", mutationRates._neuronMutations[0]._weightSigma);
+    settings.setValue(settingsPrefix + "neuron mutation 1.bias sigma", mutationRates._neuronMutations[0]._biasSigma);
+    settings.setValue(settingsPrefix + "neuron mutation 1.activation function probability", mutationRates._neuronMutations[0]._activationFunctionProbability);
 
-    settings.setValue(settingsPrefix + "neuron mutation 2.probability", mutationRates._neuronMutation2._eventProbability);
-    settings.setValue(settingsPrefix + "neuron mutation 2.weight sigma", mutationRates._neuronMutation2._weightSigma);
-    settings.setValue(settingsPrefix + "neuron mutation 2.bias sigma", mutationRates._neuronMutation2._biasSigma);
-    settings.setValue(settingsPrefix + "neuron mutation 2.activation function probability", mutationRates._neuronMutation2._activationFunctionProbability);
-    settings.setValue(settingsPrefix + "cell type property mutation.probability", mutationRates._cellTypePropertiesMutation1._eventProbability);
-    settings.setValue(settingsPrefix + "cell type property mutation.sigma", mutationRates._cellTypePropertiesMutation1._sigma);
-    settings.setValue(settingsPrefix + "cell type property mutation.value probability", mutationRates._cellTypePropertiesMutation1._probability);
-    settings.setValue(settingsPrefix + "cell type property mutation 2.probability", mutationRates._cellTypePropertiesMutation2._eventProbability);
-    settings.setValue(settingsPrefix + "cell type property mutation 2.sigma", mutationRates._cellTypePropertiesMutation2._sigma);
-    settings.setValue(settingsPrefix + "cell type property mutation 2.value probability", mutationRates._cellTypePropertiesMutation2._probability);
+    settings.setValue(settingsPrefix + "neuron mutation 2.probability", mutationRates._neuronMutations[1]._eventProbability);
+    settings.setValue(settingsPrefix + "neuron mutation 2.weight sigma", mutationRates._neuronMutations[1]._weightSigma);
+    settings.setValue(settingsPrefix + "neuron mutation 2.bias sigma", mutationRates._neuronMutations[1]._biasSigma);
+    settings.setValue(settingsPrefix + "neuron mutation 2.activation function probability", mutationRates._neuronMutations[1]._activationFunctionProbability);
+    settings.setValue(settingsPrefix + "cell type property mutation.probability", mutationRates._cellTypePropertiesMutations[0]._eventProbability);
+    settings.setValue(settingsPrefix + "cell type property mutation.sigma", mutationRates._cellTypePropertiesMutations[0]._sigma);
+    settings.setValue(settingsPrefix + "cell type property mutation.value probability", mutationRates._cellTypePropertiesMutations[0]._probability);
+    settings.setValue(settingsPrefix + "cell type property mutation 2.probability", mutationRates._cellTypePropertiesMutations[1]._eventProbability);
+    settings.setValue(settingsPrefix + "cell type property mutation 2.sigma", mutationRates._cellTypePropertiesMutations[1]._sigma);
+    settings.setValue(settingsPrefix + "cell type property mutation 2.value probability", mutationRates._cellTypePropertiesMutations[1]._probability);
 }
 
 void MutationRateDialog::processIntern()
@@ -183,9 +183,9 @@ void MutationRateDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connection mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processConnectionMutationRate("Connection weight mutation rate 1", "CMR1", _mutation._connectionMutation1, rightColumnWidth);
+                processConnectionMutationRate("Connection weight mutation rate 1", "CMR1", _mutation._connectionMutations[0], rightColumnWidth);
                 table.next();
-                processConnectionMutationRate("Connection weight mutation rate 2", "CMR2", _mutation._connectionMutation2, rightColumnWidth);
+                processConnectionMutationRate("Connection weight mutation rate 2", "CMR2", _mutation._connectionMutations[1], rightColumnWidth);
                 table.next();
             });
         }
@@ -193,9 +193,9 @@ void MutationRateDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neuron mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processNeuronMutationRate("Neuron weight mutation rate 1", "NMR1", _mutation._neuronMutation1, rightColumnWidth);
+                processNeuronMutationRate("Neuron weight mutation rate 1", "NMR1", _mutation._neuronMutations[0], rightColumnWidth);
                 table.next();
-                processNeuronMutationRate("Neuron weight mutation rate 2", "NMR2", _mutation._neuronMutation2, rightColumnWidth);
+                processNeuronMutationRate("Neuron weight mutation rate 2", "NMR2", _mutation._neuronMutations[1], rightColumnWidth);
                 table.next();
             });
         }
@@ -203,9 +203,9 @@ void MutationRateDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type property mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processCellTypePropertiesMutationRate("Cell type property mutation rate 1", "CTPM1", _mutation._cellTypePropertiesMutation1, rightColumnWidth);
+                processCellTypePropertiesMutationRate("Cell type property mutation rate 1", "CTPM1", _mutation._cellTypePropertiesMutations[0], rightColumnWidth);
                 table.next();
-                processCellTypePropertiesMutationRate("Cell type property mutation rate 2", "CTPM2", _mutation._cellTypePropertiesMutation2, rightColumnWidth);
+                processCellTypePropertiesMutationRate("Cell type property mutation rate 2", "CTPM2", _mutation._cellTypePropertiesMutations[1], rightColumnWidth);
                 table.next();
             });
         }

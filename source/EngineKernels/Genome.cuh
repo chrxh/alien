@@ -362,12 +362,9 @@ struct CellTypePropertiesMutation
 
 struct MutationRates
 {
-    NeuronMutation neuronMutation1;
-    NeuronMutation neuronMutation2;
-    ConnectionMutation connectionMutation1;
-    ConnectionMutation connectionMutation2;
-    CellTypePropertiesMutation cellTypePropertiesMutation1;
-    CellTypePropertiesMutation cellTypePropertiesMutation2;
+    NeuronMutation neuronMutations[2];
+    ConnectionMutation connectionMutations[2];
+    CellTypePropertiesMutation cellTypePropertiesMutations[2];
 };
 
 struct Genome
