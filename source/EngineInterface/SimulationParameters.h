@@ -109,7 +109,7 @@ struct SimulationParameters
     BaseParameter<float> metaMutationNeuronsSigma = {0};
     BaseParameter<float> metaMutationConnectionsSigma = {0};
     BaseParameter<float> metaMutationCellTypePropertiesSigma = {0};
-    BaseParameter<float> newLineageThreshold = {0.1f};
+    BaseParameter<float> newLineageThreshold = {2.0f};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = ColorVector<float>::uniform(0.0f)};
