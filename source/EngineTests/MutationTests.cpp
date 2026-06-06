@@ -17,38 +17,11 @@
 
 #include <EngineTestData/DescTestDataFactory.h>
 
-#include "IntegrationTestFramework.h"
+#include "MutationTestsBase.h"
 
-class MutationTests : public IntegrationTestFramework
+class MutationTests : public MutationTestsBase
 {
-public:
-    MutationTests()
-        : IntegrationTestFramework()
-    {}
-
-    ~MutationTests() = default;
-
 protected:
-    GenomeDesc createTestGenome() const
-    {
-        auto const& factory = DescTestDataFactory::get();
-        auto nodeParameters = factory.getAllNodeParameters();
-
-        std::vector<GeneDesc> genes;
-        size_t constexpr nodesPerGene = 4;
-        for (size_t index = 0; index < nodeParameters.size(); index += nodesPerGene) {
-            auto nodeCount = std::min(nodesPerGene, nodeParameters.size() - index);
-            std::vector<NodeDesc> nodes;
-            nodes.reserve(nodeCount);
-            for (size_t offset = 0; offset < nodeCount; ++offset) {
-                nodes.push_back(factory.createNonDefaultNodeDesc(nodeParameters.at(index + offset)));
-            }
-            genes.emplace_back(GeneDesc().nodes(nodes));
-        }
-
-        return GenomeDesc().genes(genes);
-    }
-
     bool compareAllExceptNeuronWeights(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
@@ -160,14 +133,6 @@ protected:
         reset(expected);
         reset(actual);
         return expected == actual;
-    }
-
-    GenomeDesc getMutatedGenome(uint64_t objectId = 1) const
-    {
-        auto actualData = _simulationFacade->getSimulationData();
-        auto actualCell = actualData.getObjectRef(objectId).getCellRef();
-        auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
-        return actualData.getGenomeRef(actualCreature._genomeId);
     }
 
     template <typename Predicate>
@@ -677,192 +642,6 @@ TEST_F(MutationTests, cellTypePropertiesMutation_doesNotChangeOtherAttributes)
     auto actualGenome = getMutatedGenome();
 
     EXPECT_TRUE(compareAllExceptCellTypeProperties(genome, actualGenome));
-}
-
-TEST_F(MutationTests, metaMutation_neuronRatesActuallyChange)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _parameters.metaMutationNeuronsSigma.value = 1.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(1).getCellRef();
-    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
-    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
-
-    bool anyChanged = actualGenome._mutationRates._neuronMutations[0]._eventProbability != 0.5f
-        || actualGenome._mutationRates._neuronMutations[0]._weightSigma != 0.5f || actualGenome._mutationRates._neuronMutations[0]._biasSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutations[0]._activationFunctionProbability != 0.5f
-        || actualGenome._mutationRates._neuronMutations[1]._eventProbability != 0.5f || actualGenome._mutationRates._neuronMutations[1]._weightSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutations[1]._biasSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutations[1]._activationFunctionProbability != 0.5f;
-    EXPECT_TRUE(anyChanged);
-
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._weightSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._biasSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._activationFunctionProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._weightSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._biasSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._activationFunctionProbability, 0.0f);
-}
-
-TEST_F(MutationTests, metaMutation_neuronRatesZeroSigmaNoChange)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().eventProbability(0.5f).weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _parameters.metaMutationNeuronsSigma.value = 0.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(1).getCellRef();
-    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
-    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
-
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._weightSigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._biasSigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._activationFunctionProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._weightSigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._biasSigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._activationFunctionProbability, 0.5f);
-}
-
-TEST_F(MutationTests, metaMutation_connectionRatesActuallyChange)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
-    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _parameters.metaMutationConnectionsSigma.value = 1.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(1).getCellRef();
-    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
-    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
-
-    bool anyChanged = actualGenome._mutationRates._connectionMutations[0]._eventProbability != 0.5f
-        || actualGenome._mutationRates._connectionMutations[0]._sigma != 0.5f || actualGenome._mutationRates._connectionMutations[1]._eventProbability != 0.5f
-        || actualGenome._mutationRates._connectionMutations[1]._sigma != 0.5f;
-    EXPECT_TRUE(anyChanged);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutations[0]._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutations[0]._sigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutations[1]._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutations[1]._sigma, 0.0f);
-}
-
-TEST_F(MutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
-    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.5f).sigma(0.5f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _parameters.metaMutationConnectionsSigma.value = 0.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = actualData.getObjectRef(1).getCellRef();
-    auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
-    auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
-
-    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[0]._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[0]._sigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[1]._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[1]._sigma, 0.5f);
-}
-
-TEST_F(MutationTests, metaMutation_cellTypePropertyRatesActuallyChange)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
-    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _parameters.metaMutationCellTypePropertiesSigma.value = 1.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualGenome = getMutatedGenome();
-
-    bool anyChanged = actualGenome._mutationRates._cellTypePropertiesMutations[0]._eventProbability != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[0]._sigma != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[0]._probability != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._eventProbability != 0.4f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._sigma != 0.4f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._probability != 0.4f;
-    EXPECT_TRUE(anyChanged);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._sigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._probability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._eventProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._sigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._probability, 0.0f);
-}
-
-TEST_F(MutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
-    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _parameters.metaMutationCellTypePropertiesSigma.value = 0.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[0]._eventProbability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[0]._sigma, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[0]._probability, 0.5f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._eventProbability, 0.4f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._sigma, 0.4f);
-    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._probability, 0.4f);
 }
 
 enum class MutationType
