@@ -469,7 +469,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("New lineage threshold")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::newLineageThreshold).min(0.0f).max(10000.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::newLineageThreshold).min(0.0f).max(10000.0f).infinity(true).logarithmic(true).format("%.5f")),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")

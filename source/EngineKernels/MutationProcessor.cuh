@@ -126,14 +126,16 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                     int neuronIndex = laneId;
                     if (data.primaryNumberGen.random() < rate.eventProbability) {
                         if (rate.weightSigma > 0) {
+                            auto accumulatedWeightLocal = 0.0f;
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
                                 auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
                                 auto delta = generateGaussian(data) * rate.weightSigma;
                                 float newValue = weight.getValue() + delta;
                                 newValue = max(-2.0f, min(2.0f, newValue));
                                 weight = NeuralNetWeight(newValue);
-                                atomicAdd_block(&accumulatedMutations, abs(delta));
+                                accumulatedWeightLocal += abs(delta);
                             }
+                            atomicAdd_block(&accumulatedMutations, accumulatedWeightLocal / (NEURONS_PER_CELL * NEURONS_PER_CELL));
                         }
                         if (rate.biasSigma > 0) {
                             auto& bias = node.neuralNetwork.biases[neuronIndex];
@@ -141,12 +143,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                             float newBias = bias + delta;
                             newBias = max(-2.0f, min(2.0f, newBias));
                             bias = newBias;
-                            atomicAdd_block(&accumulatedMutations, abs(delta));
+                            atomicAdd_block(&accumulatedMutations, abs(delta) / NEURONS_PER_CELL);
                         }
                         if (rate.activationFunctionProbability > 0 && data.primaryNumberGen.random() < rate.activationFunctionProbability) {
                             node.neuralNetwork.activationFunctions[neuronIndex] =
                                 static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
-                            atomicAdd_block(&accumulatedMutations, 1.0f);
+                            atomicAdd_block(&accumulatedMutations, 1.0f / NEURONS_PER_CELL);
                         }
                     }
                 }
@@ -177,7 +179,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
                         float newValue = weight + delta;
                         newValue = max(-2.0f, min(2.0f, newValue));
                         weight = newValue;
-                        atomicAdd_block(&accumulatedMutations, abs(delta));
+                        atomicAdd_block(&accumulatedMutations, abs(delta) / MAX_OBJECT_CONNECTIONS);
                     }
                 }
             }
@@ -425,10 +427,26 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         Const::DigestorRawEnergyConductivity_Min,
                         Const::DigestorRawEnergyConductivity_Max);
                     break;
-                case CellType_Memory:
+                case CellType_Memory: {
                     mutateBitset(
                         node.cellTypeData.memory.channelBitMask,
                         Const::MemoryChannelBitMask_Max);
+
+                    auto const numSignalEntries = static_cast<int>(node.cellTypeData.memory.numSignalEntries);
+                    if (rate.sigma > 0 && numSignalEntries > 0) {
+                        float signalMutations = 0.0f;
+                        for (int entryIndex = 0; entryIndex < numSignalEntries; ++entryIndex) {
+                            auto& entry = node.cellTypeData.memory.signalEntries[entryIndex];
+                            for (int channelIndex = 0; channelIndex < NEURONS_PER_CELL; ++channelIndex) {
+                                auto delta = generateGaussian(data) * rate.sigma;
+                                auto newValue = max(-2.0f, min(2.0f, entry.channels[channelIndex] + delta));
+                                signalMutations += abs(newValue - entry.channels[channelIndex]);
+                                entry.channels[channelIndex] = newValue;
+                            }
+                        }
+                        atomicAdd_block(&accumulatedMutations, signalMutations / numSignalEntries);
+                    }
+
                     switch (node.cellTypeData.memory.mode) {
                     case MemoryMode_SignalDelay:
                         mutateNumber(
@@ -454,6 +472,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         break;
                     }
                     break;
+                }
                 case CellType_Communicator:
                     switch (node.cellTypeData.communicator.mode) {
                     case CommunicatorMode_Sender:
