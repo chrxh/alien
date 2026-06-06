@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "EngineConstants.h"
+
 using namespace std::string_literals;
 
 //***********
@@ -166,6 +168,13 @@ namespace Channels
 {
     auto constexpr GeneratorOutput = 0;
 }
+namespace Const
+{
+    auto constexpr GeneratorValue_Min = -2.0f;
+    auto constexpr GeneratorValue_Max = 2.0f;
+    auto constexpr GeneratorTimeOffset_Min = 0;
+    auto constexpr GeneratorPeriod_Min = 1;
+}
 
 using GeneratorMode = int;
 enum GeneratorMode_
@@ -183,6 +192,12 @@ namespace Const
 //*******************
 //* Depot constants *
 //*******************
+namespace Const
+{
+    auto constexpr DepotStorageLimit_Min = 0.0f;
+    auto constexpr DepotStorageLimit_Max = 1000.0f;
+    auto constexpr DepotInitialStoredUsableEnergy_Min = 0.0f;
+}
 
 //********************
 //* Sensor constants *
@@ -197,6 +212,18 @@ namespace Channels
     auto constexpr SensorTelemetryCellEnergy = 1;
     auto constexpr SensorTelemetryCellVelAngle = 2;
     auto constexpr SensorTelemetryCellVelStrength = 3;
+}
+namespace Const
+{
+    auto constexpr SensorRange_Min = 0;
+    auto constexpr SensorRange_Max = 512;
+    auto constexpr DetectEnergyMinDensity_Min = 0.0f;
+    auto constexpr DetectEnergyMinDensity_Max = 1.0f;
+    auto constexpr DetectFreeCellMinDensity_Min = 0.0f;
+    auto constexpr DetectFreeCellMinDensity_Max = 1.0f;
+    auto constexpr RestrictToColors_Min = 0;
+    auto constexpr RestrictToColors_Max = (1 << MAX_COLORS) - 1;
+    auto constexpr CreatureNumCells_Min = 0;
 }
 
 using LineageRestriction = int;
@@ -230,6 +257,11 @@ namespace Const
 namespace Channels
 {
     auto constexpr MuscleAngle = 1;
+}
+namespace Const
+{
+    auto constexpr MuscleModeRatio_Min = 0.0f;
+    auto constexpr MuscleModeRatio_Max = 1.0f;
 }
 
 using MuscleMode = int;
@@ -312,6 +344,11 @@ namespace Const
 //***********************
 //* Detonator constants *
 //***********************
+namespace Const
+{
+    auto constexpr DetonatorCountdown_Min = 1;
+}
+
 using DetonatorState = int;
 enum DetonatorState_
 {
@@ -323,6 +360,11 @@ enum DetonatorState_
 //*************************
 //* Reconnector constants *
 //*************************
+namespace Channels
+{
+    auto constexpr ReconnectorSuccess = 2;
+}
+
 using ReconnectorMode = int;
 enum ReconnectorMode_
 {
@@ -337,17 +379,23 @@ namespace Const
     std::vector<std::string> const ReconnectorModeStrings = {"Solid", "Free cell", "Creature"};
 }
 
-namespace Channels
-{
-    auto constexpr ReconnectorSuccess = 2;
-}
-
 //********************
 //* Memory constants *
 //********************
 namespace Channels
 {
     auto constexpr MemoryReadWriteAction = 0;
+}
+namespace Const
+{
+    auto constexpr DigestorRawEnergyConductivity_Min = 0.0f;
+    auto constexpr DigestorRawEnergyConductivity_Max = 1.0f;
+    auto constexpr MemoryChannelBitMask_Min = uint16_t{0};
+    auto constexpr MemoryChannelBitMask_Max = uint16_t{0xffff};
+    auto constexpr SignalDelay_Min = 0;
+    auto constexpr SignalDelay_Max = MAX_CELL_MEMORY_ENTRIES;
+    auto constexpr SignalIntegratorNewSignalWeight_Min = 0.0f;
+    auto constexpr SignalIntegratorNewSignalWeight_Max = 1.0f;
 }
 
 using MemoryMode = int;
@@ -379,6 +427,12 @@ enum SignalRecorderState_
 namespace Channels
 {
     auto constexpr CommunicatorAngle = 1;
+}
+namespace Const
+{
+    auto constexpr CommunicatorRange_Min = 0;
+    auto constexpr CommunicatorRange_Max = 20;
+    auto constexpr CommunicatorMaxTimesSent_Min = 0;
 }
 
 using CommunicatorMode = int;

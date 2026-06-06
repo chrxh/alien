@@ -24,8 +24,10 @@ PUBLIC
     IntegrationTestFramework.h
     LayerParameterTests.cpp
     MemoryTests.cpp
+    MetaMutationTests.cpp
     MuscleTests.cpp
     MutationTests.cpp
+    MutationTestsBase.h
     NeuronTests.cpp
     ObjectConnectionTests.cpp
     PhysicsTests.cpp

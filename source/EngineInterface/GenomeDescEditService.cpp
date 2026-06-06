@@ -541,10 +541,12 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
     }
     genome._lineageId = 0;
     genome._accumulatedMutations = 0;
-    genome._mutationRates._neuronMutation1 = NeuronMutationDesc();
-    genome._mutationRates._neuronMutation2 = NeuronMutationDesc();
-    genome._mutationRates._connectionMutation1 = ConnectionMutationDesc();
-    genome._mutationRates._connectionMutation2 = ConnectionMutationDesc();
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc();
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc();
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc();
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc();
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc();
+    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc();
 
     resetUnusedGenes(genome, geneIndices);
 }

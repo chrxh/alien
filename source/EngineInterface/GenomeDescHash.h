@@ -541,18 +541,17 @@ struct std::hash<GenomeDesc>
         hash_combine(seed, desc._frontAngle);
         hash_combine(seed, desc._accumulatedMutations);
         hash_combine(seed, desc._prevLineageId);
-        hash_combine(seed, desc._mutationRates._neuronMutation1._eventProbability);
-        hash_combine(seed, desc._mutationRates._neuronMutation1._weightSigma);
-        hash_combine(seed, desc._mutationRates._neuronMutation1._biasSigma);
-        hash_combine(seed, desc._mutationRates._neuronMutation1._activationFunctionProbability);
-        hash_combine(seed, desc._mutationRates._neuronMutation2._eventProbability);
-        hash_combine(seed, desc._mutationRates._neuronMutation2._weightSigma);
-        hash_combine(seed, desc._mutationRates._neuronMutation2._biasSigma);
-        hash_combine(seed, desc._mutationRates._neuronMutation2._activationFunctionProbability);
-        hash_combine(seed, desc._mutationRates._connectionMutation1._eventProbability);
-        hash_combine(seed, desc._mutationRates._connectionMutation1._sigma);
-        hash_combine(seed, desc._mutationRates._connectionMutation2._eventProbability);
-        hash_combine(seed, desc._mutationRates._connectionMutation2._sigma);
+        for (int i = 0; i < 2; ++i) {
+            hash_combine(seed, desc._mutationRates._neuronMutations[i]._eventProbability);
+            hash_combine(seed, desc._mutationRates._neuronMutations[i]._weightSigma);
+            hash_combine(seed, desc._mutationRates._neuronMutations[i]._biasSigma);
+            hash_combine(seed, desc._mutationRates._neuronMutations[i]._activationFunctionProbability);
+            hash_combine(seed, desc._mutationRates._connectionMutations[i]._eventProbability);
+            hash_combine(seed, desc._mutationRates._connectionMutations[i]._sigma);
+            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._eventProbability);
+            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._sigma);
+            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._probability);
+        }
         return seed;
     }
 };

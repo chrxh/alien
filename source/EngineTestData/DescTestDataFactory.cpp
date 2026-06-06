@@ -173,10 +173,14 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
 std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
 {
     auto mutation = MutationRatesDesc()
-                        .neuronMutation1(NeuronMutationDesc().eventProbability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f))
-                        .neuronMutation2(NeuronMutationDesc().eventProbability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f))
-                        .connectionMutation1(ConnectionMutationDesc().eventProbability(0.6f).sigma(0.7f))
-                        .connectionMutation2(ConnectionMutationDesc().eventProbability(0.8f).sigma(0.9f));
+                        .neuronMutations(
+                            {NeuronMutationDesc().eventProbability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f),
+                             NeuronMutationDesc().eventProbability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f)})
+                        .connectionMutations(
+                            {ConnectionMutationDesc().eventProbability(0.6f).sigma(0.7f), ConnectionMutationDesc().eventProbability(0.8f).sigma(0.9f)})
+                        .cellTypePropertiesMutations(
+                            {CellTypePropertiesMutationDesc().eventProbability(0.45f).sigma(0.55f).probability(0.65f),
+                             CellTypePropertiesMutationDesc().eventProbability(0.75f).sigma(0.85f).probability(0.95f)});
 
     auto genome = GenomeDesc()
                       .name("Test Genome")

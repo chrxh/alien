@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <limits>
 #include <optional>
@@ -428,14 +429,26 @@ struct ConnectionMutationDesc
     MEMBER(ConnectionMutationDesc, float, sigma, 0.0f);
 };
 
+struct CellTypePropertiesMutationDesc
+{
+    auto operator<=>(CellTypePropertiesMutationDesc const&) const = default;
+
+    MEMBER(CellTypePropertiesMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(CellTypePropertiesMutationDesc, float, sigma, 0.0f);
+    MEMBER(CellTypePropertiesMutationDesc, float, probability, 0.0f);
+};
+
 struct MutationRatesDesc
 {
+    using NeuronMutationArray = std::array<NeuronMutationDesc, 2>;
+    using ConnectionMutationArray = std::array<ConnectionMutationDesc, 2>;
+    using CellTypePropertiesMutationArray = std::array<CellTypePropertiesMutationDesc, 2>;
+
     auto operator<=>(MutationRatesDesc const&) const = default;
 
-    MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation1, NeuronMutationDesc());
-    MEMBER(MutationRatesDesc, NeuronMutationDesc, neuronMutation2, NeuronMutationDesc());
-    MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation1, ConnectionMutationDesc());
-    MEMBER(MutationRatesDesc, ConnectionMutationDesc, connectionMutation2, ConnectionMutationDesc());
+    MEMBER(MutationRatesDesc, NeuronMutationArray, neuronMutations, NeuronMutationArray());
+    MEMBER(MutationRatesDesc, ConnectionMutationArray, connectionMutations, ConnectionMutationArray());
+    MEMBER(MutationRatesDesc, CellTypePropertiesMutationArray, cellTypePropertiesMutations, CellTypePropertiesMutationArray());
 
     std::vector<std::string> getActiveMutationTypes() const;
 };

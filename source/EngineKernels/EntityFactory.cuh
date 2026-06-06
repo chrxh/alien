@@ -89,18 +89,18 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->prevLineageId = genomeTO.prevLineageId;
     genome->frontAngle = genomeTO.frontAngle;
     genome->accumulatedMutations = genomeTO.accumulatedMutations;
-    genome->mutationRates.neuronMutation1 = {
-        genomeTO.mutationRates.neuronMutation1.eventProbability,
-        genomeTO.mutationRates.neuronMutation1.weightSigma,
-        genomeTO.mutationRates.neuronMutation1.biasSigma,
-        genomeTO.mutationRates.neuronMutation1.activationFunctionProbability};
-    genome->mutationRates.neuronMutation2 = {
-        genomeTO.mutationRates.neuronMutation2.eventProbability,
-        genomeTO.mutationRates.neuronMutation2.weightSigma,
-        genomeTO.mutationRates.neuronMutation2.biasSigma,
-        genomeTO.mutationRates.neuronMutation2.activationFunctionProbability};
-    genome->mutationRates.connectionMutation1 = {genomeTO.mutationRates.connectionMutation1.eventProbability, genomeTO.mutationRates.connectionMutation1.sigma};
-    genome->mutationRates.connectionMutation2 = {genomeTO.mutationRates.connectionMutation2.eventProbability, genomeTO.mutationRates.connectionMutation2.sigma};
+    for (int i = 0; i < 2; ++i) {
+        genome->mutationRates.neuronMutations[i] = {
+            genomeTO.mutationRates.neuronMutations[i].eventProbability,
+            genomeTO.mutationRates.neuronMutations[i].weightSigma,
+            genomeTO.mutationRates.neuronMutations[i].biasSigma,
+            genomeTO.mutationRates.neuronMutations[i].activationFunctionProbability};
+        genome->mutationRates.connectionMutations[i] = {genomeTO.mutationRates.connectionMutations[i].eventProbability, genomeTO.mutationRates.connectionMutations[i].sigma};
+        genome->mutationRates.cellTypePropertiesMutations[i] = {
+            genomeTO.mutationRates.cellTypePropertiesMutations[i].eventProbability,
+            genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma,
+            genomeTO.mutationRates.cellTypePropertiesMutations[i].probability};
+    }
     genome->numGenes = genomeTO.numGenes;
     for (int i = 0; i < sizeof(genomeTO.name); ++i) {
         genome->name[i] = genomeTO.name[i];
