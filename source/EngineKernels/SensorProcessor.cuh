@@ -203,7 +203,8 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                     if (distance > startRadius) {
                         uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
                         if (matchInfo != 0xffffffffffffffff) {
-                            if (!isRayBlockedBySolid(data, object->pos, angle, distance)) {
+                            if (object->typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectSolid
+                                || !isRayBlockedBySolid(data, object->pos, angle, distance)) {
                                 alienAtomicMin64(&lookupResult, matchInfo);
                             }
                             break;
