@@ -26,7 +26,7 @@ private:
     __inline__ __device__ static bool
     isRayBlockedByCreatureConnections(Object** nearSameCreatureCells, int numNearSameCreatureCells, float2 const& rayOrigin, float angle);
     __inline__ __device__ static bool isSolidAtPosition(SimulationData& data, float2 const& pos);
-    __inline__ __device__ static bool isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance);
+    __inline__ __device__ static bool isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance, SensorMode mode);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
@@ -175,7 +175,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
             if (matchInfo != 0xffffffffffffffff) {
                 if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)
-                    && !isRayBlockedBySolid(data, object->pos, angle, distance)) {
+                    && !isRayBlockedBySolid(data, object->pos, angle, distance, object->typeData.cell.cellTypeData.sensor.mode)) {
                     alienAtomicMin64(&lookupResult, matchInfo);
                 }
             }
@@ -194,7 +194,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             auto seedDistance = data.primaryNumberGen.random(0, ScanStep);
 
             if (!isRayBlockedByCreatureConnections(nearSameCreatureCells, numNearSameCreatureCells, object->pos, angle)
-                && !isRayBlockedBySolid(data, object->pos, angle, seedDistance)) {
+                && !isRayBlockedBySolid(data, object->pos, angle, seedDistance, object->typeData.cell.cellTypeData.sensor.mode)) {
                 for (float distance = seedDistance; distance <= endRadius; distance += ScanStep) {
                     auto delta = Math::unitVectorOfAngle(angle) * distance;
                     auto scanPos = object->pos + delta;
@@ -203,8 +203,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
                     if (distance > startRadius) {
                         uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
                         if (matchInfo != 0xffffffffffffffff) {
-                            if (object->typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectSolid
-                                || !isRayBlockedBySolid(data, object->pos, angle, distance)) {
+                            if (!isRayBlockedBySolid(data, object->pos, angle, distance, object->typeData.cell.cellTypeData.sensor.mode)) {
                                 alienAtomicMin64(&lookupResult, matchInfo);
                             }
                             break;
@@ -460,8 +459,11 @@ __inline__ __device__ bool SensorProcessor::isSolidAtPosition(SimulationData& da
     return false;
 }
 
-__inline__ __device__ bool SensorProcessor::isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance)
+__inline__ __device__ bool SensorProcessor::isRayBlockedBySolid(SimulationData& data, float2 const& rayOrigin, float angle, float distance, SensorMode mode)
 {
+    if (mode == SensorMode_DetectSolid) {
+        return false;
+    }
     auto direction = Math::unitVectorOfAngle(angle);
     for (float scanDistance = 0.0f; scanDistance <= distance; scanDistance += 1.0f) {
         auto scanPos = data.objectMap.getCorrectedPosition(rayOrigin + direction * scanDistance);
