@@ -30,6 +30,7 @@ private:
     void onOpenGenome();
     void onSaveGenome();
     void onCloneGenome();
+    void onCloseOtherTabs();
     void onCopyGenome();
     void onPasteGenome();
     void onSavepointGenome();

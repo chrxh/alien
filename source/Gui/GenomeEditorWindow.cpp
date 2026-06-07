@@ -69,7 +69,7 @@ void GenomeEditorWindow::initIntern()
     MutationRateDialog::get().setup();
 
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
-    _genomeEditData->showNodeIndex = GlobalSettings::get().getValue(_settingsNode  + ".show node index", true);
+    _genomeEditData->showNodeIndex = GlobalSettings::get().getValue(_settingsNode + ".show node index", true);
 
     // Initialize the first tab with default genome
     _tabs.emplace_back(_GenomeTabWidget::create(_genomeEditData, getDefaultGenome()));
@@ -116,6 +116,13 @@ void GenomeEditorWindow::processToolbar()
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CLONE).tooltip("Clone genome"))) {
         onCloneGenome();
     }
+
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_TIMES_CIRCLE).tooltip("Close all tabs except the current one").disabled(_tabs.size() <= 1))) {
+        onCloseOtherTabs();
+    }
+
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy genome to clipboard"))) {
         onCopyGenome();
@@ -151,10 +158,11 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     auto creaturesSelected = EditorModel::get().getSelectionShallowData().numCreatures > 0;
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_SYRINGE)
-                                    .tooltip("Inject the current genome to the selected creatures in the simulation")
-                                    .disabled(!creaturesSelected))) {
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters()
+                .text(ICON_FA_SYRINGE)
+                .tooltip("Inject the current genome to the selected creatures in the simulation")
+                .disabled(!creaturesSelected))) {
         onInjectGenome();
     }
 
@@ -164,11 +172,12 @@ void GenomeEditorWindow::processToolbar()
         onCreateSeed(false);
     }
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                    .text(ICON_FA_SEEDLING)
-                                    .secondText(ICON_FA_BOLT)
-                                    .secondTextOffset({30.0f, 25.0f})
-                                    .tooltip("Create a seed with current genome with free energy supply"))) {
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters()
+                .text(ICON_FA_SEEDLING)
+                .secondText(ICON_FA_BOLT)
+                .secondTextOffset({30.0f, 25.0f})
+                .tooltip("Create a seed with current genome with free energy supply"))) {
         onCreateSeed(true);
     }
 
@@ -253,6 +262,14 @@ void GenomeEditorWindow::onCloneGenome()
     openTab(getCurrentGenome(), true, false);
 }
 
+void GenomeEditorWindow::onCloseOtherTabs()
+{
+    auto selectedTab = _tabs.at(_selectedTabIndex);
+    _tabs.clear();
+    _tabs.emplace_back(selectedTab);
+    _selectedTabIndex = 0;
+}
+
 void GenomeEditorWindow::onCopyGenome()
 {
     _copiedGenome = getCurrentGenome();
@@ -294,11 +311,13 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
              .pos(pos)
              .stiffness(1.0f)
              .color(EditorModel::get().getDefaultColorCode())
-             .type(CellDesc().headCell(true).constructor(ConstructorDesc()
-                                                             .autoTriggerInterval(50)
-                                                             .provideEnergy(provideEnergy ? ProvideEnergy_Free : ProvideEnergy_FromConstructor)
-                                                             .geneIndex(0)
-                                                             .separation(true)))},
+             .type(
+                 CellDesc().headCell(true).constructor(
+                     ConstructorDesc()
+                         .autoTriggerInterval(50)
+                         .provideEnergy(provideEnergy ? ProvideEnergy_Free : ProvideEnergy_FromConstructor)
+                         .geneIndex(0)
+                         .separation(true)))},
         CreatureDesc(),
         genome);
 
