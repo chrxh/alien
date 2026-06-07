@@ -118,12 +118,6 @@ void GenomeEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_TIMES_CIRCLE).tooltip("Close all tabs except the current one").disabled(_tabs.size() <= 1))) {
-        onCloseOtherTabs();
-    }
-
-    ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy genome to clipboard"))) {
         onCopyGenome();
     }
@@ -135,13 +129,22 @@ void GenomeEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_TIMES_CIRCLE).tooltip("Close all tabs except the current one").disabled(_tabs.size() <= 1))) {
+        onCloseOtherTabs();
+    }
+
+    ImGui::SameLine();
+    AlienGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeChanged();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA).tooltip("Create save point").disabled(!hasGenomeChanged))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA).tooltip("Create save point in this tab").disabled(!hasGenomeChanged))) {
         onSavepointGenome();
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on genome").disabled(!hasGenomeChanged))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert genome to save point").disabled(!hasGenomeChanged))) {
         _tabs.at(_selectedTabIndex)->revertChanges();
     }
 
