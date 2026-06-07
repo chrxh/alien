@@ -130,7 +130,11 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_TIMES_CIRCLE).tooltip("Close all tabs except the current one").disabled(_tabs.size() <= 1))) {
+            AlienGui::ToolbarButtonParameters()
+                .text(ICON_FA_WINDOW_RESTORE)
+                .secondText(ICON_FA_TIMES)
+                .tooltip("Close all tabs except the current one")
+                .disabled(_tabs.size() <= 1))) {
         onCloseOtherTabs();
     }
 
@@ -139,7 +143,8 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     auto hasGenomeChanged = _tabs.at(_selectedTabIndex)->hasGenomeChanged();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA).tooltip("Create save point in this tab").disabled(!hasGenomeChanged))) {
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_CAMERA).tooltip("Create save point in this tab").disabled(!hasGenomeChanged))) {
         onSavepointGenome();
     }
 
