@@ -12,6 +12,8 @@ add_library(Base
     GlobalSettings.h
     Hashes.h
     JsonParser.h
+    KernelProfiler.cpp
+    KernelProfiler.h
     LoggingService.cpp
     LoggingService.h
     Macros.h

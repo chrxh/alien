@@ -6,6 +6,7 @@
 #include <Base/AlienExceptions.h>
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 #include <Base/StringHelper.h>
@@ -29,6 +30,7 @@ int main(int argc, char** argv)
         std::string outputFilename;
         std::string statisticsFilename;
         int timesteps = 0;
+        bool profile = false;
         app.add_option(
             "-i", inputFilename, "Specifies the name of the input file for the simulation to run. The corresponding *.settings.json should also be available.");
         app.add_option(
@@ -36,7 +38,17 @@ int main(int argc, char** argv)
             outputFilename,
             "Specifies the name of the output file for the simulation. The *.settings.json and *.statistics.csv file will also be saved.");
         app.add_option("-t", timesteps, "The number of time steps to be calculated.");
+        app.add_flag(
+            "-p,--profile",
+            profile,
+            "Enables debug mode and measures the wall-clock time of each simulation kernel. A profiling report is printed after the run. This bypasses CUDA "
+            "graphs and synchronizes after every kernel, so the absolute timings are slower than normal but reveal where the time is spent.");
         CLI11_PARSE(app, argc, argv);
+
+        if (profile) {
+            GlobalSettings::get().setDebugMode(true);
+            KernelProfiler::get().setEnabled(true);
+        }
 
         //read input
         std::cout << "Reading input" << std::endl;
@@ -67,6 +79,10 @@ int main(int argc, char** argv)
         auto tps = ms != 0 ? 1000.0f * toFloat(timesteps) / toFloat(ms) : 0.0f;
         std::cout << "Simulation finished: " << StringHelper::format(timesteps) << " time steps, " << StringHelper::format(ms) << " ms, "
                   << StringHelper::format(tps, 1) << " TPS" << std::endl;
+
+        if (profile) {
+            std::cout << std::endl << KernelProfiler::get().getReport() << std::endl;
+        }
 
 
         //write output simulation file
