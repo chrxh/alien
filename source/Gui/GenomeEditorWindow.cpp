@@ -131,8 +131,8 @@ void GenomeEditorWindow::processToolbar()
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
             AlienGui::ToolbarButtonParameters()
-                .text(ICON_FA_WINDOW_RESTORE)
-                .secondText(ICON_FA_TIMES)
+                .text(ICON_FA_TIMES)
+                .secondText(ICON_FA_WINDOW_MAXIMIZE)
                 .tooltip("Close all tabs except the current one")
                 .disabled(_tabs.size() <= 1))) {
         onCloseOtherTabs();
