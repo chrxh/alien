@@ -162,11 +162,10 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     auto creaturesSelected = EditorModel::get().getSelectionShallowData().numCreatures > 0;
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters()
-                .text(ICON_FA_SYRINGE)
-                .tooltip("Inject the current genome to the selected creatures in the simulation")
-                .disabled(!creaturesSelected))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
+                                    .text(ICON_FA_SYRINGE)
+                                    .tooltip("Inject the current genome to the selected creatures in the simulation")
+                                    .disabled(!creaturesSelected))) {
         onInjectGenome();
     }
 
@@ -176,12 +175,11 @@ void GenomeEditorWindow::processToolbar()
         onCreateSeed(false);
     }
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters()
-                .text(ICON_FA_SEEDLING)
-                .secondText(ICON_FA_BOLT)
-                .secondTextOffset({30.0f, 25.0f})
-                .tooltip("Create a seed with current genome with free energy supply"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
+                                    .text(ICON_FA_SEEDLING)
+                                    .secondText(ICON_FA_BOLT)
+                                    .secondTextOffset({30.0f, 25.0f})
+                                    .tooltip("Create a seed with current genome with free energy supply"))) {
         onCreateSeed(true);
     }
 
@@ -315,13 +313,11 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
              .pos(pos)
              .stiffness(1.0f)
              .color(EditorModel::get().getDefaultColorCode())
-             .type(
-                 CellDesc().headCell(true).constructor(
-                     ConstructorDesc()
-                         .autoTriggerInterval(50)
-                         .provideEnergy(provideEnergy ? ProvideEnergy_Free : ProvideEnergy_FromConstructor)
-                         .geneIndex(0)
-                         .separation(true)))},
+             .type(CellDesc().headCell(true).constructor(ConstructorDesc()
+                                                             .autoTriggerInterval(50)
+                                                             .provideEnergy(provideEnergy ? ProvideEnergy_Free : ProvideEnergy_FromConstructor)
+                                                             .geneIndex(0)
+                                                             .separation(true)))},
         CreatureDesc(),
         genome);
 
