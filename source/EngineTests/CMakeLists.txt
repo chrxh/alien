@@ -1,9 +1,12 @@
 target_sources(EngineTests
 PUBLIC
+    AccumulatedMutationTests.cpp
     AttackerTests.cpp
     BalanceTests.cpp
     CellStateTransitionTests.cpp
+    CellTypePropertiesMutationTests.cpp
     CommunicatorTests.cpp
+    ConnectionMutationTests.cpp
     ConstructorTests.cpp
     CreatureTests.cpp
     DataTransferTests.cpp
@@ -26,8 +29,8 @@ PUBLIC
     MemoryTests.cpp
     MetaMutationTests.cpp
     MuscleTests.cpp
-    MutationTests.cpp
     MutationTestsBase.h
+    NeuronMutationTests.cpp
     NeuronTests.cpp
     ObjectConnectionTests.cpp
     PhysicsTests.cpp
