@@ -392,6 +392,8 @@ namespace Const
     auto constexpr DigestorRawEnergyConductivity_Max = 1.0f;
     auto constexpr MemoryChannelBitMask_Min = uint16_t{0};
     auto constexpr MemoryChannelBitMask_Max = uint16_t{0xffff};
+    auto constexpr MemoryNumSignalEntries_Min = 0;
+    auto constexpr MemoryNumSignalEntries_Max = MAX_CELL_MEMORY_ENTRIES;
     auto constexpr SignalDelay_Min = 0;
     auto constexpr SignalDelay_Max = MAX_CELL_MEMORY_ENTRIES;
     auto constexpr SignalIntegratorNewSignalWeight_Min = 0.0f;
