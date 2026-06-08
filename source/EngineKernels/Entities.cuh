@@ -549,14 +549,28 @@ union ObjectTypeData
     Cell cell;
 };
 
-struct Object
+struct ObjectBase
 {
-    // Hot fields grouped first so per-object physics kernels touch one cache line. The neighbor scan does not read
-    // Object directly; it uses the compact ScanRecord mirror (see Map.cuh).
     float2 pos;
     float2 vel;
     float density;
     ObjectType type;
+
+    __device__ __inline__ float getMassForSPH() const
+    {
+        if (type == ObjectType_Fluid) {
+            return 0.1f;
+        } else if (type == ObjectType_Solid) {
+            return 2.0f;
+        } else {
+            return 1.0f;
+        }
+    }
+};
+
+struct Object : ObjectBase
+{
+    // Hot fields first to keep them in one cache line.
     float stiffness;
     uint8_t numConnections;
     uint8_t color;
@@ -624,17 +638,6 @@ struct Object
         }
     }
 
-    __device__ __inline__ float getMassForSPH() const
-    {
-        if (type == ObjectType_Fluid) {
-            return 0.1f;
-        } else if (type == ObjectType_Solid) {
-            return 2.0f;
-        } else {
-            return 1.0f;
-        }
-    }
-
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
         if ((connectionIndex1 - connectionIndex2 + numConnections) % numConnections == 0) {
@@ -689,6 +692,19 @@ struct Object
         __threadfence();
         atomicExch(&locked, 0);
     }
+};
+
+// Compact 40-byte mirror of Object for the neighbor scan: avoids touching the full ~500-byte Object per neighbor.
+struct __align__(8) ObjectForMap : ObjectBase
+{
+    Object* self;         // self before nextObjectIndex keeps the pointer 8-aligned (40 bytes)
+    int nextObjectIndex;  // next object in the same cell, -1 = end of chain
+    uint8_t numConnections;
+    uint8_t flags;  // bit0 = fixed, bit1 = detached, bit2 = sticky
+
+    __device__ __inline__ bool isFixed() const { return flags & 1; }
+    __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
+    __device__ __inline__ bool isSticky() const { return flags & 4; }
 };
 
 struct Entities

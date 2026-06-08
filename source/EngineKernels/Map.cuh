@@ -65,36 +65,6 @@ class BasicMap : public BaseMap
 public:
 };
 
-// Compact mirror of the Object fields read during the spatial neighbor scan. Built each timestep in set_block and
-// indexed by global object index; the cell map and per-cell chain use indices into this array, so a scan reads ~40
-// contiguous bytes per neighbor instead of dereferencing the full ~500-byte Object.
-struct __align__(8) ScanRecord
-{
-    float2 pos;
-    float2 vel;
-    float density;
-    int nextObjectIndex;  // Next object in the same cell, -1 = end of chain
-    Object* self;         // Full object, used for rare branches and force write-back
-    ObjectType type;
-    uint8_t numConnections;
-    uint8_t flags;  // bit0 = fixed, bit1 = detached, bit2 = sticky
-
-    __device__ __inline__ bool isFixed() const { return flags & 1; }
-    __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
-    __device__ __inline__ bool isSticky() const { return flags & 4; }
-
-    __device__ __inline__ float getMassForSPH() const
-    {
-        if (type == ObjectType_Fluid) {
-            return 0.1f;
-        } else if (type == ObjectType_Solid) {
-            return 2.0f;
-        } else {
-            return 1.0f;
-        }
-    }
-};
-
 class ObjectMap : public BaseMap
 {
 public:
@@ -175,7 +145,7 @@ public:
 
     __device__ __inline__ int getFirstIndex(int2 const& pos) const { return _mapHead[pos.x + pos.y * _size.x]; }
 
-    __device__ __inline__ ScanRecord* getRecords() const { return _records.getArray(); }
+    __device__ __inline__ ObjectForMap* getRecords() const { return _records.getArray(); }
 
     __device__ __inline__ void resetRecordLink(int index) { _records.at(index).nextObjectIndex = -1; }
 
@@ -261,7 +231,7 @@ public:
 private:
     int* _mapHead;
     Array<int> _mapEntries;
-    Array<ScanRecord> _records;
+    Array<ObjectForMap> _records;
 };
 
 class EnergyMap : public BaseMap
