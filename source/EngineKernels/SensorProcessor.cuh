@@ -378,8 +378,11 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
             auto const& restrictToColors = cell->cellTypeData.sensor.modeData.detectCreature.restrictToColors;
             auto const& restrictToLineage = cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
 
-            auto otherObject = data.objectMap.getFirst(scanPos);
-            while (otherObject != nullptr) {
+            auto records = data.objectMap.getRecords();
+            int otherIndex = data.objectMap.getFirstIndex(scanPos);
+            while (otherIndex >= 0) {
+                auto const& otherRecord = records[otherIndex];
+                auto otherObject = otherRecord.self;
                 // Check if this cell is part of a creature (not solid or free object)
                 if (otherObject->type == ObjectType_Cell && !cell->isSameCreature(&otherObject->typeData.cell)) {
                     bool matches = true;
@@ -411,20 +414,23 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                         return pack(distance, absAngle, density, creatureIdPart);
                     }
                 }
-                otherObject = otherObject->nextObject;
+                otherIndex = otherRecord.nextObjectIndex;
             }
 
             // Else: ScanType::Relocation
         } else {
             auto& sensor = cell->cellTypeData.sensor;
-            auto otherObject = data.objectMap.getFirst(scanPos);
-            while (otherObject != nullptr) {
+            auto records = data.objectMap.getRecords();
+            int otherIndex = data.objectMap.getFirstIndex(scanPos);
+            while (otherIndex >= 0) {
+                auto const& otherRecord = records[otherIndex];
+                auto otherObject = otherRecord.self;
                 if (otherObject->type == ObjectType_Cell && (otherObject->typeData.cell.creature->id & 0xffff) == sensor.lastMatch.creatureIdPart) {
                     uint16_t creatureIdPart = static_cast<uint16_t>(otherObject->typeData.cell.creature->id & 0xffff);
                     float density = calcCreatureDensityFromNumCells(otherObject->typeData.cell.creature->numCells);
                     return pack(distance, absAngle, density, creatureIdPart);
                 }
-                otherObject = otherObject->nextObject;
+                otherIndex = otherRecord.nextObjectIndex;
             }
         }
     }
@@ -449,12 +455,14 @@ SensorProcessor::isRayBlockedByCreatureConnections(Object** nearSameCreatureCell
 
 __inline__ __device__ bool SensorProcessor::isSolidAtPosition(SimulationData& data, float2 const& pos)
 {
-    auto object = data.objectMap.getFirst(pos);
-    while (object != nullptr) {
-        if (object->type == ObjectType_Solid) {
+    auto records = data.objectMap.getRecords();
+    int index = data.objectMap.getFirstIndex(pos);
+    while (index >= 0) {
+        auto const& record = records[index];
+        if (record.type == ObjectType_Solid) {
             return true;
         }
-        object = object->nextObject;
+        index = record.nextObjectIndex;
     }
     return false;
 }

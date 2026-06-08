@@ -551,9 +551,8 @@ union ObjectTypeData
 
 struct Object
 {
-    // Hot fields for the spatial neighbor scan, kept in the first cache line so the per-neighbor filter (pos,
-    // type) and linked-list traversal (nextObject) hit one line instead of three.
-    Object* nextObject;  // Linked list for finding all overlapping cells
+    // Hot fields grouped first so per-object physics kernels touch one cache line. The neighbor scan does not read
+    // Object directly; it uses the compact ScanRecord mirror (see Map.cuh).
     float2 pos;
     float2 vel;
     float density;

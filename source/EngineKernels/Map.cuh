@@ -65,30 +65,64 @@ class BasicMap : public BaseMap
 public:
 };
 
+// Compact mirror of the Object fields read during the spatial neighbor scan. Built each timestep in set_block and
+// indexed by global object index; the cell map and per-cell chain use indices into this array, so a scan reads ~40
+// contiguous bytes per neighbor instead of dereferencing the full ~500-byte Object.
+struct __align__(8) ScanRecord
+{
+    float2 pos;
+    float2 vel;
+    float density;
+    int nextObjectIndex;  // Next object in the same cell, -1 = end of chain
+    Object* self;         // Full object, used for rare branches and force write-back
+    ObjectType type;
+    uint8_t numConnections;
+    uint8_t flags;  // bit0 = fixed, bit1 = detached, bit2 = sticky
+
+    __device__ __inline__ bool isFixed() const { return flags & 1; }
+    __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
+    __device__ __inline__ bool isSticky() const { return flags & 4; }
+
+    __device__ __inline__ float getMassForSPH() const
+    {
+        if (type == ObjectType_Fluid) {
+            return 0.1f;
+        } else if (type == ObjectType_Solid) {
+            return 2.0f;
+        } else {
+            return 1.0f;
+        }
+    }
+};
+
 class ObjectMap : public BaseMap
 {
 public:
     __host__ __inline__ void init(int2 const& size)
     {
         BaseMap::init(size);
-        CudaMemoryManager::getInstance().acquireMemory<Object*>(size.x * size.y, _map);
+        CudaMemoryManager::getInstance().acquireMemory<int>(size.x * size.y, _mapHead);
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_mapHead, 0xFF, sizeof(int) * size.x * size.y));  // 0xFFFFFFFF = -1 = empty
         _mapEntries.init();
-
-        std::vector<Object*> hostMap(size.x * size.y, 0);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(_map, hostMap.data(), sizeof(Object*) * size.x * size.y, cudaMemcpyHostToDevice));
+        _records.init();
     }
 
-    __host__ __inline__ void resize(int maxEntries) { _mapEntries.resize(maxEntries); }
+    __host__ __inline__ void resize(int maxEntries)
+    {
+        _mapEntries.resize(maxEntries);
+        _records.resize(maxEntries);
+    }
 
     __device__ __inline__ void reset() { _mapEntries.reset(); }
 
     __host__ __inline__ void free()
     {
-        CudaMemoryManager::getInstance().freeMemory(_map);
+        CudaMemoryManager::getInstance().freeMemory(_mapHead);
         _mapEntries.free();
+        _records.free();
     }
 
-    __device__ __inline__ void set_block(int numEntities, Object** objects)
+    __device__ __inline__ void set_block(int baseIndex, int numEntities, Object** objects)
     {
         if (0 == numEntities) {
             return;
@@ -100,24 +134,31 @@ public:
         }
         __syncthreads();
 
+        auto records = _records.getArray();
         auto partition = calcThreadBlockPartition(numEntities);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& object = objects[index];
+            auto object = objects[index];
+            auto globalIndex = baseIndex + index;
+
+            auto& record = records[globalIndex];
+            record.pos = object->pos;
+            record.vel = object->vel;
+            record.density = object->density;
+            record.self = object;
+            record.type = object->type;
+            record.numConnections = object->numConnections;
+            record.flags = (object->fixed ? 1 : 0) | (object->detached ? 2 : 0) | (object->sticky ? 4 : 0);
+            // nextObjectIndex is reset to -1 in ObjectProcessor::init and only changed by atomicCAS below
+
             int2 posInt = {floorInt(object->pos.x), floorInt(object->pos.y)};
             correctPosition(posInt);
             auto slot = posInt.x + posInt.y * _size.x;
-            Object* slotObject = reinterpret_cast<Object*>(atomicCAS(
-                reinterpret_cast<unsigned long long int*>(&_map[slot]),
-                reinterpret_cast<unsigned long long int>(nullptr),
-                reinterpret_cast<unsigned long long int>(object)));
+            int slotIndex = atomicCAS(&_mapHead[slot], -1, globalIndex);
             for (int level = 0; level < 10; ++level) {
-                if (!slotObject) {
+                if (slotIndex < 0) {
                     break;
                 }
-                slotObject = reinterpret_cast<Object*>(atomicCAS(
-                    reinterpret_cast<unsigned long long int*>(&slotObject->nextObject),
-                    reinterpret_cast<unsigned long long int>(nullptr),
-                    reinterpret_cast<unsigned long long int>(object)));
+                slotIndex = atomicCAS(&records[slotIndex].nextObjectIndex, -1, globalIndex);
             }
 
             entrySubarray[index] = slot;
@@ -125,14 +166,30 @@ public:
         __syncthreads();
     }
 
-    __device__ __inline__ Object* getFirst(float2 const& pos) const
+    __device__ __inline__ int getFirstIndex(float2 const& pos) const
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         correctPosition(posInt);
-        return _map[posInt.x + posInt.y * _size.x];
+        return _mapHead[posInt.x + posInt.y * _size.x];
     }
 
-    __device__ __inline__ Object* getFirst(int2 const& pos) const { return _map[pos.x + pos.y * _size.x]; }
+    __device__ __inline__ int getFirstIndex(int2 const& pos) const { return _mapHead[pos.x + pos.y * _size.x]; }
+
+    __device__ __inline__ ScanRecord* getRecords() const { return _records.getArray(); }
+
+    __device__ __inline__ void resetRecordLink(int index) { _records.at(index).nextObjectIndex = -1; }
+
+    __device__ __inline__ Object* getFirst(float2 const& pos) const
+    {
+        auto index = getFirstIndex(pos);
+        return index < 0 ? nullptr : _records.at(index).self;
+    }
+
+    __device__ __inline__ Object* getFirst(int2 const& pos) const
+    {
+        auto index = getFirstIndex(pos);
+        return index < 0 ? nullptr : _records.at(index).self;
+    }
 
     template <typename MatchFunc>
     __device__ __inline__ void
@@ -141,24 +198,26 @@ public:
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         numObjects = 0;
         int radiusInt = ceilf(radius);
+        auto records = _records.getArray();
         for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
             for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
-                int slot = scanPos.x + scanPos.y * _size.x;
-                auto slotObject = _map[slot];
+                int index = _mapHead[scanPos.x + scanPos.y * _size.x];
                 for (int level = 0; level < 10; ++level) {
                     if (numObjects == arraySize) {
                         return;
                     }
-                    if (!slotObject) {
+                    if (index < 0) {
                         break;
                     }
+                    auto const& record = records[index];
+                    auto slotObject = record.self;  // Read fields live: this runs after positions changed since the map was built
                     if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached != 1 && matchFunc(slotObject)) {
                         objects[numObjects] = slotObject;
                         ++numObjects;
                     }
-                    slotObject = slotObject->nextObject;
+                    index = record.nextObjectIndex;
                 }
             }
         }
@@ -169,20 +228,22 @@ public:
     {
         int2 posInt = {floorInt(pos.x), floorInt(pos.y)};
         int radiusInt = ceilf(radius);
+        auto records = _records.getArray();
         for (int dy = -radiusInt; dy <= radiusInt; ++dy) {
             for (int dx = -radiusInt; dx <= radiusInt; ++dx) {
                 int2 scanPos{posInt.x + dx, posInt.y + dy};
                 correctPosition(scanPos);
-                int slot = scanPos.x + scanPos.y * _size.x;
-                auto slotObject = _map[slot];
+                int index = _mapHead[scanPos.x + scanPos.y * _size.x];
                 for (int level = 0; level < 10; ++level) {
-                    if (!slotObject) {
+                    if (index < 0) {
                         break;
                     }
+                    auto const& record = records[index];
+                    auto slotObject = record.self;  // Read fields live: this runs after positions changed since the map was built
                     if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached != 1) {
                         execFunc(slotObject);
                     }
-                    slotObject = slotObject->nextObject;
+                    index = record.nextObjectIndex;
                 }
             }
         }
@@ -193,13 +254,14 @@ public:
         auto partition = calcSystemThreadPartition(_mapEntries.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& mapEntry = _mapEntries.at(index);
-            _map[mapEntry] = nullptr;
+            _mapHead[mapEntry] = -1;
         }
     }
 
 private:
-    Object** _map;
+    int* _mapHead;
     Array<int> _mapEntries;
+    Array<ScanRecord> _records;
 };
 
 class EnergyMap : public BaseMap
