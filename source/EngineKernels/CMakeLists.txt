@@ -91,3 +91,5 @@ target_link_libraries(EngineKernels glad::glad)
 
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
 set_property(TARGET EngineKernels PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+
+alien_mark_hip_target(EngineKernels)

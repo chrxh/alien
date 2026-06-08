@@ -201,7 +201,13 @@ struct AlternativeSpec
     AlternativeMemberVariant _member = std::monostate();
 
     using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
-    MEMBER(AlternativeSpec, Alternatives, alternatives, {});
+    Alternatives _alternatives = {};
+    // Setters declared here, defined out-of-line below after ParameterSpec is complete.
+    // MSVC STL requires ParameterSpec to be complete for vector copy-assignment;
+    // defining the setter bodies inline here (before ParameterSpec) would trigger
+    // eager instantiation of vector<ParameterSpec>::operator= on an incomplete type.
+    AlternativeSpec& alternatives(Alternatives const& alternatives);
+    AlternativeSpec& alternatives(Alternatives&& alternatives);
 };
 
 struct ColorSpec
@@ -226,6 +232,19 @@ struct ParameterSpec
     MEMBER(ParameterSpec, bool, visible, true);
     MEMBER(ParameterSpec, std::optional<std::string>, description, std::nullopt);
 };
+
+// AlternativeSpec setter bodies defined here, after ParameterSpec is complete.
+// See forward-declaration above for the reason (MSVC STL incomplete-type constraint).
+inline AlternativeSpec& AlternativeSpec::alternatives(Alternatives const& alternatives)
+{
+    _alternatives = alternatives;
+    return *this;
+}
+inline AlternativeSpec& AlternativeSpec::alternatives(Alternatives&& alternatives)
+{
+    _alternatives = std::move(alternatives);
+    return *this;
+}
 
 struct ParameterGroupSpec
 {
