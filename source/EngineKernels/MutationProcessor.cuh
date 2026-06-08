@@ -432,19 +432,38 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         node.cellTypeData.memory.channelBitMask,
                         Const::MemoryChannelBitMask_Max);
 
-                    auto const numSignalEntries = static_cast<int>(node.cellTypeData.memory.numSignalEntries);
-                    if (rate.sigma > 0 && numSignalEntries > 0) {
-                        float signalMutations = 0.0f;
-                        for (int entryIndex = 0; entryIndex < numSignalEntries; ++entryIndex) {
-                            auto& entry = node.cellTypeData.memory.signalEntries[entryIndex];
-                            for (int channelIndex = 0; channelIndex < NEURONS_PER_CELL; ++channelIndex) {
-                                auto delta = generateGaussian(data) * rate.sigma;
-                                auto newValue = max(-2.0f, min(2.0f, entry.channels[channelIndex] + delta));
-                                signalMutations += abs(newValue - entry.channels[channelIndex]);
-                                entry.channels[channelIndex] = newValue;
+                    if (rate.sigma > 0) {
+                        auto& memory = node.cellTypeData.memory;
+                        auto oldNumSignalEntries = toInt(memory.numSignalEntries);
+                        auto roundedDelta = toInt(std::round(generateGaussian(data) * rate.sigma));
+                        auto newNumSignalEntries =
+                            max(Const::MemoryNumSignalEntries_Min, min(Const::MemoryNumSignalEntries_Max, oldNumSignalEntries + roundedDelta));
+                        if (newNumSignalEntries > oldNumSignalEntries) {
+                            auto newSignalEntries = data.entities.heap.getTypedSubArray<SignalEntryGenome>(newNumSignalEntries);
+                            for (int entryIndex = 0; entryIndex < newNumSignalEntries; ++entryIndex) {
+                                for (int channelIndex = 0; channelIndex < NEURONS_PER_CELL; ++channelIndex) {
+                                    newSignalEntries[entryIndex].channels[channelIndex] =
+                                        entryIndex < oldNumSignalEntries ? memory.signalEntries[entryIndex].channels[channelIndex] : 0.0f;
+                                }
                             }
+                            memory.signalEntries = newSignalEntries;
                         }
-                        atomicAdd_block(&accumulatedMutations, signalMutations / numSignalEntries);
+                        memory.numSignalEntries = static_cast<uint8_t>(newNumSignalEntries);
+                        atomicAdd_block(&accumulatedMutations, toFloat(std::abs(roundedDelta)));
+
+                        if (newNumSignalEntries > 0) {
+                            float signalMutations = 0.0f;
+                            for (int entryIndex = 0; entryIndex < newNumSignalEntries; ++entryIndex) {
+                                auto& entry = memory.signalEntries[entryIndex];
+                                for (int channelIndex = 0; channelIndex < NEURONS_PER_CELL; ++channelIndex) {
+                                    auto delta = generateGaussian(data) * rate.sigma;
+                                    auto newValue = max(-2.0f, min(2.0f, entry.channels[channelIndex] + delta));
+                                    signalMutations += abs(newValue - entry.channels[channelIndex]);
+                                    entry.channels[channelIndex] = newValue;
+                                }
+                            }
+                            atomicAdd_block(&accumulatedMutations, signalMutations / newNumSignalEntries);
+                        }
                     }
 
                     switch (node.cellTypeData.memory.mode) {
