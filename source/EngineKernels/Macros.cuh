@@ -1,12 +1,14 @@
 #pragma once
 
 #include <cassert>
+#include <chrono>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include <Base/AlienExceptions.h>
 #include <Base/GlobalSettings.h>
+#include <Base/KernelProfiler.h>
 #include <Base/LoggingService.h>
 #include <Base/Singleton.h>
 
@@ -92,44 +94,63 @@ void checkAndThrowError(T result)
 
 #define KERNEL_CALL(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
     }
 
 #define KERNEL_CALL_1_1(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<1, 1>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<1, 1>>>(__VA_ARGS__); \
     }
 
 #define KERNEL_CALL_MOD(func, threadsPerBlock, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
     }
 
-// Stream-based kernel launch macros for CUDA Graph capture
-// In debug mode, synchronize after each kernel for precise crash information
+// Stream-based kernel launch macros for CUDA Graph capture.
+// In debug mode, synchronize after each kernel (precise crash info) and record its duration; the regular
+// graph-captured path generates no synchronization or timing code.
 #define STREAM_KERNEL_CALL(func, stream, numBlocks, ...) \
-    func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
     if (GlobalSettings::get().isDebugMode()) { \
+        auto profStart = std::chrono::steady_clock::now(); \
+        func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
+    } else { \
+        func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
     }
 
 #define STREAM_KERNEL_CALL_1_1(func, stream, ...) \
-    func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
     if (GlobalSettings::get().isDebugMode()) { \
+        auto profStart = std::chrono::steady_clock::now(); \
+        func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
+    } else { \
+        func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
     }
 
 #define STREAM_KERNEL_CALL_MOD(func, stream, numBlocks, threadsPerBlock, ...) \
-    func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
     if (GlobalSettings::get().isDebugMode()) { \
+        auto profStart = std::chrono::steady_clock::now(); \
+        func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
+    } else { \
+        func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
     }
