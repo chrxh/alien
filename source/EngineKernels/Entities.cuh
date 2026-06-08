@@ -602,9 +602,6 @@ struct Object : ObjectBase
     {
         auto index = getConnectionIndex(connectedObject);
         return connections[index].distance;
-
-        DEVICE_CHECK(false);
-        return tempValue1.as_uint32_float.floatPart;  // Return some dummy in order to prevent compile error
     }
 
     __device__ __inline__ int getConnectionIndex(Object* connectedObject)

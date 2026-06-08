@@ -23,6 +23,10 @@
       "version>=": "1.84.0"
     },
     {
+      "name": "boost-pfr",
+      "version>=": "1.84.0"
+    },
+    {
       "name": "boost-property-tree",
       "version>=": "1.84.0"
     },
