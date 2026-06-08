@@ -4,6 +4,19 @@
 
 #include "Base.cuh"
 
+// HIP's float2/float3/int2 (HIP_vector_type) already define component-wise
+// arithmetic operators with the same semantics as the same-signature helpers
+// below, so on the HIP build those helpers are guarded out (with
+// ALIEN_NATIVE_VECTOR_OPS) to avoid an ambiguous overload. CUDA's vector types
+// carry no operators, so the CUDA path keeps all of them and is unchanged.
+// Mixed-type helpers (e.g. float2 - int2) have no HIP equivalent and stay
+// defined on both backends.
+#if defined(USE_HIP)
+#define ALIEN_NATIVE_VECTOR_OPS 1
+#else
+#define ALIEN_NATIVE_VECTOR_OPS 0
+#endif
+
 namespace Const
 {
     static float constexpr PI = 3.1415926535897932384626433832795f;
@@ -46,6 +59,7 @@ public:
     __inline__ __device__ static float2 crossReduced(float3 const& a, float2 const& b);
 };
 
+#if !ALIEN_NATIVE_VECTOR_OPS
 __inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q)
 {
     return {p.x + q.x, p.y + q.y};
@@ -57,11 +71,6 @@ __inline__ __device__ __host__ float3 operator+(float3 const& p, float3 const& q
 }
 
 __inline__ __device__ __host__ float2 operator-(float2 const& p, float2 const& q)
-{
-    return {p.x - q.x, p.y - q.y};
-}
-
-__inline__ __device__ __host__ float2 operator-(float2 const& p, int2 const& q)
 {
     return {p.x - q.x, p.y - q.y};
 }
@@ -132,6 +141,13 @@ __inline__ __device__ __host__ void operator-=(float2& p, float2 const& q)
 {
     p.x -= q.x;
     p.y -= q.y;
+}
+#endif  // !ALIEN_NATIVE_VECTOR_OPS
+
+// Mixed float2 - int2 has no native HIP overload; define it on both backends.
+__inline__ __device__ __host__ float2 operator-(float2 const& p, int2 const& q)
+{
+    return {p.x - q.x, p.y - q.y};
 }
 
 /************************************************************************/

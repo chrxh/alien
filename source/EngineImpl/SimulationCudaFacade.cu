@@ -714,9 +714,14 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
             cachedResult->gpuModelName = prop.name;
         }
     }
+#if !defined(USE_HIP)
+    // The CUDA compute-capability heuristic (major*100+minor, gated at >= 705)
+    // is meaningless for AMD GPUs, where prop.major/minor encode the gfx arch.
+    // On HIP accept the selected device unconditionally.
     if (highestComputeCapability < 705) {
         throw std::runtime_error("No CUDA device with compute capability of 7.5 or higher found.");
     }
+#endif
 
     return *cachedResult;
 }
