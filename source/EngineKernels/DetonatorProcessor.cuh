@@ -44,11 +44,11 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
             detonator.countdown = 0;
             statistics.incNumDetonations(object->color);
             data.objectMap.executeForEach(
-                object->pos, cudaSimulationParameters.detonatorRadius.value[object->color], object->detached, [&](Object* const& otherObject) {
+                object->pos, cudaSimulationParameters.detonatorRadius.value[object->color], object->detached(), [&](Object* const& otherObject) {
                     if (otherObject == object) {
                         return;
                     }
-                    if (otherObject->fixed) {
+                    if (otherObject->isFixed()) {
                         return;
                     }
                     auto delta = data.objectMap.getCorrectedDirection(otherObject->pos - object->pos);

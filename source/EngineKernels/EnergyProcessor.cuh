@@ -102,7 +102,7 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                 if (object->type == ObjectType_Fluid) {
                     continue;
                 }
-                if (object->fixed || object->type == ObjectType_Solid) {
+                if (object->isFixed() || object->type == ObjectType_Solid) {
                     auto vr = particle->vel - object->vel;
                     auto r = data.objectMap.getCorrectedDirection(particle->pos - object->pos);
                     auto dot_vr_r = Math::dot(vr, r);

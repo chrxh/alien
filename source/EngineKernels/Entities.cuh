@@ -555,6 +555,15 @@ struct ObjectBase
     float2 vel;
     float density;
     ObjectType type;
+    uint8_t flags;  // bit0 = fixed, bit1 = detached, bit2 = sticky
+
+    __device__ __inline__ bool isFixed() const { return flags & 1; }
+    __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
+    __device__ __inline__ bool isSticky() const { return flags & 4; }
+
+    __device__ __inline__ void setFixed(bool value) { flags = value ? (flags | 1) : (flags & ~1); }
+    __device__ __inline__ void setDetached(bool value) { flags = value ? (flags | 2) : (flags & ~2); }
+    __device__ __inline__ void setSticky(bool value) { flags = value ? (flags | 4) : (flags & ~4); }
 
     __device__ __inline__ float getMassForSPH() const
     {
@@ -574,10 +583,7 @@ struct Object : ObjectBase
     float stiffness;
     uint8_t numConnections;
     uint8_t color;
-    bool fixed;
-    bool sticky;
     uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
-    uint8_t detached;  // 0 = no, 1 = yes
     int locked;        // 0 = unlocked, 1 = locked
 
     // General
@@ -694,17 +700,12 @@ struct Object : ObjectBase
     }
 };
 
-// Compact 40-byte mirror of Object for the neighbor scan: avoids touching the full ~500-byte Object per neighbor.
+// Compact mirror of Object for the neighbor scan: avoids touching the full ~500-byte Object per neighbor.
 struct __align__(8) LightObject : ObjectBase
 {
-    Object* self;         // self before nextObjectIndex keeps the pointer 8-aligned (40 bytes)
+    Object* self;         // self first keeps the pointer 8-aligned
     int nextObjectIndex;  // next object in the same cell, -1 = end of chain
     uint8_t numConnections;
-    uint8_t flags;  // bit0 = fixed, bit1 = detached, bit2 = sticky
-
-    __device__ __inline__ bool isFixed() const { return flags & 1; }
-    __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
-    __device__ __inline__ bool isSticky() const { return flags & 4; }
 
     __device__ __inline__ void initFrom(Object* object)
     {
@@ -714,7 +715,7 @@ struct __align__(8) LightObject : ObjectBase
         type = object->type;
         self = object;
         numConnections = object->numConnections;
-        flags = (object->fixed ? 1 : 0) | (object->detached ? 2 : 0) | (object->sticky ? 4 : 0);
+        flags = object->flags;
     }
 };
 

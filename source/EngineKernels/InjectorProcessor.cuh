@@ -34,7 +34,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
         Object* injectedCell = nullptr;
         int numDefenders = 0;
         data.objectMap.executeForEach(
-            object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached, [&](auto const& otherObject) {
+            object->pos, cudaSimulationParameters.injectorRadius.value[object->color], object->detached(), [&](auto const& otherObject) {
                 if (injectedCell != nullptr) {
                     return;
                 }
@@ -44,7 +44,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                     return;
                 }
-                if (otherObject->fixed) {
+                if (otherObject->isFixed()) {
                     return;
                 }
                 if (!otherObject->typeData.cell.constructorAvailable) {

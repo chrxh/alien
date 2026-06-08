@@ -307,7 +307,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
     float2 newObjectPos = hostObject->pos + newObjectDirection / 2;
 
     if (ObjectConnectionProcessor::existCrossingConnections(
-            data, hostObject->pos, newObjectPos, cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color], hostObject->detached)) {
+            data, hostObject->pos, newObjectPos, cudaSimulationParameters.constructorConnectingCellDistance.value[hostObject->color], hostObject->detached())) {
         return nullptr;
     }
 
@@ -508,7 +508,7 @@ __inline__ __device__ void ConstructorProcessor::getObjectsToConnect(
         result[i] = nullptr;
     }
 
-    data.objectMap.executeForEach(newObjectPos, SimulationParameters::attackerCreatureSensorRange, hostObject->detached, [&](auto const& otherObject) {
+    data.objectMap.executeForEach(newObjectPos, SimulationParameters::attackerCreatureSensorRange, hostObject->detached(), [&](auto const& otherObject) {
         if (numResultCells == constructionData.shapeResult.numAdditionalConnections) {
             return;
         }

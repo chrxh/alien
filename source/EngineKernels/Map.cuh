@@ -170,7 +170,7 @@ public:
                     }
                     auto const& record = records[index];
                     auto slotObject = record.self;  // Read fields live: this runs after positions changed since the map was built
-                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached != 1 && matchFunc(slotObject)) {
+                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached() != 1 && matchFunc(slotObject)) {
                         objects[numObjects] = slotObject;
                         ++numObjects;
                     }
@@ -197,7 +197,7 @@ public:
                     }
                     auto const& record = records[index];
                     auto slotObject = record.self;  // Read fields live: this runs after positions changed since the map was built
-                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached != 1) {
+                    if (Math::length(slotObject->pos - pos) <= radius && detached + slotObject->detached() != 1) {
                         execFunc(slotObject);
                     }
                     index = record.nextObjectIndex;
