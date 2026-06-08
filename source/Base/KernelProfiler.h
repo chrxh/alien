@@ -8,13 +8,8 @@
 
 #include "Singleton.h"
 
-// Lightweight per-kernel profiler.
-//
-// It is only active when explicitly enabled (see setEnabled). The recording is meant to be driven from the
-// stream kernel-call macros while debug mode is active: there each kernel launch is followed by a stream
-// synchronization, so the measured wall-clock interval around a launch corresponds to that kernel's execution
-// (plus a small, constant launch/sync overhead). The accumulated times therefore give a faithful ranking of
-// where the simulation spends its GPU time.
+// Accumulates per-kernel wall-clock durations. Only active when enabled; fed by the kernel-call macros in debug
+// mode, where each launch is followed by a stream sync so the recorded duration is the kernel's execution time.
 class KernelProfiler
 {
     MAKE_SINGLETON(KernelProfiler);
@@ -23,7 +18,7 @@ public:
     void setEnabled(bool value) { _enabled = value; }
     bool isEnabled() const { return _enabled; }
 
-    void record(char const* name, std::chrono::steady_clock::time_point start);
+    void record(char const* name, std::chrono::steady_clock::duration duration);
 
     void reset();
     std::string getReport() const;

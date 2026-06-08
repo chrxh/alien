@@ -551,9 +551,8 @@ union ObjectTypeData
 
 struct Object
 {
-    // Hot fields read while scanning the spatial object map (SPH fluid forces, connection/verlet/cell-state kernels).
-    // They are grouped at the front so that the per-neighbor filter (type, pos) and the linked-list traversal
-    // (nextObject) hit a single cache line instead of being spread across the large struct.
+    // Hot fields for the spatial neighbor scan, kept in the first cache line so the per-neighbor filter (pos,
+    // type) and linked-list traversal (nextObject) hit one line instead of three.
     Object* nextObject;  // Linked list for finding all overlapping cells
     float2 pos;
     float2 vel;

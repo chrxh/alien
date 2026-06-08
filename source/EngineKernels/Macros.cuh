@@ -94,63 +94,63 @@ void checkAndThrowError(T result)
 
 #define KERNEL_CALL(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
-        auto _profStart = std::chrono::steady_clock::now(); \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
-        KernelProfiler::get().record(#func, _profStart); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
     }
 
 #define KERNEL_CALL_1_1(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
-        auto _profStart = std::chrono::steady_clock::now(); \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<1, 1>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
-        KernelProfiler::get().record(#func, _profStart); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<1, 1>>>(__VA_ARGS__); \
     }
 
 #define KERNEL_CALL_MOD(func, threadsPerBlock, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
-        auto _profStart = std::chrono::steady_clock::now(); \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaDeviceSynchronize()); \
-        KernelProfiler::get().record(#func, _profStart); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
     }
 
-// Stream-based kernel launch macros for CUDA Graph capture
-// In debug mode, synchronize after each kernel for precise crash information and record its wall-clock time for
-// profiling. On the regular (graph-captured) path no synchronization or timing code is generated.
+// Stream-based kernel launch macros for CUDA Graph capture.
+// In debug mode, synchronize after each kernel (precise crash info) and record its duration; the regular
+// graph-captured path generates no synchronization or timing code.
 #define STREAM_KERNEL_CALL(func, stream, numBlocks, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
-        auto _profStart = std::chrono::steady_clock::now(); \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
-        KernelProfiler::get().record(#func, _profStart); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
     }
 
 #define STREAM_KERNEL_CALL_1_1(func, stream, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
-        auto _profStart = std::chrono::steady_clock::now(); \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
-        KernelProfiler::get().record(#func, _profStart); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
     }
 
 #define STREAM_KERNEL_CALL_MOD(func, stream, numBlocks, threadsPerBlock, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
-        auto _profStart = std::chrono::steady_clock::now(); \
+        auto profStart = std::chrono::steady_clock::now(); \
         func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
         CHECK_FOR_DEVICE_ERRORS(cudaStreamSynchronize(stream)); \
-        KernelProfiler::get().record(#func, _profStart); \
+        KernelProfiler::get().record(#func, std::chrono::steady_clock::now() - profStart); \
     } else { \
         func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
     }

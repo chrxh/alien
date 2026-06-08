@@ -5,17 +5,17 @@
 #include <sstream>
 #include <vector>
 
-void KernelProfiler::record(char const* name, std::chrono::steady_clock::time_point start)
+void KernelProfiler::record(char const* name, std::chrono::steady_clock::duration duration)
 {
     if (!_enabled) {
         return;
     }
-    auto elapsed = std::chrono::duration<double, std::nano>(std::chrono::steady_clock::now() - start).count();
+    auto nanoseconds = std::chrono::duration<double, std::nano>(duration).count();
 
     std::lock_guard lock(_mutex);
     auto& entry = _entries[name];
     ++entry.count;
-    entry.totalNanoseconds += elapsed;
+    entry.totalNanoseconds += nanoseconds;
 }
 
 void KernelProfiler::reset()
