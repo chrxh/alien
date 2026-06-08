@@ -617,7 +617,7 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
 __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject)
 {
     auto result = false;
-    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](Object* nearObject) {
+    data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](Object* nearObject) {
         if (result) {
             return;
         }

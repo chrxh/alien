@@ -302,8 +302,8 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         connections.emplace_back(connection);
     }
     result._connections = connections;
-    result._fixed = objectTO.fixed;
-    result._sticky = objectTO.sticky;
+    result._fixed = objectTO.isFixed();
+    result._sticky = objectTO.isSticky();
     result._color = objectTO.color;
 
     // Handle object type: Solid, Fluid, FreeCell, or Cell
@@ -1245,8 +1245,9 @@ void DescConverterService::convertObjectToTO(
     objectTO.vel = {objectDesc._vel.x, objectDesc._vel.y};
     objectTO.stiffness = objectDesc._stiffness;
     objectTO.numConnections = 0;
-    objectTO.fixed = objectDesc._fixed;
-    objectTO.sticky = objectDesc._sticky;
+    objectTO.flags = 0;
+    objectTO.setFixed(objectDesc._fixed);
+    objectTO.setSticky(objectDesc._sticky);
     objectTO.color = objectDesc._color;
 
     // Set object type

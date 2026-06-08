@@ -188,14 +188,14 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                         adaptedDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
                     }
 
-                    if (other.isFixed() && adaptedDistance <= smoothingLength * 2 && object->detached + other.detached() != 1) {
+                    if (other.isFixed() && adaptedDistance <= smoothingLength * 2 && object->detached() + other.detached() != 1) {
                         auto index = atomicAdd(&numFixedObjects, 1);
                         if (index < MaxBarrierCellsForCollision) {
                             fixedCells[index] = other.self;
                         }
                     }
 
-                    if (!other.isFixed() && adaptedDistance <= smoothingLength * 2 && object->detached + other.detached() != 1) {
+                    if (!other.isFixed() && adaptedDistance <= smoothingLength * 2 && object->detached() + other.detached() != 1) {
 
                         // Calc density
                         auto otherMass = other.getMassForSPH();
@@ -204,7 +204,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                         if (object != other.self) {
 
                             // Overlap correction
-                            if (!object->fixed && origDistance < cudaSimulationParameters.minObjectDistance.value) {
+                            if (!object->isFixed() && origDistance < cudaSimulationParameters.minObjectDistance.value) {
                                 localCellPosDelta.x += posDelta.x * cudaSimulationParameters.minObjectDistance.value / 5;
                                 localCellPosDelta.y += posDelta.y * cudaSimulationParameters.minObjectDistance.value / 5;
                             }
@@ -240,7 +240,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
                             // Fusion
                             if (Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_OBJECT_CONNECTIONS
-                                && other.numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || other.isSticky()) && !object->fixed
+                                && other.numConnections < MAX_OBJECT_CONNECTIONS && (object->isSticky() || other.isSticky()) && !object->isFixed()
                                 && !other.isFixed()) {
                                 ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, other.self);
                             }
@@ -378,7 +378,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                 }
                 auto const& other = records[otherIndex];
                 auto otherObject = other.self;  // Read fields live: this runs after calcFluidForces nudged positions
-                if (other.type != ObjectType_Fluid && otherObject != object && object->detached + otherObject->detached != 1) {
+                if (other.type != ObjectType_Fluid && otherObject != object && object->detached() + otherObject->detached() != 1) {
 
                     auto posDelta = object->pos - otherObject->pos;
                     data.objectMap.correctDirection(posDelta);
@@ -430,7 +430,7 @@ __inline__ __device__ void ObjectProcessor::checkForces(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
         object->density = object->tempValue2.as_float2.x;
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
 
@@ -450,7 +450,7 @@ __inline__ __device__ void ObjectProcessor::applyForces(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
         auto acceleration = object->tempValue1.as_float2 / max(0.05f, object->density) * 0.5f;
@@ -472,7 +472,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (0 == object->numConnections /* || object->fixed*/) {
+        if (0 == object->numConnections /* || object->isFixed()*/) {
             continue;
         }
         float2 force{0, 0};
@@ -538,7 +538,7 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
 
@@ -566,7 +566,7 @@ __inline__ __device__ void ObjectProcessor::verletPositionUpdate(SimulationData&
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             object->pos += object->vel * cudaSimulationParameters.timestepSize.value;
             data.objectMap.correctPosition(object->pos);
         } else {
@@ -586,7 +586,7 @@ __inline__ __device__ void ObjectProcessor::verletVelocityUpdate(SimulationData&
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
         auto acceleration = (object->tempValue1.as_float2 + object->tempValue2.as_float2) / 2;
@@ -602,12 +602,12 @@ __inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& d
     auto const innerFriction = cudaSimulationParameters.innerFriction.value;
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
         for (int index = 0; index < object->numConnections; ++index) {
             auto connectedObject = object->connections[index].object;
-            if (connectedObject->fixed) {
+            if (connectedObject->isFixed()) {
                 continue;
             }
             auto posDelta = object->pos - connectedObject->pos;
@@ -634,7 +634,7 @@ __inline__ __device__ void ObjectProcessor::applyFriction(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
 
@@ -650,7 +650,7 @@ __inline__ __device__ void ObjectProcessor::radiation(SimulationData& data)
     auto partition = calcSystemThreadPartition(objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
         if (object->type == ObjectType_Solid || object->type == ObjectType_Fluid) {

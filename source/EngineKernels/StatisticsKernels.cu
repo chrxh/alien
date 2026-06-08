@@ -78,7 +78,7 @@ __global__ void cudaUpdateHistogramData_substep2(SimulationData data, Simulation
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
         if (object->type == ObjectType_Cell) {
@@ -97,7 +97,7 @@ __global__ void cudaUpdateHistogramData_substep3(SimulationData data, Simulation
     auto maxAge = statistics.getMaxAge();
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->fixed) {
+        if (object->isFixed()) {
             continue;
         }
         if (object->type == ObjectType_Cell) {

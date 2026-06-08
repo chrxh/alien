@@ -46,7 +46,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (object->fixed) {
+    if (object->isFixed()) {
         return;
     }
     auto const& cell = &object->typeData.cell;
@@ -67,7 +67,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         int numSensorTargets = 0;
         if (attackerMode == AttackerMode_Creature) {
             auto creatureId = cell->creature->id;
-            data.objectMap.executeForEach(object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached, [&](auto const& nearObject) {
+            data.objectMap.executeForEach(object->pos, SimulationParameters::attackerCreatureSensorRange, object->detached(), [&](auto const& nearObject) {
                 if (nearObject->type != ObjectType_Cell) {
                     return;
                 }
@@ -112,11 +112,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         auto sumEnergyToTransfer = 0.0f;
         data.objectMap.executeForEach(
-            object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
+            object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached(), [&](auto const& otherObject) {
                 if (otherObject->type == ObjectType_Solid || otherObject->type == ObjectType_Fluid) {
                     return;
                 }
-                if (otherObject->fixed) {
+                if (otherObject->isFixed()) {
                     return;
                 }
 
@@ -191,8 +191,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     }
 
                     // Calculate energy gain
-                    auto energyToTransfer =
-                        calcAttackableEnergy(otherCell) * cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION;
+                    auto energyToTransfer = calcAttackableEnergy(otherCell) * cudaSimulationParameters.attackerStrength.value * TIMESTEPS_PER_CELL_FUNCTION;
 
                     auto color = calcMod(object->color, MAX_COLORS);
                     auto otherColor = calcMod(otherObject->color, MAX_COLORS);

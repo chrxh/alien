@@ -95,7 +95,8 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             genomeTO.mutationRates.neuronMutations[i].weightSigma,
             genomeTO.mutationRates.neuronMutations[i].biasSigma,
             genomeTO.mutationRates.neuronMutations[i].activationFunctionProbability};
-        genome->mutationRates.connectionMutations[i] = {genomeTO.mutationRates.connectionMutations[i].eventProbability, genomeTO.mutationRates.connectionMutations[i].sigma};
+        genome->mutationRates.connectionMutations[i] = {
+            genomeTO.mutationRates.connectionMutations[i].eventProbability, genomeTO.mutationRates.connectionMutations[i].sigma};
         genome->mutationRates.cellTypePropertiesMutations[i] = {
             genomeTO.mutationRates.cellTypePropertiesMutations[i].eventProbability,
             genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma,
@@ -329,10 +330,10 @@ __inline__ __device__ Object* EntityFactory::createObjectFromTO(TOs const& to, i
     Object* object = objectArray + objectIndex;
     *objectPointer = object;
 
+    object->flags = 0;
     changeObjectFromTO(to, objectTO, object);
     object->id = objectTO.id;
     object->locked = 0;
-    object->detached = 0;
     object->selected = 0;
     object->numConnections = objectTO.numConnections;
     if (object->type == ObjectType_Cell) {
@@ -357,8 +358,8 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
     object->vel = objectTO.vel;
     object->stiffness = objectTO.stiffness;
     object->color = objectTO.color;
-    object->fixed = objectTO.fixed;
-    object->sticky = objectTO.sticky;
+    object->setFixed(objectTO.isFixed());
+    object->setSticky(objectTO.isSticky());
     object->type = objectTO.type;
 
     if (objectTO.type == ObjectType_Solid) {
@@ -645,10 +646,8 @@ __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2
     object->numConnections = 0;
     object->locked = 0;
     object->selected = 0;
-    object->detached = 0;
+    object->flags = 0;
     object->color = 0;
-    object->fixed = false;
-    object->sticky = false;
     object->density = 1.0f;
     object->type = ObjectType_FreeCell;
     object->typeData.freeCell.event = CellEvent_No;
@@ -716,12 +715,10 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     object->vel = vel;
     object->stiffness = gene->stiffness;
     object->color = node->color;
-    object->fixed = false;
-    object->sticky = false;
+    object->flags = 0;
     object->numConnections = 0;
     object->type = ObjectType_Cell;
     object->selected = 0;
-    object->detached = 0;
     object->locked = 0;
     object->density = 1.0f;
 

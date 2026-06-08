@@ -176,7 +176,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
         if (1 != object->selected) {
             continue;
         }
-        data.objectMap.executeForEach(object->pos, 1.3f, object->detached, [&](auto const& otherObject) {
+        data.objectMap.executeForEach(object->pos, 1.3f, object->detached(), [&](auto const& otherObject) {
             if (!otherObject || otherObject == object) {
                 return;
             }
@@ -349,7 +349,7 @@ __global__ void cudaMakeSticky(SimulationData data, bool includeClusters)
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, includeClusters)) {
-            object->sticky = true;
+            object->setSticky(true);
         }
     }
 }
@@ -360,7 +360,7 @@ __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, includeClusters)) {
-            object->sticky = false;
+            object->setSticky(false);
         }
     }
 }
@@ -371,7 +371,7 @@ __global__ void cudaSetBarrier(SimulationData data, bool value, bool includeClus
     for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (isSelected(object, includeClusters)) {
-            object->fixed = value;
+            object->setFixed(value);
         }
     }
 }
@@ -423,7 +423,7 @@ __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
             auto pos = object->pos;
             pos += data.objectMap.getCorrectionIncrement(applyData.startPos, pos);
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
-            if (distanceToSegment < applyData.radius && !object->fixed) {
+            if (distanceToSegment < applyData.radius && !object->isFixed()) {
                 auto weightedForce = applyData.force;
                 //*(actionRadius - distanceToSegment) / actionRadius;
                 object->vel = object->vel + weightedForce;
@@ -452,7 +452,7 @@ __global__ void cudaSetDetached(SimulationData data, bool value)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
-            object->detached = value ? 1 : 0;
+            object->setDetached(value);
         }
     }
 }

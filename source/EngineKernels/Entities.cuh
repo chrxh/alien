@@ -549,6 +549,8 @@ union ObjectTypeData
     Cell cell;
 };
 
+// Geometry data shared by Object and LightObject. Kept at exactly 24 bytes (no tail padding) so that
+// derived structs stay compact; the flags byte lives in the derived structs where it packs without padding.
 struct ObjectBase
 {
     float2 pos;
@@ -574,15 +576,21 @@ struct Object : ObjectBase
     float stiffness;
     uint8_t numConnections;
     uint8_t color;
-    bool fixed;
-    bool sticky;
     uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
-    uint8_t detached;  // 0 = no, 1 = yes
+    uint8_t flags;     // bit0 = fixed, bit1 = detached, bit2 = sticky
     int locked;        // 0 = unlocked, 1 = locked
 
     // General
     uint64_t id;
     ObjectConnection connections[MAX_OBJECT_CONNECTIONS];
+
+    __device__ __inline__ bool isFixed() const { return flags & 1; }
+    __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
+    __device__ __inline__ bool isSticky() const { return flags & 4; }
+
+    __device__ __inline__ void setFixed(bool value) { flags = value ? (flags | 1) : (flags & ~1); }
+    __device__ __inline__ void setDetached(bool value) { flags = value ? (flags | 2) : (flags & ~2); }
+    __device__ __inline__ void setSticky(bool value) { flags = value ? (flags | 4) : (flags & ~4); }
 
     // Internal algorithm data
     TempValue tempValue1;
@@ -714,9 +722,12 @@ struct __align__(8) LightObject : ObjectBase
         type = object->type;
         self = object;
         numConnections = object->numConnections;
-        flags = (object->fixed ? 1 : 0) | (object->detached ? 2 : 0) | (object->sticky ? 4 : 0);
+        flags = object->flags;
     }
 };
+
+// Keep the neighbor-scan mirror compact: growing it directly costs memory bandwidth in the hot SPH kernels.
+static_assert(sizeof(LightObject) == 40, "LightObject must stay 40 bytes for the neighbor scan");
 
 struct Entities
 {

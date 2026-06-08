@@ -302,8 +302,9 @@ namespace
         objectTO.vel = object->vel;
         objectTO.stiffness = object->stiffness;
         objectTO.color = object->color;
-        objectTO.fixed = object->fixed;
-        objectTO.sticky = object->sticky;
+        objectTO.flags = 0;
+        objectTO.setFixed(object->isFixed());
+        objectTO.setSticky(object->isSticky());
         objectTO.type = object->type;
 
         for (int i = 0; i < object->numConnections; ++i) {
