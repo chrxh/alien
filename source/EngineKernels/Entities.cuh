@@ -706,7 +706,6 @@ struct __align__(8) LightObject : ObjectBase
     __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
     __device__ __inline__ bool isSticky() const { return flags & 4; }
 
-    // Fill from object. nextObjectIndex is left untouched (managed via atomicCAS in ObjectMap).
     __device__ __inline__ void initFrom(Object* object)
     {
         pos = object->pos;
