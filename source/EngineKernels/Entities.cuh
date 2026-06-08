@@ -551,30 +551,32 @@ union ObjectTypeData
 
 struct Object
 {
-    // General
-    uint64_t id;
-    uint8_t numConnections;
-    ObjectConnection connections[MAX_OBJECT_CONNECTIONS];
+    // Hot fields read while scanning the spatial object map (SPH fluid forces, connection/verlet/cell-state kernels).
+    // They are grouped at the front so that the per-neighbor filter (type, pos) and the linked-list traversal
+    // (nextObject) hit a single cache line instead of being spread across the large struct.
+    Object* nextObject;  // Linked list for finding all overlapping cells
     float2 pos;
     float2 vel;
+    float density;
+    ObjectType type;
     float stiffness;
+    uint8_t numConnections;
     uint8_t color;
     bool fixed;
     bool sticky;
-    ObjectType type;
-    ObjectTypeData typeData;
-
-    // Editing data
     uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
     uint8_t detached;  // 0 = no, 1 = yes
+    int locked;        // 0 = unlocked, 1 = locked
+
+    // General
+    uint64_t id;
+    ObjectConnection connections[MAX_OBJECT_CONNECTIONS];
 
     // Internal algorithm data
-    int locked;  // 0 = unlocked, 1 = locked
     TempValue tempValue1;
     TempValue tempValue2;
 
-    float density;
-    Object* nextObject;  // Linked list for finding all overlapping cells
+    ObjectTypeData typeData;
 
     __device__ __inline__ float& getRefDistance(Object* connectedObject)
     {
