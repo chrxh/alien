@@ -695,7 +695,7 @@ struct Object : ObjectBase
 };
 
 // Compact 40-byte mirror of Object for the neighbor scan: avoids touching the full ~500-byte Object per neighbor.
-struct __align__(8) ObjectForMap : ObjectBase
+struct __align__(8) LightObject : ObjectBase
 {
     Object* self;         // self before nextObjectIndex keeps the pointer 8-aligned (40 bytes)
     int nextObjectIndex;  // next object in the same cell, -1 = end of chain
@@ -705,6 +705,18 @@ struct __align__(8) ObjectForMap : ObjectBase
     __device__ __inline__ bool isFixed() const { return flags & 1; }
     __device__ __inline__ int detached() const { return (flags >> 1) & 1; }
     __device__ __inline__ bool isSticky() const { return flags & 4; }
+
+    // Fill from object. nextObjectIndex is left untouched (managed via atomicCAS in ObjectMap).
+    __device__ __inline__ void initFrom(Object* object)
+    {
+        pos = object->pos;
+        vel = object->vel;
+        density = object->density;
+        type = object->type;
+        self = object;
+        numConnections = object->numConnections;
+        flags = (object->fixed ? 1 : 0) | (object->detached ? 2 : 0) | (object->sticky ? 4 : 0);
+    }
 };
 
 struct Entities

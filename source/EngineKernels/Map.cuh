@@ -59,12 +59,6 @@ protected:
     int2 _size;
 };
 
-template <typename T>
-class BasicMap : public BaseMap
-{
-public:
-};
-
 class ObjectMap : public BaseMap
 {
 public:
@@ -72,7 +66,7 @@ public:
     {
         BaseMap::init(size);
         CudaMemoryManager::getInstance().acquireMemory<int>(size.x * size.y, _mapHead);
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_mapHead, 0xFF, sizeof(int) * size.x * size.y));  // 0xFFFFFFFF = -1 = empty
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_mapHead, 0xff, sizeof(int) * size.x * size.y));  // 0xffffffff = -1 = empty
         _mapEntries.init();
         _records.init();
     }
@@ -111,14 +105,7 @@ public:
             auto globalIndex = baseIndex + index;
 
             auto& record = records[globalIndex];
-            record.pos = object->pos;
-            record.vel = object->vel;
-            record.density = object->density;
-            record.self = object;
-            record.type = object->type;
-            record.numConnections = object->numConnections;
-            record.flags = (object->fixed ? 1 : 0) | (object->detached ? 2 : 0) | (object->sticky ? 4 : 0);
-            // nextObjectIndex is reset to -1 in ObjectProcessor::init and only changed by atomicCAS below
+            record.initFrom(object);
 
             int2 posInt = {floorInt(object->pos.x), floorInt(object->pos.y)};
             correctPosition(posInt);
@@ -145,7 +132,7 @@ public:
 
     __device__ __inline__ int getFirstIndex(int2 const& pos) const { return _mapHead[pos.x + pos.y * _size.x]; }
 
-    __device__ __inline__ ObjectForMap* getRecords() const { return _records.getArray(); }
+    __device__ __inline__ LightObject* getRecords() const { return _records.getArray(); }
 
     __device__ __inline__ void resetRecordLink(int index) { _records.at(index).nextObjectIndex = -1; }
 
@@ -231,7 +218,7 @@ public:
 private:
     int* _mapHead;
     Array<int> _mapEntries;
-    Array<ObjectForMap> _records;
+    Array<LightObject> _records;
 };
 
 class EnergyMap : public BaseMap
