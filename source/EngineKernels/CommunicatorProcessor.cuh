@@ -130,12 +130,15 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         data.objectMap.correctPosition(scanPos);
 
         // Check all cells at this position (including overlapping cells)
-        auto otherObject = data.objectMap.getFirst(scanPos);
-        while (otherObject != nullptr) {
+        auto records = data.objectMap.getRecords();
+        int otherIndex = data.objectMap.getFirstIndex(scanPos);
+        while (otherIndex >= 0) {
+            auto const& otherRecord = records[otherIndex];
+            auto otherObject = otherRecord.self;
             if (isMatch(otherObject)) {
                 tryTransmitSignal(data, object, otherObject, newNumTimesSent);
             }
-            otherObject = otherObject->nextObject;
+            otherIndex = otherRecord.nextObjectIndex;
         }
     }
 }

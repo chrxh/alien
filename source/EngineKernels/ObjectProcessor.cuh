@@ -53,7 +53,7 @@ __inline__ __device__ void ObjectProcessor::init(SimulationData& data)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
 
-        object->nextObject = nullptr;
+        data.objectMap.resetRecordLink(index);
         object->tempValue1.as_uint64 = 0;
     }
 }
@@ -62,7 +62,7 @@ __inline__ __device__ void ObjectProcessor::updateMap(SimulationData& data)
 {
     auto const partition = calcBlockPartition(data.entities.objects.getNumEntries());
     Object** objectPointers = &data.entities.objects.at(partition.startIndex);
-    data.objectMap.set_block(partition.numElements(), objectPointers);
+    data.objectMap.set_block(partition.startIndex, partition.numElements(), objectPointers);
 }
 
 __inline__ __device__ void ObjectProcessor::clearDensityMap(SimulationData& data)
@@ -166,40 +166,42 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
         float2 localCellPosDelta = {0, 0};
         float localDensity = 0;
 
+        auto records = data.objectMap.getRecords();
         for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
             int2 scanPos{cellPosInt.x + (scanIndex % scanLength), cellPosInt.y + (scanIndex / scanLength)};
             data.objectMap.correctPosition(scanPos);
-            auto otherObject = data.objectMap.getFirst(scanPos);
+            int otherIndex = data.objectMap.getFirstIndex(scanPos);
             for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
-                if (!otherObject) {
+                if (otherIndex < 0) {
                     break;
                 }
-                if ((isObjectFluid && otherObject->type == ObjectType_Fluid) || (!isObjectFluid && otherObject->type != ObjectType_Fluid)) {
-                    auto posDelta = object->pos - otherObject->pos;
+                auto const& other = records[otherIndex];
+                if ((isObjectFluid && other.type == ObjectType_Fluid) || (!isObjectFluid && other.type != ObjectType_Fluid)) {
+                    auto posDelta = object->pos - other.pos;
 
                     data.objectMap.correctDirection(posDelta);
                     auto adaptedDistance = Math::length(posDelta);
                     auto origDistance = adaptedDistance;
-                    if ((object->numConnections < 3 || otherObject->numConnections < 3) && object->type == ObjectType_Cell
-                        && otherObject->type == ObjectType_Cell && object->typeData.cell.isSameCreature(&otherObject->typeData.cell)
-                        && object->typeData.cell.parentNodeIndex != otherObject->typeData.cell.parentNodeIndex) {
+                    if ((object->numConnections < 3 || other.numConnections < 3) && object->type == ObjectType_Cell && other.type == ObjectType_Cell
+                        && object->typeData.cell.isSameCreature(&other.self->typeData.cell)
+                        && object->typeData.cell.parentNodeIndex != other.self->typeData.cell.parentNodeIndex) {
                         adaptedDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
                     }
 
-                    if (otherObject->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherObject->detached != 1) {
+                    if (other.isFixed() && adaptedDistance <= smoothingLength * 2 && object->detached + other.detached() != 1) {
                         auto index = atomicAdd(&numFixedObjects, 1);
                         if (index < MaxBarrierCellsForCollision) {
-                            fixedCells[index] = otherObject;
+                            fixedCells[index] = other.self;
                         }
                     }
 
-                    if (!otherObject->fixed && adaptedDistance <= smoothingLength * 2 && object->detached + otherObject->detached != 1) {
+                    if (!other.isFixed() && adaptedDistance <= smoothingLength * 2 && object->detached + other.detached() != 1) {
 
                         // Calc density
-                        auto otherMass = otherObject->getMassForSPH();
+                        auto otherMass = other.getMassForSPH();
                         localDensity += otherMass * calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
 
-                        if (object != otherObject) {
+                        if (object != other.self) {
 
                             // Overlap correction
                             if (!object->fixed && origDistance < cudaSimulationParameters.minObjectDistance.value) {
@@ -207,21 +209,20 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                                 localCellPosDelta.y += posDelta.y * cudaSimulationParameters.minObjectDistance.value / 5;
                             }
 
-                            auto velDelta = object->vel - otherObject->vel;
+                            auto velDelta = object->vel - other.vel;
                             bool isConnected = false;
                             for (int i = 0; i < object->numConnections; ++i) {
                                 auto const& connectedObject = object->connections[i].object;
-                                if (connectedObject == otherObject) {
+                                if (connectedObject == other.self) {
                                     isConnected = true;
                                 }
                             }
                             if (!isConnected) {
 
                                 // Calc forces: for simplicity pressure = density
-                                auto const& cellPressure = object->density;              // Optimization: using the density from last time step
-                                auto const& otherObjectPressure = otherObject->density;  // Optimization: using the density from last time step
-                                auto factor =
-                                    cellPressure / (object->density * object->density) + otherObjectPressure / (otherObject->density * otherObject->density);
+                                auto const& cellPressure = object->density;       // Optimization: using the density from last time step
+                                auto const& otherObjectPressure = other.density;  // Optimization: using the density from last time step
+                                auto factor = cellPressure / (object->density * object->density) + otherObjectPressure / (other.density * other.density);
 
                                 if (adaptedDistance > NEAR_ZERO) {
                                     float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
@@ -231,7 +232,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                                     localF_pressure.y += F_pressureDelta.y;
 
                                     auto F_viscosityDelta =
-                                        velDelta / otherObject->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f) * otherMass;
+                                        velDelta / other.density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f) * otherMass;
                                     localF_viscosity.x += F_viscosityDelta.x;
                                     localF_viscosity.y += F_viscosityDelta.y;
                                 }
@@ -239,14 +240,14 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
 
                             // Fusion
                             if (Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_OBJECT_CONNECTIONS
-                                && otherObject->numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || otherObject->sticky) && !object->fixed
-                                && !otherObject->fixed) {
-                                ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherObject);
+                                && other.numConnections < MAX_OBJECT_CONNECTIONS && (object->sticky || other.isSticky()) && !object->fixed
+                                && !other.isFixed()) {
+                                ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, other.self);
                             }
                         }
                     }
                 }
-                otherObject = otherObject->nextObject;
+                otherIndex = other.nextObjectIndex;
             }
         }
 
@@ -366,22 +367,25 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
 
         float2 localF_boundary = {0, 0};
 
+        auto records = data.objectMap.getRecords();
         for (int scanIndex = toInt(block.thread_rank()); scanIndex < scanLength * scanLength; scanIndex += block.size()) {
             int2 scanPos{cellPosInt.x + (scanIndex % scanLength), cellPosInt.y + (scanIndex / scanLength)};
             data.objectMap.correctPosition(scanPos);
-            auto otherObject = data.objectMap.getFirst(scanPos);
+            int otherIndex = data.objectMap.getFirstIndex(scanPos);
             for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
-                if (!otherObject) {
+                if (otherIndex < 0) {
                     break;
                 }
-                if (otherObject->type != ObjectType_Fluid && otherObject != object && object->detached + otherObject->detached != 1) {
+                auto const& other = records[otherIndex];
+                auto otherObject = other.self;  // Read fields live: this runs after calcFluidForces nudged positions
+                if (other.type != ObjectType_Fluid && otherObject != object && object->detached + otherObject->detached != 1) {
 
                     auto posDelta = object->pos - otherObject->pos;
                     data.objectMap.correctDirection(posDelta);
                     auto adaptedDistance = Math::length(posDelta);
 
                     if (adaptedDistance <= smoothingLength * 2 && adaptedDistance > NEAR_ZERO) {
-                        auto solidMass = otherObject->getMassForSPH();
+                        auto solidMass = other.getMassForSPH();
 
                         float kernel_d_val = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
@@ -398,7 +402,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidBoundaryForces(SimulationDa
                         atomicAdd(&otherObject->tempValue1.as_float2.y, -F_on_fluid.y * cudaSimulationParameters.pressureStrength.value);
                     }
                 }
-                otherObject = otherObject->nextObject;
+                otherIndex = other.nextObjectIndex;
             }
         }
 
