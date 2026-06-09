@@ -360,11 +360,17 @@ struct CellTypePropertiesMutation
     float probability;
 };
 
+struct CellTypeModeMutation
+{
+    float eventProbability;
+};
+
 struct MutationRates
 {
     NeuronMutation neuronMutations[2];
     ConnectionMutation connectionMutations[2];
     CellTypePropertiesMutation cellTypePropertiesMutations[2];
+    CellTypeModeMutation cellTypeModeMutation;
 };
 
 struct Genome

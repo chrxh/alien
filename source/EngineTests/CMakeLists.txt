@@ -4,6 +4,7 @@ PUBLIC
     AttackerTests.cpp
     BalanceTests.cpp
     CellStateTransitionTests.cpp
+    CellTypeModeMutationTests.cpp
     CellTypeMutationCoverageGuard.cpp
     CellTypePropertiesMutationTests.cpp
     CommunicatorTests.cpp

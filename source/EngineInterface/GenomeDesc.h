@@ -70,7 +70,7 @@ struct DetectEnergyGenomeDesc
 {
     auto operator<=>(DetectEnergyGenomeDesc const&) const = default;
 
-    MEMBER(DetectEnergyGenomeDesc, float, minDensity, 1.0f);
+    MEMBER(DetectEnergyGenomeDesc, float, minDensity, Const::DetectEnergyMinDensity_Default);
 };
 
 struct DetectSolidGenomeDesc
@@ -82,8 +82,8 @@ struct DetectFreeCellGenomeDesc
 {
     auto operator<=>(DetectFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(DetectFreeCellGenomeDesc, float, minDensity, 0.5f);
-    MEMBER(DetectFreeCellGenomeDesc, int, restrictToColors, 0x3ff);
+    MEMBER(DetectFreeCellGenomeDesc, float, minDensity, Const::DetectFreeCellMinDensity_Default);
+    MEMBER(DetectFreeCellGenomeDesc, int, restrictToColors, Const::RestrictToColors_Default);
 };
 
 struct DetectCreatureGenomeDesc
@@ -92,7 +92,7 @@ struct DetectCreatureGenomeDesc
 
     MEMBER(DetectCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(DetectCreatureGenomeDesc, int, restrictToColors, 0x3ff);
+    MEMBER(DetectCreatureGenomeDesc, int, restrictToColors, Const::RestrictToColors_Default);
     MEMBER(DetectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -115,13 +115,13 @@ struct SensorGenomeDesc
 struct SquareSignalGenomeDesc
 {
     auto operator<=>(SquareSignalGenomeDesc const&) const = default;
-    MEMBER(SquareSignalGenomeDesc, int, period, 100);
+    MEMBER(SquareSignalGenomeDesc, int, period, Const::GeneratorPeriod_Default);
 };
 
 struct SawtoothSignalGenomeDesc
 {
     auto operator<=>(SawtoothSignalGenomeDesc const&) const = default;
-    MEMBER(SawtoothSignalGenomeDesc, int, period, 100);
+    MEMBER(SawtoothSignalGenomeDesc, int, period, Const::GeneratorPeriod_Default);
 };
 
 using GeneratorModeGenomeDesc = std::variant<SquareSignalGenomeDesc, SawtoothSignalGenomeDesc>;
@@ -143,7 +143,7 @@ struct AttackFreeCellGenomeDesc
 {
     auto operator<=>(AttackFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(AttackFreeCellGenomeDesc, int, restrictToColors, 0x3ff);
+    MEMBER(AttackFreeCellGenomeDesc, int, restrictToColors, Const::RestrictToColors_Default);
 };
 
 struct AttackCreatureGenomeDesc
@@ -174,40 +174,40 @@ struct AutoBendingGenomeDesc
 {
     auto operator<=>(AutoBendingGenomeDesc const&) const = default;
 
-    MEMBER(AutoBendingGenomeDesc, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
-    MEMBER(AutoBendingGenomeDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AutoBendingGenomeDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);        // Between 0 and 1
+    MEMBER(AutoBendingGenomeDesc, float, forwardBackwardRatio, Const::MuscleForwardBackwardRatio_Default);  // Between 0 and 1
 };
 
 struct ManualBendingGenomeDesc
 {
     auto operator<=>(ManualBendingGenomeDesc const&) const = default;
 
-    MEMBER(ManualBendingGenomeDesc, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
-    MEMBER(ManualBendingGenomeDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(ManualBendingGenomeDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);        // Between 0 and 1
+    MEMBER(ManualBendingGenomeDesc, float, forwardBackwardRatio, Const::MuscleForwardBackwardRatio_Default);  // Between 0 and 1
 };
 
 struct AngleBendingGenomeDesc
 {
     auto operator<=>(AngleBendingGenomeDesc const&) const = default;
 
-    MEMBER(AngleBendingGenomeDesc, float, maxAngleDeviation, 0.2f);         // Between 0 and 1
-    MEMBER(AngleBendingGenomeDesc, float, attractionRepulsionRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AngleBendingGenomeDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);              // Between 0 and 1
+    MEMBER(AngleBendingGenomeDesc, float, attractionRepulsionRatio, Const::MuscleAttractionRepulsionRatio_Default);  // Between 0 and 1
 };
 
 struct AutoCrawlingGenomeDesc
 {
     auto operator<=>(AutoCrawlingGenomeDesc const&) const = default;
 
-    MEMBER(AutoCrawlingGenomeDesc, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(AutoCrawlingGenomeDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AutoCrawlingGenomeDesc, float, maxDistanceDeviation, Const::MuscleMaxDistanceDeviation_Default);  // Between 0 and 1
+    MEMBER(AutoCrawlingGenomeDesc, float, forwardBackwardRatio, Const::MuscleForwardBackwardRatio_Default);  // Between 0 and 1
 };
 
 struct ManualCrawlingGenomeDesc
 {
     auto operator<=>(ManualCrawlingGenomeDesc const&) const = default;
 
-    MEMBER(ManualCrawlingGenomeDesc, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(ManualCrawlingGenomeDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(ManualCrawlingGenomeDesc, float, maxDistanceDeviation, Const::MuscleMaxDistanceDeviation_Default);  // Between 0 and 1
+    MEMBER(ManualCrawlingGenomeDesc, float, forwardBackwardRatio, Const::MuscleForwardBackwardRatio_Default);  // Between 0 and 1
 };
 
 struct DirectMovementGenomeDesc
@@ -243,7 +243,7 @@ struct ReconnectFreeCellGenomeDesc
 {
     auto operator<=>(ReconnectFreeCellGenomeDesc const&) const = default;
 
-    MEMBER(ReconnectFreeCellGenomeDesc, int, restrictToColors, 0x3ff);
+    MEMBER(ReconnectFreeCellGenomeDesc, int, restrictToColors, Const::RestrictToColors_Default);
 };
 
 struct ReconnectCreatureGenomeDesc
@@ -252,7 +252,7 @@ struct ReconnectCreatureGenomeDesc
 
     MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureGenomeDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(ReconnectCreatureGenomeDesc, int, restrictToColors, 0x3ff);
+    MEMBER(ReconnectCreatureGenomeDesc, int, restrictToColors, Const::RestrictToColors_Default);
     MEMBER(ReconnectCreatureGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -300,7 +300,7 @@ struct SignalDelayGenomeDesc
 {
     auto operator<=>(SignalDelayGenomeDesc const&) const = default;
 
-    MEMBER(SignalDelayGenomeDesc, int, delay, 10);
+    MEMBER(SignalDelayGenomeDesc, int, delay, Const::SignalDelay_Default);
 };
 
 struct SignalRecorderGenomeDesc
@@ -322,7 +322,7 @@ struct SignalIntegratorGenomeDesc
 {
     auto operator<=>(SignalIntegratorGenomeDesc const&) const = default;
 
-    MEMBER(SignalIntegratorGenomeDesc, float, newSignalWeight, 0.5f);  // Between 0 and 1
+    MEMBER(SignalIntegratorGenomeDesc, float, newSignalWeight, Const::SignalIntegratorNewSignalWeight_Default);  // Between 0 and 1
 };
 
 using MemoryModeGenomeDesc = std::variant<SignalDelayGenomeDesc, SignalRecorderGenomeDesc, SignalStorageGenomeDesc, SignalIntegratorGenomeDesc>;
@@ -342,15 +342,15 @@ struct SenderGenomeDesc
 {
     auto operator<=>(SenderGenomeDesc const&) const = default;
 
-    MEMBER(SenderGenomeDesc, int, range, 10);
-    MEMBER(SenderGenomeDesc, int, maxTimesSent, 4);
+    MEMBER(SenderGenomeDesc, int, range, Const::CommunicatorRange_Default);
+    MEMBER(SenderGenomeDesc, int, maxTimesSent, Const::CommunicatorMaxTimesSent_Default);
 };
 
 struct ReceiverGenomeDesc
 {
     auto operator<=>(ReceiverGenomeDesc const&) const = default;
 
-    MEMBER(ReceiverGenomeDesc, int, restrictToColors, 0x3ff);
+    MEMBER(ReceiverGenomeDesc, int, restrictToColors, Const::RestrictToColors_Default);
     MEMBER(ReceiverGenomeDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -438,6 +438,13 @@ struct CellTypePropertiesMutationDesc
     MEMBER(CellTypePropertiesMutationDesc, float, probability, 0.0f);
 };
 
+struct CellTypeModeMutationDesc
+{
+    auto operator<=>(CellTypeModeMutationDesc const&) const = default;
+
+    MEMBER(CellTypeModeMutationDesc, float, eventProbability, 0.0f);
+};
+
 struct MutationRatesDesc
 {
     using NeuronMutationArray = std::array<NeuronMutationDesc, 2>;
@@ -449,6 +456,7 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, NeuronMutationArray, neuronMutations, NeuronMutationArray());
     MEMBER(MutationRatesDesc, ConnectionMutationArray, connectionMutations, ConnectionMutationArray());
     MEMBER(MutationRatesDesc, CellTypePropertiesMutationArray, cellTypePropertiesMutations, CellTypePropertiesMutationArray());
+    MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
 
     std::vector<std::string> getActiveMutationTypes() const;
 };

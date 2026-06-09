@@ -102,6 +102,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma,
             genomeTO.mutationRates.cellTypePropertiesMutations[i].probability};
     }
+    genome->mutationRates.cellTypeModeMutation = {genomeTO.mutationRates.cellTypeModeMutation.eventProbability};
     genome->numGenes = genomeTO.numGenes;
     for (int i = 0; i < sizeof(genomeTO.name); ++i) {
         genome->name[i] = genomeTO.name[i];

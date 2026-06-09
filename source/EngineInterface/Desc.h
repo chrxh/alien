@@ -84,7 +84,7 @@ struct DetectEnergyDesc
 {
     auto operator<=>(DetectEnergyDesc const&) const = default;
 
-    MEMBER(DetectEnergyDesc, float, minDensity, 0.05f);
+    MEMBER(DetectEnergyDesc, float, minDensity, Const::DetectEnergyMinDensity_Default);
 };
 
 struct DetectSolidDesc
@@ -96,8 +96,8 @@ struct DetectFreeCellDesc
 {
     auto operator<=>(DetectFreeCellDesc const&) const = default;
 
-    MEMBER(DetectFreeCellDesc, float, minDensity, 0.05f);
-    MEMBER(DetectFreeCellDesc, int, restrictToColors, 0x3ff);
+    MEMBER(DetectFreeCellDesc, float, minDensity, Const::DetectFreeCellMinDensity_Default);
+    MEMBER(DetectFreeCellDesc, int, restrictToColors, Const::RestrictToColors_Default);
 };
 
 struct DetectCreatureDesc
@@ -106,7 +106,7 @@ struct DetectCreatureDesc
 
     MEMBER(DetectCreatureDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(DetectCreatureDesc, int, restrictToColors, 0x3ff);
+    MEMBER(DetectCreatureDesc, int, restrictToColors, Const::RestrictToColors_Default);
     MEMBER(DetectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -139,13 +139,13 @@ struct SensorDesc
 struct SquareSignalDesc
 {
     auto operator<=>(SquareSignalDesc const&) const = default;
-    MEMBER(SquareSignalDesc, int, period, 100);
+    MEMBER(SquareSignalDesc, int, period, Const::GeneratorPeriod_Default);
 };
 
 struct SawtoothSignalDesc
 {
     auto operator<=>(SawtoothSignalDesc const&) const = default;
-    MEMBER(SawtoothSignalDesc, int, period, 100);
+    MEMBER(SawtoothSignalDesc, int, period, Const::GeneratorPeriod_Default);
 };
 
 using GeneratorModeDesc = std::variant<SquareSignalDesc, SawtoothSignalDesc>;
@@ -171,7 +171,7 @@ struct AttackFreeCellDesc
 {
     auto operator<=>(AttackFreeCellDesc const&) const = default;
 
-    MEMBER(AttackFreeCellDesc, int, restrictToColors, 0x3ff);
+    MEMBER(AttackFreeCellDesc, int, restrictToColors, Const::RestrictToColors_Default);
 };
 
 struct AttackCreatureDesc
@@ -203,8 +203,8 @@ struct AutoBendingDesc
     auto operator<=>(AutoBendingDesc const&) const = default;
 
     // Fixed data
-    MEMBER(AutoBendingDesc, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
-    MEMBER(AutoBendingDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AutoBendingDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);        // Between 0 and 1
+    MEMBER(AutoBendingDesc, float, forwardBackwardRatio, Const::MuscleForwardBackwardRatio_Default);  // Between 0 and 1
 
     // Process data
     MEMBER(AutoBendingDesc, std::optional<float>, initialAngle, std::nullopt);
@@ -216,8 +216,8 @@ struct ManualBendingDesc
     auto operator<=>(ManualBendingDesc const&) const = default;
 
     // Fixed data
-    MEMBER(ManualBendingDesc, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
-    MEMBER(ManualBendingDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(ManualBendingDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);        // Between 0 and 1
+    MEMBER(ManualBendingDesc, float, forwardBackwardRatio, Const::MuscleForwardBackwardRatio_Default);  // Between 0 and 1
 
     // Process data
     MEMBER(ManualBendingDesc, std::optional<float>, initialAngle, std::nullopt);
@@ -229,8 +229,8 @@ struct AngleBendingDesc
     auto operator<=>(AngleBendingDesc const&) const = default;
 
     // Fixed data
-    MEMBER(AngleBendingDesc, float, maxAngleDeviation, 0.2f);         // Between 0 and 1
-    MEMBER(AngleBendingDesc, float, attractionRepulsionRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AngleBendingDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);              // Between 0 and 1
+    MEMBER(AngleBendingDesc, float, attractionRepulsionRatio, Const::MuscleAttractionRepulsionRatio_Default);  // Between 0 and 1
 
     // Process data
     MEMBER(AngleBendingDesc, std::optional<float>, initialAngle, std::nullopt);
@@ -241,8 +241,8 @@ struct AutoCrawlingDesc
     auto operator<=>(AutoCrawlingDesc const&) const = default;
 
     // Fixed data
-    MEMBER(AutoCrawlingDesc, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(AutoCrawlingDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AutoCrawlingDesc, float, maxDistanceDeviation, Const::MuscleMaxDistanceDeviation_Default);  // Between 0 and 1
+    MEMBER(AutoCrawlingDesc, float, forwardBackwardRatio, Const::MuscleForwardBackwardRatio_Default);  // Between 0 and 1
 
     // Process data
     MEMBER(AutoCrawlingDesc, std::optional<float>, initialDistance, std::nullopt);
@@ -255,8 +255,8 @@ struct ManualCrawlingDesc
     auto operator<=>(ManualCrawlingDesc const&) const = default;
 
     // Fixed data
-    MEMBER(ManualCrawlingDesc, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(ManualCrawlingDesc, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
+    MEMBER(ManualCrawlingDesc, float, maxDistanceDeviation, Const::MuscleMaxDistanceDeviation_Default);  // Between 0 and 1
+    MEMBER(ManualCrawlingDesc, float, forwardBackwardRatio, Const::MuscleForwardBackwardRatio_Default);  // Between 0 and 1
 
     // Process data
     MEMBER(ManualCrawlingDesc, std::optional<float>, initialDistance, std::nullopt);
@@ -300,7 +300,7 @@ struct ReconnectFreeCellDesc
 {
     auto operator<=>(ReconnectFreeCellDesc const&) const = default;
 
-    MEMBER(ReconnectFreeCellDesc, int, restrictToColors, 0x3ff);
+    MEMBER(ReconnectFreeCellDesc, int, restrictToColors, Const::RestrictToColors_Default);
 };
 
 struct ReconnectCreatureDesc
@@ -309,7 +309,7 @@ struct ReconnectCreatureDesc
 
     MEMBER(ReconnectCreatureDesc, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureDesc, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(ReconnectCreatureDesc, int, restrictToColors, 0x3ff);
+    MEMBER(ReconnectCreatureDesc, int, restrictToColors, Const::RestrictToColors_Default);
     MEMBER(ReconnectCreatureDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
@@ -358,7 +358,7 @@ struct SignalDelayDesc
 {
     auto operator<=>(SignalDelayDesc const&) const = default;
 
-    MEMBER(SignalDelayDesc, int, delay, 10);
+    MEMBER(SignalDelayDesc, int, delay, Const::SignalDelay_Default);
     MEMBER(SignalDelayDesc, int, numSignalEntriesInitialized, 0);
     MEMBER(SignalDelayDesc, int, ringBufferIndex, 0);
 };
@@ -384,7 +384,7 @@ struct SignalIntegratorDesc
 {
     auto operator<=>(SignalIntegratorDesc const&) const = default;
 
-    MEMBER(SignalIntegratorDesc, float, newSignalWeight, 0.5f);  // Between 0 and 1
+    MEMBER(SignalIntegratorDesc, float, newSignalWeight, Const::SignalIntegratorNewSignalWeight_Default);  // Between 0 and 1
 };
 
 using MemoryModeDesc = std::variant<SignalDelayDesc, SignalRecorderDesc, SignalStorageDesc, SignalIntegratorDesc>;
@@ -404,15 +404,15 @@ struct SenderDesc
 {
     auto operator<=>(SenderDesc const&) const = default;
 
-    MEMBER(SenderDesc, int, range, 15);
-    MEMBER(SenderDesc, int, maxTimesSent, 4);
+    MEMBER(SenderDesc, int, range, Const::CommunicatorRange_Default);
+    MEMBER(SenderDesc, int, maxTimesSent, Const::CommunicatorMaxTimesSent_Default);
 };
 
 struct ReceiverDesc
 {
     auto operator<=>(ReceiverDesc const&) const = default;
 
-    MEMBER(ReceiverDesc, int, restrictToColors, 0x3ff);
+    MEMBER(ReceiverDesc, int, restrictToColors, Const::RestrictToColors_Default);
     MEMBER(ReceiverDesc, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 

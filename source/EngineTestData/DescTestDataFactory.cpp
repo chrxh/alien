@@ -180,7 +180,8 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                             {ConnectionMutationDesc().eventProbability(0.6f).sigma(0.7f), ConnectionMutationDesc().eventProbability(0.8f).sigma(0.9f)})
                         .cellTypePropertiesMutations(
                             {CellTypePropertiesMutationDesc().eventProbability(0.45f).sigma(0.55f).probability(0.65f),
-                             CellTypePropertiesMutationDesc().eventProbability(0.75f).sigma(0.85f).probability(0.95f)});
+                             CellTypePropertiesMutationDesc().eventProbability(0.75f).sigma(0.85f).probability(0.95f)})
+                        .cellTypeModeMutation(CellTypeModeMutationDesc().eventProbability(0.33f));
 
     auto genome = GenomeDesc()
                       .name("Test Genome")
