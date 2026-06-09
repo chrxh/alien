@@ -549,30 +549,14 @@ union ObjectTypeData
     Cell cell;
 };
 
-// Geometry data shared by Object and LightObject. Kept at exactly 24 bytes (no tail padding) so that
-// derived structs stay compact; the flags byte lives in the derived structs where it packs without padding.
-struct ObjectBase
+struct Object
 {
+    // Hot fields first to keep them in one cache line.
     float2 pos;
     float2 vel;
     float density;
     ObjectType type;
 
-    __device__ __inline__ float getMassForSPH() const
-    {
-        if (type == ObjectType_Fluid) {
-            return 0.1f;
-        } else if (type == ObjectType_Solid) {
-            return 2.0f;
-        } else {
-            return 1.0f;
-        }
-    }
-};
-
-struct Object : ObjectBase
-{
-    // Hot fields first to keep them in one cache line.
     float stiffness;
     uint8_t numConnections;
     uint8_t color;
@@ -700,8 +684,13 @@ struct Object : ObjectBase
 };
 
 // Compact 40-byte mirror of Object for the neighbor scan: avoids touching the full ~500-byte Object per neighbor.
-struct __align__(8) LightObject : ObjectBase
+struct __align__(8) LightObject
 {
+    float2 pos;
+    float2 vel;
+    float density;
+    ObjectType type;
+
     Object* self;         // self before nextObjectIndex keeps the pointer 8-aligned (40 bytes)
     int nextObjectIndex;  // next object in the same cell, -1 = end of chain
     uint8_t numConnections;
@@ -722,6 +711,19 @@ struct __align__(8) LightObject : ObjectBase
         flags = object->flags;
     }
 };
+
+template<typename ObjectType>
+__device__ __inline__ float getMassForSPH(ObjectType const& object)
+{
+    if (object->type == ObjectType_Fluid) {
+        return 0.1f;
+    } else if (object->type == ObjectType_Solid) {
+        return 2.0f;
+    } else {
+        return 1.0f;
+    }
+}
+
 
 // Keep the neighbor-scan mirror compact: growing it directly costs memory bandwidth in the hot SPH kernels.
 static_assert(sizeof(LightObject) == 40, "LightObject must stay 40 bytes for the neighbor scan");

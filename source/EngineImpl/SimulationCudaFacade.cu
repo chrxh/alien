@@ -714,8 +714,8 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
             cachedResult->gpuModelName = prop.name;
         }
     }
-    if (highestComputeCapability < 600) {
-        throw std::runtime_error("No CUDA device with compute capability of 6.0 or higher found.");
+    if (highestComputeCapability < 750) {
+        throw std::runtime_error("No CUDA device with compute capability of 7.5 or higher found.");
     }
 
     return *cachedResult;

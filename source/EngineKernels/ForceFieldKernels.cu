@@ -151,7 +151,7 @@ __global__ void cudaApplyForceFields(SimulationData data)
             if (object->isFixed()) {
                 continue;
             }
-            object->vel += calcResultingAcceleration(object->pos, object->getMassForSPH());
+            object->vel += calcResultingAcceleration(object->pos, getMassForSPH(object));
         }
     }
     {
