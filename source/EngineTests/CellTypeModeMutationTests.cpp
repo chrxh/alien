@@ -63,7 +63,7 @@ TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_changesModeToDefaults)
     std::visit([](auto const& modeData) { EXPECT_EQ(modeData, std::decay_t<decltype(modeData)>{}); }, muscle._mode);
 }
 
-TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_doesNotChangeCellTypeWithoutMode)
+TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_doesNotChangeExceptMode)
 {
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().eventProbability(1.0f);
