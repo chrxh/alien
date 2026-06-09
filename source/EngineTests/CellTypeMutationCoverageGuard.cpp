@@ -11,11 +11,8 @@
 // count. The point is to force a conscious decision so newly added cell-type
 // attributes are never silently left out of the mutation.
 //
-// The mode counts at the bottom pin the number of modes per cell type. Modes
-// themselves are not mutated by this mutation type, but a newly added mode
-// brings its own description struct whose fields must be reviewed. When a mode
-// is added or removed, the corresponding assert fails - extend the field-count
-// list above and the mutation switch for the new mode, then bump the count here.
+// The mode counts at the bottom pin the number of modes per cell type, so adding
+// a mode also trips the check (its new description struct still needs review).
 
 
 #include <variant>
@@ -97,7 +94,7 @@ ALIEN_MUTATION_MODE_COUNT(ReconnectorModeGenomeDesc, 3);
 ALIEN_MUTATION_MODE_COUNT(MemoryModeGenomeDesc, 4);
 ALIEN_MUTATION_MODE_COUNT(CommunicatorModeGenomeDesc, 2);
 
-// Defender uses a plain enum for its mode instead of a variant.
+// Defender's mode is a plain enum, not a variant.
 static_assert(
     DefenderMode_Count == 2,
     "DefenderMode count changed - review applyMutations_cellTypeProperties() in MutationProcessor.cuh and update this count");
