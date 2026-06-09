@@ -1,6 +1,6 @@
 // Compile-time guard for cell-type property mutation coverage.
 //
-// Each static_assert below pins the number of data members of 
+// Each static_assert below pins the number of data members of
 // cell-type or mode description. The matching list of mutated attributes
 // lives in MutationProcessor::applyMutations_cellTypeProperties().
 //
@@ -10,7 +10,12 @@
 // count here - or, if the field is intentionally never mutated, just bump the
 // count. The point is to force a conscious decision so newly added cell-type
 // attributes are never silently left out of the mutation.
+//
+// The mode counts at the bottom pin the number of modes per cell type, so adding
+// a mode also trips the check (its new description struct still needs review).
 
+
+#include <variant>
 
 #include <boost/pfr.hpp>
 
@@ -20,6 +25,11 @@
     static_assert( \
         boost::pfr::tuple_size_v<Type> == (Count), \
         #Type " field count changed - review applyMutations_cellTypeProperties() in MutationProcessor.cuh and update this count")
+
+#define ALIEN_MUTATION_MODE_COUNT(Type, Count) \
+    static_assert( \
+        std::variant_size_v<Type> == (Count), \
+        #Type " mode count changed - review applyMutations_cellTypeProperties() in MutationProcessor.cuh and update this count")
 
 // --- Cell types (switch (node.cellType)) ---
 ALIEN_MUTATION_FIELD_COUNT(BaseGenomeDesc, 0);
@@ -75,4 +85,19 @@ ALIEN_MUTATION_FIELD_COUNT(SignalIntegratorGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(SenderGenomeDesc, 2);
 ALIEN_MUTATION_FIELD_COUNT(ReceiverGenomeDesc, 2);
 
+// --- Number of modes per cell type ---
+ALIEN_MUTATION_MODE_COUNT(SensorModeGenomeDesc, 5);
+ALIEN_MUTATION_MODE_COUNT(GeneratorModeGenomeDesc, 2);
+ALIEN_MUTATION_MODE_COUNT(AttackerModeGenomeDesc, 2);
+ALIEN_MUTATION_MODE_COUNT(MuscleModeGenomeDesc, 6);
+ALIEN_MUTATION_MODE_COUNT(ReconnectorModeGenomeDesc, 3);
+ALIEN_MUTATION_MODE_COUNT(MemoryModeGenomeDesc, 4);
+ALIEN_MUTATION_MODE_COUNT(CommunicatorModeGenomeDesc, 2);
+
+// Defender's mode is a plain enum, not a variant.
+static_assert(
+    DefenderMode_Count == 2,
+    "DefenderMode count changed - review applyMutations_cellTypeProperties() in MutationProcessor.cuh and update this count");
+
+#undef ALIEN_MUTATION_MODE_COUNT
 #undef ALIEN_MUTATION_FIELD_COUNT
