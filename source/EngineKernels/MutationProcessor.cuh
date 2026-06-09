@@ -25,6 +25,7 @@ private:
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellTypeProperties(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
     __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
@@ -102,6 +103,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_neurons(data, genome, accumulatedMutations);
     applyMutations_connections(data, genome, accumulatedMutations);
     applyMutations_cellTypeProperties(data, genome, accumulatedMutations);
+    applyMutations_cellTypeMode(data, genome, accumulatedMutations);
 
     block.sync();
     updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
@@ -517,6 +519,165 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
     }
 }
 
+__inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    auto const& rate = genome->mutationRates.cellTypeModeMutation;
+
+    if (rate.eventProbability <= 0) {
+        return;
+    }
+
+    // Picks a random mode index different from the current one (uniform over the remaining modes).
+    auto pickNewMode = [&](int currentMode, int count) {
+        auto newMode = data.primaryNumberGen.random(count - 2);
+        if (newMode >= currentMode) {
+            ++newMode;
+        }
+        return newMode;
+    };
+
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        auto& gene = genome->genes[geneIndex];
+        for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+            if (data.primaryNumberGen.random() >= rate.eventProbability) {
+                continue;
+            }
+            auto& node = gene.nodes[nodeIndex];
+
+            // The new mode is initialized with the same default attribute values as the host-side genome descriptions (see GenomeDesc.h).
+            bool changed = true;
+            switch (node.cellType) {
+            case CellType_Sensor: {
+                auto& sensor = node.cellTypeData.sensor;
+                sensor.mode = static_cast<SensorMode>(pickNewMode(sensor.mode, SensorMode_Count));
+                switch (sensor.mode) {
+                case SensorMode_Telemetry:
+                    sensor.modeData.telemetry = {};
+                    break;
+                case SensorMode_DetectEnergy:
+                    sensor.modeData.detectEnergy = {1.0f};
+                    break;
+                case SensorMode_DetectSolid:
+                    sensor.modeData.detectSolid = {};
+                    break;
+                case SensorMode_DetectFreeCell:
+                    sensor.modeData.detectFreeCell = {0.5f, 0x3ff};
+                    break;
+                case SensorMode_DetectCreature:
+                    sensor.modeData.detectCreature = {0, 0, 0x3ff, LineageRestriction_No};
+                    break;
+                }
+            } break;
+            case CellType_Generator: {
+                auto& generator = node.cellTypeData.generator;
+                generator.mode = static_cast<GeneratorMode>(pickNewMode(generator.mode, GeneratorMode_Count));
+                switch (generator.mode) {
+                case GeneratorMode_SquareSignal:
+                    generator.modeData.squareSignal = {100};
+                    break;
+                case GeneratorMode_SawtoothSignal:
+                    generator.modeData.sawtoothSignal = {100};
+                    break;
+                }
+            } break;
+            case CellType_Attacker: {
+                auto& attacker = node.cellTypeData.attacker;
+                attacker.mode = static_cast<AttackerMode>(pickNewMode(attacker.mode, AttackerMode_Count));
+                switch (attacker.mode) {
+                case AttackerMode_FreeCell:
+                    attacker.modeData.attackFreeCell = {0x3ff};
+                    break;
+                case AttackerMode_Creature:
+                    attacker.modeData.attackCreature = {};
+                    break;
+                }
+            } break;
+            case CellType_Muscle: {
+                auto& muscle = node.cellTypeData.muscle;
+                muscle.mode = static_cast<MuscleMode>(pickNewMode(muscle.mode, MuscleMode_Count));
+                switch (muscle.mode) {
+                case MuscleMode_AutoBending:
+                    muscle.modeData.autoBending = {0.2f, 0.8f};
+                    break;
+                case MuscleMode_ManualBending:
+                    muscle.modeData.manualBending = {0.2f, 0.8f};
+                    break;
+                case MuscleMode_AngleBending:
+                    muscle.modeData.angleBending = {0.2f, 0.8f};
+                    break;
+                case MuscleMode_AutoCrawling:
+                    muscle.modeData.autoCrawling = {0.8f, 0.8f};
+                    break;
+                case MuscleMode_ManualCrawling:
+                    muscle.modeData.manualCrawling = {0.8f, 0.8f};
+                    break;
+                case MuscleMode_DirectMovement:
+                    muscle.modeData.directMovement = {};
+                    break;
+                }
+            } break;
+            case CellType_Defender:
+                node.cellTypeData.defender.mode = static_cast<DefenderMode>(pickNewMode(node.cellTypeData.defender.mode, DefenderMode_Count));
+                break;
+            case CellType_Reconnector: {
+                auto& reconnector = node.cellTypeData.reconnector;
+                reconnector.mode = static_cast<ReconnectorMode>(pickNewMode(reconnector.mode, ReconnectorMode_Count));
+                switch (reconnector.mode) {
+                case ReconnectorMode_Solid:
+                    reconnector.modeData.reconnectSolid = {};
+                    break;
+                case ReconnectorMode_FreeCell:
+                    reconnector.modeData.reconnectFreeCell = {0x3ff};
+                    break;
+                case ReconnectorMode_Creature:
+                    reconnector.modeData.reconnectCreature = {0, 0, 0x3ff, LineageRestriction_No};
+                    break;
+                }
+            } break;
+            case CellType_Memory: {
+                auto& memory = node.cellTypeData.memory;
+                memory.mode = static_cast<MemoryMode>(pickNewMode(memory.mode, MemoryMode_Count));
+                switch (memory.mode) {
+                case MemoryMode_SignalDelay:
+                    memory.modeData.signalDelay = {10};
+                    break;
+                case MemoryMode_SignalRecorder:
+                    memory.modeData.signalRecorder = {true, 0};
+                    break;
+                case MemoryMode_SignalStorage:
+                    memory.modeData.signalStorage = {true};
+                    break;
+                case MemoryMode_SignalIntegrator:
+                    memory.modeData.signalIntegrator = {0.5f};
+                    break;
+                }
+            } break;
+            case CellType_Communicator: {
+                auto& communicator = node.cellTypeData.communicator;
+                communicator.mode = static_cast<CommunicatorMode>(pickNewMode(communicator.mode, CommunicatorMode_Count));
+                switch (communicator.mode) {
+                case CommunicatorMode_Sender:
+                    communicator.modeData.sender = {10, 4};
+                    break;
+                case CommunicatorMode_Receiver:
+                    communicator.modeData.receiver = {0x3ff, LineageRestriction_No};
+                    break;
+                }
+            } break;
+            default:
+                // Cell types without a mode field are not affected.
+                changed = false;
+                break;
+            }
+
+            if (changed) {
+                atomicAdd_block(&accumulatedMutations, 1.0f);
+            }
+        }
+    }
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
@@ -552,6 +713,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
                 mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].sigma);
                 mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].probability);
             }
+        }
+
+        float cellTypeModeSigma = cudaSimulationParameters.metaMutationCellTypeModeSigma.value;
+        if (cellTypeModeSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeModeSigma)); };
+            mutateFloat(genome->mutationRates.cellTypeModeMutation.eventProbability);
         }
     }
 }

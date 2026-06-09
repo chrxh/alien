@@ -880,6 +880,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
         result._mutationRates._cellTypePropertiesMutations[i]._sigma = genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma;
         result._mutationRates._cellTypePropertiesMutations[i]._probability = genomeTO.mutationRates.cellTypePropertiesMutations[i].probability;
     }
+    result._mutationRates._cellTypeModeMutation._eventProbability = genomeTO.mutationRates.cellTypeModeMutation.eventProbability;
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -967,6 +968,7 @@ void DescConverterService::convertGenomeToTO(
             genome._mutationRates._cellTypePropertiesMutations[i]._sigma,
             genome._mutationRates._cellTypePropertiesMutations[i]._probability};
     }
+    genomeTO.mutationRates.cellTypeModeMutation = {genome._mutationRates._cellTypeModeMutation._eventProbability};
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;

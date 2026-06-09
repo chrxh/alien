@@ -13,6 +13,8 @@
 //
 // The mode counts at the bottom pin the number of modes per cell type, so adding
 // a mode also trips the check (its new description struct still needs review).
+// Switching modes itself lives in MutationProcessor::applyMutations_cellTypeMode(),
+// which also needs a default-initialized branch for every new mode.
 
 
 #include <variant>
@@ -29,7 +31,8 @@
 #define ALIEN_MUTATION_MODE_COUNT(Type, Count) \
     static_assert( \
         std::variant_size_v<Type> == (Count), \
-        #Type " mode count changed - review applyMutations_cellTypeProperties() in MutationProcessor.cuh and update this count")
+        #Type \
+        " mode count changed - review applyMutations_cellTypeProperties() and applyMutations_cellTypeMode() in MutationProcessor.cuh and update this count")
 
 // --- Cell types (switch (node.cellType)) ---
 ALIEN_MUTATION_FIELD_COUNT(BaseGenomeDesc, 0);

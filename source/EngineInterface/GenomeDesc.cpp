@@ -62,6 +62,9 @@ std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
     if (_cellTypePropertiesMutations[0]._eventProbability > 0.0f || _cellTypePropertiesMutations[1]._eventProbability > 0.0f) {
         activeMutations.push_back("Cell type property mutations");
     }
+    if (_cellTypeModeMutation._eventProbability > 0.0f) {
+        activeMutations.push_back("Cell type mode mutations");
+    }
     return activeMutations;
 }
 

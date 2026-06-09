@@ -194,3 +194,43 @@ TEST_F(MetaMutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
     EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._sigma, 0.4f);
     EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._probability, 0.4f);
 }
+
+TEST_F(MetaMutationTests, metaMutation_cellTypeModeRatesActuallyChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().eventProbability(0.5f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationCellTypeModeSigma.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_NE(actualGenome._mutationRates._cellTypeModeMutation._eventProbability, 0.5f);
+    EXPECT_GE(actualGenome._mutationRates._cellTypeModeMutation._eventProbability, 0.0f);
+    EXPECT_LE(actualGenome._mutationRates._cellTypeModeMutation._eventProbability, 1.0f);
+}
+
+TEST_F(MetaMutationTests, metaMutation_cellTypeModeRatesZeroSigmaNoChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().eventProbability(0.5f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationCellTypeModeSigma.value = 0.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(actualGenome._mutationRates._cellTypeModeMutation._eventProbability, 0.5f);
+}
