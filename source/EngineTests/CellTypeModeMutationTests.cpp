@@ -1,3 +1,4 @@
+#include <optional>
 #include <type_traits>
 #include <variant>
 
@@ -10,7 +11,37 @@
 #include "MutationTestsBase.h"
 
 class CellTypeModeMutationTests : public MutationTestsBase
-{};
+{
+protected:
+    // Resets the active cell type mode (selected mode and its data) to a canonical value while preserving all other attributes.
+    static void resetCellTypeMode(CellTypeGenomeDesc& cellType)
+    {
+        std::visit(
+            [](auto& cellTypeData) {
+                if constexpr (requires { cellTypeData._mode; }) {
+                    cellTypeData._mode = std::decay_t<decltype(cellTypeData._mode)>{};
+                }
+            },
+            cellType);
+    }
+
+    bool compareAllExceptCellTypeMode(GenomeDesc expected, GenomeDesc actual)
+    {
+        auto reset = [](GenomeDesc& genome) {
+            genome._lineageId = 0;
+            genome._prevLineageId = std::nullopt;
+            genome._accumulatedMutations = 0.0f;
+            for (auto& gene : genome._genes) {
+                for (auto& node : gene._nodes) {
+                    resetCellTypeMode(node._cellType);
+                }
+            }
+        };
+        reset(expected);
+        reset(actual);
+        return expected == actual;
+    }
+};
 
 TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_changesModeToDefaults)
 {
@@ -34,7 +65,7 @@ TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_changesModeToDefaults)
 
 TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_doesNotChangeCellTypeWithoutMode)
 {
-    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().cellType(DepotGenomeDesc().storageLimit(350.0f).initialStoredUsableEnergy(100.0f))})});
+    auto genome = createTestGenome();
     genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().eventProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
@@ -45,8 +76,6 @@ TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_doesNotChangeCellTypeWith
     }
 
     auto actualGenome = getMutatedGenome();
-    auto const& depot = std::get<DepotGenomeDesc>(actualGenome._genes.at(0)._nodes.at(0)._cellType);
 
-    EXPECT_EQ(depot._storageLimit, 350.0f);
-    EXPECT_EQ(depot._initialStoredUsableEnergy, 100.0f);
+    EXPECT_TRUE(compareAllExceptCellTypeMode(genome, actualGenome));
 }

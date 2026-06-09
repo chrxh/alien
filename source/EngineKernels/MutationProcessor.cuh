@@ -545,7 +545,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
             }
             auto& node = gene.nodes[nodeIndex];
 
-            // The new mode is initialized with the same default attribute values as the host-side genome descriptions (see GenomeDesc.h).
+            // The new mode is initialized with the shared default attribute values (see the *_Default constants in CellTypeConstants.h),
+            // matching the host-side genome and runtime descriptions.
             bool changed = true;
             switch (node.cellType) {
             case CellType_Sensor: {
@@ -556,16 +557,16 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                     sensor.modeData.telemetry = {};
                     break;
                 case SensorMode_DetectEnergy:
-                    sensor.modeData.detectEnergy = {1.0f};
+                    sensor.modeData.detectEnergy = {Const::DetectEnergyMinDensity_Default};
                     break;
                 case SensorMode_DetectSolid:
                     sensor.modeData.detectSolid = {};
                     break;
                 case SensorMode_DetectFreeCell:
-                    sensor.modeData.detectFreeCell = {0.5f, 0x3ff};
+                    sensor.modeData.detectFreeCell = {Const::DetectFreeCellMinDensity_Default, Const::RestrictToColors_Default};
                     break;
                 case SensorMode_DetectCreature:
-                    sensor.modeData.detectCreature = {0, 0, 0x3ff, LineageRestriction_No};
+                    sensor.modeData.detectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
                     break;
                 }
             } break;
@@ -574,10 +575,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                 generator.mode = static_cast<GeneratorMode>(pickNewMode(generator.mode, GeneratorMode_Count));
                 switch (generator.mode) {
                 case GeneratorMode_SquareSignal:
-                    generator.modeData.squareSignal = {100};
+                    generator.modeData.squareSignal = {Const::GeneratorPeriod_Default};
                     break;
                 case GeneratorMode_SawtoothSignal:
-                    generator.modeData.sawtoothSignal = {100};
+                    generator.modeData.sawtoothSignal = {Const::GeneratorPeriod_Default};
                     break;
                 }
             } break;
@@ -586,7 +587,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                 attacker.mode = static_cast<AttackerMode>(pickNewMode(attacker.mode, AttackerMode_Count));
                 switch (attacker.mode) {
                 case AttackerMode_FreeCell:
-                    attacker.modeData.attackFreeCell = {0x3ff};
+                    attacker.modeData.attackFreeCell = {Const::RestrictToColors_Default};
                     break;
                 case AttackerMode_Creature:
                     attacker.modeData.attackCreature = {};
@@ -598,19 +599,19 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                 muscle.mode = static_cast<MuscleMode>(pickNewMode(muscle.mode, MuscleMode_Count));
                 switch (muscle.mode) {
                 case MuscleMode_AutoBending:
-                    muscle.modeData.autoBending = {0.2f, 0.8f};
+                    muscle.modeData.autoBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
                     break;
                 case MuscleMode_ManualBending:
-                    muscle.modeData.manualBending = {0.2f, 0.8f};
+                    muscle.modeData.manualBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
                     break;
                 case MuscleMode_AngleBending:
-                    muscle.modeData.angleBending = {0.2f, 0.8f};
+                    muscle.modeData.angleBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleAttractionRepulsionRatio_Default};
                     break;
                 case MuscleMode_AutoCrawling:
-                    muscle.modeData.autoCrawling = {0.8f, 0.8f};
+                    muscle.modeData.autoCrawling = {Const::MuscleMaxDistanceDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
                     break;
                 case MuscleMode_ManualCrawling:
-                    muscle.modeData.manualCrawling = {0.8f, 0.8f};
+                    muscle.modeData.manualCrawling = {Const::MuscleMaxDistanceDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
                     break;
                 case MuscleMode_DirectMovement:
                     muscle.modeData.directMovement = {};
@@ -628,10 +629,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                     reconnector.modeData.reconnectSolid = {};
                     break;
                 case ReconnectorMode_FreeCell:
-                    reconnector.modeData.reconnectFreeCell = {0x3ff};
+                    reconnector.modeData.reconnectFreeCell = {Const::RestrictToColors_Default};
                     break;
                 case ReconnectorMode_Creature:
-                    reconnector.modeData.reconnectCreature = {0, 0, 0x3ff, LineageRestriction_No};
+                    reconnector.modeData.reconnectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
                     break;
                 }
             } break;
@@ -640,7 +641,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                 memory.mode = static_cast<MemoryMode>(pickNewMode(memory.mode, MemoryMode_Count));
                 switch (memory.mode) {
                 case MemoryMode_SignalDelay:
-                    memory.modeData.signalDelay = {10};
+                    memory.modeData.signalDelay = {Const::SignalDelay_Default};
                     break;
                 case MemoryMode_SignalRecorder:
                     memory.modeData.signalRecorder = {true, 0};
@@ -649,7 +650,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                     memory.modeData.signalStorage = {true};
                     break;
                 case MemoryMode_SignalIntegrator:
-                    memory.modeData.signalIntegrator = {0.5f};
+                    memory.modeData.signalIntegrator = {Const::SignalIntegratorNewSignalWeight_Default};
                     break;
                 }
             } break;
@@ -658,10 +659,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
                 communicator.mode = static_cast<CommunicatorMode>(pickNewMode(communicator.mode, CommunicatorMode_Count));
                 switch (communicator.mode) {
                 case CommunicatorMode_Sender:
-                    communicator.modeData.sender = {10, 4};
+                    communicator.modeData.sender = {Const::CommunicatorRange_Default, Const::CommunicatorMaxTimesSent_Default};
                     break;
                 case CommunicatorMode_Receiver:
-                    communicator.modeData.receiver = {0x3ff, LineageRestriction_No};
+                    communicator.modeData.receiver = {Const::RestrictToColors_Default, LineageRestriction_No};
                     break;
                 }
             } break;

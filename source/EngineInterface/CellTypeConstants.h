@@ -174,6 +174,7 @@ namespace Const
     auto constexpr GeneratorValue_Max = 2.0f;
     auto constexpr GeneratorTimeOffset_Min = 0;
     auto constexpr GeneratorPeriod_Min = 1;
+    auto constexpr GeneratorPeriod_Default = 100;
 }
 
 using GeneratorMode = int;
@@ -219,10 +220,13 @@ namespace Const
     auto constexpr SensorRange_Max = 512;
     auto constexpr DetectEnergyMinDensity_Min = 0.0f;
     auto constexpr DetectEnergyMinDensity_Max = 1.0f;
+    auto constexpr DetectEnergyMinDensity_Default = 0.05f;
     auto constexpr DetectFreeCellMinDensity_Min = 0.0f;
     auto constexpr DetectFreeCellMinDensity_Max = 1.0f;
+    auto constexpr DetectFreeCellMinDensity_Default = 0.05f;
     auto constexpr RestrictToColors_Min = 0;
     auto constexpr RestrictToColors_Max = (1 << MAX_COLORS) - 1;
+    auto constexpr RestrictToColors_Default = (1 << MAX_COLORS) - 1;
     auto constexpr CreatureNumCells_Min = 0;
 }
 
@@ -262,6 +266,10 @@ namespace Const
 {
     auto constexpr MuscleModeRatio_Min = 0.0f;
     auto constexpr MuscleModeRatio_Max = 1.0f;
+    auto constexpr MuscleMaxAngleDeviation_Default = 0.2f;
+    auto constexpr MuscleForwardBackwardRatio_Default = 0.8f;
+    auto constexpr MuscleAttractionRepulsionRatio_Default = 0.8f;
+    auto constexpr MuscleMaxDistanceDeviation_Default = 0.8f;
 }
 
 using MuscleMode = int;
@@ -396,8 +404,10 @@ namespace Const
     auto constexpr MemoryNumSignalEntries_Max = MAX_CELL_MEMORY_ENTRIES;
     auto constexpr SignalDelay_Min = 0;
     auto constexpr SignalDelay_Max = MAX_CELL_MEMORY_ENTRIES;
+    auto constexpr SignalDelay_Default = 10;
     auto constexpr SignalIntegratorNewSignalWeight_Min = 0.0f;
     auto constexpr SignalIntegratorNewSignalWeight_Max = 1.0f;
+    auto constexpr SignalIntegratorNewSignalWeight_Default = 0.5f;
 }
 
 using MemoryMode = int;
@@ -434,7 +444,9 @@ namespace Const
 {
     auto constexpr CommunicatorRange_Min = 0;
     auto constexpr CommunicatorRange_Max = 20;
+    auto constexpr CommunicatorRange_Default = 15;
     auto constexpr CommunicatorMaxTimesSent_Min = 0;
+    auto constexpr CommunicatorMaxTimesSent_Default = 4;
 }
 
 using CommunicatorMode = int;
