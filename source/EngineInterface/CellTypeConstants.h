@@ -172,7 +172,11 @@ namespace Const
 {
     auto constexpr GeneratorValue_Min = -2.0f;
     auto constexpr GeneratorValue_Max = 2.0f;
+    auto constexpr GeneratorMinValue_Default = -1.0f;
+    auto constexpr GeneratorMaxValue_Default = 1.0f;
+    auto constexpr GeneratorAdditive_Default = false;
     auto constexpr GeneratorTimeOffset_Min = 0;
+    auto constexpr GeneratorTimeOffset_Default = 0;
     auto constexpr GeneratorPeriod_Min = 1;
     auto constexpr GeneratorPeriod_Default = 100;
 }
@@ -197,7 +201,9 @@ namespace Const
 {
     auto constexpr DepotStorageLimit_Min = 0.0f;
     auto constexpr DepotStorageLimit_Max = 1000.0f;
+    auto constexpr DepotStorageLimit_Default = 200.0f;
     auto constexpr DepotInitialStoredUsableEnergy_Min = 0.0f;
+    auto constexpr DepotInitialStoredUsableEnergy_Default = 0.0f;
 }
 
 //********************
@@ -218,6 +224,10 @@ namespace Const
 {
     auto constexpr SensorRange_Min = 0;
     auto constexpr SensorRange_Max = 512;
+    auto constexpr SensorMinRange_Default = 0;
+    auto constexpr SensorMaxRange_Default = 255;
+    auto constexpr SensorAutoTrigger_Default = true;
+    auto constexpr SensorTagForAttackers_Default = true;
     auto constexpr DetectEnergyMinDensity_Min = 0.0f;
     auto constexpr DetectEnergyMinDensity_Max = 1.0f;
     auto constexpr DetectEnergyMinDensity_Default = 0.05f;
@@ -335,6 +345,10 @@ namespace Channels
 {
     auto constexpr InjectorSuccess = 1;
 }
+namespace Const
+{
+    auto constexpr InjectorGeneIndex_Default = 0;
+}
 
 using InjectorMode = int;
 enum InjectorMode_
@@ -355,6 +369,7 @@ namespace Const
 namespace Const
 {
     auto constexpr DetonatorCountdown_Min = 1;
+    auto constexpr DetonatorCountdown_Default = 10;
 }
 
 using DetonatorState = int;
@@ -398,6 +413,7 @@ namespace Const
 {
     auto constexpr DigestorRawEnergyConductivity_Min = 0.0f;
     auto constexpr DigestorRawEnergyConductivity_Max = 1.0f;
+    auto constexpr DigestorRawEnergyConductivity_Default = 0.5f;
     auto constexpr MemoryChannelBitMask_Min = uint16_t{0};
     auto constexpr MemoryChannelBitMask_Max = uint16_t{0xffff};
     auto constexpr MemoryNumSignalEntries_Min = 0;

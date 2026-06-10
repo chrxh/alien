@@ -14,7 +14,8 @@ enum class MutationType
     Neuron,
     Connection,
     CellTypeProperties,
-    CellTypeMode
+    CellTypeMode,
+    CellType
 };
 
 class AccumulatedMutationTests_AllTypes
@@ -26,7 +27,7 @@ class AccumulatedMutationTests_AllTypes
 INSTANTIATE_TEST_SUITE_P(
     AccumulatedMutationTests,
     AccumulatedMutationTests_AllTypes,
-    ::testing::Values(MutationType::Neuron, MutationType::Connection, MutationType::CellTypeProperties, MutationType::CellTypeMode));
+    ::testing::Values(MutationType::Neuron, MutationType::Connection, MutationType::CellTypeProperties, MutationType::CellTypeMode, MutationType::CellType));
 
 TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
 {
@@ -44,6 +45,9 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     case MutationType::CellTypeMode:
         genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().eventProbability(1.0f);
+        break;
+    case MutationType::CellType:
+        genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
         break;
     }
 
@@ -72,6 +76,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
     _parameters.metaMutationConnectionsSigma.value = 1.0f;
     _parameters.metaMutationCellTypePropertiesSigma.value = 1.0f;
     _parameters.metaMutationCellTypeModeSigma.value = 1.0f;
+    _parameters.metaMutationCellTypeSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
