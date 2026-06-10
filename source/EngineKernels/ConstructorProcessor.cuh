@@ -19,7 +19,6 @@ private:
         Creature* creature;
         Gene* gene;
         Node* node;
-        Node* cellTypeNode;  // Node providing cell type and its properties (first node if gene->homogeneCellType, otherwise node)
         bool isSeparation;
 
         // Construction position
@@ -226,7 +225,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.creature = constructor.offspring;
     result.gene = ConstructorHelper::getCurrentGene(constructor, *genome);
     result.node = &result.gene->nodes[result.currentNodeIndex];
-    result.cellTypeNode = result.gene->homogeneCellType ? &result.gene->nodes[0] : result.node;
     result.isSeparation = constructor.separation;
     result.isFirstNode = result.currentNodeIndex == 0;
     auto isFirstConcatenation = result.currentConcatenation == 0;
@@ -237,7 +235,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     result.neededReservedEnergy = result.node->constructorAvailable ? result.node->constructor.reservedEnergy : 0.0f;
-    result.neededDepotEnergy = result.cellTypeNode->cellType == CellType_Depot ? result.cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
+    auto cellTypeNode = result.gene->homogeneCellType ? &result.gene->nodes[0] : result.node;
+    result.neededDepotEnergy = cellTypeNode->cellType == CellType_Depot ? cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
 
     ShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
@@ -553,7 +552,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         constructionData.creature,
         constructor.geneIndex,
         constructionData.currentNodeIndex,
-        constructionData.cellTypeNode,
+        constructionData.gene->homogeneCellType,
         hostObject->typeData.cell.nodeIndex,
         constructionData.currentConcatenation,
         constructionData.currentBranch,

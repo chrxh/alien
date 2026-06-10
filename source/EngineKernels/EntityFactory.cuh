@@ -30,7 +30,7 @@ public:
         Creature* creature,
         int geneIndex,
         int nodeIndex,
-        Node* cellTypeNode,
+        bool homogeneousCellType,
         int parentNodeIndex,
         int concatenationIndex,
         int branchIndex,
@@ -700,7 +700,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     Creature* creature,
     int geneIndex,
     int nodeIndex,
-    Node* cellTypeNode,
+    bool homogeneousCellType,
     int parentNodeIndex,
     int concatenationIndex,
     int branchIndex,
@@ -710,6 +710,9 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
 {
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
+
+    // With homogeneous cell type the cell type and its properties are taken from the gene's first node
+    auto const& cellTypeNode = homogeneousCellType ? &gene->nodes[0] : node;
 
     auto object = _data->entities.heap.getTypedSubArray<Object>(1);
     auto objectPointer = _data->entities.objects.getNewElement(&objectIndex);
