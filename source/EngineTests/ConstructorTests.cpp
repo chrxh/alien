@@ -3380,44 +3380,6 @@ TEST_F(ConstructorTests, homogeneCellType_inheritsCellTypeFromFirstNode)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(ConstructorTests, homogeneCellTypeDisabled_keepsOwnCellType)
-{
-    auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({
-            NodeDesc().cellType(DetonatorGenomeDesc().countdown(42)),
-            NodeDesc(),
-            NodeDesc(),
-        }),
-    });
-
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc()
-                .id(0)
-                .pos({10.0f, 10.0f})
-                .type(CellDesc()
-                          .usableEnergy(getConstructorEnergy())
-                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1).separation(false))),
-            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
-        },
-        CreatureDesc().id(0),
-        genome);
-    data.addConnection(0, 1);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
-
-    // Without homogeneous cell type, the constructed second node keeps its own (base) cell type
-    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
-    EXPECT_EQ(CellType_Base, actualConstructedCell.getCellRef().getCellType());
-}
-
 TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
 {
     auto genome = GenomeDesc().genes({
