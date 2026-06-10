@@ -183,7 +183,7 @@ void _GeneEditorWidget::processNodeList()
                     // Column 1: Node type
                     ImGui::TableNextColumn();
                     {
-                        auto nodeType = node.getCellType();
+                        auto nodeType = gene._homogeneCellType ? gene._nodes.front().getCellType() : node.getCellType();
                         auto text = Const::CellTypeStrings.at(nodeType);
                         AlienGui::Text(text);
                     }
