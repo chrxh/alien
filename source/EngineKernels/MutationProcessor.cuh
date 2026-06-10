@@ -650,7 +650,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
         return;
     }
 
-    // Picks a random mode index different from the current one (uniform over the remaining modes).
     auto pickNewMode = [&](int currentMode, int count) {
         auto newMode = data.primaryNumberGen.random(count - 2);
         if (newMode >= currentMode) {
@@ -717,7 +716,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
         return;
     }
 
-    // Picks a random cell type different from the current one (uniform over the remaining types).
     auto pickNewCellType = [&](int currentCellType) {
         auto newCellType = data.primaryNumberGen.random(CellType_Count - 2);
         if (newCellType >= currentCellType) {
@@ -736,9 +734,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
 
             node.cellType = pickNewCellType(node.cellType);
 
-            // Set the new cell type's non-mode attributes to their host-side defaults (see GenomeDesc.h) and select the default mode.
-            // The selected mode's data is then filled in by resetCellTypeModeToDefault(), shared with applyMutations_cellTypeMode().
-            // Using defaults keeps the mutated genome valid and corrected by construction.
             auto& cellTypeData = node.cellTypeData;
             switch (node.cellType) {
             case CellType_Base:
