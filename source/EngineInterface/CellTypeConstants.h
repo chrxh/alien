@@ -345,6 +345,10 @@ namespace Channels
 {
     auto constexpr InjectorSuccess = 1;
 }
+namespace Const
+{
+    auto constexpr InjectorGeneIndex_Default = 0;
+}
 
 using InjectorMode = int;
 enum InjectorMode_
@@ -356,7 +360,6 @@ enum InjectorMode_
 
 namespace Const
 {
-    auto constexpr InjectorGeneIndex_Default = 0;
     std::vector<std::string> const InjectorModeStrings = {"Only empty cells", "All cells"};
 }
 
