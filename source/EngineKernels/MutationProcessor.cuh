@@ -28,6 +28,7 @@ private:
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
 
     __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
@@ -522,6 +523,124 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
     }
 }
 
+__inline__ __device__ void MutationProcessor::resetCellTypeModeToDefault(Node& node)
+{
+    // Initializes the data of the currently selected mode with the shared default attribute values
+    // (see the *_Default constants in CellTypeConstants.h and the host-side defaults in GenomeDesc.h).
+    switch (node.cellType) {
+    case CellType_Sensor: {
+        auto& sensor = node.cellTypeData.sensor;
+        switch (sensor.mode) {
+        case SensorMode_Telemetry:
+            sensor.modeData.telemetry = {};
+            break;
+        case SensorMode_DetectEnergy:
+            sensor.modeData.detectEnergy = {Const::DetectEnergyMinDensity_Default};
+            break;
+        case SensorMode_DetectSolid:
+            sensor.modeData.detectSolid = {};
+            break;
+        case SensorMode_DetectFreeCell:
+            sensor.modeData.detectFreeCell = {Const::DetectFreeCellMinDensity_Default, Const::RestrictToColors_Default};
+            break;
+        case SensorMode_DetectCreature:
+            sensor.modeData.detectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
+            break;
+        }
+    } break;
+    case CellType_Generator: {
+        auto& generator = node.cellTypeData.generator;
+        switch (generator.mode) {
+        case GeneratorMode_SquareSignal:
+            generator.modeData.squareSignal = {Const::GeneratorPeriod_Default};
+            break;
+        case GeneratorMode_SawtoothSignal:
+            generator.modeData.sawtoothSignal = {Const::GeneratorPeriod_Default};
+            break;
+        }
+    } break;
+    case CellType_Attacker: {
+        auto& attacker = node.cellTypeData.attacker;
+        switch (attacker.mode) {
+        case AttackerMode_FreeCell:
+            attacker.modeData.attackFreeCell = {Const::RestrictToColors_Default};
+            break;
+        case AttackerMode_Creature:
+            attacker.modeData.attackCreature = {};
+            break;
+        }
+    } break;
+    case CellType_Muscle: {
+        auto& muscle = node.cellTypeData.muscle;
+        switch (muscle.mode) {
+        case MuscleMode_AutoBending:
+            muscle.modeData.autoBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
+            break;
+        case MuscleMode_ManualBending:
+            muscle.modeData.manualBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
+            break;
+        case MuscleMode_AngleBending:
+            muscle.modeData.angleBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleAttractionRepulsionRatio_Default};
+            break;
+        case MuscleMode_AutoCrawling:
+            muscle.modeData.autoCrawling = {Const::MuscleMaxDistanceDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
+            break;
+        case MuscleMode_ManualCrawling:
+            muscle.modeData.manualCrawling = {Const::MuscleMaxDistanceDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
+            break;
+        case MuscleMode_DirectMovement:
+            muscle.modeData.directMovement = {};
+            break;
+        }
+    } break;
+    case CellType_Reconnector: {
+        auto& reconnector = node.cellTypeData.reconnector;
+        switch (reconnector.mode) {
+        case ReconnectorMode_Solid:
+            reconnector.modeData.reconnectSolid = {};
+            break;
+        case ReconnectorMode_FreeCell:
+            reconnector.modeData.reconnectFreeCell = {Const::RestrictToColors_Default};
+            break;
+        case ReconnectorMode_Creature:
+            reconnector.modeData.reconnectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
+            break;
+        }
+    } break;
+    case CellType_Memory: {
+        auto& memory = node.cellTypeData.memory;
+        switch (memory.mode) {
+        case MemoryMode_SignalDelay:
+            memory.modeData.signalDelay = {Const::SignalDelay_Default};
+            break;
+        case MemoryMode_SignalRecorder:
+            memory.modeData.signalRecorder = {true, 0};
+            break;
+        case MemoryMode_SignalStorage:
+            memory.modeData.signalStorage = {true};
+            break;
+        case MemoryMode_SignalIntegrator:
+            memory.modeData.signalIntegrator = {Const::SignalIntegratorNewSignalWeight_Default};
+            break;
+        }
+    } break;
+    case CellType_Communicator: {
+        auto& communicator = node.cellTypeData.communicator;
+        switch (communicator.mode) {
+        case CommunicatorMode_Sender:
+            communicator.modeData.sender = {Const::CommunicatorRange_Default, Const::CommunicatorMaxTimesSent_Default};
+            break;
+        case CommunicatorMode_Receiver:
+            communicator.modeData.receiver = {Const::RestrictToColors_Default, LineageRestriction_No};
+            break;
+        }
+    } break;
+    default:
+        // Cell types without mode-specific data (or without a mode) need no reset.
+        break;
+    }
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
@@ -548,127 +667,33 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
             }
             auto& node = gene.nodes[nodeIndex];
 
-            // The new mode is initialized with the shared default attribute values (see the *_Default constants in CellTypeConstants.h),
-            // matching the host-side genome and runtime descriptions.
+            // Pick a new mode for the node's cell type; the new mode's data is then reset to its defaults below.
             bool changed = true;
             switch (node.cellType) {
-            case CellType_Sensor: {
-                auto& sensor = node.cellTypeData.sensor;
-                sensor.mode = static_cast<SensorMode>(pickNewMode(sensor.mode, SensorMode_Count));
-                switch (sensor.mode) {
-                case SensorMode_Telemetry:
-                    sensor.modeData.telemetry = {};
-                    break;
-                case SensorMode_DetectEnergy:
-                    sensor.modeData.detectEnergy = {Const::DetectEnergyMinDensity_Default};
-                    break;
-                case SensorMode_DetectSolid:
-                    sensor.modeData.detectSolid = {};
-                    break;
-                case SensorMode_DetectFreeCell:
-                    sensor.modeData.detectFreeCell = {Const::DetectFreeCellMinDensity_Default, Const::RestrictToColors_Default};
-                    break;
-                case SensorMode_DetectCreature:
-                    sensor.modeData.detectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
-                    break;
-                }
-            } break;
-            case CellType_Generator: {
-                auto& generator = node.cellTypeData.generator;
-                generator.mode = static_cast<GeneratorMode>(pickNewMode(generator.mode, GeneratorMode_Count));
-                switch (generator.mode) {
-                case GeneratorMode_SquareSignal:
-                    generator.modeData.squareSignal = {Const::GeneratorPeriod_Default};
-                    break;
-                case GeneratorMode_SawtoothSignal:
-                    generator.modeData.sawtoothSignal = {Const::GeneratorPeriod_Default};
-                    break;
-                }
-            } break;
-            case CellType_Attacker: {
-                auto& attacker = node.cellTypeData.attacker;
-                attacker.mode = static_cast<AttackerMode>(pickNewMode(attacker.mode, AttackerMode_Count));
-                switch (attacker.mode) {
-                case AttackerMode_FreeCell:
-                    attacker.modeData.attackFreeCell = {Const::RestrictToColors_Default};
-                    break;
-                case AttackerMode_Creature:
-                    attacker.modeData.attackCreature = {};
-                    break;
-                }
-            } break;
-            case CellType_Muscle: {
-                auto& muscle = node.cellTypeData.muscle;
-                muscle.mode = static_cast<MuscleMode>(pickNewMode(muscle.mode, MuscleMode_Count));
-                switch (muscle.mode) {
-                case MuscleMode_AutoBending:
-                    muscle.modeData.autoBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
-                    break;
-                case MuscleMode_ManualBending:
-                    muscle.modeData.manualBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
-                    break;
-                case MuscleMode_AngleBending:
-                    muscle.modeData.angleBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleAttractionRepulsionRatio_Default};
-                    break;
-                case MuscleMode_AutoCrawling:
-                    muscle.modeData.autoCrawling = {Const::MuscleMaxDistanceDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
-                    break;
-                case MuscleMode_ManualCrawling:
-                    muscle.modeData.manualCrawling = {Const::MuscleMaxDistanceDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
-                    break;
-                case MuscleMode_DirectMovement:
-                    muscle.modeData.directMovement = {};
-                    break;
-                }
-            } break;
+            case CellType_Sensor:
+                node.cellTypeData.sensor.mode = static_cast<SensorMode>(pickNewMode(node.cellTypeData.sensor.mode, SensorMode_Count));
+                break;
+            case CellType_Generator:
+                node.cellTypeData.generator.mode = static_cast<GeneratorMode>(pickNewMode(node.cellTypeData.generator.mode, GeneratorMode_Count));
+                break;
+            case CellType_Attacker:
+                node.cellTypeData.attacker.mode = static_cast<AttackerMode>(pickNewMode(node.cellTypeData.attacker.mode, AttackerMode_Count));
+                break;
+            case CellType_Muscle:
+                node.cellTypeData.muscle.mode = static_cast<MuscleMode>(pickNewMode(node.cellTypeData.muscle.mode, MuscleMode_Count));
+                break;
             case CellType_Defender:
                 node.cellTypeData.defender.mode = static_cast<DefenderMode>(pickNewMode(node.cellTypeData.defender.mode, DefenderMode_Count));
                 break;
-            case CellType_Reconnector: {
-                auto& reconnector = node.cellTypeData.reconnector;
-                reconnector.mode = static_cast<ReconnectorMode>(pickNewMode(reconnector.mode, ReconnectorMode_Count));
-                switch (reconnector.mode) {
-                case ReconnectorMode_Solid:
-                    reconnector.modeData.reconnectSolid = {};
-                    break;
-                case ReconnectorMode_FreeCell:
-                    reconnector.modeData.reconnectFreeCell = {Const::RestrictToColors_Default};
-                    break;
-                case ReconnectorMode_Creature:
-                    reconnector.modeData.reconnectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
-                    break;
-                }
-            } break;
-            case CellType_Memory: {
-                auto& memory = node.cellTypeData.memory;
-                memory.mode = static_cast<MemoryMode>(pickNewMode(memory.mode, MemoryMode_Count));
-                switch (memory.mode) {
-                case MemoryMode_SignalDelay:
-                    memory.modeData.signalDelay = {Const::SignalDelay_Default};
-                    break;
-                case MemoryMode_SignalRecorder:
-                    memory.modeData.signalRecorder = {true, 0};
-                    break;
-                case MemoryMode_SignalStorage:
-                    memory.modeData.signalStorage = {true};
-                    break;
-                case MemoryMode_SignalIntegrator:
-                    memory.modeData.signalIntegrator = {Const::SignalIntegratorNewSignalWeight_Default};
-                    break;
-                }
-            } break;
-            case CellType_Communicator: {
-                auto& communicator = node.cellTypeData.communicator;
-                communicator.mode = static_cast<CommunicatorMode>(pickNewMode(communicator.mode, CommunicatorMode_Count));
-                switch (communicator.mode) {
-                case CommunicatorMode_Sender:
-                    communicator.modeData.sender = {Const::CommunicatorRange_Default, Const::CommunicatorMaxTimesSent_Default};
-                    break;
-                case CommunicatorMode_Receiver:
-                    communicator.modeData.receiver = {Const::RestrictToColors_Default, LineageRestriction_No};
-                    break;
-                }
-            } break;
+            case CellType_Reconnector:
+                node.cellTypeData.reconnector.mode = static_cast<ReconnectorMode>(pickNewMode(node.cellTypeData.reconnector.mode, ReconnectorMode_Count));
+                break;
+            case CellType_Memory:
+                node.cellTypeData.memory.mode = static_cast<MemoryMode>(pickNewMode(node.cellTypeData.memory.mode, MemoryMode_Count));
+                break;
+            case CellType_Communicator:
+                node.cellTypeData.communicator.mode = static_cast<CommunicatorMode>(pickNewMode(node.cellTypeData.communicator.mode, CommunicatorMode_Count));
+                break;
             default:
                 // Cell types without a mode field are not affected.
                 changed = false;
@@ -676,6 +701,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
             }
 
             if (changed) {
+                resetCellTypeModeToDefault(node);
                 atomicAdd_block(&accumulatedMutations, 1.0f);
             }
         }
@@ -710,8 +736,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
 
             node.cellType = pickNewCellType(node.cellType);
 
-            // The new cell type is initialized with the shared default attribute values (see the *_Default constants in CellTypeConstants.h
-            // and the host-side defaults in GenomeDesc.h). Using defaults keeps the mutated genome valid and corrected by construction.
+            // Set the new cell type's non-mode attributes to their host-side defaults (see GenomeDesc.h) and select the default mode.
+            // The selected mode's data is then filled in by resetCellTypeModeToDefault(), shared with applyMutations_cellTypeMode().
+            // Using defaults keeps the mutated genome valid and corrected by construction.
             auto& cellTypeData = node.cellTypeData;
             switch (node.cellType) {
             case CellType_Base:
@@ -725,7 +752,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
                 sensor.autoTrigger = true;
                 sensor.tagForAttackers = true;
                 sensor.mode = SensorMode_DetectCreature;
-                sensor.modeData.detectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
                 sensor.minRange = 0;
                 sensor.maxRange = 255;
             } break;
@@ -736,29 +762,22 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
                 generator.maxValue = 1.0f;
                 generator.timeOffset = 0;
                 generator.mode = GeneratorMode_SquareSignal;
-                generator.modeData.squareSignal = {Const::GeneratorPeriod_Default};
             } break;
-            case CellType_Attacker: {
-                auto& attacker = cellTypeData.attacker;
-                attacker.mode = AttackerMode_Creature;
-                attacker.modeData.attackCreature = {};
-            } break;
+            case CellType_Attacker:
+                cellTypeData.attacker.mode = AttackerMode_Creature;
+                break;
             case CellType_Injector:
                 cellTypeData.injector = {0};
                 break;
-            case CellType_Muscle: {
-                auto& muscle = cellTypeData.muscle;
-                muscle.mode = MuscleMode_AutoBending;
-                muscle.modeData.autoBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
-            } break;
+            case CellType_Muscle:
+                cellTypeData.muscle.mode = MuscleMode_AutoBending;
+                break;
             case CellType_Defender:
                 cellTypeData.defender = {DefenderMode_DefendAgainstAttacker};
                 break;
-            case CellType_Reconnector: {
-                auto& reconnector = cellTypeData.reconnector;
-                reconnector.mode = ReconnectorMode_Creature;
-                reconnector.modeData.reconnectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
-            } break;
+            case CellType_Reconnector:
+                cellTypeData.reconnector.mode = ReconnectorMode_Creature;
+                break;
             case CellType_Detonator:
                 cellTypeData.detonator = {10};
                 break;
@@ -768,21 +787,19 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
             case CellType_Memory: {
                 auto& memory = cellTypeData.memory;
                 memory.mode = MemoryMode_SignalDelay;
-                memory.modeData.signalDelay = {Const::SignalDelay_Default};
                 memory.numSignalEntries = 0;
                 memory.channelBitMask = Const::MemoryChannelBitMask_Max;
                 memory.signalEntries = nullptr;
             } break;
-            case CellType_Communicator: {
-                auto& communicator = cellTypeData.communicator;
-                communicator.mode = CommunicatorMode_Sender;
-                communicator.modeData.sender = {Const::CommunicatorRange_Default, Const::CommunicatorMaxTimesSent_Default};
-            } break;
+            case CellType_Communicator:
+                cellTypeData.communicator.mode = CommunicatorMode_Sender;
+                break;
             case CellType_Void:
                 cellTypeData.voidCell = {};
                 break;
             }
 
+            resetCellTypeModeToDefault(node);
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
     }

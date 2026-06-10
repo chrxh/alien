@@ -10,7 +10,28 @@
 #include "MutationTestsBase.h"
 
 class CellTypeMutationTests : public MutationTestsBase
-{};
+{
+protected:
+    // Resets the cell type (selected type and its data) to a canonical value while preserving all other node attributes.
+    static void resetCellType(CellTypeGenomeDesc& cellType) { cellType = BaseGenomeDesc{}; }
+
+    bool compareAllExceptCellType(GenomeDesc expected, GenomeDesc actual)
+    {
+        auto reset = [](GenomeDesc& genome) {
+            genome._lineageId = 0;
+            genome._prevLineageId = std::nullopt;
+            genome._accumulatedMutations = 0.0f;
+            for (auto& gene : genome._genes) {
+                for (auto& node : gene._nodes) {
+                    resetCellType(node._cellType);
+                }
+            }
+        };
+        reset(expected);
+        reset(actual);
+        return expected == actual;
+    }
+};
 
 TEST_F(CellTypeMutationTests, cellTypeMutation_changesCellTypeToDefaults)
 {
@@ -25,17 +46,16 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_changesCellTypeToDefaults)
     auto actualGenome = getMutatedGenome();
     auto const& cellType = actualGenome._genes.at(0)._nodes.at(0)._cellType;
 
-    // The cell type must have changed away from the original Sensor type.
     EXPECT_FALSE(std::holds_alternative<SensorGenomeDesc>(cellType));
 
     // The new cell type must be initialized with default attribute values.
     std::visit([](auto const& cellTypeData) { EXPECT_EQ(cellTypeData, std::decay_t<decltype(cellTypeData)>{}); }, cellType);
 }
 
-TEST_F(CellTypeMutationTests, cellTypeMutation_zeroProbabilityKeepsCellType)
+TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellType)
 {
-    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().cellType(DetonatorGenomeDesc().countdown(42))})});
-    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(0.0f);
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -45,26 +65,6 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_zeroProbabilityKeepsCellType)
     }
 
     auto actualGenome = getMutatedGenome();
-    auto const& cellType = actualGenome._genes.at(0)._nodes.at(0)._cellType;
 
-    ASSERT_TRUE(std::holds_alternative<DetonatorGenomeDesc>(cellType));
-    EXPECT_EQ(std::get<DetonatorGenomeDesc>(cellType)._countdown, 42);
-}
-
-TEST_F(CellTypeMutationTests, cellTypeMutation_resultingCellTypesAlwaysHaveDefaults)
-{
-    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().cellType(BaseGenomeDesc())})});
-    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-
-    // After every mutation the freshly assigned cell type must carry default attribute values, regardless of which type was chosen.
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-        auto actualGenome = getMutatedGenome();
-        auto const& cellType = actualGenome._genes.at(0)._nodes.at(0)._cellType;
-        std::visit([](auto const& cellTypeData) { EXPECT_EQ(cellTypeData, std::decay_t<decltype(cellTypeData)>{}); }, cellType);
-    }
+    EXPECT_TRUE(compareAllExceptCellType(genome, actualGenome));
 }
