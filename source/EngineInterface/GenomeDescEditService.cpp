@@ -488,9 +488,18 @@ namespace
         inspectedGeneIndices.erase(geneIndex);
     }
 
-    void adaptNodeAttributesForPreview(GenomeDesc& genome, bool detailSimulation)
+    void adaptGenomeAttributesForPreview(GenomeDesc& genome, bool detailSimulation)
     {
+        genome._lineageId = 0;
+        genome._accumulatedMutations = 0;
+        genome._mutationRates._neuronMutations[0] = NeuronMutationDesc();
+        genome._mutationRates._neuronMutations[1] = NeuronMutationDesc();
+        genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc();
+        genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc();
+        genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc();
+        genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc();
         for (auto& gene : genome._genes) {
+            gene._homogeneCellType = false;
             for (auto& node : gene._nodes) {
                 node._color = PreviewColor;
                 if (!detailSimulation) {
@@ -534,19 +543,11 @@ void GenomeDescEditService::adaptDescriptionForPreview(GenomeDesc& genome, GeneI
 
     std::set<int> inspectedGeneIndices;
     castrate(genome, startGeneIndex, inspectedGeneIndices);
-    adaptNodeAttributesForPreview(genome, detailSimulation);
+    adaptGenomeAttributesForPreview(genome, detailSimulation);
     resetNames(genome);
     if (!detailSimulation) {
         genome._frontAngle = 0;
     }
-    genome._lineageId = 0;
-    genome._accumulatedMutations = 0;
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc();
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc();
-    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc();
-    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc();
-    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc();
-    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc();
 
     resetUnusedGenes(genome, geneIndices);
 }

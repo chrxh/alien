@@ -113,12 +113,12 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
     auto getCellType = [&](ObjectDesc const& object) -> CellType {
         auto const& cell = object.getCellRef();
         if (cell._geneIndex >= genome._genes.size()) {
-            return CellType_Base;
+            return CellType_Base;   // Return default
         }
         auto const& gene = genome._genes.at(cell._geneIndex);
         auto nodeIndex = gene._homogeneCellType ? 0 : cell._nodeIndex;
         if (nodeIndex >= gene._nodes.size()) {
-            return CellType_Base;
+            return CellType_Base;   // Return default
         }
         return gene._nodes.at(nodeIndex).getCellType();
     };
