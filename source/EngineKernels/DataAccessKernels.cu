@@ -49,6 +49,7 @@ namespace
                     genome->mutationRates.cellTypePropertiesMutations[i].probability};
             }
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.eventProbability};
+            genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.eventProbability};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];

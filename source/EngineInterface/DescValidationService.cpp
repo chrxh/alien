@@ -39,6 +39,8 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
     }
     genome._mutationRates._cellTypeModeMutation._eventProbability =
         std::clamp(genome._mutationRates._cellTypeModeMutation._eventProbability, 0.0f, 1.0f);
+    genome._mutationRates._cellTypeMutation._eventProbability =
+        std::clamp(genome._mutationRates._cellTypeMutation._eventProbability, 0.0f, 1.0f);
 
     // Validate each gene
     for (auto& gene : genome._genes) {

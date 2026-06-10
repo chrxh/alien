@@ -6,6 +6,7 @@ PUBLIC
     CellStateTransitionTests.cpp
     CellTypeModeMutationTests.cpp
     CellTypeMutationCoverageGuard.cpp
+    CellTypeMutationTests.cpp
     CellTypePropertiesMutationTests.cpp
     CommunicatorTests.cpp
     ConnectionMutationTests.cpp

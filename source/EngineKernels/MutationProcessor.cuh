@@ -26,6 +26,7 @@ private:
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellTypeProperties(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
 
     __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
@@ -105,6 +106,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_connections(data, genome, accumulatedMutations);
     applyMutations_cellTypeProperties(data, genome, accumulatedMutations);
     applyMutations_cellTypeMode(data, genome, accumulatedMutations);
+    applyMutations_cellType(data, genome, accumulatedMutations);
 
     block.sync();
     updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
@@ -680,6 +682,112 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
     }
 }
 
+__inline__ __device__ void MutationProcessor::applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    auto const& rate = genome->mutationRates.cellTypeMutation;
+
+    if (rate.eventProbability <= 0) {
+        return;
+    }
+
+    // Picks a random cell type different from the current one (uniform over the remaining types).
+    auto pickNewCellType = [&](int currentCellType) {
+        auto newCellType = data.primaryNumberGen.random(CellType_Count - 2);
+        if (newCellType >= currentCellType) {
+            ++newCellType;
+        }
+        return newCellType;
+    };
+
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        auto& gene = genome->genes[geneIndex];
+        for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+            if (data.primaryNumberGen.random() >= rate.eventProbability) {
+                continue;
+            }
+            auto& node = gene.nodes[nodeIndex];
+
+            node.cellType = pickNewCellType(node.cellType);
+
+            // The new cell type is initialized with the shared default attribute values (see the *_Default constants in CellTypeConstants.h
+            // and the host-side defaults in GenomeDesc.h). Using defaults keeps the mutated genome valid and corrected by construction.
+            auto& cellTypeData = node.cellTypeData;
+            switch (node.cellType) {
+            case CellType_Base:
+                cellTypeData.base = {};
+                break;
+            case CellType_Depot:
+                cellTypeData.depot = {200.0f, 0.0f};
+                break;
+            case CellType_Sensor: {
+                auto& sensor = cellTypeData.sensor;
+                sensor.autoTrigger = true;
+                sensor.tagForAttackers = true;
+                sensor.mode = SensorMode_DetectCreature;
+                sensor.modeData.detectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
+                sensor.minRange = 0;
+                sensor.maxRange = 255;
+            } break;
+            case CellType_Generator: {
+                auto& generator = cellTypeData.generator;
+                generator.additive = false;
+                generator.minValue = -1.0f;
+                generator.maxValue = 1.0f;
+                generator.timeOffset = 0;
+                generator.mode = GeneratorMode_SquareSignal;
+                generator.modeData.squareSignal = {Const::GeneratorPeriod_Default};
+            } break;
+            case CellType_Attacker: {
+                auto& attacker = cellTypeData.attacker;
+                attacker.mode = AttackerMode_Creature;
+                attacker.modeData.attackCreature = {};
+            } break;
+            case CellType_Injector:
+                cellTypeData.injector = {0};
+                break;
+            case CellType_Muscle: {
+                auto& muscle = cellTypeData.muscle;
+                muscle.mode = MuscleMode_AutoBending;
+                muscle.modeData.autoBending = {Const::MuscleMaxAngleDeviation_Default, Const::MuscleForwardBackwardRatio_Default};
+            } break;
+            case CellType_Defender:
+                cellTypeData.defender = {DefenderMode_DefendAgainstAttacker};
+                break;
+            case CellType_Reconnector: {
+                auto& reconnector = cellTypeData.reconnector;
+                reconnector.mode = ReconnectorMode_Creature;
+                reconnector.modeData.reconnectCreature = {0, 0, Const::RestrictToColors_Default, LineageRestriction_No};
+            } break;
+            case CellType_Detonator:
+                cellTypeData.detonator = {10};
+                break;
+            case CellType_Digestor:
+                cellTypeData.digestor = {0.5f};
+                break;
+            case CellType_Memory: {
+                auto& memory = cellTypeData.memory;
+                memory.mode = MemoryMode_SignalDelay;
+                memory.modeData.signalDelay = {Const::SignalDelay_Default};
+                memory.numSignalEntries = 0;
+                memory.channelBitMask = Const::MemoryChannelBitMask_Max;
+                memory.signalEntries = nullptr;
+            } break;
+            case CellType_Communicator: {
+                auto& communicator = cellTypeData.communicator;
+                communicator.mode = CommunicatorMode_Sender;
+                communicator.modeData.sender = {Const::CommunicatorRange_Default, Const::CommunicatorMaxTimesSent_Default};
+            } break;
+            case CellType_Void:
+                cellTypeData.voidCell = {};
+                break;
+            }
+
+            atomicAdd_block(&accumulatedMutations, 1.0f);
+        }
+    }
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
@@ -721,6 +829,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (cellTypeModeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeModeSigma)); };
             mutateFloat(genome->mutationRates.cellTypeModeMutation.eventProbability);
+        }
+
+        float cellTypeMutationSigma = cudaSimulationParameters.metaMutationCellTypeSigma.value;
+        if (cellTypeMutationSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeMutationSigma)); };
+            mutateFloat(genome->mutationRates.cellTypeMutation.eventProbability);
         }
     }
 }

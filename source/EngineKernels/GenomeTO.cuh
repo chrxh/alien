@@ -371,12 +371,18 @@ struct CellTypeModeMutationTO
     float eventProbability;
 };
 
+struct CellTypeMutationTO
+{
+    float eventProbability;
+};
+
 struct MutationRatesTO
 {
     NeuronMutationTO neuronMutations[2];
     ConnectionMutationTO connectionMutations[2];
     CellTypePropertiesMutationTO cellTypePropertiesMutations[2];
     CellTypeModeMutationTO cellTypeModeMutation;
+    CellTypeMutationTO cellTypeMutation;
 };
 
 struct GenomeTO
