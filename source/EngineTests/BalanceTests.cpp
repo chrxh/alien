@@ -113,6 +113,7 @@ public:
 TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCapabilities)
 {
     _parameters.attackerRadius.value[0] = 3.0f;
+    _parameters.muscleMovementAcceleration = {ColorVector<float>::uniform(3.0f)};
     _simulationFacade->setSimulationParameters(_parameters);
 
     Desc data;
@@ -156,6 +157,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
 TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionCapabilities)
 {
     _parameters.attackerRadius.value[0] = 3.0f;
+    _parameters.muscleMovementAcceleration = {ColorVector<float>::uniform(3.0f)};
     _simulationFacade->setSimulationParameters(_parameters);
 
     Desc data;
