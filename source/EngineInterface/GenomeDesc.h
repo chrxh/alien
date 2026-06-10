@@ -42,8 +42,8 @@ struct DepotGenomeDesc
 {
     auto operator<=>(DepotGenomeDesc const&) const = default;
 
-    MEMBER(DepotGenomeDesc, float, storageLimit, 200.0f);
-    MEMBER(DepotGenomeDesc, float, initialStoredUsableEnergy, 0.0f);
+    MEMBER(DepotGenomeDesc, float, storageLimit, Const::DepotStorageLimit_Default);
+    MEMBER(DepotGenomeDesc, float, initialStoredUsableEnergy, Const::DepotInitialStoredUsableEnergy_Default);
 };
 
 struct ConstructorGenomeDesc
@@ -103,11 +103,11 @@ struct SensorGenomeDesc
 {
     auto operator<=>(SensorGenomeDesc const&) const = default;
 
-    MEMBER(SensorGenomeDesc, bool, autoTrigger, true);
-    MEMBER(SensorGenomeDesc, bool, tagForAttackers, true);
+    MEMBER(SensorGenomeDesc, bool, autoTrigger, Const::SensorAutoTrigger_Default);
+    MEMBER(SensorGenomeDesc, bool, tagForAttackers, Const::SensorTagForAttackers_Default);
     MEMBER(SensorGenomeDesc, SensorModeGenomeDesc, mode, DetectCreatureGenomeDesc());
-    MEMBER(SensorGenomeDesc, int, minRange, 0);
-    MEMBER(SensorGenomeDesc, int, maxRange, 255);
+    MEMBER(SensorGenomeDesc, int, minRange, Const::SensorMinRange_Default);
+    MEMBER(SensorGenomeDesc, int, maxRange, Const::SensorMaxRange_Default);
 
     SensorMode getMode() const;
 };
@@ -130,10 +130,10 @@ struct GeneratorGenomeDesc
 {
     auto operator<=>(GeneratorGenomeDesc const&) const = default;
 
-    MEMBER(GeneratorGenomeDesc, bool, additive, false);
-    MEMBER(GeneratorGenomeDesc, float, minValue, -1.0f);
-    MEMBER(GeneratorGenomeDesc, float, maxValue, 1.0f);
-    MEMBER(GeneratorGenomeDesc, int, timeOffset, 0);
+    MEMBER(GeneratorGenomeDesc, bool, additive, Const::GeneratorAdditive_Default);
+    MEMBER(GeneratorGenomeDesc, float, minValue, Const::GeneratorMinValue_Default);
+    MEMBER(GeneratorGenomeDesc, float, maxValue, Const::GeneratorMaxValue_Default);
+    MEMBER(GeneratorGenomeDesc, int, timeOffset, Const::GeneratorTimeOffset_Default);
     MEMBER(GeneratorGenomeDesc, GeneratorModeGenomeDesc, mode, SquareSignalGenomeDesc());
 
     GeneratorMode getMode() const;
@@ -166,7 +166,7 @@ struct InjectorGenomeDesc
 {
     auto operator<=>(InjectorGenomeDesc const&) const = default;
 
-    MEMBER(InjectorGenomeDesc, int, geneIndex, 0);
+    MEMBER(InjectorGenomeDesc, int, geneIndex, Const::InjectorGeneIndex_Default);
 };
 
 
@@ -271,14 +271,14 @@ struct DetonatorGenomeDesc
 {
     auto operator<=>(DetonatorGenomeDesc const&) const = default;
 
-    MEMBER(DetonatorGenomeDesc, int, countdown, 10);
+    MEMBER(DetonatorGenomeDesc, int, countdown, Const::DetonatorCountdown_Default);
 };
 
 struct DigestorGenomeDesc
 {
     auto operator<=>(DigestorGenomeDesc const&) const = default;
 
-    MEMBER(DigestorGenomeDesc, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
+    MEMBER(DigestorGenomeDesc, float, rawEnergyConductivity, Const::DigestorRawEnergyConductivity_Default);  // Between 0 and 1
 
     float getRawEnergyConversionRate() const { return 1 - _rawEnergyConductivity; }
     DigestorGenomeDesc& setRawEnergyConversionRate(float value)
@@ -446,6 +446,13 @@ struct CellTypeModeMutationDesc
     MEMBER(CellTypeModeMutationDesc, float, eventProbability, 0.0f);
 };
 
+struct CellTypeMutationDesc
+{
+    auto operator<=>(CellTypeMutationDesc const&) const = default;
+
+    MEMBER(CellTypeMutationDesc, float, eventProbability, 0.0f);
+};
+
 struct MutationRatesDesc
 {
     using NeuronMutationArray = std::array<NeuronMutationDesc, 2>;
@@ -458,6 +465,7 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, ConnectionMutationArray, connectionMutations, ConnectionMutationArray());
     MEMBER(MutationRatesDesc, CellTypePropertiesMutationArray, cellTypePropertiesMutations, CellTypePropertiesMutationArray());
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
+    MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
 
     std::vector<std::string> getActiveMutationTypes() const;
 };

@@ -1,20 +1,14 @@
 // Compile-time guard for cell-type property mutation coverage.
 //
-// Each static_assert below pins the number of data members of
-// cell-type or mode description. The matching list of mutated attributes
-// lives in MutationProcessor::applyMutations_cellTypeProperties().
-//
-// When a field is added to or removed from one of these structs, the
-// corresponding assert fails to compile. Treat that failure as a checklist:
-// either extend the mutation switch for the new attribute and then bump the
-// count here - or, if the field is intentionally never mutated, just bump the
-// count. The point is to force a conscious decision so newly added cell-type
-// attributes are never silently left out of the mutation.
+// Each static_assert pins the field count of a cell-type or mode struct. When a
+// field is added or removed the matching assert fails to compile - treat it as a
+// checklist: either handle the new field in MutationProcessor.cuh (see the
+// function named in the message) or, if it is intentionally never mutated, just
+// bump the count. This forces a conscious decision so new attributes are never
+// silently left out of the mutation.
 //
 // The mode counts at the bottom pin the number of modes per cell type, so adding
-// a mode also trips the check (its new description struct still needs review).
-// Switching modes itself lives in MutationProcessor::applyMutations_cellTypeMode(),
-// which also needs a default-initialized branch for every new mode.
+// a mode trips the check too (its new description struct still needs review).
 
 
 #include <variant>
@@ -26,7 +20,7 @@
 #define ALIEN_MUTATION_FIELD_COUNT(Type, Count) \
     static_assert( \
         boost::pfr::tuple_size_v<Type> == (Count), \
-        #Type " field count changed - review applyMutations_cellTypeProperties() in MutationProcessor.cuh and update this count")
+        #Type " field count changed - review applyMutations_cellTypeProperties() and applyMutations_cellType() in MutationProcessor.cuh and update this count")
 
 #define ALIEN_MUTATION_MODE_COUNT(Type, Count) \
     static_assert( \
