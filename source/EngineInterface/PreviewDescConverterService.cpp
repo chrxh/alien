@@ -109,16 +109,29 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
         auto const* node = getNode(object);
         return node != nullptr ? node->_color : 0;
     };
+    // With homogeneous cell type the cell type is taken from the gene's first node (see EntityFactory::createCellFromNode)
+    auto getCellType = [&](ObjectDesc const& object) -> CellType {
+        auto const& cell = object.getCellRef();
+        if (cell._geneIndex >= genome._genes.size()) {
+            return CellType_Base;
+        }
+        auto const& gene = genome._genes.at(cell._geneIndex);
+        auto nodeIndex = gene._homogeneCellType ? 0 : cell._nodeIndex;
+        if (nodeIndex >= gene._nodes.size()) {
+            return CellType_Base;
+        }
+        return gene._nodes.at(nodeIndex).getCellType();
+    };
     for (auto const& object : phenotype._objects) {
         auto const* node = getNode(object);
         auto previewCell = CellPreviewDesc()
                                .id(object._id)
                                .pos(object._pos)
-                                .color(getPreviewColor(object))
-                                .inactive(isPreviewInactive(object))
+                               .color(getPreviewColor(object))
+                               .inactive(isPreviewInactive(object))
                                .geneIndex(object.getCellRef()._geneIndex)
                                .nodeIndex(object.getCellRef()._nodeIndex)
-                               .cellType(node != nullptr ? node->getCellType() : CellType_Base);
+                               .cellType(getCellType(object));
 
         previewCell._signal = SignalPreviewDesc().channels(object.getCellRef()._signal._channels);
         if (node != nullptr && node->_constructor.has_value()) {
