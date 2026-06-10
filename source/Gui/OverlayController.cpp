@@ -149,7 +149,7 @@ void OverlayController::processProgressAnimation()
             auto [point1, depth1] = getPoint(i, 0.0f);
             auto [point2, depth2] = getPoint(i, Const::Pi);
             auto depth = (depth1 + depth2) / 2.0f;
-            drawList->AddLine(point1, point2, ImColor::HSV(0.58f, 0.7f, 0.5f, (0.25f + depth * 0.25f) * alpha), rungThickness);
+            drawList->AddLine(point1, point2, ImColor::HSV(0.7f, 0.7f, 1.0f, (0.25f + depth * 0.25f) * alpha), rungThickness);
         }
 
         for (int i = 1; i < helixSegments; ++i) {
@@ -161,23 +161,23 @@ void OverlayController::processProgressAnimation()
             auto depth2 = (previousDepth2 + currentDepth2) / 2.0f;
 
             drawList->AddLine(
-                previousPoint1, currentPoint1, ImColor::HSV(0.61f, 0.85f, 0.65f + depth1 * 0.25f, (0.45f + depth1 * 0.35f) * alpha), strandThickness);
+                previousPoint1, currentPoint1, ImColor::HSV(0.61f, 0.95f, 0.65f + depth1 * 0.25f, (0.45f + depth1 * 0.35f) * alpha), strandThickness);
             drawList->AddLine(
-                previousPoint2, currentPoint2, ImColor::HSV(0.67f, 0.85f, 0.65f + depth2 * 0.25f, (0.45f + depth2 * 0.35f) * alpha), strandThickness);
+                previousPoint2, currentPoint2, ImColor::HSV(0.79f, 0.95f, 0.65f + depth2 * 0.25f, (0.45f + depth2 * 0.35f) * alpha), strandThickness);
         }
 
         for (int i = 0; i < helixSegments; i += 2) {
             auto [point1, depth1] = getPoint(i, 0.0f);
             auto [point2, depth2] = getPoint(i, Const::Pi);
             drawList->AddCircleFilled(
-                point1, dotRadius * (0.75f + depth1 * 0.5f), ImColor::HSV(0.61f, 0.75f, 0.75f + depth1 * 0.2f, (0.5f + depth1 * 0.4f) * alpha));
+                point1, dotRadius * (0.75f + depth1 * 0.5f), ImColor::HSV(0.61f, 0.45f, 0.75f + depth1 * 0.2f, (0.5f + depth1 * 0.4f) * alpha));
             drawList->AddCircleFilled(
-                point2, dotRadius * (0.75f + depth2 * 0.5f), ImColor::HSV(0.67f, 0.75f, 0.75f + depth2 * 0.2f, (0.5f + depth2 * 0.4f) * alpha));
+                point2, dotRadius * (0.75f + depth2 * 0.5f), ImColor::HSV(0.79f, 0.45f, 0.75f + depth2 * 0.2f, (0.5f + depth2 * 0.4f) * alpha));
         }
         drawList->AddText(
             StyleRepository::get().getReefMediumFont(),
             scale(16.0f),
-            {center.x - scale(28.0f), center.y - scale(15.0f)},
+            {center.x - scale(28.0f), center.y - scale(0.0f)},
             ImColor::HSV(0, 0, 1, 0.7f * alpha),
             "Processing");
 
