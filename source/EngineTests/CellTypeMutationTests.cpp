@@ -12,9 +12,6 @@
 class CellTypeMutationTests : public MutationTestsBase
 {
 protected:
-    // Resets the cell type (selected type and its data) to a canonical value while preserving all other node attributes.
-    static void resetCellType(CellTypeGenomeDesc& cellType) { cellType = BaseGenomeDesc{}; }
-
     bool compareAllExceptCellType(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
@@ -23,7 +20,7 @@ protected:
             genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
-                    resetCellType(node._cellType);
+                    node._cellType = BaseGenomeDesc{};  // canonicalize so everything except the cell type is compared
                 }
             }
         };

@@ -47,8 +47,8 @@ struct DepotDesc
 {
     auto operator<=>(DepotDesc const&) const = default;
 
-    MEMBER(DepotDesc, float, storageLimit, 200.0f);
-    MEMBER(DepotDesc, float, storedUsableEnergy, 0.0f);
+    MEMBER(DepotDesc, float, storageLimit, Const::DepotStorageLimit_Default);
+    MEMBER(DepotDesc, float, storedUsableEnergy, Const::DepotInitialStoredUsableEnergy_Default);
 };
 
 struct ConstructorDesc
@@ -124,11 +124,11 @@ struct SensorDesc
 {
     auto operator<=>(SensorDesc const&) const = default;
 
-    MEMBER(SensorDesc, bool, autoTrigger, true);
-    MEMBER(SensorDesc, bool, tagForAttackers, true);
+    MEMBER(SensorDesc, bool, autoTrigger, Const::SensorAutoTrigger_Default);
+    MEMBER(SensorDesc, bool, tagForAttackers, Const::SensorTagForAttackers_Default);
     MEMBER(SensorDesc, SensorModeDesc, mode, DetectCreatureDesc());
-    MEMBER(SensorDesc, int, minRange, 0);
-    MEMBER(SensorDesc, int, maxRange, 255);
+    MEMBER(SensorDesc, int, minRange, Const::SensorMinRange_Default);
+    MEMBER(SensorDesc, int, maxRange, Const::SensorMaxRange_Default);
 
     // Process data
     MEMBER(SensorDesc, std::optional<SensorLastMatchDesc>, lastMatch, std::nullopt);
@@ -155,10 +155,10 @@ struct GeneratorDesc
     auto operator<=>(GeneratorDesc const&) const = default;
 
     // Fixed data
-    MEMBER(GeneratorDesc, bool, additive, false);
-    MEMBER(GeneratorDesc, float, minValue, -1.0f);
-    MEMBER(GeneratorDesc, float, maxValue, 1.0f);
-    MEMBER(GeneratorDesc, int, timeOffset, 0);
+    MEMBER(GeneratorDesc, bool, additive, Const::GeneratorAdditive_Default);
+    MEMBER(GeneratorDesc, float, minValue, Const::GeneratorMinValue_Default);
+    MEMBER(GeneratorDesc, float, maxValue, Const::GeneratorMaxValue_Default);
+    MEMBER(GeneratorDesc, int, timeOffset, Const::GeneratorTimeOffset_Default);
     MEMBER(GeneratorDesc, GeneratorModeDesc, mode, SquareSignalDesc());
 
     // Process data
@@ -195,7 +195,7 @@ struct InjectorDesc
     InjectorDesc();
     auto operator<=>(InjectorDesc const&) const = default;
 
-    MEMBER(InjectorDesc, int, geneIndex, 0);
+    MEMBER(InjectorDesc, int, geneIndex, Const::InjectorGeneIndex_Default);
 };
 
 struct AutoBendingDesc
@@ -336,7 +336,7 @@ struct DigestorDesc
 {
     auto operator<=>(DigestorDesc const&) const = default;
 
-    MEMBER(DigestorDesc, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
+    MEMBER(DigestorDesc, float, rawEnergyConductivity, Const::DigestorRawEnergyConductivity_Default);  // Between 0 and 1
 
     float getRawEnergyConversionRate() const { return 1 - _rawEnergyConductivity; }
     DigestorDesc& setRawEnergyConversionRate(float value)

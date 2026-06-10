@@ -740,29 +740,29 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
                 cellTypeData.base = {};
                 break;
             case CellType_Depot:
-                cellTypeData.depot = {200.0f, 0.0f};
+                cellTypeData.depot = {Const::DepotStorageLimit_Default, Const::DepotInitialStoredUsableEnergy_Default};
                 break;
             case CellType_Sensor: {
                 auto& sensor = cellTypeData.sensor;
-                sensor.autoTrigger = true;
-                sensor.tagForAttackers = true;
+                sensor.autoTrigger = Const::SensorAutoTrigger_Default;
+                sensor.tagForAttackers = Const::SensorTagForAttackers_Default;
                 sensor.mode = SensorMode_DetectCreature;
-                sensor.minRange = 0;
-                sensor.maxRange = 255;
+                sensor.minRange = Const::SensorMinRange_Default;
+                sensor.maxRange = Const::SensorMaxRange_Default;
             } break;
             case CellType_Generator: {
                 auto& generator = cellTypeData.generator;
-                generator.additive = false;
-                generator.minValue = -1.0f;
-                generator.maxValue = 1.0f;
-                generator.timeOffset = 0;
+                generator.additive = Const::GeneratorAdditive_Default;
+                generator.minValue = Const::GeneratorMinValue_Default;
+                generator.maxValue = Const::GeneratorMaxValue_Default;
+                generator.timeOffset = Const::GeneratorTimeOffset_Default;
                 generator.mode = GeneratorMode_SquareSignal;
             } break;
             case CellType_Attacker:
                 cellTypeData.attacker.mode = AttackerMode_Creature;
                 break;
             case CellType_Injector:
-                cellTypeData.injector = {0};
+                cellTypeData.injector = {Const::InjectorGeneIndex_Default};
                 break;
             case CellType_Muscle:
                 cellTypeData.muscle.mode = MuscleMode_AutoBending;
@@ -774,10 +774,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
                 cellTypeData.reconnector.mode = ReconnectorMode_Creature;
                 break;
             case CellType_Detonator:
-                cellTypeData.detonator = {10};
+                cellTypeData.detonator = {Const::DetonatorCountdown_Default};
                 break;
             case CellType_Digestor:
-                cellTypeData.digestor = {0.5f};
+                cellTypeData.digestor = {Const::DigestorRawEnergyConductivity_Default};
                 break;
             case CellType_Memory: {
                 auto& memory = cellTypeData.memory;
