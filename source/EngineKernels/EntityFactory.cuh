@@ -30,6 +30,7 @@ public:
         Creature* creature,
         int geneIndex,
         int nodeIndex,
+        bool homogeneousCellType,
         int parentNodeIndex,
         int concatenationIndex,
         int branchIndex,
@@ -117,6 +118,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
         gene.shape = geneTO.shape;
         gene.stiffness = geneTO.stiffness;
         gene.connectionDistance = geneTO.connectionDistance;
+        gene.homogeneCellType = geneTO.homogeneCellType;
         gene.numNodes = geneTO.numNodes;
         for (int i = 0; i < sizeof(geneTO.name); ++i) {
             gene.name[i] = geneTO.name[i];
@@ -698,6 +700,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     Creature* creature,
     int geneIndex,
     int nodeIndex,
+    bool homogeneousCellType,
     int parentNodeIndex,
     int concatenationIndex,
     int branchIndex,
@@ -707,6 +710,9 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
 {
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
+
+    // With homogeneous cell type the cell type and its properties are taken from the gene's first node
+    auto const& cellTypeNode = homogeneousCellType ? &gene->nodes[0] : node;
 
     auto object = _data->entities.heap.getTypedSubArray<Object>(1);
     auto objectPointer = _data->entities.objects.getNewElement(&objectIndex);
@@ -760,18 +766,18 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     cell.lastUpdate = 0;
     cell.event = CellEvent_No;
 
-    switch (node->cellType) {
+    switch (cellTypeNode->cellType) {
     case CellType_Base: {
         cell.cellType = CellType_Base;
     } break;
     case CellType_Depot: {
         cell.cellType = CellType_Depot;
-        cell.cellTypeData.depot.storageLimit = node->cellTypeData.depot.storageLimit;
-        cell.cellTypeData.depot.storedUsableEnergy = node->cellTypeData.depot.initialStoredUsableEnergy;
+        cell.cellTypeData.depot.storageLimit = cellTypeNode->cellTypeData.depot.storageLimit;
+        cell.cellTypeData.depot.storedUsableEnergy = cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy;
     } break;
     case CellType_Sensor: {
         cell.cellType = CellType_Sensor;
-        auto const& nodeSensor = node->cellTypeData.sensor;
+        auto const& nodeSensor = cellTypeNode->cellTypeData.sensor;
         auto& sensor = cell.cellTypeData.sensor;
         sensor.autoTrigger = nodeSensor.autoTrigger;
         sensor.tagForAttackers = nodeSensor.tagForAttackers;
@@ -795,7 +801,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     } break;
     case CellType_Generator: {
         cell.cellType = CellType_Generator;
-        auto const& nodeGenerator = node->cellTypeData.generator;
+        auto const& nodeGenerator = cellTypeNode->cellTypeData.generator;
         auto& generator = cell.cellTypeData.generator;
         generator.additive = nodeGenerator.additive;
         generator.minValue = nodeGenerator.minValue;
@@ -811,7 +817,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     } break;
     case CellType_Attacker: {
         cell.cellType = CellType_Attacker;
-        auto const& nodeAttacker = node->cellTypeData.attacker;
+        auto const& nodeAttacker = cellTypeNode->cellTypeData.attacker;
         auto& attacker = cell.cellTypeData.attacker;
         attacker.mode = nodeAttacker.mode;
         if (nodeAttacker.mode == AttackerMode_FreeCell) {
@@ -820,13 +826,13 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     } break;
     case CellType_Injector: {
         cell.cellType = CellType_Injector;
-        auto const& nodeInjector = node->cellTypeData.injector;
+        auto const& nodeInjector = cellTypeNode->cellTypeData.injector;
         auto& injector = cell.cellTypeData.injector;
         injector.geneIndex = nodeInjector.geneIndex;
     } break;
     case CellType_Muscle: {
         cell.cellType = CellType_Muscle;
-        auto const& nodeMuscle = node->cellTypeData.muscle;
+        auto const& nodeMuscle = cellTypeNode->cellTypeData.muscle;
         auto& muscle = cell.cellTypeData.muscle;
         muscle.lastMovementX = 0;
         muscle.lastMovementY = 0;
@@ -869,13 +875,13 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     } break;
     case CellType_Defender: {
         cell.cellType = CellType_Defender;
-        auto const& nodeDefender = node->cellTypeData.defender;
+        auto const& nodeDefender = cellTypeNode->cellTypeData.defender;
         auto& defender = cell.cellTypeData.defender;
         defender.mode = nodeDefender.mode;
     } break;
     case CellType_Reconnector: {
         cell.cellType = CellType_Reconnector;
-        auto const& nodeReconnector = node->cellTypeData.reconnector;
+        auto const& nodeReconnector = cellTypeNode->cellTypeData.reconnector;
         auto& reconnector = cell.cellTypeData.reconnector;
         reconnector.mode = nodeReconnector.mode;
         if (nodeReconnector.mode == ReconnectorMode_Solid) {
@@ -890,20 +896,20 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     } break;
     case CellType_Detonator: {
         cell.cellType = CellType_Detonator;
-        auto const& nodeDetonator = node->cellTypeData.detonator;
+        auto const& nodeDetonator = cellTypeNode->cellTypeData.detonator;
         auto& detonator = cell.cellTypeData.detonator;
         detonator.state = DetonatorState_Ready;
         detonator.countdown = nodeDetonator.countdown;
     } break;
     case CellType_Digestor: {
         cell.cellType = CellType_Digestor;
-        auto const& nodeDigestor = node->cellTypeData.digestor;
+        auto const& nodeDigestor = cellTypeNode->cellTypeData.digestor;
         auto& digestor = cell.cellTypeData.digestor;
         digestor.rawEnergyConductivity = nodeDigestor.rawEnergyConductivity;
     } break;
     case CellType_Memory: {
         cell.cellType = CellType_Memory;
-        auto const& nodeMemory = node->cellTypeData.memory;
+        auto const& nodeMemory = cellTypeNode->cellTypeData.memory;
         auto& memory = cell.cellTypeData.memory;
         memory.mode = nodeMemory.mode;
         memory.numSignalEntries = nodeMemory.numSignalEntries;
@@ -931,7 +937,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     } break;
     case CellType_Communicator: {
         cell.cellType = CellType_Communicator;
-        auto const& nodeCommunicator = node->cellTypeData.communicator;
+        auto const& nodeCommunicator = cellTypeNode->cellTypeData.communicator;
         auto& communicator = cell.cellTypeData.communicator;
         communicator.mode = nodeCommunicator.mode;
         if (nodeCommunicator.mode == CommunicatorMode_Sender) {

@@ -105,6 +105,14 @@ void _GeneEditorWidget::processHeaderData()
             // Stiffness
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
 
+            // Homogeneous cell type
+            AlienGui::Checkbox(
+                AlienGui::CheckboxParameters()
+                    .name("Homogeneous cell type")
+                    .textWidth(rightColumnWidth)
+                    .tooltip("If enabled, every constructed cell of this gene uses the cell type and its properties of the first node."),
+                gene._homogeneCellType);
+
             table.next();
             table.end();
         }
@@ -175,7 +183,7 @@ void _GeneEditorWidget::processNodeList()
                     // Column 1: Node type
                     ImGui::TableNextColumn();
                     {
-                        auto nodeType = node.getCellType();
+                        auto nodeType = gene._homogeneCellType ? gene._nodes.front().getCellType() : node.getCellType();
                         auto text = Const::CellTypeStrings.at(nodeType);
                         AlienGui::Text(text);
                     }

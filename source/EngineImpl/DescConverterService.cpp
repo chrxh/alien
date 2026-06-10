@@ -892,6 +892,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
         geneDesc._shape = geneTO->shape;
         geneDesc._stiffness = geneTO->stiffness;
         geneDesc._connectionDistance = geneTO->connectionDistance;
+        geneDesc._homogeneCellType = geneTO->homogeneCellType;
 
         CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
         for (int k = 0; k < geneTO->numNodes; ++k) {
@@ -980,6 +981,7 @@ void DescConverterService::convertGenomeToTO(
         geneTO.shape = geneDesc._shape;
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
+        geneTO.homogeneCellType = geneDesc._homogeneCellType;
         geneTO.numNodes = toInt(geneDesc._nodes.size());
 
         auto nodeArrayStartIndex = nodeTOs.size();

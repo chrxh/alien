@@ -205,6 +205,10 @@ void _NodeEditorWidget::processNodeAttributes()
     if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
+
+        // With homogeneous cell type the cell type and its properties of the first node are shown and edited for every node
+        auto& cellTypeNode = gene._homogeneCellType ? gene._nodes.front() : node;
+
         auto const simulationParameters = _SimulationFacade::get()->getSimulationParameters();
         auto const& customizationColors = simulationParameters.customizationColors.value;
 
@@ -232,14 +236,14 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::ComboColorParameters().customizationColors(customizationColors).name("Color").textWidth(rightColumnWidth), node._color);
 
             // Type
-            auto nodeType = node.getCellType();
+            auto nodeType = cellTypeNode.getCellType();
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeStrings).textWidth(rightColumnWidth), nodeType)) {
-                if (nodeIndex.value() == 0 && nodeType == CellType_Void) {
+                if (nodeType == CellType_Void && (gene._homogeneCellType || nodeIndex.value() == 0)) {
                     showMessage("Error", "The first node cannot be void.");
-                } else if (nodeIndex.value() == gene._nodes.size() - 1 && nodeType == CellType_Void) {
+                } else if (nodeType == CellType_Void && nodeIndex.value() == gene._nodes.size() - 1) {
                     showMessage("Error", "The last node cannot be void.");
                 } else {
-                    node._cellType = createCellTypeGenomeDesc(nodeType);
+                    cellTypeNode._cellType = createCellTypeGenomeDesc(nodeType);
                 }
             }
 
@@ -316,7 +320,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
             if (nodeType == CellType_Base) {
             } else if (nodeType == CellType_Depot) {
-                auto& depot = std::get<DepotGenomeDesc>(node._cellType);
+                auto& depot = std::get<DepotGenomeDesc>(cellTypeNode._cellType);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Max energy for storage").format("%.1f").textWidth(rightColumnWidth), depot._storageLimit);
                 AlienGui::InputFloat(
@@ -327,7 +331,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 ImGui::PushID("Sensor");
 
                 // Auto activation interval
-                auto& sensor = std::get<SensorGenomeDesc>(node._cellType);
+                auto& sensor = std::get<SensorGenomeDesc>(cellTypeNode._cellType);
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Auto trigger").textWidth(rightColumnWidth), sensor._autoTrigger);
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Tag for attackers").textWidth(rightColumnWidth), sensor._tagForAttackers);
 
@@ -384,7 +388,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
             } else if (nodeType == CellType_Generator) {
 
-                auto& generator = std::get<GeneratorGenomeDesc>(node._cellType);
+                auto& generator = std::get<GeneratorGenomeDesc>(cellTypeNode._cellType);
 
                 // Additive
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Additive").textWidth(rightColumnWidth), generator._additive);
@@ -422,7 +426,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
             } else if (nodeType == CellType_Attacker) {
 
-                auto& attacker = std::get<AttackerGenomeDesc>(node._cellType);
+                auto& attacker = std::get<AttackerGenomeDesc>(cellTypeNode._cellType);
                 auto mode = attacker.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::AttackerModeStrings).textWidth(rightColumnWidth), mode)) {
                     attacker._mode = createAttackerModeGenomeDesc(mode);
@@ -441,13 +445,13 @@ void _NodeEditorWidget::processNodeAttributes()
             } else if (nodeType == CellType_Injector) {
 
                 // Gene index
-                auto& injector = std::get<InjectorGenomeDesc>(node._cellType);
+                auto& injector = std::get<InjectorGenomeDesc>(cellTypeNode._cellType);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(rightColumnWidth), injector._geneIndex);
 
             } else if (nodeType == CellType_Muscle) {
 
                 // Mode
-                auto& muscle = std::get<MuscleGenomeDesc>(node._cellType);
+                auto& muscle = std::get<MuscleGenomeDesc>(cellTypeNode._cellType);
                 auto mode = muscle.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::MuscleModeStrings).textWidth(rightColumnWidth), mode)) {
                     muscle._mode = createMuscleModeGenomeDesc(mode);
@@ -539,13 +543,13 @@ void _NodeEditorWidget::processNodeAttributes()
             } else if (nodeType == CellType_Defender) {
 
                 // Defender mode
-                auto& defender = std::get<DefenderGenomeDesc>(node._cellType);
+                auto& defender = std::get<DefenderGenomeDesc>(cellTypeNode._cellType);
                 AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::DefenderModeStrings).textWidth(rightColumnWidth), defender._mode);
 
             } else if (nodeType == CellType_Reconnector) {
 
                 // Mode selection
-                auto& reconnector = std::get<ReconnectorGenomeDesc>(node._cellType);
+                auto& reconnector = std::get<ReconnectorGenomeDesc>(cellTypeNode._cellType);
                 auto mode = reconnector.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::ReconnectorModeStrings).textWidth(rightColumnWidth), mode)) {
                     reconnector._mode = createReconnectorModeGenomeDesc(mode);
@@ -578,11 +582,11 @@ void _NodeEditorWidget::processNodeAttributes()
             } else if (nodeType == CellType_Detonator) {
 
                 // Countdown
-                auto& detonator = std::get<DetonatorGenomeDesc>(node._cellType);
+                auto& detonator = std::get<DetonatorGenomeDesc>(cellTypeNode._cellType);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth), detonator._countdown);
             } else if (nodeType == CellType_Digestor) {
 
-                auto& digestor = std::get<DigestorGenomeDesc>(node._cellType);
+                auto& digestor = std::get<DigestorGenomeDesc>(cellTypeNode._cellType);
                 AlienGui::SliderFloat(
                     AlienGui::SliderFloatParameters().name("Energy conductivity").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                     &digestor._rawEnergyConductivity);
@@ -593,7 +597,7 @@ void _NodeEditorWidget::processNodeAttributes()
             } else if (nodeType == CellType_Memory) {
 
                 // Mode selection
-                auto& memory = std::get<MemoryGenomeDesc>(node._cellType);
+                auto& memory = std::get<MemoryGenomeDesc>(cellTypeNode._cellType);
                 auto mode = memory.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::MemoryModeStrings).textWidth(rightColumnWidth), mode)) {
                     memory._mode = createMemoryModeGenomeDesc(mode);
@@ -657,7 +661,7 @@ void _NodeEditorWidget::processNodeAttributes()
             } else if (nodeType == CellType_Communicator) {
 
                 // Mode selection
-                auto& communicator = std::get<CommunicatorGenomeDesc>(node._cellType);
+                auto& communicator = std::get<CommunicatorGenomeDesc>(cellTypeNode._cellType);
                 auto mode = communicator.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::CommunicatorModeStrings).textWidth(rightColumnWidth), mode)) {
                     communicator._mode = createCommunicatorModeGenomeDesc(mode);

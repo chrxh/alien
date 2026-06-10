@@ -3336,6 +3336,50 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     }
 }
 
+TEST_F(ConstructorTests, homogeneCellType_inheritsCellTypeFromFirstNode)
+{
+    auto const Countdown = 42;
+
+    auto genome = GenomeDesc().genes({
+        GeneDesc().homogeneCellType(true).nodes({
+            NodeDesc().cellType(DetonatorGenomeDesc().countdown(Countdown)),
+            NodeDesc(),
+            NodeDesc(),
+        }),
+    });
+
+    auto data = Desc().addCreature(
+        {
+            ObjectDesc()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .type(CellDesc()
+                          .usableEnergy(getConstructorEnergy())
+                          .constructor(ConstructorDesc().geneIndex(0).autoTriggerInterval(1).lastConstructedCellId(1).separation(false))),
+            ObjectDesc().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).type(CellDesc().cellState(CellState_Constructing).nodeIndex(0)),
+        },
+        CreatureDesc().id(0),
+        genome);
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData.getNumObjectsWithoutCreature());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
+
+    // The second node is a base cell, but with homogeneous cell type it inherits the detonator type and properties of the first node
+    auto actualConstructedCell = actualData.getOtherObjectRef({0, 1});
+    EXPECT_EQ(CellType_Detonator, actualConstructedCell.getCellRef().getCellType());
+    auto const& detonator = std::get<DetonatorDesc>(actualConstructedCell.getCellRef()._cellType);
+    EXPECT_EQ(Countdown, detonator._countdown);
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
 TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
 {
     auto genome = GenomeDesc().genes({
