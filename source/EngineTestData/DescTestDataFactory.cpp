@@ -196,6 +196,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                               .shape(ConstructorShape_Hexagon)
                               .stiffness(0.75f)
                               .connectionDistance(0.8f)
+                              .homogeneCellType(true)
                               .nodes({
                                   createNonDefaultNodeDesc(nodeParameter),
                               }),

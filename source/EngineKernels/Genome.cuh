@@ -334,6 +334,7 @@ struct Gene
     ConstructorShape shape;
     float stiffness;
     float connectionDistance;
+    bool homogeneCellType;
 
     int numNodes;
     Node* nodes;
