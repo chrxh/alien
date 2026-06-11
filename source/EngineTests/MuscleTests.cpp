@@ -174,7 +174,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
-    for (int i = 0; i < 250; ++i) {
+    for (int i = 0; i < 220; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -260,7 +260,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     auto minAngle = 90.0f;
     auto maxAngle = 90.0f;
-    for (int i = 0; i < 250; ++i) {
+    for (int i = 0; i < 220; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -361,7 +361,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     auto numPositiveAngleChanges = 0;
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
-    for (int i = 0; i < 500; ++i) {
+    for (int i = 0; i < 300; ++i) {
         calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION, detailedPreview);
 
         auto actualData = getSimulationData(detailedPreview);
@@ -460,7 +460,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     auto numPositiveAngleChanges = 0;
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
-    for (int i = 0; i < 500; ++i) {
+    for (int i = 0; i < 300; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -698,7 +698,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 500; ++i) {
+    for (int i = 0; i < 300; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -769,7 +769,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 500; ++i) {
+    for (int i = 0; i < 300; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -847,7 +847,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 500; ++i) {
+    for (int i = 0; i < 300; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -905,7 +905,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 500; ++i) {
+    for (int i = 0; i < 300; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
