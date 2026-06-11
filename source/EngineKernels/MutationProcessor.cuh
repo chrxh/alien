@@ -716,7 +716,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
         return;
     }
 
-    // Pick a new non-void cell type that differs from the current one; void nodes keep their type (see below).
+    // Pick a new non-void cell type that differs from the current one; void nodes keep their type
     auto pickNewCellType = [&](int currentCellType) {
         auto newCellType = data.primaryNumberGen.random(CellType_Count - 3);
         if (newCellType >= currentCellType) {
@@ -728,7 +728,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
 
-        // The homogeneous cell type flag is a per-gene property, so let a single thread mutate it.
         if (laneId == 0 && data.primaryNumberGen.random() < rate.eventProbability) {
             gene.homogeneCellType = !gene.homogeneCellType;
             atomicAdd_block(&accumulatedMutations, 1.0f);
@@ -737,7 +736,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
         for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
             auto& node = gene.nodes[nodeIndex];
 
-            // Void nodes must stay void and non-void nodes must stay non-void.
             if (node.cellType == CellType_Void) {
                 continue;
             }
