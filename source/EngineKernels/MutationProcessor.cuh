@@ -716,10 +716,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
         return;
     }
 
-    // Pick a new non-void cell type that differs from the current one; void nodes keep their type (see below).
+    // Pick a cell type and shift it past the current type and the void type, so that neither can be selected.
+    // The explicit void shift keeps this correct even if further cell types are added next to the void type.
     auto pickNewCellType = [&](int currentCellType) {
         auto newCellType = data.primaryNumberGen.random(CellType_Count - 3);
         if (newCellType >= currentCellType) {
+            ++newCellType;
+        }
+        if (newCellType >= CellType_Void) {
             ++newCellType;
         }
         return newCellType;

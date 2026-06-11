@@ -69,7 +69,12 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellTypeAndHom
 
 TEST_F(CellTypeMutationTests, cellTypeMutation_keepsVoidNodesVoid)
 {
-    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().cellType(VoidGenomeDesc())})});
+    // The first and last node of a gene cannot be void, so put the void node in the middle.
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({
+        NodeDesc().cellType(BaseGenomeDesc()),
+        NodeDesc().cellType(VoidGenomeDesc()),
+        NodeDesc().cellType(BaseGenomeDesc()),
+    })});
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
@@ -81,7 +86,10 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_keepsVoidNodesVoid)
 
     auto actualGenome = getMutatedGenome();
 
-    EXPECT_EQ(actualGenome._genes.at(0)._nodes.at(0).getCellType(), CellType_Void);
+    auto const& nodes = actualGenome._genes.at(0)._nodes;
+    EXPECT_NE(nodes.at(0).getCellType(), CellType_Void);
+    EXPECT_EQ(nodes.at(1).getCellType(), CellType_Void);
+    EXPECT_NE(nodes.at(2).getCellType(), CellType_Void);
 }
 
 TEST_F(CellTypeMutationTests, cellTypeMutation_keepsNonVoidNodesNonVoid)
