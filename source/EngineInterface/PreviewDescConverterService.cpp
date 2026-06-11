@@ -101,14 +101,6 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
         }
         return &nodes.at(cell._nodeIndex);
     };
-    auto isPreviewInactive = [&](ObjectDesc const& object) {
-        auto const* node = getNode(object);
-        return node == nullptr || node->getCellType() == CellType_Void || object.getCellRef()._cellState != CellState_Ready;
-    };
-    auto getPreviewColor = [&](ObjectDesc const& object) {
-        auto const* node = getNode(object);
-        return node != nullptr ? node->_color : 0;
-    };
     // With homogeneous cell type the cell type is taken from the gene's first node (see EntityFactory::createCellFromNode)
     auto getCellType = [&](ObjectDesc const& object) -> CellType {
         auto const& cell = object.getCellRef();
@@ -121,6 +113,14 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
             return CellType_Base;   // Return default
         }
         return gene._nodes.at(nodeIndex).getCellType();
+    };
+    auto isPreviewInactive = [&](ObjectDesc const& object) {
+        auto const* node = getNode(object);
+        return node == nullptr || getCellType(object) == CellType_Void || object.getCellRef()._cellState != CellState_Ready;
+    };
+    auto getPreviewColor = [&](ObjectDesc const& object) {
+        auto const* node = getNode(object);
+        return node != nullptr ? node->_color : 0;
     };
     for (auto const& object : phenotype._objects) {
         auto const* node = getNode(object);
