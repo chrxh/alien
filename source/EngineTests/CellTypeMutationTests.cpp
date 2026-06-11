@@ -12,13 +12,14 @@
 class CellTypeMutationTests : public MutationTestsBase
 {
 protected:
-    bool compareAllExceptCellType(GenomeDesc expected, GenomeDesc actual)
+    bool compareAllExceptCellTypeAndHomogeneFlag(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
             genome._lineageId = 0;
             genome._prevLineageId = std::nullopt;
             genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
+                gene._homogeneCellType = false;  // canonicalize: the cell type mutation may also flip this flag
                 for (auto& node : gene._nodes) {
                     node._cellType = BaseGenomeDesc{};  // canonicalize so everything except the cell type is compared
                 }
@@ -49,7 +50,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_changesCellTypeToDefaults)
     std::visit([](auto const& cellTypeData) { EXPECT_EQ(cellTypeData, std::decay_t<decltype(cellTypeData)>{}); }, cellType);
 }
 
-TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellType)
+TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellTypeAndHomogeneFlag)
 {
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
@@ -63,5 +64,73 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellType)
 
     auto actualGenome = getMutatedGenome();
 
-    EXPECT_TRUE(compareAllExceptCellType(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptCellTypeAndHomogeneFlag(genome, actualGenome));
+}
+
+TEST_F(CellTypeMutationTests, cellTypeMutation_keepsVoidNodesVoid)
+{
+    // The first and last node of a gene cannot be void, so put the void node in the middle.
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({
+        NodeDesc().cellType(BaseGenomeDesc()),
+        NodeDesc().cellType(VoidGenomeDesc()),
+        NodeDesc().cellType(BaseGenomeDesc()),
+    })});
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+
+    auto const& nodes = actualGenome._genes.at(0)._nodes;
+    EXPECT_NE(nodes.at(0).getCellType(), CellType_Void);
+    EXPECT_EQ(nodes.at(1).getCellType(), CellType_Void);
+    EXPECT_NE(nodes.at(2).getCellType(), CellType_Void);
+}
+
+TEST_F(CellTypeMutationTests, cellTypeMutation_keepsNonVoidNodesNonVoid)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+
+    // The cell type mutation must never turn a non-void node into a void node or vice versa.
+    ASSERT_EQ(genome._genes.size(), actualGenome._genes.size());
+    for (size_t geneIndex = 0; geneIndex < genome._genes.size(); ++geneIndex) {
+        auto const& expectedNodes = genome._genes.at(geneIndex)._nodes;
+        auto const& actualNodes = actualGenome._genes.at(geneIndex)._nodes;
+        ASSERT_EQ(expectedNodes.size(), actualNodes.size());
+        for (size_t nodeIndex = 0; nodeIndex < expectedNodes.size(); ++nodeIndex) {
+            auto expectedIsVoid = expectedNodes.at(nodeIndex).getCellType() == CellType_Void;
+            auto actualIsVoid = actualNodes.at(nodeIndex).getCellType() == CellType_Void;
+            EXPECT_EQ(expectedIsVoid, actualIsVoid);
+        }
+    }
+}
+
+TEST_F(CellTypeMutationTests, cellTypeMutation_changesHomogeneCellTypeFlag)
+{
+    auto genome = GenomeDesc().genes({GeneDesc().homogeneCellType(false).nodes({NodeDesc().cellType(BaseGenomeDesc())})});
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+
+    EXPECT_TRUE(actualGenome._genes.at(0)._homogeneCellType);
 }

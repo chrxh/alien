@@ -716,9 +716,13 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
         return;
     }
 
+    // Pick a new non-void cell type that differs from the current one; void nodes keep their type
     auto pickNewCellType = [&](int currentCellType) {
-        auto newCellType = data.primaryNumberGen.random(CellType_Count - 2);
+        auto newCellType = data.primaryNumberGen.random(CellType_Count - 3);
         if (newCellType >= currentCellType) {
+            ++newCellType;
+        }
+        if (newCellType >= CellType_Void) {
             ++newCellType;
         }
         return newCellType;
@@ -726,11 +730,21 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
 
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
+
+        if (laneId == 0 && data.primaryNumberGen.random() < rate.eventProbability) {
+            gene.homogeneCellType = !gene.homogeneCellType;
+            atomicAdd_block(&accumulatedMutations, 1.0f);
+        }
+
         for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+            auto& node = gene.nodes[nodeIndex];
+
+            if (node.cellType == CellType_Void) {
+                continue;
+            }
             if (data.primaryNumberGen.random() >= rate.eventProbability) {
                 continue;
             }
-            auto& node = gene.nodes[nodeIndex];
 
             node.cellType = pickNewCellType(node.cellType);
 
@@ -788,9 +802,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
             } break;
             case CellType_Communicator:
                 cellTypeData.communicator.mode = CommunicatorMode_Sender;
-                break;
-            case CellType_Void:
-                cellTypeData.voidCell = {};
                 break;
             }
 
