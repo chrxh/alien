@@ -722,6 +722,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
         if (newCellType >= currentCellType) {
             ++newCellType;
         }
+        if (newCellType >= CellType_Void) {
+            ++newCellType;
+        }
         return newCellType;
     };
 
