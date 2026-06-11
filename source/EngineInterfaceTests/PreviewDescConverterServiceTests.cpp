@@ -140,33 +140,38 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_marksConnectionI
     EXPECT_TRUE(result.description._connections.at(0)._inactive);
 }
 
-TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_homogeneCellTypeKeepsVoidCellActive)
+TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature_homogeneCellTypeKeepsVoidCellActive)
 {
+    // The first and last node of a gene cannot be void, so the void node is placed in the middle.
     auto genome = GenomeDesc().genes({
-        GeneDesc().homogeneCellType(true).nodes({NodeDesc().color(2).cellType(MuscleGenomeDesc()), NodeDesc().cellType(VoidGenomeDesc())}),
+        GeneDesc().homogeneCellType(true).nodes({NodeDesc().color(2).cellType(MuscleGenomeDesc()), NodeDesc().cellType(VoidGenomeDesc()), NodeDesc().color(3)}),
     });
 
     Desc input;
     input.addCreature(
         {
-            ObjectDesc().id(1).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
-            ObjectDesc().id(2).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(1).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(3).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(2)),
         },
         CreatureDesc(),
         genome);
     input.addConnection(1, 2);
+    input.addConnection(2, 3);
+    input.addConnection(3, 1);
 
     auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
 
-    ASSERT_EQ(2, result.description._cells.size());
-    ASSERT_EQ(1, result.description._connections.size());
+    ASSERT_EQ(3, result.description._cells.size());
 
     auto object2 = getPreviewCell(result.description, 0, 1);
 
-    // With homogeneous cell type the void node inherits the first node's cell type and must not be grayed out.
+    // With homogeneous cell type the intermediate void node inherits the first node's cell type and must not be grayed out.
     EXPECT_EQ(CellType_Muscle, object2._cellType);
     EXPECT_FALSE(object2._inactive);
-    EXPECT_FALSE(result.description._connections.at(0)._inactive);
+    for (auto const& connection : result.description._connections) {
+        EXPECT_FALSE(connection._inactive);
+    }
 }
 
 TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_usesGenomeForCellTypes)
