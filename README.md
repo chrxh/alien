@@ -86,34 +86,15 @@ git clone --branch releases/v4.12 --recursive https://github.com/chrxh/alien.git
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
 ### Build instructions
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [MSVC v142+](https://visualstudio.microsoft.com/vs/)).
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components.
 
-Build steps:
-```
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release -j8
-```
-If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
-It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
-
-#### Faster Windows builds (optional)
-On Windows, the default Visual Studio generator (the generated `.sln`) builds the CUDA libraries one project after another, which is considerably slower than the GCC/Make build on Linux. A `Ninja Multi-Config` preset is provided that compiles all CUDA translation units in parallel (file-level, like the Linux build) and is significantly faster.
-
-**Inside Visual Studio (recommended):** instead of generating and opening a `.sln`, open the repository as a CMake project via *File ▸ Open ▸ Folder...* (requires the "C++ CMake tools for Windows" Visual Studio component). Visual Studio detects `CMakePresets.json`, sets up the MSVC environment itself, and offers the `windows-ninja` configuration in the configuration dropdown. Building then runs Ninja from within the IDE; Solution Explorer, IntelliSense and debugging work as usual.
-
-**From the command line:** the helper script (in the repository root, with an identical copy in `scripts\`) sets up the MSVC environment automatically and can be run from any prompt:
-```
-build-windows-ninja.bat
-```
-or, from a *x64 Native Tools Command Prompt for VS 2022* with Ninja on `PATH`:
+Build steps (run from an *x64 Native Tools Command Prompt for VS 2022*):
 ```
 cmake --preset windows-ninja
 cmake --build --preset windows-ninja-release
 ```
-Either way, the executables are then placed under `build-ninja/Release`.
-
-> Note: with the Ninja generator, CMake must be recent enough for your installed MSVC toolset, otherwise the generate step fails with `No known features for CXX compiler MSVC`. The helper script and the Visual Studio CMake integration use the CMake that ships with Visual Studio, which always matches; if you call `cmake` directly, use a current CMake (e.g. the one under `<VS install>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin`).
+If everything goes well, the ALIEN executable can be found under `build-ninja\Release\alien.exe`.
+It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
 There are reported build issues with (updated: 2024-06-22)
 * GCC 12+ (version 11 should work)
