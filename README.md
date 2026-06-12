@@ -98,10 +98,7 @@ ALIEN is built the same way on Windows and Linux. It uses the **Ninja** build to
 
 **Build steps:**
 
-Windows shortcut: Just run the **`build-windows-ninja.bat`** from the repository root. It automatically sets up the MSVC environment, locates Ninja and CMake from your Visual Studio installation and builds ALIEN — no Developer Command Prompt needed.
-```
-build-windows-ninja.bat
-```
+Windows shortcut: Just run the `build-windows-ninja.bat` from the repository root. It automatically sets up the MSVC environment, locates Ninja and CMake from your Visual Studio installation and builds ALIEN — no Developer Command Prompt needed.
 
 Otherwise (Linux or Windows from a *Developer Command Prompt*), invoke the CMake preset directly:
 ```
