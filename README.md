@@ -86,21 +86,28 @@ git clone --branch releases/v4.12 --recursive https://github.com/chrxh/alien.git
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
 ### Build instructions
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC 9.x+ or [MSVC v142+](https://visualstudio.microsoft.com/vs/)).
+ALIEN is built the same way on Windows and Linux. It uses the **Ninja** build tool together with the **CUDA compiler** (`nvcc`), so both need to be installed and reachable from the command line (i.e. on your `PATH`).
 
-Build steps:
+**Prerequisites**
+- [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads)
+- Windows: [Visual Studio](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components (the latter ships Ninja). The MSVC environment must be active while building.
+- Linux: GCC, ninja-build and the X11/OpenGL development libraries:
+  ```
+  sudo apt-get install ninja-build libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+  ```
+
+**Build steps**
+
+Windows shortcut: Just run the `build-windows-ninja.bat` from the repository root. It automatically sets up the MSVC environment, locates Ninja and CMake from your Visual Studio installation and builds ALIEN.
+
+Otherwise (Linux or Windows from a *Developer Command Prompt*), invoke the CMake preset directly:
 ```
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release -j8
+cmake --preset ninja
+cmake --build --preset ninja-release
 ```
-If everything goes well, the ALIEN executable can be found under the build directory in `./alien` or `.\Release\alien.exe` depending on the used toolchain and platform.
+
+If everything goes well, the ALIEN executable can be found under `build-ninja/Release/` (`alien.exe` on Windows, `alien` on Linux).
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
-
-There are reported build issues with (updated: 2024-06-22)
-* GCC 12+ (version 11 should work)
-* Visual Studio 17.10 (version 17.9 should work)
-* CUDA 12.5 (version 12.4 should work)
 
 # ⌨️ Command-line interface
 

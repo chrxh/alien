@@ -1,0 +1,32 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 31,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ninja",
+      "displayName": "Ninja Multi-Config",
+      "description": "Fast cross-platform build (Windows and Linux). Compiles all CUDA translation units in parallel (file-level) via the Ninja Multi-Config generator, unlike the Visual Studio generator which builds whole library projects one after another. Requires Ninja and the CUDA toolchain (nvcc) on PATH; on Windows it must additionally be run from an MSVC environment (e.g. via build-windows-ninja.bat).",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build-ninja",
+      "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ninja-release",
+      "displayName": "Ninja - Release",
+      "configurePreset": "ninja",
+      "configuration": "Release"
+    },
+    {
+      "name": "ninja-debug",
+      "displayName": "Ninja - Debug",
+      "configurePreset": "ninja",
+      "configuration": "Debug"
+    }
+  ]
+}

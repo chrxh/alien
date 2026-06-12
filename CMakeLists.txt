@@ -4,11 +4,13 @@ cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
 # Using the vcpkg submodule
 set(CMAKE_TOOLCHAIN_FILE external/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "")
 
-# Default to Debug
-if(NOT CMAKE_BUILD_TYPE)
+# Default to Debug for single-config generators. Multi-config generators (Visual
+# Studio, Ninja Multi-Config, Xcode) select the configuration at build time, so
+# CMAKE_BUILD_TYPE must stay empty for them.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_GENERATOR MATCHES "Multi-Config|Visual Studio|Xcode")
     message("Build type not specified, using Debug")
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type not specified, using Debug" FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
+endif()
 
 # Default CUDA target architectures
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
@@ -20,7 +22,7 @@ set(CMAKE_CUDA_STANDARD 20)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -lineinfo --use-local-env -use_fast_math")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -lineinfo --use-local-env -use_fast_math")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --threads 0")
@@ -50,6 +52,11 @@ add_compile_definitions($<$<COMPILE_LANGUAGE:CXX>:NOMINMAX>)
 
 # Treat all NVCC (CUDA) warnings as errors
 add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
+
+# Emit host debug info (nvcc -g) only for debug-capable configurations. On MSVC,
+# -g forces the host compiler to generate debug info that is serialized through
+# mspdbsrv, which noticeably slows down Release compilation for no runtime benefit.
+add_compile_options($<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CONFIG:Debug,RelWithDebInfo>>:-g>)
 
 add_executable(alien)
 add_executable(cli)
@@ -89,16 +96,21 @@ add_subdirectory(source/PersisterInterface)
 add_subdirectory(source/PersisterTests)
 add_subdirectory(source/Shaders)
 
-# Copy resources to the build location
+# Copy resources and imgui.ini next to the build output so that ALIEN finds them
 add_custom_command(
     TARGET alien POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/resources
-        ${CMAKE_CURRENT_BINARY_DIR}/resources)
+        ${CMAKE_CURRENT_BINARY_DIR}/resources
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/resources
+        $<TARGET_FILE_DIR:alien>/resources)
 
-# Copy imgui.ini
 add_custom_command(
     TARGET alien POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_SOURCE_DIR}/imgui.ini
-        ${CMAKE_CURRENT_BINARY_DIR})
+        ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/imgui.ini
+        $<TARGET_FILE_DIR:alien>)
