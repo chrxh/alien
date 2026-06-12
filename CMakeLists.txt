@@ -97,11 +97,6 @@ add_subdirectory(source/PersisterTests)
 add_subdirectory(source/Shaders)
 
 # Copy resources and imgui.ini next to the build output so that ALIEN finds them
-# at runtime. They are placed both in the build root (used when starting ALIEN
-# from the build directory) and next to the executable (used e.g. by the Visual
-# Studio CMake/Ninja integration, whose working directory is the executable's
-# folder). Copies are made so that the originals in the source tree stay
-# untouched at runtime. For single-config generators both destinations coincide.
 add_custom_command(
     TARGET alien POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
