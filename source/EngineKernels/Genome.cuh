@@ -371,6 +371,11 @@ struct CellTypeMutation
     float eventProbability;
 };
 
+struct VoidMutation
+{
+    float eventProbability;
+};
+
 struct MutationRates
 {
     NeuronMutation neuronMutations[2];
@@ -378,6 +383,7 @@ struct MutationRates
     CellTypePropertiesMutation cellTypePropertiesMutations[2];
     CellTypeModeMutation cellTypeModeMutation;
     CellTypeMutation cellTypeMutation;
+    VoidMutation voidMutation;
 };
 
 struct Genome
