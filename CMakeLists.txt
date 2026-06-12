@@ -20,7 +20,7 @@ set(CMAKE_CUDA_STANDARD 20)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -lineinfo --use-local-env -use_fast_math")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -lineinfo --use-local-env -use_fast_math")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --threads 0")
@@ -50,6 +50,11 @@ add_compile_definitions($<$<COMPILE_LANGUAGE:CXX>:NOMINMAX>)
 
 # Treat all NVCC (CUDA) warnings as errors
 add_compile_options($<$<COMPILE_LANGUAGE:CUDA>:--Werror=all-warnings>)
+
+# Emit host debug info (nvcc -g) only for debug-capable configurations. On MSVC,
+# -g forces the host compiler to generate debug info that is serialized through
+# mspdbsrv, which noticeably slows down Release compilation for no runtime benefit.
+add_compile_options($<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<CONFIG:Debug,RelWithDebInfo>>:-g>)
 
 add_executable(alien)
 add_executable(cli)
