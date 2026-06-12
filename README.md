@@ -86,20 +86,15 @@ git clone --branch releases/v4.12 --recursive https://github.com/chrxh/alien.git
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
 ### Build instructions
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components.
+Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC or [Visual Studio](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components).
 
-Build steps (run from an *x64 Native Tools Command Prompt for VS 2022*):
+Build steps:
 ```
 cmake --preset windows-ninja
 cmake --build --preset windows-ninja-release
 ```
-If everything goes well, the ALIEN executable can be found under `build-ninja\Release\alien.exe`.
+If everything goes well, the ALIEN executable can be found under `build-ninja/Release/alien.exe`.
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
-
-There are reported build issues with (updated: 2024-06-22)
-* GCC 12+ (version 11 should work)
-* Visual Studio 17.10 (version 17.9 should work)
-* CUDA 12.5 (version 12.4 should work)
 
 # ⌨️ Command-line interface
 
