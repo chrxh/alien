@@ -86,14 +86,24 @@ git clone --branch releases/v4.12 --recursive https://github.com/chrxh/alien.git
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
 ### Build instructions
-Prerequisites: [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads) and a toolchain for CMake (e.g. GCC or [Visual Studio](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components).
+ALIEN is built the same way on Windows and Linux. It uses the **Ninja** build tool together with the **CUDA compiler** (`nvcc`), so both need to be installed and reachable from the command line (i.e. on your `PATH`).
+
+Prerequisites:
+- [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads)
+- **Windows:** [Visual Studio](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components (the latter ships Ninja). The MSVC environment must be active while building.
+- **Linux:** a C++ compiler (e.g. GCC), `ninja-build` and the X11/OpenGL development libraries:
+  ```
+  sudo apt-get install ninja-build libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+  ```
 
 Build steps:
 ```
-cmake --preset windows-ninja
-cmake --build --preset windows-ninja-release
+cmake --preset ninja
+cmake --build --preset ninja-release
 ```
-If everything goes well, the ALIEN executable can be found under `build-ninja/Release/alien.exe`.
+On Windows, run these from a *Developer Command Prompt* so the MSVC environment is set up — or simply use the bundled `build-windows-ninja.bat`, which sets it up automatically.
+
+If everything goes well, the ALIEN executable can be found under `build-ninja/Release/` (`alien.exe` on Windows, `alien` on Linux).
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
 # ⌨️ Command-line interface
