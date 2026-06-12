@@ -88,17 +88,17 @@ Note: The `--recursive` parameter is necessary to check out the vcpkg submodule 
 ### Build instructions
 ALIEN is built the same way on Windows and Linux. It uses the **Ninja** build tool together with the **CUDA compiler** (`nvcc`), so both need to be installed and reachable from the command line (i.e. on your `PATH`).
 
-**Prerequisites:**
+**Prerequisites**
 - [CUDA Toolkit 11.2+](https://developer.nvidia.com/cuda-downloads)
-- **Windows:** [Visual Studio](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components (the latter ships Ninja). The MSVC environment must be active while building.
-- **Linux:** a C++ compiler (e.g. GCC), `ninja-build` and the X11/OpenGL development libraries:
+- Windows: [Visual Studio](https://visualstudio.microsoft.com/vs/) with the "Desktop development with C++" and "C++ CMake tools for Windows" components (the latter ships Ninja). The MSVC environment must be active while building.
+- Linux: GCC, ninja-build and the X11/OpenGL development libraries:
   ```
   sudo apt-get install ninja-build libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
   ```
 
-**Build steps:**
+**Build steps**
 
-Windows shortcut: Just run the `build-windows-ninja.bat` from the repository root. It automatically sets up the MSVC environment, locates Ninja and CMake from your Visual Studio installation and builds ALIEN — no Developer Command Prompt needed.
+Windows shortcut: Just run the `build-windows-ninja.bat` from the repository root. It automatically sets up the MSVC environment, locates Ninja and CMake from your Visual Studio installation and builds ALIEN.
 
 Otherwise (Linux or Windows from a *Developer Command Prompt*), invoke the CMake preset directly:
 ```
