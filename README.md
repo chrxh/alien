@@ -102,9 +102,9 @@ On Windows, the default Visual Studio generator (the generated `.sln`) builds th
 
 **Inside Visual Studio (recommended):** instead of generating and opening a `.sln`, open the repository as a CMake project via *File ▸ Open ▸ Folder...* (requires the "C++ CMake tools for Windows" Visual Studio component). Visual Studio detects `CMakePresets.json`, sets up the MSVC environment itself, and offers the `windows-ninja` configuration in the configuration dropdown. Building then runs Ninja from within the IDE; Solution Explorer, IntelliSense and debugging work as usual.
 
-**From the command line:** the helper script sets up the MSVC environment automatically and can be run from any prompt:
+**From the command line:** the helper script (in the repository root, with an identical copy in `scripts\`) sets up the MSVC environment automatically and can be run from any prompt:
 ```
-scripts\build-windows-ninja.bat
+build-windows-ninja.bat
 ```
 or, from a *x64 Native Tools Command Prompt for VS 2022* with Ninja on `PATH`:
 ```
@@ -112,6 +112,8 @@ cmake --preset windows-ninja
 cmake --build --preset windows-ninja-release
 ```
 Either way, the executables are then placed under `build-ninja/Release`.
+
+> Note: with the Ninja generator, CMake must be recent enough for your installed MSVC toolset, otherwise the generate step fails with `No known features for CXX compiler MSVC`. The helper script and the Visual Studio CMake integration use the CMake that ships with Visual Studio, which always matches; if you call `cmake` directly, use a current CMake (e.g. the one under `<VS install>\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin`).
 
 There are reported build issues with (updated: 2024-06-22)
 * GCC 12+ (version 11 should work)

@@ -5,14 +5,18 @@ rem This compiles all CUDA translation units in parallel and is considerably
 rem faster than the default Visual Studio generator (which builds the CUDA
 rem libraries one project after another).
 rem
-rem The script sets up the MSVC build environment automatically, so it can be
-rem run from any prompt (PowerShell or cmd):
+rem The script sets up the MSVC build environment automatically, so it can be run
+rem from any prompt (PowerShell or cmd). An identical copy lives in the repository
+rem root and in scripts\; either can be run directly:
 rem
-rem     scripts\build-windows-ninja.bat            (Release, default)
-rem     scripts\build-windows-ninja.bat Debug
+rem     build-windows-ninja.bat            (Release, default)
+rem     build-windows-ninja.bat Debug
 rem
 setlocal enabledelayedexpansion
-cd /d "%~dp0.."
+
+rem Change to the repository root (this script may sit in the root or in scripts\).
+cd /d "%~dp0"
+if not exist "CMakePresets.json" cd ..
 
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 if not exist "%VSWHERE%" (
@@ -37,6 +41,12 @@ where ninja >nul 2>nul || (
     echo [build] Visual Studio component, or put ninja.exe on PATH.
     exit /b 1
 )
+
+rem Prefer the CMake that ships with Visual Studio: it matches the installed MSVC
+rem toolset. An older CMake on PATH can fail the Ninja generate step with
+rem "No known features for CXX compiler MSVC" when the MSVC toolset is newer.
+set "VSCMAKE=%VSINSTALL%\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin"
+if exist "%VSCMAKE%\cmake.exe" set "PATH=%VSCMAKE%;%PATH%"
 
 set "BUILD_PRESET=windows-ninja-release"
 if /i "%~1"=="Debug" set "BUILD_PRESET=windows-ninja-debug"
