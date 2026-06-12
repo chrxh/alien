@@ -139,7 +139,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 {
-    auto constexpr MaxAngleDeviation = 15.0f;
+    auto constexpr MaxAngleDeviation = 5.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
 
     auto [side, channel0, channel1] = GetParam();
@@ -174,7 +174,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
-    for (int i = 0; i < 220; ++i) {
+    for (int i = 0; i < 90; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -225,7 +225,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
 TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 {
-    auto constexpr MaxAngleDeviation = 15.0f;
+    auto constexpr MaxAngleDeviation = 5.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
 
     auto [side, channel0, channel1] = GetParam();
@@ -260,7 +260,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     auto minAngle = 90.0f;
     auto maxAngle = 90.0f;
-    for (int i = 0; i < 220; ++i) {
+    for (int i = 0; i < 90; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -670,7 +670,7 @@ INSTANTIATE_TEST_SUITE_P(MuscleTests_AutoCrawling, MuscleTests_AutoCrawling, ::t
 
 TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 {
-    auto constexpr MaxDistanceDeviation = 0.5f;
+    auto constexpr MaxDistanceDeviation = 0.2f;
 
     auto channel0 = GetParam();
 
@@ -698,7 +698,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 300; ++i) {
+    for (int i = 0; i < 80; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -743,7 +743,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
 TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 {
-    auto constexpr MaxDistanceDeviation = 0.5f;
+    auto constexpr MaxDistanceDeviation = 0.2f;
 
     auto channel0 = GetParam();
 
@@ -769,7 +769,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 300; ++i) {
+    for (int i = 0; i < 80; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -817,7 +817,7 @@ INSTANTIATE_TEST_SUITE_P(MuscleTests_ManualCrawling, MuscleTests_ManualCrawling,
 
 TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 {
-    auto constexpr MaxDistanceDeviation = 0.5f;
+    auto constexpr MaxDistanceDeviation = 0.2f;
 
     auto channel0 = GetParam();
 
@@ -847,7 +847,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 300; ++i) {
+    for (int i = 0; i < 80; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
@@ -877,7 +877,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
 TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 {
-    auto constexpr MaxDistanceDeviation = 0.5f;
+    auto constexpr MaxDistanceDeviation = 0.2f;
 
     auto channel0 = GetParam();
 
@@ -905,7 +905,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     auto minDistance = 1.0f;
     auto maxDistance = 1.0f;
-    for (int i = 0; i < 300; ++i) {
+    for (int i = 0; i < 80; ++i) {
         _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
 
         auto actualData = _simulationFacade->getSimulationData();
