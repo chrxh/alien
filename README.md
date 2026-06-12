@@ -97,11 +97,17 @@ Prerequisites:
   ```
 
 Build steps:
+
+> **🪟 Windows shortcut:** Just run the bundled **`build-windows-ninja.bat`** from the repository root. It automatically sets up the MSVC environment, locates Ninja and CMake from your Visual Studio installation and builds ALIEN — no Developer Command Prompt needed.
+> ```
+> build-windows-ninja.bat
+> ```
+
+Otherwise (Linux, or Windows from a *Developer Command Prompt*), invoke the CMake preset directly:
 ```
 cmake --preset ninja
 cmake --build --preset ninja-release
 ```
-On Windows, run these from a *Developer Command Prompt* so the MSVC environment is set up — or simply use the bundled `build-windows-ninja.bat`, which sets it up automatically.
 
 If everything goes well, the ALIEN executable can be found under `build-ninja/Release/` (`alien.exe` on Windows, `alien` on Linux).
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
