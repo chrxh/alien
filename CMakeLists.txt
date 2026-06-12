@@ -4,11 +4,13 @@ cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
 # Using the vcpkg submodule
 set(CMAKE_TOOLCHAIN_FILE external/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "")
 
-# Default to Debug
-if(NOT CMAKE_BUILD_TYPE)
+# Default to Debug for single-config generators. Multi-config generators (Visual
+# Studio, Ninja Multi-Config, Xcode) select the configuration at build time, so
+# CMAKE_BUILD_TYPE must stay empty for them.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_GENERATOR MATCHES "Multi-Config|Visual Studio|Xcode")
     message("Build type not specified, using Debug")
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type not specified, using Debug" FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
+endif()
 
 # Default CUDA target architectures
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)

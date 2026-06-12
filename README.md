@@ -98,12 +98,18 @@ If everything goes well, the ALIEN executable can be found under the build direc
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
 #### Faster Windows builds (optional)
-On Windows, the default Visual Studio generator builds the CUDA libraries one project after another, which is considerably slower than the GCC/Make build on Linux. A `Ninja Multi-Config` preset is provided that compiles all CUDA translation units in parallel and is significantly faster. Open a *x64 Native Tools Command Prompt for VS 2022* (so that `cl` and `nvcc` are on `PATH`, and with Ninja available) and run:
+On Windows, the default Visual Studio generator builds the CUDA libraries one project after another, which is considerably slower than the GCC/Make build on Linux. A `Ninja Multi-Config` preset is provided that compiles all CUDA translation units in parallel and is significantly faster.
+
+The easiest way is the helper script, which sets up the MSVC environment automatically and can be run from any prompt:
+```
+scripts\build-windows-ninja.bat
+```
+Alternatively, from a *x64 Native Tools Command Prompt for VS 2022* with Ninja on `PATH`:
 ```
 cmake --preset windows-ninja
 cmake --build --preset windows-ninja-release
 ```
-The executables are then placed under `build-ninja/Release`.
+Either way, the executables are then placed under `build-ninja/Release`.
 
 There are reported build issues with (updated: 2024-06-22)
 * GCC 12+ (version 11 should work)

@@ -9,7 +9,7 @@
     {
       "name": "windows-ninja",
       "displayName": "Windows Ninja Multi-Config",
-      "description": "Fast Windows build. Compiles all CUDA translation units in parallel (file-level), unlike the Visual Studio generator which builds whole library projects one after another. Run from a 'x64 Native Tools Command Prompt for VS' (with Ninja on PATH) so that cl.exe and nvcc are available.",
+      "description": "Fast Windows build. Compiles all CUDA translation units in parallel (file-level), unlike the Visual Studio generator which builds whole library projects one after another. Requires the MSVC environment and Ninja on PATH; the scripts/build-windows-ninja.bat helper sets this up automatically.",
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/build-ninja",
       "toolchainFile": "${sourceDir}/external/vcpkg/scripts/buildsystems/vcpkg.cmake"
@@ -20,15 +20,13 @@
       "name": "windows-ninja-release",
       "displayName": "Windows Ninja - Release",
       "configurePreset": "windows-ninja",
-      "configuration": "Release",
-      "jobs": 0
+      "configuration": "Release"
     },
     {
       "name": "windows-ninja-debug",
       "displayName": "Windows Ninja - Debug",
       "configurePreset": "windows-ninja",
-      "configuration": "Debug",
-      "jobs": 0
+      "configuration": "Debug"
     }
   ]
 }
