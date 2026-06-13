@@ -825,11 +825,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
 
 __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
-    // Toggling the void state requires a per-gene correction of the boundary nodes afterwards, so the whole mutation
-    // runs on a single thread to keep the genome consistent without cross-thread synchronization.
-    if (cg_mutation::this_thread_block().thread_rank() != 0) {
-        return;
-    }
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.voidMutation;
 
     if (rate.eventProbability <= 0) {
@@ -842,7 +838,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
 
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
-        for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+        for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+            // The first and last node of a gene must not be void, so they are never mutated.
+            if (nodeIndex == 0 || nodeIndex == gene.numNodes - 1) {
+                continue;
+            }
             if (data.primaryNumberGen.random() >= rate.eventProbability) {
                 continue;
             }
@@ -852,18 +852,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
             node.cellType = node.cellType == CellType_Void ? pickNonVoidCellType() : CellType_Void;
             resetCellTypeToDefault(node);
             atomicAdd_block(&accumulatedMutations, 1.0f);
-        }
-
-        // Validate and correct the genome: the first and last node of a gene must not be void.
-        auto correctBoundaryNode = [&](Node& node) {
-            if (node.cellType == CellType_Void) {
-                node.cellType = pickNonVoidCellType();
-                resetCellTypeToDefault(node);
-            }
-        };
-        if (gene.numNodes > 0) {
-            correctBoundaryNode(gene.nodes[0]);
-            correctBoundaryNode(gene.nodes[gene.numNodes - 1]);
         }
     }
 }

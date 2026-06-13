@@ -291,9 +291,7 @@ TEST_F(MetaMutationTests, metaMutation_voidRatesActuallyChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_NE(actualGenome._mutationRates._voidMutation._eventProbability, 0.5f);
-    EXPECT_GE(actualGenome._mutationRates._voidMutation._eventProbability, 0.0f);
-    EXPECT_LE(actualGenome._mutationRates._voidMutation._eventProbability, 1.0f);
+    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._voidMutation._eventProbability, 0.5f));
 }
 
 TEST_F(MetaMutationTests, metaMutation_voidRatesZeroSigmaNoChange)
