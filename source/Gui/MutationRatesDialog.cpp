@@ -227,7 +227,7 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
         mutationRates._cellTypePropertiesMutations[i]._sigma =
             settings.getValue(settingsPrefix + "cell type property mutation" + indexSuffix + ".sigma", mutationRates._cellTypePropertiesMutations[i]._sigma);
         mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability = settings.getValue(
-            settingsPrefix + "cell type property mutation" + indexSuffix + ".value probability", mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability);
+            settingsPrefix + "cell type property mutation" + indexSuffix + ".discrete change probability", mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability);
     }
 
     mutationRates._cellTypeModeMutation._nodeProbability =
@@ -245,7 +245,7 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
         mutationRates._constructorMutations[i]._sigma =
             settings.getValue(settingsPrefix + "constructor mutation " + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
         mutationRates._constructorMutations[i]._discreteChangeProbability = settings.getValue(
-            settingsPrefix + "constructor mutation " + indexSuffix + ".value probability", mutationRates._constructorMutations[i]._discreteChangeProbability);
+            settingsPrefix + "constructor mutation " + indexSuffix + ".discrete change probability", mutationRates._constructorMutations[i]._discreteChangeProbability);
     }
 }
 
@@ -274,7 +274,7 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
             settingsPrefix + "cell type property mutation " + indexSuffix + ".node probability", mutationRates._cellTypePropertiesMutations[i]._nodeProbability);
         settings.setValue(settingsPrefix + "cell type property mutation " + indexSuffix + ".sigma", mutationRates._cellTypePropertiesMutations[i]._sigma);
         settings.setValue(
-            settingsPrefix + "cell type property mutation " + indexSuffix + ".value probability", mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability);
+            settingsPrefix + "cell type property mutation " + indexSuffix + ".discrete change probability", mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability);
     }
 
     settings.setValue(settingsPrefix + "cell type mode mutation.node probability", mutationRates._cellTypeModeMutation._nodeProbability);
@@ -286,7 +286,7 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
 
         settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".node probability", mutationRates._constructorMutations[i]._nodeProbability);
         settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
-        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".value probability", mutationRates._constructorMutations[i]._discreteChangeProbability);
+        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".discrete change probability", mutationRates._constructorMutations[i]._discreteChangeProbability);
     }
 }
 
