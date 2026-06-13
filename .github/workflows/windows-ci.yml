@@ -40,10 +40,12 @@ jobs:
         .\bootstrap-vcpkg.bat -disableMetrics
         Pop-Location
 
-    - name: Configure CMake
-      shell: pwsh
-      run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="external\vcpkg\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CUDA_COMPILER=nvcc
-
-    - name: Build
-      shell: pwsh
-      run: cmake --build build -j32
+    # Build with the "Ninja Multi-Config" preset instead of the default Visual
+    # Studio generator. Ninja compiles all CUDA translation units in parallel
+    # (file-level), which is considerably faster than MSVC building the CUDA
+    # libraries one project after another. The build-windows-ninja.bat script
+    # sets up the MSVC environment, puts Ninja/CMake on PATH and runs the
+    # ninja preset (see CMakePresets.json).
+    - name: Build (Ninja)
+      shell: cmd
+      run: build-windows-ninja.bat ${{ env.BUILD_TYPE }}
