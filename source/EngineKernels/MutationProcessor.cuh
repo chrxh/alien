@@ -883,17 +883,16 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 }
 
                 // Mutate whether the node has a constructor at all; enabling one initializes it with default values.
-                bool wasAvailable = node.constructorAvailable;
                 if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
                     node.constructorAvailable = !node.constructorAvailable;
-                    atomicAdd_block(&accumulatedMutations, 1.0f);
-                    if (node.constructorAvailable && !wasAvailable) {
+                    if (node.constructorAvailable) {
                         constructor = {};
                         constructor.autoTriggerInterval = Const::ConstructorAutoTriggerInterval_Default;
                         constructor.constructionActivationTime = Const::ConstructorConstructionActivationTime_Default;
                         constructor.numBranches = 1;
                         constructor.numConcatenations = 1;
                     }
+                    atomicAdd_block(&accumulatedMutations, 1.0f);
                 }
             }
         }
