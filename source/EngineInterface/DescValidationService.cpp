@@ -287,6 +287,8 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
                 constructor._numBranches = std::clamp(constructor._numBranches, 1, 6);
                 constructor._numConcatenations = std::max(constructor._numConcatenations, 1);
+                constructor._constructionAngle =
+                    std::clamp(constructor._constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
             }
         }
     }
@@ -486,6 +488,8 @@ void DescValidationService::validateAndCorrect(ObjectDesc& object)
             constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
             constructor._numBranches = std::clamp(constructor._numBranches, 1, 6);
             constructor._numConcatenations = std::max(constructor._numConcatenations, 1);
+            constructor._constructionAngle =
+                std::clamp(constructor._constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
         }
     }
 }
