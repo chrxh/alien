@@ -50,9 +50,9 @@ struct ConstructorGenomeDesc
 {
     auto operator<=>(ConstructorGenomeDesc const&) const = default;
 
-    MEMBER(ConstructorGenomeDesc, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
+    MEMBER(ConstructorGenomeDesc, std::optional<int>, autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Default);  // std::nullopt = manual triggering
     MEMBER(ConstructorGenomeDesc, int, geneIndex, 0);
-    MEMBER(ConstructorGenomeDesc, int, constructionActivationTime, 100);
+    MEMBER(ConstructorGenomeDesc, int, constructionActivationTime, Const::ConstructorConstructionActivationTime_Default);
     MEMBER(ConstructorGenomeDesc, float, constructionAngle, 0.0f);
     MEMBER(ConstructorGenomeDesc, ProvideEnergy, provideEnergy, ProvideEnergy_FromConstructor);
     MEMBER(ConstructorGenomeDesc, float, reservedEnergy, 0.0f);

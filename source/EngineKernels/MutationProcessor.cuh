@@ -910,10 +910,13 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 if (node.constructorAvailable) {
                     if (constructor.autoTriggerInterval > 0) {
                         // Only an already auto-triggering constructor is mutated, so it keeps auto triggering.
-                        mutateNumber(constructor.autoTriggerInterval, 1, 100);
+                        mutateNumber(constructor.autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Min, Const::ConstructorAutoTriggerInterval_Max);
                     }
                     mutateNumber(constructor.geneIndex, 0, max(0, genome->numGenes - 1));
-                    mutateNumber(constructor.constructionActivationTime, 0, MAX_ACTIVATION_TIME);
+                    mutateNumber(
+                        constructor.constructionActivationTime,
+                        Const::ConstructorConstructionActivationTime_Min,
+                        Const::ConstructorConstructionActivationTime_Max);
                     mutateNumber(constructor.constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
                     mutateNumber(constructor.reservedEnergy, 0.0f, 300.0f);
                     mutateNumber(constructor.numBranches, 1, 6);
@@ -929,7 +932,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                     node.constructorAvailable = !node.constructorAvailable;
                     atomicAdd_block(&accumulatedMutations, 1.0f);
                     if (node.constructorAvailable && !wasAvailable) {
-                        constructor = {100, 0, 100, 0.0f, ProvideEnergy_FromConstructor, 0.0f, false, 1, 1};
+                        constructor = {};
+                        constructor.autoTriggerInterval = Const::ConstructorAutoTriggerInterval_Default;
+                        constructor.constructionActivationTime = Const::ConstructorConstructionActivationTime_Default;
+                        constructor.numBranches = 1;
+                        constructor.numConcatenations = 1;
                     }
                 }
             }
