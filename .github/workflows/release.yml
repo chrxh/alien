@@ -1,0 +1,93 @@
+name: Package and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+
+env:
+  BUILD_TYPE: Release
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build-and-package:
+    name: Build and Package Linux
+    runs-on: [self-hosted, Linux]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          clean: false
+          fetch-depth: 0
+
+      - name: Unshallow vcpkg submodule
+        run: cd external/vcpkg && git fetch --unshallow || true && cd ../..
+
+      - name: Install system dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+
+      - name: Install CUDA (via NVIDIA's repo)
+        run: sudo apt-get install -y gnupg software-properties-common wget && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb && sudo dpkg -i cuda-keyring_1.1-1_all.deb && sudo apt-get install -y cuda-compiler-13-0
+
+      - name: Add CUDA to PATH
+        run: echo "/usr/local/cuda/bin" >> $GITHUB_PATH && echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Bootstrap vcpkg
+        run: pushd external/vcpkg && ./bootstrap-vcpkg.sh -disableMetrics && popd
+
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
+
+      - name: Build
+        run: cmake --build build -j32
+
+      - name: Run tests
+        run: cd build && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests
+
+      - name: Create package archive
+        run: bash scripts/package-release.sh "${{ github.ref_name }}" build
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alien-${{ github.ref_name }}-linux-x64
+          path: alien-${{ github.ref_name }}-linux-x64.tar.gz
+          if-no-files-found: error
+
+      - name: Upload SHA256SUMS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHA256SUMS
+          path: SHA256SUMS
+          if-no-files-found: error
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-and-package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Generate release notes
+        run: TAG="${{ github.ref_name }}" && VERSION="${TAG#v}" && NOTES=$(awk -v ver="$VERSION" '/^## \[/{if(found)exit;split($0,p,"[][]");if(p[2]==ver)found=1;next}found{print}' RELEASE-NOTES.md) && if [ -z "$NOTES" ]; then NOTES="Release $TAG"; fi && echo "$NOTES" > release_body.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ALIEN ${{ github.ref_name }}
+          body_path: release_body.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: "alien-${{ github.ref_name }}-linux-x64/alien-${{ github.ref_name }}-linux-x64.tar.gz\nSHA256SUMS/SHA256SUMS"
+          fail_on_unmatched_files: true
