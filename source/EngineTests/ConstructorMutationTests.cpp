@@ -78,7 +78,9 @@ TEST_F(ConstructorMutationTests, constructorMutation_mutatesManualAutoTriggerInt
     _simulationFacade->testOnly_mutate(1);
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_FLOAT_EQ(actualGenome._accumulatedMutations, 3.0f);
+    auto const& actualConstructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
+    ASSERT_TRUE(actualConstructor.has_value());
+    EXPECT_EQ(actualConstructor->_autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Default);
 }
 
 TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultValues)
