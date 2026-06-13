@@ -40,10 +40,6 @@ jobs:
         .\bootstrap-vcpkg.bat -disableMetrics
         Pop-Location
 
-    - name: Configure CMake
-      shell: pwsh
-      run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="external\vcpkg\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CUDA_COMPILER=nvcc
-
-    - name: Build
-      shell: pwsh
-      run: cmake --build build -j32
+    - name: Build (Ninja)
+      shell: cmd
+      run: build-windows-ninja.bat ${{ env.BUILD_TYPE }}
