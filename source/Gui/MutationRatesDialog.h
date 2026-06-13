@@ -10,9 +10,9 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class MutationRateDialog : public AlienDialog
+class MutationRatesDialog : public AlienDialog
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MutationRateDialog);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MutationRatesDialog);
 
 public:
     void loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix) const;
@@ -22,7 +22,7 @@ public:
     void openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback);
 
 private:
-    MutationRateDialog();
+    MutationRatesDialog();
 
     void initIntern() override;
     void shutdownIntern() override;

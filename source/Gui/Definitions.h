@@ -103,7 +103,7 @@ class GenomeEditorWindow;
 
 class PreviewSettingsDialog;
 
-class MutationRateDialog;
+class MutationRatesDialog;
 
 class FileTransferController;
 

@@ -1,4 +1,4 @@
-#include "MutationRateDialog.h"
+#include "MutationRatesDialog.h"
 
 #include <imgui.h>
 
@@ -18,7 +18,7 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
@@ -38,7 +38,7 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
@@ -71,7 +71,7 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
@@ -83,7 +83,14 @@ namespace
                 AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
                 &mutation._sigma);
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters()
+                    .name("Discrete change probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
                 &mutation._discreteChangeProbability);
         }
         AlienGui::EndTreeNode();
@@ -94,7 +101,7 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
@@ -111,7 +118,7 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
@@ -128,7 +135,7 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
@@ -145,7 +152,7 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
@@ -157,7 +164,14 @@ namespace
                 AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
                 &mutation._sigma);
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters()
+                    .name("Discrete change probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
                 &mutation._discreteChangeProbability);
         }
         AlienGui::EndTreeNode();
@@ -174,15 +188,15 @@ namespace
     }
 }
 
-MutationRateDialog::MutationRateDialog()
+MutationRatesDialog::MutationRatesDialog()
     : AlienDialog("Mutation rates", {800.0f, 400.0f})
 {}
 
-void MutationRateDialog::initIntern() {}
+void MutationRatesDialog::initIntern() {}
 
-void MutationRateDialog::shutdownIntern() {}
+void MutationRatesDialog::shutdownIntern() {}
 
-void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix) const
+void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix) const
 {
     auto& settings = GlobalSettings::get();
 
@@ -240,7 +254,7 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
         settings.getValue(settingsPrefix + "constructor mutation 2.value probability", mutationRates._constructorMutations[1]._discreteChangeProbability);
 }
 
-void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
+void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
 {
     auto& settings = GlobalSettings::get();
 
@@ -275,7 +289,7 @@ void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, st
     settings.setValue(settingsPrefix + "constructor mutation 2.value probability", mutationRates._constructorMutations[1]._discreteChangeProbability);
 }
 
-void MutationRateDialog::processIntern()
+void MutationRatesDialog::processIntern()
 {
     // Use a child window with scrolling for the content, reserving space for buttons
     auto buttonAreaHeight = scale(50.0f);
@@ -364,23 +378,23 @@ void MutationRateDialog::processIntern()
     }
 }
 
-void MutationRateDialog::open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
+void MutationRatesDialog::open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
 {
     _mutation = mutationRates;
     _onAdoptCallback = onAdoptCallback;
     AlienDialog::open();
 }
 
-void MutationRateDialog::openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
+void MutationRatesDialog::openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
 {
     _mutation = mutationRates;
     _onAdoptCallback = onAdoptCallback;
     AlienDialog::openNested();
 }
 
-void MutationRateDialog::openIntern() {}
+void MutationRatesDialog::openIntern() {}
 
-void MutationRateDialog::onAdopt()
+void MutationRatesDialog::onAdopt()
 {
     if (_onAdoptCallback) {
         _onAdoptCallback(_mutation);
