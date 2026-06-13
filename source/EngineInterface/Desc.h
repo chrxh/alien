@@ -233,7 +233,7 @@ struct AngleBendingDesc
     auto operator<=>(AngleBendingDesc const&) const = default;
 
     // Fixed data
-    MEMBER(AngleBendingDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);              // Between 0 and 1
+    MEMBER(AngleBendingDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);                // Between 0 and 1
     MEMBER(AngleBendingDesc, float, attractionRepulsionRatio, Const::MuscleAttractionRepulsionRatio_Default);  // Between 0 and 1
 
     // Process data
@@ -524,6 +524,7 @@ struct CellDesc
     // Additional rendering data
     MEMBER(CellDesc, CellEvent, event, CellEvent_No);
     MEMBER(CellDesc, int, eventCounter, 0);
+    MEMBER(CellDesc, uint8_t, signalChanges, 0);
     MEMBER(CellDesc, RealVector2D, eventPos, RealVector2D());
 
     CellType getCellType() const;
