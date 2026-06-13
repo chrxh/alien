@@ -187,21 +187,21 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
     auto& settings = GlobalSettings::get();
 
     for (auto i = 0; i < 2; ++i) {
-        auto const indexSuffix = i == 0 ? " 1" : " 2";
+        auto const indexSuffix = i == 0 ? "1" : "2";
 
         mutationRates._connectionMutations[i]._eventProbability =
-            settings.getValue(settingsPrefix + "connection mutation" + indexSuffix + ".probability", mutationRates._connectionMutations[i]._eventProbability);
+            settings.getValue(settingsPrefix + "connection mutation " + indexSuffix + ".probability", mutationRates._connectionMutations[i]._eventProbability);
         mutationRates._connectionMutations[i]._sigma =
-            settings.getValue(settingsPrefix + "connection mutation" + indexSuffix + ".sigma", mutationRates._connectionMutations[i]._sigma);
+            settings.getValue(settingsPrefix + "connection mutation " + indexSuffix + ".sigma", mutationRates._connectionMutations[i]._sigma);
 
         mutationRates._neuronMutations[i]._eventProbability =
-            settings.getValue(settingsPrefix + "neuron mutation" + indexSuffix + ".probability", mutationRates._neuronMutations[i]._eventProbability);
+            settings.getValue(settingsPrefix + "neuron mutation " + indexSuffix + ".probability", mutationRates._neuronMutations[i]._eventProbability);
         mutationRates._neuronMutations[i]._weightSigma =
-            settings.getValue(settingsPrefix + "neuron mutation" + indexSuffix + ".weight sigma", mutationRates._neuronMutations[i]._weightSigma);
+            settings.getValue(settingsPrefix + "neuron mutation " + indexSuffix + ".weight sigma", mutationRates._neuronMutations[i]._weightSigma);
         mutationRates._neuronMutations[i]._biasSigma =
-            settings.getValue(settingsPrefix + "neuron mutation" + indexSuffix + ".bias sigma", mutationRates._neuronMutations[i]._biasSigma);
+            settings.getValue(settingsPrefix + "neuron mutation " + indexSuffix + ".bias sigma", mutationRates._neuronMutations[i]._biasSigma);
         mutationRates._neuronMutations[i]._activationFunctionProbability = settings.getValue(
-            settingsPrefix + "neuron mutation" + indexSuffix + ".activation function probability",
+            settingsPrefix + "neuron mutation " + indexSuffix + ".activation function probability",
             mutationRates._neuronMutations[i]._activationFunctionProbability);
     }
 
@@ -224,14 +224,14 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
         settings.getValue(settingsPrefix + "void mutation.probability", mutationRates._voidMutation._eventProbability);
 
     for (auto i = 0; i < 2; ++i) {
-        auto const indexSuffix = i == 0 ? " 1" : " 2";
+        auto const indexSuffix = i == 0 ? "1" : "2";
 
-        mutationRates._constructorMutations[i]._eventProbability =
-            settings.getValue(settingsPrefix + "constructor mutation" + indexSuffix + ".probability", mutationRates._constructorMutations[i]._eventProbability);
+        mutationRates._constructorMutations[i]._eventProbability = settings.getValue(
+            settingsPrefix + "constructor mutation " + indexSuffix + ".probability", mutationRates._constructorMutations[i]._eventProbability);
         mutationRates._constructorMutations[i]._sigma =
-            settings.getValue(settingsPrefix + "constructor mutation" + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
+            settings.getValue(settingsPrefix + "constructor mutation " + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
         mutationRates._constructorMutations[i]._probability = settings.getValue(
-            settingsPrefix + "constructor mutation" + indexSuffix + ".value probability", mutationRates._constructorMutations[i]._probability);
+            settingsPrefix + "constructor mutation " + indexSuffix + ".value probability", mutationRates._constructorMutations[i]._probability);
     }
 }
 
@@ -240,27 +240,27 @@ void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, st
     auto& settings = GlobalSettings::get();
 
     for (auto i = 0; i < 2; ++i) {
-        auto const indexSuffix = i == 0 ? " 1" : " 2";
+        auto const indexSuffix = i == 0 ? "1" : "2";
 
-        settings.setValue(settingsPrefix + "connection mutation" + indexSuffix + ".probability", mutationRates._connectionMutations[i]._eventProbability);
-        settings.setValue(settingsPrefix + "connection mutation" + indexSuffix + ".sigma", mutationRates._connectionMutations[i]._sigma);
+        settings.setValue(settingsPrefix + "connection mutation " + indexSuffix + ".probability", mutationRates._connectionMutations[i]._eventProbability);
+        settings.setValue(settingsPrefix + "connection mutation " + indexSuffix + ".sigma", mutationRates._connectionMutations[i]._sigma);
 
-        settings.setValue(settingsPrefix + "neuron mutation" + indexSuffix + ".probability", mutationRates._neuronMutations[i]._eventProbability);
-        settings.setValue(settingsPrefix + "neuron mutation" + indexSuffix + ".weight sigma", mutationRates._neuronMutations[i]._weightSigma);
-        settings.setValue(settingsPrefix + "neuron mutation" + indexSuffix + ".bias sigma", mutationRates._neuronMutations[i]._biasSigma);
+        settings.setValue(settingsPrefix + "neuron mutation " + indexSuffix + ".probability", mutationRates._neuronMutations[i]._eventProbability);
+        settings.setValue(settingsPrefix + "neuron mutation " + indexSuffix + ".weight sigma", mutationRates._neuronMutations[i]._weightSigma);
+        settings.setValue(settingsPrefix + "neuron mutation " + indexSuffix + ".bias sigma", mutationRates._neuronMutations[i]._biasSigma);
         settings.setValue(
-            settingsPrefix + "neuron mutation" + indexSuffix + ".activation function probability",
+            settingsPrefix + "neuron mutation " + indexSuffix + ".activation function probability",
             mutationRates._neuronMutations[i]._activationFunctionProbability);
     }
 
     for (auto i = 0; i < 2; ++i) {
-        auto const indexSuffix = i == 0 ? "" : " 2";
+        auto const indexSuffix = i == 0 ? "1" : "2";
 
         settings.setValue(
-            settingsPrefix + "cell type property mutation" + indexSuffix + ".probability", mutationRates._cellTypePropertiesMutations[i]._eventProbability);
-        settings.setValue(settingsPrefix + "cell type property mutation" + indexSuffix + ".sigma", mutationRates._cellTypePropertiesMutations[i]._sigma);
+            settingsPrefix + "cell type property mutation " + indexSuffix + ".probability", mutationRates._cellTypePropertiesMutations[i]._eventProbability);
+        settings.setValue(settingsPrefix + "cell type property mutation " + indexSuffix + ".sigma", mutationRates._cellTypePropertiesMutations[i]._sigma);
         settings.setValue(
-            settingsPrefix + "cell type property mutation" + indexSuffix + ".value probability", mutationRates._cellTypePropertiesMutations[i]._probability);
+            settingsPrefix + "cell type property mutation " + indexSuffix + ".value probability", mutationRates._cellTypePropertiesMutations[i]._probability);
     }
 
     settings.setValue(settingsPrefix + "cell type mode mutation.probability", mutationRates._cellTypeModeMutation._eventProbability);
@@ -268,11 +268,11 @@ void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, st
     settings.setValue(settingsPrefix + "void mutation.probability", mutationRates._voidMutation._eventProbability);
 
     for (auto i = 0; i < 2; ++i) {
-        auto const indexSuffix = i == 0 ? "" : " 2";
+        auto const indexSuffix = i == 0 ? "1" : "2";
 
-        settings.setValue(settingsPrefix + "constructor mutation" + indexSuffix + ".probability", mutationRates._constructorMutations[i]._eventProbability);
-        settings.setValue(settingsPrefix + "constructor mutation" + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
-        settings.setValue(settingsPrefix + "constructor mutation" + indexSuffix + ".value probability", mutationRates._constructorMutations[i]._probability);
+        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".probability", mutationRates._constructorMutations[i]._eventProbability);
+        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
+        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".value probability", mutationRates._constructorMutations[i]._probability);
     }
 }
 
