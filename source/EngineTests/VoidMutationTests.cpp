@@ -30,9 +30,9 @@ TEST_F(VoidMutationTests, voidMutation_nonVoidBecomesVoid)
     auto actualGenome = getMutatedGenome();
     auto const& nodes = actualGenome._genes.at(0)._nodes;
 
-    EXPECT_EQ(nodes.at(0).getCellType(), CellType_Base);
+    EXPECT_EQ(nodes.at(0), genome._genes.at(0)._nodes.at(0));
     EXPECT_EQ(nodes.at(1).getCellType(), CellType_Void);
-    EXPECT_EQ(nodes.at(2).getCellType(), CellType_Base);
+    EXPECT_EQ(nodes.at(2), genome._genes.at(0)._nodes.at(2));
 }
 
 TEST_F(VoidMutationTests, voidMutation_voidBecomesNonVoid)
@@ -52,8 +52,8 @@ TEST_F(VoidMutationTests, voidMutation_voidBecomesNonVoid)
     auto actualGenome = getMutatedGenome();
     auto const& nodes = actualGenome._genes.at(0)._nodes;
 
-    EXPECT_EQ(nodes.at(0).getCellType(), CellType_Base);
-    EXPECT_EQ(nodes.at(2).getCellType(), CellType_Base);
+    EXPECT_EQ(nodes.at(0), genome._genes.at(0)._nodes.at(0));
+    EXPECT_EQ(nodes.at(2), genome._genes.at(0)._nodes.at(2));
 
     // The void node is turned into a non-void cell type with default attribute values.
     auto const& revived = nodes.at(1)._cellType;
