@@ -66,6 +66,23 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
     EXPECT_LE(originalConstructor->_constructionActivationTime, Const::ConstructorConstructionActivationTime_Max);
 }
 
+TEST_F(ConstructorMutationTests, constructorMutation_mutatesManualAutoTriggerInterval)
+{
+    auto genome = GenomeDesc().genes(
+        {GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().autoTriggerInterval(std::nullopt).geneIndex(0).separation(false))})});
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(0.0f).discreteChangeProbability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+    auto const& actualConstructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
+    ASSERT_TRUE(actualConstructor.has_value());
+    EXPECT_EQ(actualConstructor->_autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Default);
+}
+
 TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultValues)
 {
     auto genome = createTestGenome();
