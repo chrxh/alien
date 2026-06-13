@@ -64,7 +64,7 @@ jobs:
         -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
 
     - name: Build
-      run: cmake --build build -j32
+      run: cmake --build build -j$(( $(nproc) / 2 ))
       
     - name: Run Tests
       run: |
