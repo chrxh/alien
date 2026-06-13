@@ -7,7 +7,8 @@ class ConstructorHelper
 public:
     __inline__ __device__ static bool isFinished(Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
-    __inline__ __device__ static bool hasInfiniteConcatenations(Constructor const& constructor);
+    template <typename ConstructorType>
+    __inline__ __device__ static bool hasInfiniteConcatenations(ConstructorType const& constructor);
     __inline__ __device__ static void
     getConstructorIndices(uint16_t& currentNodeIndex, uint32_t& currentConcatenation, uint8_t& currentBranch, Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Object* getLastConstructedCell(Object* constructorCell);
@@ -51,7 +52,8 @@ __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const&
     return &genome.genes[constructor.geneIndex];
 }
 
-__inline__ __device__ bool ConstructorHelper::hasInfiniteConcatenations(Constructor const& constructor)
+template <typename ConstructorType>
+__inline__ __device__ bool ConstructorHelper::hasInfiniteConcatenations(ConstructorType const& constructor)
 {
     return constructor.numConcatenations == 0x7fffffff;
 }

@@ -16,7 +16,8 @@ enum class MutationType
     CellTypeProperties,
     CellTypeMode,
     CellType,
-    Void
+    Void,
+    Constructor
 };
 
 class AccumulatedMutationTests_AllTypes
@@ -34,7 +35,8 @@ INSTANTIATE_TEST_SUITE_P(
         MutationType::CellTypeProperties,
         MutationType::CellTypeMode,
         MutationType::CellType,
-        MutationType::Void));
+        MutationType::Void,
+        MutationType::Constructor));
 
 TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
 {
@@ -58,6 +60,9 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     case MutationType::Void:
         genome._mutationRates._voidMutation = VoidMutationDesc().eventProbability(1.0f);
+        break;
+    case MutationType::Constructor:
+        genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
         break;
     }
 
@@ -88,6 +93,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
     _parameters.metaMutationCellTypeModeSigma.value = 1.0f;
     _parameters.metaMutationCellTypeSigma.value = 1.0f;
     _parameters.metaMutationVoidSigma.value = 1.0f;
+    _parameters.metaMutationConstructorSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);

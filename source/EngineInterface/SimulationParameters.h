@@ -112,6 +112,7 @@ struct SimulationParameters
     BaseParameter<float> metaMutationCellTypeModeSigma = {0};
     BaseParameter<float> metaMutationCellTypeSigma = {0};
     BaseParameter<float> metaMutationVoidSigma = {0};
+    BaseParameter<float> metaMutationConstructorSigma = {0};
     BaseParameter<float> newLineageThreshold = {Infinity<float>::value};
 
     // Cell type: Attacker

@@ -10,6 +10,7 @@
 #include <EngineInterface/NeuralNetWeight.h>
 #include <EngineInterface/SimulationParameters.h>
 
+#include "ConstructorHelper.cuh"
 #include "EntityFactory.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -28,7 +29,9 @@ private:
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
+
     __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
     __inline__ __device__ static void resetCellTypeToDefault(Node& node);
 
@@ -111,6 +114,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_cellTypeMode(data, genome, accumulatedMutations);
     applyMutations_cellType(data, genome, accumulatedMutations);
     applyMutations_void(data, genome, accumulatedMutations);
+    applyMutations_constructor(data, genome, accumulatedMutations);
 
     block.sync();
     updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
@@ -221,7 +225,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     if (rate.sigma <= 0) {
                         return;
                     }
-                    auto delta = generateGaussian(data) * rate.sigma;
+                    auto delta = generateGaussian(data) * rate.sigma * (maxValue - minValue);
                     if constexpr (std::is_integral_v<ValueType>) {
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
@@ -856,6 +860,90 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
     }
 }
 
+__inline__ __device__ void MutationProcessor::applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+    ConstructorMutation rates[2] = {genome->mutationRates.constructorMutations[0], genome->mutationRates.constructorMutations[1]};
+
+    for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
+        auto const& rate = rates[rateIndex];
+        if (rate.eventProbability <= 0 || (rate.sigma <= 0 && rate.probability <= 0)) {
+            continue;
+        }
+
+        for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+            auto& gene = genome->genes[geneIndex];
+            for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+                if (data.primaryNumberGen.random() >= rate.eventProbability) {
+                    continue;
+                }
+                auto& node = gene.nodes[nodeIndex];
+                auto& constructor = node.constructor;
+
+                // Mutate real and integer attributes by a Gaussian step scaled by the value range; the clamping mirrors DescValidationService.
+                auto mutateNumber = [&](auto& value, auto minValue, auto maxValue) {
+                    using ValueType = std::decay_t<decltype(value)>;
+                    if (rate.sigma <= 0) {
+                        return;
+                    }
+                    auto delta = generateGaussian(data) * rate.sigma * (maxValue - minValue);
+                    if constexpr (std::is_integral_v<ValueType>) {
+                        auto roundedDelta = static_cast<int>(std::round(delta));
+                        auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
+                        value = static_cast<ValueType>(newValue);
+                        atomicAdd_block(&accumulatedMutations, static_cast<float>(std::abs(roundedDelta)));
+                    } else {
+                        value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
+                        atomicAdd_block(&accumulatedMutations, std::abs(delta));
+                    }
+                };
+
+                auto mutateBoolField = [&](bool& value) {
+                    if (data.primaryNumberGen.random() < rate.probability) {
+                        value = !value;
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
+                    }
+                };
+
+                // Mutate the attributes of an existing constructor (real/integer via sigma, bool via probability).
+                if (node.constructorAvailable) {
+                    if (constructor.autoTriggerInterval > 0) {
+                        // Only an already auto-triggering constructor is mutated, so it keeps auto triggering.
+                        mutateNumber(constructor.autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Min, Const::ConstructorAutoTriggerInterval_Min + 100);
+                    }
+                    mutateNumber(constructor.geneIndex, 0, max(0, genome->numGenes - 1));
+                    mutateNumber(
+                        constructor.constructionActivationTime,
+                        Const::ConstructorConstructionActivationTime_Min,
+                        Const::ConstructorConstructionActivationTime_Max);
+                    mutateNumber(constructor.constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
+                    mutateNumber(constructor.reservedEnergy, 0.0f, 300.0f);
+                    mutateNumber(constructor.numBranches, 1, 6);
+                    if (!ConstructorHelper::hasInfiniteConcatenations(constructor)) {
+                        mutateNumber(constructor.numConcatenations, 1, 100);
+                    }
+                    mutateBoolField(constructor.separation);
+                }
+
+                // Mutate whether the node has a constructor at all; enabling one initializes it with default values.
+                bool wasAvailable = node.constructorAvailable;
+                if (data.primaryNumberGen.random() < rate.probability) {
+                    node.constructorAvailable = !node.constructorAvailable;
+                    atomicAdd_block(&accumulatedMutations, 1.0f);
+                    if (node.constructorAvailable && !wasAvailable) {
+                        constructor = {};
+                        constructor.autoTriggerInterval = Const::ConstructorAutoTriggerInterval_Default;
+                        constructor.constructionActivationTime = Const::ConstructorConstructionActivationTime_Default;
+                        constructor.numBranches = 1;
+                        constructor.numConcatenations = 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
@@ -909,6 +997,16 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (voidMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * voidMutationSigma)); };
             mutateFloat(genome->mutationRates.voidMutation.eventProbability);
+        }
+
+        float constructorSigma = cudaSimulationParameters.metaMutationConstructorSigma.value;
+        if (constructorSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * constructorSigma)); };
+            for (int i = 0; i < 2; ++i) {
+                mutateFloat(genome->mutationRates.constructorMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.constructorMutations[i].sigma);
+                mutateFloat(genome->mutationRates.constructorMutations[i].probability);
+            }
         }
     }
 }

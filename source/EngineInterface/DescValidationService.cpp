@@ -24,6 +24,11 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
         mutation._sigma = std::clamp(mutation._sigma, 0.0f, 1.0f);
         mutation._probability = std::clamp(mutation._probability, 0.0f, 1.0f);
     };
+    auto validateConstructorMutation = [](ConstructorMutationDesc& mutation) {
+        mutation._eventProbability = std::clamp(mutation._eventProbability, 0.0f, 1.0f);
+        mutation._sigma = std::clamp(mutation._sigma, 0.0f, 1.0f);
+        mutation._probability = std::clamp(mutation._probability, 0.0f, 1.0f);
+    };
     for (int i = 0; i < 2; ++i) {
         auto& neuronMutation = genome._mutationRates._neuronMutations[i];
         neuronMutation._eventProbability = std::clamp(neuronMutation._eventProbability, 0.0f, 1.0f);
@@ -36,6 +41,7 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
         connectionMutation._sigma = std::max(connectionMutation._sigma, 0.0f);
 
         validateCellTypePropertiesMutation(genome._mutationRates._cellTypePropertiesMutations[i]);
+        validateConstructorMutation(genome._mutationRates._constructorMutations[i]);
     }
     genome._mutationRates._cellTypeModeMutation._eventProbability =
         std::clamp(genome._mutationRates._cellTypeModeMutation._eventProbability, 0.0f, 1.0f);
@@ -269,12 +275,20 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                     value = std::max(value, 1);
                 }
                 constructor._geneIndex = std::max(constructor._geneIndex, 0);
-                constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, MAX_ACTIVATION_TIME);
+                if (constructor._autoTriggerInterval.has_value()) {
+                    constructor._autoTriggerInterval = std::max(*constructor._autoTriggerInterval, Const::ConstructorConstructionActivationTime_Min);
+                }
+                constructor._constructionActivationTime = std::clamp(
+                    constructor._constructionActivationTime,
+                    Const::ConstructorConstructionActivationTime_Min,
+                    Const::ConstructorConstructionActivationTime_Max);
                 constructor._provideEnergy =
                     std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
                 constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
                 constructor._numBranches = std::clamp(constructor._numBranches, 1, 6);
                 constructor._numConcatenations = std::max(constructor._numConcatenations, 1);
+                constructor._constructionAngle =
+                    std::clamp(constructor._constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
             }
         }
     }
@@ -467,12 +481,15 @@ void DescValidationService::validateAndCorrect(ObjectDesc& object)
                 value = std::max(value, 0);
             }
             constructor._geneIndex = std::max(constructor._geneIndex, 0);
-            constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, MAX_ACTIVATION_TIME);
+            constructor._constructionActivationTime = std::clamp(
+                constructor._constructionActivationTime, Const::ConstructorConstructionActivationTime_Min, Const::ConstructorConstructionActivationTime_Max);
             constructor._provideEnergy =
                 std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
             constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
             constructor._numBranches = std::clamp(constructor._numBranches, 1, 6);
             constructor._numConcatenations = std::max(constructor._numConcatenations, 1);
+            constructor._constructionAngle =
+                std::clamp(constructor._constructionAngle, Const::ConstructorConstructionAngle_Min, Const::ConstructorConstructionAngle_Max);
         }
     }
 }

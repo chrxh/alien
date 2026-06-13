@@ -71,6 +71,9 @@ std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
     if (_voidMutation._eventProbability > 0.0f) {
         activeMutations.push_back("Void mutations");
     }
+    if (_constructorMutations[0]._eventProbability > 0.0f || _constructorMutations[1]._eventProbability > 0.0f) {
+        activeMutations.push_back("Constructor mutations");
+    }
     return activeMutations;
 }
 

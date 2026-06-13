@@ -140,6 +140,29 @@ namespace
         AlienGui::EndTreeNode();
     }
 
+    void processConstructorMutationRate(std::string const& name, std::string const& id, ConstructorMutationDesc& mutation, float rightColumnWidth)
+    {
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Event probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &mutation._eventProbability);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
+                &mutation._sigma);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
+                &mutation._probability);
+        }
+        AlienGui::EndTreeNode();
+    }
+
     template <typename Func>
     void processConcreteMutationRates(Func&& processMutationRates)
     {
@@ -203,6 +226,18 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
         settings.getValue(settingsPrefix + "cell type mutation.probability", mutationRates._cellTypeMutation._eventProbability);
     mutationRates._voidMutation._eventProbability =
         settings.getValue(settingsPrefix + "void mutation.probability", mutationRates._voidMutation._eventProbability);
+    mutationRates._constructorMutations[0]._eventProbability =
+        settings.getValue(settingsPrefix + "constructor mutation.probability", mutationRates._constructorMutations[0]._eventProbability);
+    mutationRates._constructorMutations[0]._sigma =
+        settings.getValue(settingsPrefix + "constructor mutation.sigma", mutationRates._constructorMutations[0]._sigma);
+    mutationRates._constructorMutations[0]._probability =
+        settings.getValue(settingsPrefix + "constructor mutation.value probability", mutationRates._constructorMutations[0]._probability);
+    mutationRates._constructorMutations[1]._eventProbability =
+        settings.getValue(settingsPrefix + "constructor mutation 2.probability", mutationRates._constructorMutations[1]._eventProbability);
+    mutationRates._constructorMutations[1]._sigma =
+        settings.getValue(settingsPrefix + "constructor mutation 2.sigma", mutationRates._constructorMutations[1]._sigma);
+    mutationRates._constructorMutations[1]._probability =
+        settings.getValue(settingsPrefix + "constructor mutation 2.value probability", mutationRates._constructorMutations[1]._probability);
 }
 
 void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
@@ -232,6 +267,12 @@ void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, st
     settings.setValue(settingsPrefix + "cell type mode mutation.probability", mutationRates._cellTypeModeMutation._eventProbability);
     settings.setValue(settingsPrefix + "cell type mutation.probability", mutationRates._cellTypeMutation._eventProbability);
     settings.setValue(settingsPrefix + "void mutation.probability", mutationRates._voidMutation._eventProbability);
+    settings.setValue(settingsPrefix + "constructor mutation.probability", mutationRates._constructorMutations[0]._eventProbability);
+    settings.setValue(settingsPrefix + "constructor mutation.sigma", mutationRates._constructorMutations[0]._sigma);
+    settings.setValue(settingsPrefix + "constructor mutation.value probability", mutationRates._constructorMutations[0]._probability);
+    settings.setValue(settingsPrefix + "constructor mutation 2.probability", mutationRates._constructorMutations[1]._eventProbability);
+    settings.setValue(settingsPrefix + "constructor mutation 2.sigma", mutationRates._constructorMutations[1]._sigma);
+    settings.setValue(settingsPrefix + "constructor mutation 2.value probability", mutationRates._constructorMutations[1]._probability);
 }
 
 void MutationRateDialog::processIntern()
@@ -290,6 +331,16 @@ void MutationRateDialog::processIntern()
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Void mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
                 processVoidMutationRate("Mutation rate", "VM", _mutation._voidMutation, rightColumnWidth);
+                table.next();
+            });
+        }
+        AlienGui::EndTreeNode();
+
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor mutations").rank(AlienGui::TreeNodeRank::High))) {
+            processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
+                processConstructorMutationRate("Mutation rate 1", "COM1", _mutation._constructorMutations[0], rightColumnWidth);
+                table.next();
+                processConstructorMutationRate("Mutation rate 2", "COM2", _mutation._constructorMutations[1], rightColumnWidth);
                 table.next();
             });
         }
