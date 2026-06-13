@@ -30,49 +30,10 @@ protected:
     }
 };
 
-TEST_F(ConstructorMutationTests, constructorMutation_changesScalarProperties)
+TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttributes)
 {
     auto genome = createTestGenome();
     genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).sigma(1.0f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1);
-
-    auto actualGenome = getMutatedGenome();
-
-    auto const& originalConstructor = genome._genes.at(0)._nodes.at(0)._constructor;
-    auto const& actualConstructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
-    ASSERT_TRUE(originalConstructor.has_value());
-    ASSERT_TRUE(actualConstructor.has_value());
-    EXPECT_NE(originalConstructor->_constructionAngle, actualConstructor->_constructionAngle);
-}
-
-TEST_F(ConstructorMutationTests, constructorMutation_changesBoolAndEnumProperties)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).probability(1.0f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1);
-
-    auto actualGenome = getMutatedGenome();
-
-    auto const& originalConstructor = genome._genes.at(0)._nodes.at(0)._constructor;
-    auto const& actualConstructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
-    ASSERT_TRUE(originalConstructor.has_value());
-    ASSERT_TRUE(actualConstructor.has_value());
-    EXPECT_NE(originalConstructor->_separation, actualConstructor->_separation);
-    EXPECT_NE(originalConstructor->_provideEnergy, actualConstructor->_provideEnergy);
-}
-
-TEST_F(ConstructorMutationTests, constructorMutation_keepsValidGeneIndex)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -82,19 +43,49 @@ TEST_F(ConstructorMutationTests, constructorMutation_keepsValidGeneIndex)
     }
 
     auto actualGenome = getMutatedGenome();
-    auto numGenes = static_cast<int>(actualGenome._genes.size());
+    auto const numGenes = static_cast<int>(actualGenome._genes.size());
+
+    auto const& originalConstructor = genome._genes.at(0)._nodes.at(0)._constructor;
+    auto const& actualConstructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
+    ASSERT_TRUE(originalConstructor.has_value());
+    ASSERT_TRUE(actualConstructor.has_value());
+    EXPECT_NE(originalConstructor->_constructionAngle, actualConstructor->_constructionAngle);
+
+    // All mutated constructors must stay within their valid ranges.
     for (auto const& gene : actualGenome._genes) {
         for (auto const& node : gene._nodes) {
             if (node._constructor.has_value()) {
-                EXPECT_GE(node._constructor->_geneIndex, 0);
-                EXPECT_LT(node._constructor->_geneIndex, numGenes);
-                EXPECT_GE(node._constructor->_numBranches, 1);
-                EXPECT_LE(node._constructor->_numBranches, 6);
-                EXPECT_GE(node._constructor->_reservedEnergy, 0.0f);
-                EXPECT_GE(node._constructor->_numConcatenations, 1);
+                auto const& constructor = node._constructor.value();
+                EXPECT_GE(constructor._geneIndex, 0);
+                EXPECT_LT(constructor._geneIndex, numGenes);
+                EXPECT_GE(constructor._numBranches, 1);
+                EXPECT_LE(constructor._numBranches, 6);
+                EXPECT_GE(constructor._reservedEnergy, 0.0f);
+                EXPECT_GE(constructor._numConcatenations, 1);
+                EXPECT_GE(constructor._constructionAngle, Const::ConstructorConstructionAngle_Min);
+                EXPECT_LE(constructor._constructionAngle, Const::ConstructorConstructionAngle_Max);
             }
         }
     }
+}
+
+TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultValues)
+{
+    auto genome = createTestGenome();
+    genome._genes.at(0)._nodes.at(0)._constructor.reset();  // node without a constructor
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).probability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+
+    // The node had no constructor, so turning it on must initialize it with default values.
+    auto const& constructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
+    ASSERT_TRUE(constructor.has_value());
+    EXPECT_TRUE(constructor.value() == ConstructorGenomeDesc());
 }
 
 TEST_F(ConstructorMutationTests, constructorMutation_doesNotChangeOtherAttributes)
