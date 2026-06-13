@@ -156,7 +156,7 @@ enum ProvideEnergy_
 namespace Const
 {
     std::vector<std::string> const ConstructorShapeStrings = {"Segment", "Triangle", "Rectangle", "Hexagon", "Tube", "Large Lolli", "Small Lolli", "Zigzag"};
-    std::vector<std::string> const ProvideEnergyStrings = {"From constructor", "Free"};
+    std::vector<std::string> const ProvideEnergyStrings = {"Reduce cell energy", "Free"};
 }
 
 //**********************
