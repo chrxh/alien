@@ -168,7 +168,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 if (constructionData.isSeparation) {
                     ++constructor.currentOffspring;
                     if (constructor.provideEnergy == ProvideEnergy_Free) {
-                        constructor.provideEnergy = ProvideEnergy_FromConstructor;
+                        constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
                     }
                     constructor.offspring = nullptr;
 

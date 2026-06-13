@@ -1,10 +1,9 @@
 name: windows-build
 
 on:
-  push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 
 env:
@@ -25,25 +24,36 @@ jobs:
       with:
         submodules: recursive
         clean: true
-    
+
+    - name: Check for recent changes
+      id: recent_changes
+      shell: pwsh
+      run: |
+        $recentCommit = git log --since="24 hours ago" --oneline -n 1
+        if ($recentCommit) {
+          "should_run=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        } else {
+          "should_run=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "No commits in the last 24 hours. Skipping Windows build."
+        }
+
     - name: Unshallow vcpkg submodule
+      if: steps.recent_changes.outputs.should_run == 'true'
       shell: pwsh
       run: |
         cd external/vcpkg
         git fetch --unshallow 2>$null; if (-not $?) { Write-Host "Already unshallowed or fetch failed (continuing)" }
         exit 0
-    
+
     - name: Bootstrap vcpkg
+      if: steps.recent_changes.outputs.should_run == 'true'
       shell: pwsh
       run: |
         Push-Location external/vcpkg
         .\bootstrap-vcpkg.bat -disableMetrics
         Pop-Location
 
-    - name: Configure CMake
-      shell: pwsh
-      run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="external\vcpkg\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CUDA_COMPILER=nvcc
-
-    - name: Build
-      shell: pwsh
-      run: cmake --build build -j32
+    - name: Build (Ninja)
+      if: steps.recent_changes.outputs.should_run == 'true'
+      shell: cmd
+      run: build-windows-ninja.bat ${{ env.BUILD_TYPE }}

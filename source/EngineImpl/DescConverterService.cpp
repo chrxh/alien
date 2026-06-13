@@ -340,6 +340,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         cellDesc._headCell = objectTO.typeData.cell.headCell;
         cellDesc._event = objectTO.typeData.cell.event;
         cellDesc._eventCounter = objectTO.typeData.cell.eventCounter;
+        cellDesc._signalChanges = objectTO.typeData.cell.signalChanges;
         cellDesc._eventPos = {objectTO.typeData.cell.eventPos.x, objectTO.typeData.cell.eventPos.y};
         cellDesc._lastUpdate = objectTO.typeData.cell.lastUpdate;
         cellDesc._concatenationIndex = objectTO.typeData.cell.concatenationIndex;
@@ -1302,6 +1303,7 @@ void DescConverterService::convertObjectToTO(
         objectTO.typeData.cell.activationTime = cellDesc._activationTime;
         objectTO.typeData.cell.event = cellDesc._event;
         objectTO.typeData.cell.eventCounter = cellDesc._eventCounter;
+        objectTO.typeData.cell.signalChanges = cellDesc._signalChanges;
         objectTO.typeData.cell.eventPos = {cellDesc._eventPos.x, cellDesc._eventPos.y};
         objectTO.typeData.cell.lastUpdate = cellDesc._lastUpdate;
         objectTO.typeData.cell.concatenationIndex = cellDesc._concatenationIndex;

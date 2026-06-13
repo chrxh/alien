@@ -123,7 +123,6 @@ namespace Channels
 namespace Const
 {
     auto constexpr ConstructorAutoTriggerInterval_Min = 1;
-    auto constexpr ConstructorAutoTriggerInterval_Max = 100;
     auto constexpr ConstructorAutoTriggerInterval_Default = 100;
     auto constexpr ConstructorConstructionActivationTime_Min = 0;
     auto constexpr ConstructorConstructionActivationTime_Max = 256 * 4;
@@ -149,7 +148,7 @@ enum ConstructorShape_
 using ProvideEnergy = uint8_t;
 enum ProvideEnergy_
 {
-    ProvideEnergy_FromConstructor = 0,
+    ProvideEnergy_ReduceCellEnergy = 0,
     ProvideEnergy_Free = 1,
     ProvideEnergy_Count = 2,
 };
@@ -157,7 +156,7 @@ enum ProvideEnergy_
 namespace Const
 {
     std::vector<std::string> const ConstructorShapeStrings = {"Segment", "Triangle", "Rectangle", "Hexagon", "Tube", "Large Lolli", "Small Lolli", "Zigzag"};
-    std::vector<std::string> const ProvideEnergyStrings = {"From constructor", "Free"};
+    std::vector<std::string> const ProvideEnergyStrings = {"Reduce cell energy", "Free"};
 }
 
 //**********************

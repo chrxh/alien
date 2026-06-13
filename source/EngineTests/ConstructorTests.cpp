@@ -433,7 +433,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     auto newConstructor = newObject.getCellRef()._constructor.value();
-    EXPECT_EQ(ProvideEnergy_FromConstructor, newConstructor._provideEnergy);
+    EXPECT_EQ(ProvideEnergy_ReduceCellEnergy, newConstructor._provideEnergy);
 
     // Verify no active signal
     EXPECT_TRUE(approxCompare(0.0f, hostObject.getCellRef()._signal._channels[0]));
@@ -477,7 +477,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     EXPECT_TRUE(_descTestDataFactory->compare(newObject, randomNode));
     auto newConstructor = newObject.getCellRef()._constructor.value();
-    EXPECT_EQ(ProvideEnergy_FromConstructor, newConstructor._provideEnergy);
+    EXPECT_EQ(ProvideEnergy_ReduceCellEnergy, newConstructor._provideEnergy);
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview_detail)
@@ -2946,9 +2946,9 @@ INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_ProvideEnergy,
     ConstructorTests_ProvideEnergy_Separation,
     ::testing::Values(
-        std::make_pair(ProvideEnergy_FromConstructor, Separation::No),
+        std::make_pair(ProvideEnergy_ReduceCellEnergy, Separation::No),
         std::make_pair(ProvideEnergy_Free, Separation::No),
-        std::make_pair(ProvideEnergy_FromConstructor, Separation::Yes),
+        std::make_pair(ProvideEnergy_ReduceCellEnergy, Separation::Yes),
         std::make_pair(ProvideEnergy_Free, Separation::Yes)));
 
 TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy)
@@ -3005,7 +3005,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
         EXPECT_TRUE(approxCompare(0.0f, getReservedEnergy(actualConstructedCell.getCellRef())));
         auto newConstructor = actualConstructedCell.getCellRef()._constructor.value();
         if (separation == Separation::Yes) {
-            EXPECT_EQ(ProvideEnergy_FromConstructor, newConstructor._provideEnergy);
+            EXPECT_EQ(ProvideEnergy_ReduceCellEnergy, newConstructor._provideEnergy);
         } else {
             EXPECT_EQ(ProvideEnergy_Free, newConstructor._provideEnergy);
         }
@@ -3214,10 +3214,7 @@ class ConstructorTests_ProvideEnergy
     , public testing::WithParamInterface<ProvideEnergy>
 {};
 
-INSTANTIATE_TEST_SUITE_P(
-    ConstructorTests_ProvideEnergy,
-    ConstructorTests_ProvideEnergy,
-    ::testing::Values(ProvideEnergy_FromConstructor, ProvideEnergy_Free));
+INSTANTIATE_TEST_SUITE_P(ConstructorTests_ProvideEnergy, ConstructorTests_ProvideEnergy, ::testing::Values(ProvideEnergy_ReduceCellEnergy, ProvideEnergy_Free));
 
 TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnergy_sufficientEnergy)
 {

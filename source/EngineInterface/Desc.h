@@ -56,10 +56,14 @@ struct ConstructorDesc
     auto operator<=>(ConstructorDesc const&) const = default;
 
     // Properties
-    MEMBER(ConstructorDesc, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
+    MEMBER(
+        ConstructorDesc,
+        std::optional<int>,
+        autoTriggerInterval,
+        Const::ConstructorAutoTriggerInterval_Default);  // std::nullopt = manual triggering, value must be >= 3
     MEMBER(ConstructorDesc, int, constructionActivationTime, 100);
     MEMBER(ConstructorDesc, float, constructionAngle, 0.0f);
-    MEMBER(ConstructorDesc, ProvideEnergy, provideEnergy, ProvideEnergy_FromConstructor);
+    MEMBER(ConstructorDesc, ProvideEnergy, provideEnergy, ProvideEnergy_ReduceCellEnergy);
     MEMBER(ConstructorDesc, float, reservedEnergy, 0.0f);
     MEMBER(ConstructorDesc, bool, separation, false);
     MEMBER(ConstructorDesc, int, numBranches, 1);        // For separation = false
@@ -229,7 +233,7 @@ struct AngleBendingDesc
     auto operator<=>(AngleBendingDesc const&) const = default;
 
     // Fixed data
-    MEMBER(AngleBendingDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);              // Between 0 and 1
+    MEMBER(AngleBendingDesc, float, maxAngleDeviation, Const::MuscleMaxAngleDeviation_Default);                // Between 0 and 1
     MEMBER(AngleBendingDesc, float, attractionRepulsionRatio, Const::MuscleAttractionRepulsionRatio_Default);  // Between 0 and 1
 
     // Process data
@@ -520,6 +524,7 @@ struct CellDesc
     // Additional rendering data
     MEMBER(CellDesc, CellEvent, event, CellEvent_No);
     MEMBER(CellDesc, int, eventCounter, 0);
+    MEMBER(CellDesc, uint8_t, signalChanges, 0);
     MEMBER(CellDesc, RealVector2D, eventPos, RealVector2D());
 
     CellType getCellType() const;

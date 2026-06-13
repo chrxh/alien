@@ -409,7 +409,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->signal.channels[i] = cellTO.signal.channels[i];
         }
         cell->signal.numTimesSent = cellTO.signal.numTimesSent;
-        cell->signalChanges = 0;
+        cell->signalChanges = cellTO.signalChanges;
 
         cell->cellType = cellTO.cellType;
 
@@ -966,7 +966,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
         constructor.constructionAngle = nodeConstructor.constructionAngle;
-        constructor.provideEnergy = ProvideEnergy_FromConstructor;
+        constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
         constructor.reservedEnergy = nodeConstructor.reservedEnergy;
         constructor.separation = nodeConstructor.separation;
         constructor.numBranches = nodeConstructor.numBranches;

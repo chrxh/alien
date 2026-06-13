@@ -449,6 +449,7 @@ struct CellTO
     // Additional rendering data
     CellEvent event;
     uint8_t eventCounter;
+    uint8_t signalChanges;
     float2 eventPos;
 };
 

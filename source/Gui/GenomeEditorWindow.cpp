@@ -315,7 +315,7 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
              .color(EditorModel::get().getDefaultColorCode())
              .type(CellDesc().headCell(true).constructor(ConstructorDesc()
                                                              .autoTriggerInterval(50)
-                                                             .provideEnergy(provideEnergy ? ProvideEnergy_Free : ProvideEnergy_FromConstructor)
+                                                             .provideEnergy(provideEnergy ? ProvideEnergy_Free : ProvideEnergy_ReduceCellEnergy)
                                                              .geneIndex(0)
                                                              .separation(true)))},
         CreatureDesc(),

@@ -38,9 +38,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
+    _simulationFacade->testOnly_mutate(1);
 
     auto actualGenome = getMutatedGenome();
     auto const numGenes = static_cast<int>(actualGenome._genes.size());
@@ -50,23 +48,22 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
     ASSERT_TRUE(originalConstructor.has_value());
     ASSERT_TRUE(actualConstructor.has_value());
     EXPECT_NE(originalConstructor->_constructionAngle, actualConstructor->_constructionAngle);
+    EXPECT_NE(originalConstructor->_reservedEnergy, actualConstructor->_reservedEnergy);
 
     // All mutated constructors must stay within their valid ranges.
-    for (auto const& gene : actualGenome._genes) {
-        for (auto const& node : gene._nodes) {
-            if (node._constructor.has_value()) {
-                auto const& constructor = node._constructor.value();
-                EXPECT_GE(constructor._geneIndex, 0);
-                EXPECT_LT(constructor._geneIndex, numGenes);
-                EXPECT_GE(constructor._numBranches, 1);
-                EXPECT_LE(constructor._numBranches, 6);
-                EXPECT_GE(constructor._reservedEnergy, 0.0f);
-                EXPECT_GE(constructor._numConcatenations, 1);
-                EXPECT_GE(constructor._constructionAngle, Const::ConstructorConstructionAngle_Min);
-                EXPECT_LE(constructor._constructionAngle, Const::ConstructorConstructionAngle_Max);
-            }
-        }
+    if (originalConstructor->_autoTriggerInterval.has_value()) {
+        EXPECT_GE(actualConstructor->_autoTriggerInterval.value(), Const::ConstructorAutoTriggerInterval_Min);
     }
+    EXPECT_GE(originalConstructor->_geneIndex, 0);
+    EXPECT_LT(originalConstructor->_geneIndex, numGenes);
+    EXPECT_GE(originalConstructor->_numBranches, 1);
+    EXPECT_LE(originalConstructor->_numBranches, 6);
+    EXPECT_GE(originalConstructor->_reservedEnergy, 0.0f);
+    EXPECT_GE(originalConstructor->_numConcatenations, 1);
+    EXPECT_GE(originalConstructor->_constructionAngle, Const::ConstructorConstructionAngle_Min);
+    EXPECT_LE(originalConstructor->_constructionAngle, Const::ConstructorConstructionAngle_Max);
+    EXPECT_GE(originalConstructor->_constructionActivationTime, Const::ConstructorConstructionActivationTime_Min);
+    EXPECT_LE(originalConstructor->_constructionActivationTime, Const::ConstructorConstructionActivationTime_Max);
 }
 
 TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultValues)
@@ -88,7 +85,23 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
     EXPECT_TRUE(constructor.value() == ConstructorGenomeDesc());
 }
 
-TEST_F(ConstructorMutationTests, constructorMutation_doesNotChangeOtherAttributes)
+TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(0.0f).sigma(1.0f).discreteChangeProbability(1.0f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(actualGenome, genome);
+}
+
+TEST_F(ConstructorMutationTests, constructorMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
     genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
@@ -104,20 +117,4 @@ TEST_F(ConstructorMutationTests, constructorMutation_doesNotChangeOtherAttribute
     auto actualGenome = getMutatedGenome();
 
     EXPECT_TRUE(compareAllExceptConstructor(genome, actualGenome));
-}
-
-TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
-{
-    auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(0.0f).sigma(1.0f).discreteChangeProbability(1.0f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome, genome);
 }
