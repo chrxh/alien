@@ -275,8 +275,13 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                     value = std::max(value, 1);
                 }
                 constructor._geneIndex = std::max(constructor._geneIndex, 0);
-                constructor._constructionActivationTime =
-                    std::clamp(constructor._constructionActivationTime, 0, Const::ConstructorConstructionActivationTime_Max);
+                if (constructor._autoTriggerInterval.has_value()) {
+                    constructor._autoTriggerInterval = std::max(*constructor._autoTriggerInterval, Const::ConstructorConstructionActivationTime_Min);
+                }
+                constructor._constructionActivationTime = std::clamp(
+                    constructor._constructionActivationTime,
+                    Const::ConstructorConstructionActivationTime_Min,
+                    Const::ConstructorConstructionActivationTime_Max);
                 constructor._provideEnergy =
                     std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
                 constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
@@ -474,7 +479,8 @@ void DescValidationService::validateAndCorrect(ObjectDesc& object)
                 value = std::max(value, 0);
             }
             constructor._geneIndex = std::max(constructor._geneIndex, 0);
-            constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, Const::ConstructorConstructionActivationTime_Max);
+            constructor._constructionActivationTime = std::clamp(
+                constructor._constructionActivationTime, Const::ConstructorConstructionActivationTime_Min, Const::ConstructorConstructionActivationTime_Max);
             constructor._provideEnergy =
                 std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
             constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);

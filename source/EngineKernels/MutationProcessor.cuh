@@ -910,7 +910,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 if (node.constructorAvailable) {
                     if (constructor.autoTriggerInterval > 0) {
                         // Only an already auto-triggering constructor is mutated, so it keeps auto triggering.
-                        mutateNumber(constructor.autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Min, Const::ConstructorAutoTriggerInterval_Max);
+                        mutateNumber(constructor.autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Min, Const::ConstructorAutoTriggerInterval_Min + 100);
                     }
                     mutateNumber(constructor.geneIndex, 0, max(0, genome->numGenes - 1));
                     mutateNumber(

@@ -123,7 +123,6 @@ namespace Channels
 namespace Const
 {
     auto constexpr ConstructorAutoTriggerInterval_Min = 1;
-    auto constexpr ConstructorAutoTriggerInterval_Max = 100;
     auto constexpr ConstructorAutoTriggerInterval_Default = 100;
     auto constexpr ConstructorConstructionActivationTime_Min = 0;
     auto constexpr ConstructorConstructionActivationTime_Max = 256 * 4;
