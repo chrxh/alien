@@ -278,12 +278,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 case CellType_Base:
                     break;
                 case CellType_Depot:
+                    mutateNumber(node.cellTypeData.depot.storageLimit, Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
                     mutateNumber(
-                        node.cellTypeData.depot.storageLimit, Const::DepotStorageLimit_Min, Const::DepotStorageLimit_Max);
-                    mutateNumber(
-                        node.cellTypeData.depot.initialStoredUsableEnergy,
-                        Const::DepotInitialStoredUsableEnergy_Min,
-                        node.cellTypeData.depot.storageLimit);
+                        node.cellTypeData.depot.initialStoredUsableEnergy, Const::DepotInitialStoredUsableEnergy_Min, node.cellTypeData.depot.storageLimit);
                     break;
                 case CellType_Sensor:
                     mutateBoolField(node.cellTypeData.sensor.autoTrigger);
@@ -295,9 +292,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         break;
                     case SensorMode_DetectEnergy:
                         mutateNumber(
-                            node.cellTypeData.sensor.modeData.detectEnergy.minDensity,
-                            Const::DetectEnergyMinDensity_Min,
-                            Const::DetectEnergyMinDensity_Max);
+                            node.cellTypeData.sensor.modeData.detectEnergy.minDensity, Const::DetectEnergyMinDensity_Min, Const::DetectEnergyMinDensity_Max);
                         break;
                     case SensorMode_DetectSolid:
                         break;
@@ -306,16 +301,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                             node.cellTypeData.sensor.modeData.detectFreeCell.minDensity,
                             Const::DetectFreeCellMinDensity_Min,
                             Const::DetectFreeCellMinDensity_Max);
-                        mutateBitset(
-                            node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors,
-                            Const::RestrictToColors_Max);
+                        mutateBitset(node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColors, Const::RestrictToColors_Max);
                         break;
                     case SensorMode_DetectCreature:
                         mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.minNumCells, Const::CreatureNumCells_Min, 100);
                         mutateNumber(node.cellTypeData.sensor.modeData.detectCreature.maxNumCells, Const::CreatureNumCells_Min, 100);
-                        mutateBitset(
-                            node.cellTypeData.sensor.modeData.detectCreature.restrictToColors,
-                            Const::RestrictToColors_Max);
+                        mutateBitset(node.cellTypeData.sensor.modeData.detectCreature.restrictToColors, Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage, LineageRestriction_Count);
                         break;
                     }
@@ -342,9 +333,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 case CellType_Attacker:
                     switch (node.cellTypeData.attacker.mode) {
                     case AttackerMode_FreeCell:
-                        mutateBitset(
-                            node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors,
-                            Const::RestrictToColors_Max);
+                        mutateBitset(node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColors, Const::RestrictToColors_Max);
                         break;
                     case AttackerMode_Creature:
                         break;
@@ -356,54 +345,31 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 case CellType_Muscle:
                     switch (node.cellTypeData.muscle.mode) {
                     case MuscleMode_AutoBending:
+                        mutateNumber(node.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         mutateNumber(
-                            node.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
+                            node.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_ManualBending:
+                        mutateNumber(node.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         mutateNumber(
-                            node.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
+                            node.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_AngleBending:
+                        mutateNumber(node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         mutateNumber(
-                            node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
-                        mutateNumber(
-                            node.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
+                            node.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_AutoCrawling:
                         mutateNumber(
-                            node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
+                            node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         mutateNumber(
-                            node.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
+                            node.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_ManualCrawling:
                         mutateNumber(
-                            node.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
+                            node.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         mutateNumber(
-                            node.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio,
-                            Const::MuscleModeRatio_Min,
-                            Const::MuscleModeRatio_Max);
+                            node.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio, Const::MuscleModeRatio_Min, Const::MuscleModeRatio_Max);
                         break;
                     case MuscleMode_DirectMovement:
                         break;
@@ -416,34 +382,25 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     case ReconnectorMode_Solid:
                         break;
                     case ReconnectorMode_FreeCell:
-                        mutateBitset(
-                            node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors,
-                            Const::RestrictToColors_Max);
+                        mutateBitset(node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColors, Const::RestrictToColors_Max);
                         break;
                     case ReconnectorMode_Creature:
                         mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells, Const::CreatureNumCells_Min, 100);
                         mutateNumber(node.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells, Const::CreatureNumCells_Min, 100);
-                        mutateBitset(
-                            node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors,
-                            Const::RestrictToColors_Max);
+                        mutateBitset(node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColors, Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage, LineageRestriction_Count);
                         break;
                     }
                     break;
                 case CellType_Detonator:
-                    mutateNumber(
-                        node.cellTypeData.detonator.countdown, Const::DetonatorCountdown_Min, 100);
+                    mutateNumber(node.cellTypeData.detonator.countdown, Const::DetonatorCountdown_Min, 100);
                     break;
                 case CellType_Digestor:
                     mutateNumber(
-                        node.cellTypeData.digestor.rawEnergyConductivity,
-                        Const::DigestorRawEnergyConductivity_Min,
-                        Const::DigestorRawEnergyConductivity_Max);
+                        node.cellTypeData.digestor.rawEnergyConductivity, Const::DigestorRawEnergyConductivity_Min, Const::DigestorRawEnergyConductivity_Max);
                     break;
                 case CellType_Memory: {
-                    mutateBitset(
-                        node.cellTypeData.memory.channelBitMask,
-                        Const::MemoryChannelBitMask_Max);
+                    mutateBitset(node.cellTypeData.memory.channelBitMask, Const::MemoryChannelBitMask_Max);
 
                     if (rate.sigma > 0) {
                         auto& memory = node.cellTypeData.memory;
@@ -481,10 +438,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
 
                     switch (node.cellTypeData.memory.mode) {
                     case MemoryMode_SignalDelay:
-                        mutateNumber(
-                            node.cellTypeData.memory.modeData.signalDelay.delay,
-                            Const::SignalDelay_Min,
-                            Const::SignalDelay_Max);
+                        mutateNumber(node.cellTypeData.memory.modeData.signalDelay.delay, Const::SignalDelay_Min, Const::SignalDelay_Max);
                         break;
                     case MemoryMode_SignalRecorder:
                         mutateBoolField(node.cellTypeData.memory.modeData.signalRecorder.readOnly);
@@ -508,16 +462,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 case CellType_Communicator:
                     switch (node.cellTypeData.communicator.mode) {
                     case CommunicatorMode_Sender:
-                        mutateNumber(
-                            node.cellTypeData.communicator.modeData.sender.range,
-                            Const::CommunicatorRange_Min,
-                            Const::CommunicatorRange_Max);
+                        mutateNumber(node.cellTypeData.communicator.modeData.sender.range, Const::CommunicatorRange_Min, Const::CommunicatorRange_Max);
                         mutateNumber(node.cellTypeData.communicator.modeData.sender.maxTimesSent, Const::CommunicatorMaxTimesSent_Min, 10);
                         break;
                     case CommunicatorMode_Receiver:
-                        mutateBitset(
-                            node.cellTypeData.communicator.modeData.receiver.restrictToColors,
-                            Const::RestrictToColors_Max);
+                        mutateBitset(node.cellTypeData.communicator.modeData.receiver.restrictToColors, Const::RestrictToColors_Max);
                         mutateEnumField(node.cellTypeData.communicator.modeData.receiver.restrictToLineage, LineageRestriction_Count);
                         break;
                     }
@@ -908,9 +857,16 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
 
                 // Mutate the attributes of an existing constructor (real/integer via sigma, bool via probability).
                 if (node.constructorAvailable) {
+                    if (constructor.autoTriggerInterval == 0 || constructor.autoTriggerInterval == Const::ConstructorAutoTriggerInterval_Default) {
+                        if (data.primaryNumberGen.random() < rate.probability) {
+                            constructor.autoTriggerInterval = constructor.autoTriggerInterval == 0 ? Const::ConstructorAutoTriggerInterval_Default : 0;
+                            atomicAdd_block(&accumulatedMutations, 1.0f);
+                        }
+                    }
                     if (constructor.autoTriggerInterval > 0) {
-                        // Only an already auto-triggering constructor is mutated, so it keeps auto triggering.
-                        mutateNumber(constructor.autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Min, Const::ConstructorAutoTriggerInterval_Min + 100);
+                        // Positive intervals are still mutated numerically after the zero/default switch.
+                        mutateNumber(
+                            constructor.autoTriggerInterval, Const::ConstructorAutoTriggerInterval_Min, Const::ConstructorAutoTriggerInterval_Min + 100);
                     }
                     mutateNumber(constructor.geneIndex, 0, max(0, genome->numGenes - 1));
                     mutateNumber(
