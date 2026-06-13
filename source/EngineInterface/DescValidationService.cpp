@@ -275,7 +275,8 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                     value = std::max(value, 1);
                 }
                 constructor._geneIndex = std::max(constructor._geneIndex, 0);
-                constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, MAX_ACTIVATION_TIME);
+                constructor._constructionActivationTime =
+                    std::clamp(constructor._constructionActivationTime, 0, Const::ConstructorConstructionActivationTime_Max);
                 constructor._provideEnergy =
                     std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
                 constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
@@ -473,7 +474,7 @@ void DescValidationService::validateAndCorrect(ObjectDesc& object)
                 value = std::max(value, 0);
             }
             constructor._geneIndex = std::max(constructor._geneIndex, 0);
-            constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, MAX_ACTIVATION_TIME);
+            constructor._constructionActivationTime = std::clamp(constructor._constructionActivationTime, 0, Const::ConstructorConstructionActivationTime_Max);
             constructor._provideEnergy =
                 std::clamp(constructor._provideEnergy, static_cast<ProvideEnergy>(0), static_cast<ProvideEnergy>(ProvideEnergy_Count - 1));
             constructor._reservedEnergy = std::max(0.0f, constructor._reservedEnergy);
