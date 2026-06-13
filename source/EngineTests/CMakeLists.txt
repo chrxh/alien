@@ -43,6 +43,7 @@ PUBLIC
     SimulationControlTests.cpp
     StatisticsTests.cpp
     Testsuite.cpp
+    VoidMutationTests.cpp
     VoidTests.cpp)
 
 target_link_libraries(EngineTests Base)

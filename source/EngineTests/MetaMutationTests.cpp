@@ -274,3 +274,41 @@ TEST_F(MetaMutationTests, metaMutation_cellTypeRatesZeroSigmaNoChange)
     auto actualGenome = getMutatedGenome();
     EXPECT_EQ(actualGenome._mutationRates._cellTypeMutation._eventProbability, 0.5f);
 }
+
+TEST_F(MetaMutationTests, metaMutation_voidRatesActuallyChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._voidMutation = VoidMutationDesc().eventProbability(0.5f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationVoidSigma.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._voidMutation._eventProbability, 0.5f));
+}
+
+TEST_F(MetaMutationTests, metaMutation_voidRatesZeroSigmaNoChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._voidMutation = VoidMutationDesc().eventProbability(0.5f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationVoidSigma.value = 0.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(actualGenome._mutationRates._voidMutation._eventProbability, 0.5f);
+}

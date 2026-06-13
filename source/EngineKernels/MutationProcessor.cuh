@@ -27,8 +27,10 @@ private:
     __inline__ __device__ static void applyMutations_cellTypeProperties(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
     __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
+    __inline__ __device__ static void resetCellTypeToDefault(Node& node);
 
     __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
@@ -108,6 +110,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_cellTypeProperties(data, genome, accumulatedMutations);
     applyMutations_cellTypeMode(data, genome, accumulatedMutations);
     applyMutations_cellType(data, genome, accumulatedMutations);
+    applyMutations_void(data, genome, accumulatedMutations);
 
     block.sync();
     updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
@@ -641,6 +644,73 @@ __inline__ __device__ void MutationProcessor::resetCellTypeModeToDefault(Node& n
     }
 }
 
+__inline__ __device__ void MutationProcessor::resetCellTypeToDefault(Node& node)
+{
+    // Initializes all attributes of the node's current cell type with their shared default values
+    // (see the *_Default constants in CellTypeConstants.h and the host-side defaults in GenomeDesc.h).
+    auto& cellTypeData = node.cellTypeData;
+    switch (node.cellType) {
+    case CellType_Base:
+        cellTypeData.base = {};
+        break;
+    case CellType_Depot:
+        cellTypeData.depot = {Const::DepotStorageLimit_Default, Const::DepotInitialStoredUsableEnergy_Default};
+        break;
+    case CellType_Sensor: {
+        auto& sensor = cellTypeData.sensor;
+        sensor.autoTrigger = Const::SensorAutoTrigger_Default;
+        sensor.tagForAttackers = Const::SensorTagForAttackers_Default;
+        sensor.mode = SensorMode_DetectCreature;
+        sensor.minRange = Const::SensorMinRange_Default;
+        sensor.maxRange = Const::SensorMaxRange_Default;
+    } break;
+    case CellType_Generator: {
+        auto& generator = cellTypeData.generator;
+        generator.additive = Const::GeneratorAdditive_Default;
+        generator.minValue = Const::GeneratorMinValue_Default;
+        generator.maxValue = Const::GeneratorMaxValue_Default;
+        generator.timeOffset = Const::GeneratorTimeOffset_Default;
+        generator.mode = GeneratorMode_SquareSignal;
+    } break;
+    case CellType_Attacker:
+        cellTypeData.attacker.mode = AttackerMode_Creature;
+        break;
+    case CellType_Injector:
+        cellTypeData.injector = {Const::InjectorGeneIndex_Default};
+        break;
+    case CellType_Muscle:
+        cellTypeData.muscle.mode = MuscleMode_AutoBending;
+        break;
+    case CellType_Defender:
+        cellTypeData.defender = {DefenderMode_DefendAgainstAttacker};
+        break;
+    case CellType_Reconnector:
+        cellTypeData.reconnector.mode = ReconnectorMode_Creature;
+        break;
+    case CellType_Detonator:
+        cellTypeData.detonator = {Const::DetonatorCountdown_Default};
+        break;
+    case CellType_Digestor:
+        cellTypeData.digestor = {Const::DigestorRawEnergyConductivity_Default};
+        break;
+    case CellType_Memory: {
+        auto& memory = cellTypeData.memory;
+        memory.mode = MemoryMode_SignalDelay;
+        memory.numSignalEntries = 0;
+        memory.channelBitMask = Const::MemoryChannelBitMask_Max;
+        memory.signalEntries = nullptr;
+    } break;
+    case CellType_Communicator:
+        cellTypeData.communicator.mode = CommunicatorMode_Sender;
+        break;
+    case CellType_Void:
+        cellTypeData.voidCell = {};
+        break;
+    }
+
+    resetCellTypeModeToDefault(node);
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
@@ -747,65 +817,40 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
             }
 
             node.cellType = pickNewCellType(node.cellType);
+            resetCellTypeToDefault(node);
+            atomicAdd_block(&accumulatedMutations, 1.0f);
+        }
+    }
+}
 
-            auto& cellTypeData = node.cellTypeData;
-            switch (node.cellType) {
-            case CellType_Base:
-                cellTypeData.base = {};
-                break;
-            case CellType_Depot:
-                cellTypeData.depot = {Const::DepotStorageLimit_Default, Const::DepotInitialStoredUsableEnergy_Default};
-                break;
-            case CellType_Sensor: {
-                auto& sensor = cellTypeData.sensor;
-                sensor.autoTrigger = Const::SensorAutoTrigger_Default;
-                sensor.tagForAttackers = Const::SensorTagForAttackers_Default;
-                sensor.mode = SensorMode_DetectCreature;
-                sensor.minRange = Const::SensorMinRange_Default;
-                sensor.maxRange = Const::SensorMaxRange_Default;
-            } break;
-            case CellType_Generator: {
-                auto& generator = cellTypeData.generator;
-                generator.additive = Const::GeneratorAdditive_Default;
-                generator.minValue = Const::GeneratorMinValue_Default;
-                generator.maxValue = Const::GeneratorMaxValue_Default;
-                generator.timeOffset = Const::GeneratorTimeOffset_Default;
-                generator.mode = GeneratorMode_SquareSignal;
-            } break;
-            case CellType_Attacker:
-                cellTypeData.attacker.mode = AttackerMode_Creature;
-                break;
-            case CellType_Injector:
-                cellTypeData.injector = {Const::InjectorGeneIndex_Default};
-                break;
-            case CellType_Muscle:
-                cellTypeData.muscle.mode = MuscleMode_AutoBending;
-                break;
-            case CellType_Defender:
-                cellTypeData.defender = {DefenderMode_DefendAgainstAttacker};
-                break;
-            case CellType_Reconnector:
-                cellTypeData.reconnector.mode = ReconnectorMode_Creature;
-                break;
-            case CellType_Detonator:
-                cellTypeData.detonator = {Const::DetonatorCountdown_Default};
-                break;
-            case CellType_Digestor:
-                cellTypeData.digestor = {Const::DigestorRawEnergyConductivity_Default};
-                break;
-            case CellType_Memory: {
-                auto& memory = cellTypeData.memory;
-                memory.mode = MemoryMode_SignalDelay;
-                memory.numSignalEntries = 0;
-                memory.channelBitMask = Const::MemoryChannelBitMask_Max;
-                memory.signalEntries = nullptr;
-            } break;
-            case CellType_Communicator:
-                cellTypeData.communicator.mode = CommunicatorMode_Sender;
-                break;
+__inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    auto const& rate = genome->mutationRates.voidMutation;
+
+    if (rate.eventProbability <= 0) {
+        return;
+    }
+
+    // Pick a non-void cell type used when a void node is turned into a non-void node.
+    // Void is the last entry before CellType_Count, so the range [0, CellType_Count - 2] covers exactly the non-void types.
+    auto pickNonVoidCellType = [&]() { return data.primaryNumberGen.random(CellType_Count - 2); };
+
+    for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+        auto& gene = genome->genes[geneIndex];
+        for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+            // The first and last node of a gene must not be void, so they are never mutated.
+            if (nodeIndex == 0 || nodeIndex == gene.numNodes - 1) {
+                continue;
             }
+            if (data.primaryNumberGen.random() >= rate.eventProbability) {
+                continue;
+            }
+            auto& node = gene.nodes[nodeIndex];
 
-            resetCellTypeModeToDefault(node);
+            // Toggle the node between void and non-void; the new cell type is reset to its default attribute values.
+            node.cellType = node.cellType == CellType_Void ? pickNonVoidCellType() : CellType_Void;
+            resetCellTypeToDefault(node);
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
     }
@@ -858,6 +903,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (cellTypeMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeMutationSigma)); };
             mutateFloat(genome->mutationRates.cellTypeMutation.eventProbability);
+        }
+
+        float voidMutationSigma = cudaSimulationParameters.metaMutationVoidSigma.value;
+        if (voidMutationSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * voidMutationSigma)); };
+            mutateFloat(genome->mutationRates.voidMutation.eventProbability);
         }
     }
 }
