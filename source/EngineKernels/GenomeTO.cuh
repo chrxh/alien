@@ -347,7 +347,7 @@ struct GeneTO
 
 struct NeuronMutationTO
 {
-    float eventProbability;
+    float nodeProbability;
     float weightSigma;
     float biasSigma;
     float activationFunctionProbability;
@@ -355,37 +355,37 @@ struct NeuronMutationTO
 
 struct ConnectionMutationTO
 {
-    float eventProbability;
+    float nodeProbability;
     float sigma;
 };
 
 struct CellTypePropertiesMutationTO
 {
-    float eventProbability;
+    float nodeProbability;
     float sigma;
-    float probability;
+    float discreteChangeProbability;
 };
 
 struct CellTypeModeMutationTO
 {
-    float eventProbability;
+    float nodeProbability;
 };
 
 struct CellTypeMutationTO
 {
-    float eventProbability;
+    float nodeProbability;
 };
 
 struct VoidMutationTO
 {
-    float eventProbability;
+    float nodeProbability;
 };
 
 struct ConstructorMutationTO
 {
-    float eventProbability;
+    float nodeProbability;
     float sigma;
-    float probability;
+    float discreteChangeProbability;
 };
 
 struct MutationRatesTO

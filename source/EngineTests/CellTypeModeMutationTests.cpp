@@ -47,7 +47,7 @@ TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_changesModeToDefaults)
 {
     auto genome = GenomeDesc().genes(
         {GeneDesc().nodes({NodeDesc().cellType(MuscleGenomeDesc().mode(AutoBendingGenomeDesc().maxAngleDeviation(0.55f).forwardBackwardRatio(0.25f)))})});
-    genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -66,7 +66,7 @@ TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_changesModeToDefaults)
 TEST_F(CellTypeModeMutationTests, cellTypeModeMutation_doesNotChangeExceptMode)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

@@ -44,25 +44,25 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
     switch (GetParam()) {
     case MutationType::Neuron:
         genome._mutationRates._neuronMutations[0] =
-            NeuronMutationDesc().eventProbability(1.0f).weightSigma(1.0f).biasSigma(1.0f).activationFunctionProbability(1.0f);
+            NeuronMutationDesc().nodeProbability(1.0f).weightSigma(1.0f).biasSigma(1.0f).activationFunctionProbability(1.0f);
         break;
     case MutationType::Connection:
-        genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
+        genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(1.0f).sigma(1.0f);
         break;
     case MutationType::CellTypeProperties:
-        genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+        genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
         break;
     case MutationType::CellTypeMode:
-        genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().eventProbability(1.0f);
+        genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(1.0f);
         break;
     case MutationType::CellType:
-        genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+        genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
         break;
     case MutationType::Void:
-        genome._mutationRates._voidMutation = VoidMutationDesc().eventProbability(1.0f);
+        genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
         break;
     case MutationType::Constructor:
-        genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+        genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
         break;
     }
 

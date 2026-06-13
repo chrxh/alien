@@ -33,7 +33,7 @@ protected:
 TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttributes)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -73,7 +73,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
 {
     auto genome = createTestGenome();
     genome._genes.at(0)._nodes.at(0)._constructor.reset();  // node without a constructor
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).probability(1.0f);
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).discreteChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -91,8 +91,8 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
 TEST_F(ConstructorMutationTests, constructorMutation_doesNotChangeOtherAttributes)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
-    genome._mutationRates._constructorMutations[1] = ConstructorMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
+    genome._mutationRates._constructorMutations[1] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -109,7 +109,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_doesNotChangeOtherAttribute
 TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(0.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(0.0f).sigma(1.0f).discreteChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

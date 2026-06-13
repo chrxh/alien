@@ -32,8 +32,8 @@ protected:
 TEST_F(ConnectionMutationTests, connectionWeightMutation_weightsActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
-    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.0f).sigma(0.0f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().nodeProbability(0.0f).sigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -77,8 +77,8 @@ TEST_F(ConnectionMutationTests, connectionWeightMutation_weightsActuallyChange)
 TEST_F(ConnectionMutationTests, connectionWeightMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(0.0f).sigma(1.0f);
-    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(0.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(0.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().nodeProbability(0.0f).sigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -105,8 +105,8 @@ TEST_F(ConnectionMutationTests, connectionWeightMutation_zeroProbabilityNoChange
 TEST_F(ConnectionMutationTests, connectionWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
-    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().eventProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc().nodeProbability(1.0f).sigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

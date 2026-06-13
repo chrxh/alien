@@ -75,7 +75,7 @@ protected:
 TEST_F(CellTypePropertiesMutationTests, cellTypePropertiesMutation_changesScalarBoolAndEnumProperties)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -124,7 +124,7 @@ TEST_F(CellTypePropertiesMutationTests, cellTypePropertiesMutation_changesScalar
 TEST_F(CellTypePropertiesMutationTests, cellTypePropertiesMutation_changesBitsetPropertiesBitwise)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).discreteChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -173,8 +173,8 @@ TEST_F(CellTypePropertiesMutationTests, cellTypePropertiesMutation_changesBitset
 TEST_F(CellTypePropertiesMutationTests, cellTypePropertiesMutation_doesNotChangeOtherAttributes)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
-    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().eventProbability(1.0f).sigma(1.0f).probability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
+    genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
