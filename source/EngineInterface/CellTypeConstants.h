@@ -120,6 +120,11 @@ namespace Channels
 {
     auto constexpr ConstructorSuccess = 4;
 }
+namespace Const
+{
+    auto constexpr ConstructorConstructionAngle_Min = -180.0f;
+    auto constexpr ConstructorConstructionAngle_Max = 180.0f;
+}
 
 using ConstructorShape = int;
 enum ConstructorShape_
@@ -145,9 +150,6 @@ enum ProvideEnergy_
 
 namespace Const
 {
-    auto constexpr ConstructorConstructionAngle_Min = -180.0f;
-    auto constexpr ConstructorConstructionAngle_Max = 180.0f;
-
     std::vector<std::string> const ConstructorShapeStrings = {"Segment", "Triangle", "Rectangle", "Hexagon", "Tube", "Large Lolli", "Small Lolli", "Zigzag"};
     std::vector<std::string> const ProvideEnergyStrings = {"From constructor", "Free"};
 }

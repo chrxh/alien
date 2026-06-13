@@ -31,6 +31,7 @@ private:
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
+
     __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
     __inline__ __device__ static void resetCellTypeToDefault(Node& node);
 
@@ -923,7 +924,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 }
 
                 // Mutate whether the node has a constructor at all; enabling one initializes it with default values.
-                bool const wasAvailable = node.constructorAvailable;
+                bool wasAvailable = node.constructorAvailable;
                 if (data.primaryNumberGen.random() < rate.probability) {
                     node.constructorAvailable = !node.constructorAvailable;
                     atomicAdd_block(&accumulatedMutations, 1.0f);
