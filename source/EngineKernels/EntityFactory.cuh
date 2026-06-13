@@ -92,24 +92,24 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->accumulatedMutations = genomeTO.accumulatedMutations;
     for (int i = 0; i < 2; ++i) {
         genome->mutationRates.neuronMutations[i] = {
-            genomeTO.mutationRates.neuronMutations[i].eventProbability,
+            genomeTO.mutationRates.neuronMutations[i].nodeProbability,
             genomeTO.mutationRates.neuronMutations[i].weightSigma,
             genomeTO.mutationRates.neuronMutations[i].biasSigma,
             genomeTO.mutationRates.neuronMutations[i].activationFunctionProbability};
         genome->mutationRates.connectionMutations[i] = {
-            genomeTO.mutationRates.connectionMutations[i].eventProbability, genomeTO.mutationRates.connectionMutations[i].sigma};
+            genomeTO.mutationRates.connectionMutations[i].nodeProbability, genomeTO.mutationRates.connectionMutations[i].sigma};
         genome->mutationRates.cellTypePropertiesMutations[i] = {
-            genomeTO.mutationRates.cellTypePropertiesMutations[i].eventProbability,
+            genomeTO.mutationRates.cellTypePropertiesMutations[i].nodeProbability,
             genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma,
-            genomeTO.mutationRates.cellTypePropertiesMutations[i].probability};
+            genomeTO.mutationRates.cellTypePropertiesMutations[i].discreteChangeProbability};
         genome->mutationRates.constructorMutations[i] = {
-            genomeTO.mutationRates.constructorMutations[i].eventProbability,
+            genomeTO.mutationRates.constructorMutations[i].nodeProbability,
             genomeTO.mutationRates.constructorMutations[i].sigma,
-            genomeTO.mutationRates.constructorMutations[i].probability};
+            genomeTO.mutationRates.constructorMutations[i].discreteChangeProbability};
     }
-    genome->mutationRates.cellTypeModeMutation = {genomeTO.mutationRates.cellTypeModeMutation.eventProbability};
-    genome->mutationRates.cellTypeMutation = {genomeTO.mutationRates.cellTypeMutation.eventProbability};
-    genome->mutationRates.voidMutation = {genomeTO.mutationRates.voidMutation.eventProbability};
+    genome->mutationRates.cellTypeModeMutation = {genomeTO.mutationRates.cellTypeModeMutation.nodeProbability};
+    genome->mutationRates.cellTypeMutation = {genomeTO.mutationRates.cellTypeMutation.nodeProbability};
+    genome->mutationRates.voidMutation = {genomeTO.mutationRates.voidMutation.nodeProbability};
     genome->numGenes = genomeTO.numGenes;
     for (int i = 0; i < sizeof(genomeTO.name); ++i) {
         genome->name[i] = genomeTO.name[i];

@@ -173,21 +173,21 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
 
 std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
 {
-    auto mutation =
-        MutationRatesDesc()
-            .neuronMutations(
-                {NeuronMutationDesc().eventProbability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f),
-                 NeuronMutationDesc().eventProbability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f)})
-            .connectionMutations({ConnectionMutationDesc().eventProbability(0.6f).sigma(0.7f), ConnectionMutationDesc().eventProbability(0.8f).sigma(0.9f)})
-            .cellTypePropertiesMutations(
-                {CellTypePropertiesMutationDesc().eventProbability(0.45f).sigma(0.55f).probability(0.65f),
-                 CellTypePropertiesMutationDesc().eventProbability(0.75f).sigma(0.85f).probability(0.95f)})
-            .cellTypeModeMutation(CellTypeModeMutationDesc().eventProbability(0.33f))
-            .cellTypeMutation(CellTypeMutationDesc().eventProbability(0.22f))
-            .voidMutation(VoidMutationDesc().eventProbability(0.11f))
-            .constructorMutations(
-                {ConstructorMutationDesc().eventProbability(0.12f).sigma(0.13f).probability(0.14f),
-                 ConstructorMutationDesc().eventProbability(0.16f).sigma(0.17f).probability(0.18f)});
+    auto mutation = MutationRatesDesc()
+                        .neuronMutations(
+                            {NeuronMutationDesc().nodeProbability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f),
+                             NeuronMutationDesc().nodeProbability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f)})
+                        .connectionMutations(
+                            {ConnectionMutationDesc().nodeProbability(0.6f).sigma(0.7f), ConnectionMutationDesc().nodeProbability(0.8f).sigma(0.9f)})
+                        .cellTypePropertiesMutations(
+                            {CellTypePropertiesMutationDesc().nodeProbability(0.45f).sigma(0.55f).discreteChangeProbability(0.65f),
+                             CellTypePropertiesMutationDesc().nodeProbability(0.75f).sigma(0.85f).discreteChangeProbability(0.95f)})
+                        .cellTypeModeMutation(CellTypeModeMutationDesc().nodeProbability(0.33f))
+                        .cellTypeMutation(CellTypeMutationDesc().nodeProbability(0.22f))
+                        .voidMutation(VoidMutationDesc().nodeProbability(0.11f))
+                        .constructorMutations(
+                            {ConstructorMutationDesc().nodeProbability(0.12f).sigma(0.13f).discreteChangeProbability(0.14f),
+                             ConstructorMutationDesc().nodeProbability(0.16f).sigma(0.17f).discreteChangeProbability(0.18f)});
 
     auto genome = GenomeDesc()
                       .name("Test Genome")

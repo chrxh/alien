@@ -1,4 +1,4 @@
-#include "MutationRateDialog.h"
+#include "MutationRatesDialog.h"
 
 #include <imgui.h>
 
@@ -18,14 +18,14 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &mutation._eventProbability);
+                &mutation._nodeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
                 &mutation._sigma);
@@ -38,14 +38,14 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &mutation._eventProbability);
+                &mutation._nodeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Weight sigma").id(id).min(0.0f).max(2.0f).logarithmic(true).format("%.2f").textWidth(rightColumnWidth),
                 &mutation._weightSigma);
@@ -71,20 +71,27 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &mutation._eventProbability);
+                &mutation._nodeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
                 &mutation._sigma);
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
-                &mutation._probability);
+                AlienGui::SliderFloatParameters()
+                    .name("Discrete change probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &mutation._discreteChangeProbability);
         }
         AlienGui::EndTreeNode();
     }
@@ -94,14 +101,14 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &mutation._eventProbability);
+                &mutation._nodeProbability);
         }
         AlienGui::EndTreeNode();
     }
@@ -111,14 +118,14 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &mutation._eventProbability);
+                &mutation._nodeProbability);
         }
         AlienGui::EndTreeNode();
     }
@@ -128,14 +135,14 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &mutation._eventProbability);
+                &mutation._nodeProbability);
         }
         AlienGui::EndTreeNode();
     }
@@ -145,20 +152,27 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Event probability")
+                    .name("Node probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &mutation._eventProbability);
+                &mutation._nodeProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
                 &mutation._sigma);
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Probability").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.5f").textWidth(rightColumnWidth),
-                &mutation._probability);
+                AlienGui::SliderFloatParameters()
+                    .name("Discrete change probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &mutation._discreteChangeProbability);
         }
         AlienGui::EndTreeNode();
     }
@@ -174,28 +188,28 @@ namespace
     }
 }
 
-MutationRateDialog::MutationRateDialog()
+MutationRatesDialog::MutationRatesDialog()
     : AlienDialog("Mutation rates", {800.0f, 400.0f})
 {}
 
-void MutationRateDialog::initIntern() {}
+void MutationRatesDialog::initIntern() {}
 
-void MutationRateDialog::shutdownIntern() {}
+void MutationRatesDialog::shutdownIntern() {}
 
-void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix) const
+void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::string const& settingsPrefix) const
 {
     auto& settings = GlobalSettings::get();
 
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
 
-        mutationRates._connectionMutations[i]._eventProbability =
-            settings.getValue(settingsPrefix + "connection mutation " + indexSuffix + ".probability", mutationRates._connectionMutations[i]._eventProbability);
+        mutationRates._connectionMutations[i]._nodeProbability =
+            settings.getValue(settingsPrefix + "connection mutation " + indexSuffix + ".node probability", mutationRates._connectionMutations[i]._nodeProbability);
         mutationRates._connectionMutations[i]._sigma =
             settings.getValue(settingsPrefix + "connection mutation " + indexSuffix + ".sigma", mutationRates._connectionMutations[i]._sigma);
 
-        mutationRates._neuronMutations[i]._eventProbability =
-            settings.getValue(settingsPrefix + "neuron mutation " + indexSuffix + ".probability", mutationRates._neuronMutations[i]._eventProbability);
+        mutationRates._neuronMutations[i]._nodeProbability =
+            settings.getValue(settingsPrefix + "neuron mutation " + indexSuffix + ".node probability", mutationRates._neuronMutations[i]._nodeProbability);
         mutationRates._neuronMutations[i]._weightSigma =
             settings.getValue(settingsPrefix + "neuron mutation " + indexSuffix + ".weight sigma", mutationRates._neuronMutations[i]._weightSigma);
         mutationRates._neuronMutations[i]._biasSigma =
@@ -208,44 +222,44 @@ void MutationRateDialog::loadSettings(MutationRatesDesc& mutationRates, std::str
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "" : " 2";
 
-        mutationRates._cellTypePropertiesMutations[i]._eventProbability = settings.getValue(
-            settingsPrefix + "cell type property mutation" + indexSuffix + ".probability", mutationRates._cellTypePropertiesMutations[i]._eventProbability);
+        mutationRates._cellTypePropertiesMutations[i]._nodeProbability = settings.getValue(
+            settingsPrefix + "cell type property mutation" + indexSuffix + ".node probability", mutationRates._cellTypePropertiesMutations[i]._nodeProbability);
         mutationRates._cellTypePropertiesMutations[i]._sigma =
             settings.getValue(settingsPrefix + "cell type property mutation" + indexSuffix + ".sigma", mutationRates._cellTypePropertiesMutations[i]._sigma);
-        mutationRates._cellTypePropertiesMutations[i]._probability = settings.getValue(
-            settingsPrefix + "cell type property mutation" + indexSuffix + ".value probability", mutationRates._cellTypePropertiesMutations[i]._probability);
+        mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability = settings.getValue(
+            settingsPrefix + "cell type property mutation" + indexSuffix + ".discrete change probability", mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability);
     }
 
-    mutationRates._cellTypeModeMutation._eventProbability =
-        settings.getValue(settingsPrefix + "cell type mode mutation.probability", mutationRates._cellTypeModeMutation._eventProbability);
-    mutationRates._cellTypeMutation._eventProbability =
-        settings.getValue(settingsPrefix + "cell type mutation.probability", mutationRates._cellTypeMutation._eventProbability);
-    mutationRates._voidMutation._eventProbability =
-        settings.getValue(settingsPrefix + "void mutation.probability", mutationRates._voidMutation._eventProbability);
+    mutationRates._cellTypeModeMutation._nodeProbability =
+        settings.getValue(settingsPrefix + "cell type mode mutation.node probability", mutationRates._cellTypeModeMutation._nodeProbability);
+    mutationRates._cellTypeMutation._nodeProbability =
+        settings.getValue(settingsPrefix + "cell type mutation.node probability", mutationRates._cellTypeMutation._nodeProbability);
+    mutationRates._voidMutation._nodeProbability =
+        settings.getValue(settingsPrefix + "void mutation.node probability", mutationRates._voidMutation._nodeProbability);
 
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
 
-        mutationRates._constructorMutations[i]._eventProbability = settings.getValue(
-            settingsPrefix + "constructor mutation " + indexSuffix + ".probability", mutationRates._constructorMutations[i]._eventProbability);
+        mutationRates._constructorMutations[i]._nodeProbability = settings.getValue(
+            settingsPrefix + "constructor mutation " + indexSuffix + ".node probability", mutationRates._constructorMutations[i]._nodeProbability);
         mutationRates._constructorMutations[i]._sigma =
             settings.getValue(settingsPrefix + "constructor mutation " + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
-        mutationRates._constructorMutations[i]._probability = settings.getValue(
-            settingsPrefix + "constructor mutation " + indexSuffix + ".value probability", mutationRates._constructorMutations[i]._probability);
+        mutationRates._constructorMutations[i]._discreteChangeProbability = settings.getValue(
+            settingsPrefix + "constructor mutation " + indexSuffix + ".discrete change probability", mutationRates._constructorMutations[i]._discreteChangeProbability);
     }
 }
 
-void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
+void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, std::string const& settingsPrefix) const
 {
     auto& settings = GlobalSettings::get();
 
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
 
-        settings.setValue(settingsPrefix + "connection mutation " + indexSuffix + ".probability", mutationRates._connectionMutations[i]._eventProbability);
+        settings.setValue(settingsPrefix + "connection mutation " + indexSuffix + ".node probability", mutationRates._connectionMutations[i]._nodeProbability);
         settings.setValue(settingsPrefix + "connection mutation " + indexSuffix + ".sigma", mutationRates._connectionMutations[i]._sigma);
 
-        settings.setValue(settingsPrefix + "neuron mutation " + indexSuffix + ".probability", mutationRates._neuronMutations[i]._eventProbability);
+        settings.setValue(settingsPrefix + "neuron mutation " + indexSuffix + ".node probability", mutationRates._neuronMutations[i]._nodeProbability);
         settings.setValue(settingsPrefix + "neuron mutation " + indexSuffix + ".weight sigma", mutationRates._neuronMutations[i]._weightSigma);
         settings.setValue(settingsPrefix + "neuron mutation " + indexSuffix + ".bias sigma", mutationRates._neuronMutations[i]._biasSigma);
         settings.setValue(
@@ -257,26 +271,26 @@ void MutationRateDialog::saveSettings(MutationRatesDesc const& mutationRates, st
         auto const indexSuffix = i == 0 ? "1" : "2";
 
         settings.setValue(
-            settingsPrefix + "cell type property mutation " + indexSuffix + ".probability", mutationRates._cellTypePropertiesMutations[i]._eventProbability);
+            settingsPrefix + "cell type property mutation " + indexSuffix + ".node probability", mutationRates._cellTypePropertiesMutations[i]._nodeProbability);
         settings.setValue(settingsPrefix + "cell type property mutation " + indexSuffix + ".sigma", mutationRates._cellTypePropertiesMutations[i]._sigma);
         settings.setValue(
-            settingsPrefix + "cell type property mutation " + indexSuffix + ".value probability", mutationRates._cellTypePropertiesMutations[i]._probability);
+            settingsPrefix + "cell type property mutation " + indexSuffix + ".discrete change probability", mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability);
     }
 
-    settings.setValue(settingsPrefix + "cell type mode mutation.probability", mutationRates._cellTypeModeMutation._eventProbability);
-    settings.setValue(settingsPrefix + "cell type mutation.probability", mutationRates._cellTypeMutation._eventProbability);
-    settings.setValue(settingsPrefix + "void mutation.probability", mutationRates._voidMutation._eventProbability);
+    settings.setValue(settingsPrefix + "cell type mode mutation.node probability", mutationRates._cellTypeModeMutation._nodeProbability);
+    settings.setValue(settingsPrefix + "cell type mutation.node probability", mutationRates._cellTypeMutation._nodeProbability);
+    settings.setValue(settingsPrefix + "void mutation.node probability", mutationRates._voidMutation._nodeProbability);
 
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
 
-        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".probability", mutationRates._constructorMutations[i]._eventProbability);
+        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".node probability", mutationRates._constructorMutations[i]._nodeProbability);
         settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
-        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".value probability", mutationRates._constructorMutations[i]._probability);
+        settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".discrete change probability", mutationRates._constructorMutations[i]._discreteChangeProbability);
     }
 }
 
-void MutationRateDialog::processIntern()
+void MutationRatesDialog::processIntern()
 {
     // Use a child window with scrolling for the content, reserving space for buttons
     auto buttonAreaHeight = scale(50.0f);
@@ -365,23 +379,23 @@ void MutationRateDialog::processIntern()
     }
 }
 
-void MutationRateDialog::open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
+void MutationRatesDialog::open(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
 {
     _mutation = mutationRates;
     _onAdoptCallback = onAdoptCallback;
     AlienDialog::open();
 }
 
-void MutationRateDialog::openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
+void MutationRatesDialog::openNested(MutationRatesDesc const& mutationRates, std::function<void(MutationRatesDesc const&)> const& onAdoptCallback)
 {
     _mutation = mutationRates;
     _onAdoptCallback = onAdoptCallback;
     AlienDialog::openNested();
 }
 
-void MutationRateDialog::openIntern() {}
+void MutationRatesDialog::openIntern() {}
 
-void MutationRateDialog::onAdopt()
+void MutationRatesDialog::onAdopt()
 {
     if (_onAdoptCallback) {
         _onAdoptCallback(_mutation);

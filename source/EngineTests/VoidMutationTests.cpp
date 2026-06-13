@@ -20,7 +20,7 @@ TEST_F(VoidMutationTests, voidMutation_nonVoidBecomesVoid)
         NodeDesc().cellType(MuscleGenomeDesc()),
         NodeDesc().cellType(BaseGenomeDesc()),
     })});
-    genome._mutationRates._voidMutation = VoidMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -42,7 +42,7 @@ TEST_F(VoidMutationTests, voidMutation_voidBecomesNonVoid)
         NodeDesc().cellType(VoidGenomeDesc()),
         NodeDesc().cellType(BaseGenomeDesc()),
     })});
-    genome._mutationRates._voidMutation = VoidMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -68,7 +68,7 @@ TEST_F(VoidMutationTests, voidMutation_zeroProbabilityNoChange)
         NodeDesc().cellType(MuscleGenomeDesc()),
         NodeDesc().cellType(BaseGenomeDesc()),
     })});
-    genome._mutationRates._voidMutation = VoidMutationDesc().eventProbability(0.0f);
+    genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

@@ -128,7 +128,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.eventProbability <= 0 || (rate.weightSigma <= 0 && rate.biasSigma <= 0 && rate.activationFunctionProbability <= 0)) {
+        if (rate.nodeProbability <= 0 || (rate.weightSigma <= 0 && rate.biasSigma <= 0 && rate.activationFunctionProbability <= 0)) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -137,7 +137,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                 auto& node = gene.nodes[nodeIndex];
                 if (laneId < NEURONS_PER_CELL) {
                     int neuronIndex = laneId;
-                    if (data.primaryNumberGen.random() < rate.eventProbability) {
+                    if (data.primaryNumberGen.random() < rate.nodeProbability) {
                         if (rate.weightSigma > 0) {
                             auto accumulatedWeightLocal = 0.0f;
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
@@ -178,7 +178,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.eventProbability <= 0 || rate.sigma <= 0) {
+        if (rate.nodeProbability <= 0 || rate.sigma <= 0) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -186,7 +186,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
             for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
                 auto& node = gene.nodes[nodeIndex];
                 if (laneId < MAX_OBJECT_CONNECTIONS) {
-                    if (data.primaryNumberGen.random() < rate.eventProbability) {
+                    if (data.primaryNumberGen.random() < rate.nodeProbability) {
                         auto& weight = node.neuralNetwork.connectionWeights[laneId];
                         auto delta = generateGaussian(data) * rate.sigma;
                         float newValue = weight + delta;
@@ -208,14 +208,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.eventProbability <= 0 || (rate.sigma <= 0 && rate.probability <= 0)) {
+        if (rate.nodeProbability <= 0 || (rate.sigma <= 0 && rate.discreteChangeProbability <= 0)) {
             continue;
         }
 
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
             auto& gene = genome->genes[geneIndex];
             for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
-                if (data.primaryNumberGen.random() >= rate.eventProbability) {
+                if (data.primaryNumberGen.random() >= rate.nodeProbability) {
                     continue;
                 }
                 auto& node = gene.nodes[nodeIndex];
@@ -238,7 +238,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 };
 
                 auto mutateBoolField = [&](bool& value) {
-                    if (data.primaryNumberGen.random() < rate.probability) {
+                    if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
                         value = !value;
                         atomicAdd_block(&accumulatedMutations, 1.0f);
                     }
@@ -251,7 +251,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     auto const maskValue = static_cast<UnsignedType>(mask);
                     for (int bitIndex = 0; bitIndex < sizeof(UnsignedType) * 8; ++bitIndex) {
                         auto const bit = UnsignedType{1} << bitIndex;
-                        if ((maskValue & bit) != 0 && data.primaryNumberGen.random() < rate.probability) {
+                        if ((maskValue & bit) != 0 && data.primaryNumberGen.random() < rate.discreteChangeProbability) {
                             newValue ^= bit;
                         }
                     }
@@ -263,7 +263,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
 
                 auto mutateEnumField = [&](auto& value, int count) {
                     using ValueType = std::decay_t<decltype(value)>;
-                    if (count > 1 && data.primaryNumberGen.random() < rate.probability) {
+                    if (count > 1 && data.primaryNumberGen.random() < rate.discreteChangeProbability) {
                         auto currentValue = static_cast<int>(value);
                         auto newValue = data.primaryNumberGen.random(count - 2);
                         if (newValue >= currentValue) {
@@ -669,7 +669,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.cellTypeModeMutation;
 
-    if (rate.eventProbability <= 0) {
+    if (rate.nodeProbability <= 0) {
         return;
     }
 
@@ -684,7 +684,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
         for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
-            if (data.primaryNumberGen.random() >= rate.eventProbability) {
+            if (data.primaryNumberGen.random() >= rate.nodeProbability) {
                 continue;
             }
             auto& node = gene.nodes[nodeIndex];
@@ -735,7 +735,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.cellTypeMutation;
 
-    if (rate.eventProbability <= 0) {
+    if (rate.nodeProbability <= 0) {
         return;
     }
 
@@ -754,7 +754,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
 
-        if (laneId == 0 && data.primaryNumberGen.random() < rate.eventProbability) {
+        if (laneId == 0 && data.primaryNumberGen.random() < rate.nodeProbability) {
             gene.homogeneCellType = !gene.homogeneCellType;
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
@@ -765,7 +765,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
             if (node.cellType == CellType_Void) {
                 continue;
             }
-            if (data.primaryNumberGen.random() >= rate.eventProbability) {
+            if (data.primaryNumberGen.random() >= rate.nodeProbability) {
                 continue;
             }
 
@@ -781,7 +781,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.voidMutation;
 
-    if (rate.eventProbability <= 0) {
+    if (rate.nodeProbability <= 0) {
         return;
     }
 
@@ -796,7 +796,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
             if (nodeIndex == 0 || nodeIndex == gene.numNodes - 1) {
                 continue;
             }
-            if (data.primaryNumberGen.random() >= rate.eventProbability) {
+            if (data.primaryNumberGen.random() >= rate.nodeProbability) {
                 continue;
             }
             auto& node = gene.nodes[nodeIndex];
@@ -817,14 +817,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.eventProbability <= 0 || (rate.sigma <= 0 && rate.probability <= 0)) {
+        if (rate.nodeProbability <= 0 || (rate.sigma <= 0 && rate.discreteChangeProbability <= 0)) {
             continue;
         }
 
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
             auto& gene = genome->genes[geneIndex];
             for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
-                if (data.primaryNumberGen.random() >= rate.eventProbability) {
+                if (data.primaryNumberGen.random() >= rate.nodeProbability) {
                     continue;
                 }
                 auto& node = gene.nodes[nodeIndex];
@@ -849,16 +849,16 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 };
 
                 auto mutateBoolField = [&](bool& value) {
-                    if (data.primaryNumberGen.random() < rate.probability) {
+                    if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
                         value = !value;
                         atomicAdd_block(&accumulatedMutations, 1.0f);
                     }
                 };
 
-                // Mutate the attributes of an existing constructor (real/integer via sigma, bool via probability).
+                // Mutate the attributes of an existing constructor (real/integer via sigma, bool via discreteChangeProbability).
                 if (node.constructorAvailable) {
                     if (constructor.autoTriggerInterval == 0 || constructor.autoTriggerInterval == Const::ConstructorAutoTriggerInterval_Default) {
-                        if (data.primaryNumberGen.random() < rate.probability) {
+                        if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
                             constructor.autoTriggerInterval = constructor.autoTriggerInterval == 0 ? Const::ConstructorAutoTriggerInterval_Default : 0;
                             atomicAdd_block(&accumulatedMutations, 1.0f);
                         }
@@ -884,7 +884,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
 
                 // Mutate whether the node has a constructor at all; enabling one initializes it with default values.
                 bool wasAvailable = node.constructorAvailable;
-                if (data.primaryNumberGen.random() < rate.probability) {
+                if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
                     node.constructorAvailable = !node.constructorAvailable;
                     atomicAdd_block(&accumulatedMutations, 1.0f);
                     if (node.constructorAvailable && !wasAvailable) {
@@ -910,7 +910,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (neuronSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * neuronSigma)); };
             for (int i = 0; i < 2; ++i) {
-                mutateFloat(genome->mutationRates.neuronMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.neuronMutations[i].nodeProbability);
                 mutateFloat(genome->mutationRates.neuronMutations[i].weightSigma);
                 mutateFloat(genome->mutationRates.neuronMutations[i].biasSigma);
                 mutateFloat(genome->mutationRates.neuronMutations[i].activationFunctionProbability);
@@ -922,7 +922,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (connSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * connSigma)); };
             for (int i = 0; i < 2; ++i) {
-                mutateFloat(genome->mutationRates.connectionMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.connectionMutations[i].nodeProbability);
                 mutateFloat(genome->mutationRates.connectionMutations[i].sigma);
             }
         }
@@ -931,37 +931,37 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (cellTypeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeSigma)); };
             for (int i = 0; i < 2; ++i) {
-                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].nodeProbability);
                 mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].sigma);
-                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].probability);
+                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].discreteChangeProbability);
             }
         }
 
         float cellTypeModeSigma = cudaSimulationParameters.metaMutationCellTypeModeSigma.value;
         if (cellTypeModeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeModeSigma)); };
-            mutateFloat(genome->mutationRates.cellTypeModeMutation.eventProbability);
+            mutateFloat(genome->mutationRates.cellTypeModeMutation.nodeProbability);
         }
 
         float cellTypeMutationSigma = cudaSimulationParameters.metaMutationCellTypeSigma.value;
         if (cellTypeMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeMutationSigma)); };
-            mutateFloat(genome->mutationRates.cellTypeMutation.eventProbability);
+            mutateFloat(genome->mutationRates.cellTypeMutation.nodeProbability);
         }
 
         float voidMutationSigma = cudaSimulationParameters.metaMutationVoidSigma.value;
         if (voidMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * voidMutationSigma)); };
-            mutateFloat(genome->mutationRates.voidMutation.eventProbability);
+            mutateFloat(genome->mutationRates.voidMutation.nodeProbability);
         }
 
         float constructorSigma = cudaSimulationParameters.metaMutationConstructorSigma.value;
         if (constructorSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * constructorSigma)); };
             for (int i = 0; i < 2; ++i) {
-                mutateFloat(genome->mutationRates.constructorMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.constructorMutations[i].nodeProbability);
                 mutateFloat(genome->mutationRates.constructorMutations[i].sigma);
-                mutateFloat(genome->mutationRates.constructorMutations[i].probability);
+                mutateFloat(genome->mutationRates.constructorMutations[i].discreteChangeProbability);
             }
         }
     }

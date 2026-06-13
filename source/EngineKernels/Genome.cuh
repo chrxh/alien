@@ -342,7 +342,7 @@ struct Gene
 
 struct NeuronMutation
 {
-    float eventProbability;
+    float nodeProbability;
     float weightSigma;
     float biasSigma;
     float activationFunctionProbability;
@@ -350,37 +350,37 @@ struct NeuronMutation
 
 struct ConnectionMutation
 {
-    float eventProbability;
+    float nodeProbability;
     float sigma;
 };
 
 struct CellTypePropertiesMutation
 {
-    float eventProbability;
+    float nodeProbability;
     float sigma;
-    float probability;
+    float discreteChangeProbability;
 };
 
 struct CellTypeModeMutation
 {
-    float eventProbability;
+    float nodeProbability;
 };
 
 struct CellTypeMutation
 {
-    float eventProbability;
+    float nodeProbability;
 };
 
 struct VoidMutation
 {
-    float eventProbability;
+    float nodeProbability;
 };
 
 struct ConstructorMutation
 {
-    float eventProbability;
+    float nodeProbability;
     float sigma;
-    float probability;
+    float discreteChangeProbability;
 };
 
 struct MutationRates

@@ -16,7 +16,7 @@
 #include "GenericMessageDialog.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
-#include "MutationRateDialog.h"
+#include "MutationRatesDialog.h"
 #include "StyleRepository.h"
 
 namespace
@@ -100,7 +100,7 @@ void _GenomeEditorWidget::processHeaderData()
             AlienGui::ListBox(AlienGui::ListBoxParameters().items(_editData->genome._mutationRates.getActiveMutationTypes()).width(listBoxWidth));
             ImGui::SameLine();
             if (AlienGui::Button("Edit")) {
-                MutationRateDialog::get().open(
+                MutationRatesDialog::get().open(
                     _editData->genome._mutationRates, [this](MutationRatesDesc const& mutationRates) { _editData->genome._mutationRates = mutationRates; });
             }
 

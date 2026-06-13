@@ -416,7 +416,7 @@ struct NeuronMutationDesc
 {
     auto operator<=>(NeuronMutationDesc const&) const = default;
 
-    MEMBER(NeuronMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(NeuronMutationDesc, float, nodeProbability, 0.0f);
     MEMBER(NeuronMutationDesc, float, weightSigma, 0.0f);
     MEMBER(NeuronMutationDesc, float, biasSigma, 0.0f);
     MEMBER(NeuronMutationDesc, float, activationFunctionProbability, 0.0f);
@@ -426,7 +426,7 @@ struct ConnectionMutationDesc
 {
     auto operator<=>(ConnectionMutationDesc const&) const = default;
 
-    MEMBER(ConnectionMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(ConnectionMutationDesc, float, nodeProbability, 0.0f);
     MEMBER(ConnectionMutationDesc, float, sigma, 0.0f);
 };
 
@@ -434,39 +434,39 @@ struct CellTypePropertiesMutationDesc
 {
     auto operator<=>(CellTypePropertiesMutationDesc const&) const = default;
 
-    MEMBER(CellTypePropertiesMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(CellTypePropertiesMutationDesc, float, nodeProbability, 0.0f);
     MEMBER(CellTypePropertiesMutationDesc, float, sigma, 0.0f);
-    MEMBER(CellTypePropertiesMutationDesc, float, probability, 0.0f);
+    MEMBER(CellTypePropertiesMutationDesc, float, discreteChangeProbability, 0.0f);
 };
 
 struct CellTypeModeMutationDesc
 {
     auto operator<=>(CellTypeModeMutationDesc const&) const = default;
 
-    MEMBER(CellTypeModeMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(CellTypeModeMutationDesc, float, nodeProbability, 0.0f);
 };
 
 struct CellTypeMutationDesc
 {
     auto operator<=>(CellTypeMutationDesc const&) const = default;
 
-    MEMBER(CellTypeMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(CellTypeMutationDesc, float, nodeProbability, 0.0f);
 };
 
 struct VoidMutationDesc
 {
     auto operator<=>(VoidMutationDesc const&) const = default;
 
-    MEMBER(VoidMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(VoidMutationDesc, float, nodeProbability, 0.0f);
 };
 
 struct ConstructorMutationDesc
 {
     auto operator<=>(ConstructorMutationDesc const&) const = default;
 
-    MEMBER(ConstructorMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, nodeProbability, 0.0f);
     MEMBER(ConstructorMutationDesc, float, sigma, 0.0f);
-    MEMBER(ConstructorMutationDesc, float, probability, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, discreteChangeProbability, 0.0f);
 };
 
 struct MutationRatesDesc

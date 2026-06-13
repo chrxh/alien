@@ -97,8 +97,8 @@ PUBLIC
     MassOperationsDialog.h
     MultiplierWindow.cpp
     MultiplierWindow.h
-    MutationRateDialog.cpp
-    MutationRateDialog.h
+    MutationRatesDialog.cpp
+    MutationRatesDialog.h
     NetworkSettingsDialog.cpp
     NetworkSettingsDialog.h
     NetworkTransferController.cpp

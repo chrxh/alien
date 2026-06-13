@@ -12,7 +12,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "MutationRateDialog.h"
+#include "MutationRatesDialog.h"
 #include "StyleRepository.h"
 
 namespace
@@ -56,7 +56,7 @@ void MassOperationsDialog::initIntern()
     _maxGlow = settings.getValue(settingsPrefix + "maximum glow", _maxGlow);
 
     _randomizeMutationRates = settings.getValue(settingsPrefix + "randomize mutation rates", _randomizeMutationRates);
-    MutationRateDialog::get().loadSettings(_mutationRates, settingsPrefix + "mutation rates.");
+    MutationRatesDialog::get().loadSettings(_mutationRates, settingsPrefix + "mutation rates.");
 
     _restrictToSelectedCreatures = settings.getValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
     validateAndCorrect();
@@ -96,7 +96,7 @@ void MassOperationsDialog::shutdownIntern()
     settings.setValue(settingsPrefix + "maximum glow", _maxGlow);
 
     settings.setValue(settingsPrefix + "randomize mutation rates", _randomizeMutationRates);
-    MutationRateDialog::get().saveSettings(_mutationRates, settingsPrefix + "mutation rates.");
+    MutationRatesDialog::get().saveSettings(_mutationRates, settingsPrefix + "mutation rates.");
 
     settings.setValue(settingsPrefix + "restrict to selected creatures", _restrictToSelectedCreatures);
 }
@@ -215,7 +215,7 @@ void MassOperationsDialog::processIntern()
             AlienGui::ListBox(AlienGui::ListBoxParameters().items(_mutationRates.getActiveMutationTypes()).width(listBoxWidth));
             ImGui::SameLine();
             if (AlienGui::Button("Edit")) {
-                MutationRateDialog::get().openNested(_mutationRates, [this](MutationRatesDesc const& mutationRates) { _mutationRates = mutationRates; });
+                MutationRatesDialog::get().openNested(_mutationRates, [this](MutationRatesDesc const& mutationRates) { _mutationRates = mutationRates; });
             }
             ImGui::EndDisabled();
 
@@ -242,7 +242,7 @@ void MassOperationsDialog::processIntern()
     }
 
     validateAndCorrect();
-    MutationRateDialog::get().processNested();
+    MutationRatesDialog::get().processNested();
 }
 
 MassOperationsDialog::MassOperationsDialog()

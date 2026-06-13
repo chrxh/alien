@@ -34,7 +34,7 @@ protected:
 TEST_F(CellTypeMutationTests, cellTypeMutation_changesCellTypeToDefaults)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().cellType(SensorGenomeDesc().autoTrigger(false).minRange(123).maxRange(200))})});
-    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -53,7 +53,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_changesCellTypeToDefaults)
 TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellTypeAndHomogeneFlag)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -75,7 +75,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_keepsVoidNodesVoid)
         NodeDesc().cellType(VoidGenomeDesc()),
         NodeDesc().cellType(BaseGenomeDesc()),
     })});
-    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -95,7 +95,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_keepsVoidNodesVoid)
 TEST_F(CellTypeMutationTests, cellTypeMutation_keepsNonVoidNodesNonVoid)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -123,7 +123,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_keepsNonVoidNodesNonVoid)
 TEST_F(CellTypeMutationTests, cellTypeMutation_changesHomogeneCellTypeFlag)
 {
     auto genome = GenomeDesc().genes({GeneDesc().homogeneCellType(false).nodes({NodeDesc().cellType(BaseGenomeDesc())})});
-    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().eventProbability(1.0f);
+    genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

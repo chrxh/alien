@@ -543,22 +543,22 @@ struct std::hash<GenomeDesc>
         hash_combine(seed, desc._accumulatedMutations);
         hash_combine(seed, desc._prevLineageId);
         for (int i = 0; i < 2; ++i) {
-            hash_combine(seed, desc._mutationRates._neuronMutations[i]._eventProbability);
+            hash_combine(seed, desc._mutationRates._neuronMutations[i]._nodeProbability);
             hash_combine(seed, desc._mutationRates._neuronMutations[i]._weightSigma);
             hash_combine(seed, desc._mutationRates._neuronMutations[i]._biasSigma);
             hash_combine(seed, desc._mutationRates._neuronMutations[i]._activationFunctionProbability);
-            hash_combine(seed, desc._mutationRates._connectionMutations[i]._eventProbability);
+            hash_combine(seed, desc._mutationRates._connectionMutations[i]._nodeProbability);
             hash_combine(seed, desc._mutationRates._connectionMutations[i]._sigma);
-            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._eventProbability);
+            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._nodeProbability);
             hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._sigma);
-            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._probability);
-            hash_combine(seed, desc._mutationRates._constructorMutations[i]._eventProbability);
+            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability);
+            hash_combine(seed, desc._mutationRates._constructorMutations[i]._nodeProbability);
             hash_combine(seed, desc._mutationRates._constructorMutations[i]._sigma);
-            hash_combine(seed, desc._mutationRates._constructorMutations[i]._probability);
+            hash_combine(seed, desc._mutationRates._constructorMutations[i]._discreteChangeProbability);
         }
-        hash_combine(seed, desc._mutationRates._cellTypeModeMutation._eventProbability);
-        hash_combine(seed, desc._mutationRates._cellTypeMutation._eventProbability);
-        hash_combine(seed, desc._mutationRates._voidMutation._eventProbability);
+        hash_combine(seed, desc._mutationRates._cellTypeModeMutation._nodeProbability);
+        hash_combine(seed, desc._mutationRates._cellTypeMutation._nodeProbability);
+        hash_combine(seed, desc._mutationRates._voidMutation._nodeProbability);
         return seed;
     }
 };
