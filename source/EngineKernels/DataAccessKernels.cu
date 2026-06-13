@@ -357,6 +357,7 @@ namespace
             cellTO.headCell = cell.headCell;
             cellTO.event = cell.event;
             cellTO.eventCounter = cell.eventCounter;
+            cellTO.signalChanges = cell.signalChanges;
             cellTO.eventPos = cell.eventPos;
 
             // Copy NeuralNet to NeuralNetTO

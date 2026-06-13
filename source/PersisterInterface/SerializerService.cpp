@@ -1027,6 +1027,7 @@ namespace
     auto constexpr Id_Cell_Event = 14;
     auto constexpr Id_Cell_EventCounter = 15;
     auto constexpr Id_Cell_EventPos = 16;
+    auto constexpr Id_Cell_SignalChanges = 25;
     auto constexpr Id_Cell_LastUpdate = 18;
     auto constexpr Id_Cell_ConcatenationIndex = 19;
     auto constexpr Id_Cell_BranchIndex = 20;
@@ -1691,6 +1692,7 @@ namespace cereal
         scope.addMember(Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
         scope.addMember(Id_Cell_Event, data._event, defaultObject._event);
         scope.addMember(Id_Cell_EventCounter, data._eventCounter, defaultObject._eventCounter);
+        scope.addMember(Id_Cell_SignalChanges, data._signalChanges, defaultObject._signalChanges);
         scope.addMember(Id_Cell_EventPos, data._eventPos, defaultObject._eventPos);
         scope.addMember(Id_Cell_LastUpdate, data._lastUpdate, defaultObject._lastUpdate);
         scope.addDesc(Id_Cell_CellType, data._cellType);
