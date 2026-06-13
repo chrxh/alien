@@ -146,7 +146,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
 
     // Check that the seed provides no energy anymore after the creature is constructed
     auto constructor = actualData.getObjectRef(0).getCellRef()._constructor.value();
-    EXPECT_EQ(ProvideEnergy_FromConstructor, constructor._provideEnergy);
+    EXPECT_EQ(ProvideEnergy_ReduceCellEnergy, constructor._provideEnergy);
 
     DescEditService::get().removeCell(actualData, 0);
     ASSERT_EQ(1, actualData._creatures.size());
@@ -230,7 +230,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     // Check that the seed provides no energy anymore after the creature is constructed
     auto constructor = actualData.getObjectRef(0).getCellRef()._constructor.value();
     if (constructor._separation) {
-        EXPECT_EQ(ProvideEnergy_FromConstructor, constructor._provideEnergy);
+        EXPECT_EQ(ProvideEnergy_ReduceCellEnergy, constructor._provideEnergy);
     }
     DescEditService::get().removeCell(actualData, 0);
     ASSERT_EQ(1, actualData._creatures.size());

@@ -148,7 +148,7 @@ enum ConstructorShape_
 using ProvideEnergy = uint8_t;
 enum ProvideEnergy_
 {
-    ProvideEnergy_FromConstructor = 0,
+    ProvideEnergy_ReduceCellEnergy = 0,
     ProvideEnergy_Free = 1,
     ProvideEnergy_Count = 2,
 };
