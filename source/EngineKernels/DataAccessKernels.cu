@@ -47,6 +47,10 @@ namespace
                     genome->mutationRates.cellTypePropertiesMutations[i].eventProbability,
                     genome->mutationRates.cellTypePropertiesMutations[i].sigma,
                     genome->mutationRates.cellTypePropertiesMutations[i].probability};
+                genomeTO.mutationRates.constructorMutations[i] = {
+                    genome->mutationRates.constructorMutations[i].eventProbability,
+                    genome->mutationRates.constructorMutations[i].sigma,
+                    genome->mutationRates.constructorMutations[i].probability};
             }
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.eventProbability};
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.eventProbability};

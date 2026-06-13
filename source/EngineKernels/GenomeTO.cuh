@@ -381,6 +381,13 @@ struct VoidMutationTO
     float eventProbability;
 };
 
+struct ConstructorMutationTO
+{
+    float eventProbability;
+    float sigma;
+    float probability;
+};
+
 struct MutationRatesTO
 {
     NeuronMutationTO neuronMutations[2];
@@ -389,6 +396,7 @@ struct MutationRatesTO
     CellTypeModeMutationTO cellTypeModeMutation;
     CellTypeMutationTO cellTypeMutation;
     VoidMutationTO voidMutation;
+    ConstructorMutationTO constructorMutations[2];
 };
 
 struct GenomeTO

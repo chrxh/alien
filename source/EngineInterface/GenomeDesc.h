@@ -460,11 +460,21 @@ struct VoidMutationDesc
     MEMBER(VoidMutationDesc, float, eventProbability, 0.0f);
 };
 
+struct ConstructorMutationDesc
+{
+    auto operator<=>(ConstructorMutationDesc const&) const = default;
+
+    MEMBER(ConstructorMutationDesc, float, eventProbability, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, sigma, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, probability, 0.0f);
+};
+
 struct MutationRatesDesc
 {
     using NeuronMutationArray = std::array<NeuronMutationDesc, 2>;
     using ConnectionMutationArray = std::array<ConnectionMutationDesc, 2>;
     using CellTypePropertiesMutationArray = std::array<CellTypePropertiesMutationDesc, 2>;
+    using ConstructorMutationArray = std::array<ConstructorMutationDesc, 2>;
 
     auto operator<=>(MutationRatesDesc const&) const = default;
 
@@ -474,6 +484,7 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());
+    MEMBER(MutationRatesDesc, ConstructorMutationArray, constructorMutations, ConstructorMutationArray());
 
     std::vector<std::string> getActiveMutationTypes() const;
 };

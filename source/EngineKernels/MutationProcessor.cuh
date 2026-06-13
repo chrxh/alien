@@ -28,6 +28,7 @@ private:
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
     __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
     __inline__ __device__ static void resetCellTypeToDefault(Node& node);
@@ -111,6 +112,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_cellTypeMode(data, genome, accumulatedMutations);
     applyMutations_cellType(data, genome, accumulatedMutations);
     applyMutations_void(data, genome, accumulatedMutations);
+    applyMutations_constructor(data, genome, accumulatedMutations);
 
     block.sync();
     updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
@@ -856,6 +858,108 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
     }
 }
 
+__inline__ __device__ void MutationProcessor::applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+    ConstructorMutation rates[2] = {genome->mutationRates.constructorMutations[0], genome->mutationRates.constructorMutations[1]};
+
+    for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
+        auto const& rate = rates[rateIndex];
+        if (rate.eventProbability <= 0 || (rate.sigma <= 0 && rate.probability <= 0)) {
+            continue;
+        }
+
+        for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
+            auto& gene = genome->genes[geneIndex];
+            for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
+                auto& node = gene.nodes[nodeIndex];
+                if (!node.constructorAvailable) {
+                    continue;
+                }
+                if (data.primaryNumberGen.random() >= rate.eventProbability) {
+                    continue;
+                }
+                auto& constructor = node.constructor;
+
+                // Mutate real and integer attributes by a Gaussian step; the clamping mirrors DescValidationService.
+                auto mutateNumber = [&](auto& value, auto minValue, auto maxValue) {
+                    using ValueType = std::decay_t<decltype(value)>;
+                    if (rate.sigma <= 0) {
+                        return;
+                    }
+                    auto delta = generateGaussian(data) * rate.sigma;
+                    if constexpr (std::is_integral_v<ValueType>) {
+                        auto roundedDelta = static_cast<int>(std::round(delta));
+                        auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
+                        value = static_cast<ValueType>(newValue);
+                        atomicAdd_block(&accumulatedMutations, static_cast<float>(std::abs(roundedDelta)));
+                    } else {
+                        value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
+                        atomicAdd_block(&accumulatedMutations, std::abs(delta));
+                    }
+                };
+
+                // Same as mutateNumber but only clamped from below (for attributes without an upper bound).
+                auto mutateLowerBoundedNumber = [&](auto& value, auto minValue) {
+                    using ValueType = std::decay_t<decltype(value)>;
+                    if (rate.sigma <= 0) {
+                        return;
+                    }
+                    auto delta = generateGaussian(data) * rate.sigma;
+                    if constexpr (std::is_integral_v<ValueType>) {
+                        auto roundedDelta = static_cast<int>(std::round(delta));
+                        auto newValue = max(static_cast<int>(minValue), static_cast<int>(value) + roundedDelta);
+                        value = static_cast<ValueType>(newValue);
+                        atomicAdd_block(&accumulatedMutations, static_cast<float>(std::abs(roundedDelta)));
+                    } else {
+                        value = max(static_cast<ValueType>(minValue), value + delta);
+                        atomicAdd_block(&accumulatedMutations, std::abs(delta));
+                    }
+                };
+
+                auto mutateBoolField = [&](bool& value) {
+                    if (data.primaryNumberGen.random() < rate.probability) {
+                        value = !value;
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
+                    }
+                };
+
+                auto mutateEnumField = [&](auto& value, int count) {
+                    using ValueType = std::decay_t<decltype(value)>;
+                    if (count > 1 && data.primaryNumberGen.random() < rate.probability) {
+                        auto currentValue = static_cast<int>(value);
+                        auto newValue = data.primaryNumberGen.random(count - 2);
+                        if (newValue >= currentValue) {
+                            ++newValue;
+                        }
+                        value = static_cast<ValueType>(newValue);
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
+                    }
+                };
+
+                // Real and integer attributes (sigma)
+                if (constructor.autoTriggerInterval > 0) {
+                    // Only an already auto-triggering constructor is mutated, so it keeps auto triggering (>= 1).
+                    mutateLowerBoundedNumber(constructor.autoTriggerInterval, 1);
+                }
+                mutateNumber(constructor.geneIndex, 0, max(0, genome->numGenes - 1));
+                mutateNumber(constructor.constructionActivationTime, 0, MAX_ACTIVATION_TIME);
+                mutateNumber(constructor.constructionAngle, -360.0f, 360.0f);
+                mutateLowerBoundedNumber(constructor.reservedEnergy, 0.0f);
+                mutateNumber(constructor.numBranches, 1, 6);
+                if (constructor.numConcatenations != 0x7fffffff) {  // 0x7fffffff encodes infinite concatenations and is left untouched
+                    mutateLowerBoundedNumber(constructor.numConcatenations, 1);
+                }
+
+                // Bool and enum attributes (probability)
+                mutateBoolField(constructor.separation);
+                mutateEnumField(constructor.provideEnergy, ProvideEnergy_Count);
+            }
+        }
+    }
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData& data, Genome* genome)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
@@ -909,6 +1013,16 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (voidMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * voidMutationSigma)); };
             mutateFloat(genome->mutationRates.voidMutation.eventProbability);
+        }
+
+        float constructorSigma = cudaSimulationParameters.metaMutationConstructorSigma.value;
+        if (constructorSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * constructorSigma)); };
+            for (int i = 0; i < 2; ++i) {
+                mutateFloat(genome->mutationRates.constructorMutations[i].eventProbability);
+                mutateFloat(genome->mutationRates.constructorMutations[i].sigma);
+                mutateFloat(genome->mutationRates.constructorMutations[i].probability);
+            }
         }
     }
 }

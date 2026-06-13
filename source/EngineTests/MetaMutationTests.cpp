@@ -312,3 +312,61 @@ TEST_F(MetaMutationTests, metaMutation_voidRatesZeroSigmaNoChange)
     auto actualGenome = getMutatedGenome();
     EXPECT_EQ(actualGenome._mutationRates._voidMutation._eventProbability, 0.5f);
 }
+
+TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+    genome._mutationRates._constructorMutations[1] = ConstructorMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationConstructorSigma.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+
+    bool anyChanged = actualGenome._mutationRates._constructorMutations[0]._eventProbability != 0.5f
+        || actualGenome._mutationRates._constructorMutations[0]._sigma != 0.5f
+        || actualGenome._mutationRates._constructorMutations[0]._probability != 0.5f
+        || actualGenome._mutationRates._constructorMutations[1]._eventProbability != 0.4f
+        || actualGenome._mutationRates._constructorMutations[1]._sigma != 0.4f
+        || actualGenome._mutationRates._constructorMutations[1]._probability != 0.4f;
+    EXPECT_TRUE(anyChanged);
+    EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._probability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._eventProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._sigma, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._probability, 0.0f);
+}
+
+TEST_F(MetaMutationTests, metaMutation_constructorRatesZeroSigmaNoChange)
+{
+    auto genome = createTestGenome();
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().eventProbability(0.5f).sigma(0.5f).probability(0.5f);
+    genome._mutationRates._constructorMutations[1] = ConstructorMutationDesc().eventProbability(0.4f).sigma(0.4f).probability(0.4f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.metaMutationConstructorSigma.value = 0.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._eventProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._sigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._probability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._eventProbability, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._sigma, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._probability, 0.4f);
+}

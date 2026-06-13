@@ -10,6 +10,7 @@ PUBLIC
     CellTypePropertiesMutationTests.cpp
     CommunicatorTests.cpp
     ConnectionMutationTests.cpp
+    ConstructorMutationTests.cpp
     ConstructorTests.cpp
     CreatureTests.cpp
     DataTransferTests.cpp

@@ -183,7 +183,10 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                              CellTypePropertiesMutationDesc().eventProbability(0.75f).sigma(0.85f).probability(0.95f)})
                         .cellTypeModeMutation(CellTypeModeMutationDesc().eventProbability(0.33f))
                         .cellTypeMutation(CellTypeMutationDesc().eventProbability(0.22f))
-                        .voidMutation(VoidMutationDesc().eventProbability(0.11f));
+                        .voidMutation(VoidMutationDesc().eventProbability(0.11f))
+                        .constructorMutations(
+                            {ConstructorMutationDesc().eventProbability(0.12f).sigma(0.13f).probability(0.14f),
+                             ConstructorMutationDesc().eventProbability(0.16f).sigma(0.17f).probability(0.18f)});
 
     auto genome = GenomeDesc()
                       .name("Test Genome")

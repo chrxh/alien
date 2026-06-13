@@ -479,6 +479,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::metaMutationVoidSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
+                        .name("Constructor mutations sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::metaMutationConstructorSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
                         .name("New lineage threshold")
                         .reference(
                             FloatSpec().member(&SimulationParameters::newLineageThreshold).min(0.0f).max(10000.0f).infinity(true).logarithmic(true).format("%.5f")),

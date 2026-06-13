@@ -879,6 +879,9 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
         result._mutationRates._cellTypePropertiesMutations[i]._eventProbability = genomeTO.mutationRates.cellTypePropertiesMutations[i].eventProbability;
         result._mutationRates._cellTypePropertiesMutations[i]._sigma = genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma;
         result._mutationRates._cellTypePropertiesMutations[i]._probability = genomeTO.mutationRates.cellTypePropertiesMutations[i].probability;
+        result._mutationRates._constructorMutations[i]._eventProbability = genomeTO.mutationRates.constructorMutations[i].eventProbability;
+        result._mutationRates._constructorMutations[i]._sigma = genomeTO.mutationRates.constructorMutations[i].sigma;
+        result._mutationRates._constructorMutations[i]._probability = genomeTO.mutationRates.constructorMutations[i].probability;
     }
     result._mutationRates._cellTypeModeMutation._eventProbability = genomeTO.mutationRates.cellTypeModeMutation.eventProbability;
     result._mutationRates._cellTypeMutation._eventProbability = genomeTO.mutationRates.cellTypeMutation.eventProbability;
@@ -970,6 +973,10 @@ void DescConverterService::convertGenomeToTO(
             genome._mutationRates._cellTypePropertiesMutations[i]._eventProbability,
             genome._mutationRates._cellTypePropertiesMutations[i]._sigma,
             genome._mutationRates._cellTypePropertiesMutations[i]._probability};
+        genomeTO.mutationRates.constructorMutations[i] = {
+            genome._mutationRates._constructorMutations[i]._eventProbability,
+            genome._mutationRates._constructorMutations[i]._sigma,
+            genome._mutationRates._constructorMutations[i]._probability};
     }
     genomeTO.mutationRates.cellTypeModeMutation = {genome._mutationRates._cellTypeModeMutation._eventProbability};
     genomeTO.mutationRates.cellTypeMutation = {genome._mutationRates._cellTypeMutation._eventProbability};

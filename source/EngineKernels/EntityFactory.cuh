@@ -102,6 +102,10 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             genomeTO.mutationRates.cellTypePropertiesMutations[i].eventProbability,
             genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma,
             genomeTO.mutationRates.cellTypePropertiesMutations[i].probability};
+        genome->mutationRates.constructorMutations[i] = {
+            genomeTO.mutationRates.constructorMutations[i].eventProbability,
+            genomeTO.mutationRates.constructorMutations[i].sigma,
+            genomeTO.mutationRates.constructorMutations[i].probability};
     }
     genome->mutationRates.cellTypeModeMutation = {genomeTO.mutationRates.cellTypeModeMutation.eventProbability};
     genome->mutationRates.cellTypeMutation = {genomeTO.mutationRates.cellTypeMutation.eventProbability};
