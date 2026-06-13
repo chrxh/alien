@@ -40,12 +40,6 @@ jobs:
         .\bootstrap-vcpkg.bat -disableMetrics
         Pop-Location
 
-    # Build with the "Ninja Multi-Config" preset instead of the default Visual
-    # Studio generator. Ninja compiles all CUDA translation units in parallel
-    # (file-level), which is considerably faster than MSVC building the CUDA
-    # libraries one project after another. The build-windows-ninja.bat script
-    # sets up the MSVC environment, puts Ninja/CMake on PATH and runs the
-    # ninja preset (see CMakePresets.json).
     - name: Build (Ninja)
       shell: cmd
       run: build-windows-ninja.bat ${{ env.BUILD_TYPE }}
