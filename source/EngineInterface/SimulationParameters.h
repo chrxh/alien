@@ -134,7 +134,7 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> defenderAntiInjectorStrength = {ColorVector<float>::uniform(0.5f)};
 
     // Cell type: Injector
-    BaseParameter<ColorVector<float>> injectorEnergyCost = {ColorVector<float>::uniform(50.0f)};
+    BaseParameter<ColorVector<float>> injectorEnergyCost = {ColorVector<float>::uniform(250.0f)};
     BaseParameter<ColorVector<float>> injectorRadius = {ColorVector<float>::uniform(3.0f)};
 
     // Cell type: Muscle

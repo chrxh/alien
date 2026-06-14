@@ -500,6 +500,31 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_separation)
     }
 }
 
+TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_castrateNonSeparatingRootReference)
+{
+    // A non-separating constructor that references the root gene (geneIndex 0) starts a new creature in the
+    // simulation (see ConstructorProcessor::findOrCreateNewCreature), which would create a second offspring
+    // generation in the preview. Such a reference must be castrated even though separation is false.
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+        }),
+    });
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{1, 0}}, false);
+
+    ASSERT_EQ(1, subGenomes.size());
+    EXPECT_EQ(1, subGenomes.at(0).startIndex);
+    auto const& subGenome = subGenomes.at(0).genome;
+
+    ASSERT_EQ(2, subGenome._genes.size());
+    auto const& gene1 = subGenome._genes.at(1);
+    ASSERT_EQ(1, gene1._nodes.size());
+    EXPECT_EQ(2, getRefGeneIndex(gene1, 0));  // Castrated (root reference starts a new creature)
+}
+
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_withinLimit)
 {
     auto genome = GenomeDesc().genes({
