@@ -28,6 +28,7 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
         mutation._nodeProbability = std::clamp(mutation._nodeProbability, 0.0f, 1.0f);
         mutation._sigma = std::clamp(mutation._sigma, 0.0f, 1.0f);
         mutation._discreteChangeProbability = std::clamp(mutation._discreteChangeProbability, 0.0f, 1.0f);
+        mutation._existConstructorProbability = std::clamp(mutation._existConstructorProbability, 0.0f, 1.0f);
     };
     for (int i = 0; i < 2; ++i) {
         auto& neuronMutation = genome._mutationRates._neuronMutations[i];

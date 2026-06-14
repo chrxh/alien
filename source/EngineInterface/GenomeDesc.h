@@ -467,6 +467,7 @@ struct ConstructorMutationDesc
     MEMBER(ConstructorMutationDesc, float, nodeProbability, 0.0f);
     MEMBER(ConstructorMutationDesc, float, sigma, 0.0f);
     MEMBER(ConstructorMutationDesc, float, discreteChangeProbability, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, existConstructorProbability, 0.0f);
 };
 
 struct MutationRatesDesc

@@ -381,6 +381,7 @@ struct ConstructorMutation
     float nodeProbability;
     float sigma;
     float discreteChangeProbability;
+    float existConstructorProbability;
 };
 
 struct MutationRates

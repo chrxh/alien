@@ -173,6 +173,16 @@ namespace
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
                 &mutation._discreteChangeProbability);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Exist constructor probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &mutation._existConstructorProbability);
         }
         AlienGui::EndTreeNode();
     }
@@ -246,6 +256,9 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
             settings.getValue(settingsPrefix + "constructor mutation " + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
         mutationRates._constructorMutations[i]._discreteChangeProbability = settings.getValue(
             settingsPrefix + "constructor mutation " + indexSuffix + ".discrete change probability", mutationRates._constructorMutations[i]._discreteChangeProbability);
+        mutationRates._constructorMutations[i]._existConstructorProbability = settings.getValue(
+            settingsPrefix + "constructor mutation " + indexSuffix + ".exist constructor probability",
+            mutationRates._constructorMutations[i]._existConstructorProbability);
     }
 }
 
@@ -287,6 +300,9 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
         settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".node probability", mutationRates._constructorMutations[i]._nodeProbability);
         settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".sigma", mutationRates._constructorMutations[i]._sigma);
         settings.setValue(settingsPrefix + "constructor mutation " + indexSuffix + ".discrete change probability", mutationRates._constructorMutations[i]._discreteChangeProbability);
+        settings.setValue(
+            settingsPrefix + "constructor mutation " + indexSuffix + ".exist constructor probability",
+            mutationRates._constructorMutations[i]._existConstructorProbability);
     }
 }
 
