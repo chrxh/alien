@@ -480,7 +480,7 @@ namespace
 
                         if (constructor._separation || constructor._geneIndex == 0) {
                             // A separating reference or a reference to the root gene starts a new creature (see ConstructorProcessor),
-                            // which would create a second offspring generation in the preview => perform castration.
+                            // => perform castration.
                             constructor._geneIndex = genome._genes.size();
                         }
                     }
