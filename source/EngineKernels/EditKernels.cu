@@ -529,7 +529,7 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refOb
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
             result.collectObject(object, refPos, data.objectMap);
-            if (object->type == ObjectType_Cell) {
+            if (object->selected == 1 && object->type == ObjectType_Cell) {
                 if (alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
                     result.collectCreature();
                 }
