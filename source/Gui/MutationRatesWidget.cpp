@@ -3,10 +3,10 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
-#include <cstdio>
 
 #include <imgui.h>
 
+#include <Base/StringHelper.h>
 #include <EngineInterface/GenomeDesc.h>
 
 #include "AlienGui.h"
@@ -15,20 +15,6 @@
 
 namespace
 {
-    std::string formatNodeProbability(float value)
-    {
-        char buffer[32];
-        std::snprintf(buffer, sizeof(buffer), "%.5f", value);
-        std::string result = buffer;
-        if (result.find('.') != std::string::npos) {
-            result.erase(result.find_last_not_of('0') + 1);
-            if (!result.empty() && result.back() == '.') {
-                result.pop_back();
-            }
-        }
-        return result;
-    }
-
     void addActiveMutationType(std::vector<std::string>& result, std::string const& name, std::initializer_list<float> nodeProbabilities)
     {
         std::string probabilities;
@@ -37,7 +23,7 @@ namespace
                 if (!probabilities.empty()) {
                     probabilities += ", ";
                 }
-                probabilities += formatNodeProbability(nodeProbability);
+                probabilities += StringHelper::format(nodeProbability, 5);
             }
         }
         if (!probabilities.empty()) {
