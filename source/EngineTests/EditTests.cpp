@@ -150,6 +150,31 @@ TEST_F(EditTests, getSelectionShallowData_selectMultipleCreatures)
     EXPECT_EQ(0, selectionData.numEnergyParticles);
 }
 
+TEST_F(EditTests, getSelectionShallowData_onlyDirectlySelectedCreatures)
+{
+    auto data = Desc()
+                    .addCreature({
+                        ObjectDesc().id(1).pos({50, 50}),
+                        ObjectDesc().id(2).pos({51, 50}),
+                    })
+                    .addCreature({
+                        ObjectDesc().id(3).pos({52, 50}),
+                        ObjectDesc().id(4).pos({53, 50}),
+                    });
+    data.addConnection(1, 2);
+    data.addConnection(3, 4);
+    data.addConnection(2, 3);
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->setSelection({49, 49}, {51.5f, 51});
+    auto selectionData = _simulationFacade->getSelectionShallowData();
+
+    EXPECT_EQ(2, selectionData.numObjects);
+    EXPECT_EQ(1, selectionData.numCreatures);
+    EXPECT_EQ(4, selectionData.numClusterCells);
+    EXPECT_EQ(0, selectionData.numEnergyParticles);
+}
+
 TEST_F(EditTests, injectGenomeToSelectedCreatures_noSelection)
 {
     auto data = Desc().addCreature({ObjectDesc().id(1).pos({50, 50})}, CreatureDesc(), GenomeDesc());
