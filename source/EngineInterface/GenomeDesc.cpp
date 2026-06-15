@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstdio>
 
 #include "NumberGenerator.h"
 
@@ -49,53 +48,6 @@ GenomeDesc GenomeDesc::id(uint64_t id)
     NumberGenerator::get().adaptMaxEntityId(id);
     _id = id;
     return *this;
-}
-
-namespace
-{
-    std::string formatNodeProbability(float value)
-    {
-        char buffer[32];
-        std::snprintf(buffer, sizeof(buffer), "%.5f", value);
-        std::string result = buffer;
-        if (result.find('.') != std::string::npos) {
-            result.erase(result.find_last_not_of('0') + 1);
-            if (!result.empty() && result.back() == '.') {
-                result.pop_back();
-            }
-        }
-        return result;
-    }
-
-    void addActiveMutationType(std::vector<std::string>& result, std::string const& name, std::initializer_list<float> nodeProbabilities)
-    {
-        std::string probabilities;
-        for (auto const& nodeProbability : nodeProbabilities) {
-            if (nodeProbability > 0.0f) {
-                if (!probabilities.empty()) {
-                    probabilities += ", ";
-                }
-                probabilities += formatNodeProbability(nodeProbability);
-            }
-        }
-        if (!probabilities.empty()) {
-            result.push_back(name + ": " + probabilities);
-        }
-    }
-}
-
-std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
-{
-    std::vector<std::string> activeMutations;
-    addActiveMutationType(activeMutations, "Connection", {_connectionMutations[0]._nodeProbability, _connectionMutations[1]._nodeProbability});
-    addActiveMutationType(activeMutations, "Neuron", {_neuronMutations[0]._nodeProbability, _neuronMutations[1]._nodeProbability});
-    addActiveMutationType(
-        activeMutations, "Cell type property", {_cellTypePropertiesMutations[0]._nodeProbability, _cellTypePropertiesMutations[1]._nodeProbability});
-    addActiveMutationType(activeMutations, "Cell type mode", {_cellTypeModeMutation._nodeProbability});
-    addActiveMutationType(activeMutations, "Cell type", {_cellTypeMutation._nodeProbability});
-    addActiveMutationType(activeMutations, "Void", {_voidMutation._nodeProbability});
-    addActiveMutationType(activeMutations, "Constructor", {_constructorMutations[0]._nodeProbability, _constructorMutations[1]._nodeProbability});
-    return activeMutations;
 }
 
 bool GenomeDesc::equalWithoutId(GenomeDesc const& other) const
