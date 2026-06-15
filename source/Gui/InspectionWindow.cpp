@@ -553,6 +553,7 @@ void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
             inspectorText("Front angle", frontAngle.str());
             inspectorText("Genome name", genome._name);
             inspectorText("Lineage id", std::to_string(genome._lineageId));
+            inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
             if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
                 GenomeEditorWindow::get().openTab(genome, false);
             }

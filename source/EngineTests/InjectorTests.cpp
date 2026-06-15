@@ -232,3 +232,38 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     // Construction progress should be reset
     EXPECT_FALSE(actualConstructor._lastConstructedCellId.has_value());
 }
+
+/**
+ * Test: No injection on creatures resistant to injection
+ * Cells of a creature whose genome has resistanceToInjection enabled should not be injected
+ */
+TEST_F(InjectorTests, noInjectionOnResistantCreature)
+{
+    // Create injector with geneIndex=2
+    auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
+
+    // Add target creature within injection radius whose genome resists injection
+    data.addCreature(
+        {
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}),
+        },
+        CreatureDesc().id(2),
+        GenomeDesc().id(2).resistanceToInjection(true));
+    data.addConnection(100, 101);
+
+    auto origConstructor = data.getObjectRef(100).getCellRef()._constructor.value();
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4 * TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualInjector = actualData.getObjectRef(1);
+    auto actualConstructor = actualData.getObjectRef(100).getCellRef()._constructor.value();
+
+    // Constructor's geneIndex should remain unchanged because the creature resists injection
+    EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
+
+    // Injector should report failure
+    EXPECT_TRUE(approxCompare(0.0f, actualInjector.getCellRef()._signal._channels[Channels::InjectorSuccess]));
+}

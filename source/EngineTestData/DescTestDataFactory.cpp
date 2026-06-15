@@ -195,6 +195,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                       .prevLineageId(501)
                       .frontAngle(270.0f)
                       .accumulatedMutations(0.05f)
+                      .resistanceToInjection(true)
                       .mutationRates(mutation)
                       .genes({
                           GeneDesc()
