@@ -93,8 +93,7 @@ void _GenomeEditorWidget::processHeaderData()
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters()
                     .name("Resistance to injection")
-                    .textWidth(rightColumnWidth)
-                    .tooltip("If enabled, no cell of a creature with this genome can be injected by a hostile injector."),
+                    .textWidth(rightColumnWidth),
                 _editData->genome._resistanceToInjection);
 
             table.next();

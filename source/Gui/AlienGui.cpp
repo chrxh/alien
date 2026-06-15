@@ -1736,7 +1736,7 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     } else {
         // Auto-size: one line per item plus padding
         auto numItems = parameters._items.empty() ? 1 : parameters._items.size();
-        boxHeight = (lineHeight + padding.y * 2) * numItems;
+        boxHeight = (lineHeight + padding.y * 2 - scale(1.0f)) * numItems;
     }
 
     // Calculate width

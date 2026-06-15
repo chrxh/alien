@@ -4,6 +4,7 @@
 
 #include "ObjectConnectionProcessor.cuh"
 #include "SimulationStatistics.cuh"
+#include "CellProcessor.cuh"
 
 class ReconnectorProcessor
 {
@@ -56,28 +57,26 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             }
 
             if (reconnectorMode == ReconnectorMode_Solid) {
-                // Connect to solid cells only
                 if (otherObject->type != ObjectType_Solid) {
                     return;
                 }
             } else if (reconnectorMode == ReconnectorMode_FreeCell) {
-                // Connect to free cells only
                 if (otherObject->type != ObjectType_FreeCell) {
                     return;
                 }
 
-                // Filter by color restriction
                 auto const& restrictToColors = reconnector.modeData.reconnectFreeCell.restrictToColors;
                 if (!((restrictToColors >> otherObject->color) & 1)) {
                     return;
                 }
             } else if (reconnectorMode == ReconnectorMode_Creature) {
-                // Connect to cells with creatures only
                 if (otherObject->type != ObjectType_Cell) {
                     return;
                 }
-                // Must be from a different creature
                 if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
+                    return;
+                }
+                if (!CellProcessor::isCellReady(data, object)) {
                     return;
                 }
 
