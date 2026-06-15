@@ -35,6 +35,7 @@ namespace
             genomeTO.prevLineageId = genome->prevLineageId;
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.accumulatedMutations = genome->accumulatedMutations;
+            genomeTO.resistanceToInjection = genome->resistanceToInjection;
             for (int i = 0; i < 2; ++i) {
                 genomeTO.mutationRates.neuronMutations[i] = {
                     genome->mutationRates.neuronMutations[i].nodeProbability,

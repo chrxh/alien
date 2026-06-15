@@ -406,6 +406,7 @@ struct Genome
     uint32_t prevLineageId;
     float frontAngle;
     float accumulatedMutations;
+    bool resistanceToInjection;
     MutationRates mutationRates;
 
     // Temporary data

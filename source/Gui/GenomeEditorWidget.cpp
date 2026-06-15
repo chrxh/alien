@@ -90,6 +90,13 @@ void _GenomeEditorWidget::processHeaderData()
                 AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth),
                 &_editData->genome._frontAngle);
 
+            AlienGui::Checkbox(
+                AlienGui::CheckboxParameters()
+                    .name("Resistance to injection")
+                    .textWidth(rightColumnWidth)
+                    .tooltip("If enabled, no cell of a creature with this genome can be injected by a hostile injector."),
+                _editData->genome._resistanceToInjection);
+
             table.next();
 
             AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));

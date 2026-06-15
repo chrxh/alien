@@ -870,6 +870,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._prevLineageId = genomeTO.prevLineageId != 0 ? std::make_optional(genomeTO.prevLineageId) : std::nullopt;
     result._frontAngle = genomeTO.frontAngle;
     result._accumulatedMutations = genomeTO.accumulatedMutations;
+    result._resistanceToInjection = genomeTO.resistanceToInjection;
     for (int i = 0; i < 2; ++i) {
         result._mutationRates._neuronMutations[i]._nodeProbability = genomeTO.mutationRates.neuronMutations[i].nodeProbability;
         result._mutationRates._neuronMutations[i]._weightSigma = genomeTO.mutationRates.neuronMutations[i].weightSigma;
@@ -965,6 +966,7 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.prevLineageId = genome._prevLineageId.value_or(0);
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.accumulatedMutations = genome._accumulatedMutations;
+    genomeTO.resistanceToInjection = genome._resistanceToInjection;
     for (int i = 0; i < 2; ++i) {
         genomeTO.mutationRates.neuronMutations[i] = {
             genome._mutationRates._neuronMutations[i]._nodeProbability,
