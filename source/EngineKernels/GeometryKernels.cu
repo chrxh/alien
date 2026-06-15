@@ -85,6 +85,29 @@ namespace
         return (ri << 16) | (gi << 8) | bi;
     }
 
+    __device__ __inline__ void rgbToHsv(float r, float g, float b, float& h, float& s, float& v)
+    {
+        float maxC = fmaxf(r, fmaxf(g, b));
+        float minC = fminf(r, fminf(g, b));
+        float delta = maxC - minC;
+        h = 0.0f;
+        if (delta > 0.0f) {
+            if (maxC == r) {
+                h = fmodf((g - b) / delta, 6.0f);
+            } else if (maxC == g) {
+                h = (b - r) / delta + 2.0f;
+            } else {
+                h = (r - g) / delta + 4.0f;
+            }
+            h /= 6.0f;
+            if (h < 0.0f) {
+                h += 1.0f;
+            }
+        }
+        s = maxC <= 0.0f ? 0.0f : delta / maxC;
+        v = maxC;
+    }
+
     __device__ __inline__ uint32_t getCellColorByCode(int colorCode)
     {
         auto const& color = cudaSimulationParameters.customizationColors.value[calcMod(colorCode, MAX_COLORS)];
@@ -109,13 +132,17 @@ namespace
             if (object->type != ObjectType_Cell) {
                 return 0xffffff;
             }
+            auto const& color = cudaSimulationParameters.customizationColors.value[calcMod(object->color, MAX_COLORS)];
+            float r = fminf(1.0f, fmaxf(0.0f, color.r));
+            float g = fminf(1.0f, fmaxf(0.0f, color.g));
+            float b = fminf(1.0f, fmaxf(0.0f, color.b));
+            float h, s, v;
+            rgbToHsv(r, g, b, h, s, v);
             auto lineageId = object->typeData.cell.creature->genome->lineageId;
-            uint32_t hash1 = lineageId * 2654435761u;
-            uint32_t hash2 = lineageId * 2246822519u;
-            uint32_t hash3 = lineageId * 3266489917u;
-            float h = static_cast<float>(hash1 & 0xFFFFu) / 65535.0f;
-            float s = 0.7f + 0.3f * (static_cast<float>(hash2 & 0xFFFFu) / 65535.0f);
-            float v = 0.6f + 0.1f * (static_cast<float>(hash3 & 0xFFFFu) / 65535.0f);
+            uint32_t hash = lineageId * 2654435761u;
+            float hueOffset = (static_cast<float>(hash & 0xFFFFu) / 65535.0f) * 0.2f - 0.1f;
+            h += hueOffset;
+            h -= floorf(h);
             return hsvToRgb(h, s, v);
         }
         return getCellColorByCode(object->color);
