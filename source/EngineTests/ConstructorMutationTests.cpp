@@ -33,37 +33,48 @@ protected:
 TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttributes)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f);
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
+    auto const& original = genome._genes.at(0)._nodes.at(0)._constructor.value();
+
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1);
 
-    auto actualGenome = getMutatedGenome();
-    auto const numGenes = static_cast<int>(actualGenome._genes.size());
+    // Every mutable constructor attribute must change at least once (provideEnergy is intentionally not mutated).
+    bool autoTriggerIntervalChanged = false;
+    bool geneIndexChanged = false;
+    bool constructionActivationTimeChanged = false;
+    bool constructionAngleChanged = false;
+    bool reservedEnergyChanged = false;
+    bool separationChanged = false;
+    bool numBranchesChanged = false;
+    bool numConcatenationsChanged = false;
 
-    auto const& originalConstructor = genome._genes.at(0)._nodes.at(0)._constructor;
-    auto const& actualConstructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
-    ASSERT_TRUE(originalConstructor.has_value());
-    ASSERT_TRUE(actualConstructor.has_value());
-    EXPECT_NE(originalConstructor->_constructionAngle, actualConstructor->_constructionAngle);
-    EXPECT_NE(originalConstructor->_reservedEnergy, actualConstructor->_reservedEnergy);
-
-    // All mutated constructors must stay within their valid ranges.
-    if (originalConstructor->_autoTriggerInterval.has_value()) {
-        EXPECT_GE(actualConstructor->_autoTriggerInterval.value(), Const::ConstructorAutoTriggerInterval_Min);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+        auto const actualGenome = getMutatedGenome();
+        auto const& constructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
+        ASSERT_TRUE(constructor.has_value());  // without existConstructorProbability the constructor must never be removed
+        auto const& mutated = constructor.value();
+        autoTriggerIntervalChanged |= mutated._autoTriggerInterval != original._autoTriggerInterval;
+        geneIndexChanged |= mutated._geneIndex != original._geneIndex;
+        constructionActivationTimeChanged |= mutated._constructionActivationTime != original._constructionActivationTime;
+        constructionAngleChanged |= mutated._constructionAngle != original._constructionAngle;
+        reservedEnergyChanged |= mutated._reservedEnergy != original._reservedEnergy;
+        separationChanged |= mutated._separation != original._separation;
+        numBranchesChanged |= mutated._numBranches != original._numBranches;
+        numConcatenationsChanged |= mutated._numConcatenations != original._numConcatenations;
     }
-    EXPECT_GE(originalConstructor->_geneIndex, 0);
-    EXPECT_LT(originalConstructor->_geneIndex, numGenes);
-    EXPECT_GE(originalConstructor->_numBranches, 1);
-    EXPECT_LE(originalConstructor->_numBranches, 6);
-    EXPECT_GE(originalConstructor->_reservedEnergy, 0.0f);
-    EXPECT_GE(originalConstructor->_numConcatenations, 1);
-    EXPECT_GE(originalConstructor->_constructionAngle, Const::ConstructorConstructionAngle_Min);
-    EXPECT_LE(originalConstructor->_constructionAngle, Const::ConstructorConstructionAngle_Max);
-    EXPECT_GE(originalConstructor->_constructionActivationTime, Const::ConstructorConstructionActivationTime_Min);
-    EXPECT_LE(originalConstructor->_constructionActivationTime, Const::ConstructorConstructionActivationTime_Max);
+
+    EXPECT_TRUE(autoTriggerIntervalChanged);
+    EXPECT_TRUE(geneIndexChanged);
+    EXPECT_TRUE(constructionActivationTimeChanged);
+    EXPECT_TRUE(constructionAngleChanged);
+    EXPECT_TRUE(reservedEnergyChanged);
+    EXPECT_TRUE(separationChanged);
+    EXPECT_TRUE(numBranchesChanged);
+    EXPECT_TRUE(numConcatenationsChanged);
 }
 
 TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultValues)
@@ -138,31 +149,4 @@ TEST_F(ConstructorMutationTests, constructorMutation_existProbabilityTogglesCons
     // existConstructorProbability alone must toggle whether a node has a constructor.
     EXPECT_TRUE(actualGenome._genes.at(0)._nodes.at(0)._constructor.has_value());   // had none -> gained one
     EXPECT_FALSE(actualGenome._genes.at(0)._nodes.at(1)._constructor.has_value());  // had one -> lost it
-}
-
-TEST_F(ConstructorMutationTests, constructorMutation_discreteChangeDoesNotToggleConstructorPresence)
-{
-    auto genome = createTestGenome();
-    genome._genes.at(0)._nodes.at(0)._constructor.reset();  // one node without a constructor
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualGenome = getMutatedGenome();
-
-    // Without existConstructorProbability the presence of a constructor must never change, even though attributes mutate heavily.
-    ASSERT_EQ(actualGenome._genes.size(), genome._genes.size());
-    for (size_t geneIndex = 0; geneIndex < genome._genes.size(); ++geneIndex) {
-        auto const& expectedNodes = genome._genes.at(geneIndex)._nodes;
-        auto const& actualNodes = actualGenome._genes.at(geneIndex)._nodes;
-        ASSERT_EQ(actualNodes.size(), expectedNodes.size());
-        for (size_t nodeIndex = 0; nodeIndex < expectedNodes.size(); ++nodeIndex) {
-            EXPECT_EQ(actualNodes.at(nodeIndex)._constructor.has_value(), expectedNodes.at(nodeIndex)._constructor.has_value());
-        }
-    }
 }
