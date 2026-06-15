@@ -87,14 +87,14 @@ namespace
 std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
 {
     std::vector<std::string> activeMutations;
-    addActiveMutationType(activeMutations, "Connection mutations", {_connectionMutations[0]._nodeProbability, _connectionMutations[1]._nodeProbability});
-    addActiveMutationType(activeMutations, "Neuron mutations", {_neuronMutations[0]._nodeProbability, _neuronMutations[1]._nodeProbability});
+    addActiveMutationType(activeMutations, "Connection", {_connectionMutations[0]._nodeProbability, _connectionMutations[1]._nodeProbability});
+    addActiveMutationType(activeMutations, "Neuron", {_neuronMutations[0]._nodeProbability, _neuronMutations[1]._nodeProbability});
     addActiveMutationType(
-        activeMutations, "Cell type property mutations", {_cellTypePropertiesMutations[0]._nodeProbability, _cellTypePropertiesMutations[1]._nodeProbability});
-    addActiveMutationType(activeMutations, "Cell type mode mutations", {_cellTypeModeMutation._nodeProbability});
-    addActiveMutationType(activeMutations, "Cell type mutations", {_cellTypeMutation._nodeProbability});
-    addActiveMutationType(activeMutations, "Void mutations", {_voidMutation._nodeProbability});
-    addActiveMutationType(activeMutations, "Constructor mutations", {_constructorMutations[0]._nodeProbability, _constructorMutations[1]._nodeProbability});
+        activeMutations, "Cell type property", {_cellTypePropertiesMutations[0]._nodeProbability, _cellTypePropertiesMutations[1]._nodeProbability});
+    addActiveMutationType(activeMutations, "Cell type mode", {_cellTypeModeMutation._nodeProbability});
+    addActiveMutationType(activeMutations, "Cell type", {_cellTypeMutation._nodeProbability});
+    addActiveMutationType(activeMutations, "Void", {_voidMutation._nodeProbability});
+    addActiveMutationType(activeMutations, "Constructor", {_constructorMutations[0]._nodeProbability, _constructorMutations[1]._nodeProbability});
     return activeMutations;
 }
 
