@@ -42,39 +42,20 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
     _simulationFacade->setSimulationData(data);
 
     // Every mutable constructor attribute must change at least once (provideEnergy is intentionally not mutated).
-    bool autoTriggerIntervalChanged = false;
-    bool geneIndexChanged = false;
-    bool constructionActivationTimeChanged = false;
-    bool constructionAngleChanged = false;
-    bool reservedEnergyChanged = false;
-    bool separationChanged = false;
-    bool numBranchesChanged = false;
-    bool numConcatenationsChanged = false;
+    _simulationFacade->testOnly_mutate(1);
+    auto const actualGenome = getMutatedGenome();
+    auto const& constructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
+    ASSERT_TRUE(constructor.has_value());  // without existConstructorProbability the constructor must never be removed
+    auto const& mutated = constructor.value();
 
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-        auto const actualGenome = getMutatedGenome();
-        auto const& constructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
-        ASSERT_TRUE(constructor.has_value());  // without existConstructorProbability the constructor must never be removed
-        auto const& mutated = constructor.value();
-        autoTriggerIntervalChanged |= mutated._autoTriggerInterval != original._autoTriggerInterval;
-        geneIndexChanged |= mutated._geneIndex != original._geneIndex;
-        constructionActivationTimeChanged |= mutated._constructionActivationTime != original._constructionActivationTime;
-        constructionAngleChanged |= mutated._constructionAngle != original._constructionAngle;
-        reservedEnergyChanged |= mutated._reservedEnergy != original._reservedEnergy;
-        separationChanged |= mutated._separation != original._separation;
-        numBranchesChanged |= mutated._numBranches != original._numBranches;
-        numConcatenationsChanged |= mutated._numConcatenations != original._numConcatenations;
-    }
-
-    EXPECT_TRUE(autoTriggerIntervalChanged);
-    EXPECT_TRUE(geneIndexChanged);
-    EXPECT_TRUE(constructionActivationTimeChanged);
-    EXPECT_TRUE(constructionAngleChanged);
-    EXPECT_TRUE(reservedEnergyChanged);
-    EXPECT_TRUE(separationChanged);
-    EXPECT_TRUE(numBranchesChanged);
-    EXPECT_TRUE(numConcatenationsChanged);
+    EXPECT_TRUE(mutated._autoTriggerInterval != original._autoTriggerInterval);
+    EXPECT_TRUE(mutated._geneIndex != original._geneIndex);
+    EXPECT_TRUE(mutated._constructionActivationTime != original._constructionActivationTime);
+    EXPECT_TRUE(mutated._constructionAngle != original._constructionAngle);
+    EXPECT_TRUE(mutated._reservedEnergy != original._reservedEnergy);
+    EXPECT_TRUE(mutated._separation != original._separation);
+    EXPECT_TRUE(mutated._numBranches != original._numBranches);
+    EXPECT_TRUE(mutated._numConcatenations != original._numConcatenations);
 }
 
 TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultValues)
