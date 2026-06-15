@@ -50,7 +50,8 @@ namespace
                 genomeTO.mutationRates.constructorMutations[i] = {
                     genome->mutationRates.constructorMutations[i].nodeProbability,
                     genome->mutationRates.constructorMutations[i].sigma,
-                    genome->mutationRates.constructorMutations[i].discreteChangeProbability};
+                    genome->mutationRates.constructorMutations[i].discreteChangeProbability,
+                    genome->mutationRates.constructorMutations[i].existConstructorProbability};
             }
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.nodeProbability};
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.nodeProbability};

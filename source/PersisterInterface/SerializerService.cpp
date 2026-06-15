@@ -309,6 +309,7 @@ namespace
     auto constexpr Id_ConstructorMutation_NodeProbability = 0;
     auto constexpr Id_ConstructorMutation_Sigma = 1;
     auto constexpr Id_ConstructorMutation_DiscreteChangeProbability = 2;
+    auto constexpr Id_ConstructorMutation_ExistConstructorProbability = 3;
 
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
@@ -945,6 +946,7 @@ namespace cereal
         scope.addMember(Id_ConstructorMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
         scope.addMember(Id_ConstructorMutation_Sigma, data._sigma, defaultObject._sigma);
         scope.addMember(Id_ConstructorMutation_DiscreteChangeProbability, data._discreteChangeProbability, defaultObject._discreteChangeProbability);
+        scope.addMember(Id_ConstructorMutation_ExistConstructorProbability, data._existConstructorProbability, defaultObject._existConstructorProbability);
     }
     SPLIT_SERIALIZATION(ConstructorMutationDesc)
 

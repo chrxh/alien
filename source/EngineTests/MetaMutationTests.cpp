@@ -316,8 +316,10 @@ TEST_F(MetaMutationTests, metaMutation_voidRatesZeroSigmaNoChange)
 TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(0.5f).sigma(0.5f).discreteChangeProbability(0.5f);
-    genome._mutationRates._constructorMutations[1] = ConstructorMutationDesc().nodeProbability(0.4f).sigma(0.4f).discreteChangeProbability(0.4f);
+    genome._mutationRates._constructorMutations[0] =
+        ConstructorMutationDesc().nodeProbability(0.5f).sigma(0.5f).discreteChangeProbability(0.5f).existConstructorProbability(0.5f);
+    genome._mutationRates._constructorMutations[1] =
+        ConstructorMutationDesc().nodeProbability(0.4f).sigma(0.4f).discreteChangeProbability(0.4f).existConstructorProbability(0.4f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -334,23 +336,29 @@ TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)
     bool anyChanged = actualGenome._mutationRates._constructorMutations[0]._nodeProbability != 0.5f
         || actualGenome._mutationRates._constructorMutations[0]._sigma != 0.5f
         || actualGenome._mutationRates._constructorMutations[0]._discreteChangeProbability != 0.5f
+        || actualGenome._mutationRates._constructorMutations[0]._existConstructorProbability != 0.5f
         || actualGenome._mutationRates._constructorMutations[1]._nodeProbability != 0.4f
         || actualGenome._mutationRates._constructorMutations[1]._sigma != 0.4f
-        || actualGenome._mutationRates._constructorMutations[1]._discreteChangeProbability != 0.4f;
+        || actualGenome._mutationRates._constructorMutations[1]._discreteChangeProbability != 0.4f
+        || actualGenome._mutationRates._constructorMutations[1]._existConstructorProbability != 0.4f;
     EXPECT_TRUE(anyChanged);
     EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._nodeProbability, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._sigma, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._discreteChangeProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._existConstructorProbability, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._nodeProbability, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._sigma, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._discreteChangeProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._existConstructorProbability, 0.0f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_constructorRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(0.5f).sigma(0.5f).discreteChangeProbability(0.5f);
-    genome._mutationRates._constructorMutations[1] = ConstructorMutationDesc().nodeProbability(0.4f).sigma(0.4f).discreteChangeProbability(0.4f);
+    genome._mutationRates._constructorMutations[0] =
+        ConstructorMutationDesc().nodeProbability(0.5f).sigma(0.5f).discreteChangeProbability(0.5f).existConstructorProbability(0.5f);
+    genome._mutationRates._constructorMutations[1] =
+        ConstructorMutationDesc().nodeProbability(0.4f).sigma(0.4f).discreteChangeProbability(0.4f).existConstructorProbability(0.4f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -366,7 +374,9 @@ TEST_F(MetaMutationTests, metaMutation_constructorRatesZeroSigmaNoChange)
     EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._nodeProbability, 0.5f);
     EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._sigma, 0.5f);
     EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._discreteChangeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._existConstructorProbability, 0.5f);
     EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._nodeProbability, 0.4f);
     EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._sigma, 0.4f);
     EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._discreteChangeProbability, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._existConstructorProbability, 0.4f);
 }

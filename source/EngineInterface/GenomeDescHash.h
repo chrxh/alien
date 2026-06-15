@@ -555,6 +555,7 @@ struct std::hash<GenomeDesc>
             hash_combine(seed, desc._mutationRates._constructorMutations[i]._nodeProbability);
             hash_combine(seed, desc._mutationRates._constructorMutations[i]._sigma);
             hash_combine(seed, desc._mutationRates._constructorMutations[i]._discreteChangeProbability);
+            hash_combine(seed, desc._mutationRates._constructorMutations[i]._existConstructorProbability);
         }
         hash_combine(seed, desc._mutationRates._cellTypeModeMutation._nodeProbability);
         hash_combine(seed, desc._mutationRates._cellTypeMutation._nodeProbability);

@@ -62,7 +62,8 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
         break;
     case MutationType::Constructor:
-        genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
+        genome._mutationRates._constructorMutations[0] =
+            ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f).existConstructorProbability(1.0f);
         break;
     }
 
