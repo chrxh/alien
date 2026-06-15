@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 
 #include "NumberGenerator.h"
 
@@ -50,30 +51,50 @@ GenomeDesc GenomeDesc::id(uint64_t id)
     return *this;
 }
 
+namespace
+{
+    std::string formatNodeProbability(float value)
+    {
+        char buffer[32];
+        std::snprintf(buffer, sizeof(buffer), "%.5f", value);
+        std::string result = buffer;
+        if (result.find('.') != std::string::npos) {
+            result.erase(result.find_last_not_of('0') + 1);
+            if (!result.empty() && result.back() == '.') {
+                result.pop_back();
+            }
+        }
+        return result;
+    }
+
+    void addActiveMutationType(std::vector<std::string>& result, std::string const& name, std::initializer_list<float> nodeProbabilities)
+    {
+        std::string probabilities;
+        for (auto const& nodeProbability : nodeProbabilities) {
+            if (nodeProbability > 0.0f) {
+                if (!probabilities.empty()) {
+                    probabilities += ", ";
+                }
+                probabilities += formatNodeProbability(nodeProbability);
+            }
+        }
+        if (!probabilities.empty()) {
+            result.push_back(name + ": " + probabilities);
+        }
+    }
+}
+
 std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
 {
     std::vector<std::string> activeMutations;
-    if (_connectionMutations[0]._nodeProbability > 0.0f || _connectionMutations[1]._nodeProbability > 0.0f) {
-        activeMutations.push_back("Connection mutations");
-    }
-    if (_neuronMutations[0]._nodeProbability > 0.0f || _neuronMutations[1]._nodeProbability > 0.0f) {
-        activeMutations.push_back("Neuron mutations");
-    }
-    if (_cellTypePropertiesMutations[0]._nodeProbability > 0.0f || _cellTypePropertiesMutations[1]._nodeProbability > 0.0f) {
-        activeMutations.push_back("Cell type property mutations");
-    }
-    if (_cellTypeModeMutation._nodeProbability > 0.0f) {
-        activeMutations.push_back("Cell type mode mutations");
-    }
-    if (_cellTypeMutation._nodeProbability > 0.0f) {
-        activeMutations.push_back("Cell type mutations");
-    }
-    if (_voidMutation._nodeProbability > 0.0f) {
-        activeMutations.push_back("Void mutations");
-    }
-    if (_constructorMutations[0]._nodeProbability > 0.0f || _constructorMutations[1]._nodeProbability > 0.0f) {
-        activeMutations.push_back("Constructor mutations");
-    }
+    addActiveMutationType(activeMutations, "Connection mutations", {_connectionMutations[0]._nodeProbability, _connectionMutations[1]._nodeProbability});
+    addActiveMutationType(activeMutations, "Neuron mutations", {_neuronMutations[0]._nodeProbability, _neuronMutations[1]._nodeProbability});
+    addActiveMutationType(
+        activeMutations, "Cell type property mutations", {_cellTypePropertiesMutations[0]._nodeProbability, _cellTypePropertiesMutations[1]._nodeProbability});
+    addActiveMutationType(activeMutations, "Cell type mode mutations", {_cellTypeModeMutation._nodeProbability});
+    addActiveMutationType(activeMutations, "Cell type mutations", {_cellTypeMutation._nodeProbability});
+    addActiveMutationType(activeMutations, "Void mutations", {_voidMutation._nodeProbability});
+    addActiveMutationType(activeMutations, "Constructor mutations", {_constructorMutations[0]._nodeProbability, _constructorMutations[1]._nodeProbability});
     return activeMutations;
 }
 
