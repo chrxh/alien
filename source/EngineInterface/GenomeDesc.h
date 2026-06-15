@@ -486,8 +486,6 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());
     MEMBER(MutationRatesDesc, ConstructorMutationArray, constructorMutations, ConstructorMutationArray());
-
-    std::vector<std::string> getActiveMutationTypes() const;
 };
 
 struct GenomeDesc

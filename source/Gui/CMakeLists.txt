@@ -99,6 +99,8 @@ PUBLIC
     MultiplierWindow.h
     MutationRatesDialog.cpp
     MutationRatesDialog.h
+    MutationRatesWidget.cpp
+    MutationRatesWidget.h
     NetworkSettingsDialog.cpp
     NetworkSettingsDialog.h
     NetworkTransferController.cpp

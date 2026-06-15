@@ -13,6 +13,7 @@
 
 #include "AlienGui.h"
 #include "MutationRatesDialog.h"
+#include "MutationRatesWidget.h"
 #include "StyleRepository.h"
 
 namespace
@@ -209,14 +210,7 @@ void MassOperationsDialog::processIntern()
             ImGui::Checkbox("##mutationRates", &_randomizeMutationRates);
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
             ImGui::BeginDisabled(!_randomizeMutationRates);
-            auto buttonWidth = scale(60.0f);
-            auto availableWidth = ImGui::GetContentRegionAvail().x;
-            auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
-            AlienGui::ListBox(AlienGui::ListBoxParameters().items(_mutationRates.getActiveMutationTypes()).width(listBoxWidth));
-            ImGui::SameLine();
-            if (AlienGui::Button("Edit")) {
-                MutationRatesDialog::get().openNested(_mutationRates, [this](MutationRatesDesc const& mutationRates) { _mutationRates = mutationRates; });
-            }
+            MutationRatesWidget::process(_mutationRates, true);
             ImGui::EndDisabled();
 
             table.next();
