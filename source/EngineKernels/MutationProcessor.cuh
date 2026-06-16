@@ -230,7 +230,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
                         value = static_cast<ValueType>(newValue);
-                        atomicAdd_block(&accumulatedMutations, static_cast<float>(std::abs(roundedDelta)));
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
                     } else {
                         value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
                         atomicAdd_block(&accumulatedMutations, std::abs(delta));
@@ -841,7 +841,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
                         value = static_cast<ValueType>(newValue);
-                        atomicAdd_block(&accumulatedMutations, static_cast<float>(std::abs(roundedDelta)));
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
                     } else {
                         value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
                         atomicAdd_block(&accumulatedMutations, std::abs(delta));
