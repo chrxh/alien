@@ -128,9 +128,9 @@ namespace
         if (coloring == CellColoring_None) {
             return 0x7f7f7f;
         }
-        if (coloring == CellColoring_LineageId) {
+        if (coloring == CellColoring_LineageAndCustomization) {
             if (object->type != ObjectType_Cell) {
-                return 0x7f7f7f;
+                return getCustomizationColor(object->color);
             }
             auto const& color = cudaSimulationParameters.customizationColors.value[calcMod(object->color, MAX_COLORS)];
             float r = fminf(1.0f, fmaxf(0.0f, color.r));

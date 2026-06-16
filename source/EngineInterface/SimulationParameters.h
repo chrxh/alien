@@ -30,7 +30,7 @@ struct SimulationParameters
     // Visualization
     BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
     BaseParameter<ColorVector<FloatColorRGB>> customizationColors = {getDefaultCustomizationColorVector()};
-    BaseParameter<ColorVector<CellColoring>> objectColoring = {ColorVector<CellColoring>::uniform(CellColoring_CellColor)};
+    BaseParameter<ColorVector<CellColoring>> objectColoring = {ColorVector<CellColoring>::uniform(CellColoring_Customization)};
     BaseParameter<CellType> highlightedCellType = {CellType_Base};
     BaseParameter<float> glow = {0.3f};
     BaseParameter<bool> borderlessRendering = {false};

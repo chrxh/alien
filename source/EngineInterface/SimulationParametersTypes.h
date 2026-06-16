@@ -149,8 +149,8 @@ using CellColoring = int;
 enum CellColoring_
 {
     CellColoring_None,
-    CellColoring_CellColor,
-    CellColoring_LineageId,
+    CellColoring_Customization,
+    CellColoring_LineageAndCustomization,
 };
 
 using CellDeathConsequences = int;

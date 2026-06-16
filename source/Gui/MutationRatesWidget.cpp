@@ -27,7 +27,7 @@ namespace
             }
         }
         if (!probabilities.empty()) {
-            result.push_back(name + ": " + probabilities);
+            result.push_back(name + " (" + probabilities + ")");
         }
     }
 
