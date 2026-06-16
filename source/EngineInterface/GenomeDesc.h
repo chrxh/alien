@@ -460,6 +460,34 @@ struct VoidMutationDesc
     MEMBER(VoidMutationDesc, float, nodeProbability, 0.0f);
 };
 
+struct AppendNodeMutationDesc
+{
+    auto operator<=>(AppendNodeMutationDesc const&) const = default;
+
+    MEMBER(AppendNodeMutationDesc, float, geneProbability, 0.0f);
+};
+
+struct AddNodeMutationDesc
+{
+    auto operator<=>(AddNodeMutationDesc const&) const = default;
+
+    MEMBER(AddNodeMutationDesc, float, geneProbability, 0.0f);
+};
+
+struct TrimNodeMutationDesc
+{
+    auto operator<=>(TrimNodeMutationDesc const&) const = default;
+
+    MEMBER(TrimNodeMutationDesc, float, geneProbability, 0.0f);
+};
+
+struct DeleteNodeMutationDesc
+{
+    auto operator<=>(DeleteNodeMutationDesc const&) const = default;
+
+    MEMBER(DeleteNodeMutationDesc, float, geneProbability, 0.0f);
+};
+
 struct ConstructorMutationDesc
 {
     auto operator<=>(ConstructorMutationDesc const&) const = default;
@@ -479,13 +507,39 @@ struct MutationRatesDesc
 
     auto operator<=>(MutationRatesDesc const&) const = default;
 
-    MEMBER(MutationRatesDesc, NeuronMutationArray, neuronMutations, NeuronMutationArray());
-    MEMBER(MutationRatesDesc, ConnectionMutationArray, connectionMutations, ConnectionMutationArray());
-    MEMBER(MutationRatesDesc, CellTypePropertiesMutationArray, cellTypePropertiesMutations, CellTypePropertiesMutationArray());
+    MEMBER(
+        MutationRatesDesc,
+        NeuronMutationArray,
+        neuronMutations,
+        (NeuronMutationArray{
+            {NeuronMutationDesc().weightSigma(0.05f).biasSigma(0.05f).activationFunctionProbability(0.05f),
+             NeuronMutationDesc().weightSigma(0.5f).biasSigma(0.1f).activationFunctionProbability(0.1f)}}));
+    MEMBER(
+        MutationRatesDesc,
+        ConnectionMutationArray,
+        connectionMutations,
+        (ConnectionMutationArray{{ConnectionMutationDesc().sigma(0.05f), ConnectionMutationDesc().sigma(0.5f)}}));
+    MEMBER(
+        MutationRatesDesc,
+        CellTypePropertiesMutationArray,
+        cellTypePropertiesMutations,
+        (CellTypePropertiesMutationArray{
+            {CellTypePropertiesMutationDesc().sigma(0.05f).discreteChangeProbability(0.05f),
+             CellTypePropertiesMutationDesc().sigma(0.5f).discreteChangeProbability(0.5f)}}));
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());
-    MEMBER(MutationRatesDesc, ConstructorMutationArray, constructorMutations, ConstructorMutationArray());
+    MEMBER(MutationRatesDesc, AppendNodeMutationDesc, appendNodeMutation, AppendNodeMutationDesc());
+    MEMBER(MutationRatesDesc, AddNodeMutationDesc, addNodeMutation, AddNodeMutationDesc());
+    MEMBER(MutationRatesDesc, TrimNodeMutationDesc, trimNodeMutation, TrimNodeMutationDesc());
+    MEMBER(MutationRatesDesc, DeleteNodeMutationDesc, deleteNodeMutation, DeleteNodeMutationDesc());
+    MEMBER(
+        MutationRatesDesc,
+        ConstructorMutationArray,
+        constructorMutations,
+        (ConstructorMutationArray{
+            {ConstructorMutationDesc().sigma(0.05f).discreteChangeProbability(0.05f).existConstructorProbability(0.05f),
+             ConstructorMutationDesc().discreteChangeProbability(0.5f).existConstructorProbability(0.5f)}}));
 };
 
 struct GenomeDesc

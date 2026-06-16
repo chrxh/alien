@@ -23,17 +23,30 @@ public:
     __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
 private:
+    // Upper bound for node-adding mutations to keep genome growth bounded and avoid heap exhaustion.
+    static auto constexpr MaxNodesPerGene = 200;
+
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellTypeProperties(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_appendNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_addNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_trimNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_deleteNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
 
     __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
     __inline__ __device__ static void resetCellTypeToDefault(Node& node);
+    __inline__ __device__ static CellType chooseRandomCellTypeExceptVoid(SimulationData& data);
+    __inline__ __device__ static bool setRandomCellTypeMode(SimulationData& data, Node& node);
+    __inline__ __device__ static void initNewNode(SimulationData& data, Node& node, int color);
+    __inline__ __device__ static void insertNode(SimulationData& data, Genome* genome, Gene& gene, int position);
+    __inline__ __device__ static void removeNode(SimulationData& data, Gene& gene, int position);
+    __inline__ __device__ static void correctGenome(SimulationData& data, Genome* genome);
 
     __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
@@ -115,6 +128,20 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_cellType(data, genome, accumulatedMutations);
     applyMutations_void(data, genome, accumulatedMutations);
     applyMutations_constructor(data, genome, accumulatedMutations);
+
+    // sync since following mutations may change entire genes
+    block.sync();
+    auto const& nodeRates = genome->mutationRates;
+    bool anyNodeMutation = nodeRates.appendNodeMutation.geneProbability > 0 || nodeRates.addNodeMutation.geneProbability > 0
+        || nodeRates.trimNodeMutation.geneProbability > 0 || nodeRates.deleteNodeMutation.geneProbability > 0;
+    if (anyNodeMutation) {
+        applyMutations_appendNode(data, genome, accumulatedMutations);
+        applyMutations_addNode(data, genome, accumulatedMutations);
+        applyMutations_trimNode(data, genome, accumulatedMutations);
+        applyMutations_deleteNode(data, genome, accumulatedMutations);
+        block.sync();
+        correctGenome(data, genome);
+    }
 
     block.sync();
     updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
@@ -673,57 +700,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
         return;
     }
 
-    auto pickNewMode = [&](int currentMode, int count) {
-        auto newMode = data.primaryNumberGen.random(count - 2);
-        if (newMode >= currentMode) {
-            ++newMode;
-        }
-        return newMode;
-    };
-
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
         for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
             if (data.primaryNumberGen.random() >= rate.nodeProbability) {
                 continue;
             }
-            auto& node = gene.nodes[nodeIndex];
-
-            // Pick a new mode for the node's cell type; the new mode's data is then reset to its defaults below.
-            bool changed = true;
-            switch (node.cellType) {
-            case CellType_Sensor:
-                node.cellTypeData.sensor.mode = static_cast<SensorMode>(pickNewMode(node.cellTypeData.sensor.mode, SensorMode_Count));
-                break;
-            case CellType_Generator:
-                node.cellTypeData.generator.mode = static_cast<GeneratorMode>(pickNewMode(node.cellTypeData.generator.mode, GeneratorMode_Count));
-                break;
-            case CellType_Attacker:
-                node.cellTypeData.attacker.mode = static_cast<AttackerMode>(pickNewMode(node.cellTypeData.attacker.mode, AttackerMode_Count));
-                break;
-            case CellType_Muscle:
-                node.cellTypeData.muscle.mode = static_cast<MuscleMode>(pickNewMode(node.cellTypeData.muscle.mode, MuscleMode_Count));
-                break;
-            case CellType_Defender:
-                node.cellTypeData.defender.mode = static_cast<DefenderMode>(pickNewMode(node.cellTypeData.defender.mode, DefenderMode_Count));
-                break;
-            case CellType_Reconnector:
-                node.cellTypeData.reconnector.mode = static_cast<ReconnectorMode>(pickNewMode(node.cellTypeData.reconnector.mode, ReconnectorMode_Count));
-                break;
-            case CellType_Memory:
-                node.cellTypeData.memory.mode = static_cast<MemoryMode>(pickNewMode(node.cellTypeData.memory.mode, MemoryMode_Count));
-                break;
-            case CellType_Communicator:
-                node.cellTypeData.communicator.mode = static_cast<CommunicatorMode>(pickNewMode(node.cellTypeData.communicator.mode, CommunicatorMode_Count));
-                break;
-            default:
-                // Cell types without a mode field are not affected.
-                changed = false;
-                break;
-            }
-
-            if (changed) {
-                resetCellTypeModeToDefault(node);
+            // Switch the node to a different random mode (its data is reset to defaults); cell types without a mode are unaffected.
+            if (setRandomCellTypeMode(data, gene.nodes[nodeIndex])) {
                 atomicAdd_block(&accumulatedMutations, 1.0f);
             }
         }
@@ -785,10 +769,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
         return;
     }
 
-    // Pick a non-void cell type used when a void node is turned into a non-void node.
-    // Void is the last entry before CellType_Count, so the range [0, CellType_Count - 2] covers exactly the non-void types.
-    auto pickNonVoidCellType = [&]() { return data.primaryNumberGen.random(CellType_Count - 2); };
-
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
         for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
@@ -802,10 +782,242 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
             auto& node = gene.nodes[nodeIndex];
 
             // Toggle the node between void and non-void; the new cell type is reset to its default attribute values.
-            node.cellType = node.cellType == CellType_Void ? pickNonVoidCellType() : CellType_Void;
+            node.cellType = node.cellType == CellType_Void ? chooseRandomCellTypeExceptVoid(data) : CellType_Void;
             resetCellTypeToDefault(node);
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
+    }
+}
+
+__inline__ __device__ CellType MutationProcessor::chooseRandomCellTypeExceptVoid(SimulationData& data)
+{
+    // Pick a uniformly random non-void cell type without assuming the position of CellType_Void within the enum.
+    auto cellType = data.primaryNumberGen.random(CellType_Count - 2);
+    if (cellType >= CellType_Void) {
+        ++cellType;
+    }
+    return static_cast<CellType>(cellType);
+}
+
+__inline__ __device__ bool MutationProcessor::setRandomCellTypeMode(SimulationData& data, Node& node)
+{
+    // Pick a mode different from the node's current mode for its cell type and reset that mode's data to its defaults.
+    // Returns whether the cell type has a mode at all.
+    auto pickNewMode = [&](int currentMode, int count) {
+        auto newMode = data.primaryNumberGen.random(count - 2);
+        if (newMode >= currentMode) {
+            ++newMode;
+        }
+        return newMode;
+    };
+    bool changed = true;
+    switch (node.cellType) {
+    case CellType_Sensor:
+        node.cellTypeData.sensor.mode = static_cast<SensorMode>(pickNewMode(node.cellTypeData.sensor.mode, SensorMode_Count));
+        break;
+    case CellType_Generator:
+        node.cellTypeData.generator.mode = static_cast<GeneratorMode>(pickNewMode(node.cellTypeData.generator.mode, GeneratorMode_Count));
+        break;
+    case CellType_Attacker:
+        node.cellTypeData.attacker.mode = static_cast<AttackerMode>(pickNewMode(node.cellTypeData.attacker.mode, AttackerMode_Count));
+        break;
+    case CellType_Muscle:
+        node.cellTypeData.muscle.mode = static_cast<MuscleMode>(pickNewMode(node.cellTypeData.muscle.mode, MuscleMode_Count));
+        break;
+    case CellType_Defender:
+        node.cellTypeData.defender.mode = static_cast<DefenderMode>(pickNewMode(node.cellTypeData.defender.mode, DefenderMode_Count));
+        break;
+    case CellType_Reconnector:
+        node.cellTypeData.reconnector.mode = static_cast<ReconnectorMode>(pickNewMode(node.cellTypeData.reconnector.mode, ReconnectorMode_Count));
+        break;
+    case CellType_Memory:
+        node.cellTypeData.memory.mode = static_cast<MemoryMode>(pickNewMode(node.cellTypeData.memory.mode, MemoryMode_Count));
+        break;
+    case CellType_Communicator:
+        node.cellTypeData.communicator.mode = static_cast<CommunicatorMode>(pickNewMode(node.cellTypeData.communicator.mode, CommunicatorMode_Count));
+        break;
+    default:
+        // Cell types without a mode field are not affected.
+        changed = false;
+        break;
+    }
+    if (changed) {
+        resetCellTypeModeToDefault(node);
+    }
+    return changed;
+}
+
+__inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, Node& node, int color)
+{
+    // A freshly created node uses the shared default attribute values (mirrors NodeDesc / NeuralNetGenomeDesc defaults).
+    node.referenceAngle = 0.0f;
+    node.color = color;
+    for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
+        node.neuralNetwork.weights[i] = NeuralNetWeight(0.0f);
+    }
+    for (int i = 0; i < NEURONS_PER_CELL; ++i) {
+        node.neuralNetwork.weights[i * NEURONS_PER_CELL + i] = NeuralNetWeight(1.0f);
+        node.neuralNetwork.biases[i] = 0.0f;
+        node.neuralNetwork.activationFunctions[i] = ActivationFunction_Identity;
+    }
+    for (int i = 0; i < MAX_OBJECT_CONNECTIONS; ++i) {
+        node.neuralNetwork.connectionWeights[i] = 0.0f;
+    }
+    node.neuralNetwork.connectionWeights[0] = 1.0f;
+    node.constructorAvailable = false;
+
+    // Random non-void cell type with a random mode; all cell-type attributes stay at their defaults.
+    node.cellType = chooseRandomCellTypeExceptVoid(data);
+    resetCellTypeToDefault(node);
+    setRandomCellTypeMode(data, node);
+}
+
+__inline__ __device__ void MutationProcessor::insertNode(SimulationData& data, Genome* genome, Gene& gene, int position)
+{
+    // The new node inherits the color of its previous neighbor, otherwise its next neighbor, otherwise the genome's first
+    // node, otherwise a random color.
+    auto const oldNumNodes = gene.numNodes;
+    int color;
+    if (position > 0) {
+        color = gene.nodes[position - 1].color;
+    } else if (oldNumNodes > 0) {
+        color = gene.nodes[0].color;
+    } else {
+        color = data.primaryNumberGen.random(MAX_COLORS - 1);
+        for (int otherGeneIndex = 0; otherGeneIndex < genome->numGenes; ++otherGeneIndex) {
+            if (genome->genes[otherGeneIndex].numNodes > 0) {
+                color = genome->genes[otherGeneIndex].nodes[0].color;
+                break;
+            }
+        }
+    }
+
+    // Reallocate the gene's node array with one extra slot at the given position holding the new default node.
+    auto const newNumNodes = oldNumNodes + 1;
+    auto newNodes = data.entities.heap.getTypedSubArray<Node>(newNumNodes);
+    for (int i = 0; i < position; ++i) {
+        newNodes[i] = gene.nodes[i];
+    }
+    initNewNode(data, newNodes[position], color);
+    for (int i = position; i < oldNumNodes; ++i) {
+        newNodes[i + 1] = gene.nodes[i];
+    }
+    gene.nodes = newNodes;
+    gene.numNodes = newNumNodes;
+}
+
+__inline__ __device__ void MutationProcessor::removeNode(SimulationData& data, Gene& gene, int position)
+{
+    // Reallocate the gene's node array without the node at the given position.
+    auto const oldNumNodes = gene.numNodes;
+    auto const newNumNodes = oldNumNodes - 1;
+    auto newNodes = data.entities.heap.getTypedSubArray<Node>(newNumNodes);
+    for (int i = 0; i < position; ++i) {
+        newNodes[i] = gene.nodes[i];
+    }
+    for (int i = position + 1; i < oldNumNodes; ++i) {
+        newNodes[i - 1] = gene.nodes[i];
+    }
+    gene.nodes = newNodes;
+    gene.numNodes = newNumNodes;
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_appendNode(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    auto const& rate = genome->mutationRates.appendNodeMutation;
+    if (rate.geneProbability <= 0) {
+        return;
+    }
+
+    // Genes are independent, so each thread mutates whole genes on its own.
+    for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
+        auto& gene = genome->genes[geneIndex];
+        if (gene.numNodes >= MaxNodesPerGene || data.primaryNumberGen.random() >= rate.geneProbability) {
+            continue;
+        }
+        auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes;  // start or end
+        insertNode(data, genome, gene, position);
+        atomicAdd_block(&accumulatedMutations, 1.0f);
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_addNode(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    auto const& rate = genome->mutationRates.addNodeMutation;
+    if (rate.geneProbability <= 0) {
+        return;
+    }
+
+    for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
+        auto& gene = genome->genes[geneIndex];
+        if (gene.numNodes >= MaxNodesPerGene || data.primaryNumberGen.random() >= rate.geneProbability) {
+            continue;
+        }
+        auto position = data.primaryNumberGen.random(gene.numNodes);  // [0, numNodes] => any insertion slot, incl. start/end
+        insertNode(data, genome, gene, position);
+        atomicAdd_block(&accumulatedMutations, 1.0f);
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_trimNode(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    auto const& rate = genome->mutationRates.trimNodeMutation;
+    if (rate.geneProbability <= 0) {
+        return;
+    }
+
+    for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
+        auto& gene = genome->genes[geneIndex];
+        if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.geneProbability) {  // keep at least one node
+            continue;
+        }
+        auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes - 1;  // start or end
+        removeNode(data, gene, position);
+        atomicAdd_block(&accumulatedMutations, 1.0f);
+    }
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_deleteNode(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    auto const& rate = genome->mutationRates.deleteNodeMutation;
+    if (rate.geneProbability <= 0) {
+        return;
+    }
+
+    for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
+        auto& gene = genome->genes[geneIndex];
+        if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.geneProbability) {  // keep at least one node
+            continue;
+        }
+        auto position = data.primaryNumberGen.random(gene.numNodes - 1);  // [0, numNodes - 1] => any node
+        removeNode(data, gene, position);
+        atomicAdd_block(&accumulatedMutations, 1.0f);
+    }
+}
+
+__inline__ __device__ void MutationProcessor::correctGenome(SimulationData& data, Genome* genome)
+{
+    // Structural node mutations may have left the first or last node of a gene void, which is not allowed.
+    // Turn such boundary nodes into a random non-void cell type with default attributes (mirrors applyMutations_void).
+    auto laneId = cg_mutation::this_thread_block().thread_rank();
+    for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
+        auto& gene = genome->genes[geneIndex];
+        if (gene.numNodes == 0) {
+            continue;
+        }
+        auto fixBoundaryNode = [&](int nodeIndex) {
+            auto& node = gene.nodes[nodeIndex];
+            if (node.cellType == CellType_Void) {
+                node.cellType = chooseRandomCellTypeExceptVoid(data);
+                resetCellTypeToDefault(node);
+            }
+        };
+        fixBoundaryNode(0);
+        fixBoundaryNode(gene.numNodes - 1);
     }
 }
 
@@ -952,6 +1164,30 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (voidMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * voidMutationSigma)); };
             mutateFloat(genome->mutationRates.voidMutation.nodeProbability);
+        }
+
+        float appendNodeSigma = cudaSimulationParameters.metaMutationAppendNodeSigma.value;
+        if (appendNodeSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * appendNodeSigma)); };
+            mutateFloat(genome->mutationRates.appendNodeMutation.geneProbability);
+        }
+
+        float addNodeSigma = cudaSimulationParameters.metaMutationAddNodeSigma.value;
+        if (addNodeSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * addNodeSigma)); };
+            mutateFloat(genome->mutationRates.addNodeMutation.geneProbability);
+        }
+
+        float trimNodeSigma = cudaSimulationParameters.metaMutationTrimNodeSigma.value;
+        if (trimNodeSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * trimNodeSigma)); };
+            mutateFloat(genome->mutationRates.trimNodeMutation.geneProbability);
+        }
+
+        float deleteNodeSigma = cudaSimulationParameters.metaMutationDeleteNodeSigma.value;
+        if (deleteNodeSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * deleteNodeSigma)); };
+            mutateFloat(genome->mutationRates.deleteNodeMutation.geneProbability);
         }
 
         float constructorSigma = cudaSimulationParameters.metaMutationConstructorSigma.value;

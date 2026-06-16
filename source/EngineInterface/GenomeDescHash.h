@@ -561,6 +561,10 @@ struct std::hash<GenomeDesc>
         hash_combine(seed, desc._mutationRates._cellTypeModeMutation._nodeProbability);
         hash_combine(seed, desc._mutationRates._cellTypeMutation._nodeProbability);
         hash_combine(seed, desc._mutationRates._voidMutation._nodeProbability);
+        hash_combine(seed, desc._mutationRates._appendNodeMutation._geneProbability);
+        hash_combine(seed, desc._mutationRates._addNodeMutation._geneProbability);
+        hash_combine(seed, desc._mutationRates._trimNodeMutation._geneProbability);
+        hash_combine(seed, desc._mutationRates._deleteNodeMutation._geneProbability);
         return seed;
     }
 };

@@ -307,6 +307,14 @@ namespace
 
     auto constexpr Id_VoidMutation_NodeProbability = 0;
 
+    auto constexpr Id_AppendNodeMutation_GeneProbability = 0;
+
+    auto constexpr Id_AddNodeMutation_GeneProbability = 0;
+
+    auto constexpr Id_TrimNodeMutation_GeneProbability = 0;
+
+    auto constexpr Id_DeleteNodeMutation_GeneProbability = 0;
+
     auto constexpr Id_ConstructorMutation_NodeProbability = 0;
     auto constexpr Id_ConstructorMutation_Sigma = 1;
     auto constexpr Id_ConstructorMutation_DiscreteChangeProbability = 2;
@@ -439,6 +447,10 @@ namespace
     auto constexpr Id_MutationRates_VoidMutation = 9;
     auto constexpr Id_MutationRates_ConstructorMutation1 = 10;
     auto constexpr Id_MutationRates_ConstructorMutation2 = 11;
+    auto constexpr Id_MutationRates_AppendNodeMutation = 12;
+    auto constexpr Id_MutationRates_AddNodeMutation = 13;
+    auto constexpr Id_MutationRates_TrimNodeMutation = 14;
+    auto constexpr Id_MutationRates_DeleteNodeMutation = 15;
 
     auto constexpr Id_Genome_Genes = 6;
     auto constexpr Id_Genome_MutationRates = 7;
@@ -940,6 +952,42 @@ namespace cereal
     SPLIT_SERIALIZATION(VoidMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AppendNodeMutationDesc& data)
+    {
+        AppendNodeMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_AppendNodeMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(AppendNodeMutationDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AddNodeMutationDesc& data)
+    {
+        AddNodeMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_AddNodeMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(AddNodeMutationDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, TrimNodeMutationDesc& data)
+    {
+        TrimNodeMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_TrimNodeMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(TrimNodeMutationDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DeleteNodeMutationDesc& data)
+    {
+        DeleteNodeMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_DeleteNodeMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(DeleteNodeMutationDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConstructorMutationDesc& data)
     {
         ConstructorMutationDesc defaultObject;
@@ -965,6 +1013,10 @@ namespace cereal
         scope.addDesc(Id_MutationRates_CellTypeModeMutation, data._cellTypeModeMutation);
         scope.addDesc(Id_MutationRates_CellTypeMutation, data._cellTypeMutation);
         scope.addDesc(Id_MutationRates_VoidMutation, data._voidMutation);
+        scope.addDesc(Id_MutationRates_AppendNodeMutation, data._appendNodeMutation);
+        scope.addDesc(Id_MutationRates_AddNodeMutation, data._addNodeMutation);
+        scope.addDesc(Id_MutationRates_TrimNodeMutation, data._trimNodeMutation);
+        scope.addDesc(Id_MutationRates_DeleteNodeMutation, data._deleteNodeMutation);
         scope.addDesc(Id_MutationRates_ConstructorMutation1, data._constructorMutations[0]);
         scope.addDesc(Id_MutationRates_ConstructorMutation2, data._constructorMutations[1]);
     }

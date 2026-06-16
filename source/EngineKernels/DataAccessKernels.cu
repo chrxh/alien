@@ -57,6 +57,10 @@ namespace
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.nodeProbability};
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.nodeProbability};
             genomeTO.mutationRates.voidMutation = {genome->mutationRates.voidMutation.nodeProbability};
+            genomeTO.mutationRates.appendNodeMutation = {genome->mutationRates.appendNodeMutation.geneProbability};
+            genomeTO.mutationRates.addNodeMutation = {genome->mutationRates.addNodeMutation.geneProbability};
+            genomeTO.mutationRates.trimNodeMutation = {genome->mutationRates.trimNodeMutation.geneProbability};
+            genomeTO.mutationRates.deleteNodeMutation = {genome->mutationRates.deleteNodeMutation.geneProbability};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];

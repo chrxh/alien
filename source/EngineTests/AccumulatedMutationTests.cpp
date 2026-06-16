@@ -17,6 +17,10 @@ enum class MutationType
     CellTypeMode,
     CellType,
     Void,
+    AppendNode,
+    AddNode,
+    TrimNode,
+    DeleteNode,
     Constructor
 };
 
@@ -36,6 +40,10 @@ INSTANTIATE_TEST_SUITE_P(
         MutationType::CellTypeMode,
         MutationType::CellType,
         MutationType::Void,
+        MutationType::AppendNode,
+        MutationType::AddNode,
+        MutationType::TrimNode,
+        MutationType::DeleteNode,
         MutationType::Constructor));
 
 TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
@@ -60,6 +68,18 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     case MutationType::Void:
         genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
+        break;
+    case MutationType::AppendNode:
+        genome._mutationRates._appendNodeMutation = AppendNodeMutationDesc().geneProbability(1.0f);
+        break;
+    case MutationType::AddNode:
+        genome._mutationRates._addNodeMutation = AddNodeMutationDesc().geneProbability(1.0f);
+        break;
+    case MutationType::TrimNode:
+        genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(1.0f);
+        break;
+    case MutationType::DeleteNode:
+        genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(1.0f);
         break;
     case MutationType::Constructor:
         genome._mutationRates._constructorMutations[0] =
@@ -94,6 +114,10 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
     _parameters.metaMutationCellTypeModeSigma.value = 1.0f;
     _parameters.metaMutationCellTypeSigma.value = 1.0f;
     _parameters.metaMutationVoidSigma.value = 1.0f;
+    _parameters.metaMutationAppendNodeSigma.value = 1.0f;
+    _parameters.metaMutationAddNodeSigma.value = 1.0f;
+    _parameters.metaMutationTrimNodeSigma.value = 1.0f;
+    _parameters.metaMutationDeleteNodeSigma.value = 1.0f;
     _parameters.metaMutationConstructorSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 

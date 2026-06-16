@@ -45,6 +45,10 @@ namespace
         addActiveMutationType(activeMutations, "Cell type mode", {mutationRates._cellTypeModeMutation._nodeProbability});
         addActiveMutationType(activeMutations, "Cell type", {mutationRates._cellTypeMutation._nodeProbability});
         addActiveMutationType(activeMutations, "Void", {mutationRates._voidMutation._nodeProbability});
+        addActiveMutationType(activeMutations, "Append node", {mutationRates._appendNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Add node", {mutationRates._addNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Trim node", {mutationRates._trimNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Delete node", {mutationRates._deleteNodeMutation._geneProbability});
         addActiveMutationType(
             activeMutations, "Constructor", {mutationRates._constructorMutations[0]._nodeProbability, mutationRates._constructorMutations[1]._nodeProbability});
         return activeMutations;

@@ -376,6 +376,26 @@ struct VoidMutation
     float nodeProbability;
 };
 
+struct AppendNodeMutation
+{
+    float geneProbability;
+};
+
+struct AddNodeMutation
+{
+    float geneProbability;
+};
+
+struct TrimNodeMutation
+{
+    float geneProbability;
+};
+
+struct DeleteNodeMutation
+{
+    float geneProbability;
+};
+
 struct ConstructorMutation
 {
     float nodeProbability;
@@ -392,6 +412,10 @@ struct MutationRates
     CellTypeModeMutation cellTypeModeMutation;
     CellTypeMutation cellTypeMutation;
     VoidMutation voidMutation;
+    AppendNodeMutation appendNodeMutation;
+    AddNodeMutation addNodeMutation;
+    TrimNodeMutation trimNodeMutation;
+    DeleteNodeMutation deleteNodeMutation;
     ConstructorMutation constructorMutations[2];
 };
 

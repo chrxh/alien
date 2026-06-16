@@ -479,6 +479,22 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::metaMutationVoidSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
+                        .name("Append node mutations sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::metaMutationAppendNodeSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Add node mutations sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::metaMutationAddNodeSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Trim node mutations sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::metaMutationTrimNodeSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Delete node mutations sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::metaMutationDeleteNodeSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
                         .name("Constructor mutations sigma")
                         .reference(
                             FloatSpec().member(&SimulationParameters::metaMutationConstructorSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
