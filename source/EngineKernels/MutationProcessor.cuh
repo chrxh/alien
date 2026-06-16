@@ -128,11 +128,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     applyMutations_void(data, genome, accumulatedMutations);
     applyMutations_constructor(data, genome, accumulatedMutations);
 
-    // The structural node mutations reallocate gene node arrays per gene, so all preceding per-node writes (and any
-    // meta-mutation writes to the rates) must be visible first; afterwards the genome is corrected (e.g. void first/last
-    // nodes) before counting takes place. The block is only entered when a node mutation is active so genomes without it
-    // stay untouched. The sync below makes the rates uniform across the block, so this decision (and the inner syncs) do
-    // not diverge.
+    // sync since following mutations may change entire genes
     block.sync();
     auto const& nodeRates = genome->mutationRates;
     bool anyNodeMutation = nodeRates.appendNodeMutation.geneProbability > 0 || nodeRates.addNodeMutation.geneProbability > 0
