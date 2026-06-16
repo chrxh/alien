@@ -52,13 +52,13 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
     switch (GetParam()) {
     case MutationType::Neuron:
         genome._mutationRates._neuronMutations[0] =
-            NeuronMutationDesc().nodeProbability(1.0f).weightSigma(1.0f).biasSigma(1.0f).activationFunctionProbability(1.0f);
+            NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f).biasChangeSigma(1.0f).actfnChangeProbability(1.0f);
         break;
     case MutationType::Connection:
-        genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(1.0f).sigma(1.0f);
+        genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f);
         break;
     case MutationType::CellTypeProperties:
-        genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
+        genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
         break;
     case MutationType::CellTypeMode:
         genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(1.0f);
@@ -83,7 +83,7 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     case MutationType::Constructor:
         genome._mutationRates._constructorMutations[0] =
-            ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f).existConstructorProbability(1.0f);
+            ConstructorMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f).constructorToggleProbability(1.0f);
         break;
     }
 
@@ -108,17 +108,17 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    _parameters.metaMutationNeuronsSigma.value = 1.0f;
-    _parameters.metaMutationConnectionsSigma.value = 1.0f;
-    _parameters.metaMutationCellTypePropertiesSigma.value = 1.0f;
-    _parameters.metaMutationCellTypeModeSigma.value = 1.0f;
-    _parameters.metaMutationCellTypeSigma.value = 1.0f;
-    _parameters.metaMutationVoidSigma.value = 1.0f;
-    _parameters.metaMutationAppendNodeSigma.value = 1.0f;
-    _parameters.metaMutationAddNodeSigma.value = 1.0f;
-    _parameters.metaMutationTrimNodeSigma.value = 1.0f;
-    _parameters.metaMutationDeleteNodeSigma.value = 1.0f;
-    _parameters.metaMutationConstructorSigma.value = 1.0f;
+    _parameters.neuronsMetaMutationsSigma.value = 1.0f;
+    _parameters.connectionsMetaMutationsSigma.value = 1.0f;
+    _parameters.cellTypePropertiesMetaMutationsSigma.value = 1.0f;
+    _parameters.cellTypeModeMetaMutationsSigma.value = 1.0f;
+    _parameters.cellTypeMetaMutationsSigma.value = 1.0f;
+    _parameters.voidMetaMutationsSigma.value = 1.0f;
+    _parameters.appendNodeMetaMutationsSigma.value = 1.0f;
+    _parameters.addNodeMetaMutationsSigma.value = 1.0f;
+    _parameters.trimNodeMetaMutationsSigma.value = 1.0f;
+    _parameters.deleteNodeMetaMutationsSigma.value = 1.0f;
+    _parameters.constructorMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);

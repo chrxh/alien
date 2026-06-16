@@ -94,20 +94,20 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     for (int i = 0; i < 2; ++i) {
         genome->mutationRates.neuronMutations[i] = {
             genomeTO.mutationRates.neuronMutations[i].nodeProbability,
-            genomeTO.mutationRates.neuronMutations[i].weightSigma,
-            genomeTO.mutationRates.neuronMutations[i].biasSigma,
-            genomeTO.mutationRates.neuronMutations[i].activationFunctionProbability};
+            genomeTO.mutationRates.neuronMutations[i].weightChangeSigma,
+            genomeTO.mutationRates.neuronMutations[i].biasChangeSigma,
+            genomeTO.mutationRates.neuronMutations[i].actfnChangeProbability};
         genome->mutationRates.connectionMutations[i] = {
-            genomeTO.mutationRates.connectionMutations[i].nodeProbability, genomeTO.mutationRates.connectionMutations[i].sigma};
+            genomeTO.mutationRates.connectionMutations[i].nodeProbability, genomeTO.mutationRates.connectionMutations[i].valueChangeSigma};
         genome->mutationRates.cellTypePropertiesMutations[i] = {
             genomeTO.mutationRates.cellTypePropertiesMutations[i].nodeProbability,
-            genomeTO.mutationRates.cellTypePropertiesMutations[i].sigma,
-            genomeTO.mutationRates.cellTypePropertiesMutations[i].discreteChangeProbability};
+            genomeTO.mutationRates.cellTypePropertiesMutations[i].valueChangeSigma,
+            genomeTO.mutationRates.cellTypePropertiesMutations[i].enumChangeProbability};
         genome->mutationRates.constructorMutations[i] = {
             genomeTO.mutationRates.constructorMutations[i].nodeProbability,
-            genomeTO.mutationRates.constructorMutations[i].sigma,
-            genomeTO.mutationRates.constructorMutations[i].discreteChangeProbability,
-            genomeTO.mutationRates.constructorMutations[i].existConstructorProbability};
+            genomeTO.mutationRates.constructorMutations[i].valueChangeSigma,
+            genomeTO.mutationRates.constructorMutations[i].enumChangeProbability,
+            genomeTO.mutationRates.constructorMutations[i].constructorToggleProbability};
     }
     genome->mutationRates.cellTypeModeMutation = {genomeTO.mutationRates.cellTypeModeMutation.nodeProbability};
     genome->mutationRates.cellTypeMutation = {genomeTO.mutationRates.cellTypeMutation.nodeProbability};

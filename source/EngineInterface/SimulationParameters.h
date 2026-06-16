@@ -106,17 +106,17 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {ColorVector<float>::uniform(3.5f)};
 
     // Meta mutations
-    BaseParameter<float> metaMutationNeuronsSigma = {0};
-    BaseParameter<float> metaMutationConnectionsSigma = {0};
-    BaseParameter<float> metaMutationCellTypePropertiesSigma = {0};
-    BaseParameter<float> metaMutationCellTypeModeSigma = {0};
-    BaseParameter<float> metaMutationCellTypeSigma = {0};
-    BaseParameter<float> metaMutationVoidSigma = {0};
-    BaseParameter<float> metaMutationAppendNodeSigma = {0};
-    BaseParameter<float> metaMutationAddNodeSigma = {0};
-    BaseParameter<float> metaMutationTrimNodeSigma = {0};
-    BaseParameter<float> metaMutationDeleteNodeSigma = {0};
-    BaseParameter<float> metaMutationConstructorSigma = {0};
+    BaseParameter<float> neuronsMetaMutationsSigma = {0};
+    BaseParameter<float> connectionsMetaMutationsSigma = {0};
+    BaseParameter<float> cellTypePropertiesMetaMutationsSigma = {0};
+    BaseParameter<float> cellTypeModeMetaMutationsSigma = {0};
+    BaseParameter<float> cellTypeMetaMutationsSigma = {0};
+    BaseParameter<float> voidMetaMutationsSigma = {0};
+    BaseParameter<float> appendNodeMetaMutationsSigma = {0};
+    BaseParameter<float> addNodeMetaMutationsSigma = {0};
+    BaseParameter<float> trimNodeMetaMutationsSigma = {0};
+    BaseParameter<float> deleteNodeMetaMutationsSigma = {0};
+    BaseParameter<float> constructorMetaMutationsSigma = {0};
     BaseParameter<float> newLineageThreshold = {Infinity<float>::value};
 
     // Cell type: Attacker

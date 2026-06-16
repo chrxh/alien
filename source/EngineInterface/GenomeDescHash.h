@@ -545,18 +545,18 @@ struct std::hash<GenomeDesc>
         hash_combine(seed, desc._prevLineageId);
         for (int i = 0; i < 2; ++i) {
             hash_combine(seed, desc._mutationRates._neuronMutations[i]._nodeProbability);
-            hash_combine(seed, desc._mutationRates._neuronMutations[i]._weightSigma);
-            hash_combine(seed, desc._mutationRates._neuronMutations[i]._biasSigma);
-            hash_combine(seed, desc._mutationRates._neuronMutations[i]._activationFunctionProbability);
+            hash_combine(seed, desc._mutationRates._neuronMutations[i]._weightChangeSigma);
+            hash_combine(seed, desc._mutationRates._neuronMutations[i]._biasChangeSigma);
+            hash_combine(seed, desc._mutationRates._neuronMutations[i]._actfnChangeProbability);
             hash_combine(seed, desc._mutationRates._connectionMutations[i]._nodeProbability);
-            hash_combine(seed, desc._mutationRates._connectionMutations[i]._sigma);
+            hash_combine(seed, desc._mutationRates._connectionMutations[i]._valueChangeSigma);
             hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._nodeProbability);
-            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._sigma);
-            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._discreteChangeProbability);
+            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._valueChangeSigma);
+            hash_combine(seed, desc._mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability);
             hash_combine(seed, desc._mutationRates._constructorMutations[i]._nodeProbability);
-            hash_combine(seed, desc._mutationRates._constructorMutations[i]._sigma);
-            hash_combine(seed, desc._mutationRates._constructorMutations[i]._discreteChangeProbability);
-            hash_combine(seed, desc._mutationRates._constructorMutations[i]._existConstructorProbability);
+            hash_combine(seed, desc._mutationRates._constructorMutations[i]._valueChangeSigma);
+            hash_combine(seed, desc._mutationRates._constructorMutations[i]._enumChangeProbability);
+            hash_combine(seed, desc._mutationRates._constructorMutations[i]._constructorToggleProbability);
         }
         hash_combine(seed, desc._mutationRates._cellTypeModeMutation._nodeProbability);
         hash_combine(seed, desc._mutationRates._cellTypeMutation._nodeProbability);

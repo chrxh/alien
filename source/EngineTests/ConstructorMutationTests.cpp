@@ -33,7 +33,7 @@ protected:
 TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttributes)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f);
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -45,7 +45,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_changesConstructorAttribute
     _simulationFacade->testOnly_mutate(1);
     auto const actualGenome = getMutatedGenome();
     auto const& constructor = actualGenome._genes.at(0)._nodes.at(0)._constructor;
-    ASSERT_TRUE(constructor.has_value());  // without existConstructorProbability the constructor must never be removed
+    ASSERT_TRUE(constructor.has_value());  // without constructorToggleProbability the constructor must never be removed
     auto const& mutated = constructor.value();
 
     EXPECT_TRUE(mutated._autoTriggerInterval != original._autoTriggerInterval);
@@ -62,7 +62,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
 {
     auto genome = createTestGenome();
     genome._genes.at(0)._nodes.at(0)._constructor.reset();  // node without a constructor
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).existConstructorProbability(1.0f);
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).constructorToggleProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -81,7 +81,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
     genome._mutationRates._constructorMutations[0] =
-        ConstructorMutationDesc().nodeProbability(0.0f).sigma(1.0f).discreteChangeProbability(1.0f).existConstructorProbability(1.0f);
+        ConstructorMutationDesc().nodeProbability(0.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f).constructorToggleProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -98,9 +98,9 @@ TEST_F(ConstructorMutationTests, constructorMutation_keepOtherAttributesUnchange
 {
     auto genome = createTestGenome();
     genome._mutationRates._constructorMutations[0] =
-        ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f).existConstructorProbability(1.0f);
+        ConstructorMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f).constructorToggleProbability(1.0f);
     genome._mutationRates._constructorMutations[1] =
-        ConstructorMutationDesc().nodeProbability(1.0f).sigma(1.0f).discreteChangeProbability(1.0f).existConstructorProbability(1.0f);
+        ConstructorMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f).constructorToggleProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -118,7 +118,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_existProbabilityTogglesCons
 {
     auto genome = createTestGenome();
     genome._genes.at(0)._nodes.at(0)._constructor.reset();  // one node without a constructor
-    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).existConstructorProbability(1.0f);
+    genome._mutationRates._constructorMutations[0] = ConstructorMutationDesc().nodeProbability(1.0f).constructorToggleProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -127,7 +127,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_existProbabilityTogglesCons
 
     auto actualGenome = getMutatedGenome();
 
-    // existConstructorProbability alone must toggle whether a node has a constructor.
+    // constructorToggleProbability alone must toggle whether a node has a constructor.
     EXPECT_TRUE(actualGenome._genes.at(0)._nodes.at(0)._constructor.has_value());   // had none -> gained one
     EXPECT_FALSE(actualGenome._genes.at(0)._nodes.at(1)._constructor.has_value());  // had one -> lost it
 }

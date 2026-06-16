@@ -21,25 +21,25 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
     genome._accumulatedMutations = std::max(genome._accumulatedMutations, 0.0f);
     auto validateCellTypePropertiesMutation = [](CellTypePropertiesMutationDesc& mutation) {
         mutation._nodeProbability = std::clamp(mutation._nodeProbability, 0.0f, 1.0f);
-        mutation._sigma = std::clamp(mutation._sigma, 0.0f, 1.0f);
-        mutation._discreteChangeProbability = std::clamp(mutation._discreteChangeProbability, 0.0f, 1.0f);
+        mutation._valueChangeSigma = std::clamp(mutation._valueChangeSigma, 0.0f, 1.0f);
+        mutation._enumChangeProbability = std::clamp(mutation._enumChangeProbability, 0.0f, 1.0f);
     };
     auto validateConstructorMutation = [](ConstructorMutationDesc& mutation) {
         mutation._nodeProbability = std::clamp(mutation._nodeProbability, 0.0f, 1.0f);
-        mutation._sigma = std::clamp(mutation._sigma, 0.0f, 1.0f);
-        mutation._discreteChangeProbability = std::clamp(mutation._discreteChangeProbability, 0.0f, 1.0f);
-        mutation._existConstructorProbability = std::clamp(mutation._existConstructorProbability, 0.0f, 1.0f);
+        mutation._valueChangeSigma = std::clamp(mutation._valueChangeSigma, 0.0f, 1.0f);
+        mutation._enumChangeProbability = std::clamp(mutation._enumChangeProbability, 0.0f, 1.0f);
+        mutation._constructorToggleProbability = std::clamp(mutation._constructorToggleProbability, 0.0f, 1.0f);
     };
     for (int i = 0; i < 2; ++i) {
         auto& neuronMutation = genome._mutationRates._neuronMutations[i];
         neuronMutation._nodeProbability = std::clamp(neuronMutation._nodeProbability, 0.0f, 1.0f);
-        neuronMutation._weightSigma = std::max(neuronMutation._weightSigma, 0.0f);
-        neuronMutation._biasSigma = std::max(neuronMutation._biasSigma, 0.0f);
-        neuronMutation._activationFunctionProbability = std::clamp(neuronMutation._activationFunctionProbability, 0.0f, 1.0f);
+        neuronMutation._weightChangeSigma = std::max(neuronMutation._weightChangeSigma, 0.0f);
+        neuronMutation._biasChangeSigma = std::max(neuronMutation._biasChangeSigma, 0.0f);
+        neuronMutation._actfnChangeProbability = std::clamp(neuronMutation._actfnChangeProbability, 0.0f, 1.0f);
 
         auto& connectionMutation = genome._mutationRates._connectionMutations[i];
         connectionMutation._nodeProbability = std::clamp(connectionMutation._nodeProbability, 0.0f, 1.0f);
-        connectionMutation._sigma = std::max(connectionMutation._sigma, 0.0f);
+        connectionMutation._valueChangeSigma = std::max(connectionMutation._valueChangeSigma, 0.0f);
 
         validateCellTypePropertiesMutation(genome._mutationRates._cellTypePropertiesMutations[i]);
         validateConstructorMutation(genome._mutationRates._constructorMutations[i]);

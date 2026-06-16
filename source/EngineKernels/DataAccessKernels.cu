@@ -39,20 +39,20 @@ namespace
             for (int i = 0; i < 2; ++i) {
                 genomeTO.mutationRates.neuronMutations[i] = {
                     genome->mutationRates.neuronMutations[i].nodeProbability,
-                    genome->mutationRates.neuronMutations[i].weightSigma,
-                    genome->mutationRates.neuronMutations[i].biasSigma,
-                    genome->mutationRates.neuronMutations[i].activationFunctionProbability};
+                    genome->mutationRates.neuronMutations[i].weightChangeSigma,
+                    genome->mutationRates.neuronMutations[i].biasChangeSigma,
+                    genome->mutationRates.neuronMutations[i].actfnChangeProbability};
                 genomeTO.mutationRates.connectionMutations[i] = {
-                    genome->mutationRates.connectionMutations[i].nodeProbability, genome->mutationRates.connectionMutations[i].sigma};
+                    genome->mutationRates.connectionMutations[i].nodeProbability, genome->mutationRates.connectionMutations[i].valueChangeSigma};
                 genomeTO.mutationRates.cellTypePropertiesMutations[i] = {
                     genome->mutationRates.cellTypePropertiesMutations[i].nodeProbability,
-                    genome->mutationRates.cellTypePropertiesMutations[i].sigma,
-                    genome->mutationRates.cellTypePropertiesMutations[i].discreteChangeProbability};
+                    genome->mutationRates.cellTypePropertiesMutations[i].valueChangeSigma,
+                    genome->mutationRates.cellTypePropertiesMutations[i].enumChangeProbability};
                 genomeTO.mutationRates.constructorMutations[i] = {
                     genome->mutationRates.constructorMutations[i].nodeProbability,
-                    genome->mutationRates.constructorMutations[i].sigma,
-                    genome->mutationRates.constructorMutations[i].discreteChangeProbability,
-                    genome->mutationRates.constructorMutations[i].existConstructorProbability};
+                    genome->mutationRates.constructorMutations[i].valueChangeSigma,
+                    genome->mutationRates.constructorMutations[i].enumChangeProbability,
+                    genome->mutationRates.constructorMutations[i].constructorToggleProbability};
             }
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.nodeProbability};
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.nodeProbability};

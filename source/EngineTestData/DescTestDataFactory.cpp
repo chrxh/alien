@@ -175,13 +175,13 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
 {
     auto mutation = MutationRatesDesc()
                         .neuronMutations(
-                            {NeuronMutationDesc().nodeProbability(0.1f).weightSigma(0.2f).biasSigma(0.15f).activationFunctionProbability(0.05f),
-                             NeuronMutationDesc().nodeProbability(0.3f).weightSigma(0.4f).biasSigma(0.35f).activationFunctionProbability(0.25f)})
+                            {NeuronMutationDesc().nodeProbability(0.1f).weightChangeSigma(0.2f).biasChangeSigma(0.15f).actfnChangeProbability(0.05f),
+                             NeuronMutationDesc().nodeProbability(0.3f).weightChangeSigma(0.4f).biasChangeSigma(0.35f).actfnChangeProbability(0.25f)})
                         .connectionMutations(
-                            {ConnectionMutationDesc().nodeProbability(0.6f).sigma(0.7f), ConnectionMutationDesc().nodeProbability(0.8f).sigma(0.9f)})
+                            {ConnectionMutationDesc().nodeProbability(0.6f).valueChangeSigma(0.7f), ConnectionMutationDesc().nodeProbability(0.8f).valueChangeSigma(0.9f)})
                         .cellTypePropertiesMutations(
-                            {CellTypePropertiesMutationDesc().nodeProbability(0.45f).sigma(0.55f).discreteChangeProbability(0.65f),
-                             CellTypePropertiesMutationDesc().nodeProbability(0.75f).sigma(0.85f).discreteChangeProbability(0.95f)})
+                            {CellTypePropertiesMutationDesc().nodeProbability(0.45f).valueChangeSigma(0.55f).enumChangeProbability(0.65f),
+                             CellTypePropertiesMutationDesc().nodeProbability(0.75f).valueChangeSigma(0.85f).enumChangeProbability(0.95f)})
                         .cellTypeModeMutation(CellTypeModeMutationDesc().nodeProbability(0.33f))
                         .cellTypeMutation(CellTypeMutationDesc().nodeProbability(0.22f))
                         .voidMutation(VoidMutationDesc().nodeProbability(0.11f))
@@ -190,8 +190,8 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                         .trimNodeMutation(TrimNodeMutationDesc().geneProbability(0.43f))
                         .deleteNodeMutation(DeleteNodeMutationDesc().geneProbability(0.44f))
                         .constructorMutations(
-                            {ConstructorMutationDesc().nodeProbability(0.12f).sigma(0.13f).discreteChangeProbability(0.14f).existConstructorProbability(0.15f),
-                             ConstructorMutationDesc().nodeProbability(0.16f).sigma(0.17f).discreteChangeProbability(0.18f).existConstructorProbability(0.19f)});
+                            {ConstructorMutationDesc().nodeProbability(0.12f).valueChangeSigma(0.13f).enumChangeProbability(0.14f).constructorToggleProbability(0.15f),
+                             ConstructorMutationDesc().nodeProbability(0.16f).valueChangeSigma(0.17f).enumChangeProbability(0.18f).constructorToggleProbability(0.19f)});
 
     auto genome = GenomeDesc()
                       .name("Test Genome")
