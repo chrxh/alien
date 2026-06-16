@@ -90,6 +90,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     genome->prevLineageId = genomeTO.prevLineageId;
     genome->frontAngle = genomeTO.frontAngle;
     genome->accumulatedMutations = genomeTO.accumulatedMutations;
+    genome->resistanceToInjection = genomeTO.resistanceToInjection;
     for (int i = 0; i < 2; ++i) {
         genome->mutationRates.neuronMutations[i] = {
             genomeTO.mutationRates.neuronMutations[i].nodeProbability,
@@ -105,7 +106,8 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
         genome->mutationRates.constructorMutations[i] = {
             genomeTO.mutationRates.constructorMutations[i].nodeProbability,
             genomeTO.mutationRates.constructorMutations[i].sigma,
-            genomeTO.mutationRates.constructorMutations[i].discreteChangeProbability};
+            genomeTO.mutationRates.constructorMutations[i].discreteChangeProbability,
+            genomeTO.mutationRates.constructorMutations[i].existConstructorProbability};
     }
     genome->mutationRates.cellTypeModeMutation = {genomeTO.mutationRates.cellTypeModeMutation.nodeProbability};
     genome->mutationRates.cellTypeMutation = {genomeTO.mutationRates.cellTypeMutation.nodeProbability};

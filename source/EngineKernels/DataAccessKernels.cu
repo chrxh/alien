@@ -35,6 +35,7 @@ namespace
             genomeTO.prevLineageId = genome->prevLineageId;
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.accumulatedMutations = genome->accumulatedMutations;
+            genomeTO.resistanceToInjection = genome->resistanceToInjection;
             for (int i = 0; i < 2; ++i) {
                 genomeTO.mutationRates.neuronMutations[i] = {
                     genome->mutationRates.neuronMutations[i].nodeProbability,
@@ -50,7 +51,8 @@ namespace
                 genomeTO.mutationRates.constructorMutations[i] = {
                     genome->mutationRates.constructorMutations[i].nodeProbability,
                     genome->mutationRates.constructorMutations[i].sigma,
-                    genome->mutationRates.constructorMutations[i].discreteChangeProbability};
+                    genome->mutationRates.constructorMutations[i].discreteChangeProbability,
+                    genome->mutationRates.constructorMutations[i].existConstructorProbability};
             }
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.nodeProbability};
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.nodeProbability};

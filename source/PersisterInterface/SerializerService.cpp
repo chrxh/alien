@@ -287,6 +287,7 @@ namespace
     auto constexpr Id_Genome_LineageId = 3;
     auto constexpr Id_Genome_AccumulatedMutations = 4;
     auto constexpr Id_Genome_PrevLineageId = 5;
+    auto constexpr Id_Genome_ResistanceToInjection = 6;
 
     auto constexpr Id_NeuronMutation_NodeProbability = 0;
     auto constexpr Id_NeuronMutation_WeightSigma = 1;
@@ -317,6 +318,7 @@ namespace
     auto constexpr Id_ConstructorMutation_NodeProbability = 0;
     auto constexpr Id_ConstructorMutation_Sigma = 1;
     auto constexpr Id_ConstructorMutation_DiscreteChangeProbability = 2;
+    auto constexpr Id_ConstructorMutation_ExistConstructorProbability = 3;
 
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
@@ -993,6 +995,7 @@ namespace cereal
         scope.addMember(Id_ConstructorMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
         scope.addMember(Id_ConstructorMutation_Sigma, data._sigma, defaultObject._sigma);
         scope.addMember(Id_ConstructorMutation_DiscreteChangeProbability, data._discreteChangeProbability, defaultObject._discreteChangeProbability);
+        scope.addMember(Id_ConstructorMutation_ExistConstructorProbability, data._existConstructorProbability, defaultObject._existConstructorProbability);
     }
     SPLIT_SERIALIZATION(ConstructorMutationDesc)
 
@@ -1030,6 +1033,7 @@ namespace cereal
         scope.addMember(Id_Genome_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
         scope.addMember(Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
         scope.addMember(Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+        scope.addMember(Id_Genome_ResistanceToInjection, data._resistanceToInjection, defaultObject._resistanceToInjection);
         scope.addDesc(Id_Genome_Genes, data._genes);
         scope.addDesc(Id_Genome_MutationRates, data._mutationRates);
     }

@@ -1736,7 +1736,7 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     } else {
         // Auto-size: one line per item plus padding
         auto numItems = parameters._items.empty() ? 1 : parameters._items.size();
-        boxHeight = (lineHeight + padding.y * 2) * numItems;
+        boxHeight = (lineHeight + padding.y * 2 - scale(1.0f)) * numItems;
     }
 
     // Calculate width
@@ -1757,8 +1757,11 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     // Draw frame border
     drawList->AddRect(ImVec2(cursorPos.x, cursorPos.y), ImVec2(cursorPos.x + width, cursorPos.y + boxHeight), borderColor, style.FrameRounding, 0, 1.0f);
 
-    // Draw items with disabled text color to match read-only fields
-    ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + padding.x, cursorPos.y + padding.y));
+    // Draw items with disabled text color to match read-only fields, clipped to the box (no scrollbar)
+    ImGui::SetCursorScreenPos(cursorPos);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
+    ImGui::BeginChild("##listBox", ImVec2(width, boxHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::SetCursorPos(padding);
 
     ImGui::BeginDisabled();  // This applies the disabled text color
     ImGui::BeginGroup();
@@ -1771,6 +1774,9 @@ void AlienGui::ListBox(ListBoxParameters const& parameters)
     }
     ImGui::EndGroup();
     ImGui::EndDisabled();
+
+    ImGui::EndChild();
+    ImGui::PopStyleColor();
 
     // Move cursor to end of the box (right side), keeping same Y position for same-line layout
     ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + width, cursorPos.y));

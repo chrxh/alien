@@ -16,7 +16,7 @@
 #include "GenericMessageDialog.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
-#include "MutationRatesDialog.h"
+#include "MutationRatesWidget.h"
 #include "StyleRepository.h"
 
 namespace
@@ -90,19 +90,17 @@ void _GenomeEditorWidget::processHeaderData()
                 AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth),
                 &_editData->genome._frontAngle);
 
+            AlienGui::Checkbox(
+                AlienGui::CheckboxParameters()
+                    .name("Resistance to injection")
+                    .textWidth(rightColumnWidth),
+                _editData->genome._resistanceToInjection);
+
             table.next();
 
             AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
 
-            auto buttonWidth = scale(60.0f);
-            auto availableWidth = ImGui::GetContentRegionAvail().x;
-            auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
-            AlienGui::ListBox(AlienGui::ListBoxParameters().items(_editData->genome._mutationRates.getActiveMutationTypes()).width(listBoxWidth));
-            ImGui::SameLine();
-            if (AlienGui::Button("Edit")) {
-                MutationRatesDialog::get().open(
-                    _editData->genome._mutationRates, [this](MutationRatesDesc const& mutationRates) { _editData->genome._mutationRates = mutationRates; });
-            }
+            MutationRatesWidget::process(_editData->genome._mutationRates);
 
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()

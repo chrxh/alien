@@ -50,6 +50,9 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 if (!otherObject->typeData.cell.constructorAvailable) {
                     return;
                 }
+                if (otherObject->typeData.cell.creature->genome->resistanceToInjection) {
+                    return;
+                }
                 // Only inject to other cells which are in a visible cone with respect to the injector cell
                 if (ObjectConnectionProcessor::existsOwnIntersectingObjectInBetween(data, object, otherObject)) {
                     return;

@@ -190,8 +190,8 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                         .trimNodeMutation(TrimNodeMutationDesc().geneProbability(0.43f))
                         .deleteNodeMutation(DeleteNodeMutationDesc().geneProbability(0.44f))
                         .constructorMutations(
-                            {ConstructorMutationDesc().nodeProbability(0.12f).sigma(0.13f).discreteChangeProbability(0.14f),
-                             ConstructorMutationDesc().nodeProbability(0.16f).sigma(0.17f).discreteChangeProbability(0.18f)});
+                            {ConstructorMutationDesc().nodeProbability(0.12f).sigma(0.13f).discreteChangeProbability(0.14f).existConstructorProbability(0.15f),
+                             ConstructorMutationDesc().nodeProbability(0.16f).sigma(0.17f).discreteChangeProbability(0.18f).existConstructorProbability(0.19f)});
 
     auto genome = GenomeDesc()
                       .name("Test Genome")
@@ -199,6 +199,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                       .prevLineageId(501)
                       .frontAngle(270.0f)
                       .accumulatedMutations(0.05f)
+                      .resistanceToInjection(true)
                       .mutationRates(mutation)
                       .genes({
                           GeneDesc()

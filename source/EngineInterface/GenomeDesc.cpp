@@ -50,45 +50,6 @@ GenomeDesc GenomeDesc::id(uint64_t id)
     return *this;
 }
 
-std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
-{
-    std::vector<std::string> activeMutations;
-    if (_connectionMutations[0]._nodeProbability > 0.0f || _connectionMutations[1]._nodeProbability > 0.0f) {
-        activeMutations.push_back("Connection mutations");
-    }
-    if (_neuronMutations[0]._nodeProbability > 0.0f || _neuronMutations[1]._nodeProbability > 0.0f) {
-        activeMutations.push_back("Neuron mutations");
-    }
-    if (_cellTypePropertiesMutations[0]._nodeProbability > 0.0f || _cellTypePropertiesMutations[1]._nodeProbability > 0.0f) {
-        activeMutations.push_back("Cell type property mutations");
-    }
-    if (_cellTypeModeMutation._nodeProbability > 0.0f) {
-        activeMutations.push_back("Cell type mode mutations");
-    }
-    if (_cellTypeMutation._nodeProbability > 0.0f) {
-        activeMutations.push_back("Cell type mutations");
-    }
-    if (_voidMutation._nodeProbability > 0.0f) {
-        activeMutations.push_back("Void mutations");
-    }
-    if (_appendNodeMutation._geneProbability > 0.0f) {
-        activeMutations.push_back("Append node mutations");
-    }
-    if (_addNodeMutation._geneProbability > 0.0f) {
-        activeMutations.push_back("Add node mutations");
-    }
-    if (_trimNodeMutation._geneProbability > 0.0f) {
-        activeMutations.push_back("Trim node mutations");
-    }
-    if (_deleteNodeMutation._geneProbability > 0.0f) {
-        activeMutations.push_back("Delete node mutations");
-    }
-    if (_constructorMutations[0]._nodeProbability > 0.0f || _constructorMutations[1]._nodeProbability > 0.0f) {
-        activeMutations.push_back("Constructor mutations");
-    }
-    return activeMutations;
-}
-
 bool GenomeDesc::equalWithoutId(GenomeDesc const& other) const
 {
     auto compareClone = *this;

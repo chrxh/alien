@@ -260,7 +260,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
                         value = static_cast<ValueType>(newValue);
-                        atomicAdd_block(&accumulatedMutations, static_cast<float>(std::abs(roundedDelta)));
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
                     } else {
                         value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
                         atomicAdd_block(&accumulatedMutations, std::abs(delta));
@@ -1044,7 +1044,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.nodeProbability <= 0 || (rate.sigma <= 0 && rate.discreteChangeProbability <= 0)) {
+        if (rate.nodeProbability <= 0 || (rate.sigma <= 0 && rate.discreteChangeProbability <= 0 && rate.existConstructorProbability <= 0)) {
             continue;
         }
 
@@ -1068,7 +1068,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
                         value = static_cast<ValueType>(newValue);
-                        atomicAdd_block(&accumulatedMutations, static_cast<float>(std::abs(roundedDelta)));
+                        atomicAdd_block(&accumulatedMutations, 1.0f);
                     } else {
                         value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
                         atomicAdd_block(&accumulatedMutations, std::abs(delta));
@@ -1110,7 +1110,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 }
 
                 // Mutate whether the node has a constructor at all; enabling one initializes it with default values.
-                if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
+                if (data.primaryNumberGen.random() < rate.existConstructorProbability) {
                     node.constructorAvailable = !node.constructorAvailable;
                     if (node.constructorAvailable) {
                         constructor = {};
@@ -1212,6 +1212,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
                 mutateFloat(genome->mutationRates.constructorMutations[i].nodeProbability);
                 mutateFloat(genome->mutationRates.constructorMutations[i].sigma);
                 mutateFloat(genome->mutationRates.constructorMutations[i].discreteChangeProbability);
+                mutateFloat(genome->mutationRates.constructorMutations[i].existConstructorProbability);
             }
         }
     }

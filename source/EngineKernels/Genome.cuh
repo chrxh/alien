@@ -401,6 +401,7 @@ struct ConstructorMutation
     float nodeProbability;
     float sigma;
     float discreteChangeProbability;
+    float existConstructorProbability;
 };
 
 struct MutationRates
@@ -429,6 +430,7 @@ struct Genome
     uint32_t prevLineageId;
     float frontAngle;
     float accumulatedMutations;
+    bool resistanceToInjection;
     MutationRates mutationRates;
 
     // Temporary data

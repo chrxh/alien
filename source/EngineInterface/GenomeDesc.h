@@ -495,6 +495,7 @@ struct ConstructorMutationDesc
     MEMBER(ConstructorMutationDesc, float, nodeProbability, 0.0f);
     MEMBER(ConstructorMutationDesc, float, sigma, 0.0f);
     MEMBER(ConstructorMutationDesc, float, discreteChangeProbability, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, existConstructorProbability, 0.0f);
 };
 
 struct MutationRatesDesc
@@ -517,8 +518,6 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, TrimNodeMutationDesc, trimNodeMutation, TrimNodeMutationDesc());
     MEMBER(MutationRatesDesc, DeleteNodeMutationDesc, deleteNodeMutation, DeleteNodeMutationDesc());
     MEMBER(MutationRatesDesc, ConstructorMutationArray, constructorMutations, ConstructorMutationArray());
-
-    std::vector<std::string> getActiveMutationTypes() const;
 };
 
 struct GenomeDesc
@@ -535,6 +534,7 @@ struct GenomeDesc
     MEMBER(GenomeDesc, std::optional<int>, prevLineageId, std::nullopt);
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
     MEMBER(GenomeDesc, float, accumulatedMutations, 0.0f);
+    MEMBER(GenomeDesc, bool, resistanceToInjection, false);
 
     MEMBER(GenomeDesc, MutationRatesDesc, mutationRates, MutationRatesDesc());
 };

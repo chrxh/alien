@@ -541,6 +541,7 @@ struct std::hash<GenomeDesc>
         }
         hash_combine(seed, desc._frontAngle);
         hash_combine(seed, desc._accumulatedMutations);
+        hash_combine(seed, desc._resistanceToInjection);
         hash_combine(seed, desc._prevLineageId);
         for (int i = 0; i < 2; ++i) {
             hash_combine(seed, desc._mutationRates._neuronMutations[i]._nodeProbability);
@@ -555,6 +556,7 @@ struct std::hash<GenomeDesc>
             hash_combine(seed, desc._mutationRates._constructorMutations[i]._nodeProbability);
             hash_combine(seed, desc._mutationRates._constructorMutations[i]._sigma);
             hash_combine(seed, desc._mutationRates._constructorMutations[i]._discreteChangeProbability);
+            hash_combine(seed, desc._mutationRates._constructorMutations[i]._existConstructorProbability);
         }
         hash_combine(seed, desc._mutationRates._cellTypeModeMutation._nodeProbability);
         hash_combine(seed, desc._mutationRates._cellTypeMutation._nodeProbability);
