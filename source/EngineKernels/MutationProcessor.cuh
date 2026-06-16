@@ -23,8 +23,8 @@ public:
     __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
 
 private:
-    // Upper bound for node-adding mutations to keep genome growth bounded and avoid heap exhaustion.
-    static auto constexpr MaxNodesPerGene = 200;
+    // Upper bound to avoid heap exhaustion.
+    static auto constexpr MaxNodesPerGene = 2000;
 
     __inline__ __device__ static void applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_connections(SimulationData& data, Genome* genome, float& accumulatedMutations);
