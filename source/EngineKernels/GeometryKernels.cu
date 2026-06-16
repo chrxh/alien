@@ -108,7 +108,7 @@ namespace
         v = maxC;
     }
 
-    __device__ __inline__ uint32_t getCellColorByCode(int colorCode)
+    __device__ __inline__ uint32_t getCustomizationColor(int colorCode)
     {
         auto const& color = cudaSimulationParameters.customizationColors.value[calcMod(colorCode, MAX_COLORS)];
         auto const toInt = [](float value) {
@@ -122,15 +122,15 @@ namespace
         return (toInt(color.r) << 16) | (toInt(color.g) << 8) | toInt(color.b);
     }
 
-    __device__ __inline__ uint32_t getCellColor(Object* object)
+    __device__ __inline__ uint32_t getObjectColor(Object* object)
     {
         auto coloring = cudaSimulationParameters.objectColoring.value[calcMod(object->color, MAX_COLORS)];
         if (coloring == CellColoring_None) {
-            return 0xffffff;
+            return 0x7f7f7f;
         }
         if (coloring == CellColoring_LineageId) {
             if (object->type != ObjectType_Cell) {
-                return 0xffffff;
+                return 0x7f7f7f;
             }
             auto const& color = cudaSimulationParameters.customizationColors.value[calcMod(object->color, MAX_COLORS)];
             float r = fminf(1.0f, fmaxf(0.0f, color.r));
@@ -145,7 +145,7 @@ namespace
             h -= floorf(h);
             return hsvToRgb(h, s, v);
         }
-        return getCellColorByCode(object->color);
+        return getCustomizationColor(object->color);
     }
 
     __device__ __inline__ bool isInVisibleRect(float2 const& pos, GeometryExtractionContext const& context)
@@ -170,7 +170,7 @@ __global__ void cudaExtractObjectData(SimulationData data, ObjectVertexData* obj
 
             auto const& pos = object->pos;
 
-            auto const& cellColor = getCellColor(object);
+            auto const& cellColor = getObjectColor(object);
 
             float luminance;
             float zOffset = 0.0f;
@@ -389,7 +389,7 @@ cudaExtractFluidParticleData(SimulationData data, FluidParticleVertexData* fluid
                 fluidParticleData[idx].pos[0] = object->pos.x;
                 fluidParticleData[idx].pos[1] = object->pos.y;
                 fluidParticleData[idx].pos[2] = 0.0f;
-                auto color = getCellColorByCode(object->color);
+                auto color = getCustomizationColor(object->color);
                 fluidParticleData[idx].color[0] = intensity * toFloat((color >> 16) & 0xff) / 255;
                 fluidParticleData[idx].color[1] = intensity * toFloat((color >> 8) & 0xff) / 255;
                 fluidParticleData[idx].color[2] = intensity * toFloat(color & 0xff) / 255;
@@ -588,8 +588,8 @@ __global__ void cudaExtractSelectedConnectionData(
             }
 
             // Get cell colors
-            auto cellColor = getCellColor(object);
-            auto connectedObjectColor = getCellColor(connectedObject);
+            auto cellColor = getObjectColor(object);
+            auto connectedObjectColor = getObjectColor(connectedObject);
 
             // Add connection arrow data (2 vertices for the line)
             uint64_t vertexIndex = alienAtomicAdd64(numConnectionArrowVertices, uint64_t(2));
