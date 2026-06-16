@@ -67,8 +67,8 @@ protected:
 TEST_F(NeuronMutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightSigma(1.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).weightSigma(1.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -88,8 +88,8 @@ TEST_F(NeuronMutationTests, neuronWeightMutation_keepOtherAttributesUnchanged)
 TEST_F(NeuronMutationTests, neuronWeightMutation_weightsActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightSigma(1.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.0f).weightSigma(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.0f).weightChangeSigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -133,8 +133,8 @@ TEST_F(NeuronMutationTests, neuronWeightMutation_weightsActuallyChange)
 TEST_F(NeuronMutationTests, neuronWeightMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(0.0f).weightSigma(1.0f).biasSigma(1.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.0f).weightSigma(1.0f).biasSigma(1.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(0.0f).weightChangeSigma(1.0f).biasChangeSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.0f).weightChangeSigma(1.0f).biasChangeSigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -164,8 +164,8 @@ TEST_F(NeuronMutationTests, neuronWeightMutation_zeroProbabilityNoChange)
 TEST_F(NeuronMutationTests, neuronBiasMutation_biasesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightSigma(0.0f).biasSigma(1.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.0f).weightSigma(0.0f).biasSigma(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(0.0f).biasChangeSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.0f).weightChangeSigma(0.0f).biasChangeSigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -209,8 +209,8 @@ TEST_F(NeuronMutationTests, neuronBiasMutation_biasesActuallyChange)
 TEST_F(NeuronMutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightSigma(0.0f).biasSigma(0.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).weightSigma(0.0f).biasSigma(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(0.0f).biasChangeSigma(0.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(0.0f).biasChangeSigma(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -237,8 +237,8 @@ TEST_F(NeuronMutationTests, neuronBiasMutation_zeroBiasSigmaNoChange)
 TEST_F(NeuronMutationTests, neuronBiasMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).biasSigma(1.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).biasSigma(1.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).biasChangeSigma(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).biasChangeSigma(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -258,8 +258,8 @@ TEST_F(NeuronMutationTests, neuronBiasMutation_keepOtherAttributesUnchanged)
 TEST_F(NeuronMutationTests, neuronActivationFunctionMutation_activationFunctionsActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).activationFunctionProbability(1.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).actfnChangeProbability(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.0f).actfnChangeProbability(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -303,8 +303,8 @@ TEST_F(NeuronMutationTests, neuronActivationFunctionMutation_activationFunctions
 TEST_F(NeuronMutationTests, neuronActivationFunctionMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).activationFunctionProbability(0.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).activationFunctionProbability(0.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).actfnChangeProbability(0.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).actfnChangeProbability(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -331,8 +331,8 @@ TEST_F(NeuronMutationTests, neuronActivationFunctionMutation_zeroProbabilityNoCh
 TEST_F(NeuronMutationTests, neuronActivationFunctionMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).activationFunctionProbability(1.0f);
-    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).activationFunctionProbability(1.0f);
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).actfnChangeProbability(1.0f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(1.0f).actfnChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

@@ -290,16 +290,16 @@ namespace
     auto constexpr Id_Genome_ResistanceToInjection = 6;
 
     auto constexpr Id_NeuronMutation_NodeProbability = 0;
-    auto constexpr Id_NeuronMutation_WeightSigma = 1;
-    auto constexpr Id_NeuronMutation_BiasSigma = 2;
-    auto constexpr Id_NeuronMutation_ActivationFunctionProbability = 3;
+    auto constexpr Id_NeuronMutation_WeightChangeSigma = 1;
+    auto constexpr Id_NeuronMutation_BiasChangeSigma = 2;
+    auto constexpr Id_NeuronMutation_ActfnChangeProbability = 3;
 
     auto constexpr Id_ConnectionMutation_NodeProbability = 0;
-    auto constexpr Id_ConnectionMutation_Sigma = 1;
+    auto constexpr Id_ConnectionMutation_ValueChangeSigma = 1;
 
     auto constexpr Id_CellTypePropertiesMutation_NodeProbability = 0;
-    auto constexpr Id_CellTypePropertiesMutation_Sigma = 1;
-    auto constexpr Id_CellTypePropertiesMutation_DiscreteChangeProbability = 2;
+    auto constexpr Id_CellTypePropertiesMutation_ValueChangeSigma = 1;
+    auto constexpr Id_CellTypePropertiesMutation_EnumChangeProbability = 2;
 
     auto constexpr Id_CellTypeModeMutation_NodeProbability = 0;
 
@@ -316,9 +316,9 @@ namespace
     auto constexpr Id_DeleteNodeMutation_GeneProbability = 0;
 
     auto constexpr Id_ConstructorMutation_NodeProbability = 0;
-    auto constexpr Id_ConstructorMutation_Sigma = 1;
-    auto constexpr Id_ConstructorMutation_DiscreteChangeProbability = 2;
-    auto constexpr Id_ConstructorMutation_ExistConstructorProbability = 3;
+    auto constexpr Id_ConstructorMutation_ValueChangeSigma = 1;
+    auto constexpr Id_ConstructorMutation_EnumChangeProbability = 2;
+    auto constexpr Id_ConstructorMutation_ConstructorToggleProbability = 3;
 
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
@@ -897,9 +897,9 @@ namespace cereal
         NeuronMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_NeuronMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
-        scope.addMember(Id_NeuronMutation_WeightSigma, data._weightSigma, defaultObject._weightSigma);
-        scope.addMember(Id_NeuronMutation_BiasSigma, data._biasSigma, defaultObject._biasSigma);
-        scope.addMember(Id_NeuronMutation_ActivationFunctionProbability, data._activationFunctionProbability, defaultObject._activationFunctionProbability);
+        scope.addMember(Id_NeuronMutation_WeightChangeSigma, data._weightChangeSigma, defaultObject._weightChangeSigma);
+        scope.addMember(Id_NeuronMutation_BiasChangeSigma, data._biasChangeSigma, defaultObject._biasChangeSigma);
+        scope.addMember(Id_NeuronMutation_ActfnChangeProbability, data._actfnChangeProbability, defaultObject._actfnChangeProbability);
     }
     SPLIT_SERIALIZATION(NeuronMutationDesc)
 
@@ -909,7 +909,7 @@ namespace cereal
         ConnectionMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_ConnectionMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
-        scope.addMember(Id_ConnectionMutation_Sigma, data._sigma, defaultObject._sigma);
+        scope.addMember(Id_ConnectionMutation_ValueChangeSigma, data._valueChangeSigma, defaultObject._valueChangeSigma);
     }
     SPLIT_SERIALIZATION(ConnectionMutationDesc)
 
@@ -919,8 +919,8 @@ namespace cereal
         CellTypePropertiesMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_CellTypePropertiesMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
-        scope.addMember(Id_CellTypePropertiesMutation_Sigma, data._sigma, defaultObject._sigma);
-        scope.addMember(Id_CellTypePropertiesMutation_DiscreteChangeProbability, data._discreteChangeProbability, defaultObject._discreteChangeProbability);
+        scope.addMember(Id_CellTypePropertiesMutation_ValueChangeSigma, data._valueChangeSigma, defaultObject._valueChangeSigma);
+        scope.addMember(Id_CellTypePropertiesMutation_EnumChangeProbability, data._enumChangeProbability, defaultObject._enumChangeProbability);
     }
     SPLIT_SERIALIZATION(CellTypePropertiesMutationDesc)
 
@@ -993,9 +993,9 @@ namespace cereal
         ConstructorMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_ConstructorMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
-        scope.addMember(Id_ConstructorMutation_Sigma, data._sigma, defaultObject._sigma);
-        scope.addMember(Id_ConstructorMutation_DiscreteChangeProbability, data._discreteChangeProbability, defaultObject._discreteChangeProbability);
-        scope.addMember(Id_ConstructorMutation_ExistConstructorProbability, data._existConstructorProbability, defaultObject._existConstructorProbability);
+        scope.addMember(Id_ConstructorMutation_ValueChangeSigma, data._valueChangeSigma, defaultObject._valueChangeSigma);
+        scope.addMember(Id_ConstructorMutation_EnumChangeProbability, data._enumChangeProbability, defaultObject._enumChangeProbability);
+        scope.addMember(Id_ConstructorMutation_ConstructorToggleProbability, data._constructorToggleProbability, defaultObject._constructorToggleProbability);
     }
     SPLIT_SERIALIZATION(ConstructorMutationDesc)
 

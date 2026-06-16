@@ -417,9 +417,9 @@ struct NeuronMutationDesc
     auto operator<=>(NeuronMutationDesc const&) const = default;
 
     MEMBER(NeuronMutationDesc, float, nodeProbability, 0.0f);
-    MEMBER(NeuronMutationDesc, float, weightSigma, 0.0f);
-    MEMBER(NeuronMutationDesc, float, biasSigma, 0.0f);
-    MEMBER(NeuronMutationDesc, float, activationFunctionProbability, 0.0f);
+    MEMBER(NeuronMutationDesc, float, weightChangeSigma, 0.0f);
+    MEMBER(NeuronMutationDesc, float, biasChangeSigma, 0.0f);
+    MEMBER(NeuronMutationDesc, float, actfnChangeProbability, 0.0f);
 };
 
 struct ConnectionMutationDesc
@@ -427,7 +427,7 @@ struct ConnectionMutationDesc
     auto operator<=>(ConnectionMutationDesc const&) const = default;
 
     MEMBER(ConnectionMutationDesc, float, nodeProbability, 0.0f);
-    MEMBER(ConnectionMutationDesc, float, sigma, 0.0f);
+    MEMBER(ConnectionMutationDesc, float, valueChangeSigma, 0.0f);
 };
 
 struct CellTypePropertiesMutationDesc
@@ -435,8 +435,8 @@ struct CellTypePropertiesMutationDesc
     auto operator<=>(CellTypePropertiesMutationDesc const&) const = default;
 
     MEMBER(CellTypePropertiesMutationDesc, float, nodeProbability, 0.0f);
-    MEMBER(CellTypePropertiesMutationDesc, float, sigma, 0.0f);
-    MEMBER(CellTypePropertiesMutationDesc, float, discreteChangeProbability, 0.0f);
+    MEMBER(CellTypePropertiesMutationDesc, float, valueChangeSigma, 0.0f);
+    MEMBER(CellTypePropertiesMutationDesc, float, enumChangeProbability, 0.0f);
 };
 
 struct CellTypeModeMutationDesc
@@ -493,9 +493,9 @@ struct ConstructorMutationDesc
     auto operator<=>(ConstructorMutationDesc const&) const = default;
 
     MEMBER(ConstructorMutationDesc, float, nodeProbability, 0.0f);
-    MEMBER(ConstructorMutationDesc, float, sigma, 0.0f);
-    MEMBER(ConstructorMutationDesc, float, discreteChangeProbability, 0.0f);
-    MEMBER(ConstructorMutationDesc, float, existConstructorProbability, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, valueChangeSigma, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, enumChangeProbability, 0.0f);
+    MEMBER(ConstructorMutationDesc, float, constructorToggleProbability, 0.0f);
 };
 
 struct MutationRatesDesc
@@ -512,20 +512,20 @@ struct MutationRatesDesc
         NeuronMutationArray,
         neuronMutations,
         (NeuronMutationArray{
-            {NeuronMutationDesc().weightSigma(0.05f).biasSigma(0.05f).activationFunctionProbability(0.05f),
-             NeuronMutationDesc().weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f)}}));
+            {NeuronMutationDesc().weightChangeSigma(0.05f).biasChangeSigma(0.05f).actfnChangeProbability(0.05f),
+             NeuronMutationDesc().weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f)}}));
     MEMBER(
         MutationRatesDesc,
         ConnectionMutationArray,
         connectionMutations,
-        (ConnectionMutationArray{{ConnectionMutationDesc().sigma(0.05f), ConnectionMutationDesc().sigma(0.5f)}}));
+        (ConnectionMutationArray{{ConnectionMutationDesc().valueChangeSigma(0.05f), ConnectionMutationDesc().valueChangeSigma(0.5f)}}));
     MEMBER(
         MutationRatesDesc,
         CellTypePropertiesMutationArray,
         cellTypePropertiesMutations,
         (CellTypePropertiesMutationArray{
-            {CellTypePropertiesMutationDesc().sigma(0.05f).discreteChangeProbability(0.05f),
-             CellTypePropertiesMutationDesc().sigma(0.5f).discreteChangeProbability(0.5f)}}));
+            {CellTypePropertiesMutationDesc().valueChangeSigma(0.05f).enumChangeProbability(0.05f),
+             CellTypePropertiesMutationDesc().valueChangeSigma(0.5f).enumChangeProbability(0.5f)}}));
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());
@@ -538,8 +538,8 @@ struct MutationRatesDesc
         ConstructorMutationArray,
         constructorMutations,
         (ConstructorMutationArray{
-            {ConstructorMutationDesc().sigma(0.05f).discreteChangeProbability(0.05f).existConstructorProbability(0.05f),
-             ConstructorMutationDesc().discreteChangeProbability(0.5f).existConstructorProbability(0.5f)}}));
+            {ConstructorMutationDesc().valueChangeSigma(0.05f).enumChangeProbability(0.05f).constructorToggleProbability(0.05f),
+             ConstructorMutationDesc().enumChangeProbability(0.5f).constructorToggleProbability(0.5f)}}));
 };
 
 struct GenomeDesc

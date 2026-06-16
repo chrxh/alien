@@ -155,7 +155,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.nodeProbability <= 0 || (rate.weightSigma <= 0 && rate.biasSigma <= 0 && rate.activationFunctionProbability <= 0)) {
+        if (rate.nodeProbability <= 0 || (rate.weightChangeSigma <= 0 && rate.biasChangeSigma <= 0 && rate.actfnChangeProbability <= 0)) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -165,11 +165,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                 if (laneId < NEURONS_PER_CELL) {
                     int neuronIndex = laneId;
                     if (data.primaryNumberGen.random() < rate.nodeProbability) {
-                        if (rate.weightSigma > 0) {
+                        if (rate.weightChangeSigma > 0) {
                             auto accumulatedWeightLocal = 0.0f;
                             for (int weightIndex = 0; weightIndex < NEURONS_PER_CELL; ++weightIndex) {
                                 auto& weight = node.neuralNetwork.weights[neuronIndex * NEURONS_PER_CELL + weightIndex];
-                                auto delta = generateGaussian(data) * rate.weightSigma;
+                                auto delta = generateGaussian(data) * rate.weightChangeSigma;
                                 float newValue = weight.getValue() + delta;
                                 newValue = max(-2.0f, min(2.0f, newValue));
                                 weight = NeuralNetWeight(newValue);
@@ -177,15 +177,15 @@ __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationD
                             }
                             atomicAdd_block(&accumulatedMutations, accumulatedWeightLocal / (NEURONS_PER_CELL * NEURONS_PER_CELL));
                         }
-                        if (rate.biasSigma > 0) {
+                        if (rate.biasChangeSigma > 0) {
                             auto& bias = node.neuralNetwork.biases[neuronIndex];
-                            auto delta = generateGaussian(data) * rate.biasSigma;
+                            auto delta = generateGaussian(data) * rate.biasChangeSigma;
                             float newBias = bias + delta;
                             newBias = max(-2.0f, min(2.0f, newBias));
                             bias = newBias;
                             atomicAdd_block(&accumulatedMutations, abs(delta) / NEURONS_PER_CELL);
                         }
-                        if (rate.activationFunctionProbability > 0 && data.primaryNumberGen.random() < rate.activationFunctionProbability) {
+                        if (rate.actfnChangeProbability > 0 && data.primaryNumberGen.random() < rate.actfnChangeProbability) {
                             node.neuralNetwork.activationFunctions[neuronIndex] =
                                 static_cast<ActivationFunction>(data.primaryNumberGen.random(ActivationFunction_Count - 1));
                             atomicAdd_block(&accumulatedMutations, 1.0f / NEURONS_PER_CELL);
@@ -205,7 +205,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.nodeProbability <= 0 || rate.sigma <= 0) {
+        if (rate.nodeProbability <= 0 || rate.valueChangeSigma <= 0) {
             continue;
         }
         for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
@@ -215,7 +215,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_connections(Simulat
                 if (laneId < MAX_OBJECT_CONNECTIONS) {
                     if (data.primaryNumberGen.random() < rate.nodeProbability) {
                         auto& weight = node.neuralNetwork.connectionWeights[laneId];
-                        auto delta = generateGaussian(data) * rate.sigma;
+                        auto delta = generateGaussian(data) * rate.valueChangeSigma;
                         float newValue = weight + delta;
                         newValue = max(-2.0f, min(2.0f, newValue));
                         weight = newValue;
@@ -235,7 +235,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.nodeProbability <= 0 || (rate.sigma <= 0 && rate.discreteChangeProbability <= 0)) {
+        if (rate.nodeProbability <= 0 || (rate.valueChangeSigma <= 0 && rate.enumChangeProbability <= 0)) {
             continue;
         }
 
@@ -249,10 +249,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
 
                 auto mutateNumber = [&](auto& value, auto minValue, auto maxValue) {
                     using ValueType = std::decay_t<decltype(value)>;
-                    if (rate.sigma <= 0) {
+                    if (rate.valueChangeSigma <= 0) {
                         return;
                     }
-                    auto delta = generateGaussian(data) * rate.sigma * (maxValue - minValue);
+                    auto delta = generateGaussian(data) * rate.valueChangeSigma * (maxValue - minValue);
                     if constexpr (std::is_integral_v<ValueType>) {
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
@@ -265,7 +265,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 };
 
                 auto mutateBoolField = [&](bool& value) {
-                    if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
+                    if (data.primaryNumberGen.random() < rate.enumChangeProbability) {
                         value = !value;
                         atomicAdd_block(&accumulatedMutations, 1.0f);
                     }
@@ -278,7 +278,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     auto const maskValue = static_cast<UnsignedType>(mask);
                     for (int bitIndex = 0; bitIndex < sizeof(UnsignedType) * 8; ++bitIndex) {
                         auto const bit = UnsignedType{1} << bitIndex;
-                        if ((maskValue & bit) != 0 && data.primaryNumberGen.random() < rate.discreteChangeProbability) {
+                        if ((maskValue & bit) != 0 && data.primaryNumberGen.random() < rate.enumChangeProbability) {
                             newValue ^= bit;
                         }
                     }
@@ -290,7 +290,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
 
                 auto mutateEnumField = [&](auto& value, int count) {
                     using ValueType = std::decay_t<decltype(value)>;
-                    if (count > 1 && data.primaryNumberGen.random() < rate.discreteChangeProbability) {
+                    if (count > 1 && data.primaryNumberGen.random() < rate.enumChangeProbability) {
                         auto currentValue = static_cast<int>(value);
                         auto newValue = data.primaryNumberGen.random(count - 2);
                         if (newValue >= currentValue) {
@@ -429,10 +429,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                 case CellType_Memory: {
                     mutateBitset(node.cellTypeData.memory.channelBitMask, Const::MemoryChannelBitMask_Max);
 
-                    if (rate.sigma > 0) {
+                    if (rate.valueChangeSigma > 0) {
                         auto& memory = node.cellTypeData.memory;
                         auto oldNumSignalEntries = toInt(memory.numSignalEntries);
-                        auto roundedDelta = toInt(std::round(generateGaussian(data) * rate.sigma));
+                        auto roundedDelta = toInt(std::round(generateGaussian(data) * rate.valueChangeSigma));
                         auto newNumSignalEntries =
                             max(Const::MemoryNumSignalEntries_Min, min(Const::MemoryNumSignalEntries_Max, oldNumSignalEntries + roundedDelta));
                         if (newNumSignalEntries > oldNumSignalEntries) {
@@ -453,7 +453,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                             for (int entryIndex = 0; entryIndex < newNumSignalEntries; ++entryIndex) {
                                 auto& entry = memory.signalEntries[entryIndex];
                                 for (int channelIndex = 0; channelIndex < NEURONS_PER_CELL; ++channelIndex) {
-                                    auto delta = generateGaussian(data) * rate.sigma;
+                                    auto delta = generateGaussian(data) * rate.valueChangeSigma;
                                     auto newValue = max(-2.0f, min(2.0f, entry.channels[channelIndex] + delta));
                                     signalMutations += abs(newValue - entry.channels[channelIndex]);
                                     entry.channels[channelIndex] = newValue;
@@ -1029,7 +1029,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.nodeProbability <= 0 || (rate.sigma <= 0 && rate.discreteChangeProbability <= 0 && rate.existConstructorProbability <= 0)) {
+        if (rate.nodeProbability <= 0 || (rate.valueChangeSigma <= 0 && rate.enumChangeProbability <= 0 && rate.constructorToggleProbability <= 0)) {
             continue;
         }
 
@@ -1045,10 +1045,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 // Mutate real and integer attributes by a Gaussian step scaled by the value range; the clamping mirrors DescValidationService.
                 auto mutateNumber = [&](auto& value, auto minValue, auto maxValue) {
                     using ValueType = std::decay_t<decltype(value)>;
-                    if (rate.sigma <= 0) {
+                    if (rate.valueChangeSigma <= 0) {
                         return;
                     }
-                    auto delta = generateGaussian(data) * rate.sigma * (maxValue - minValue);
+                    auto delta = generateGaussian(data) * rate.valueChangeSigma * (maxValue - minValue);
                     if constexpr (std::is_integral_v<ValueType>) {
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
@@ -1061,16 +1061,16 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 };
 
                 auto mutateBoolField = [&](bool& value) {
-                    if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
+                    if (data.primaryNumberGen.random() < rate.enumChangeProbability) {
                         value = !value;
                         atomicAdd_block(&accumulatedMutations, 1.0f);
                     }
                 };
 
-                // Mutate the attributes of an existing constructor (real/integer via sigma, bool via discreteChangeProbability).
+                // Mutate the attributes of an existing constructor (real/integer via valueChangeSigma, bool via enumChangeProbability).
                 if (node.constructorAvailable) {
                     if (constructor.autoTriggerInterval == 0 || constructor.autoTriggerInterval == Const::ConstructorAutoTriggerInterval_Default) {
-                        if (data.primaryNumberGen.random() < rate.discreteChangeProbability) {
+                        if (data.primaryNumberGen.random() < rate.enumChangeProbability) {
                             constructor.autoTriggerInterval = constructor.autoTriggerInterval == 0 ? Const::ConstructorAutoTriggerInterval_Default : 0;
                             atomicAdd_block(&accumulatedMutations, 1.0f);
                         }
@@ -1095,7 +1095,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 }
 
                 // Mutate whether the node has a constructor at all; enabling one initializes it with default values.
-                if (data.primaryNumberGen.random() < rate.existConstructorProbability) {
+                if (data.primaryNumberGen.random() < rate.constructorToggleProbability) {
                     node.constructorAvailable = !node.constructorAvailable;
                     if (node.constructorAvailable) {
                         constructor = {};
@@ -1117,87 +1117,87 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
 
     if (laneId == 0) {
         // Meta-mutate neuron mutation rates
-        float neuronSigma = cudaSimulationParameters.metaMutationNeuronsSigma.value;
+        float neuronSigma = cudaSimulationParameters.neuronsMetaMutationsSigma.value;
         if (neuronSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * neuronSigma)); };
             for (int i = 0; i < 2; ++i) {
                 mutateFloat(genome->mutationRates.neuronMutations[i].nodeProbability);
-                mutateFloat(genome->mutationRates.neuronMutations[i].weightSigma);
-                mutateFloat(genome->mutationRates.neuronMutations[i].biasSigma);
-                mutateFloat(genome->mutationRates.neuronMutations[i].activationFunctionProbability);
+                mutateFloat(genome->mutationRates.neuronMutations[i].weightChangeSigma);
+                mutateFloat(genome->mutationRates.neuronMutations[i].biasChangeSigma);
+                mutateFloat(genome->mutationRates.neuronMutations[i].actfnChangeProbability);
             }
         }
 
         // Meta-mutate connection mutation rates
-        float connSigma = cudaSimulationParameters.metaMutationConnectionsSigma.value;
+        float connSigma = cudaSimulationParameters.connectionsMetaMutationsSigma.value;
         if (connSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * connSigma)); };
             for (int i = 0; i < 2; ++i) {
                 mutateFloat(genome->mutationRates.connectionMutations[i].nodeProbability);
-                mutateFloat(genome->mutationRates.connectionMutations[i].sigma);
+                mutateFloat(genome->mutationRates.connectionMutations[i].valueChangeSigma);
             }
         }
 
-        float cellTypeSigma = cudaSimulationParameters.metaMutationCellTypePropertiesSigma.value;
+        float cellTypeSigma = cudaSimulationParameters.cellTypePropertiesMetaMutationsSigma.value;
         if (cellTypeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeSigma)); };
             for (int i = 0; i < 2; ++i) {
                 mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].nodeProbability);
-                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].sigma);
-                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].discreteChangeProbability);
+                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].valueChangeSigma);
+                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].enumChangeProbability);
             }
         }
 
-        float cellTypeModeSigma = cudaSimulationParameters.metaMutationCellTypeModeSigma.value;
+        float cellTypeModeSigma = cudaSimulationParameters.cellTypeModeMetaMutationsSigma.value;
         if (cellTypeModeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeModeSigma)); };
             mutateFloat(genome->mutationRates.cellTypeModeMutation.nodeProbability);
         }
 
-        float cellTypeMutationSigma = cudaSimulationParameters.metaMutationCellTypeSigma.value;
+        float cellTypeMutationSigma = cudaSimulationParameters.cellTypeMetaMutationsSigma.value;
         if (cellTypeMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeMutationSigma)); };
             mutateFloat(genome->mutationRates.cellTypeMutation.nodeProbability);
         }
 
-        float voidMutationSigma = cudaSimulationParameters.metaMutationVoidSigma.value;
+        float voidMutationSigma = cudaSimulationParameters.voidMetaMutationsSigma.value;
         if (voidMutationSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * voidMutationSigma)); };
             mutateFloat(genome->mutationRates.voidMutation.nodeProbability);
         }
 
-        float appendNodeSigma = cudaSimulationParameters.metaMutationAppendNodeSigma.value;
+        float appendNodeSigma = cudaSimulationParameters.appendNodeMetaMutationsSigma.value;
         if (appendNodeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * appendNodeSigma)); };
             mutateFloat(genome->mutationRates.appendNodeMutation.geneProbability);
         }
 
-        float addNodeSigma = cudaSimulationParameters.metaMutationAddNodeSigma.value;
+        float addNodeSigma = cudaSimulationParameters.addNodeMetaMutationsSigma.value;
         if (addNodeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * addNodeSigma)); };
             mutateFloat(genome->mutationRates.addNodeMutation.geneProbability);
         }
 
-        float trimNodeSigma = cudaSimulationParameters.metaMutationTrimNodeSigma.value;
+        float trimNodeSigma = cudaSimulationParameters.trimNodeMetaMutationsSigma.value;
         if (trimNodeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * trimNodeSigma)); };
             mutateFloat(genome->mutationRates.trimNodeMutation.geneProbability);
         }
 
-        float deleteNodeSigma = cudaSimulationParameters.metaMutationDeleteNodeSigma.value;
+        float deleteNodeSigma = cudaSimulationParameters.deleteNodeMetaMutationsSigma.value;
         if (deleteNodeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * deleteNodeSigma)); };
             mutateFloat(genome->mutationRates.deleteNodeMutation.geneProbability);
         }
 
-        float constructorSigma = cudaSimulationParameters.metaMutationConstructorSigma.value;
+        float constructorSigma = cudaSimulationParameters.constructorMetaMutationsSigma.value;
         if (constructorSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * constructorSigma)); };
             for (int i = 0; i < 2; ++i) {
                 mutateFloat(genome->mutationRates.constructorMutations[i].nodeProbability);
-                mutateFloat(genome->mutationRates.constructorMutations[i].sigma);
-                mutateFloat(genome->mutationRates.constructorMutations[i].discreteChangeProbability);
-                mutateFloat(genome->mutationRates.constructorMutations[i].existConstructorProbability);
+                mutateFloat(genome->mutationRates.constructorMutations[i].valueChangeSigma);
+                mutateFloat(genome->mutationRates.constructorMutations[i].enumChangeProbability);
+                mutateFloat(genome->mutationRates.constructorMutations[i].constructorToggleProbability);
             }
         }
     }
