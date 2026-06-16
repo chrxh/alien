@@ -71,6 +71,18 @@ std::vector<std::string> MutationRatesDesc::getActiveMutationTypes() const
     if (_voidMutation._nodeProbability > 0.0f) {
         activeMutations.push_back("Void mutations");
     }
+    if (_appendNodeMutation._geneProbability > 0.0f) {
+        activeMutations.push_back("Append node mutations");
+    }
+    if (_addNodeMutation._geneProbability > 0.0f) {
+        activeMutations.push_back("Add node mutations");
+    }
+    if (_trimNodeMutation._geneProbability > 0.0f) {
+        activeMutations.push_back("Trim node mutations");
+    }
+    if (_deleteNodeMutation._geneProbability > 0.0f) {
+        activeMutations.push_back("Delete node mutations");
+    }
     if (_constructorMutations[0]._nodeProbability > 0.0f || _constructorMutations[1]._nodeProbability > 0.0f) {
         activeMutations.push_back("Constructor mutations");
     }

@@ -49,6 +49,14 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
         std::clamp(genome._mutationRates._cellTypeMutation._nodeProbability, 0.0f, 1.0f);
     genome._mutationRates._voidMutation._nodeProbability =
         std::clamp(genome._mutationRates._voidMutation._nodeProbability, 0.0f, 1.0f);
+    genome._mutationRates._appendNodeMutation._geneProbability =
+        std::clamp(genome._mutationRates._appendNodeMutation._geneProbability, 0.0f, 1.0f);
+    genome._mutationRates._addNodeMutation._geneProbability =
+        std::clamp(genome._mutationRates._addNodeMutation._geneProbability, 0.0f, 1.0f);
+    genome._mutationRates._trimNodeMutation._geneProbability =
+        std::clamp(genome._mutationRates._trimNodeMutation._geneProbability, 0.0f, 1.0f);
+    genome._mutationRates._deleteNodeMutation._geneProbability =
+        std::clamp(genome._mutationRates._deleteNodeMutation._geneProbability, 0.0f, 1.0f);
 
     // Validate each gene
     for (auto& gene : genome._genes) {

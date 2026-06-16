@@ -112,6 +112,10 @@ struct SimulationParameters
     BaseParameter<float> metaMutationCellTypeModeSigma = {0};
     BaseParameter<float> metaMutationCellTypeSigma = {0};
     BaseParameter<float> metaMutationVoidSigma = {0};
+    BaseParameter<float> metaMutationAppendNodeSigma = {0};
+    BaseParameter<float> metaMutationAddNodeSigma = {0};
+    BaseParameter<float> metaMutationTrimNodeSigma = {0};
+    BaseParameter<float> metaMutationDeleteNodeSigma = {0};
     BaseParameter<float> metaMutationConstructorSigma = {0};
     BaseParameter<float> newLineageThreshold = {Infinity<float>::value};
 

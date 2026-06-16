@@ -1,6 +1,8 @@
 target_sources(EngineTests
 PUBLIC
     AccumulatedMutationTests.cpp
+    AddNodeMutationTests.cpp
+    AppendNodeMutationTests.cpp
     AttackerTests.cpp
     BalanceTests.cpp
     CellStateTransitionTests.cpp
@@ -15,6 +17,7 @@ PUBLIC
     CreatureTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
+    DeleteNodeMutationTests.cpp
     DepotTests.cpp
     DescriptionEditTests.cpp
     DetonatorTests.cpp
@@ -44,6 +47,7 @@ PUBLIC
     SimulationControlTests.cpp
     StatisticsTests.cpp
     Testsuite.cpp
+    TrimNodeMutationTests.cpp
     VoidMutationTests.cpp
     VoidTests.cpp)
 

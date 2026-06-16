@@ -460,6 +460,34 @@ struct VoidMutationDesc
     MEMBER(VoidMutationDesc, float, nodeProbability, 0.0f);
 };
 
+struct AppendNodeMutationDesc
+{
+    auto operator<=>(AppendNodeMutationDesc const&) const = default;
+
+    MEMBER(AppendNodeMutationDesc, float, geneProbability, 0.0f);
+};
+
+struct AddNodeMutationDesc
+{
+    auto operator<=>(AddNodeMutationDesc const&) const = default;
+
+    MEMBER(AddNodeMutationDesc, float, geneProbability, 0.0f);
+};
+
+struct TrimNodeMutationDesc
+{
+    auto operator<=>(TrimNodeMutationDesc const&) const = default;
+
+    MEMBER(TrimNodeMutationDesc, float, geneProbability, 0.0f);
+};
+
+struct DeleteNodeMutationDesc
+{
+    auto operator<=>(DeleteNodeMutationDesc const&) const = default;
+
+    MEMBER(DeleteNodeMutationDesc, float, geneProbability, 0.0f);
+};
+
 struct ConstructorMutationDesc
 {
     auto operator<=>(ConstructorMutationDesc const&) const = default;
@@ -484,6 +512,10 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());
+    MEMBER(MutationRatesDesc, AppendNodeMutationDesc, appendNodeMutation, AppendNodeMutationDesc());
+    MEMBER(MutationRatesDesc, AddNodeMutationDesc, addNodeMutation, AddNodeMutationDesc());
+    MEMBER(MutationRatesDesc, TrimNodeMutationDesc, trimNodeMutation, TrimNodeMutationDesc());
+    MEMBER(MutationRatesDesc, DeleteNodeMutationDesc, deleteNodeMutation, DeleteNodeMutationDesc());
     MEMBER(MutationRatesDesc, ConstructorMutationArray, constructorMutations, ConstructorMutationArray());
 
     std::vector<std::string> getActiveMutationTypes() const;
