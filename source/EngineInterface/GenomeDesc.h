@@ -513,7 +513,7 @@ struct MutationRatesDesc
         neuronMutations,
         (NeuronMutationArray{
             {NeuronMutationDesc().weightSigma(0.05f).biasSigma(0.05f).activationFunctionProbability(0.05f),
-             NeuronMutationDesc().weightSigma(0.5f).biasSigma(0.1f).activationFunctionProbability(0.1f)}}));
+             NeuronMutationDesc().weightSigma(0.5f).biasSigma(0.5f).activationFunctionProbability(0.5f)}}));
     MEMBER(
         MutationRatesDesc,
         ConnectionMutationArray,
