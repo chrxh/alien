@@ -41,9 +41,10 @@ private:
 
     __inline__ __device__ static void resetCellTypeModeToDefault(Node& node);
     __inline__ __device__ static void resetCellTypeToDefault(Node& node);
-    __inline__ __device__ static void setRandomCellTypeMode(SimulationData& data, Node& node);
-    __inline__ __device__ static void initNewNode(SimulationData& data, Node& node);
-    __inline__ __device__ static void insertNode(SimulationData& data, Gene& gene, int position);
+    __inline__ __device__ static CellType chooseRandomCellTypeExceptVoid(SimulationData& data);
+    __inline__ __device__ static bool setRandomCellTypeMode(SimulationData& data, Node& node);
+    __inline__ __device__ static void initNewNode(SimulationData& data, Node& node, int color);
+    __inline__ __device__ static void insertNode(SimulationData& data, Genome* genome, Gene& gene, int position);
     __inline__ __device__ static void removeNode(SimulationData& data, Gene& gene, int position);
     __inline__ __device__ static void correctGenome(SimulationData& data, Genome* genome);
 
@@ -699,57 +700,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeMode(Simula
         return;
     }
 
-    auto pickNewMode = [&](int currentMode, int count) {
-        auto newMode = data.primaryNumberGen.random(count - 2);
-        if (newMode >= currentMode) {
-            ++newMode;
-        }
-        return newMode;
-    };
-
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
         for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
             if (data.primaryNumberGen.random() >= rate.nodeProbability) {
                 continue;
             }
-            auto& node = gene.nodes[nodeIndex];
-
-            // Pick a new mode for the node's cell type; the new mode's data is then reset to its defaults below.
-            bool changed = true;
-            switch (node.cellType) {
-            case CellType_Sensor:
-                node.cellTypeData.sensor.mode = static_cast<SensorMode>(pickNewMode(node.cellTypeData.sensor.mode, SensorMode_Count));
-                break;
-            case CellType_Generator:
-                node.cellTypeData.generator.mode = static_cast<GeneratorMode>(pickNewMode(node.cellTypeData.generator.mode, GeneratorMode_Count));
-                break;
-            case CellType_Attacker:
-                node.cellTypeData.attacker.mode = static_cast<AttackerMode>(pickNewMode(node.cellTypeData.attacker.mode, AttackerMode_Count));
-                break;
-            case CellType_Muscle:
-                node.cellTypeData.muscle.mode = static_cast<MuscleMode>(pickNewMode(node.cellTypeData.muscle.mode, MuscleMode_Count));
-                break;
-            case CellType_Defender:
-                node.cellTypeData.defender.mode = static_cast<DefenderMode>(pickNewMode(node.cellTypeData.defender.mode, DefenderMode_Count));
-                break;
-            case CellType_Reconnector:
-                node.cellTypeData.reconnector.mode = static_cast<ReconnectorMode>(pickNewMode(node.cellTypeData.reconnector.mode, ReconnectorMode_Count));
-                break;
-            case CellType_Memory:
-                node.cellTypeData.memory.mode = static_cast<MemoryMode>(pickNewMode(node.cellTypeData.memory.mode, MemoryMode_Count));
-                break;
-            case CellType_Communicator:
-                node.cellTypeData.communicator.mode = static_cast<CommunicatorMode>(pickNewMode(node.cellTypeData.communicator.mode, CommunicatorMode_Count));
-                break;
-            default:
-                // Cell types without a mode field are not affected.
-                changed = false;
-                break;
-            }
-
-            if (changed) {
-                resetCellTypeModeToDefault(node);
+            // Switch the node to a different random mode (its data is reset to defaults); cell types without a mode are unaffected.
+            if (setRandomCellTypeMode(data, gene.nodes[nodeIndex])) {
                 atomicAdd_block(&accumulatedMutations, 1.0f);
             }
         }
@@ -811,10 +769,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
         return;
     }
 
-    // Pick a non-void cell type used when a void node is turned into a non-void node.
-    // Void is the last entry before CellType_Count, so the range [0, CellType_Count - 2] covers exactly the non-void types.
-    auto pickNonVoidCellType = [&]() { return data.primaryNumberGen.random(CellType_Count - 2); };
-
     for (int geneIndex = 0; geneIndex < genome->numGenes; ++geneIndex) {
         auto& gene = genome->genes[geneIndex];
         for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {
@@ -828,42 +782,59 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
             auto& node = gene.nodes[nodeIndex];
 
             // Toggle the node between void and non-void; the new cell type is reset to its default attribute values.
-            node.cellType = node.cellType == CellType_Void ? pickNonVoidCellType() : CellType_Void;
+            node.cellType = node.cellType == CellType_Void ? chooseRandomCellTypeExceptVoid(data) : CellType_Void;
             resetCellTypeToDefault(node);
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
     }
 }
 
-__inline__ __device__ void MutationProcessor::setRandomCellTypeMode(SimulationData& data, Node& node)
+__inline__ __device__ CellType MutationProcessor::chooseRandomCellTypeExceptVoid(SimulationData& data)
 {
-    // Pick a uniformly random mode for the node's cell type and reset that mode's data to its defaults.
-    auto randomMode = [&](int count) { return data.primaryNumberGen.random(count - 1); };
+    // Pick a uniformly random non-void cell type without assuming the position of CellType_Void within the enum.
+    auto cellType = data.primaryNumberGen.random(CellType_Count - 2);
+    if (cellType >= CellType_Void) {
+        ++cellType;
+    }
+    return static_cast<CellType>(cellType);
+}
+
+__inline__ __device__ bool MutationProcessor::setRandomCellTypeMode(SimulationData& data, Node& node)
+{
+    // Pick a mode different from the node's current mode for its cell type and reset that mode's data to its defaults.
+    // Returns whether the cell type has a mode at all.
+    auto pickNewMode = [&](int currentMode, int count) {
+        auto newMode = data.primaryNumberGen.random(count - 2);
+        if (newMode >= currentMode) {
+            ++newMode;
+        }
+        return newMode;
+    };
     bool changed = true;
     switch (node.cellType) {
     case CellType_Sensor:
-        node.cellTypeData.sensor.mode = static_cast<SensorMode>(randomMode(SensorMode_Count));
+        node.cellTypeData.sensor.mode = static_cast<SensorMode>(pickNewMode(node.cellTypeData.sensor.mode, SensorMode_Count));
         break;
     case CellType_Generator:
-        node.cellTypeData.generator.mode = static_cast<GeneratorMode>(randomMode(GeneratorMode_Count));
+        node.cellTypeData.generator.mode = static_cast<GeneratorMode>(pickNewMode(node.cellTypeData.generator.mode, GeneratorMode_Count));
         break;
     case CellType_Attacker:
-        node.cellTypeData.attacker.mode = static_cast<AttackerMode>(randomMode(AttackerMode_Count));
+        node.cellTypeData.attacker.mode = static_cast<AttackerMode>(pickNewMode(node.cellTypeData.attacker.mode, AttackerMode_Count));
         break;
     case CellType_Muscle:
-        node.cellTypeData.muscle.mode = static_cast<MuscleMode>(randomMode(MuscleMode_Count));
+        node.cellTypeData.muscle.mode = static_cast<MuscleMode>(pickNewMode(node.cellTypeData.muscle.mode, MuscleMode_Count));
         break;
     case CellType_Defender:
-        node.cellTypeData.defender.mode = static_cast<DefenderMode>(randomMode(DefenderMode_Count));
+        node.cellTypeData.defender.mode = static_cast<DefenderMode>(pickNewMode(node.cellTypeData.defender.mode, DefenderMode_Count));
         break;
     case CellType_Reconnector:
-        node.cellTypeData.reconnector.mode = static_cast<ReconnectorMode>(randomMode(ReconnectorMode_Count));
+        node.cellTypeData.reconnector.mode = static_cast<ReconnectorMode>(pickNewMode(node.cellTypeData.reconnector.mode, ReconnectorMode_Count));
         break;
     case CellType_Memory:
-        node.cellTypeData.memory.mode = static_cast<MemoryMode>(randomMode(MemoryMode_Count));
+        node.cellTypeData.memory.mode = static_cast<MemoryMode>(pickNewMode(node.cellTypeData.memory.mode, MemoryMode_Count));
         break;
     case CellType_Communicator:
-        node.cellTypeData.communicator.mode = static_cast<CommunicatorMode>(randomMode(CommunicatorMode_Count));
+        node.cellTypeData.communicator.mode = static_cast<CommunicatorMode>(pickNewMode(node.cellTypeData.communicator.mode, CommunicatorMode_Count));
         break;
     default:
         // Cell types without a mode field are not affected.
@@ -873,13 +844,14 @@ __inline__ __device__ void MutationProcessor::setRandomCellTypeMode(SimulationDa
     if (changed) {
         resetCellTypeModeToDefault(node);
     }
+    return changed;
 }
 
-__inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, Node& node)
+__inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, Node& node, int color)
 {
     // A freshly created node uses the shared default attribute values (mirrors NodeDesc / NeuralNetGenomeDesc defaults).
     node.referenceAngle = 0.0f;
-    node.color = 0;
+    node.color = color;
     for (int i = 0; i < NEURONS_PER_CELL * NEURONS_PER_CELL; ++i) {
         node.neuralNetwork.weights[i] = NeuralNetWeight(0.0f);
     }
@@ -894,22 +866,39 @@ __inline__ __device__ void MutationProcessor::initNewNode(SimulationData& data, 
     node.neuralNetwork.connectionWeights[0] = 1.0f;
     node.constructorAvailable = false;
 
-    // Random non-void cell type and random mode; all cell-type attributes stay at their defaults.
-    node.cellType = data.primaryNumberGen.random(CellType_Count - 2);
+    // Random non-void cell type with a random mode; all cell-type attributes stay at their defaults.
+    node.cellType = chooseRandomCellTypeExceptVoid(data);
     resetCellTypeToDefault(node);
     setRandomCellTypeMode(data, node);
 }
 
-__inline__ __device__ void MutationProcessor::insertNode(SimulationData& data, Gene& gene, int position)
+__inline__ __device__ void MutationProcessor::insertNode(SimulationData& data, Genome* genome, Gene& gene, int position)
 {
-    // Reallocate the gene's node array with one extra slot at the given position holding a new default node.
+    // The new node inherits the color of its previous neighbor, otherwise its next neighbor, otherwise the genome's first
+    // node, otherwise a random color.
     auto const oldNumNodes = gene.numNodes;
+    int color;
+    if (position > 0) {
+        color = gene.nodes[position - 1].color;
+    } else if (oldNumNodes > 0) {
+        color = gene.nodes[0].color;
+    } else {
+        color = data.primaryNumberGen.random(MAX_COLORS - 1);
+        for (int otherGeneIndex = 0; otherGeneIndex < genome->numGenes; ++otherGeneIndex) {
+            if (genome->genes[otherGeneIndex].numNodes > 0) {
+                color = genome->genes[otherGeneIndex].nodes[0].color;
+                break;
+            }
+        }
+    }
+
+    // Reallocate the gene's node array with one extra slot at the given position holding the new default node.
     auto const newNumNodes = oldNumNodes + 1;
     auto newNodes = data.entities.heap.getTypedSubArray<Node>(newNumNodes);
     for (int i = 0; i < position; ++i) {
         newNodes[i] = gene.nodes[i];
     }
-    initNewNode(data, newNodes[position]);
+    initNewNode(data, newNodes[position], color);
     for (int i = position; i < oldNumNodes; ++i) {
         newNodes[i + 1] = gene.nodes[i];
     }
@@ -948,7 +937,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_appendNode(Simulati
             continue;
         }
         auto position = data.primaryNumberGen.random() < 0.5f ? 0 : gene.numNodes;  // start or end
-        insertNode(data, gene, position);
+        insertNode(data, genome, gene, position);
         atomicAdd_block(&accumulatedMutations, 1.0f);
     }
 }
@@ -967,7 +956,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_addNode(SimulationD
             continue;
         }
         auto position = data.primaryNumberGen.random(gene.numNodes);  // [0, numNodes] => any insertion slot, incl. start/end
-        insertNode(data, gene, position);
+        insertNode(data, genome, gene, position);
         atomicAdd_block(&accumulatedMutations, 1.0f);
     }
 }
@@ -1023,7 +1012,7 @@ __inline__ __device__ void MutationProcessor::correctGenome(SimulationData& data
         auto fixBoundaryNode = [&](int nodeIndex) {
             auto& node = gene.nodes[nodeIndex];
             if (node.cellType == CellType_Void) {
-                node.cellType = data.primaryNumberGen.random(CellType_Count - 2);
+                node.cellType = chooseRandomCellTypeExceptVoid(data);
                 resetCellTypeToDefault(node);
             }
         };
