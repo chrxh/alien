@@ -9,7 +9,7 @@ class AccumulatedMutationTests : public MutationTestsBase
 {
 };
 
-enum class MutationType
+enum class MutationCategory
 {
     Neuron,
     Connection,
@@ -26,7 +26,7 @@ enum class MutationType
 
 class AccumulatedMutationTests_AllTypes
     : public AccumulatedMutationTests
-    , public ::testing::WithParamInterface<MutationType>
+    , public ::testing::WithParamInterface<MutationCategory>
 {
 };
 
@@ -34,54 +34,54 @@ INSTANTIATE_TEST_SUITE_P(
     AccumulatedMutationTests,
     AccumulatedMutationTests_AllTypes,
     ::testing::Values(
-        MutationType::Neuron,
-        MutationType::Connection,
-        MutationType::CellTypeProperties,
-        MutationType::CellTypeMode,
-        MutationType::CellType,
-        MutationType::Void,
-        MutationType::AppendNode,
-        MutationType::AddNode,
-        MutationType::TrimNode,
-        MutationType::DeleteNode,
-        MutationType::Constructor));
+        MutationCategory::Neuron,
+        MutationCategory::Connection,
+        MutationCategory::CellTypeProperties,
+        MutationCategory::CellTypeMode,
+        MutationCategory::CellType,
+        MutationCategory::Void,
+        MutationCategory::AppendNode,
+        MutationCategory::AddNode,
+        MutationCategory::TrimNode,
+        MutationCategory::DeleteNode,
+        MutationCategory::Constructor));
 
 TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
 {
     auto genome = createTestGenome().lineageId(42).prevLineageId(41);
     switch (GetParam()) {
-    case MutationType::Neuron:
+    case MutationCategory::Neuron:
         genome._mutationRates._neuronMutations[0] =
             NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f).biasChangeSigma(1.0f).actfnChangeProbability(1.0f);
         break;
-    case MutationType::Connection:
+    case MutationCategory::Connection:
         genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f);
         break;
-    case MutationType::CellTypeProperties:
+    case MutationCategory::CellTypeProperties:
         genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
         break;
-    case MutationType::CellTypeMode:
+    case MutationCategory::CellTypeMode:
         genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(1.0f);
         break;
-    case MutationType::CellType:
+    case MutationCategory::CellType:
         genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
         break;
-    case MutationType::Void:
+    case MutationCategory::Void:
         genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
         break;
-    case MutationType::AppendNode:
+    case MutationCategory::AppendNode:
         genome._mutationRates._appendNodeMutation = AppendNodeMutationDesc().geneProbability(1.0f);
         break;
-    case MutationType::AddNode:
+    case MutationCategory::AddNode:
         genome._mutationRates._addNodeMutation = AddNodeMutationDesc().geneProbability(1.0f);
         break;
-    case MutationType::TrimNode:
+    case MutationCategory::TrimNode:
         genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(1.0f);
         break;
-    case MutationType::DeleteNode:
+    case MutationCategory::DeleteNode:
         genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(1.0f);
         break;
-    case MutationType::Constructor:
+    case MutationCategory::Constructor:
         genome._mutationRates._constructorMutations[0] =
             ConstructorMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f).constructorToggleProbability(1.0f);
         break;

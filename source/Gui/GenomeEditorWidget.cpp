@@ -96,6 +96,10 @@ void _GenomeEditorWidget::processHeaderData()
                     .textWidth(rightColumnWidth),
                 _editData->genome._resistanceToInjection);
 
+            AlienGui::Combo(
+                AlienGui::ComboParameters().name("Mutation type").values(Const::MutationTypeStrings).textWidth(rightColumnWidth),
+                _editData->genome._mutationType);
+
             table.next();
 
             AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
