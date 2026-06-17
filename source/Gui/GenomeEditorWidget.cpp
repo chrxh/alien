@@ -96,9 +96,7 @@ void _GenomeEditorWidget::processHeaderData()
                     .textWidth(rightColumnWidth),
                 _editData->genome._resistanceToInjection);
 
-            AlienGui::Combo(
-                AlienGui::ComboParameters().name("Mutation type").values(Const::MutationTypeStrings).textWidth(rightColumnWidth),
-                _editData->genome._mutationType);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
 
             table.next();
 

@@ -259,20 +259,6 @@ enum LineageRestriction_
     LineageRestriction_Count,
 };
 
-using MutationType = int;
-enum MutationType_
-{
-    MutationType_NoMutations,     // No mutations are applied to the genome
-    MutationType_FixedMutations,  // Mutations are applied, but no meta-mutations (mutation rates stay fixed)
-    MutationType_MetaMutations,   // Both mutations and meta-mutations are applied
-    MutationType_Count,
-};
-
-namespace Const
-{
-    std::vector<std::string> const MutationTypeStrings = {"No mutations", "Fixed mutations", "Meta mutations"};
-}
-
 using SensorMode = int;
 enum SensorMode_
 {

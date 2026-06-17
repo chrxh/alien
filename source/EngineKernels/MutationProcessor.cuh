@@ -111,11 +111,6 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
 {
-    // mutationType is uniform across the block, so an early return does not diverge cooperative-group syncs
-    if (genome->mutationType == MutationType_NoMutations) {
-        return;
-    }
-
     __shared__ float accumulatedMutations;
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
@@ -125,7 +120,8 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     }
     block.sync();
 
-    if (genome->mutationType == MutationType_MetaMutations) {
+    // applyMetaMutations is uniform across the block, so the conditional call does not diverge cooperative-group syncs
+    if (genome->applyMetaMutations) {
         applyMutations_meta(data, genome);
     }
     applyMutations_neurons(data, genome, accumulatedMutations);

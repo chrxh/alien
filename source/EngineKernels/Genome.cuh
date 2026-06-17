@@ -431,7 +431,7 @@ struct Genome
     float frontAngle;
     float accumulatedMutations;
     bool resistanceToInjection;
-    MutationType mutationType;
+    bool applyMetaMutations;
     MutationRates mutationRates;
 
     // Temporary data

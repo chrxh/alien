@@ -557,7 +557,7 @@ struct GenomeDesc
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
     MEMBER(GenomeDesc, float, accumulatedMutations, 0.0f);
     MEMBER(GenomeDesc, bool, resistanceToInjection, false);
-    MEMBER(GenomeDesc, MutationType, mutationType, MutationType_MetaMutations);
+    MEMBER(GenomeDesc, bool, applyMetaMutations, true);
 
     MEMBER(GenomeDesc, MutationRatesDesc, mutationRates, MutationRatesDesc());
 };

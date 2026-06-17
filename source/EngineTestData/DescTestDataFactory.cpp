@@ -200,7 +200,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                       .frontAngle(270.0f)
                       .accumulatedMutations(0.05f)
                       .resistanceToInjection(true)
-                      .mutationType(MutationType_FixedMutations)
+                      .applyMetaMutations(false)
                       .mutationRates(mutation)
                       .genes({
                           GeneDesc()

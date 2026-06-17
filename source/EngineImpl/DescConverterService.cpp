@@ -871,7 +871,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._frontAngle = genomeTO.frontAngle;
     result._accumulatedMutations = genomeTO.accumulatedMutations;
     result._resistanceToInjection = genomeTO.resistanceToInjection;
-    result._mutationType = genomeTO.mutationType;
+    result._applyMetaMutations = genomeTO.applyMetaMutations;
     for (int i = 0; i < 2; ++i) {
         result._mutationRates._neuronMutations[i]._nodeProbability = genomeTO.mutationRates.neuronMutations[i].nodeProbability;
         result._mutationRates._neuronMutations[i]._weightChangeSigma = genomeTO.mutationRates.neuronMutations[i].weightChangeSigma;
@@ -972,7 +972,7 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.accumulatedMutations = genome._accumulatedMutations;
     genomeTO.resistanceToInjection = genome._resistanceToInjection;
-    genomeTO.mutationType = genome._mutationType;
+    genomeTO.applyMetaMutations = genome._applyMetaMutations;
     for (int i = 0; i < 2; ++i) {
         genomeTO.mutationRates.neuronMutations[i] = {
             genome._mutationRates._neuronMutations[i]._nodeProbability,
