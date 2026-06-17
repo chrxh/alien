@@ -130,7 +130,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
         gene.shape = geneTO.shape;
         gene.stiffness = geneTO.stiffness;
         gene.connectionDistance = geneTO.connectionDistance;
-        gene.homogeneCellType = geneTO.homogeneCellType;
+        gene.homogeneousCellType = geneTO.homogeneousCellType;
         gene.numNodes = geneTO.numNodes;
         for (int i = 0; i < sizeof(geneTO.name); ++i) {
             gene.name[i] = geneTO.name[i];

@@ -324,7 +324,7 @@ namespace
     auto constexpr Id_Gene_Shape = 1;
     auto constexpr Id_Gene_Stiffness = 5;
     auto constexpr Id_Gene_ConnectionDistance = 6;
-    auto constexpr Id_Gene_HomogeneCellType = 7;
+    auto constexpr Id_Gene_HomogeneousCellType = 7;
 
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
@@ -886,7 +886,7 @@ namespace cereal
         scope.addMember(Id_Gene_Shape, data._shape, defaultObject._shape);
         scope.addMember(Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         scope.addMember(Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
-        scope.addMember(Id_Gene_HomogeneCellType, data._homogeneCellType, defaultObject._homogeneCellType);
+        scope.addMember(Id_Gene_HomogeneousCellType, data._homogeneousCellType, defaultObject._homogeneousCellType);
         scope.addDesc(Id_Gene_Nodes, data._nodes);
     }
     SPLIT_SERIALIZATION(GeneDesc)

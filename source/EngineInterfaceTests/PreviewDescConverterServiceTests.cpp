@@ -140,11 +140,11 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_marksConnectionI
     EXPECT_TRUE(result.description._connections.at(0)._inactive);
 }
 
-TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature_homogeneCellTypeKeepsVoidCellActive)
+TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature_homogeneousCellTypeKeepsVoidCellActive)
 {
     // The first and last node of a gene cannot be void, so the void node is placed in the middle.
     auto genome = GenomeDesc().genes({
-        GeneDesc().homogeneCellType(true).nodes({NodeDesc().color(2).cellType(MuscleGenomeDesc()), NodeDesc().cellType(VoidGenomeDesc()), NodeDesc().color(3)}),
+        GeneDesc().homogeneousCellType(true).nodes({NodeDesc().color(2).cellType(MuscleGenomeDesc()), NodeDesc().cellType(VoidGenomeDesc()), NodeDesc().color(3)}),
     });
 
     Desc input;

@@ -739,8 +739,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellType(Simulation
         auto& gene = genome->genes[geneIndex];
 
         if (laneId == 0 && data.primaryNumberGen.random() < rate.nodeProbability) {
-            gene.homogeneCellType = !gene.homogeneCellType;
-            atomicAdd_block(&accumulatedMutations, 1.0f);
+            gene.homogeneousCellType = !gene.homogeneousCellType;
+            atomicAdd_block(&accumulatedMutations, toFloat(gene.numNodes));
         }
 
         for (int nodeIndex = laneId; nodeIndex < gene.numNodes; nodeIndex += blockDim.x) {

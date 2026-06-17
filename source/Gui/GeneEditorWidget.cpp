@@ -111,7 +111,7 @@ void _GeneEditorWidget::processHeaderData()
                     .name("Homogeneous cell type")
                     .textWidth(rightColumnWidth)
                     .tooltip("If enabled, every constructed cell of this gene uses the cell type and its properties of the first node."),
-                gene._homogeneCellType);
+                gene._homogeneousCellType);
 
             table.next();
             table.end();
@@ -183,7 +183,7 @@ void _GeneEditorWidget::processNodeList()
                     // Column 1: Node type
                     ImGui::TableNextColumn();
                     {
-                        auto nodeType = gene._homogeneCellType ? gene._nodes.front().getCellType() : node.getCellType();
+                        auto nodeType = gene._homogeneousCellType ? gene._nodes.front().getCellType() : node.getCellType();
                         auto text = Const::CellTypeStrings.at(nodeType);
                         AlienGui::Text(text);
                     }

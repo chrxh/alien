@@ -3333,12 +3333,12 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     }
 }
 
-TEST_F(ConstructorTests, homogeneCellType_inheritsCellTypeFromFirstNode)
+TEST_F(ConstructorTests, homogeneousCellType_inheritsCellTypeFromFirstNode)
 {
     auto const Countdown = 42;
 
     auto genome = GenomeDesc().genes({
-        GeneDesc().homogeneCellType(true).nodes({
+        GeneDesc().homogeneousCellType(true).nodes({
             NodeDesc().cellType(DetonatorGenomeDesc().countdown(Countdown)),
             NodeDesc(),
             NodeDesc(),

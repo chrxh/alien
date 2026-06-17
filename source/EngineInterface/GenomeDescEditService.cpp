@@ -501,7 +501,7 @@ namespace
         genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc();
         genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc();
         for (auto& gene : genome._genes) {
-            gene._homogeneCellType = false;
+            gene._homogeneousCellType = false;
             for (auto& node : gene._nodes) {
                 node._color = PreviewColor;
                 if (!detailSimulation) {

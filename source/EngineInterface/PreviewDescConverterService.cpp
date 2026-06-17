@@ -108,7 +108,7 @@ ConversionResult PreviewDescConverterService::convertToPreviewDesc(
             return CellType_Base;   // Return default
         }
         auto const& gene = genome._genes.at(cell._geneIndex);
-        auto nodeIndex = gene._homogeneCellType ? 0 : cell._nodeIndex;
+        auto nodeIndex = gene._homogeneousCellType ? 0 : cell._nodeIndex;
         if (nodeIndex >= gene._nodes.size()) {
             return CellType_Base;   // Return default
         }
