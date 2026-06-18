@@ -1,6 +1,5 @@
 #include "MutationRatesWidget.h"
 
-#include <algorithm>
 #include <initializer_list>
 #include <string>
 #include <utility>
@@ -60,11 +59,9 @@ namespace
 
 void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightColumnWidth, bool nested)
 {
-    // Edit button right-aligned above the first read-only field
+    // Edit button spanning the field column (same width as the read-only fields) above the first one
     auto fieldWidth = ImGui::GetContentRegionAvail().x - scale(rightColumnWidth);
-    auto editButtonWidth = ImGui::CalcTextSize("Edit").x + ImGui::GetStyle().FramePadding.x * 2;
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, fieldWidth - editButtonWidth));
-    if (AlienGui::Button("Edit")) {
+    if (ImGui::Button("Edit", ImVec2(fieldWidth, 0))) {
         auto onAdopt = [&mutationRates](MutationRatesDesc const& adoptedRates) { mutationRates = adoptedRates; };
         if (nested) {
             MutationRatesDialog::get().openNested(mutationRates, onAdopt);
