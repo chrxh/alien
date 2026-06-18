@@ -120,7 +120,10 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     }
     block.sync();
 
-    applyMutations_meta(data, genome);
+    // applyMetaMutations is uniform across the block, so the conditional call does not diverge cooperative-group syncs
+    if (genome->applyMetaMutations) {
+        applyMutations_meta(data, genome);
+    }
     applyMutations_neurons(data, genome, accumulatedMutations);
     applyMutations_connections(data, genome, accumulatedMutations);
     applyMutations_cellTypeProperties(data, genome, accumulatedMutations);

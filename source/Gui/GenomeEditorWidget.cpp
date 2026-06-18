@@ -102,6 +102,7 @@ void _GenomeEditorWidget::processHeaderData()
 
             MutationRatesWidget::process(_editData->genome._mutationRates);
 
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name("Accumulated mutations")
