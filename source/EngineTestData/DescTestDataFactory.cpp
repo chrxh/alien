@@ -49,11 +49,11 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
 {
     switch (objectParameter.objectType) {
     case ObjectType_Solid:
-        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(SolidDesc().energy(42.0f));
+        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).isStatic(true).type(SolidDesc().energy(42.0f));
     case ObjectType_Fluid:
-        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FluidDesc().energy(42.0f).glow(1.0f));
+        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).isStatic(true).type(FluidDesc().energy(42.0f).glow(1.0f));
     case ObjectType_FreeCell:
-        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).fixed(true).type(FreeCellDesc().energy(42.0f).age(7));
+        return ObjectDesc().pos({0.5f, 0.8f}).vel({-0.3f, 0.7f}).color(3).isStatic(true).type(FreeCellDesc().energy(42.0f).age(7));
     case ObjectType_Cell: {
         auto cellTypeDesc = createNonDefaultCellTypeDesc(objectParameter);
         NeuralNetDesc nn;
@@ -66,7 +66,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
             .pos({0.5f, 0.8f})
             .vel({-0.3f, 0.7f})
             .color(3)
-            .fixed(true)
+            .isStatic(true)
             .type(CellDesc()
                       .neuralNetwork(nn)
                       .usableEnergy(150.0f)

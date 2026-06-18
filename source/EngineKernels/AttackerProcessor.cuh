@@ -46,7 +46,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (object->isFixed()) {
+    if (object->isStatic()) {
         return;
     }
     auto const& cell = &object->typeData.cell;
@@ -116,7 +116,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 if (otherObject->type == ObjectType_Solid || otherObject->type == ObjectType_Fluid) {
                     return;
                 }
-                if (otherObject->isFixed()) {
+                if (otherObject->isStatic()) {
                     return;
                 }
 

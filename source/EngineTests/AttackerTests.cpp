@@ -70,7 +70,7 @@ protected:
     {
         auto data = Desc().addCreature(
             {
-                ObjectDesc().id(100).pos(pos).color(color).fixed(fixed).type(CellDesc().usableEnergy(usableEnergy)),
+                ObjectDesc().id(100).pos(pos).color(color).isStatic(fixed).type(CellDesc().usableEnergy(usableEnergy)),
             },
             CreatureDesc().id(creatureId));
         return data;

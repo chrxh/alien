@@ -25,7 +25,7 @@ Desc DescEditService::createRect(CreateRectParameters const& parameters) const
                                              .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                              .stiffness(parameters._stiffness)
                                              .color(parameters._color)
-                                             .fixed(parameters._fixed)
+                                             .isStatic(parameters._isStatic)
                                              .sticky(parameters._sticky)
                                              .type(parameters._objectType));
         }
@@ -49,7 +49,7 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
                                              .stiffness(parameters._stiffness)
                                              .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                              .color(parameters._color)
-                                             .fixed(parameters._fixed)
+                                             .isStatic(parameters._isStatic)
                                              .sticky(parameters._sticky)
                                              .type(parameters._objectType));
 
@@ -59,7 +59,7 @@ Desc DescEditService::createHex(CreateHexParameters const& parameters) const
                                                  .stiffness(parameters._stiffness)
                                                  .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
                                                  .color(parameters._color)
-                                                 .fixed(parameters._fixed)
+                                                 .isStatic(parameters._isStatic)
                                                  .type(parameters._objectType));
             }
         }
@@ -81,7 +81,7 @@ Desc DescEditService::createCircle(CreateCircleParameters const& parameters) con
                                          .pos(parameters._center)
                                          .stiffness(parameters._stiffness)
                                          .color(parameters._color)
-                                         .fixed(parameters._fixed)
+                                         .isStatic(parameters._isStatic)
                                          .sticky(parameters._sticky)
                                          .type(parameters._type));
         return result;
@@ -104,7 +104,7 @@ Desc DescEditService::createCircle(CreateCircleParameters const& parameters) con
                                              .stiffness(parameters._stiffness)
                                              .pos({parameters._center.x + dxMod, parameters._center.y + dy})
                                              .color(parameters._color)
-                                             .fixed(parameters._fixed)
+                                             .isStatic(parameters._isStatic)
                                              .sticky(parameters._sticky)
                                              .type(parameters._type));
         }

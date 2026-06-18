@@ -471,17 +471,17 @@ struct ObjectTO
     float2 vel;
     float stiffness;
     uint8_t color;
-    uint8_t flags;  // bit0 = fixed, bit2 = sticky
+    uint8_t flags;  // bit0 = isStatic, bit2 = sticky
     ObjectType type;
     ObjectTypeDataTO typeData;
 
     // Editing data
     uint8_t selected;
 
-    __host__ __device__ __inline__ bool isFixed() const { return flags & 1; }
+    __host__ __device__ __inline__ bool isStatic() const { return flags & 1; }
     __host__ __device__ __inline__ bool isSticky() const { return flags & 4; }
 
-    __host__ __device__ __inline__ void setFixed(bool value) { flags = value ? (flags | 1) : (flags & ~1); }
+    __host__ __device__ __inline__ void setStatic(bool value) { flags = value ? (flags | 1) : (flags & ~1); }
     __host__ __device__ __inline__ void setSticky(bool value) { flags = value ? (flags | 4) : (flags & ~4); }
 };
 

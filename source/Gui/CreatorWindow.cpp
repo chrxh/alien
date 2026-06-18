@@ -42,7 +42,7 @@ void CreatorWindow::initIntern()
 {
     _energy = GlobalSettings::get().getValue("editors.creator.energy", _energy);
     _stiffness = GlobalSettings::get().getValue("editors.creator.stiffness", _stiffness);
-    _fixed = GlobalSettings::get().getValue("editors.creator.fixed", _fixed);
+    _static = GlobalSettings::get().getValue("editors.creator.static", _static);
     _objectDistance = GlobalSettings::get().getValue("editors.creator.object distance", _objectDistance);
     _glow = GlobalSettings::get().getValue("editors.creator.glow", _glow);
     _makeSticky = GlobalSettings::get().getValue("editors.creator.make sticky", _makeSticky);
@@ -59,7 +59,7 @@ void CreatorWindow::shutdownIntern()
 {
     GlobalSettings::get().setValue("editors.creator.energy", _energy);
     GlobalSettings::get().setValue("editors.creator.stiffness", _stiffness);
-    GlobalSettings::get().setValue("editors.creator.fixed", _fixed);
+    GlobalSettings::get().setValue("editors.creator.static", _static);
     GlobalSettings::get().setValue("editors.creator.object distance", _objectDistance);
     GlobalSettings::get().setValue("editors.creator.glow", _glow);
     GlobalSettings::get().setValue("editors.creator.make sticky", _makeSticky);
@@ -170,7 +170,7 @@ void CreatorWindow::processIntern()
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
         }
         if (!isEnergyMaterial()) {
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Fixed").textWidth(RightColumnWidth).tooltip(Const::CellFixedTooltip), _fixed);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Static").textWidth(RightColumnWidth).tooltip(Const::CellStaticTooltip), _static);
         }
     }
     ImGui::EndChild();
@@ -223,7 +223,7 @@ void CreatorWindow::onDrawing()
                                                             .sticky(_makeSticky)
                                                             .cellDistance(1.0f)
                                                             .color(EditorModel::get().getDefaultColorCode())
-                                                            .fixed(_fixed)
+                                                            .isStatic(_static)
                                                             .connectObjects(false));
         return isEnergyMaterial() ? convertToEnergyParticles(desc) : desc;
     };
@@ -290,7 +290,7 @@ void CreatorWindow::createEntity()
                                               .pos(getRandomPos())
                                               .stiffness(_stiffness)
                                               .color(EditorModel::get().getDefaultColorCode())
-                                              .fixed(_fixed)
+                                              .isStatic(_static)
                                               .sticky(_makeSticky)
                                               .type(getObjectTypeDesc()));
     }
@@ -312,7 +312,7 @@ void CreatorWindow::createRectangle()
                                                              .sticky(_makeSticky)
                                                              .color(EditorModel::get().getDefaultColorCode())
                                                              .center(getRandomPos())
-                                                             .fixed(_fixed));
+                                                             .isStatic(_static));
     if (isEnergyMaterial()) {
         description = convertToEnergyParticles(description);
     }
@@ -333,7 +333,7 @@ void CreatorWindow::createHexagon()
                                                             .sticky(_makeSticky)
                                                             .color(EditorModel::get().getDefaultColorCode())
                                                             .center(getRandomPos())
-                                                            .fixed(_fixed));
+                                                            .isStatic(_static));
     if (isEnergyMaterial()) {
         description = convertToEnergyParticles(description);
     } else {
@@ -368,7 +368,7 @@ void CreatorWindow::createDisc()
                                                   .sticky(_makeSticky)
                                                   .pos(relPos)
                                                   .color(color)
-                                                  .fixed(_fixed)
+                                                  .isStatic(_static)
                                                   .type(objectType));
         }
     }

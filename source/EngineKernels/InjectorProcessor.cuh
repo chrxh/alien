@@ -44,7 +44,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 if (object->typeData.cell.isSameCreature(&otherObject->typeData.cell)) {
                     return;
                 }
-                if (otherObject->isFixed()) {
+                if (otherObject->isStatic()) {
                     return;
                 }
                 if (!otherObject->typeData.cell.constructorAvailable) {

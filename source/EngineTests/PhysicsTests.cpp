@@ -175,8 +175,8 @@ TEST_F(PhysicsTests, noGhostMovements)
 TEST_F(PhysicsTests, angularForcesBetweenFixedAndNonFixedObject)
 {
     auto data = Desc().addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).fixed(true),
-        ObjectDesc().id(2).pos({10.0f, 11.0f}).fixed(true),
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).isStatic(true),
+        ObjectDesc().id(2).pos({10.0f, 11.0f}).isStatic(true),
         ObjectDesc().id(3).pos({11.0f, 11.0f}).type(CellDesc().headCell(true)),
     });
     data.addConnection(2, 1);

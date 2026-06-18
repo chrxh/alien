@@ -148,7 +148,7 @@ __global__ void cudaApplyForceFields(SimulationData data)
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& object = objects.at(index);
-            if (object->isFixed()) {
+            if (object->isStatic()) {
                 continue;
             }
             object->vel += calcResultingAcceleration(object->pos, getMassForSPH(object));

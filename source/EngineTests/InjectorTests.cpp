@@ -143,8 +143,8 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
     // Add target creature with fixed constructor
     data.addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 103.0f}).fixed(true).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
-            ObjectDesc().id(101).pos({101.0f, 103.0f}).fixed(true),
+            ObjectDesc().id(100).pos({100.0f, 103.0f}).isStatic(true).type(CellDesc().constructor(ConstructorDesc().geneIndex(0))),
+            ObjectDesc().id(101).pos({101.0f, 103.0f}).isStatic(true),
         },
         CreatureDesc().id(2));
     data.addConnection(100, 101);

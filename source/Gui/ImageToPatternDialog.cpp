@@ -101,7 +101,7 @@ void ImageToPatternDialog::show()
                                                        .id(NumberGenerator::get().createEntityId())
                                                        .pos({toFloat(x) + xOffset, toFloat(y)})
                                                        .color(matchedCellColor)
-                                                       .fixed(false)
+                                                       .isStatic(false)
                                                        .type(SolidDesc()));
                 }
             }

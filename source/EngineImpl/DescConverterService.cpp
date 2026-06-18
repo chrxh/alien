@@ -302,7 +302,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         connections.emplace_back(connection);
     }
     result._connections = connections;
-    result._fixed = objectTO.isFixed();
+    result._isStatic = objectTO.isStatic();
     result._sticky = objectTO.isSticky();
     result._color = objectTO.color;
 
@@ -1278,7 +1278,7 @@ void DescConverterService::convertObjectToTO(
     objectTO.stiffness = objectDesc._stiffness;
     objectTO.numConnections = 0;
     objectTO.flags = 0;
-    objectTO.setFixed(objectDesc._fixed);
+    objectTO.setStatic(objectDesc._isStatic);
     objectTO.setSticky(objectDesc._sticky);
     objectTO.color = objectDesc._color;
 

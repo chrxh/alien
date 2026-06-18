@@ -374,7 +374,7 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
     object->vel = objectTO.vel;
     object->stiffness = objectTO.stiffness;
     object->color = objectTO.color;
-    object->setFixed(objectTO.isFixed());
+    object->setStatic(objectTO.isStatic());
     object->setSticky(objectTO.isSticky());
     object->type = objectTO.type;
 

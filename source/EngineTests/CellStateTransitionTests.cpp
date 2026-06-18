@@ -42,8 +42,8 @@ TEST_F(CellStateTransitionTests, ready_ready)
 {
     Desc data;
     data.addCreature({
-        ObjectDesc().id(1).pos({10.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready)),
-        ObjectDesc().id(2).pos({11.0f, 10.0f}).fixed(true).type(CellDesc().cellState(CellState_Ready)),
+        ObjectDesc().id(1).pos({10.0f, 10.0f}).isStatic(true).type(CellDesc().cellState(CellState_Ready)),
+        ObjectDesc().id(2).pos({11.0f, 10.0f}).isStatic(true).type(CellDesc().cellState(CellState_Ready)),
     });
     data.addConnection(1, 2);
 
@@ -89,7 +89,7 @@ TEST_F(CellStateTransitionTests, underConstruction_activating)
 
 TEST_F(CellStateTransitionTests, noDyingForFixedCells)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).fixed(true).pos({10.0f, 10.0f})});
+    auto data = Desc().addCreature({ObjectDesc().id(1).isStatic(true).pos({10.0f, 10.0f})});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -119,7 +119,7 @@ TEST_F(CellStateTransitionTests, cellStaysAliveWhenLastUpdateBelowInterval)
 
 TEST_F(CellStateTransitionTests, fixedCellDoesNotDieFromLastUpdate)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1).fixed(true).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 2))});
+    auto data = Desc().addCreature({ObjectDesc().id(1).isStatic(true).pos({10.0f, 10.0f}).type(CellDesc().lastUpdate(2 * CELL_UPDATE_INTERVAL + 2))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

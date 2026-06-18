@@ -59,7 +59,7 @@ private:
 
     float _energy = 100.0f;
     float _stiffness = 1.0f;
-    bool _fixed = false;
+    bool _static = false;
     float _objectDistance = 1.0f;
     float _glow = 0.0f;
     bool _makeSticky = false;

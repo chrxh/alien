@@ -318,7 +318,7 @@ namespace
         objectTO.stiffness = object->stiffness;
         objectTO.color = object->color;
         objectTO.flags = 0;
-        objectTO.setFixed(object->isFixed());
+        objectTO.setStatic(object->isStatic());
         objectTO.setSticky(object->isSticky());
         objectTO.type = object->type;
 
