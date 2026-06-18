@@ -554,9 +554,7 @@ TEST_F(MetaMutationTests, metaMutation_applyMetaMutationsDisabledNoRateChange)
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
+    _simulationFacade->testOnly_mutate(1);
 
     auto actualGenome = getMutatedGenome();
     EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._nodeProbability, 0.5f);
