@@ -567,7 +567,6 @@ void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedOb
     auto& genome = extendedObject.genome.value();
     std::stringstream frontAngle;
     frontAngle << std::fixed << std::setprecision(1) << genome._frontAngle;
-    inspectorText("Front angle", frontAngle.str());
     inspectorText("Genome name", genome._name);
     inspectorText("Lineage id", std::to_string(genome._lineageId));
     inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
