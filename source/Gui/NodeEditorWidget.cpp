@@ -207,7 +207,7 @@ void _NodeEditorWidget::processNodeAttributes()
         auto& node = _editData->getSelectedNodeRef();
 
         // With homogeneous cell type the cell type and its properties of the first node are shown and edited for every node
-        auto& cellTypeNode = gene._homogeneCellType ? gene._nodes.front() : node;
+        auto& cellTypeNode = gene._homogeneousCellType ? gene._nodes.front() : node;
 
         auto const simulationParameters = _SimulationFacade::get()->getSimulationParameters();
         auto const& customizationColors = simulationParameters.customizationColors.value;
@@ -238,7 +238,7 @@ void _NodeEditorWidget::processNodeAttributes()
             // Type
             auto nodeType = cellTypeNode.getCellType();
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeStrings).textWidth(rightColumnWidth), nodeType)) {
-                if (nodeType == CellType_Void && (gene._homogeneCellType || nodeIndex.value() == 0)) {
+                if (nodeType == CellType_Void && (gene._homogeneousCellType || nodeIndex.value() == 0)) {
                     showMessage("Error", "The first node cannot be void.");
                 } else if (nodeType == CellType_Void && nodeIndex.value() == gene._nodes.size() - 1) {
                     showMessage("Error", "The last node cannot be void.");

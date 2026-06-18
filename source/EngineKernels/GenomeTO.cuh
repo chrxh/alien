@@ -339,7 +339,7 @@ struct GeneTO
     ConstructorShape shape;
     float stiffness;
     float connectionDistance;
-    bool homogeneCellType;
+    bool homogeneousCellType;
 
     int numNodes;
     uint64_t nodeArrayIndex;

@@ -12,14 +12,14 @@
 class CellTypeMutationTests : public MutationTestsBase
 {
 protected:
-    bool compareAllExceptCellTypeAndHomogeneFlag(GenomeDesc expected, GenomeDesc actual)
+    bool compareAllExceptCellTypeAndHomogeneousFlag(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
             genome._lineageId = 0;
             genome._prevLineageId = std::nullopt;
             genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
-                gene._homogeneCellType = false;  // canonicalize: the cell type mutation may also flip this flag
+                gene._homogeneousCellType = false;  // canonicalize: the cell type mutation may also flip this flag
                 for (auto& node : gene._nodes) {
                     node._cellType = BaseGenomeDesc{};  // canonicalize so everything except the cell type is compared
                 }
@@ -50,7 +50,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_changesCellTypeToDefaults)
     std::visit([](auto const& cellTypeData) { EXPECT_EQ(cellTypeData, std::decay_t<decltype(cellTypeData)>{}); }, cellType);
 }
 
-TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellTypeAndHomogeneFlag)
+TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellTypeAndHomogeneousFlag)
 {
     auto genome = createTestGenome();
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
@@ -64,7 +64,7 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_doesNotChangeExceptCellTypeAndHom
 
     auto actualGenome = getMutatedGenome();
 
-    EXPECT_TRUE(compareAllExceptCellTypeAndHomogeneFlag(genome, actualGenome));
+    EXPECT_TRUE(compareAllExceptCellTypeAndHomogeneousFlag(genome, actualGenome));
 }
 
 TEST_F(CellTypeMutationTests, cellTypeMutation_keepsVoidNodesVoid)
@@ -120,9 +120,9 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_keepsNonVoidNodesNonVoid)
     }
 }
 
-TEST_F(CellTypeMutationTests, cellTypeMutation_changesHomogeneCellTypeFlag)
+TEST_F(CellTypeMutationTests, cellTypeMutation_changesHomogeneousCellTypeFlag)
 {
-    auto genome = GenomeDesc().genes({GeneDesc().homogeneCellType(false).nodes({NodeDesc().cellType(BaseGenomeDesc())})});
+    auto genome = GenomeDesc().genes({GeneDesc().homogeneousCellType(false).nodes({NodeDesc().cellType(BaseGenomeDesc())})});
     genome._mutationRates._cellTypeMutation = CellTypeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
@@ -132,5 +132,5 @@ TEST_F(CellTypeMutationTests, cellTypeMutation_changesHomogeneCellTypeFlag)
 
     auto actualGenome = getMutatedGenome();
 
-    EXPECT_TRUE(actualGenome._genes.at(0)._homogeneCellType);
+    EXPECT_TRUE(actualGenome._genes.at(0)._homogeneousCellType);
 }

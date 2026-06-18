@@ -525,7 +525,7 @@ struct std::hash<GeneDesc>
         hash_combine(seed, static_cast<int>(desc._shape));
         hash_combine(seed, desc._stiffness);
         hash_combine(seed, desc._connectionDistance);
-        hash_combine(seed, desc._homogeneCellType);
+        hash_combine(seed, desc._homogeneousCellType);
         return seed;
     }
 };

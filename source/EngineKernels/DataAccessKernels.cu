@@ -75,7 +75,7 @@ namespace
                 geneTO.shape = gene.shape;
                 geneTO.stiffness = gene.stiffness;
                 geneTO.connectionDistance = gene.connectionDistance;
-                geneTO.homogeneCellType = gene.homogeneCellType;
+                geneTO.homogeneousCellType = gene.homogeneousCellType;
                 geneTO.numNodes = gene.numNodes;
                 for (int i = 0; i < sizeof(gene.name); ++i) {
                     geneTO.name[i] = gene.name[i];

@@ -235,7 +235,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     result.neededReservedEnergy = result.node->constructorAvailable ? result.node->constructor.reservedEnergy : 0.0f;
-    auto cellTypeNode = result.gene->homogeneCellType ? &result.gene->nodes[0] : result.node;
+    auto cellTypeNode = result.gene->homogeneousCellType ? &result.gene->nodes[0] : result.node;
     result.neededDepotEnergy = cellTypeNode->cellType == CellType_Depot ? cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
 
     ShapeGenerator shapeGenerator;
@@ -552,7 +552,7 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         constructionData.creature,
         constructor.geneIndex,
         constructionData.currentNodeIndex,
-        constructionData.gene->homogeneCellType,
+        constructionData.gene->homogeneousCellType,
         hostObject->typeData.cell.nodeIndex,
         constructionData.currentConcatenation,
         constructionData.currentBranch,

@@ -409,7 +409,7 @@ struct GeneDesc
     MEMBER(GeneDesc, ConstructorShape, shape, ConstructorShape_Segment);
     MEMBER(GeneDesc, float, stiffness, 1.0f);
     MEMBER(GeneDesc, float, connectionDistance, 1.0f);
-    MEMBER(GeneDesc, bool, homogeneCellType, false);
+    MEMBER(GeneDesc, bool, homogeneousCellType, false);
 };
 
 struct NeuronMutationDesc
