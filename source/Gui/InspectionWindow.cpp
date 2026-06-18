@@ -27,6 +27,7 @@ std::optional<float> _InspectionWindow::_savedScrollY;
 namespace
 {
     auto constexpr CellWindowWidth = 420.0f;
+    auto constexpr CreatureWindowWidth = 300.0f;
     auto constexpr ParticleWindowWidth = 320.0f;
     auto constexpr TableColumnWidth = 380.0f;
     auto constexpr TextWidth = 160.0f;
@@ -234,7 +235,7 @@ void _InspectionWindow::process()
     auto width = calcWindowWidth();
     float height;
     if (_creatureMode) {
-        height = StyleRepository::get().scale(260.0f);
+        height = StyleRepository::get().scale(320.0f);
     } else if (isObject()) {
         height = StyleRepository::get().scale(500.0f);
     } else {
@@ -307,11 +308,7 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 {
     if (_creatureMode) {
         if (extendedObject.creature.has_value() && extendedObject.genome.has_value()) {
-            AlienGui::DynamicTableLayout table(TableColumnWidth);
-            if (table.begin()) {
-                processCreatureProperties(extendedObject);
-                table.end();
-            }
+            processCreatureProperties(extendedObject);
         }
         return;
     }
@@ -871,6 +868,9 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
 
 float _InspectionWindow::calcWindowWidth() const
 {
+    if (_creatureMode) {
+        return StyleRepository::get().scale(CreatureWindowWidth);
+    }
     if (isObject()) {
         return StyleRepository::get().scale(CellWindowWidth);
     }
