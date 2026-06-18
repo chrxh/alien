@@ -5,5 +5,5 @@ struct MutationRatesDesc;
 class MutationRatesWidget
 {
 public:
-    static void process(MutationRatesDesc& mutationRates, bool nested = false);
+    static void process(MutationRatesDesc& mutationRates, float rightColumnWidth, bool nested = false);
 };

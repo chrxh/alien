@@ -18,7 +18,7 @@
 
 namespace
 {
-    auto constexpr RightColumnWidth = 120.0f;
+    auto constexpr RightColumnWidth = 140.0f;
     auto constexpr MinColumnWidth = 300.0f;
     auto constexpr SettingsPrefix = "dialogs.mass operations.";
 }
@@ -210,7 +210,7 @@ void MassOperationsDialog::processIntern()
             ImGui::Checkbox("##mutationRates", &_randomizeMutationRates);
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
             ImGui::BeginDisabled(!_randomizeMutationRates);
-            MutationRatesWidget::process(_mutationRates, true);
+            MutationRatesWidget::process(_mutationRates, RightColumnWidth, true);
             ImGui::EndDisabled();
 
             table.next();
