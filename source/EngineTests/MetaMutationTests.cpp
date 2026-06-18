@@ -540,3 +540,31 @@ TEST_F(MetaMutationTests, metaMutation_constructorRatesZeroSigmaNoChange)
     EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._enumChangeProbability, 0.4f);
     EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._constructorToggleProbability, 0.4f);
 }
+
+TEST_F(MetaMutationTests, metaMutation_applyMetaMutationsDisabledNoRateChange)
+{
+    auto genome = createTestGenome();
+    genome._applyMetaMutations = false;
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(0.5f).weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f);
+    genome._mutationRates._neuronMutations[1] = NeuronMutationDesc().nodeProbability(0.5f).weightChangeSigma(0.5f).biasChangeSigma(0.5f).actfnChangeProbability(0.5f);
+
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _parameters.neuronsMetaMutationsSigma.value = 1.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
+
+    auto actualGenome = getMutatedGenome();
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._nodeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._weightChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._biasChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._actfnChangeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._nodeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._weightChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._biasChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._actfnChangeProbability, 0.5f);
+}
