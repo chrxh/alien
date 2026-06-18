@@ -1095,7 +1095,7 @@ namespace
     auto constexpr Id_Object_Vel = 3;
     auto constexpr Id_Object_Stiffness = 4;
     auto constexpr Id_Object_Color = 5;
-    auto constexpr Id_Object_Fixed = 6;
+    auto constexpr Id_Object_Static = 6;
     auto constexpr Id_Object_Sticky = 17;
 
     auto constexpr Id_Signal_Channels = 0;
@@ -1770,7 +1770,7 @@ namespace cereal
         scope.addMember(Id_Object_Vel, data._vel, defaultObject._vel);
         scope.addMember(Id_Object_Stiffness, data._stiffness, defaultObject._stiffness);
         scope.addMember(Id_Object_Color, data._color, defaultObject._color);
-        scope.addMember(Id_Object_Fixed, data._fixed, defaultObject._fixed);
+        scope.addMember(Id_Object_Static, data._isStatic, defaultObject._isStatic);
         scope.addMember(Id_Object_Sticky, data._sticky, defaultObject._sticky);
         scope.addDesc(Id_Object_Connections, data._connections);
         scope.addDesc(Id_Object_Type, data._type);

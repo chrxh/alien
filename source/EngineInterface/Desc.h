@@ -544,7 +544,7 @@ struct ObjectDesc
     MEMBER(ObjectDesc, RealVector2D, vel, RealVector2D());
     MEMBER(ObjectDesc, float, stiffness, 1.0f);
     MEMBER(ObjectDesc, int, color, 0);
-    MEMBER(ObjectDesc, bool, fixed, false);
+    MEMBER(ObjectDesc, bool, isStatic, false);
     MEMBER(ObjectDesc, bool, sticky, false);
     MEMBER(ObjectDesc, ObjectTypeDesc, type, CellDesc());
 

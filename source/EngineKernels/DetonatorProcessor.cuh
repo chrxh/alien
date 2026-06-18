@@ -48,7 +48,7 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
                     if (otherObject == object) {
                         return;
                     }
-                    if (otherObject->isFixed()) {
+                    if (otherObject->isStatic()) {
                         return;
                     }
                     auto delta = data.objectMap.getCorrectedDirection(otherObject->pos - object->pos);

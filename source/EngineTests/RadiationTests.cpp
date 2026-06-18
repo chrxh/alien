@@ -31,7 +31,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
     auto initialEnergy = 200.0f;
 
     auto data =
-        Desc().addCreature({ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDesc().usableEnergy(initialEnergy))});
+        Desc().addCreature({ObjectDesc().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).isStatic(true).color(0).type(CellDesc().usableEnergy(initialEnergy))});
 
     _simulationFacade->setSimulationData(data);
 

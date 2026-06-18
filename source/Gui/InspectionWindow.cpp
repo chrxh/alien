@@ -394,7 +394,7 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
                     .name("Color")
                     .textWidth(TextWidth),
                 object._color);
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Fixed").textWidth(TextWidth), object._fixed);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Static").textWidth(TextWidth), object._isStatic);
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(TextWidth), object._sticky);
 
             auto objectType = object.getObjectType();
