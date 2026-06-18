@@ -22,7 +22,8 @@ public:
 
     void onInspectSelectedObjects();
     void onInspectSelectedGenomes();
-    bool onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> const& entities, bool selectGenomeTab);
+    void onInspectSelectedCreatures();
+    bool onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> const& entities, bool creatureMode);
 
     bool isCopyingPossible() const;
     void onCopy();

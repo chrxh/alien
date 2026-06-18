@@ -16,6 +16,7 @@ class PatternEditorWindow : public AlienWindow
 public:
     bool isObjectInspectionPossible() const;
     bool isGenomeInspectionPossible() const;
+    bool isCreatureInspectionPossible() const;
 
     bool isCopyingPossible() const;
     void onCopy();

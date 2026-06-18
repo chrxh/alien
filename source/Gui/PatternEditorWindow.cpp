@@ -115,6 +115,15 @@ void PatternEditorWindow::processIntern()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Inspect genomes");
 
+    //inspect creatures button
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!isCreatureInspectionPossible());
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PAW))) {
+        EditorController::get().onInspectSelectedCreatures();
+    }
+    ImGui::EndDisabled();
+    AlienGui::Tooltip("Inspect creatures");
+
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
@@ -301,6 +310,11 @@ bool PatternEditorWindow::isObjectInspectionPossible() const
 }
 
 bool PatternEditorWindow::isGenomeInspectionPossible() const
+{
+    return EditorModel::get().getSelectionShallowData().numCreatures > 0;
+}
+
+bool PatternEditorWindow::isCreatureInspectionPossible() const
 {
     return EditorModel::get().getSelectionShallowData().numCreatures > 0;
 }

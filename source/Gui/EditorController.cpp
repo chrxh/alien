@@ -1,11 +1,14 @@
 #include "EditorController.h"
 
 #include <memory>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <imgui.h>
 
 #include <Base/Math.h>
 
+#include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/DescEditService.h>
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -108,7 +111,64 @@ void EditorController::onInspectSelectedGenomes()
     printOverlayMessage(std::to_string(uniqueGenomes.size()) + (uniqueGenomes.size() == 1 ? " genome" : " genomes") + " inspected");
 }
 
-bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> const& entities, bool selectGenomeTab)
+void EditorController::onInspectSelectedCreatures()
+{
+    // Collect the creature ids of the directly selected cells
+    Desc directlySelectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
+    std::unordered_set<uint64_t> selectedCreatureIds;
+    for (auto const& object : directlySelectedData._objects) {
+        if (object.getObjectType() == ObjectType_Cell) {
+            selectedCreatureIds.insert(object.getCellRef()._creatureId);
+        }
+    }
+    if (selectedCreatureIds.empty()) {
+        return;
+    }
+
+    // Consider all cells of those creatures and pick the head cell of each
+    // (head cell with the smallest branch index, then smallest concatenation index)
+    Desc creatureData = _SimulationFacade::get()->getSelectedSimulationData(true);
+    auto entities = DescEditService::get().getObjects(creatureData);
+
+    std::unordered_map<uint64_t, ExtendedObjectDesc> headCellByCreatureId;
+    for (auto const& entity : entities) {
+        if (!std::holds_alternative<ExtendedObjectDesc>(entity)) {
+            continue;
+        }
+        auto const& extendedObject = std::get<ExtendedObjectDesc>(entity);
+        if (extendedObject.object.getObjectType() != ObjectType_Cell || !extendedObject.creature.has_value()) {
+            continue;
+        }
+        auto const& cell = extendedObject.object.getCellRef();
+        if (!cell._headCell || selectedCreatureIds.find(cell._creatureId) == selectedCreatureIds.end()) {
+            continue;
+        }
+        auto it = headCellByCreatureId.find(cell._creatureId);
+        if (it == headCellByCreatureId.end()) {
+            headCellByCreatureId.emplace(cell._creatureId, extendedObject);
+        } else {
+            auto const& bestCell = it->second.object.getCellRef();
+            if (cell._branchIndex < bestCell._branchIndex
+                || (cell._branchIndex == bestCell._branchIndex && cell._concatenationIndex < bestCell._concatenationIndex)) {
+                it->second = extendedObject;
+            }
+        }
+    }
+
+    std::vector<ExtendedObjectOrEnergyDesc> headCells;
+    for (auto const& [creatureId, headCell] : headCellByCreatureId) {
+        headCells.emplace_back(headCell);
+    }
+
+    if (!onInspectObjects(headCells, true)) {
+        std::string message = "Too many creatures are selected for inspection. A maximum of ";
+        message += std::to_string(Const::MaxInspectedObjects);
+        message += " creatures are allowed.";
+        showMessage("Inspection not possible", message);
+    }
+}
+
+bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> const& entities, bool creatureMode)
 {
     if (entities.empty()) {
         return true;
@@ -183,7 +243,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedObjectOrEnergyDesc> 
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
         windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 500.0f) + 40.0f;
-        _inspectorWindows.emplace_back(std::make_shared<_InspectionWindow>(id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
+        _inspectorWindows.emplace_back(std::make_shared<_InspectionWindow>(id, RealVector2D{windowPosX, windowPosY}, creatureMode));
     }
     return true;
 }
