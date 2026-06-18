@@ -18,7 +18,7 @@
 
 namespace
 {
-    auto constexpr RightColumnWidth = 120.0f;
+    auto constexpr RightColumnWidth = 140.0f;
     auto constexpr MinColumnWidth = 300.0f;
     auto constexpr SettingsPrefix = "dialogs.mass operations.";
 }

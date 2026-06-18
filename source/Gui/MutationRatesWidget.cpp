@@ -59,10 +59,8 @@ namespace
 
 void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightColumnWidth, bool nested)
 {
-    // Keep all rows aligned to the start position even when called after an indenting SameLine (e.g. in MassOperationsDialog)
-    auto startPosX = ImGui::GetCursorPosX();
+    ImGui::BeginGroup();
 
-    // Edit button spanning the field column, with a label to its right like the read-only fields below
     if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Click to edit").textWidth(rightColumnWidth))) {
         auto onAdopt = [&mutationRates](MutationRatesDesc const& adoptedRates) { mutationRates = adoptedRates; };
         if (nested) {
@@ -74,7 +72,7 @@ void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightC
 
     for (auto const& [name, probabilities] : getActiveMutationTypes(mutationRates)) {
         auto value = probabilities;
-        ImGui::SetCursorPosX(startPosX);
         AlienGui::InputText(AlienGui::InputTextParameters().name(name).readOnly(true).textWidth(rightColumnWidth), value);
     }
+    ImGui::EndGroup();
 }
