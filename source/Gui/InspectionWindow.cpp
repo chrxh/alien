@@ -235,7 +235,7 @@ void _InspectionWindow::process()
     auto width = calcWindowWidth();
     float height;
     if (_creatureMode) {
-        height = StyleRepository::get().scale(320.0f);
+        height = StyleRepository::get().scale(280.0f);
     } else if (isObject()) {
         height = StyleRepository::get().scale(500.0f);
     } else {
