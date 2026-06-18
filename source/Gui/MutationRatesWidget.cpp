@@ -59,9 +59,8 @@ namespace
 
 void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightColumnWidth, bool nested)
 {
-    // Edit button spanning the field column (same width as the read-only fields) above the first one
-    auto fieldWidth = ImGui::GetContentRegionAvail().x - scale(rightColumnWidth);
-    if (ImGui::Button("Edit", ImVec2(fieldWidth, 0))) {
+    // Edit button spanning the field column, with a label to its right like the read-only fields below
+    if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Click to edit").textWidth(rightColumnWidth))) {
         auto onAdopt = [&mutationRates](MutationRatesDesc const& adoptedRates) { mutationRates = adoptedRates; };
         if (nested) {
             MutationRatesDialog::get().openNested(mutationRates, onAdopt);
