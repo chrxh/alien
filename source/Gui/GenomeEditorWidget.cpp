@@ -96,14 +96,13 @@ void _GenomeEditorWidget::processHeaderData()
                     .textWidth(rightColumnWidth),
                 _editData->genome._resistanceToInjection);
 
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
-
             table.next();
 
             AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
 
             MutationRatesWidget::process(_editData->genome._mutationRates);
 
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name("Accumulated mutations")

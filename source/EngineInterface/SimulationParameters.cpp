@@ -453,7 +453,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 }),
             ParameterGroupSpec()
-                .name("Meta mutations")
+                .name("Meta-mutations")
                 .parameters({
                     ParameterSpec()
                         .name("Neuron mutations sigma")
