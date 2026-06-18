@@ -492,7 +492,7 @@ void MainLoopController::processMenubar()
         AlienGui::MenuItemParameters()
             .name("Inspect creatures")
             .keyAlt(true)
-            .key(ImGuiKey_R)
+            .key(ImGuiKey_P)
             .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isCreatureInspectionPossible()),
         [&] { EditorController::get().onInspectSelectedCreatures(); });
     AlienGui::MenuItem(

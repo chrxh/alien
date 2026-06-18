@@ -33,7 +33,8 @@ private:
     void processFluidNode(ObjectDesc& object);
     void processFreeCellNode(ObjectDesc& object);
     void processCellNode(ObjectDesc& object);
-    void processCreatureNode(ExtendedObjectDesc& extendedObject, bool defaultOpen = false);
+    void processCreatureNode(ExtendedObjectDesc& extendedObject);
+    void processCreatureProperties(ExtendedObjectDesc& extendedObject);
     void processSignalsNode(CellDesc& cell);
     void processNeuralNetNode(CellDesc& cell);
     void processCellTypeNode(CellDesc& cell);

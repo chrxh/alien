@@ -234,7 +234,7 @@ void _InspectionWindow::process()
     auto width = calcWindowWidth();
     float height;
     if (_creatureMode) {
-        height = StyleRepository::get().scale(230.0f);
+        height = StyleRepository::get().scale(260.0f);
     } else if (isObject()) {
         height = StyleRepository::get().scale(500.0f);
     } else {
@@ -306,11 +306,10 @@ std::string _InspectionWindow::generateTitle() const
 void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 {
     if (_creatureMode) {
-        if (extendedObject.creature.has_value()) {
+        if (extendedObject.creature.has_value() && extendedObject.genome.has_value()) {
             AlienGui::DynamicTableLayout table(TableColumnWidth);
             if (table.begin()) {
-                processCreatureNode(extendedObject, true);
-                table.next();
+                processCreatureProperties(extendedObject);
                 table.end();
             }
         }
@@ -562,26 +561,29 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 }
 
 
-void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject, bool defaultOpen)
+void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedObject)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Creature").rank(AlienGui::TreeNodeRank::High).defaultOpen(defaultOpen))) {
-        processPropertiesSubNode("Creature", [&] {
-            auto& creature = extendedObject.creature.value();
-            inspectorHexId("Creature id", creature._id);
-            inspectorText("Generation", std::to_string(creature._generation));
-            inspectorText("Num cells", std::to_string(creature._numCells));
-            auto& genome = extendedObject.genome.value();
-            std::stringstream frontAngle;
-            frontAngle << std::fixed << std::setprecision(1) << genome._frontAngle;
-            inspectorText("Front angle", frontAngle.str());
-            inspectorText("Genome name", genome._name);
-            inspectorText("Lineage id", std::to_string(genome._lineageId));
-            inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
-            inspectorText("Apply meta-mutations", genome._applyMetaMutations ? "Yes" : "No");
-            if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
-                GenomeEditorWindow::get().openTab(genome, false);
-            }
-        });
+    auto& creature = extendedObject.creature.value();
+    inspectorHexId("Creature id", creature._id);
+    inspectorText("Generation", std::to_string(creature._generation));
+    inspectorText("Num cells", std::to_string(creature._numCells));
+    auto& genome = extendedObject.genome.value();
+    std::stringstream frontAngle;
+    frontAngle << std::fixed << std::setprecision(1) << genome._frontAngle;
+    inspectorText("Front angle", frontAngle.str());
+    inspectorText("Genome name", genome._name);
+    inspectorText("Lineage id", std::to_string(genome._lineageId));
+    inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
+    inspectorText("Apply meta-mutations", genome._applyMetaMutations ? "Yes" : "No");
+    if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
+        GenomeEditorWindow::get().openTab(genome, false);
+    }
+}
+
+void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
+{
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Creature").rank(AlienGui::TreeNodeRank::High).defaultOpen(false))) {
+        processPropertiesSubNode("Creature", [&] { processCreatureProperties(extendedObject); });
     }
     AlienGui::EndTreeNode();
 }

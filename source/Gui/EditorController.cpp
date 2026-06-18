@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <imgui.h>
 
@@ -112,10 +113,23 @@ void EditorController::onInspectSelectedGenomes()
 
 void EditorController::onInspectSelectedCreatures()
 {
-    Desc selectedData = _SimulationFacade::get()->getSelectedSimulationData(true);
-    auto entities = DescEditService::get().getObjects(selectedData);
+    // Collect the creature ids of the directly selected cells
+    Desc directlySelectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
+    std::unordered_set<uint64_t> selectedCreatureIds;
+    for (auto const& object : directlySelectedData._objects) {
+        if (object.getObjectType() == ObjectType_Cell) {
+            selectedCreatureIds.insert(object.getCellRef()._creatureId);
+        }
+    }
+    if (selectedCreatureIds.empty()) {
+        return;
+    }
 
-    // For each creature, pick the head cell with smallest branch index, then smallest concatenation index
+    // Consider all cells of those creatures and pick the head cell of each
+    // (head cell with the smallest branch index, then smallest concatenation index)
+    Desc creatureData = _SimulationFacade::get()->getSelectedSimulationData(true);
+    auto entities = DescEditService::get().getObjects(creatureData);
+
     std::unordered_map<uint64_t, ExtendedObjectDesc> headCellByCreatureId;
     for (auto const& entity : entities) {
         if (!std::holds_alternative<ExtendedObjectDesc>(entity)) {
@@ -126,13 +140,12 @@ void EditorController::onInspectSelectedCreatures()
             continue;
         }
         auto const& cell = extendedObject.object.getCellRef();
-        if (!cell._headCell) {
+        if (!cell._headCell || selectedCreatureIds.find(cell._creatureId) == selectedCreatureIds.end()) {
             continue;
         }
-        auto creatureId = extendedObject.creature->_id;
-        auto it = headCellByCreatureId.find(creatureId);
+        auto it = headCellByCreatureId.find(cell._creatureId);
         if (it == headCellByCreatureId.end()) {
-            headCellByCreatureId.emplace(creatureId, extendedObject);
+            headCellByCreatureId.emplace(cell._creatureId, extendedObject);
         } else {
             auto const& bestCell = it->second.object.getCellRef();
             if (cell._branchIndex < bestCell._branchIndex
