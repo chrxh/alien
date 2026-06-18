@@ -1,7 +1,9 @@
 #include "MutationRatesWidget.h"
 
+#include <algorithm>
 #include <initializer_list>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <imgui.h>
@@ -15,7 +17,8 @@
 
 namespace
 {
-    void addActiveMutationType(std::vector<std::string>& result, std::string const& name, std::initializer_list<float> nodeProbabilities)
+    void
+    addActiveMutationType(std::vector<std::pair<std::string, std::string>>& result, std::string const& name, std::initializer_list<float> nodeProbabilities)
     {
         std::string probabilities;
         for (auto const& nodeProbability : nodeProbabilities) {
@@ -27,13 +30,13 @@ namespace
             }
         }
         if (!probabilities.empty()) {
-            result.push_back(name + " (" + probabilities + ")");
+            result.emplace_back(name, probabilities);
         }
     }
 
-    std::vector<std::string> getActiveMutationTypes(MutationRatesDesc const& mutationRates)
+    std::vector<std::pair<std::string, std::string>> getActiveMutationTypes(MutationRatesDesc const& mutationRates)
     {
-        std::vector<std::string> activeMutations;
+        std::vector<std::pair<std::string, std::string>> activeMutations;
         addActiveMutationType(
             activeMutations, "Connection", {mutationRates._connectionMutations[0]._nodeProbability, mutationRates._connectionMutations[1]._nodeProbability});
         addActiveMutationType(
@@ -55,13 +58,12 @@ namespace
     }
 }
 
-void MutationRatesWidget::process(MutationRatesDesc& mutationRates, bool nested)
+void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightColumnWidth, bool nested)
 {
-    auto buttonWidth = scale(60.0f);
-    auto availableWidth = ImGui::GetContentRegionAvail().x;
-    auto listBoxWidth = availableWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
-    AlienGui::ListBox(AlienGui::ListBoxParameters().items(getActiveMutationTypes(mutationRates)).width(listBoxWidth));
-    ImGui::SameLine();
+    // Edit button right-aligned above the first read-only field
+    auto fieldWidth = ImGui::GetContentRegionAvail().x - scale(rightColumnWidth);
+    auto editButtonWidth = ImGui::CalcTextSize("Edit").x + ImGui::GetStyle().FramePadding.x * 2;
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, fieldWidth - editButtonWidth));
     if (AlienGui::Button("Edit")) {
         auto onAdopt = [&mutationRates](MutationRatesDesc const& adoptedRates) { mutationRates = adoptedRates; };
         if (nested) {
@@ -69,5 +71,10 @@ void MutationRatesWidget::process(MutationRatesDesc& mutationRates, bool nested)
         } else {
             MutationRatesDialog::get().open(mutationRates, onAdopt);
         }
+    }
+
+    for (auto const& [name, probabilities] : getActiveMutationTypes(mutationRates)) {
+        auto value = probabilities;
+        AlienGui::InputText(AlienGui::InputTextParameters().name(name).readOnly(true).textWidth(rightColumnWidth), value);
     }
 }
