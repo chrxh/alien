@@ -12,7 +12,7 @@
 class _InspectionWindow
 {
 public:
-    _InspectionWindow(uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab);
+    _InspectionWindow(uint64_t entityId, RealVector2D const& initialPos, bool creatureMode);
     ~_InspectionWindow();
 
     void process();
@@ -33,7 +33,7 @@ private:
     void processFluidNode(ObjectDesc& object);
     void processFreeCellNode(ObjectDesc& object);
     void processCellNode(ObjectDesc& object);
-    void processCreatureNode(ExtendedObjectDesc& extendedObject);
+    void processCreatureNode(ExtendedObjectDesc& extendedObject, bool defaultOpen = false);
     void processSignalsNode(CellDesc& cell);
     void processNeuralNetNode(CellDesc& cell);
     void processCellTypeNode(CellDesc& cell);
@@ -45,7 +45,7 @@ private:
 
     bool _on = true;
     uint64_t _entityId = 0;
-    bool _selectGenomeTab = false;
+    bool _creatureMode = false;
     bool _isFirstFrame = true;
     std::optional<std::vector<SignalEntryDesc>> _pendingSignalEntries;
 

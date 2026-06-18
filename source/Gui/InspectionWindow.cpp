@@ -216,10 +216,10 @@ namespace
     }
 }
 
-_InspectionWindow::_InspectionWindow(uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab)
+_InspectionWindow::_InspectionWindow(uint64_t entityId, RealVector2D const& initialPos, bool creatureMode)
     : _entityId(entityId)
     , _initialPos(initialPos)
-    , _selectGenomeTab(selectGenomeTab)
+    , _creatureMode(creatureMode)
 {
     _neuralNetWidget = _NeuralNetEditorWidget::create();
 }
@@ -232,7 +232,14 @@ void _InspectionWindow::process()
         return;
     }
     auto width = calcWindowWidth();
-    auto height = isObject() ? StyleRepository::get().scale(500.0f) : StyleRepository::get().scale(180.0f);
+    float height;
+    if (_creatureMode) {
+        height = StyleRepository::get().scale(230.0f);
+    } else if (isObject()) {
+        height = StyleRepository::get().scale(500.0f);
+    } else {
+        height = StyleRepository::get().scale(180.0f);
+    }
     auto borderlessRendering = _SimulationFacade::get()->getSimulationParameters().borderlessRendering.value;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
@@ -284,7 +291,11 @@ bool _InspectionWindow::isObject() const
 std::string _InspectionWindow::generateTitle() const
 {
     std::stringstream ss;
-    if (isObject()) {
+    if (_creatureMode) {
+        auto entity = EditorModel::get().getInspectedEntity(_entityId);
+        auto const& creature = std::get<ExtendedObjectDesc>(entity).creature;
+        ss << "Creature with id 0x" << std::hex << std::uppercase << (creature.has_value() ? creature->_id : _entityId);
+    } else if (isObject()) {
         ss << "Cell with id 0x" << std::hex << std::uppercase << _entityId;
     } else {
         ss << "Energy particle with id 0x" << std::hex << std::uppercase << _entityId;
@@ -294,6 +305,18 @@ std::string _InspectionWindow::generateTitle() const
 
 void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 {
+    if (_creatureMode) {
+        if (extendedObject.creature.has_value()) {
+            AlienGui::DynamicTableLayout table(TableColumnWidth);
+            if (table.begin()) {
+                processCreatureNode(extendedObject, true);
+                table.next();
+                table.end();
+            }
+        }
+        return;
+    }
+
     auto& object = extendedObject.object;
     auto origObject = object;
 
@@ -539,9 +562,9 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 }
 
 
-void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject)
+void _InspectionWindow::processCreatureNode(ExtendedObjectDesc& extendedObject, bool defaultOpen)
 {
-    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Creature").rank(AlienGui::TreeNodeRank::High).defaultOpen(false))) {
+    if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Creature").rank(AlienGui::TreeNodeRank::High).defaultOpen(defaultOpen))) {
         processPropertiesSubNode("Creature", [&] {
             auto& creature = extendedObject.creature.value();
             inspectorHexId("Creature id", creature._id);

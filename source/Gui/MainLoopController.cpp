@@ -490,6 +490,13 @@ void MainLoopController::processMenubar()
         [&] { EditorController::get().onInspectSelectedGenomes(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
+            .name("Inspect creatures")
+            .keyAlt(true)
+            .key(ImGuiKey_R)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isCreatureInspectionPossible()),
+        [&] { EditorController::get().onInspectSelectedCreatures(); });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters()
             .name("Close inspections")
             .key(ImGuiKey_Escape)
             .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive()),
