@@ -37,20 +37,20 @@ namespace
     {
         std::vector<std::pair<std::string, std::string>> activeMutations;
         addActiveMutationType(
-            activeMutations, "Connection", {mutationRates._connectionMutations[0]._nodeProbability, mutationRates._connectionMutations[1]._nodeProbability});
+            activeMutations, "Connection mutations", {mutationRates._connectionMutations[0]._nodeProbability, mutationRates._connectionMutations[1]._nodeProbability});
         addActiveMutationType(
-            activeMutations, "Neuron", {mutationRates._neuronMutations[0]._nodeProbability, mutationRates._neuronMutations[1]._nodeProbability});
+            activeMutations, "Neuron mutations", {mutationRates._neuronMutations[0]._nodeProbability, mutationRates._neuronMutations[1]._nodeProbability});
         addActiveMutationType(
             activeMutations,
-            "Cell type property",
+            "Cell type property mut.",
             {mutationRates._cellTypePropertiesMutations[0]._nodeProbability, mutationRates._cellTypePropertiesMutations[1]._nodeProbability});
-        addActiveMutationType(activeMutations, "Cell type mode", {mutationRates._cellTypeModeMutation._nodeProbability});
-        addActiveMutationType(activeMutations, "Cell type", {mutationRates._cellTypeMutation._nodeProbability});
-        addActiveMutationType(activeMutations, "Void", {mutationRates._voidMutation._nodeProbability});
-        addActiveMutationType(activeMutations, "Append node", {mutationRates._appendNodeMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Add node", {mutationRates._addNodeMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Trim node", {mutationRates._trimNodeMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Delete node", {mutationRates._deleteNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Cell type mode mut.", {mutationRates._cellTypeModeMutation._nodeProbability});
+        addActiveMutationType(activeMutations, "Cell type mutations", {mutationRates._cellTypeMutation._nodeProbability});
+        addActiveMutationType(activeMutations, "Void mutations", {mutationRates._voidMutation._nodeProbability});
+        addActiveMutationType(activeMutations, "Append node mutations", {mutationRates._appendNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Add node mutations", {mutationRates._addNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Trim node mutations", {mutationRates._trimNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Delete node mutations", {mutationRates._deleteNodeMutation._geneProbability});
         addActiveMutationType(
             activeMutations, "Constructor", {mutationRates._constructorMutations[0]._nodeProbability, mutationRates._constructorMutations[1]._nodeProbability});
         return activeMutations;
