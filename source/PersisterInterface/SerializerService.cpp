@@ -287,6 +287,20 @@ namespace
     auto constexpr Id_Genome_ResistanceToInjection = 6;
     auto constexpr Id_Genome_ApplyMetaMutations = 7;
 
+    // Compatibility: lineage attributes were stored in the genome in the old model and have been moved to the creature.
+    // Loading reads these legacy genome keys and migrates them to the creature; saving no longer writes them. Remove later.
+    auto constexpr Id_Genome_Legacy_LineageId = 3;
+    auto constexpr Id_Genome_Legacy_AccumulatedMutations = 4;
+    auto constexpr Id_Genome_Legacy_PrevLineageId = 5;
+
+    struct LegacyLineage
+    {
+        int lineageId;
+        std::optional<int> prevLineageId;
+        float accumulatedMutations;
+    };
+    std::unordered_map<uint64_t, LegacyLineage> legacyLineageByGenomeId;
+
     auto constexpr Id_NeuronMutation_NodeProbability = 0;
     auto constexpr Id_NeuronMutation_WeightChangeSigma = 1;
     auto constexpr Id_NeuronMutation_BiasChangeSigma = 2;
@@ -1032,6 +1046,17 @@ namespace cereal
         scope.addMember(Id_Genome_ApplyMetaMutations, data._applyMetaMutations, defaultObject._applyMetaMutations);
         scope.addDesc(Id_Genome_Genes, data._genes);
         scope.addDesc(Id_Genome_MutationRates, data._mutationRates);
+
+        // Compatibility: stash legacy genome-level lineage so it can be migrated to the creature after loading. Remove later.
+        if (task == SerializationTask::Load) {
+            LegacyLineage legacy{0, std::nullopt, 0.0f};
+            scope.addMember(Id_Genome_Legacy_LineageId, legacy.lineageId, 0);
+            scope.addMember(Id_Genome_Legacy_PrevLineageId, legacy.prevLineageId, std::optional<int>{});
+            scope.addMember(Id_Genome_Legacy_AccumulatedMutations, legacy.accumulatedMutations, 0.0f);
+            if (legacy.lineageId != 0 || legacy.prevLineageId.has_value() || legacy.accumulatedMutations != 0.0f) {
+                legacyLineageByGenomeId[data._id] = legacy;
+            }
+        }
     }
     SPLIT_SERIALIZATION(GenomeDesc)
 }
@@ -1808,11 +1833,30 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, Desc& description)
     {
-        auto scope = getSerializationScope(task, ar);
-        scope.addDesc(Id_Desc_Objects, description._objects);
-        scope.addDesc(Id_Desc_Energies, description._energies);
-        scope.addDesc(Id_Desc_Creatures, description._creatures);
-        scope.addDesc(Id_Desc_Genomes, description._genomes);
+        // Compatibility: collected during genome loading (below), applied to creatures afterwards. Remove later.
+        if (task == SerializationTask::Load) {
+            legacyLineageByGenomeId.clear();
+        }
+        {
+            auto scope = getSerializationScope(task, ar);
+            scope.addDesc(Id_Desc_Objects, description._objects);
+            scope.addDesc(Id_Desc_Energies, description._energies);
+            scope.addDesc(Id_Desc_Creatures, description._creatures);
+            scope.addDesc(Id_Desc_Genomes, description._genomes);
+        }
+
+        // Compatibility: migrate legacy genome-level lineage to the owning creatures. Remove later.
+        if (task == SerializationTask::Load && !legacyLineageByGenomeId.empty()) {
+            for (auto& creature : description._creatures) {
+                auto findResult = legacyLineageByGenomeId.find(creature._genomeId);
+                if (findResult != legacyLineageByGenomeId.end()) {
+                    creature._lineageId = findResult->second.lineageId;
+                    creature._prevLineageId = findResult->second.prevLineageId;
+                    creature._accumulatedMutations = findResult->second.accumulatedMutations;
+                }
+            }
+            legacyLineageByGenomeId.clear();
+        }
     }
     SPLIT_SERIALIZATION(Desc)
 }

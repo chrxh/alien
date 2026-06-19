@@ -325,14 +325,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creatureTO.creatureIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(creature) - _data->entities.heap.getArray());
 
     creature->id = creatureTO.id;
-    creature->ancestorId = creatureTO.ancestorId;
-    creature->generation = creatureTO.generation;
-    creature->numCells = creatureTO.numCells;
-    creature->mutationState = creatureTO.mutationState;
-    creature->lineageId = creatureTO.lineageId;
-    creature->prevLineageId = creatureTO.prevLineageId;
-    creature->accumulatedMutations = creatureTO.accumulatedMutations;
-    creature->headUpdateId = creatureTO.headUpdateId;
+    changeCreatureFromTO(creatureTO, creature);
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     creature->genome = &_data->entities.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
@@ -612,9 +605,14 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
 
 __inline__ __device__ void EntityFactory::changeCreatureFromTO(CreatureTO const& creatureTO, Creature* creature)
 {
+    creature->ancestorId = creatureTO.ancestorId;
+    creature->generation = creatureTO.generation;
+    creature->numCells = creatureTO.numCells;
+    creature->mutationState = creatureTO.mutationState;
     creature->lineageId = creatureTO.lineageId;
     creature->prevLineageId = creatureTO.prevLineageId;
     creature->accumulatedMutations = creatureTO.accumulatedMutations;
+    creature->headUpdateId = creatureTO.headUpdateId;
 }
 
 __inline__ __device__ void EntityFactory::changeEnergyFromTO(EnergyTO const& particleTO, Energy* particle)
