@@ -350,7 +350,7 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
         table.end();
     }
 
-    DescValidationService::get().validateAndCorrect(object);
+    DescValidationService::get().validateAndCorrect(extendedObject);
 
     applyPendingSignalEntries(extendedObject);
     if (object != origObject || extendedObject.creature != origCreature) {

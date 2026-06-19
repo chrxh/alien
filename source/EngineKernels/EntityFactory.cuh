@@ -17,6 +17,7 @@ public:
     __inline__ __device__ Genome* createGenomeFromTO(TOs const& to, int genomeIndex);
     __inline__ __device__ Object* createObjectFromTO(TOs const& to, int objectIndex, Object* objectArray);
     __inline__ __device__ void changeObjectFromTO(TOs const& to, ObjectTO const& objectTO, Object* object);
+    __inline__ __device__ void changeCreatureFromTO(CreatureTO const& creatureTO, Creature* creature);
     __inline__ __device__ void changeEnergyFromTO(EnergyTO const& particleTO, Energy* particle);
 
     __inline__ __device__ Energy* createEnergy(float energy, float2 const& pos, float2 const& vel, int color);
@@ -607,6 +608,13 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.energyNeeded = false;
         }
     }
+}
+
+__inline__ __device__ void EntityFactory::changeCreatureFromTO(CreatureTO const& creatureTO, Creature* creature)
+{
+    creature->lineageId = creatureTO.lineageId;
+    creature->prevLineageId = creatureTO.prevLineageId;
+    creature->accumulatedMutations = creatureTO.accumulatedMutations;
 }
 
 __inline__ __device__ void EntityFactory::changeEnergyFromTO(EnergyTO const& particleTO, Energy* particle)
