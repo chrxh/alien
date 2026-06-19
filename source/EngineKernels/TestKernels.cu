@@ -25,7 +25,7 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
         block.sync();
 
         if (shouldMutate) {
-            MutationProcessor::applyMutations(data, object->typeData.cell.creature->genome);
+            MutationProcessor::applyMutations(data, object->typeData.cell.creature, object->typeData.cell.creature->genome);
         }
         block.sync();
     }

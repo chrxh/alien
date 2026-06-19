@@ -15,9 +15,6 @@ protected:
     bool compareAllExceptConstructor(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._lineageId = 0;
-            genome._prevLineageId = std::nullopt;
-            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     node._constructor.reset();

@@ -865,11 +865,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._id = genomeTO.id;
     NumberGenerator::get().adaptMaxEntityId(genomeTO.id);
     result._name = char64ToString(genomeTO.name);
-    result._lineageId = genomeTO.lineageId;
-    NumberGenerator::get().adaptMaxLineageId(genomeTO.lineageId);
-    result._prevLineageId = genomeTO.prevLineageId != 0 ? std::make_optional(genomeTO.prevLineageId) : std::nullopt;
     result._frontAngle = genomeTO.frontAngle;
-    result._accumulatedMutations = genomeTO.accumulatedMutations;
     result._resistanceToInjection = genomeTO.resistanceToInjection;
     result._applyMetaMutations = genomeTO.applyMetaMutations;
     for (int i = 0; i < 2; ++i) {
@@ -931,6 +927,10 @@ CreatureDesc DescConverterService::createCreatureDesc(TOs const& to, int creatur
     result._generation = creatureTO.generation;
     result._numCells = creatureTO.numCells;
     result._mutationState = creatureTO.mutationState;
+    result._lineageId = creatureTO.lineageId;
+    NumberGenerator::get().adaptMaxLineageId(creatureTO.lineageId);
+    result._prevLineageId = creatureTO.prevLineageId != 0 ? std::make_optional(creatureTO.prevLineageId) : std::nullopt;
+    result._accumulatedMutations = creatureTO.accumulatedMutations;
     result._headUpdateId = creatureTO.headUpdateId;
 
     return result;
@@ -967,10 +967,7 @@ void DescConverterService::convertGenomeToTO(
 
     stringToChar64(genomeTO.name, genome._name);
     genomeTO.id = genome._id;
-    genomeTO.lineageId = genome._lineageId;
-    genomeTO.prevLineageId = genome._prevLineageId.value_or(0);
     genomeTO.frontAngle = genome._frontAngle;
-    genomeTO.accumulatedMutations = genome._accumulatedMutations;
     genomeTO.resistanceToInjection = genome._resistanceToInjection;
     genomeTO.applyMetaMutations = genome._applyMetaMutations;
     for (int i = 0; i < 2; ++i) {
@@ -1246,6 +1243,9 @@ void DescConverterService::convertCreatureToTO(
     creatureTO.headUpdateId = creatureDesc._headUpdateId;
     creatureTO.numCells = creatureDesc._numCells;
     creatureTO.mutationState = creatureDesc._mutationState;
+    creatureTO.lineageId = creatureDesc._lineageId;
+    creatureTO.prevLineageId = creatureDesc._prevLineageId.value_or(0);
+    creatureTO.accumulatedMutations = creatureDesc._accumulatedMutations;
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
 }
 

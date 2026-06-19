@@ -15,9 +15,6 @@ protected:
     bool compareAllExceptCellTypeAndHomogeneousFlag(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._lineageId = 0;
-            genome._prevLineageId = std::nullopt;
-            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 gene._homogeneousCellType = false;  // canonicalize: the cell type mutation may also flip this flag
                 for (auto& node : gene._nodes) {

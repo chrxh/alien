@@ -431,10 +431,7 @@ struct GenomeTO
     int numGenes;
     uint64_t geneArrayIndex;
 
-    uint32_t lineageId;
-    uint32_t prevLineageId;
     float frontAngle;
-    float accumulatedMutations;
     bool resistanceToInjection;
     bool applyMetaMutations;
     MutationRatesTO mutationRates;

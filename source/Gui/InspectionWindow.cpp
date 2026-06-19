@@ -315,6 +315,7 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 
     auto& object = extendedObject.object;
     auto origObject = object;
+    auto origCreature = extendedObject.creature;
 
     AlienGui::DynamicTableLayout table(TableColumnWidth);
     if (table.begin()) {
@@ -352,7 +353,7 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
     DescValidationService::get().validateAndCorrect(object);
 
     applyPendingSignalEntries(extendedObject);
-    if (object != origObject) {
+    if (object != origObject || extendedObject.creature != origCreature) {
         _SimulationFacade::get()->changeCell(extendedObject);
     }
 }
@@ -564,11 +565,11 @@ void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedOb
     inspectorHexId("Creature id", creature._id);
     inspectorText("Generation", std::to_string(creature._generation));
     inspectorText("Num cells", std::to_string(creature._numCells));
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth), creature._lineageId);
+    AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Prev lineage id").textWidth(TextWidth), creature._prevLineageId);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Accumulated mutations").format("%.5f").textWidth(TextWidth), creature._accumulatedMutations);
     auto& genome = extendedObject.genome.value();
-    std::stringstream frontAngle;
-    frontAngle << std::fixed << std::setprecision(1) << genome._frontAngle;
     inspectorText("Genome name", genome._name);
-    inspectorText("Lineage id", std::to_string(genome._lineageId));
     inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
     inspectorText("Apply meta-mutations", genome._applyMetaMutations ? "Yes" : "No");
     if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {

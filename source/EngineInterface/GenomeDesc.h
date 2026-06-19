@@ -552,10 +552,7 @@ struct GenomeDesc
     GenomeDesc id(uint64_t id);
     MEMBER(GenomeDesc, std::string, name, "");
     MEMBER(GenomeDesc, std::vector<GeneDesc>, genes, {})
-    MEMBER(GenomeDesc, int, lineageId, 0);
-    MEMBER(GenomeDesc, std::optional<int>, prevLineageId, std::nullopt);
     MEMBER(GenomeDesc, float, frontAngle, 0.0f);
-    MEMBER(GenomeDesc, float, accumulatedMutations, 0.0f);
     MEMBER(GenomeDesc, bool, resistanceToInjection, false);
     MEMBER(GenomeDesc, bool, applyMetaMutations, true);
 

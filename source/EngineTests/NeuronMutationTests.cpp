@@ -15,9 +15,6 @@ protected:
     bool compareAllExceptNeuronWeights(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._lineageId = 0;
-            genome._prevLineageId = std::nullopt;
-            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._weights.begin(), node._neuralNetwork._weights.end(), 0.0f);
@@ -32,9 +29,6 @@ protected:
     bool compareAllExceptNeuronBiases(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._lineageId = 0;
-            genome._prevLineageId = std::nullopt;
-            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._biases.begin(), node._neuralNetwork._biases.end(), 0.0f);
@@ -49,9 +43,6 @@ protected:
     bool compareAllExceptActivationFunctions(GenomeDesc expected, GenomeDesc actual)
     {
         auto reset = [](GenomeDesc& genome) {
-            genome._lineageId = 0;
-            genome._prevLineageId = std::nullopt;
-            genome._accumulatedMutations = 0.0f;
             for (auto& gene : genome._genes) {
                 for (auto& node : gene._nodes) {
                     std::fill(node._neuralNetwork._activationFunctions.begin(), node._neuralNetwork._activationFunctions.end(), ActivationFunction_Identity);

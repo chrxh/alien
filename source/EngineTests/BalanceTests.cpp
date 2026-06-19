@@ -31,8 +31,8 @@ public:
                 .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
                 .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_Free).separation(true))),
             },
-            CreatureDesc(),
-            GenomeDesc().lineageId(0).prevLineageId(0).frontAngle(225.0f).genes(
+            CreatureDesc().lineageId(0).prevLineageId(0),
+            GenomeDesc().frontAngle(225.0f).genes(
             {
                 GeneDesc()
 
@@ -73,8 +73,8 @@ public:
                 .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
                 .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_Free).separation(true))),
             },
-            CreatureDesc(),
-            GenomeDesc().lineageId(1).prevLineageId(1).frontAngle(225.0f).genes(
+            CreatureDesc().lineageId(1).prevLineageId(1),
+            GenomeDesc().frontAngle(225.0f).genes(
             {
                 GeneDesc()
 
@@ -129,16 +129,10 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
     _simulationFacade->calcTimesteps(20000);
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Create a map of genomeId to lineageId
-    std::unordered_map<uint64_t, int> genomeIdToLineageId;
-    for (const auto& genome : actualData._genomes) {
-        genomeIdToLineageId[genome._id] = genome._lineageId;
-    }
-
     int numSmallCreatures = 0;
     int numLargeCreatures = 0;
     for (const auto& creature : actualData._creatures) {
-        auto lineageId = genomeIdToLineageId.at(creature._genomeId);
+        auto lineageId = creature._lineageId;
         if (lineageId == 0) {
             ++numSmallCreatures;
         } else if (lineageId == 1) {
@@ -173,16 +167,10 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionC
     _simulationFacade->calcTimesteps(20000);
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Create a map of genomeId to lineageId
-    std::unordered_map<uint64_t, int> genomeIdToLineageId;
-    for (const auto& genome : actualData._genomes) {
-        genomeIdToLineageId[genome._id] = genome._lineageId;
-    }
-
     int numSmallCreatures = 0;
     int numLargeCreatures = 0;
     for (const auto& creature : actualData._creatures) {
-        auto lineageId = genomeIdToLineageId.at(creature._genomeId);
+        auto lineageId = creature._lineageId;
         if (lineageId == 0) {
             ++numSmallCreatures;
         } else if (lineageId == 1) {

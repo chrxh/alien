@@ -492,8 +492,6 @@ namespace
 
     void adaptGenomeAttributesForPreview(GenomeDesc& genome, bool detailSimulation)
     {
-        genome._lineageId = 0;
-        genome._accumulatedMutations = 0;
         genome._mutationRates._neuronMutations[0] = NeuronMutationDesc();
         genome._mutationRates._neuronMutations[1] = NeuronMutationDesc();
         genome._mutationRates._connectionMutations[0] = ConnectionMutationDesc();

@@ -48,7 +48,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
 {
-    auto genome = createTestGenome().lineageId(42).prevLineageId(41);
+    auto genome = createTestGenome();
     switch (GetParam()) {
     case MutationType::Neuron:
         genome._mutationRates._neuronMutations[0] =
@@ -87,7 +87,7 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     }
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).prevLineageId(41), genome);
 
     auto parameters = _parameters;
     parameters.newLineageThreshold.value = 1.0e30f;
@@ -98,15 +98,15 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         _simulationFacade->testOnly_mutate(1);
     }
 
-    auto actualGenome = getMutatedGenome();
-    EXPECT_GT(actualGenome._accumulatedMutations, genome._accumulatedMutations);
+    auto actualCreature = getMutatedCreature();
+    EXPECT_GT(actualCreature._accumulatedMutations, 0.0f);
 }
 
 TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount)
 {
-    auto genome = GenomeDesc().lineageId(42).prevLineageId(41);
+    auto genome = GenomeDesc();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).prevLineageId(41), genome);
 
     _parameters.neuronsMetaMutationsSigma.value = 1.0f;
     _parameters.connectionsMetaMutationsSigma.value = 1.0f;
@@ -124,18 +124,17 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
 
-    auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome._accumulatedMutations, 0.0f);
-    EXPECT_EQ(actualGenome._lineageId, 42);
-    EXPECT_EQ(actualGenome._prevLineageId, 41);
+    auto actualCreature = getMutatedCreature();
+    EXPECT_EQ(actualCreature._accumulatedMutations, 0.0f);
+    EXPECT_EQ(actualCreature._lineageId, 42);
+    EXPECT_EQ(actualCreature._prevLineageId, 41);
 }
 
 TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
 {
-    auto genome = createTestGenome().lineageId(42).prevLineageId(41);
-    genome._accumulatedMutations = 11.0f;
+    auto genome = createTestGenome();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).prevLineageId(41).accumulatedMutations(11.0f), genome);
 
     _parameters.newLineageThreshold.value = 0.1f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -143,8 +142,8 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
 
-    auto actualGenome = getMutatedGenome();
-    ASSERT_TRUE(actualGenome._prevLineageId.has_value());
-    EXPECT_EQ(*actualGenome._prevLineageId, 42);
-    EXPECT_GT(actualGenome._lineageId, 42);
+    auto actualCreature = getMutatedCreature();
+    ASSERT_TRUE(actualCreature._prevLineageId.has_value());
+    EXPECT_EQ(*actualCreature._prevLineageId, 42);
+    EXPECT_GT(actualCreature._lineageId, 42);
 }

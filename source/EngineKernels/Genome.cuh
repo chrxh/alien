@@ -426,24 +426,11 @@ struct Genome
     int numGenes;
     Gene* genes;
 
-    uint32_t lineageId;
-    uint32_t prevLineageId;
     float frontAngle;
-    float accumulatedMutations;
     bool resistanceToInjection;
     bool applyMetaMutations;
     MutationRates mutationRates;
 
     // Temporary data
     uint64_t genomeIndex;  // May be invalid
-
-    __device__ __inline__ bool isRelatedLineage(Genome* other)
-    {
-        if (prevLineageId != 0 && other->prevLineageId != 0) {
-            return lineageId == other->lineageId || lineageId == other->prevLineageId || prevLineageId == other->lineageId
-                || prevLineageId == other->prevLineageId;
-        } else {
-            return lineageId == other->lineageId;
-        }
-    }
 };
