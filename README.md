@@ -113,10 +113,10 @@ It is important to start ALIEN directly from the build folder, otherwise it will
 ALIEN can alternatively be built for AMD GPUs with ROCm/HIP in place of CUDA. Prerequisites: a [ROCm](https://rocm.docs.amd.com/) installation (7.2 or newer) providing HIP, and a CMake toolchain. Configure with `-DUSE_HIP=ON` and set the target GPU architecture via `CMAKE_HIP_ARCHITECTURES` (for example `gfx90a` for CDNA2 / MI200, or `gfx1100` for RDNA3):
 ```
 mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx90a
+cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx90a -DCMAKE_PREFIX_PATH=/opt/rocm
 cmake --build . --config Release -j8
 ```
-The default build targets NVIDIA GPUs via CUDA and is unchanged; `-DUSE_HIP=ON` selects the AMD path.
+The default build targets NVIDIA GPUs via CUDA and is unchanged; `-DUSE_HIP=ON` selects the AMD path. The `-DCMAKE_PREFIX_PATH=/opt/rocm` entry lets `find_package(hip)` locate the ROCm install when CMake uses the vcpkg toolchain; adjust the path if ROCm is installed elsewhere or already on `PATH`.
 
 # ⌨️ Command-line interface
 
