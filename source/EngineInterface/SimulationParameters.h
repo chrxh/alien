@@ -117,7 +117,7 @@ struct SimulationParameters
     BaseParameter<float> trimNodeMetaMutationsSigma = {0};
     BaseParameter<float> deleteNodeMetaMutationsSigma = {0};
     BaseParameter<float> constructorMetaMutationsSigma = {0};
-    BaseParameter<float> newLineageThreshold = {Infinity<float>::value};
+    BaseParameter<float> newLineageThreshold = {1.0f};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = ColorVector<float>::uniform(0.0f)};
