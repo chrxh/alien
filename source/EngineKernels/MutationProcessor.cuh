@@ -1126,9 +1126,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * neuronSigma)); };
             for (int i = 0; i < 2; ++i) {
                 mutateFloat(genome->mutationRates.neuronMutations[i].nodeProbability);
-                mutateFloat(genome->mutationRates.neuronMutations[i].weightChangeSigma);
-                mutateFloat(genome->mutationRates.neuronMutations[i].biasChangeSigma);
-                mutateFloat(genome->mutationRates.neuronMutations[i].actfnChangeProbability);
             }
         }
 
@@ -1138,7 +1135,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * connSigma)); };
             for (int i = 0; i < 2; ++i) {
                 mutateFloat(genome->mutationRates.connectionMutations[i].nodeProbability);
-                mutateFloat(genome->mutationRates.connectionMutations[i].valueChangeSigma);
             }
         }
 
@@ -1147,8 +1143,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeSigma)); };
             for (int i = 0; i < 2; ++i) {
                 mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].nodeProbability);
-                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].valueChangeSigma);
-                mutateFloat(genome->mutationRates.cellTypePropertiesMutations[i].enumChangeProbability);
             }
         }
 
@@ -1199,9 +1193,6 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * constructorSigma)); };
             for (int i = 0; i < 2; ++i) {
                 mutateFloat(genome->mutationRates.constructorMutations[i].nodeProbability);
-                mutateFloat(genome->mutationRates.constructorMutations[i].valueChangeSigma);
-                mutateFloat(genome->mutationRates.constructorMutations[i].enumChangeProbability);
-                mutateFloat(genome->mutationRates.constructorMutations[i].constructorToggleProbability);
             }
         }
     }

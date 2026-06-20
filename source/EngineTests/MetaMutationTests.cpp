@@ -30,22 +30,19 @@ TEST_F(MetaMutationTests, metaMutation_neuronRatesActuallyChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    bool anyChanged = actualGenome._mutationRates._neuronMutations[0]._nodeProbability != 0.5f
-        || actualGenome._mutationRates._neuronMutations[0]._weightChangeSigma != 0.5f || actualGenome._mutationRates._neuronMutations[0]._biasChangeSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutations[0]._actfnChangeProbability != 0.5f
-        || actualGenome._mutationRates._neuronMutations[1]._nodeProbability != 0.5f || actualGenome._mutationRates._neuronMutations[1]._weightChangeSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutations[1]._biasChangeSigma != 0.5f
-        || actualGenome._mutationRates._neuronMutations[1]._actfnChangeProbability != 0.5f;
-    EXPECT_TRUE(anyChanged);
+    bool nodeProbabilityChanged =
+        actualGenome._mutationRates._neuronMutations[0]._nodeProbability != 0.5f || actualGenome._mutationRates._neuronMutations[1]._nodeProbability != 0.5f;
+    EXPECT_TRUE(nodeProbabilityChanged);
 
     EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._nodeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._weightChangeSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._biasChangeSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[0]._actfnChangeProbability, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._nodeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._weightChangeSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._biasChangeSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._neuronMutations[1]._actfnChangeProbability, 0.0f);
+
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._weightChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._biasChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[0]._actfnChangeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._weightChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._biasChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._neuronMutations[1]._actfnChangeProbability, 0.5f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_neuronRatesZeroSigmaNoChange)
@@ -100,14 +97,13 @@ TEST_F(MetaMutationTests, metaMutation_connectionRatesActuallyChange)
     auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
     auto actualGenome = actualData.getGenomeRef(actualCreature._genomeId);
 
-    bool anyChanged = actualGenome._mutationRates._connectionMutations[0]._nodeProbability != 0.5f
-        || actualGenome._mutationRates._connectionMutations[0]._valueChangeSigma != 0.5f || actualGenome._mutationRates._connectionMutations[1]._nodeProbability != 0.5f
-        || actualGenome._mutationRates._connectionMutations[1]._valueChangeSigma != 0.5f;
-    EXPECT_TRUE(anyChanged);
+    bool nodeProbabilityChanged = actualGenome._mutationRates._connectionMutations[0]._nodeProbability != 0.5f
+        || actualGenome._mutationRates._connectionMutations[1]._nodeProbability != 0.5f;
+    EXPECT_TRUE(nodeProbabilityChanged);
     EXPECT_GE(actualGenome._mutationRates._connectionMutations[0]._nodeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutations[0]._valueChangeSigma, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._connectionMutations[1]._nodeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._connectionMutations[1]._valueChangeSigma, 0.0f);
+    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[0]._valueChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._connectionMutations[1]._valueChangeSigma, 0.5f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_connectionRatesZeroSigmaNoChange)
@@ -155,19 +151,15 @@ TEST_F(MetaMutationTests, metaMutation_cellTypePropertyRatesActuallyChange)
 
     auto actualGenome = getMutatedGenome();
 
-    bool anyChanged = actualGenome._mutationRates._cellTypePropertiesMutations[0]._nodeProbability != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[0]._valueChangeSigma != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[0]._enumChangeProbability != 0.5f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._nodeProbability != 0.4f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._valueChangeSigma != 0.4f
-        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._enumChangeProbability != 0.4f;
-    EXPECT_TRUE(anyChanged);
+    bool nodeProbabilityChanged = actualGenome._mutationRates._cellTypePropertiesMutations[0]._nodeProbability != 0.5f
+        || actualGenome._mutationRates._cellTypePropertiesMutations[1]._nodeProbability != 0.4f;
+    EXPECT_TRUE(nodeProbabilityChanged);
     EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._nodeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._valueChangeSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[0]._enumChangeProbability, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._nodeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._valueChangeSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._cellTypePropertiesMutations[1]._enumChangeProbability, 0.0f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[0]._valueChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[0]._enumChangeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._valueChangeSigma, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._cellTypePropertiesMutations[1]._enumChangeProbability, 0.4f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
@@ -493,23 +485,17 @@ TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)
 
     auto actualGenome = getMutatedGenome();
 
-    bool anyChanged = actualGenome._mutationRates._constructorMutations[0]._nodeProbability != 0.5f
-        || actualGenome._mutationRates._constructorMutations[0]._valueChangeSigma != 0.5f
-        || actualGenome._mutationRates._constructorMutations[0]._enumChangeProbability != 0.5f
-        || actualGenome._mutationRates._constructorMutations[0]._constructorToggleProbability != 0.5f
-        || actualGenome._mutationRates._constructorMutations[1]._nodeProbability != 0.4f
-        || actualGenome._mutationRates._constructorMutations[1]._valueChangeSigma != 0.4f
-        || actualGenome._mutationRates._constructorMutations[1]._enumChangeProbability != 0.4f
-        || actualGenome._mutationRates._constructorMutations[1]._constructorToggleProbability != 0.4f;
-    EXPECT_TRUE(anyChanged);
+    bool nodeProbabilityChanged = actualGenome._mutationRates._constructorMutations[0]._nodeProbability != 0.5f
+        || actualGenome._mutationRates._constructorMutations[1]._nodeProbability != 0.4f;
+    EXPECT_TRUE(nodeProbabilityChanged);
     EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._nodeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._valueChangeSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._enumChangeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._constructorMutations[0]._constructorToggleProbability, 0.0f);
     EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._nodeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._valueChangeSigma, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._enumChangeProbability, 0.0f);
-    EXPECT_GE(actualGenome._mutationRates._constructorMutations[1]._constructorToggleProbability, 0.0f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._valueChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._enumChangeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[0]._constructorToggleProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._valueChangeSigma, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._enumChangeProbability, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._constructorMutations[1]._constructorToggleProbability, 0.4f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_constructorRatesZeroSigmaNoChange)
