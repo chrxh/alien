@@ -10,7 +10,7 @@
 namespace
 {
     auto constexpr MinTreeNodeWidth = 300.0f;
-    auto constexpr RightColumnWidth = 190.0f;
+    auto constexpr RightColumnWidth = 195.0f;
 
     void processConnectionMutationRate(std::string const& name, std::string const& id, ConnectionMutationDesc& mutation, float rightColumnWidth)
     {
