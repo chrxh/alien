@@ -158,6 +158,19 @@ namespace
             float v = 0.6f + 0.1f * (static_cast<float>(hash3 & 0xFFFFu) / 65535.0f);
             return hsvToRgb(h, s, v);
         }
+        if (coloring == CellColoring_Creature) {
+            if (object->type != ObjectType_Cell) {
+                return getCustomizationColor(object->color);
+            }
+            auto creatureId = static_cast<uint32_t>(object->typeData.cell.creature->id);
+            uint32_t hash1 = creatureId * 2654435761u;
+            uint32_t hash2 = creatureId * 2246822519u;
+            uint32_t hash3 = creatureId * 3266489917u;
+            float h = static_cast<float>(hash1 & 0xFFFFu) / 65535.0f;
+            float s = 0.7f + 0.3f * (static_cast<float>(hash2 & 0xFFFFu) / 65535.0f);
+            float v = 0.6f + 0.1f * (static_cast<float>(hash3 & 0xFFFFu) / 65535.0f);
+            return hsvToRgb(h, s, v);
+        }
         return getCustomizationColor(object->color);
     }
 

@@ -90,6 +90,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                            {"Customization", {}},
                                            {"Lineage + Customization", {}},
                                            {"Lineage", {}},
+                                           {"Creature", {}},
                                        }))
                         .description(coloringTooltip),
                     ParameterSpec()
