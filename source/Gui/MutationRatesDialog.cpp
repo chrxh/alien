@@ -9,9 +9,9 @@
 
 namespace
 {
-    auto constexpr HeaderMinRightColumnWidth = 160.0f;
-    auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
-    auto constexpr HeaderMinColumnWidth = 300.0f;
+    auto constexpr MinRightColumnWidth = 160.0f;
+    auto constexpr MaxLeftColumnWidth = 200.0f;
+    auto constexpr MinColumnWidth = 300.0f;
 
     void processConnectionMutationRate(std::string const& name, std::string const& id, ConnectionMutationDesc& mutation, float rightColumnWidth)
     {
@@ -208,7 +208,7 @@ namespace
     template <typename Func>
     void processConcreteMutationRates(Func&& processMutationRates)
     {
-        AlienGui::DynamicTableLayout table(HeaderMinColumnWidth);
+        AlienGui::DynamicTableLayout table(MinColumnWidth);
         if (table.begin()) {
             processMutationRates(table);
             table.end();
@@ -341,7 +341,7 @@ void MutationRatesDialog::processIntern()
     // Use a child window with scrolling for the content, reserving space for buttons
     auto buttonAreaHeight = scale(50.0f);
     if (ImGui::BeginChild("MutationRateContent", ImVec2(0, -buttonAreaHeight), false)) {
-        auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
+        auto rightColumnWidth = 180.0f;
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connection weight mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
