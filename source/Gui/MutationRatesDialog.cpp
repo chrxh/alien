@@ -9,9 +9,8 @@
 
 namespace
 {
-    auto constexpr MinRightColumnWidth = 160.0f;
-    auto constexpr MaxLeftColumnWidth = 200.0f;
-    auto constexpr MinColumnWidth = 300.0f;
+    auto constexpr MinTreeNodeWidth = 300.0f;
+    auto constexpr RightColumnWidth = 190.0f;
 
     void processConnectionMutationRate(std::string const& name, std::string const& id, ConnectionMutationDesc& mutation, float rightColumnWidth)
     {
@@ -208,7 +207,7 @@ namespace
     template <typename Func>
     void processConcreteMutationRates(Func&& processMutationRates)
     {
-        AlienGui::DynamicTableLayout table(MinColumnWidth);
+        AlienGui::DynamicTableLayout table(MinTreeNodeWidth);
         if (table.begin()) {
             processMutationRates(table);
             table.end();
@@ -341,13 +340,11 @@ void MutationRatesDialog::processIntern()
     // Use a child window with scrolling for the content, reserving space for buttons
     auto buttonAreaHeight = scale(50.0f);
     if (ImGui::BeginChild("MutationRateContent", ImVec2(0, -buttonAreaHeight), false)) {
-        auto rightColumnWidth = 180.0f;
-
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Connection weight mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processConnectionMutationRate("Mutation rate 1", "CMR1", _mutation._connectionMutations[0], rightColumnWidth);
+                processConnectionMutationRate("Mutation rate 1", "CMR1", _mutation._connectionMutations[0], RightColumnWidth);
                 table.next();
-                processConnectionMutationRate("Mutation rate 2", "CMR2", _mutation._connectionMutations[1], rightColumnWidth);
+                processConnectionMutationRate("Mutation rate 2", "CMR2", _mutation._connectionMutations[1], RightColumnWidth);
                 table.next();
             });
         }
@@ -355,9 +352,9 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Neuron mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processNeuronMutationRate("Mutation rate 1", "NMR1", _mutation._neuronMutations[0], rightColumnWidth);
+                processNeuronMutationRate("Mutation rate 1", "NMR1", _mutation._neuronMutations[0], RightColumnWidth);
                 table.next();
-                processNeuronMutationRate("Mutation rate 2", "NMR2", _mutation._neuronMutations[1], rightColumnWidth);
+                processNeuronMutationRate("Mutation rate 2", "NMR2", _mutation._neuronMutations[1], RightColumnWidth);
                 table.next();
             });
         }
@@ -365,9 +362,9 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type property mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processCellTypePropertiesMutationRate("Mutation rate 1", "CTPM1", _mutation._cellTypePropertiesMutations[0], rightColumnWidth);
+                processCellTypePropertiesMutationRate("Mutation rate 1", "CTPM1", _mutation._cellTypePropertiesMutations[0], RightColumnWidth);
                 table.next();
-                processCellTypePropertiesMutationRate("Mutation rate 2", "CTPM2", _mutation._cellTypePropertiesMutations[1], rightColumnWidth);
+                processCellTypePropertiesMutationRate("Mutation rate 2", "CTPM2", _mutation._cellTypePropertiesMutations[1], RightColumnWidth);
                 table.next();
             });
         }
@@ -375,7 +372,7 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type mode mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processCellTypeModeMutationRate("Mutation rate", "CTMM", _mutation._cellTypeModeMutation, rightColumnWidth);
+                processCellTypeModeMutationRate("Mutation rate", "CTMM", _mutation._cellTypeModeMutation, RightColumnWidth);
                 table.next();
             });
         }
@@ -383,7 +380,7 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Cell type mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processCellTypeMutationRate("Mutation rate", "CTM", _mutation._cellTypeMutation, rightColumnWidth);
+                processCellTypeMutationRate("Mutation rate", "CTM", _mutation._cellTypeMutation, RightColumnWidth);
                 table.next();
             });
         }
@@ -391,7 +388,7 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Void mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processVoidMutationRate("Mutation rate", "VM", _mutation._voidMutation, rightColumnWidth);
+                processVoidMutationRate("Mutation rate", "VM", _mutation._voidMutation, RightColumnWidth);
                 table.next();
             });
         }
@@ -399,7 +396,7 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Append node mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processGeneProbabilityMutationRate("Mutation rate", "APNM", _mutation._appendNodeMutation, rightColumnWidth);
+                processGeneProbabilityMutationRate("Mutation rate", "APNM", _mutation._appendNodeMutation, RightColumnWidth);
                 table.next();
             });
         }
@@ -407,7 +404,7 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Add node mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processGeneProbabilityMutationRate("Mutation rate", "ADNM", _mutation._addNodeMutation, rightColumnWidth);
+                processGeneProbabilityMutationRate("Mutation rate", "ADNM", _mutation._addNodeMutation, RightColumnWidth);
                 table.next();
             });
         }
@@ -415,7 +412,7 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Trim node mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processGeneProbabilityMutationRate("Mutation rate", "TRNM", _mutation._trimNodeMutation, rightColumnWidth);
+                processGeneProbabilityMutationRate("Mutation rate", "TRNM", _mutation._trimNodeMutation, RightColumnWidth);
                 table.next();
             });
         }
@@ -423,7 +420,7 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Delete node mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processGeneProbabilityMutationRate("Mutation rate", "DLNM", _mutation._deleteNodeMutation, rightColumnWidth);
+                processGeneProbabilityMutationRate("Mutation rate", "DLNM", _mutation._deleteNodeMutation, RightColumnWidth);
                 table.next();
             });
         }
@@ -431,9 +428,9 @@ void MutationRatesDialog::processIntern()
 
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Constructor mutations").rank(AlienGui::TreeNodeRank::High))) {
             processConcreteMutationRates([&](AlienGui::DynamicTableLayout& table) {
-                processConstructorMutationRate("Mutation rate 1", "COM1", _mutation._constructorMutations[0], rightColumnWidth);
+                processConstructorMutationRate("Mutation rate 1", "COM1", _mutation._constructorMutations[0], RightColumnWidth);
                 table.next();
-                processConstructorMutationRate("Mutation rate 2", "COM2", _mutation._constructorMutations[1], rightColumnWidth);
+                processConstructorMutationRate("Mutation rate 2", "COM2", _mutation._constructorMutations[1], RightColumnWidth);
                 table.next();
             });
         }
