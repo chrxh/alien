@@ -235,11 +235,11 @@ void _InspectionWindow::process()
     auto width = calcWindowWidth();
     float height;
     if (_creatureMode) {
-        height = StyleRepository::get().scale(280.0f);
+        height = scale(295.0f);
     } else if (isObject()) {
-        height = StyleRepository::get().scale(500.0f);
+        height = scale(500.0f);
     } else {
-        height = StyleRepository::get().scale(180.0f);
+        height = scale(180.0f);
     }
     auto borderlessRendering = _SimulationFacade::get()->getSimulationParameters().borderlessRendering.value;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
@@ -262,7 +262,7 @@ void _InspectionWindow::process()
         _isFirstFrame = false;
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescEditService::get().getPos(entity), borderlessRendering);
-        auto factor = StyleRepository::get().scale(1);
+        auto factor = scale(1);
 
         drawList->AddLine({windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor}, {entityPos.x, entityPos.y}, Const::InspectorLineColor, 1.5f);
         drawList->AddRectFilled(
