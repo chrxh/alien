@@ -152,6 +152,7 @@ enum CellColoring_
     CellColoring_Customization,
     CellColoring_LineageAndCustomization,
     CellColoring_Lineage,
+    CellColoring_Creature,
 };
 
 using CellDeathConsequences = int;
