@@ -236,7 +236,7 @@ void _InspectionWindow::process()
     float height;
     if (_creatureMode) {
         height = scale(295.0f);
-    } else if (isObject()) {
+    } else if (isExtendedObject()) {
         height = scale(500.0f);
     } else {
         height = scale(180.0f);
@@ -251,9 +251,13 @@ void _InspectionWindow::process()
             ImGui::SetScrollY(*_savedScrollY);
         }
         auto windowPos = ImGui::GetWindowPos();
-        if (isObject()) {
+        if (isExtendedObject()) {
             auto extendedObject = std::get<ExtendedObjectDesc>(entity);
-            processExtendedObject(extendedObject);
+            if (_creatureMode) {
+                processCreature(extendedObject);
+            } else {
+                processObject(extendedObject);
+            }
             EditorModel::get().addInspectedEntity(extendedObject);
         } else {
             processParticle(std::get<EnergyDesc>(entity));
@@ -283,7 +287,7 @@ uint64_t _InspectionWindow::getId() const
     return _entityId;
 }
 
-bool _InspectionWindow::isObject() const
+bool _InspectionWindow::isExtendedObject() const
 {
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
     return std::holds_alternative<ExtendedObjectDesc>(entity);
@@ -296,21 +300,12 @@ std::string _InspectionWindow::generateTitle() const
         auto entity = EditorModel::get().getInspectedEntity(_entityId);
         auto const& creature = std::get<ExtendedObjectDesc>(entity).creature;
         ss << "Creature with id 0x" << std::hex << std::uppercase << (creature.has_value() ? creature->_id : _entityId);
-    } else if (isObject()) {
+    } else if (isExtendedObject()) {
         ss << "Cell with id 0x" << std::hex << std::uppercase << _entityId;
     } else {
         ss << "Energy particle with id 0x" << std::hex << std::uppercase << _entityId;
     }
     return ss.str();
-}
-
-void _InspectionWindow::processExtendedObject(ExtendedObjectDesc& extendedObject)
-{
-    if (_creatureMode) {
-        processCreature(extendedObject);
-    } else {
-        processObject(extendedObject);
-    }
 }
 
 void _InspectionWindow::processCreature(ExtendedObjectDesc& extendedObject)
@@ -885,7 +880,7 @@ float _InspectionWindow::calcWindowWidth() const
     if (_creatureMode) {
         return StyleRepository::get().scale(CreatureWindowWidth);
     }
-    if (isObject()) {
+    if (isExtendedObject()) {
         return StyleRepository::get().scale(CellWindowWidth);
     }
     return StyleRepository::get().scale(ParticleWindowWidth);

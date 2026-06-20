@@ -21,10 +21,9 @@ public:
     uint64_t getId() const;
 
 private:
-    bool isObject() const;
+    bool isExtendedObject() const;
     std::string generateTitle() const;
 
-    void processExtendedObject(ExtendedObjectDesc& extendedObject);
     void processObject(ExtendedObjectDesc& extendedObject);
     void processCreature(ExtendedObjectDesc& extendedObject);
     void processParticle(EnergyDesc particle);
