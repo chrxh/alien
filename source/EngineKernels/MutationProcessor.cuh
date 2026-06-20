@@ -35,6 +35,8 @@ private:
     __inline__ __device__ static void applyMutations_addNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_trimNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_deleteNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_duplicateGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_deleteGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_meta(SimulationData& data, Genome* genome);
 
@@ -92,6 +94,14 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
         applyMutations_deleteNode(data, genome, accumulatedMutations);
         block.sync();
         correctGenome(data, genome);
+    }
+
+    // sync since the following mutations may add or remove whole genes (changing genome->genes and numGenes)
+    block.sync();
+    bool anyGeneMutation = nodeRates.duplicateGeneMutation.geneProbability > 0 || nodeRates.deleteGeneMutation.geneProbability > 0;
+    if (anyGeneMutation) {
+        applyMutations_duplicateGene(data, genome, accumulatedMutations);
+        applyMutations_deleteGene(data, genome, accumulatedMutations);
     }
 
     block.sync();
@@ -972,6 +982,170 @@ __inline__ __device__ void MutationProcessor::correctGenome(SimulationData& data
     }
 }
 
+__inline__ __device__ void MutationProcessor::applyMutations_duplicateGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    // Picks one random gene and, if it is referenced by more than one constructor, appends an independent copy of it as the
+    // last gene and repoints one randomly chosen referencing constructor to the copy. As the copy is added at the end, no
+    // existing gene index shifts, so other references stay valid. Gene references are modeled via constructor.geneIndex.
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+    auto const& rate = genome->mutationRates.duplicateGeneMutation;
+    if (rate.geneProbability <= 0) {  // uniform across the block, so the early return does not desync the cooperative group
+        return;
+    }
+
+    __shared__ bool active;
+    __shared__ Gene* newGenes;
+    __shared__ Node* newNodes;
+    __shared__ Node* chosenNode;
+    __shared__ int oldNumGenes;
+    __shared__ int duplicatedGene;
+    __shared__ int duplicatedNumNodes;
+
+    if (laneId == 0) {
+        active = false;
+        oldNumGenes = genome->numGenes;
+        if (oldNumGenes > 0 && data.primaryNumberGen.random() < rate.geneProbability) {
+            auto const candidate = data.primaryNumberGen.random(oldNumGenes - 1);  // [0, numGenes - 1]
+
+            // Count the constructors referencing the candidate gene.
+            int numReferences = 0;
+            for (int geneIndex = 0; geneIndex < oldNumGenes; ++geneIndex) {
+                auto const& gene = genome->genes[geneIndex];
+                for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                    auto const& node = gene.nodes[nodeIndex];
+                    if (node.constructorAvailable && node.constructor.geneIndex == candidate) {
+                        ++numReferences;
+                    }
+                }
+            }
+
+            if (numReferences > 1) {
+                auto const target = data.primaryNumberGen.random(numReferences - 1);  // [0, numReferences - 1]
+
+                // Locate the target-th referencing constructor node.
+                Node* chosen = nullptr;
+                int referenceIndex = 0;
+                for (int geneIndex = 0; geneIndex < oldNumGenes && chosen == nullptr; ++geneIndex) {
+                    auto& gene = genome->genes[geneIndex];
+                    for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                        auto& node = gene.nodes[nodeIndex];
+                        if (node.constructorAvailable && node.constructor.geneIndex == candidate) {
+                            if (referenceIndex == target) {
+                                chosen = &node;
+                                break;
+                            }
+                            ++referenceIndex;
+                        }
+                    }
+                }
+
+                duplicatedGene = candidate;
+                duplicatedNumNodes = genome->genes[candidate].numNodes;
+                chosenNode = chosen;
+                newGenes = data.entities.heap.getTypedSubArray<Gene>(oldNumGenes + 1);
+                newNodes = duplicatedNumNodes > 0 ? data.entities.heap.getTypedSubArray<Node>(duplicatedNumNodes) : nullptr;
+                newGenes[oldNumGenes] = genome->genes[candidate];  // shallow copy of the gene-level attributes
+                active = true;
+            }
+        }
+    }
+    block.sync();
+
+    if (active) {
+        // Shallow-copy the existing genes (the node arrays are kept) and deep-copy the duplicated gene's nodes in parallel.
+        for (int geneIndex = laneId; geneIndex < oldNumGenes; geneIndex += blockDim.x) {
+            newGenes[geneIndex] = genome->genes[geneIndex];
+        }
+        for (int nodeIndex = laneId; nodeIndex < duplicatedNumNodes; nodeIndex += blockDim.x) {
+            newNodes[nodeIndex] = genome->genes[duplicatedGene].nodes[nodeIndex];
+        }
+        block.sync();
+
+        if (laneId == 0) {
+            newGenes[oldNumGenes].nodes = newNodes;
+            newGenes[oldNumGenes].numNodes = duplicatedNumNodes;
+            if (chosenNode != nullptr) {
+                chosenNode->constructor.geneIndex = oldNumGenes;  // repoint to the appended copy (the new last gene)
+            }
+            genome->genes = newGenes;
+            genome->numGenes = oldNumGenes + 1;
+            atomicAdd_block(&accumulatedMutations, toFloat(max(1, duplicatedNumNodes)));
+        }
+    }
+    block.sync();
+}
+
+__inline__ __device__ void MutationProcessor::applyMutations_deleteGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    // Deletes one random non-root gene. Constructors referencing the deleted gene are turned off, injectors referencing it are
+    // redirected to the root gene, and all references to genes behind the deleted one are decremented to account for the shift.
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+    auto const& rate = genome->mutationRates.deleteGeneMutation;
+    if (rate.geneProbability <= 0) {  // uniform across the block, so the early return does not desync the cooperative group
+        return;
+    }
+
+    __shared__ bool active;
+    __shared__ Gene* newGenes;
+    __shared__ int oldNumGenes;
+    __shared__ int deletedGene;
+    __shared__ int deletedNumNodes;
+
+    if (laneId == 0) {
+        active = false;
+        oldNumGenes = genome->numGenes;
+        // Keep the root gene (index 0) and at least one gene overall.
+        if (oldNumGenes > 1 && data.primaryNumberGen.random() < rate.geneProbability) {
+            deletedGene = 1 + data.primaryNumberGen.random(oldNumGenes - 2);  // [1, numGenes - 1]
+            deletedNumNodes = genome->genes[deletedGene].numNodes;
+            newGenes = data.entities.heap.getTypedSubArray<Gene>(oldNumGenes - 1);
+            active = true;
+        }
+    }
+    block.sync();
+
+    if (active) {
+        // Compact the surviving genes (shallow copy keeping their node arrays) and adapt gene references in parallel.
+        for (int geneIndex = laneId; geneIndex < oldNumGenes; geneIndex += blockDim.x) {
+            if (geneIndex == deletedGene) {
+                continue;
+            }
+            auto const targetIndex = geneIndex < deletedGene ? geneIndex : geneIndex - 1;
+            newGenes[targetIndex] = genome->genes[geneIndex];
+
+            auto& gene = newGenes[targetIndex];
+            for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                auto& node = gene.nodes[nodeIndex];
+                if (node.constructorAvailable) {
+                    if (node.constructor.geneIndex == deletedGene) {
+                        node.constructorAvailable = false;
+                    } else if (node.constructor.geneIndex > deletedGene) {
+                        node.constructor.geneIndex -= 1;
+                    }
+                }
+                if (node.cellType == CellType_Injector) {
+                    auto& injectorGeneIndex = node.cellTypeData.injector.geneIndex;
+                    if (injectorGeneIndex == deletedGene) {
+                        injectorGeneIndex = 0;
+                    } else if (injectorGeneIndex > deletedGene) {
+                        injectorGeneIndex -= 1;
+                    }
+                }
+            }
+        }
+        block.sync();
+
+        if (laneId == 0) {
+            genome->genes = newGenes;
+            genome->numGenes = oldNumGenes - 1;
+            atomicAdd_block(&accumulatedMutations, toFloat(max(1, deletedNumNodes)));
+        }
+    }
+    block.sync();
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto block = cg_mutation::this_thread_block();
@@ -1133,6 +1307,18 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (deleteNodeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * deleteNodeSigma)); };
             mutateFloat(genome->mutationRates.deleteNodeMutation.geneProbability);
+        }
+
+        float duplicateGeneSigma = cudaSimulationParameters.duplicateGeneMetaMutationsSigma.value;
+        if (duplicateGeneSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * duplicateGeneSigma)); };
+            mutateFloat(genome->mutationRates.duplicateGeneMutation.geneProbability);
+        }
+
+        float deleteGeneSigma = cudaSimulationParameters.deleteGeneMetaMutationsSigma.value;
+        if (deleteGeneSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * deleteGeneSigma)); };
+            mutateFloat(genome->mutationRates.deleteGeneMutation.geneProbability);
         }
 
         float constructorSigma = cudaSimulationParameters.constructorMetaMutationsSigma.value;
