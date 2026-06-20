@@ -1,6 +1,7 @@
 #pragma once
 
 auto constexpr VALUE_NOT_SET_UINT64 = 0x7fffffffffffffff;
+auto constexpr VALUE_NOT_SET_UINT32 = 0x7fffffff;
 auto constexpr VALUE_NOT_SET_FLOAT = 1e16f;
 
 auto constexpr MAX_OBJECT_CONNECTIONS = 6;
