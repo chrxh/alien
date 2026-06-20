@@ -256,7 +256,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     if (rate.valueChangeSigma <= 0) {
                         return;
                     }
-                    auto delta = generateGaussian(data) * rate.valueChangeSigma * (maxValue - minValue);
+                    auto relDelta = generateGaussian(data) * rate.valueChangeSigma;
+                    auto delta = relDelta * (maxValue - minValue);
                     if constexpr (std::is_integral_v<ValueType>) {
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
@@ -264,7 +265,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         atomicAdd_block(&accumulatedMutations, 1.0f);
                     } else {
                         value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
-                        atomicAdd_block(&accumulatedMutations, std::abs(delta));
+                        atomicAdd_block(&accumulatedMutations, std::abs(relDelta) * 4);
                     }
                 };
 
@@ -1052,7 +1053,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                     if (rate.valueChangeSigma <= 0) {
                         return;
                     }
-                    auto delta = generateGaussian(data) * rate.valueChangeSigma * (maxValue - minValue);
+                    auto relDelta = generateGaussian(data) * rate.valueChangeSigma;
+                    auto delta = relDelta * (maxValue - minValue);
                     if constexpr (std::is_integral_v<ValueType>) {
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
@@ -1060,7 +1062,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                         atomicAdd_block(&accumulatedMutations, 1.0f);
                     } else {
                         value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
-                        atomicAdd_block(&accumulatedMutations, std::abs(delta));
+                        atomicAdd_block(&accumulatedMutations, std::abs(relDelta) * 4);
                     }
                 };
 
