@@ -308,7 +308,12 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 {
     if (_creatureMode) {
         if (extendedObject.creature.has_value() && extendedObject.genome.has_value()) {
+            auto origCreature = extendedObject.creature;
             processCreatureProperties(extendedObject);
+            DescValidationService::get().validateAndCorrect(extendedObject);
+            if (extendedObject.creature != origCreature) {
+                _SimulationFacade::get()->changeCell(extendedObject);
+            }
         }
         return;
     }
