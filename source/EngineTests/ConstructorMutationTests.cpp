@@ -74,6 +74,51 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
     EXPECT_TRUE(constructor.value() == ConstructorGenomeDesc());
 }
 
+TEST_F(ConstructorMutationTests, mutatesCreatureWhileOffspringUnderConstruction)
+{
+    // The mutation gate in MutationProcessor::process no longer requires constructor.offspring == nullptr,
+    // so a creature is mutated even while its constructor still has an offspring under construction.
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
+
+    auto data = Desc().addCreature(
+        {ObjectDesc()
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .type(CellDesc()
+                       .usableEnergy(_parameters.normalCellEnergy.value[0] * 3.5f)  // enough energy for mutation and construction
+                       .constructor(ConstructorDesc().geneIndex(0).separation(false).numBranches(1).numConcatenations(1)))},
+        CreatureDesc().id(1).mutationState(MutationState_NotMutated),
+        genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // The offspring construction has started but is not finished (the gene has two nodes, one built so far).
+    ASSERT_EQ(2, actualData._creatures.size());
+    auto newCreature = actualData.getOtherCreatureRef(1);
+    ASSERT_EQ(1, actualData.getObjectsForCreature(newCreature._id).size());
+
+    // Despite the offspring still being under construction, the host genome must have been mutated.
+    auto mutatedGenome = getMutatedGenome(1);
+    bool anyWeightChanged = false;
+    for (size_t g = 0; g < genome._genes.size() && !anyWeightChanged; ++g) {
+        for (size_t n = 0; n < genome._genes.at(g)._nodes.size() && !anyWeightChanged; ++n) {
+            auto const& origWeights = genome._genes.at(g)._nodes.at(n)._neuralNetwork._weights;
+            auto const& actualWeights = mutatedGenome._genes.at(g)._nodes.at(n)._neuralNetwork._weights;
+            for (size_t w = 0; w < origWeights.size(); ++w) {
+                if (origWeights.at(w) != actualWeights.at(w)) {
+                    anyWeightChanged = true;
+                    break;
+                }
+            }
+        }
+    }
+    EXPECT_TRUE(anyWeightChanged);
+}
+
 TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
