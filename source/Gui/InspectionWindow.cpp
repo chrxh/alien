@@ -253,7 +253,7 @@ void _InspectionWindow::process()
         auto windowPos = ImGui::GetWindowPos();
         if (isObject()) {
             auto extendedObject = std::get<ExtendedObjectDesc>(entity);
-            processObject(extendedObject);
+            processExtendedObject(extendedObject);
             EditorModel::get().addInspectedEntity(extendedObject);
         } else {
             processParticle(std::get<EnergyDesc>(entity));
@@ -304,20 +304,29 @@ std::string _InspectionWindow::generateTitle() const
     return ss.str();
 }
 
-void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
+void _InspectionWindow::processExtendedObject(ExtendedObjectDesc& extendedObject)
 {
     if (_creatureMode) {
-        if (extendedObject.creature.has_value() && extendedObject.genome.has_value()) {
-            auto origCreature = extendedObject.creature;
-            processCreatureProperties(extendedObject);
-            DescValidationService::get().validateAndCorrect(extendedObject);
-            if (extendedObject.creature != origCreature) {
-                _SimulationFacade::get()->changeCell(extendedObject);
-            }
-        }
-        return;
+        processCreature(extendedObject);
+    } else {
+        processObject(extendedObject);
     }
+}
 
+void _InspectionWindow::processCreature(ExtendedObjectDesc& extendedObject)
+{
+    if (extendedObject.creature.has_value() && extendedObject.genome.has_value()) {
+        auto origCreature = extendedObject.creature;
+        processCreatureProperties(extendedObject);
+        DescValidationService::get().validateAndCorrect(extendedObject);
+        if (extendedObject.creature != origCreature) {
+            _SimulationFacade::get()->changeCell(extendedObject);
+        }
+    }
+}
+
+void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
+{
     auto& object = extendedObject.object;
     auto origObject = object;
     auto origCreature = extendedObject.creature;

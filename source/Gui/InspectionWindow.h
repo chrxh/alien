@@ -24,7 +24,9 @@ private:
     bool isObject() const;
     std::string generateTitle() const;
 
+    void processExtendedObject(ExtendedObjectDesc& extendedObject);
     void processObject(ExtendedObjectDesc& extendedObject);
+    void processCreature(ExtendedObjectDesc& extendedObject);
     void processParticle(EnergyDesc particle);
     void applyPendingSignalEntries(ExtendedObjectDesc& extendedObject);
 
