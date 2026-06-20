@@ -262,11 +262,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
                         value = static_cast<ValueType>(newValue);
-                        atomicAdd_block(&accumulatedMutations, 1.0f);
                     } else {
                         value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
-                        atomicAdd_block(&accumulatedMutations, std::abs(relDelta) * 4);
                     }
+                    atomicAdd_block(&accumulatedMutations, std::abs(relDelta) * 4);
                 };
 
                 auto mutateBoolField = [&](bool& value) {
@@ -1059,11 +1058,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                         auto roundedDelta = static_cast<int>(std::round(delta));
                         auto newValue = max(static_cast<int>(minValue), min(static_cast<int>(maxValue), static_cast<int>(value) + roundedDelta));
                         value = static_cast<ValueType>(newValue);
-                        atomicAdd_block(&accumulatedMutations, 1.0f);
                     } else {
                         value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
-                        atomicAdd_block(&accumulatedMutations, std::abs(relDelta) * 4);
                     }
+                    atomicAdd_block(&accumulatedMutations, std::abs(relDelta) * 4);
                 };
 
                 auto mutateBoolField = [&](bool& value) {
