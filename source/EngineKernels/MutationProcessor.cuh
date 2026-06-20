@@ -85,7 +85,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
                 // Performance optimization:
                 // Only mutate genome if it has a constructor for new offspring and a minimal amount of energy for construction
                 // (=> prevents creation of genomes which are not used)
-                if (cell.constructorAvailable && (cell.constructor.geneIndex == 0 || cell.constructor.separation) && cell.constructor.offspring == nullptr
+                if (cell.constructorAvailable && (cell.constructor.geneIndex == 0 || cell.constructor.separation)
                     && hasMinimalEnergyForConstruction(object)) {
                     auto& creature = object->typeData.cell.creature;
                     int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
