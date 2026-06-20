@@ -515,9 +515,9 @@ void DescEditService::randomizeCountdowns(Desc& description, int minValue, int m
 
 void DescEditService::randomizeLineageIds(Desc& description) const
 {
-    for (auto& genome : description._genomes) {
-        genome._lineageId = NumberGenerator::get().getRandomInt();
-        genome._prevLineageId = 0;
+    for (auto& creature : description._creatures) {
+        creature._lineageId = NumberGenerator::get().getRandomInt();
+        creature._prevLineageId = std::nullopt;
     }
 }
 

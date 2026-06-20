@@ -101,11 +101,11 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 // Filter by lineage restriction
                 if (reconnector.modeData.reconnectCreature.restrictToLineage != LineageRestriction_No) {
                     if (reconnector.modeData.reconnectCreature.restrictToLineage == LineageRestriction_RelatedLineage) {
-                        if (!object->typeData.cell.creature->genome->isRelatedLineage(otherObject->typeData.cell.creature->genome)) {
+                        if (!object->typeData.cell.creature->isRelatedLineage(otherObject->typeData.cell.creature)) {
                             return;
                         }
                     } else if (reconnector.modeData.reconnectCreature.restrictToLineage == LineageRestriction_UnrelatedLineage) {
-                        if (object->typeData.cell.creature->genome->isRelatedLineage(otherObject->typeData.cell.creature->genome)) {
+                        if (object->typeData.cell.creature->isRelatedLineage(otherObject->typeData.cell.creature)) {
                             return;
                         }
                     }

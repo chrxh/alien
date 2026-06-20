@@ -496,6 +496,10 @@ struct CreatureTO
     uint64_t genomeArrayIndex;
     MutationState mutationState;
 
+    uint32_t lineageId;
+    uint32_t prevLineageId;
+    float accumulatedMutations;
+
     // Process data
     uint32_t headUpdateId;
 

@@ -422,8 +422,8 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
             ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
             ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
-        CreatureDesc().id(1),
-        GenomeDesc().lineageId(senderLineageId));
+        CreatureDesc().id(1).lineageId(senderLineageId),
+        GenomeDesc());
     data.addConnection(100, 101);
 
     data.addCreature(
@@ -431,8 +431,8 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
             ObjectDesc().id(200).pos({120.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToLineage(params.restriction)))),
             ObjectDesc().id(201).pos({121.0f, 100.0f}),
         },
-        CreatureDesc().id(2),
-        GenomeDesc().lineageId(receiverLineageId));
+        CreatureDesc().id(2).lineageId(receiverLineageId),
+        GenomeDesc());
     data.addConnection(200, 201);
 
     _simulationFacade->setSimulationData(data);

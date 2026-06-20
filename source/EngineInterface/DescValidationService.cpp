@@ -14,11 +14,6 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
     genome._frontAngle = Math::getNormalizedAngle(genome._frontAngle, -180.0f);
 
     // Validate mutation rate fields
-    genome._lineageId = std::max(genome._lineageId, 0);
-    if (genome._prevLineageId.has_value()) {
-        genome._prevLineageId = std::max(genome._prevLineageId.value(), 0);
-    }
-    genome._accumulatedMutations = std::max(genome._accumulatedMutations, 0.0f);
     auto validateCellTypePropertiesMutation = [](CellTypePropertiesMutationDesc& mutation) {
         mutation._nodeProbability = std::clamp(mutation._nodeProbability, 0.0f, 1.0f);
         mutation._valueChangeSigma = std::clamp(mutation._valueChangeSigma, 0.0f, 1.0f);
@@ -303,10 +298,20 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
     }
 }
 
-void DescValidationService::validateAndCorrect(ObjectDesc& object)
+void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObject)
 {
+    auto& object = extendedObject.object;
     object._stiffness = std::clamp(object._stiffness, 0.0f, 1.0f);
     object._color = std::clamp(object._color, 0, MAX_COLORS - 1);
+
+    if (extendedObject.creature.has_value()) {
+        auto& creature = extendedObject.creature.value();
+        creature._lineageId = std::max(creature._lineageId, 0);
+        if (creature._prevLineageId.has_value()) {
+            creature._prevLineageId = std::max(creature._prevLineageId.value(), 0);
+        }
+        creature._accumulatedMutations = std::max(creature._accumulatedMutations, 0.0f);
+    }
 
     if (object.getObjectType() == ObjectType_Cell) {
         auto& cell = object.getCellRef();

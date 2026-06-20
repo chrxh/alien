@@ -11,5 +11,5 @@ class DescValidationService
 
 public:
     void validateAndCorrect(GenomeDesc& genome);
-    void validateAndCorrect(ObjectDesc& object);
+    void validateAndCorrect(ExtendedObjectDesc& extendedObject);
 };

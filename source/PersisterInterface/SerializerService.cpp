@@ -284,9 +284,6 @@ namespace
     auto constexpr Id_Genome_Id = 0;
     auto constexpr Id_Genome_Name = 1;
     auto constexpr Id_Genome_FrontAngle = 2;
-    auto constexpr Id_Genome_LineageId = 3;
-    auto constexpr Id_Genome_AccumulatedMutations = 4;
-    auto constexpr Id_Genome_PrevLineageId = 5;
     auto constexpr Id_Genome_ResistanceToInjection = 6;
     auto constexpr Id_Genome_ApplyMetaMutations = 7;
 
@@ -1030,9 +1027,6 @@ namespace cereal
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Genome_Id, data._id, defaultObject._id);
         scope.addMember(Id_Genome_Name, data._name, defaultObject._name);
-        scope.addMember(Id_Genome_LineageId, data._lineageId, defaultObject._lineageId);
-        scope.addMember(Id_Genome_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
-        scope.addMember(Id_Genome_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
         scope.addMember(Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         scope.addMember(Id_Genome_ResistanceToInjection, data._resistanceToInjection, defaultObject._resistanceToInjection);
         scope.addMember(Id_Genome_ApplyMetaMutations, data._applyMetaMutations, defaultObject._applyMetaMutations);
@@ -1060,6 +1054,9 @@ namespace
     auto constexpr Id_Creature_HeadUpdateId = 5;
     auto constexpr Id_Creature_GenomeId = 6;
     auto constexpr Id_Creature_MutationState = 7;
+    auto constexpr Id_Creature_LineageId = 3;
+    auto constexpr Id_Creature_PrevLineageId = 8;
+    auto constexpr Id_Creature_AccumulatedMutations = 9;
 
     auto constexpr Id_Solid_Energy = 0;
 
@@ -1789,6 +1786,9 @@ namespace cereal
         scope.addMember(Id_Creature_HeadUpdateId, data._headUpdateId, defaultObject._headUpdateId);
         scope.addMember(Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
         scope.addMember(Id_Creature_MutationState, data._mutationState, defaultObject._mutationState);
+        scope.addMember(Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
+        scope.addMember(Id_Creature_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
+        scope.addMember(Id_Creature_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
     }
     SPLIT_SERIALIZATION(CreatureDesc)
 

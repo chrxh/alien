@@ -30,6 +30,10 @@ __global__ void cudaChangeObject(SimulationData data, TOs changeTO)
             EntityFactory entityFactory;
             entityFactory.init(&data);
             entityFactory.changeObjectFromTO(changeTO, objectTO, object);
+            if (objectTO.type == ObjectType_Cell) {
+                auto const& creatureTO = changeTO.creatures[objectTO.typeData.cell.creatureIndex];
+                entityFactory.changeCreatureFromTO(creatureTO, object->typeData.cell.creature);
+            }
         }
     }
 }

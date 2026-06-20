@@ -20,7 +20,7 @@ class MutationProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
-    __inline__ __device__ static void applyMutations(SimulationData& data, Genome* genome);
+    __inline__ __device__ static void applyMutations(SimulationData& data, Creature* creature, Genome* genome);
 
 private:
     // Upper bound to avoid heap exhaustion.
@@ -48,7 +48,8 @@ private:
     __inline__ __device__ static void removeNode(SimulationData& data, Gene& gene, int position);
     __inline__ __device__ static void correctGenome(SimulationData& data, Genome* genome);
 
-    __inline__ __device__ static void updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void
+    updateAccumulatedMutationsAndLineageId(SimulationData& data, Creature* creature, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 
@@ -99,7 +100,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
         if (clonedGenome != nullptr) {
 
             // Apply mutations to cloned genome
-            applyMutations(data, clonedGenome);
+            applyMutations(data, object->typeData.cell.creature, clonedGenome);
 
             if (laneId == 0) {
                 object->typeData.cell.creature->genome = clonedGenome;
@@ -109,7 +110,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
     }
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Genome* genome)
+__inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Creature* creature, Genome* genome)
 {
     __shared__ float accumulatedMutations;
     auto block = cg_mutation::this_thread_block();
@@ -147,7 +148,7 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     }
 
     block.sync();
-    updateAccumulatedMutationsAndLineageId(data, genome, accumulatedMutations);
+    updateAccumulatedMutationsAndLineageId(data, creature, genome, accumulatedMutations);
 }
 
 __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations)
@@ -1206,7 +1207,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
     }
 }
 
-__inline__ __device__ void MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, Genome* genome, float& accumulatedMutations)
+__inline__ __device__ void
+MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, Creature* creature, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     if (laneId == 0) {
@@ -1214,11 +1216,11 @@ __inline__ __device__ void MutationProcessor::updateAccumulatedMutationsAndLinea
         auto denominator = numberOfNodes > 0 ? toFloat(numberOfNodes) : 1.0f;
 
 
-        genome->accumulatedMutations += accumulatedMutations / denominator;
-        if (genome->accumulatedMutations > cudaSimulationParameters.newLineageThreshold.value) {
-            genome->prevLineageId = genome->lineageId;
-            genome->lineageId = data.primaryNumberGen.createLineageId();
-            genome->accumulatedMutations = 0;
+        creature->accumulatedMutations += accumulatedMutations / denominator;
+        if (creature->accumulatedMutations > cudaSimulationParameters.newLineageThreshold.value) {
+            creature->prevLineageId = creature->lineageId;
+            creature->lineageId = data.primaryNumberGen.createLineageId();
+            creature->accumulatedMutations = 0;
         }
     }
 }

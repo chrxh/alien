@@ -398,11 +398,11 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const
                     }
                     if (matches && restrictToLineage != LineageRestriction_No) {
                         if (restrictToLineage == LineageRestriction_RelatedLineage) {
-                            if (!object->typeData.cell.creature->genome->isRelatedLineage(otherObject->typeData.cell.creature->genome)) {
+                            if (!object->typeData.cell.creature->isRelatedLineage(otherObject->typeData.cell.creature)) {
                                 matches = false;
                             }
                         } else if (restrictToLineage == LineageRestriction_UnrelatedLineage) {
-                            if (object->typeData.cell.creature->genome->isRelatedLineage(otherObject->typeData.cell.creature->genome)) {
+                            if (object->typeData.cell.creature->isRelatedLineage(otherObject->typeData.cell.creature)) {
                                 matches = false;
                             }
                         }

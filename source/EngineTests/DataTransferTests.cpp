@@ -310,6 +310,42 @@ TEST_F(DataTransferTests, injectGenomeToSelectedCreatures_multipleCreatures_only
     }
 }
 
+TEST_F(DataTransferTests, changeCell_creatureLineage)
+{
+    auto genome = GenomeDesc();
+    Desc data;
+    data.addCreature({ObjectDesc().id(1)}, CreatureDesc().id(1).lineageId(5), genome);
+    _simulationFacade->setSimulationData(data);
+
+    auto inspectedData = _simulationFacade->getInspectedSimulationData({1});
+    auto objects = DescEditService::get().getObjects(inspectedData);
+    ASSERT_EQ(1, objects.size());
+    auto extended = std::get<ExtendedObjectDesc>(objects.front());
+    ASSERT_TRUE(extended.creature.has_value());
+    EXPECT_EQ(5, extended.creature->_lineageId);
+    EXPECT_FALSE(extended.creature->_prevLineageId.has_value());  // unset optional round-trips through the TO sentinel
+
+    extended.creature->_lineageId = 9;
+    extended.creature->_prevLineageId = 7;
+    extended.creature->_accumulatedMutations = 3.5f;
+    _simulationFacade->changeCell(extended);
+
+    auto after = _simulationFacade->getSimulationData();
+    auto creature = after.getCreatureRef(1);
+    EXPECT_EQ(9, creature._lineageId);
+    ASSERT_TRUE(creature._prevLineageId.has_value());
+    EXPECT_EQ(7, *creature._prevLineageId);
+    EXPECT_EQ(3.5f, creature._accumulatedMutations);
+
+    // Same readback path the GUI uses for its periodic refresh
+    auto reinspected = _simulationFacade->getInspectedSimulationData({1});
+    auto creature2 = reinspected.getCreatureRef(1);
+    EXPECT_EQ(9, creature2._lineageId);
+    ASSERT_TRUE(creature2._prevLineageId.has_value());
+    EXPECT_EQ(7, *creature2._prevLineageId);
+    EXPECT_EQ(3.5f, creature2._accumulatedMutations);
+}
+
 TEST_F(DataTransferTests, getInspectedSimulationData)
 {
     auto constexpr CreatureId1 = 1;

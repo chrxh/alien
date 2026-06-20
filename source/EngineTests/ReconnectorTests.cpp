@@ -36,8 +36,8 @@ protected:
                     .color(color)
                     .type(CellDesc().signal({1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
             },
-            CreatureDesc(),
-            GenomeDesc().lineageId(lineageId));
+            CreatureDesc().lineageId(lineageId),
+            GenomeDesc());
         data.addConnection(1, 2);
         return data;
     }
@@ -54,8 +54,8 @@ protected:
                     .color(color)
                     .type(CellDesc().signal({-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),  // Signal on connected cell will propagate
             },
-            CreatureDesc(),
-            GenomeDesc().lineageId(lineageId));
+            CreatureDesc().lineageId(lineageId),
+            GenomeDesc());
         data.addConnection(1, 2);
         return data;
     }
@@ -407,8 +407,8 @@ TEST_F(ReconnectorTests, creatureMode_relatedLineage_success)
             ObjectDesc().id(10).pos({99.0f, 100.0f}),
             ObjectDesc().id(11).pos({98.0f, 100.0f}),
         },
-        CreatureDesc(),
-        GenomeDesc().lineageId(5));
+        CreatureDesc().lineageId(5),
+        GenomeDesc());
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -429,8 +429,8 @@ TEST_F(ReconnectorTests, creatureMode_relatedLineage_failed)
             ObjectDesc().id(10).pos({99.0f, 100.0f}),
             ObjectDesc().id(11).pos({98.0f, 100.0f}),
         },
-        CreatureDesc(),
-        GenomeDesc().lineageId(6));
+        CreatureDesc().lineageId(6),
+        GenomeDesc());
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -451,8 +451,8 @@ TEST_F(ReconnectorTests, creatureMode_unrelatedLineage_success)
             ObjectDesc().id(10).pos({99.0f, 100.0f}),
             ObjectDesc().id(11).pos({98.0f, 100.0f}),
         },
-        CreatureDesc(),
-        GenomeDesc().lineageId(6));
+        CreatureDesc().lineageId(6),
+        GenomeDesc());
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);
@@ -473,8 +473,8 @@ TEST_F(ReconnectorTests, creatureMode_unrelatedLineage_failed)
             ObjectDesc().id(10).pos({99.0f, 100.0f}),
             ObjectDesc().id(11).pos({98.0f, 100.0f}),
         },
-        CreatureDesc(),
-        GenomeDesc().lineageId(5));
+        CreatureDesc().lineageId(5),
+        GenomeDesc());
     data.addConnection(10, 11);
 
     _simulationFacade->setSimulationData(data);

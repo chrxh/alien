@@ -75,9 +75,6 @@ void _GenomeEditorWidget::processHeaderData()
 
             AlienGui::Group(AlienGui::GroupParameters().text("Base properties and info"));
             AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
-            if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage").textWidth(rightColumnWidth), _editData->genome._lineageId)) {
-                _editData->genome._prevLineageId.reset();
-            }
 
             auto numNodesString = std::to_string(GenomeDescInfoService::get().getNumberOfNodes(_editData->genome));
             AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
@@ -103,15 +100,6 @@ void _GenomeEditorWidget::processHeaderData()
             MutationRatesWidget::process(_editData->genome._mutationRates, rightColumnWidth);
 
             AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Accumulated mutations")
-                    .format("%.5f")
-                    .min(0.0f)
-                    .max(10000.0f)
-                    .logarithmic(true)
-                    .textWidth(rightColumnWidth),
-                &_editData->genome._accumulatedMutations);
 
             table.next();
 

@@ -47,4 +47,11 @@ protected:
         auto actualCreature = actualData.getCreatureRef(actualCell._creatureId);
         return actualData.getGenomeRef(actualCreature._genomeId);
     }
+
+    CreatureDesc getMutatedCreature(uint64_t objectId = 1) const
+    {
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualCell = actualData.getObjectRef(objectId).getCellRef();
+        return actualData.getCreatureRef(actualCell._creatureId);
+    }
 };

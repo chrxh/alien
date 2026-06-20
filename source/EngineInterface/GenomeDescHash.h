@@ -540,10 +540,8 @@ struct std::hash<GenomeDesc>
             hash_combine(seed, std::hash<GeneDesc>{}(gene));
         }
         hash_combine(seed, desc._frontAngle);
-        hash_combine(seed, desc._accumulatedMutations);
         hash_combine(seed, desc._resistanceToInjection);
         hash_combine(seed, desc._applyMetaMutations);
-        hash_combine(seed, desc._prevLineageId);
         for (int i = 0; i < 2; ++i) {
             hash_combine(seed, desc._mutationRates._neuronMutations[i]._nodeProbability);
             hash_combine(seed, desc._mutationRates._neuronMutations[i]._weightChangeSigma);

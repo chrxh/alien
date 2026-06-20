@@ -235,11 +235,11 @@ void _InspectionWindow::process()
     auto width = calcWindowWidth();
     float height;
     if (_creatureMode) {
-        height = StyleRepository::get().scale(280.0f);
-    } else if (isObject()) {
-        height = StyleRepository::get().scale(500.0f);
+        height = scale(295.0f);
+    } else if (isExtendedObject()) {
+        height = scale(500.0f);
     } else {
-        height = StyleRepository::get().scale(180.0f);
+        height = scale(180.0f);
     }
     auto borderlessRendering = _SimulationFacade::get()->getSimulationParameters().borderlessRendering.value;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
@@ -251,9 +251,13 @@ void _InspectionWindow::process()
             ImGui::SetScrollY(*_savedScrollY);
         }
         auto windowPos = ImGui::GetWindowPos();
-        if (isObject()) {
+        if (isExtendedObject()) {
             auto extendedObject = std::get<ExtendedObjectDesc>(entity);
-            processObject(extendedObject);
+            if (_creatureMode) {
+                processCreature(extendedObject);
+            } else {
+                processObject(extendedObject);
+            }
             EditorModel::get().addInspectedEntity(extendedObject);
         } else {
             processParticle(std::get<EnergyDesc>(entity));
@@ -262,7 +266,7 @@ void _InspectionWindow::process()
         _isFirstFrame = false;
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescEditService::get().getPos(entity), borderlessRendering);
-        auto factor = StyleRepository::get().scale(1);
+        auto factor = scale(1);
 
         drawList->AddLine({windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor}, {entityPos.x, entityPos.y}, Const::InspectorLineColor, 1.5f);
         drawList->AddRectFilled(
@@ -283,7 +287,7 @@ uint64_t _InspectionWindow::getId() const
     return _entityId;
 }
 
-bool _InspectionWindow::isObject() const
+bool _InspectionWindow::isExtendedObject() const
 {
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
     return std::holds_alternative<ExtendedObjectDesc>(entity);
@@ -296,7 +300,7 @@ std::string _InspectionWindow::generateTitle() const
         auto entity = EditorModel::get().getInspectedEntity(_entityId);
         auto const& creature = std::get<ExtendedObjectDesc>(entity).creature;
         ss << "Creature with id 0x" << std::hex << std::uppercase << (creature.has_value() ? creature->_id : _entityId);
-    } else if (isObject()) {
+    } else if (isExtendedObject()) {
         ss << "Cell with id 0x" << std::hex << std::uppercase << _entityId;
     } else {
         ss << "Energy particle with id 0x" << std::hex << std::uppercase << _entityId;
@@ -304,17 +308,23 @@ std::string _InspectionWindow::generateTitle() const
     return ss.str();
 }
 
+void _InspectionWindow::processCreature(ExtendedObjectDesc& extendedObject)
+{
+    if (extendedObject.creature.has_value() && extendedObject.genome.has_value()) {
+        auto origCreature = extendedObject.creature;
+        processCreatureProperties(extendedObject);
+        DescValidationService::get().validateAndCorrect(extendedObject);
+        if (extendedObject.creature != origCreature) {
+            _SimulationFacade::get()->changeCell(extendedObject);
+        }
+    }
+}
+
 void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
 {
-    if (_creatureMode) {
-        if (extendedObject.creature.has_value() && extendedObject.genome.has_value()) {
-            processCreatureProperties(extendedObject);
-        }
-        return;
-    }
-
     auto& object = extendedObject.object;
     auto origObject = object;
+    auto origCreature = extendedObject.creature;
 
     AlienGui::DynamicTableLayout table(TableColumnWidth);
     if (table.begin()) {
@@ -349,10 +359,10 @@ void _InspectionWindow::processObject(ExtendedObjectDesc& extendedObject)
         table.end();
     }
 
-    DescValidationService::get().validateAndCorrect(object);
+    DescValidationService::get().validateAndCorrect(extendedObject);
 
     applyPendingSignalEntries(extendedObject);
-    if (object != origObject) {
+    if (object != origObject || extendedObject.creature != origCreature) {
         _SimulationFacade::get()->changeCell(extendedObject);
     }
 }
@@ -564,11 +574,11 @@ void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedOb
     inspectorHexId("Creature id", creature._id);
     inspectorText("Generation", std::to_string(creature._generation));
     inspectorText("Num cells", std::to_string(creature._numCells));
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth), creature._lineageId);
+    AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Prev lineage id").textWidth(TextWidth), creature._prevLineageId);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Accumulated mutations").format("%.5f").textWidth(TextWidth), creature._accumulatedMutations);
     auto& genome = extendedObject.genome.value();
-    std::stringstream frontAngle;
-    frontAngle << std::fixed << std::setprecision(1) << genome._frontAngle;
     inspectorText("Genome name", genome._name);
-    inspectorText("Lineage id", std::to_string(genome._lineageId));
     inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
     inspectorText("Apply meta-mutations", genome._applyMetaMutations ? "Yes" : "No");
     if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Edit genome").textWidth(TextWidth))) {
@@ -870,7 +880,7 @@ float _InspectionWindow::calcWindowWidth() const
     if (_creatureMode) {
         return StyleRepository::get().scale(CreatureWindowWidth);
     }
-    if (isObject()) {
+    if (isExtendedObject()) {
         return StyleRepository::get().scale(CellWindowWidth);
     }
     return StyleRepository::get().scale(ParticleWindowWidth);

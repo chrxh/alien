@@ -17,6 +17,7 @@ public:
     __inline__ __device__ Genome* createGenomeFromTO(TOs const& to, int genomeIndex);
     __inline__ __device__ Object* createObjectFromTO(TOs const& to, int objectIndex, Object* objectArray);
     __inline__ __device__ void changeObjectFromTO(TOs const& to, ObjectTO const& objectTO, Object* object);
+    __inline__ __device__ void changeCreatureFromTO(CreatureTO const& creatureTO, Creature* creature);
     __inline__ __device__ void changeEnergyFromTO(EnergyTO const& particleTO, Energy* particle);
 
     __inline__ __device__ Energy* createEnergy(float energy, float2 const& pos, float2 const& vel, int color);
@@ -86,10 +87,7 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
     auto genome = _data->entities.heap.getTypedSubArray<Genome>(1);
     genomeTO.genomeIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->entities.heap.getArray());
     genome->id = genomeTO.id;
-    genome->lineageId = genomeTO.lineageId;
-    genome->prevLineageId = genomeTO.prevLineageId;
     genome->frontAngle = genomeTO.frontAngle;
-    genome->accumulatedMutations = genomeTO.accumulatedMutations;
     genome->resistanceToInjection = genomeTO.resistanceToInjection;
     genome->applyMetaMutations = genomeTO.applyMetaMutations;
     for (int i = 0; i < 2; ++i) {
@@ -327,11 +325,7 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TOs const& t
     creatureTO.creatureIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(creature) - _data->entities.heap.getArray());
 
     creature->id = creatureTO.id;
-    creature->ancestorId = creatureTO.ancestorId;
-    creature->generation = creatureTO.generation;
-    creature->numCells = creatureTO.numCells;
-    creature->mutationState = creatureTO.mutationState;
-    creature->headUpdateId = creatureTO.headUpdateId;
+    changeCreatureFromTO(creatureTO, creature);
 
     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     creature->genome = &_data->entities.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
@@ -607,6 +601,18 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->constructor.energyNeeded = false;
         }
     }
+}
+
+__inline__ __device__ void EntityFactory::changeCreatureFromTO(CreatureTO const& creatureTO, Creature* creature)
+{
+    creature->ancestorId = creatureTO.ancestorId;
+    creature->generation = creatureTO.generation;
+    creature->numCells = creatureTO.numCells;
+    creature->mutationState = creatureTO.mutationState;
+    creature->lineageId = creatureTO.lineageId;
+    creature->prevLineageId = creatureTO.prevLineageId;
+    creature->accumulatedMutations = creatureTO.accumulatedMutations;
+    creature->headUpdateId = creatureTO.headUpdateId;
 }
 
 __inline__ __device__ void EntityFactory::changeEnergyFromTO(EnergyTO const& particleTO, Energy* particle)

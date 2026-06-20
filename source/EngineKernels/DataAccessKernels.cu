@@ -31,10 +31,7 @@ namespace
             }
             auto& genomeTO = to.genomes[genomeTOIndex];
             genomeTO.id = genome->id;
-            genomeTO.lineageId = genome->lineageId;
-            genomeTO.prevLineageId = genome->prevLineageId;
             genomeTO.frontAngle = genome->frontAngle;
-            genomeTO.accumulatedMutations = genome->accumulatedMutations;
             genomeTO.resistanceToInjection = genome->resistanceToInjection;
             genomeTO.applyMetaMutations = genome->applyMetaMutations;
             for (int i = 0; i < 2; ++i) {
@@ -293,6 +290,9 @@ namespace
             creatureTO.generation = creature->generation;
             creatureTO.numCells = creature->numCells;
             creatureTO.mutationState = creature->mutationState;
+            creatureTO.lineageId = creature->lineageId;
+            creatureTO.prevLineageId = creature->prevLineageId;
+            creatureTO.accumulatedMutations = creature->accumulatedMutations;
             creatureTO.headUpdateId = creature->headUpdateId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
@@ -1042,6 +1042,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TOs to)
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& creature = to.creatures[index];
             maxIds.entityId = max(maxIds.entityId, creature.id);
+            maxIds.lineageId = max(maxIds.lineageId, creature.lineageId);
         }
     }
     {
@@ -1050,7 +1051,6 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TOs to)
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& genome = to.genomes[index];
             maxIds.entityId = max(maxIds.entityId, genome.id);
-            maxIds.lineageId = max(maxIds.lineageId, genome.lineageId);
         }
     }
     numberGen.adaptMaxIds(maxIds);

@@ -138,7 +138,7 @@ namespace
             float b = fminf(1.0f, fmaxf(0.0f, color.b));
             float h, s, v;
             rgbToHsv(r, g, b, h, s, v);
-            auto lineageId = object->typeData.cell.creature->genome->lineageId;
+            auto lineageId = object->typeData.cell.creature->lineageId;
             uint32_t hash = lineageId * 2654435761u;
             float hueOffset = (static_cast<float>(hash & 0xFFFFu) / 65535.0f) * 0.2f - 0.1f;
             h += hueOffset;
@@ -149,7 +149,7 @@ namespace
             if (object->type != ObjectType_Cell) {
                 return getCustomizationColor(object->color);
             }
-            auto lineageId = object->typeData.cell.creature->genome->lineageId;
+            auto lineageId = object->typeData.cell.creature->lineageId;
             uint32_t hash1 = lineageId * 2654435761u;
             uint32_t hash2 = lineageId * 2246822519u;
             uint32_t hash3 = lineageId * 3266489917u;

@@ -195,10 +195,7 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
 
     auto genome = GenomeDesc()
                       .name("Test Genome")
-                      .lineageId(502)
-                      .prevLineageId(501)
                       .frontAngle(270.0f)
-                      .accumulatedMutations(0.05f)
                       .resistanceToInjection(true)
                       .applyMetaMutations(false)
                       .mutationRates(mutation)
@@ -214,8 +211,16 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                               }),
                       });
 
-    auto creature =
-        CreatureDesc().ancestorId(1001).generation(7).numCells(25).headUpdateId(42).mutationState(MutationState_MutationInProgress).genomeId(genome._id);
+    auto creature = CreatureDesc()
+                        .ancestorId(1001)
+                        .generation(7)
+                        .numCells(25)
+                        .headUpdateId(42)
+                        .mutationState(MutationState_MutationInProgress)
+                        .lineageId(502)
+                        .prevLineageId(501)
+                        .accumulatedMutations(0.05f)
+                        .genomeId(genome._id);
 
     return {creature, genome};
 }
