@@ -18,6 +18,13 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
 endif()
 
 set(CMAKE_CXX_STANDARD 23)
+
+# This project does not use C++20 modules. Disabling the module dependency scan
+# avoids the per-target dyndep (CXX.dd) generation, which both speeds up the build
+# and works around a Ninja assertion (build.cc:423 "edge && !edge->outputs_ready()")
+# hit by the Ninja Multi-Config generator while processing those dyndep files.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 set(CMAKE_CUDA_STANDARD 20)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
