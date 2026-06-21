@@ -74,26 +74,26 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
     EXPECT_TRUE(constructor.value() == ConstructorGenomeDesc());
 }
 
-TEST_F(ConstructorMutationTests, mutatesCreatureWhileOffspringConstructionPending)
+TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
 {
-    // A constructor sets constructor.offspring on trigger but cannot build the first cell because the
-    // offspring node reserves more energy than is available. The mutation gate in MutationProcessor::process
-    // no longer requires constructor.offspring == nullptr, so the creature is mutated even though its offspring
-    // stays unbuilt (with the previous code the mutation was skipped while constructor.offspring != nullptr).
-    auto genome = GenomeDesc().genes(
-        {GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().reservedEnergy(1000000.0f))})});  // first cell can never be afforded
+    // The constructor sets constructor.offspring already on the first (energy-less) trigger. External energy then
+    // flows in slowly until the offspring is actually constructed. Because separation is off, constructor.offspring
+    // is never reset to nullptr. The mutation gate in MutationProcessor::process no longer requires
+    // constructor.offspring == nullptr, so the creature is mutated during this process (with the previous code the
+    // mutation was skipped the whole time because constructor.offspring != nullptr).
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
     genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
 
     auto data = Desc().addCreature(
         {ObjectDesc()
              .id(1)
              .pos({100.0f, 100.0f})
-             .type(CellDesc().usableEnergy(0.0f).constructor(ConstructorDesc().autoTriggerInterval(1).geneIndex(0).separation(true)))},
+             .type(CellDesc().usableEnergy(0.0f).constructor(ConstructorDesc().autoTriggerInterval(1).geneIndex(0).separation(false)))},
         CreatureDesc().id(1).mutationState(MutationState_NotMutated),
         genome);
 
-    // External energy inflow slowly lifts the creature's energy above the mutation threshold while it keeps
-    // failing to construct the first cell, so the energy gate opens only after constructor.offspring is set.
+    // The creature starts without energy (mutation gate closed) but constructor.offspring is set anyway; external
+    // energy inflow then raises the energy above the mutation threshold while constructor.offspring is already set.
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 1000000000.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -105,10 +105,10 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileOffspringConstructionPendin
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    // No offspring cell could be built, so the host cell is still the only object.
-    ASSERT_EQ(1, actualData.getNumObjects());
+    // The offspring cell was actually constructed (host cell + one offspring cell).
+    ASSERT_EQ(2, actualData.getNumObjects());
 
-    // Despite the offspring construction being stuck, the host genome must have been mutated.
+    // The host genome must have been mutated while its constructor.offspring was set.
     auto mutatedGenome = getMutatedGenome(1);
     bool anyWeightChanged = false;
     for (size_t g = 0; g < genome._genes.size() && !anyWeightChanged; ++g) {
