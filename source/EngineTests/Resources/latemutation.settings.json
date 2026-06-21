@@ -1,0 +1,4443 @@
+{
+    "General": {
+        "Version": "5.0.0-alpha.20",
+        "Time step": "2149",
+        "Real time": "15141",
+        "Zoom": "24.77403450",
+        "Center": {
+            "X": "2439.23974609",
+            "Y": "726.07519531"
+        },
+        "World size": {
+            "X": "5000",
+            "Y": "1500"
+        }
+    },
+    "Simulation parameters": {
+        "Number of layers": "10",
+        "Number of sources": "0",
+        "Layer order number": {
+            "Index 0": "1",
+            "Index 1": "2",
+            "Index 2": "3",
+            "Index 3": "4",
+            "Index 4": "5",
+            "Index 5": "6",
+            "Index 6": "7",
+            "Index 7": "8",
+            "Index 8": "9",
+            "Index 9": "10"
+        },
+        "General": {
+            "Project name": {
+                "Base": {
+                    "Value": "<unnamed simulation>"
+                }
+            },
+            "Layer name": {
+                "Layer 0": {
+                    "Value": "Gravity"
+                },
+                "Layer 1": {
+                    "Value": "Low Gravity"
+                },
+                "Layer 2": {
+                    "Value": "Perlin noise"
+                },
+                "Layer 3": {
+                    "Value": "Ground Storm"
+                },
+                "Layer 4": {
+                    "Value": "Heaven Storm"
+                },
+                "Layer 5": {
+                    "Value": "Storm bottom"
+                },
+                "Layer 6": {
+                    "Value": "Storm middle"
+                },
+                "Layer 7": {
+                    "Value": "Death zone bottom"
+                },
+                "Layer 8": {
+                    "Value": "Ground1"
+                },
+                "Layer 9": {
+                    "Value": "Ground2"
+                }
+            },
+            "Opacity": {
+                "Layer 0": {
+                    "Value": "1.00000000"
+                },
+                "Layer 1": {
+                    "Value": "1.00000000"
+                },
+                "Layer 2": {
+                    "Value": "0.28200001"
+                },
+                "Layer 3": {
+                    "Value": "1.00000000"
+                },
+                "Layer 4": {
+                    "Value": "1.00000000"
+                },
+                "Layer 5": {
+                    "Value": "1.00000000"
+                },
+                "Layer 6": {
+                    "Value": "1.00000000"
+                },
+                "Layer 7": {
+                    "Value": "1.00000000"
+                },
+                "Layer 8": {
+                    "Value": "1.00000000"
+                },
+                "Layer 9": {
+                    "Value": "1.00000000"
+                }
+            }
+        },
+        "Visualization": {
+            "Background color": {
+                "Base": {
+                    "Value": {
+                        "R": "0.00000000",
+                        "G": "0.00000000",
+                        "B": "0.10600000"
+                    }
+                },
+                "Layer 0": {
+                    "Value": {
+                        "R": "0.04004500",
+                        "G": "0.05583568",
+                        "B": "0.09170306"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 1": {
+                    "Value": {
+                        "R": "0.01510269",
+                        "G": "0.07072505",
+                        "B": "0.10480350"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 2": {
+                    "Value": {
+                        "R": "0.04000001",
+                        "G": "0.08471619",
+                        "B": "0.20000000"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 3": {
+                    "Value": {
+                        "R": "0.00427147",
+                        "G": "0.00000000",
+                        "B": "0.12227076"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 4": {
+                    "Value": {
+                        "R": "0.18270777",
+                        "G": "0.18046947",
+                        "B": "0.24454147"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 5": {
+                    "Value": {
+                        "R": "0.03073932",
+                        "G": "0.13537121",
+                        "B": "0.04079128"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 6": {
+                    "Value": {
+                        "R": "0.03137255",
+                        "G": "0.13725491",
+                        "B": "0.03921569"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 7": {
+                    "Value": {
+                        "R": "0.15720522",
+                        "G": "0.05079994",
+                        "B": "0.05079994"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 8": {
+                    "Value": {
+                        "R": "0.39301312",
+                        "G": "0.10468908",
+                        "B": "0.10468908"
+                    },
+                    "Enabled": "true"
+                },
+                "Layer 9": {
+                    "Value": {
+                        "R": "0.39215687",
+                        "G": "0.10588235",
+                        "B": "0.10588235"
+                    },
+                    "Enabled": "true"
+                }
+            },
+            "Customization colors": {
+                "Base": {
+                    "Color 0": {
+                        "R": "0.12549020",
+                        "G": "0.12549020",
+                        "B": "1.00000000"
+                    },
+                    "Color 1": {
+                        "R": "0.06559739",
+                        "G": "0.00000000",
+                        "B": "0.75109172"
+                    },
+                    "Color 2": {
+                        "R": "0.16727372",
+                        "G": "0.56331879",
+                        "B": "0.18456821"
+                    },
+                    "Color 3": {
+                        "R": "0.03003377",
+                        "G": "0.52084106",
+                        "B": "0.98253274"
+                    },
+                    "Color 4": {
+                        "R": "0.57969880",
+                        "G": "0.00000000",
+                        "B": "0.66375542"
+                    },
+                    "Color 5": {
+                        "R": "1.00000000",
+                        "G": "1.00000000",
+                        "B": "0.12549020"
+                    },
+                    "Color 6": {
+                        "R": "0.69019610",
+                        "G": "0.17647059",
+                        "B": "0.06274510"
+                    },
+                    "Color 7": {
+                        "R": "0.07848820",
+                        "G": "0.85589516",
+                        "B": "0.07848820"
+                    },
+                    "Color 8": {
+                        "R": "0.12549020",
+                        "G": "1.00000000",
+                        "B": "0.70980394"
+                    },
+                    "Color 9": {
+                        "R": "0.62445414",
+                        "G": "0.62445414",
+                        "B": "0.62445414"
+                    }
+                }
+            },
+            "Object coloring": {
+                "Base": {
+                    "Color 0": "3",
+                    "Color 1": "1",
+                    "Color 2": "1",
+                    "Color 3": "1",
+                    "Color 4": "1",
+                    "Color 5": "1",
+                    "Color 6": "1",
+                    "Color 7": "1",
+                    "Color 8": "1",
+                    "Color 9": "1"
+                }
+            },
+            "Glow": {
+                "Base": {
+                    "Value": "0.30000001"
+                }
+            },
+            "Borderless rendering": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Grid lines": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Mark reference domain": {
+                "Base": {
+                    "Value": "true"
+                }
+            }
+        },
+        "Location": {
+            "Position (x,y)": {
+                "Layer 0": {
+                    "Value": {
+                        "X": "825.00000000",
+                        "Y": "825.00000000"
+                    }
+                },
+                "Layer 1": {
+                    "Value": {
+                        "X": "841.01000977",
+                        "Y": "587.21002197"
+                    }
+                },
+                "Layer 2": {
+                    "Value": {
+                        "X": "900.00000000",
+                        "Y": "900.00000000"
+                    }
+                },
+                "Layer 3": {
+                    "Value": {
+                        "X": "3911.72143555",
+                        "Y": "1374.60998535"
+                    }
+                },
+                "Layer 4": {
+                    "Value": {
+                        "X": "3911.72143555",
+                        "Y": "194.11000061"
+                    }
+                },
+                "Layer 5": {
+                    "Value": {
+                        "X": "3859.34399414",
+                        "Y": "1366.54003906"
+                    }
+                },
+                "Layer 6": {
+                    "Value": {
+                        "X": "2797.20141602",
+                        "Y": "1035.66003418"
+                    }
+                },
+                "Layer 7": {
+                    "Value": {
+                        "X": "750.00000000",
+                        "Y": "1497.00000000"
+                    }
+                },
+                "Layer 8": {
+                    "Value": {
+                        "X": "750.00000000",
+                        "Y": "1497.00000000"
+                    }
+                },
+                "Layer 9": {
+                    "Value": {
+                        "X": "750.00000000",
+                        "Y": "5.00000000"
+                    }
+                }
+            },
+            "Velocity (x,y)": {
+                "Layer 0": {
+                    "Value": {
+                        "X": "0.00000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 1": {
+                    "Value": {
+                        "X": "0.00000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 2": {
+                    "Value": {
+                        "X": "0.00000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 3": {
+                    "Value": {
+                        "X": "0.01000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 4": {
+                    "Value": {
+                        "X": "0.01000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 5": {
+                    "Value": {
+                        "X": "0.01000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 6": {
+                    "Value": {
+                        "X": "-0.05000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 7": {
+                    "Value": {
+                        "X": "0.00000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 8": {
+                    "Value": {
+                        "X": "0.00000000",
+                        "Y": "0.00000000"
+                    }
+                },
+                "Layer 9": {
+                    "Value": {
+                        "X": "0.00000000",
+                        "Y": "0.00000000"
+                    }
+                }
+            }
+        },
+        "Shape": {
+            "Shape": {
+                "Layer 0": {
+                    "Value": "1"
+                },
+                "Layer 1": {
+                    "Value": "1"
+                },
+                "Layer 2": {
+                    "Value": "1"
+                },
+                "Layer 3": {
+                    "Value": "1"
+                },
+                "Layer 4": {
+                    "Value": "1"
+                },
+                "Layer 5": {
+                    "Value": "0"
+                },
+                "Layer 6": {
+                    "Value": "1"
+                },
+                "Layer 7": {
+                    "Value": "1"
+                },
+                "Layer 8": {
+                    "Value": "1"
+                },
+                "Layer 9": {
+                    "Value": "1"
+                },
+                "Circular": {
+                    "Core radius": {
+                        "Layer 0": {
+                            "Value": "250.00000000"
+                        },
+                        "Layer 1": {
+                            "Value": "250.00000000"
+                        },
+                        "Layer 2": {
+                            "Value": "250.00000000"
+                        },
+                        "Layer 3": {
+                            "Value": "44.77999878"
+                        },
+                        "Layer 4": {
+                            "Value": "44.77999878"
+                        },
+                        "Layer 5": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 6": {
+                            "Value": "50.38000107"
+                        },
+                        "Layer 7": {
+                            "Value": "250.00000000"
+                        },
+                        "Layer 8": {
+                            "Value": "250.00000000"
+                        },
+                        "Layer 9": {
+                            "Value": "250.00000000"
+                        }
+                    }
+                },
+                "Rectangular": {
+                    "Core size (width,height)": {
+                        "Layer 0": {
+                            "Value": {
+                                "X": "6000.00000000",
+                                "Y": "1500.00000000"
+                            }
+                        },
+                        "Layer 1": {
+                            "Value": {
+                                "X": "6000.00000000",
+                                "Y": "514.92999268"
+                            }
+                        },
+                        "Layer 2": {
+                            "Value": {
+                                "X": "6000.00000000",
+                                "Y": "1500.00000000"
+                            }
+                        },
+                        "Layer 3": {
+                            "Value": {
+                                "X": "6000.00000000",
+                                "Y": "9.32999992"
+                            }
+                        },
+                        "Layer 4": {
+                            "Value": {
+                                "X": "6000.00000000",
+                                "Y": "9.32999992"
+                            }
+                        },
+                        "Layer 5": {
+                            "Value": {
+                                "X": "250.00000000",
+                                "Y": "250.00000000"
+                            }
+                        },
+                        "Layer 6": {
+                            "Value": {
+                                "X": "59.70000076",
+                                "Y": "20.52000046"
+                            }
+                        },
+                        "Layer 7": {
+                            "Value": {
+                                "X": "6000.00000000",
+                                "Y": "0.00000000"
+                            }
+                        },
+                        "Layer 8": {
+                            "Value": {
+                                "X": "6000.00000000",
+                                "Y": "5.00000000"
+                            }
+                        },
+                        "Layer 9": {
+                            "Value": {
+                                "X": "6000.00000000",
+                                "Y": "5.00000000"
+                            }
+                        }
+                    }
+                }
+            },
+            "Fade-out radius": {
+                "Layer 0": {
+                    "Value": "150.00000000"
+                },
+                "Layer 1": {
+                    "Value": "322.14999390"
+                },
+                "Layer 2": {
+                    "Value": "150.00000000"
+                },
+                "Layer 3": {
+                    "Value": "80.52999878"
+                },
+                "Layer 4": {
+                    "Value": "233.33000183"
+                },
+                "Layer 5": {
+                    "Value": "90.59999847"
+                },
+                "Layer 6": {
+                    "Value": "45.31000137"
+                },
+                "Layer 7": {
+                    "Value": "50.34000015"
+                },
+                "Layer 8": {
+                    "Value": "0.00000000"
+                },
+                "Layer 9": {
+                    "Value": "0.00000000"
+                }
+            }
+        },
+        "Force field": {
+            "Field type": {
+                "Layer 0": {
+                    "Value": "3",
+                    "Enabled": "true"
+                },
+                "Layer 1": {
+                    "Value": "3",
+                    "Enabled": "true"
+                },
+                "Layer 2": {
+                    "Value": "4",
+                    "Enabled": "true"
+                },
+                "Layer 3": {
+                    "Value": "4",
+                    "Enabled": "true"
+                },
+                "Layer 4": {
+                    "Value": "3",
+                    "Enabled": "true"
+                },
+                "Layer 5": {
+                    "Value": "3",
+                    "Enabled": "true"
+                },
+                "Layer 6": {
+                    "Value": "3",
+                    "Enabled": "true"
+                },
+                "Layer 7": {
+                    "Value": "3",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Value": "3",
+                    "Enabled": "true"
+                },
+                "Layer 9": {
+                    "Value": "3",
+                    "Enabled": "true"
+                },
+                "Radial": {
+                    "Orientation": {
+                        "Layer 0": {
+                            "Value": "0"
+                        },
+                        "Layer 1": {
+                            "Value": "0"
+                        },
+                        "Layer 2": {
+                            "Value": "0"
+                        },
+                        "Layer 3": {
+                            "Value": "0"
+                        },
+                        "Layer 4": {
+                            "Value": "0"
+                        },
+                        "Layer 5": {
+                            "Value": "0"
+                        },
+                        "Layer 6": {
+                            "Value": "0"
+                        },
+                        "Layer 7": {
+                            "Value": "0"
+                        },
+                        "Layer 8": {
+                            "Value": "0"
+                        },
+                        "Layer 9": {
+                            "Value": "0"
+                        }
+                    },
+                    "Strength": {
+                        "Layer 0": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 1": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 2": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 3": {
+                            "Value": "0.06715800"
+                        },
+                        "Layer 4": {
+                            "Value": "0.06715800"
+                        },
+                        "Layer 5": {
+                            "Value": "0.06715800"
+                        },
+                        "Layer 6": {
+                            "Value": "0.06715800"
+                        },
+                        "Layer 7": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 8": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 9": {
+                            "Value": "0.00100000"
+                        }
+                    },
+                    "Drift angle": {
+                        "Layer 0": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 1": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 2": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 3": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 4": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 5": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 6": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 7": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 8": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 9": {
+                            "Value": "0.00000000"
+                        }
+                    }
+                },
+                "Central": {
+                    "Strength": {
+                        "Layer 0": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 1": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 2": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 3": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 4": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 5": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 6": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 7": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 8": {
+                            "Value": "0.05000000"
+                        },
+                        "Layer 9": {
+                            "Value": "0.05000000"
+                        }
+                    }
+                },
+                "Linear": {
+                    "Angle": {
+                        "Layer 0": {
+                            "Value": "180.00000000"
+                        },
+                        "Layer 1": {
+                            "Value": "180.00000000"
+                        },
+                        "Layer 2": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 3": {
+                            "Value": "90.00000000"
+                        },
+                        "Layer 4": {
+                            "Value": "180.00000000"
+                        },
+                        "Layer 5": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 6": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 7": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 8": {
+                            "Value": "0.00000000"
+                        },
+                        "Layer 9": {
+                            "Value": "180.00000000"
+                        }
+                    },
+                    "Strength": {
+                        "Layer 0": {
+                            "Value": "0.00001600"
+                        },
+                        "Layer 1": {
+                            "Value": "0.00001500"
+                        },
+                        "Layer 2": {
+                            "Value": "0.00010000"
+                        },
+                        "Layer 3": {
+                            "Value": "0.00037400"
+                        },
+                        "Layer 4": {
+                            "Value": "0.00037400"
+                        },
+                        "Layer 5": {
+                            "Value": "0.00322600"
+                        },
+                        "Layer 6": {
+                            "Value": "0.00501300"
+                        },
+                        "Layer 7": {
+                            "Value": "0.01627600"
+                        },
+                        "Layer 8": {
+                            "Value": "0.01627600"
+                        },
+                        "Layer 9": {
+                            "Value": "0.01627600"
+                        }
+                    }
+                },
+                "Perlin noise": {
+                    "Strength": {
+                        "Layer 0": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 1": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 2": {
+                            "Value": "0.00529200"
+                        },
+                        "Layer 3": {
+                            "Value": "0.00947400"
+                        },
+                        "Layer 4": {
+                            "Value": "0.01880300"
+                        },
+                        "Layer 5": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 6": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 7": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 8": {
+                            "Value": "0.00100000"
+                        },
+                        "Layer 9": {
+                            "Value": "0.00100000"
+                        }
+                    },
+                    "Spatial structure size": {
+                        "Layer 0": {
+                            "Value": "20.00000000"
+                        },
+                        "Layer 1": {
+                            "Value": "20.00000000"
+                        },
+                        "Layer 2": {
+                            "Value": "117.00000000"
+                        },
+                        "Layer 3": {
+                            "Value": "47.00000000"
+                        },
+                        "Layer 4": {
+                            "Value": "47.00000000"
+                        },
+                        "Layer 5": {
+                            "Value": "20.00000000"
+                        },
+                        "Layer 6": {
+                            "Value": "20.00000000"
+                        },
+                        "Layer 7": {
+                            "Value": "20.00000000"
+                        },
+                        "Layer 8": {
+                            "Value": "20.00000000"
+                        },
+                        "Layer 9": {
+                            "Value": "20.00000000"
+                        }
+                    },
+                    "Temporal structure size": {
+                        "Layer 0": {
+                            "Value": "100.00000000"
+                        },
+                        "Layer 1": {
+                            "Value": "10000.00000000"
+                        },
+                        "Layer 2": {
+                            "Value": "10000.00000000"
+                        },
+                        "Layer 3": {
+                            "Value": "9176.70214844"
+                        },
+                        "Layer 4": {
+                            "Value": "9176.70214844"
+                        },
+                        "Layer 5": {
+                            "Value": "100.00000000"
+                        },
+                        "Layer 6": {
+                            "Value": "100.00000000"
+                        },
+                        "Layer 7": {
+                            "Value": "100.00000000"
+                        },
+                        "Layer 8": {
+                            "Value": "100.00000000"
+                        },
+                        "Layer 9": {
+                            "Value": "100.00000000"
+                        }
+                    }
+                }
+            }
+        },
+        "Physics: Motion": {
+            "Time step size": {
+                "Base": {
+                    "Value": "1.00000000"
+                }
+            },
+            "Smoothing length": {
+                "Base": {
+                    "Value": "0.80000001"
+                }
+            },
+            "Pressure": {
+                "Base": {
+                    "Value": "0.10000000"
+                }
+            },
+            "Viscosity": {
+                "Base": {
+                    "Value": "0.10000000"
+                }
+            },
+            "Friction": {
+                "Base": {
+                    "Value": "0.00100000"
+                },
+                "Layer 0": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                }
+            },
+            "Inner friction": {
+                "Base": {
+                    "Value": "0.60000002"
+                }
+            },
+            "Rigidity": {
+                "Base": {
+                    "Value": "0.00000000"
+                },
+                "Layer 0": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                }
+            }
+        },
+        "Physics: Thresholds": {
+            "Maximum velocity": {
+                "Base": {
+                    "Value": "2.00000000"
+                }
+            },
+            "Maximum force": {
+                "Base": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005"
+                },
+                "Layer 0": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": "1.20000005",
+                    "Color 1": "1.20000005",
+                    "Color 2": "1.20000005",
+                    "Color 3": "1.20000005",
+                    "Color 4": "1.20000005",
+                    "Color 5": "1.20000005",
+                    "Color 6": "1.20000005",
+                    "Color 7": "1.20000005",
+                    "Color 8": "1.20000005",
+                    "Color 9": "1.20000005",
+                    "Enabled": "false"
+                }
+            },
+            "Minimum distance": {
+                "Base": {
+                    "Value": "0.30000001"
+                }
+            },
+            "Maximum distance": {
+                "Base": {
+                    "Color 0": "3.59999990",
+                    "Color 1": "3.59999990",
+                    "Color 2": "3.59999990",
+                    "Color 3": "3.59999990",
+                    "Color 4": "3.59999990",
+                    "Color 5": "3.59999990",
+                    "Color 6": "3.59999990",
+                    "Color 7": "3.59999990",
+                    "Color 8": "3.59999990",
+                    "Color 9": "3.59999990"
+                }
+            },
+            "Fusion velocity": {
+                "Base": {
+                    "Value": "0.10000000"
+                },
+                "Layer 0": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Value": "0.00000000",
+                    "Enabled": "false"
+                }
+            }
+        },
+        "Radiation": {
+            "Relative strength": {
+                "Base": {
+                    "Pinned": "false"
+                }
+            },
+            "Disable radiation sources": {
+                "Layer 0": {
+                    "Value": "false"
+                },
+                "Layer 1": {
+                    "Value": "false"
+                },
+                "Layer 2": {
+                    "Value": "false"
+                },
+                "Layer 3": {
+                    "Value": "false"
+                },
+                "Layer 4": {
+                    "Value": "false"
+                },
+                "Layer 5": {
+                    "Value": "false"
+                },
+                "Layer 6": {
+                    "Value": "false"
+                },
+                "Layer 7": {
+                    "Value": "false"
+                },
+                "Layer 8": {
+                    "Value": "false"
+                },
+                "Layer 9": {
+                    "Value": "false"
+                }
+            },
+            "Absorption factor": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000"
+                },
+                "Layer 0": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000",
+                    "Enabled": "false"
+                }
+            },
+            "Radiation type I: Strength": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                },
+                "Layer 0": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": "0.01000000",
+                    "Color 1": "0.01000000",
+                    "Color 2": "0.01000000",
+                    "Color 3": "0.01000000",
+                    "Color 4": "0.01000000",
+                    "Color 5": "0.01000000",
+                    "Color 6": "0.01000000",
+                    "Color 7": "0.01000000",
+                    "Color 8": "0.01000000",
+                    "Color 9": "0.01000000",
+                    "Enabled": "true"
+                },
+                "Layer 8": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                }
+            },
+            "Radiation type I: Minimum age": {
+                "Base": {
+                    "Color 0": "0",
+                    "Color 1": "0",
+                    "Color 2": "0",
+                    "Color 3": "0",
+                    "Color 4": "0",
+                    "Color 5": "0",
+                    "Color 6": "0",
+                    "Color 7": "0",
+                    "Color 8": "0",
+                    "Color 9": "0"
+                }
+            },
+            "Radiation type II: Strength": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                }
+            },
+            "Radiation type II: Threshold": {
+                "Base": {
+                    "Color 0": "500.00000000",
+                    "Color 1": "500.00000000",
+                    "Color 2": "500.00000000",
+                    "Color 3": "500.00000000",
+                    "Color 4": "500.00000000",
+                    "Color 5": "500.00000000",
+                    "Color 6": "500.00000000",
+                    "Color 7": "500.00000000",
+                    "Color 8": "500.00000000",
+                    "Color 9": "500.00000000"
+                }
+            },
+            "Minimum split energy": {
+                "Base": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000"
+                }
+            },
+            "Energy to cell transformation": {
+                "Base": {
+                    "Value": "false"
+                }
+            }
+        },
+        "Cell life cycle": {
+            "Maximum age": {
+                "Base": {
+                    "Color 0": "80000",
+                    "Color 1": "500000",
+                    "Color 2": "500000",
+                    "Color 3": "500000",
+                    "Color 4": "500000",
+                    "Color 5": "500000",
+                    "Color 6": "500000",
+                    "Color 7": "500000",
+                    "Color 8": "80000",
+                    "Color 9": "500000"
+                }
+            },
+            "Minimum energy": {
+                "Base": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000"
+                },
+                "Layer 0": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000",
+                    "Enabled": "false"
+                }
+            },
+            "Normal energy": {
+                "Base": {
+                    "Color 0": "100.00000000",
+                    "Color 1": "100.00000000",
+                    "Color 2": "100.00000000",
+                    "Color 3": "100.00000000",
+                    "Color 4": "100.00000000",
+                    "Color 5": "100.00000000",
+                    "Color 6": "100.00000000",
+                    "Color 7": "100.00000000",
+                    "Color 8": "100.00000000",
+                    "Color 9": "100.00000000"
+                }
+            },
+            "Decay rate of dying cells": {
+                "Base": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000"
+                },
+                "Layer 0": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000",
+                    "Color 7": "0.00100000",
+                    "Color 8": "0.00100000",
+                    "Color 9": "0.00100000",
+                    "Enabled": "false"
+                }
+            }
+        },
+        "Cell construction": {
+            "Connection distance": {
+                "Base": {
+                    "Color 0": "3.50000000",
+                    "Color 1": "3.50000000",
+                    "Color 2": "3.50000000",
+                    "Color 3": "3.50000000",
+                    "Color 4": "3.50000000",
+                    "Color 5": "3.50000000",
+                    "Color 6": "3.50000000",
+                    "Color 7": "3.50000000",
+                    "Color 8": "3.50000000",
+                    "Color 9": "3.50000000"
+                }
+            }
+        },
+        "Meta-mutations": {
+            "Neuron mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Connection mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Cell type property mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Cell type mode mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Cell type mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Void mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Append node mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Add node mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Trim node mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Delete node mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "Constructor mutations sigma": {
+                "Base": {
+                    "Value": "0.00100000"
+                }
+            },
+            "New lineage threshold": {
+                "Base": {
+                    "Value": "1.00000000"
+                }
+            }
+        },
+        "Cell type: Attacker": {
+            "Energy cost": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                },
+                "Layer 0": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                }
+            },
+            "Food chain color matrix": {
+                "Base": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001"
+                },
+                "Layer 0": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0,0": "0.30000001",
+                    "Color 0,1": "0.30000001",
+                    "Color 0,2": "0.30000001",
+                    "Color 0,3": "0.30000001",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "0.30000001",
+                    "Color 0,6": "0.30000001",
+                    "Color 0,7": "0.30000001",
+                    "Color 0,8": "0.30000001",
+                    "Color 0,9": "0.30000001",
+                    "Color 1,0": "0.30000001",
+                    "Color 1,1": "0.30000001",
+                    "Color 1,2": "0.30000001",
+                    "Color 1,3": "0.30000001",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "0.30000001",
+                    "Color 1,6": "0.30000001",
+                    "Color 1,7": "0.30000001",
+                    "Color 1,8": "0.30000001",
+                    "Color 1,9": "0.30000001",
+                    "Color 2,0": "0.30000001",
+                    "Color 2,1": "0.30000001",
+                    "Color 2,2": "0.30000001",
+                    "Color 2,3": "0.30000001",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "0.30000001",
+                    "Color 2,6": "0.30000001",
+                    "Color 2,7": "0.30000001",
+                    "Color 2,8": "0.30000001",
+                    "Color 2,9": "0.30000001",
+                    "Color 3,0": "0.30000001",
+                    "Color 3,1": "0.30000001",
+                    "Color 3,2": "0.30000001",
+                    "Color 3,3": "0.30000001",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "0.30000001",
+                    "Color 3,6": "0.30000001",
+                    "Color 3,7": "0.30000001",
+                    "Color 3,8": "0.30000001",
+                    "Color 3,9": "0.30000001",
+                    "Color 4,0": "0.30000001",
+                    "Color 4,1": "0.30000001",
+                    "Color 4,2": "0.30000001",
+                    "Color 4,3": "0.30000001",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "0.30000001",
+                    "Color 4,6": "0.30000001",
+                    "Color 4,7": "0.30000001",
+                    "Color 4,8": "0.30000001",
+                    "Color 4,9": "0.30000001",
+                    "Color 5,0": "0.30000001",
+                    "Color 5,1": "0.30000001",
+                    "Color 5,2": "0.30000001",
+                    "Color 5,3": "0.30000001",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "0.30000001",
+                    "Color 5,6": "0.30000001",
+                    "Color 5,7": "0.30000001",
+                    "Color 5,8": "0.30000001",
+                    "Color 5,9": "0.30000001",
+                    "Color 6,0": "0.30000001",
+                    "Color 6,1": "0.30000001",
+                    "Color 6,2": "0.30000001",
+                    "Color 6,3": "0.30000001",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "0.30000001",
+                    "Color 6,6": "0.30000001",
+                    "Color 6,7": "0.30000001",
+                    "Color 6,8": "0.30000001",
+                    "Color 6,9": "0.30000001",
+                    "Color 7,0": "0.30000001",
+                    "Color 7,1": "0.30000001",
+                    "Color 7,2": "0.30000001",
+                    "Color 7,3": "0.30000001",
+                    "Color 7,4": "1.00000000",
+                    "Color 7,5": "0.30000001",
+                    "Color 7,6": "0.30000001",
+                    "Color 7,7": "0.30000001",
+                    "Color 7,8": "0.30000001",
+                    "Color 7,9": "0.30000001",
+                    "Color 8,0": "0.30000001",
+                    "Color 8,1": "0.30000001",
+                    "Color 8,2": "0.30000001",
+                    "Color 8,3": "0.30000001",
+                    "Color 8,4": "1.00000000",
+                    "Color 8,5": "0.30000001",
+                    "Color 8,6": "0.30000001",
+                    "Color 8,7": "0.30000001",
+                    "Color 8,8": "0.30000001",
+                    "Color 8,9": "0.30000001",
+                    "Color 9,0": "0.30000001",
+                    "Color 9,1": "0.30000001",
+                    "Color 9,2": "0.30000001",
+                    "Color 9,3": "0.30000001",
+                    "Color 9,4": "1.00000000",
+                    "Color 9,5": "0.30000001",
+                    "Color 9,6": "0.30000001",
+                    "Color 9,7": "0.30000001",
+                    "Color 9,8": "0.30000001",
+                    "Color 9,9": "0.30000001",
+                    "Enabled": "false"
+                }
+            },
+            "Attack strength": {
+                "Base": {
+                    "Value": "0.15000001"
+                }
+            },
+            "Related lineage protection": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000"
+                }
+            },
+            "Attack radius": {
+                "Base": {
+                    "Color 0": "2.00000000",
+                    "Color 1": "2.00000000",
+                    "Color 2": "2.00000000",
+                    "Color 3": "2.00000000",
+                    "Color 4": "2.00000000",
+                    "Color 5": "2.00000000",
+                    "Color 6": "2.00000000",
+                    "Color 7": "2.00000000",
+                    "Color 8": "2.00000000",
+                    "Color 9": "2.00000000"
+                }
+            }
+        },
+        "Cell type: Digestor": {
+            "Max raw energy conductivity": {
+                "Base": {
+                    "Color 0": "3.00000000",
+                    "Color 1": "3.00000000",
+                    "Color 2": "3.00000000",
+                    "Color 3": "3.00000000",
+                    "Color 4": "3.00000000",
+                    "Color 5": "3.00000000",
+                    "Color 6": "3.00000000",
+                    "Color 7": "3.00000000",
+                    "Color 8": "3.00000000",
+                    "Color 9": "3.00000000"
+                }
+            },
+            "Max raw energy conversion": {
+                "Base": {
+                    "Color 0": "0.10000000",
+                    "Color 1": "0.10000000",
+                    "Color 2": "0.10000000",
+                    "Color 3": "0.10000000",
+                    "Color 4": "0.10000000",
+                    "Color 5": "0.10000000",
+                    "Color 6": "0.10000000",
+                    "Color 7": "0.10000000",
+                    "Color 8": "0.10000000",
+                    "Color 9": "0.10000000"
+                }
+            }
+        },
+        "Cell type: Defender": {
+            "Anti-attacker strength": {
+                "Base": {
+                    "Color 0": "0.50000000",
+                    "Color 1": "0.50000000",
+                    "Color 2": "0.50000000",
+                    "Color 3": "0.50000000",
+                    "Color 4": "0.50000000",
+                    "Color 5": "0.50000000",
+                    "Color 6": "0.50000000",
+                    "Color 7": "0.50000000",
+                    "Color 8": "0.50000000",
+                    "Color 9": "0.50000000"
+                }
+            },
+            "Anti-injector strength": {
+                "Base": {
+                    "Color 0": "0.50000000",
+                    "Color 1": "0.50000000",
+                    "Color 2": "0.50000000",
+                    "Color 3": "0.50000000",
+                    "Color 4": "0.50000000",
+                    "Color 5": "0.50000000",
+                    "Color 6": "0.50000000",
+                    "Color 7": "0.50000000",
+                    "Color 8": "0.50000000",
+                    "Color 9": "0.50000000"
+                }
+            }
+        },
+        "Cell type: Injector": {
+            "Energy cost": {
+                "Base": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000",
+                    "Color 7": "50.00000000",
+                    "Color 8": "50.00000000",
+                    "Color 9": "50.00000000"
+                }
+            },
+            "Injection radius": {
+                "Base": {
+                    "Color 0": "3.00000000",
+                    "Color 1": "3.00000000",
+                    "Color 2": "3.00000000",
+                    "Color 3": "3.00000000",
+                    "Color 4": "3.00000000",
+                    "Color 5": "3.00000000",
+                    "Color 6": "3.00000000",
+                    "Color 7": "3.00000000",
+                    "Color 8": "3.00000000",
+                    "Color 9": "3.00000000"
+                }
+            }
+        },
+        "Cell type: Muscle": {
+            "Energy cost": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                }
+            },
+            "Movement acceleration": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000"
+                }
+            },
+            "Crawling acceleration": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000"
+                }
+            },
+            "Bending acceleration": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000",
+                    "Color 7": "1.00000000",
+                    "Color 8": "1.00000000",
+                    "Color 9": "1.00000000"
+                }
+            }
+        },
+        "Cell type: Sensor": {
+            "Radius": {
+                "Base": {
+                    "Color 0": "255.00000000",
+                    "Color 1": "255.00000000",
+                    "Color 2": "255.00000000",
+                    "Color 3": "255.00000000",
+                    "Color 4": "255.00000000",
+                    "Color 5": "255.00000000",
+                    "Color 6": "255.00000000",
+                    "Color 7": "255.00000000",
+                    "Color 8": "255.00000000",
+                    "Color 9": "255.00000000"
+                }
+            }
+        },
+        "Cell type: Reconnector": {
+            "Radius": {
+                "Base": {
+                    "Color 0": "2.00000000",
+                    "Color 1": "2.00000000",
+                    "Color 2": "2.00000000",
+                    "Color 3": "2.00000000",
+                    "Color 4": "2.00000000",
+                    "Color 5": "2.00000000",
+                    "Color 6": "2.00000000",
+                    "Color 7": "2.00000000",
+                    "Color 8": "2.00000000",
+                    "Color 9": "2.00000000"
+                }
+            }
+        },
+        "Cell type: Detonator": {
+            "Blast radius": {
+                "Base": {
+                    "Color 0": "10.00000000",
+                    "Color 1": "10.00000000",
+                    "Color 2": "10.00000000",
+                    "Color 3": "10.00000000",
+                    "Color 4": "10.00000000",
+                    "Color 5": "10.00000000",
+                    "Color 6": "10.00000000",
+                    "Color 7": "10.00000000",
+                    "Color 8": "10.00000000",
+                    "Color 9": "10.00000000"
+                }
+            },
+            "Chain explosion probability": {
+                "Base": {
+                    "Color 0": "0.20000000",
+                    "Color 1": "0.20000000",
+                    "Color 2": "0.20000000",
+                    "Color 3": "0.20000000",
+                    "Color 4": "0.20000000",
+                    "Color 5": "0.20000000",
+                    "Color 6": "0.20000000",
+                    "Color 7": "0.20000000",
+                    "Color 8": "0.20000000",
+                    "Color 9": "0.20000000"
+                }
+            }
+        },
+        "Advanced energy absorption control": {
+            "Enabled": "false",
+            "Low genome complexity penalty": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                },
+                "Layer 0": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                }
+            },
+            "Low connection penalty": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                }
+            },
+            "High velocity penalty": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                }
+            },
+            "Low velocity penalty": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                },
+                "Layer 0": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000",
+                    "Enabled": "false"
+                }
+            }
+        },
+        "Cell age limiter": {
+            "Enabled": "false",
+            "Maximum free cell age": {
+                "Base": {
+                    "Color 0": "2147483647",
+                    "Color 1": "2147483647",
+                    "Color 2": "2147483647",
+                    "Color 3": "2147483647",
+                    "Color 4": "2147483647",
+                    "Color 5": "2147483647",
+                    "Color 6": "2147483647",
+                    "Color 7": "2147483647",
+                    "Color 8": "2147483647",
+                    "Color 9": "2147483647"
+                }
+            },
+            "Reset age after construction": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Maximum age balancing": {
+                "Base": {
+                    "Value": "10000",
+                    "Enabled": "false"
+                }
+            }
+        },
+        "Cell color transition rules": {
+            "Enabled": "false",
+            "Target color and duration": {
+                "Base": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    }
+                },
+                "Layer 0": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 1": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 2": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 3": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 4": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 5": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 6": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 7": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 8": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                },
+                "Layer 9": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 7": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 8": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Color 9": {
+                        "Duration": "2147483647",
+                        "Target": "0"
+                    },
+                    "Enabled": "false"
+                }
+            }
+        },
+        "Customize deletion mutations": {
+            "Enabled": "false",
+            "Minimum size": {
+                "Base": {
+                    "Value": "0"
+                }
+            }
+        },
+        "External energy control": {
+            "Enabled": "true",
+            "External energy amount": {
+                "Base": {
+                    "Value": "3918862.25000000"
+                }
+            },
+            "Inflow": {
+                "Base": {
+                    "Color 0": "0.11382000",
+                    "Color 1": "0.11382000",
+                    "Color 2": "0.11382000",
+                    "Color 3": "0.11382000",
+                    "Color 4": "0.11382000",
+                    "Color 5": "0.11382000",
+                    "Color 6": "0.11382000",
+                    "Color 7": "0.11382000",
+                    "Color 8": "0.11382000",
+                    "Color 9": "0.11382000"
+                }
+            },
+            "Inflow threshold": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000",
+                    "Color 7": "0.00000000",
+                    "Color 8": "0.00000000",
+                    "Color 9": "0.00000000"
+                }
+            },
+            "Inflow only for first offspring": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Backflow": {
+                "Base": {
+                    "Color 0": "0.79799998",
+                    "Color 1": "0.79799998",
+                    "Color 2": "0.79799998",
+                    "Color 3": "0.79799998",
+                    "Color 4": "0.79799998",
+                    "Color 5": "0.79799998",
+                    "Color 6": "0.79799998",
+                    "Color 7": "0.79799998",
+                    "Color 8": "0.79799998",
+                    "Color 9": "0.79799998"
+                }
+            },
+            "Backflow limit": {
+                "Base": {
+                    "Value": "340282346638528859811704183484516925440.00000000"
+                }
+            }
+        }
+    }
+}

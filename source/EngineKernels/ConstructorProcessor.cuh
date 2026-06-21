@@ -155,6 +155,15 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         constructor.offspring = findOrCreateNewCreature(data, object);
 
+        // Keep a not-yet-separated offspring in sync with the host's current genome. The offspring creature is created
+        // (capturing the genome pointer) on the first trigger, possibly before the host is mutated (MutationProcessor
+        // runs earlier in the time step but is gated by available energy). Mirroring here, after the mutation, ensures
+        // the offspring is built from and stored with the mutated genome instead of the original one.
+        auto hostCreature = object->typeData.cell.creature;
+        if (constructor.offspring != hostCreature) {
+            constructor.offspring->genome = hostCreature->genome;
+        }
+
         if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
             return;
         }
