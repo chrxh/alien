@@ -68,7 +68,7 @@ private:
 
     __inline__ __device__ static bool checkHostEnergyAndRequestExternalEnergyIfNeeded(SimulationData& data, Object* hostObject);
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
-    __inline__ __device__ static float getAvailableEnergyForConstruction(Object* hostObject);
+    __inline__ __device__ static bool hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy);
     __inline__ __device__ static bool isExternalEnergyInflowAllowed(Object const* hostObject);
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
@@ -594,17 +594,14 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         return true;
     }
 
-    // Estimate the energy from the genome the construction will actually use: the offspring genome if construction is already ongoing,
-    // otherwise the host genome (the offspring is then cloned from it). This keeps the estimate consistent with checkAndReduceHostEnergy so
-    // the external energy inflow is requested here exactly once.
-    auto const& genome = constructor.offspring != nullptr ? constructor.offspring->genome : hostCell.creature->genome;
+    // Energy required to construct the next cell, derived from the host's own (already mutated) genome
+    auto const& genome = hostCell.creature->genome;
 
     // A finished constructor has nothing left to build, so it must not request external energy.
     if (ConstructorHelper::isFinished(hostObject, *genome)) {
         return false;
     }
 
-    // Energy required to construct the next cell
     auto requiredEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
     if (constructor.geneIndex < genome->numGenes) {
         uint16_t currentNodeIndex;
@@ -620,19 +617,7 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         }
     }
 
-    auto availableEnergyForConstruction = getAvailableEnergyForConstruction(hostObject);
-    if (availableEnergyForConstruction < requiredEnergy) {
-
-        // ... if not = > requesting external energy if possible
-        if (isExternalEnergyInflowAllowed(hostObject)) {
-            auto thresholdEnergy = requiredEnergy * cudaSimulationParameters.externalEnergyInflowThresholdFactor.value[hostObject->color];
-            if (availableEnergyForConstruction >= thresholdEnergy) {
-                constructor.energyNeeded = true;
-            }
-        }
-        return false;
-    }
-    return true;
+    return hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy);
 }
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData)
@@ -643,11 +628,10 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return true;
     }
 
-    // Energy actually required for the node being constructed. The early gate already requested external energy if needed, so here we only
-    // verify sufficiency and reduce. If it is not covered (e.g. host and offspring genome diverged), skip construction without requesting
-    // external energy again, the gate will request it on the next timestep.
+    // Energy actually required for the node being constructed (derived from the offspring genome via constructionData). The early gate only
+    // estimates this from the host genome, which may diverge from the offspring genome during ongoing construction, so re-check here.
     auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
-    if (getAvailableEnergyForConstruction(hostObject) < requiredEnergy) {
+    if (!hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy)) {
         return false;
     }
 
@@ -662,11 +646,24 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     return true;
 }
 
-__inline__ __device__ float ConstructorProcessor::getAvailableEnergyForConstruction(Object* hostObject)
+__inline__ __device__ bool ConstructorProcessor::hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy)
 {
     auto& hostCell = hostObject->typeData.cell;
+    auto& constructor = hostCell.constructor;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
-    return max(0.0f, hostCell.usableEnergy + hostCell.constructor.reservedEnergy - normalCellEnergy);
+    auto availableEnergyForConstruction = max(0.0f, hostCell.usableEnergy + constructor.reservedEnergy - normalCellEnergy);
+    if (availableEnergyForConstruction < requiredEnergy) {
+
+        // ... if not = > requesting external energy if possible
+        if (isExternalEnergyInflowAllowed(hostObject)) {
+            auto thresholdEnergy = requiredEnergy * cudaSimulationParameters.externalEnergyInflowThresholdFactor.value[hostObject->color];
+            if (availableEnergyForConstruction >= thresholdEnergy) {
+                constructor.energyNeeded = true;
+            }
+        }
+        return false;
+    }
+    return true;
 }
 
 __inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(Object const* hostObject)
