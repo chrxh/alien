@@ -76,11 +76,9 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
 
 TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
 {
-    // The constructor sets constructor.offspring already on the first (energy-less) trigger. External energy then
-    // flows in slowly until the offspring is actually constructed. Because separation is off, constructor.offspring
-    // is never reset to nullptr. The mutation gate in MutationProcessor::process no longer requires
-    // constructor.offspring == nullptr, so the creature is mutated during this process (with the previous code the
-    // mutation was skipped the whole time because constructor.offspring != nullptr).
+    // constructor.offspring is set on the first energy-less trigger and, with separation off, never reset.
+    // External energy inflow then lifts the energy until the offspring is actually constructed and the creature
+    // is mutated - which the previous code skipped while constructor.offspring != nullptr.
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
     genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
 
@@ -92,10 +90,9 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
         CreatureDesc().id(1).mutationState(MutationState_NotMutated),
         genome);
 
-    // The creature starts without energy (mutation gate closed) but constructor.offspring is set anyway; external
-    // energy inflow then raises the energy above the mutation threshold while constructor.offspring is already set.
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 1000000000.0f;
+    _parameters.newLineageThreshold.value = 1.0e30f;  // keep accumulatedMutations from resetting
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
@@ -105,25 +102,9 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    // The offspring cell was actually constructed (host cell + one offspring cell).
-    ASSERT_EQ(2, actualData.getNumObjects());
-
-    // The host genome must have been mutated while its constructor.offspring was set.
-    auto mutatedGenome = getMutatedGenome(1);
-    bool anyWeightChanged = false;
-    for (size_t g = 0; g < genome._genes.size() && !anyWeightChanged; ++g) {
-        for (size_t n = 0; n < genome._genes.at(g)._nodes.size() && !anyWeightChanged; ++n) {
-            auto const& origWeights = genome._genes.at(g)._nodes.at(n)._neuralNetwork._weights;
-            auto const& actualWeights = mutatedGenome._genes.at(g)._nodes.at(n)._neuralNetwork._weights;
-            for (size_t w = 0; w < origWeights.size(); ++w) {
-                if (origWeights.at(w) != actualWeights.at(w)) {
-                    anyWeightChanged = true;
-                    break;
-                }
-            }
-        }
-    }
-    EXPECT_TRUE(anyWeightChanged);
+    ASSERT_EQ(2, actualData.getNumObjects());  // offspring cell was constructed
+    auto hostCreatureId = actualData.getObjectRef(1).getCellRef()._creatureId;
+    EXPECT_GT(actualData.getCreatureRef(hostCreatureId)._accumulatedMutations, 0.0f);
 }
 
 TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
