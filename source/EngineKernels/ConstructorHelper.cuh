@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entities.cuh"
+#include "ConstantMemory.cuh"
 
 class ConstructorHelper
 {
@@ -12,6 +13,7 @@ public:
     __inline__ __device__ static void
     getConstructorIndices(uint16_t& currentNodeIndex, uint32_t& currentConcatenation, uint8_t& currentBranch, Object* constructorCell, Genome const& genome);
     __inline__ __device__ static Object* getLastConstructedCell(Object* constructorCell);
+    __inline__ __device__ static bool hasMinimalEnergyForConstruction(Object* object);
 };
 
 /************************************************************************/
@@ -101,4 +103,18 @@ __inline__ __device__ Object* ConstructorHelper::getLastConstructedCell(Object* 
         }
     }
     return nullptr;
+}
+
+__inline__ __device__ bool ConstructorHelper::hasMinimalEnergyForConstruction(Object* object)
+{
+    auto& cell = object->typeData.cell;
+    auto& constructor = cell.constructor;
+    if (constructor.provideEnergy == ProvideEnergy_Free) {
+        return true;
+    }
+
+    auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
+    auto availableEnergyForConstruction = cell.usableEnergy + constructor.reservedEnergy - normalCellEnergy;
+
+    return availableEnergyForConstruction >= normalCellEnergy - NEAR_ZERO;
 }

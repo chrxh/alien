@@ -106,6 +106,9 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
     ASSERT_EQ(2, actualData.getNumObjects());  // offspring cell was constructed
     auto hostCreatureId = actualData.getObjectRef(1).getCellRef()._creatureId;
     EXPECT_GT(actualData.getCreatureRef(hostCreatureId)._accumulatedMutations, 0.0f);
+
+    auto offspringCreatureId = actualData.getOtherObjectRef(1).getCellRef()._creatureId;
+    EXPECT_GT(actualData.getCreatureRef(offspringCreatureId)._accumulatedMutations, 0.0f);
 }
 
 TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)

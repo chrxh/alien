@@ -53,7 +53,6 @@ private:
     __inline__ __device__ static float generateGaussian(SimulationData& data);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
 
-    __inline__ __device__ static bool hasMinimalEnergyForConstruction(Object* object);
     __inline__ __device__ static int getNumberOfNodes(Genome* genome);
 };
 
@@ -86,7 +85,7 @@ __inline__ __device__ void MutationProcessor::process(SimulationData& data, Simu
                 // Only mutate genome if it has a constructor for new offspring and a minimal amount of energy for construction
                 // (=> prevents creation of genomes which are not used)
                 if (cell.constructorAvailable && (cell.constructor.geneIndex == 0 || cell.constructor.separation)
-                    && hasMinimalEnergyForConstruction(object)) {
+                    && ConstructorHelper::hasMinimalEnergyForConstruction(object)) {
                     auto& creature = object->typeData.cell.creature;
                     int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
                     if (origMutationState == MutationState_NotMutated) {
@@ -1231,20 +1230,6 @@ __inline__ __device__ bool MutationProcessor::isRandomEvent(SimulationData& data
     } else {
         return data.primaryNumberGen.random() < probability * 1000 && data.secondaryNumberGen.random() < 0.001f;
     }
-}
-
-__inline__ __device__ bool MutationProcessor::hasMinimalEnergyForConstruction(Object* object)
-{
-    auto& cell = object->typeData.cell;
-    auto& constructor = cell.constructor;
-    if (constructor.provideEnergy == ProvideEnergy_Free) {
-        return true;
-    }
-
-    auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-    auto availableEnergyForConstruction = cell.usableEnergy + constructor.reservedEnergy - normalCellEnergy;
-
-    return availableEnergyForConstruction >= normalCellEnergy - NEAR_ZERO;
 }
 
 __inline__ __device__ int MutationProcessor::getNumberOfNodes(Genome* genome)

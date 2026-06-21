@@ -153,6 +153,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     auto& constructor = object->typeData.cell.constructor;
     if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
 
+        // TODO add energy gate: create a method checkHostEnergyAndRequestExternalEnergyIfNeeded, if false => early return and no findOrCreateNewCreature is called
+        // TODO the existing method checkAndReduceHostEnergy should then only reduce energy
+
         constructor.offspring = findOrCreateNewCreature(data, object);
 
         if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
