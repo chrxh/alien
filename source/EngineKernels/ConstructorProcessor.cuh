@@ -594,10 +594,17 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         return true;
     }
 
-    // Energy required to construct the next cell. Estimate it from the genome the construction will actually use: the offspring genome if
-    // construction is already ongoing, otherwise the host genome (the offspring is then cloned from it). This keeps the estimate consistent
-    // with checkAndReduceHostEnergy so the external energy inflow is requested here exactly once.
+    // Estimate the energy from the genome the construction will actually use: the offspring genome if construction is already ongoing,
+    // otherwise the host genome (the offspring is then cloned from it). This keeps the estimate consistent with checkAndReduceHostEnergy so
+    // the external energy inflow is requested here exactly once.
     auto const& genome = constructor.offspring != nullptr ? constructor.offspring->genome : hostCell.creature->genome;
+
+    // A finished constructor has nothing left to build, so it must not request external energy.
+    if (ConstructorHelper::isFinished(hostObject, *genome)) {
+        return false;
+    }
+
+    // Energy required to construct the next cell
     auto requiredEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
     if (constructor.geneIndex < genome->numGenes) {
         uint16_t currentNodeIndex;
