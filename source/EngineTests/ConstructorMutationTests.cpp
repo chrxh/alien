@@ -74,6 +74,40 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
     EXPECT_TRUE(constructor.value() == ConstructorGenomeDesc());
 }
 
+TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
+{
+    // Regression test:
+    // constructor.offspring is set on the first energy-less trigger and, with separation off, never reset.
+    // External energy inflow then lifts the energy until the offspring is actually constructed and the creature
+    // is mutated - which the previous code skipped while constructor.offspring != nullptr.
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
+
+    auto data = Desc().addCreature(
+        {ObjectDesc()
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .type(CellDesc().usableEnergy(0.0f).constructor(ConstructorDesc().autoTriggerInterval(1).geneIndex(0).separation(false)))},
+        CreatureDesc().id(1).mutationState(MutationState_NotMutated),
+        genome);
+
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = 1000.0f;
+    _parameters.newLineageThreshold.value = 100.0f;  // keep accumulatedMutations from resetting
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 50; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(2, actualData.getNumObjects());  // offspring cell was constructed
+    auto hostCreatureId = actualData.getObjectRef(1).getCellRef()._creatureId;
+    EXPECT_GT(actualData.getCreatureRef(hostCreatureId)._accumulatedMutations, 0.0f);
+}
+
 TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
