@@ -462,12 +462,7 @@ struct Creature
 
     __device__ __inline__ bool isRelatedLineage(Creature* other)
     {
-        if (prevLineageId != VALUE_NOT_SET_UINT32 && other->prevLineageId != VALUE_NOT_SET_UINT32) {
-            return lineageId == other->lineageId || lineageId == other->prevLineageId || prevLineageId == other->lineageId
-                || prevLineageId == other->prevLineageId;
-        } else {
-            return lineageId == other->lineageId;
-        }
+        return lineageId == other->lineageId;
     }
 };
 
