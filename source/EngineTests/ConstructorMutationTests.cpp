@@ -76,6 +76,7 @@ TEST_F(ConstructorMutationTests, constructorMutation_addsConstructorWithDefaultV
 
 TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
 {
+    // Regression test:
     // constructor.offspring is set on the first energy-less trigger and, with separation off, never reset.
     // External energy inflow then lifts the energy until the offspring is actually constructed and the creature
     // is mutated - which the previous code skipped while constructor.offspring != nullptr.
@@ -91,8 +92,8 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
         genome);
 
     _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = 1000000000.0f;
-    _parameters.newLineageThreshold.value = 1.0e30f;  // keep accumulatedMutations from resetting
+    _parameters.externalEnergy.value = 1000.0f;
+    _parameters.newLineageThreshold.value = 100.0f;  // keep accumulatedMutations from resetting
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
