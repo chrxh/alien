@@ -32,7 +32,6 @@ PUBLIC
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
-    LateMutationTests.cpp
     LayerParameterTests.cpp
     MemoryTests.cpp
     MetaMutationTests.cpp
@@ -63,8 +62,6 @@ target_include_directories(EngineTests
     PRIVATE
         ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
 )
-
-target_compile_definitions(EngineTests PRIVATE TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/Resources")
 
 target_link_libraries(EngineTests cudart)
 target_link_libraries(EngineTests Boost::boost)

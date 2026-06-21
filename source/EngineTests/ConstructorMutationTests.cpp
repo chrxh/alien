@@ -108,6 +108,58 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
     EXPECT_GT(actualData.getCreatureRef(hostCreatureId)._accumulatedMutations, 0.0f);
 }
 
+TEST_F(ConstructorMutationTests, offspringInheritsMutatedGenome)
+{
+    // Regression test for a mutation timing bug:
+    // The constructor creates constructor.offspring already on the first energy-less trigger, capturing the host
+    // genome pointer. External energy then flows in until the host is mutated and the offspring is constructed.
+    // Because the host is mutated after the offspring creature was created, the offspring must still end up with the
+    // mutated genome - not the original one it was cloned with.
+    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})});
+    genome._mutationRates._neuronMutations[0] = NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f);
+
+    auto data = Desc().addCreature(
+        {ObjectDesc()
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .type(CellDesc().usableEnergy(0.0f).constructor(ConstructorDesc().autoTriggerInterval(1).geneIndex(0).separation(false)))},
+        CreatureDesc().id(1).mutationState(MutationState_NotMutated),
+        genome);
+
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = 1000.0f;
+    _parameters.newLineageThreshold.value = 100.0f;  // keep accumulatedMutations from resetting
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 50; ++i) {
+        _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(2, actualData.getNumObjects());  // host cell + constructed offspring cell
+
+    auto hostCreatureId = actualData.getObjectRef(1).getCellRef()._creatureId;
+    auto const& hostCreature = actualData.getCreatureRef(hostCreatureId);
+    ASSERT_GT(hostCreature._accumulatedMutations, 0.0f);  // the host was actually mutated
+    auto const& hostGenome = actualData.getGenomeRef(hostCreature._genomeId);
+
+    // Find the offspring cell (the object that is not the host) and its creature.
+    std::optional<uint64_t> offspringCreatureId;
+    for (auto const& object : actualData._objects) {
+        if (object._id != 1 && object.getObjectType() == ObjectType_Cell) {
+            offspringCreatureId = object.getCellRef()._creatureId;
+        }
+    }
+    ASSERT_TRUE(offspringCreatureId.has_value());
+    ASSERT_NE(*offspringCreatureId, hostCreatureId);  // offspring is a distinct creature
+    auto const& offspringGenome = actualData.getGenomeRef(actualData.getCreatureRef(*offspringCreatureId)._genomeId);
+
+    // The offspring inherited the host's mutated genome, not the original (with the bug it kept the original genome).
+    EXPECT_TRUE(offspringGenome.equalWithoutId(hostGenome));
+    EXPECT_FALSE(offspringGenome.equalWithoutId(genome));
+}
+
 TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
