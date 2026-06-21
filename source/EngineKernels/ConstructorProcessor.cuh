@@ -154,8 +154,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     auto& constructor = object->typeData.cell.constructor;
     if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
 
-        // Gate construction on available energy before cloning the creature. This guarantees that the host genome is already mutated
-        // (mutation uses the same energy condition and runs earlier in the timestep) when findOrCreateNewCreature clones it.
+        // Gate construction on available energy before cloning the creature. This guarantees that the host genome is already mutated.
         if (!checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object)) {
             return;
         }
