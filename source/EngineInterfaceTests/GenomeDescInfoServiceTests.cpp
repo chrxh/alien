@@ -785,3 +785,20 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_startsAtSmallestF
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2}}), result);
 }
+
+TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_dropContainedSubGenome)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false)),
+        }),
+    });
+    auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {2, 1}}), result);
+}
