@@ -178,7 +178,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         return;
     }
 
-    // Mutate the host genome before it is cloned for the offspring.
+    // Important: mutate the host genome before it is cloned for the offspring.
     mutateGenome(data, object, isPreview);
 
     // The actual construction runs on a single thread.
@@ -222,8 +222,6 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
     auto& cell = object->typeData.cell;
     auto& constructor = cell.constructor;
 
-    // The whole block participates in the mutation; the mutationState ensures each creature is mutated at most once and
-    // the preview path never mutates. The caller has already verified that enough energy for construction is available.
     __shared__ Genome* clonedGenome;
     if (threadIdx.x == 0) {
         clonedGenome = nullptr;
