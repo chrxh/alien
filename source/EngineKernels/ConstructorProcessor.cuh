@@ -67,7 +67,8 @@ private:
         ConstructionData const& constructionData);
 
     __inline__ __device__ static bool checkHostEnergyAndRequestExternalEnergyIfNeeded(SimulationData& data, Object* hostObject);
-    __inline__ __device__ static void reduceHostEnergy(Object* hostObject, ConstructionData const& constructionData);
+    __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData);
+    __inline__ __device__ static bool hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy);
     __inline__ __device__ static bool isExternalEnergyInflowAllowed(Object const* hostObject);
     __inline__ __device__ static void activateNewObjectOnLastNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
     __inline__ __device__ static void setHeadCellOnFirstNode(Object* newObject, Object* hostObject, ConstructionData const& constructionData);
@@ -154,6 +155,10 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     auto& constructor = object->typeData.cell.constructor;
     if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
 
+        if (ConstructorHelper::isFinished(object, *object->typeData.cell.creature->genome)) {
+            return;
+        }
+
         // Gate construction on available energy before cloning the creature. This guarantees that the host genome is already mutated.
         if (!checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object)) {
             return;
@@ -161,6 +166,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         constructor.offspring = findOrCreateNewCreature(data, object);
 
+        // Check again after cloning creature, because offspring genome may diverge from host genome
         if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
             return;
         }
@@ -318,7 +324,9 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
         return nullptr;
     }
 
-    reduceHostEnergy(hostObject, constructionData);
+    if (!checkAndReduceHostEnergy(data, hostObject, constructionData)) {
+        return nullptr;
+    }
 
     // For bending muscle cells: Reset front angle and restore initial angle
     for (int i = 0; i < hostObject->numConnections; ++i) {
@@ -383,7 +391,9 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
         return nullptr;
     }
 
-    reduceHostEnergy(hostObject, constructionData);
+    if (!checkAndReduceHostEnergy(data, hostObject, constructionData)) {
+        return nullptr;
+    }
 
     // For bending muscle cells: Reset front angle and restore initial angle
     if (lastObject->typeData.cell.cellType == CellType_Muscle && lastObject->typeData.cell.cellTypeData.muscle.isBendingMuscle()) {
@@ -590,8 +600,9 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
     }
 
     // Energy required to construct the next cell, derived from the host's own (already mutated) genome
-    auto requiredEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
     auto const& genome = hostCell.creature->genome;
+
+    auto requiredEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
     if (constructor.geneIndex < genome->numGenes) {
         uint16_t currentNodeIndex;
         uint32_t currentConcatenation;
@@ -606,6 +617,39 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         }
     }
 
+    return hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy);
+}
+
+__inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Object* hostObject, ConstructionData const& constructionData)
+{
+    auto& hostCell = hostObject->typeData.cell;
+    auto& constructor = hostCell.constructor;
+    if (constructor.provideEnergy == ProvideEnergy_Free) {
+        return true;
+    }
+
+    // Energy actually required for the node being constructed (derived from the offspring genome via constructionData). The early gate only
+    // estimates this from the host genome, which may diverge from the offspring genome during ongoing construction, so re-check here.
+    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
+    if (!hasEnergyForConstructionOrRequestExternalEnergy(hostObject, requiredEnergy)) {
+        return false;
+    }
+
+    // Reduce reserved energy
+    auto energyNeededFromReserved = min(constructor.reservedEnergy, requiredEnergy);
+    constructor.reservedEnergy -= energyNeededFromReserved;
+    requiredEnergy -= energyNeededFromReserved;
+
+    // Reduce usable energy
+    hostCell.usableEnergy -= requiredEnergy;
+    DEVICE_CHECK(hostCell.usableEnergy >= 0.0f);
+    return true;
+}
+
+__inline__ __device__ bool ConstructorProcessor::hasEnergyForConstructionOrRequestExternalEnergy(Object* hostObject, float requiredEnergy)
+{
+    auto& hostCell = hostObject->typeData.cell;
+    auto& constructor = hostCell.constructor;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
     auto availableEnergyForConstruction = max(0.0f, hostCell.usableEnergy + constructor.reservedEnergy - normalCellEnergy);
     if (availableEnergyForConstruction < requiredEnergy) {
@@ -620,26 +664,6 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         return false;
     }
     return true;
-}
-
-__inline__ __device__ void ConstructorProcessor::reduceHostEnergy(Object* hostObject, ConstructionData const& constructionData)
-{
-    auto& hostCell = hostObject->typeData.cell;
-    auto& constructor = hostCell.constructor;
-    if (constructor.provideEnergy == ProvideEnergy_Free) {
-        return;
-    }
-
-    auto requiredEnergy = constructionData.neededUsableEnergy + constructionData.neededReservedEnergy + constructionData.neededDepotEnergy;
-
-    // Reduce reserved energy
-    auto energyNeededFromReserved = min(constructor.reservedEnergy, requiredEnergy);
-    constructor.reservedEnergy -= energyNeededFromReserved;
-    requiredEnergy -= energyNeededFromReserved;
-
-    // Reduce usable energy
-    hostCell.usableEnergy -= requiredEnergy;
-    DEVICE_CHECK(hostCell.usableEnergy >= 0.0f);
 }
 
 __inline__ __device__ bool ConstructorProcessor::isExternalEnergyInflowAllowed(Object const* hostObject)

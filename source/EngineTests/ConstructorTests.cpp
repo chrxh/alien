@@ -3506,3 +3506,28 @@ TEST_F(ConstructorTests, externalEnergyInflow_distributedProportionally)
     EXPECT_TRUE(approxCompare(normalEnergy + 25.0f, actualData.getObjectRef(0).getCellRef()._usableEnergy));
     EXPECT_TRUE(approxCompare(normalEnergy + 25.0f, actualData.getObjectRef(1).getCellRef()._usableEnergy));
 }
+
+TEST_F(ConstructorTests, finishedConstructorDoesNotRequestExternalEnergy)
+{
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = 50.0f;
+    _parameters.externalEnergyInflowFactor.value = ColorVector<float>::uniform(1.0f);
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto normalEnergy = _parameters.normalCellEnergy.value[0];
+
+    // geneIndex(1) on a single-gene genome => the constructor is already finished (geneIndex >= numGenes)
+    auto data = Desc().addCreature(
+        {ObjectDesc().id(0).pos({100.0f, 100.0f}).type(CellDesc().usableEnergy(normalEnergy).constructor(ConstructorDesc().geneIndex(1).separation(true)))},
+        CreatureDesc().id(0),
+        GenomeDesc().genes({GeneDesc().nodes({NodeDesc()})}));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_calcTimestepWithCellFunctions();
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // A finished constructor has nothing left to build and must not pull in external energy
+    ASSERT_EQ(1, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(normalEnergy, actualData.getObjectRef(0).getCellRef()._usableEnergy));
+}

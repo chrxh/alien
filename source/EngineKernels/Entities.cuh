@@ -460,7 +460,7 @@ struct Creature
     // Temporary data
     uint64_t creatureIndex;  // May be invalid
 
-    __device__ __inline__ bool isRelatedLineage(Creature* other)
+    __device__ __inline__ bool isSameLineage(Creature* other)
     {
         return lineageId == other->lineageId;
     }
