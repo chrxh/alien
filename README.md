@@ -109,6 +109,11 @@ cmake --build --preset ninja-release
 If everything goes well, the ALIEN executable can be found under `build-ninja/Release/` (`alien.exe` on Windows, `alien` on Linux).
 It is important to start ALIEN directly from the build folder, otherwise it will not find the resource folder.
 
+By default the build targets CUDA compute capability `7.5`. To build for the [compute capability](https://developer.nvidia.com/cuda-gpus) of your own GPU (recommended, and required for older cards when using CUDA Toolkit 13 or later, which no longer supports architectures below `7.5`), pass it to the configure step, e.g. for a card with compute capability 8.9:
+```
+cmake --preset ninja -DCMAKE_CUDA_ARCHITECTURES=89
+```
+
 # ⌨️ Command-line interface
 
 This repository also contains a CLI for ALIEN. It can be used to run simulations without using a GUI. This is useful for performance measurements as well as for automatic execution and evaluation of simulations for different parameters.
