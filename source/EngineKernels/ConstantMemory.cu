@@ -1,3 +1,3 @@
 ﻿#include "ConstantMemory.cuh"
 
-__constant__ SimulationParameters cudaSimulationParameters;
+__constant__ constinit SimulationParameters cudaSimulationParameters;
