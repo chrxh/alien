@@ -155,6 +155,10 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     auto& constructor = object->typeData.cell.constructor;
     if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
 
+        if (ConstructorHelper::isFinished(object, *object->typeData.cell.creature->genome)) {
+            return;
+        }
+
         // Gate construction on available energy before cloning the creature. This guarantees that the host genome is already mutated.
         if (!checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object)) {
             return;
@@ -162,6 +166,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         constructor.offspring = findOrCreateNewCreature(data, object);
 
+        // Check again after cloning creature, because offspring genome may diverge from host genome
         if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
             return;
         }
@@ -596,11 +601,6 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
 
     // Energy required to construct the next cell, derived from the host's own (already mutated) genome
     auto const& genome = hostCell.creature->genome;
-
-    // A finished constructor has nothing left to build, so it must not request external energy.
-    if (ConstructorHelper::isFinished(hostObject, *genome)) {
-        return false;
-    }
 
     auto requiredEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
     if (constructor.geneIndex < genome->numGenes) {
