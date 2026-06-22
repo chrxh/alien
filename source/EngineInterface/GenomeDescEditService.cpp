@@ -478,9 +478,8 @@ namespace
                     } else {
                         castrate(genome, constructor._geneIndex, inspectedGeneIndices);  // Inspect further gene
 
-                        if (constructor._separation || constructor._geneIndex == 0) {
-                            // A separating reference or a reference to the root gene starts a new creature (see ConstructorProcessor),
-                            // => perform castration.
+                        if (constructor._separation) {
+                            // A separating reference starts a new creature (see ConstructorProcessor) => perform castration.
                             constructor._geneIndex = genome._genes.size();
                         }
                     }
