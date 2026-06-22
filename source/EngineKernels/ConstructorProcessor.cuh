@@ -166,8 +166,10 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     // shared with the whole block so that the block-wide genome mutation below does not diverge.
     __shared__ bool readyToConstruct;
     if (threadIdx.x == 0) {
+        // Use the offspring genome while a construction is ongoing; otherwise the host creature genome.
+        auto* genome = constructor.offspring != nullptr ? constructor.offspring->genome : object->typeData.cell.creature->genome;
         readyToConstruct = NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)
-            && !ConstructorHelper::isFinished(object, *object->typeData.cell.creature->genome) && checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object);
+            && !ConstructorHelper::isFinished(object, *genome) && checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object);
     }
     __syncthreads();
     if (!readyToConstruct) {
