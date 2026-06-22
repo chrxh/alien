@@ -162,14 +162,16 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 {
     auto& constructor = object->typeData.cell.constructor;
 
-    // The trigger, finished and energy checks have side effects and run on a single thread; their combined result is
-    // shared with the whole block so that the block-wide genome mutation below does not diverge.
     __shared__ bool readyToConstruct;
     if (threadIdx.x == 0) {
-        // Use the offspring genome while a construction is ongoing; otherwise the host creature genome.
         auto* genome = constructor.offspring != nullptr ? constructor.offspring->genome : object->typeData.cell.creature->genome;
-        readyToConstruct = NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)
-            && !ConstructorHelper::isFinished(object, *genome) && checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object);
+        readyToConstruct = NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview);
+        if (readyToConstruct) {
+            readyToConstruct = !ConstructorHelper::isFinished(object, *genome);
+        }
+        if (readyToConstruct) {
+            readyToConstruct = checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object);
+        }
     }
     __syncthreads();
     if (!readyToConstruct) {
