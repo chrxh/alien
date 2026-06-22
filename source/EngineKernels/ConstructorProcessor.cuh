@@ -4,6 +4,7 @@
 #include <EngineInterface/ShapeGenerator.h>
 
 #include "CellProcessor.cuh"
+#include "MutationProcessor.cuh"
 
 class ConstructorProcessor
 {
@@ -78,8 +79,12 @@ private:
 /************************************************************************/
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
-    auto const partition = calcSystemThreadPartition(data.entities.objects.getNumOrigEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
+    // One thread block per constructor cell so that the whole block is available for genome mutation (see processCell).
+    // The mutation requires NEURONS_PER_CELL threads; the preview path never mutates and may run with fewer threads.
+    DEVICE_CHECK(isPreview || blockDim.x == NEURONS_PER_CELL);
+
+    auto const partition = calcBlockPartition(data.entities.objects.getNumOrigEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto object = data.entities.objects.at(i);
         if (object->type != ObjectType_Cell) {
             continue;
@@ -87,7 +92,9 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
         if (!object->typeData.cell.constructorAvailable) {
             continue;
         }
-        object->typeData.cell.constructor.energyNeeded = false;
+        if (threadIdx.x == 0) {
+            object->typeData.cell.constructor.energyNeeded = false;
+        }
         if (!CellProcessor::isCellReady(data, object)) {
             continue;
         }
@@ -151,7 +158,39 @@ __inline__ __device__ void ConstructorProcessor::provideExternalEnergy(Simulatio
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
-    auto& constructor = object->typeData.cell.constructor;
+    auto& cell = object->typeData.cell;
+    auto& constructor = cell.constructor;
+
+    // Mutate the host genome before any cloning happens. The whole block participates in the mutation, the mutationState
+    // ensures that each creature is mutated at most once. The preview path must not mutate.
+    __shared__ Genome* clonedGenome;
+    if (threadIdx.x == 0) {
+        clonedGenome = nullptr;
+        if (!isPreview && (constructor.geneIndex == 0 || constructor.separation) && ConstructorHelper::hasMinimalEnergyForConstruction(object)) {
+            auto& creature = cell.creature;
+            int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
+            if (origMutationState == MutationState_NotMutated) {
+                EntityFactory factory;
+                factory.init(&data);
+                clonedGenome = factory.cloneGenome(creature->genome);
+            }
+        }
+    }
+    __syncthreads();
+
+    if (clonedGenome != nullptr) {
+        MutationProcessor::applyMutations(data, cell.creature, clonedGenome);
+        if (threadIdx.x == 0) {
+            cell.creature->genome = clonedGenome;
+        }
+    }
+    __syncthreads();
+
+    // The actual construction runs on a single thread.
+    if (threadIdx.x != 0) {
+        return;
+    }
+
     if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
 
         // Gate construction on available energy before cloning the creature. This guarantees that the host genome is already mutated.

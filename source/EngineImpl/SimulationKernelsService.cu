@@ -111,8 +111,8 @@ void SimulationKernelsService::launchTimestepKernels(
         // Cell type-specific functions
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_applyMutations, _stream, numBlocks, NEURONS_PER_CELL, data, statistics);    // Must be called before constructor (since genome must be mutated before cloning)
-        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, 4, data, statistics, false);
+        // The constructor mutates the host genome before cloning; the mutation needs NEURONS_PER_CELL threads per block.
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_constructor, _stream, numBlocks, NEURONS_PER_CELL, data, statistics, false);
         STREAM_KERNEL_CALL(cudaNextTimestep_constructor_countConstructorsNeedingEnergy, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_constructor_prepareExternalEnergyInflow, _stream, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_constructor_provideExternalEnergy, _stream, numBlocks, data);

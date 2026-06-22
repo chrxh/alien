@@ -167,11 +167,6 @@ __global__ void cudaNextTimestep_constructor_provideExternalEnergy(SimulationDat
     ConstructorProcessor::provideExternalEnergy(data);
 }
 
-__global__ void cudaNextTimestep_applyMutations(SimulationData data, SimulationStatistics statistics)
-{
-    MutationProcessor::process(data, statistics);
-}
-
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)
 {
     InjectorProcessor::process(data, statistics);
