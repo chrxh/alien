@@ -147,15 +147,21 @@ auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome
         result.emplace_back(geneIndices);
     }
 
+    return dropContainedSubGenomes(result);
+}
+
+auto GenomeDescInfoService::dropContainedSubGenomes(std::vector<GeneIndicesForSubGenome> const& subGenomes) const -> std::vector<GeneIndicesForSubGenome>
+{
     // Drop sub-genomes whose genes are fully contained in another sub-genome (but always keep the root sub-genome)
     std::vector<std::set<int>> geneSets;
-    for (auto const& geneIndices : result) {
+    for (auto const& geneIndices : subGenomes) {
         geneSets.emplace_back(geneIndices.begin(), geneIndices.end());
     }
-    std::vector<GeneIndicesForSubGenome> filteredResult;
-    for (int i = 0, size = toInt(result.size()); i < size; ++i) {
+
+    std::vector<GeneIndicesForSubGenome> result;
+    for (int i = 0, size = toInt(subGenomes.size()); i < size; ++i) {
         bool containedInOther = false;
-        if (result[i].front() != 0) {
+        if (subGenomes[i].front() != 0) {
             for (int j = 0; j < size; ++j) {
                 if (i != j && geneSets[i].size() < geneSets[j].size()
                     && std::includes(geneSets[j].begin(), geneSets[j].end(), geneSets[i].begin(), geneSets[i].end())) {
@@ -165,11 +171,11 @@ auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome
             }
         }
         if (!containedInOther) {
-            filteredResult.emplace_back(result[i]);
+            result.emplace_back(subGenomes[i]);
         }
     }
 
-    return filteredResult;
+    return result;
 }
 
 auto GenomeDescInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDesc const& genome, int startGeneIndex) const -> ReferencedGenes
