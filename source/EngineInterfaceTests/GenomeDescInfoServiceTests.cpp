@@ -754,3 +754,34 @@ TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_alternatingPatter
     auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1, 2}, {3, 4}}), result);
 }
+
+TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_rootIncludedInLaterHull)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+        }),
+    });
+    auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1, 0}}), result);
+}
+
+TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_startsAtSmallestFreeGene)
+{
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+        }),
+    });
+    auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2}}), result);
+}

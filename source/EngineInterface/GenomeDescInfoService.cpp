@@ -137,57 +137,15 @@ auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome
     while (!nonInspectedGeneIndices.empty()) {
         auto startGeneIndex = *nonInspectedGeneIndices.begin();
 
-        auto genesForPart = getGeneIndicesForSubGenomes(genome, nonInspectedGeneIndices, startGeneIndex);
-        for (auto const& geneIndices : genesForPart) {
-            for (auto const& geneIndex : geneIndices) {
-                nonInspectedGeneIndices.erase(geneIndex);
-            }
+        ReferencedGenes referenced = getReferencedGenesInNonSeparatingGeneHull(genome, startGeneIndex);
+        GeneIndicesForSubGenome geneIndices = referenced.nonSeparatingGeneIndices;
+        geneIndices.insert(geneIndices.begin(), startGeneIndex);
+
+        for (auto const& geneIndex : geneIndices) {
+            nonInspectedGeneIndices.erase(geneIndex);
         }
-        result.insert(result.end(), genesForPart.begin(), genesForPart.end());
+        result.emplace_back(geneIndices);
     }
-
-    return result;
-}
-
-auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome, std::set<int> const& nonInspectedGeneIndices, int startGeneIndex) const
-    -> std::vector<GeneIndicesForSubGenome>
-{
-    CHECK(!genome._genes.empty());
-    CHECK(startGeneIndex >= 0 && startGeneIndex < genome._genes.size());
-
-    std::vector<GeneIndicesForSubGenome> result;
-
-    std::set<int> alreadyInspectedGeneIndices;
-    std::set<int> toInspectedGeneIndices = {startGeneIndex};
-    do {
-        alreadyInspectedGeneIndices.insert(toInspectedGeneIndices.begin(), toInspectedGeneIndices.end());
-
-        std::set<int> newGeneIndices;
-        for (auto const& geneIndex : toInspectedGeneIndices) {
-            if (geneIndex >= genome._genes.size()) {
-                continue;
-            }
-            ReferencedGenes referenced = getReferencedGenesInNonSeparatingGeneHull(genome, geneIndex);
-            std::vector<int> geneIndices = referenced.nonSeparatingGeneIndices;
-            geneIndices.insert(geneIndices.begin(), geneIndex);
-
-            result.emplace_back(geneIndices);
-
-            for (auto const& separatingGeneIndex : referenced.separatingGeneIndices) {
-                if (nonInspectedGeneIndices.contains(separatingGeneIndex)) {
-                    newGeneIndices.insert(separatingGeneIndex);
-                }
-            }
-        }
-        toInspectedGeneIndices.clear();
-        std::set_difference(
-            newGeneIndices.begin(),
-            newGeneIndices.end(),
-            alreadyInspectedGeneIndices.begin(),
-            alreadyInspectedGeneIndices.end(),
-            std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
-
-    } while (!toInspectedGeneIndices.empty());
 
     return result;
 }
