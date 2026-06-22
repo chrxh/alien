@@ -23,7 +23,6 @@ __global__ void cudaNextTimestep_constructor(SimulationData data, SimulationStat
 __global__ void cudaNextTimestep_constructor_countConstructorsNeedingEnergy(SimulationData data);
 __global__ void cudaNextTimestep_constructor_prepareExternalEnergyInflow(SimulationData data);
 __global__ void cudaNextTimestep_constructor_provideExternalEnergy(SimulationData data);
-__global__ void cudaNextTimestep_applyMutations(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_defender(SimulationData data, SimulationStatistics statistics);

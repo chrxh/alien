@@ -19,7 +19,6 @@ namespace cg_mutation = cooperative_groups;
 class MutationProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
     __inline__ __device__ static void applyMutations(SimulationData& data, Creature* creature, Genome* genome);
 
 private:
@@ -59,56 +58,6 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void MutationProcessor::process(SimulationData& data, SimulationStatistics& statistics)
-{
-    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
-
-    auto block = cg_mutation::this_thread_block();
-    auto laneId = block.thread_rank();
-
-    auto& objects = data.entities.objects;
-    auto partition = calcBlockPartition(objects.getNumEntries());
-
-    EntityFactory factory;
-    factory.init(&data);
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& object = objects.at(index);
-
-        __shared__ Genome* clonedGenome;
-
-        if (laneId == 0) {
-            clonedGenome = nullptr;
-            if (object->type == ObjectType_Cell) {
-                auto const& cell = object->typeData.cell;
-                // Performance optimization:
-                // Only mutate genome if it has a constructor for new offspring and a minimal amount of energy for construction
-                // (=> prevents creation of genomes which are not used)
-                if (cell.constructorAvailable && (cell.constructor.geneIndex == 0 || cell.constructor.separation)
-                    && ConstructorHelper::hasMinimalEnergyForConstruction(object)) {
-                    auto& creature = object->typeData.cell.creature;
-                    int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
-                    if (origMutationState == MutationState_NotMutated) {
-                        clonedGenome = factory.cloneGenome(creature->genome);
-                    }
-                }
-            }
-        }
-        block.sync();
-
-        if (clonedGenome != nullptr) {
-
-            // Apply mutations to cloned genome
-            applyMutations(data, object->typeData.cell.creature, clonedGenome);
-
-            if (laneId == 0) {
-                object->typeData.cell.creature->genome = clonedGenome;
-            }
-        }
-        block.sync();
-    }
-}
-
 __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Creature* creature, Genome* genome)
 {
     __shared__ float accumulatedMutations;
