@@ -500,11 +500,11 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_separation)
     }
 }
 
-TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_keepNonSeparatingRootReference)
+TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_castrateNonSeparatingRootReference)
 {
-    // A non-separating constructor that references the root gene (geneIndex 0) should be shown transitively in
-    // the preview as long as it does not lead to a cyclic reference. Only separating or cyclic references are
-    // castrated.
+    // A non-separating constructor that references the root gene (geneIndex 0) starts a new creature in the
+    // simulation (see ConstructorProcessor::findOrCreateNewCreature), which would create a second offspring
+    // generation in the preview. Such a reference must be castrated even though separation is false.
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({
             NodeDesc(),
@@ -520,13 +520,9 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_keepNonSeparatingR
     auto const& subGenome = subGenomes.at(0).genome;
 
     ASSERT_EQ(2, subGenome._genes.size());
-
-    auto const& gene0 = subGenome._genes.at(0);
-    ASSERT_EQ(1, gene0._nodes.size());  // Root gene shown
-
     auto const& gene1 = subGenome._genes.at(1);
     ASSERT_EQ(1, gene1._nodes.size());
-    EXPECT_EQ(0, getRefGeneIndex(gene1, 0));  // Not castrated, root reference followed
+    EXPECT_EQ(2, getRefGeneIndex(gene1, 0));  // Castrated (root reference starts a new creature)
 }
 
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_withinLimit)
