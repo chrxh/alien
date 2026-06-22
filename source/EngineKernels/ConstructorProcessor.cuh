@@ -40,6 +40,7 @@ private:
         float neededDepotEnergy;
     };
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
+    __inline__ __device__ static void mutateGenome(SimulationData& data, Object* object, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
 
@@ -80,8 +81,8 @@ private:
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
     // One thread block per constructor cell so that the whole block is available for genome mutation (see processCell).
-    // The mutation requires NEURONS_PER_CELL threads; the preview path never mutates and may run with fewer threads.
-    DEVICE_CHECK(isPreview || blockDim.x == NEURONS_PER_CELL);
+    // The mutation requires NEURONS_PER_CELL threads, so the kernel is always launched with that block size.
+    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
 
     auto const partition = calcBlockPartition(data.entities.objects.getNumOrigEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
@@ -158,15 +159,69 @@ __inline__ __device__ void ConstructorProcessor::provideExternalEnergy(Simulatio
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
+    auto& constructor = object->typeData.cell.constructor;
+
+    // The trigger and energy checks have side effects and run on a single thread; their combined result is shared with the
+    // whole block so that the block-wide genome mutation below does not diverge.
+    __shared__ bool readyToConstruct;
+    if (threadIdx.x == 0) {
+        readyToConstruct = NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)
+            && checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object);
+    }
+    __syncthreads();
+    if (!readyToConstruct) {
+        return;
+    }
+
+    // Mutate the host genome before it is cloned for the offspring.
+    mutateGenome(data, object, isPreview);
+
+    // The actual construction runs on a single thread.
+    if (threadIdx.x != 0) {
+        return;
+    }
+
+    constructor.offspring = findOrCreateNewCreature(data, object);
+
+    if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
+        return;
+    }
+
+    auto constructionData = createConstructionData(object);
+    if (tryConstructCell(data, statistics, object, constructionData)) {
+        object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
+
+        alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
+        if (constructionData.isLastNodeOfLastConcatenation) {
+            if (constructionData.isSeparation) {
+                ++constructor.currentOffspring;
+                if (constructor.provideEnergy == ProvideEnergy_Free) {
+                    constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
+                }
+                constructor.offspring = nullptr;
+
+                // HACK for preview mode: Do not construct more than one offspring + move seed away
+                if (isPreview) {
+                    object->pos.y += toFloat(PREVIEW_HEIGHT / 3);
+                }
+            }
+        }
+    } else {
+        object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 0;  // Failed
+    }
+}
+
+__inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& data, Object* object, bool isPreview)
+{
     auto& cell = object->typeData.cell;
     auto& constructor = cell.constructor;
 
-    // Mutate the host genome before any cloning happens. The whole block participates in the mutation, the mutationState
-    // ensures that each creature is mutated at most once. The preview path must not mutate.
+    // The whole block participates in the mutation; the mutationState ensures each creature is mutated at most once and
+    // the preview path never mutates. The caller has already verified that enough energy for construction is available.
     __shared__ Genome* clonedGenome;
     if (threadIdx.x == 0) {
         clonedGenome = nullptr;
-        if (!isPreview && (constructor.geneIndex == 0 || constructor.separation) && ConstructorHelper::hasMinimalEnergyForConstruction(object)) {
+        if (!isPreview && (constructor.geneIndex == 0 || constructor.separation)) {
             auto& creature = cell.creature;
             int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
             if (origMutationState == MutationState_NotMutated) {
@@ -185,48 +240,6 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         }
     }
     __syncthreads();
-
-    // The actual construction runs on a single thread.
-    if (threadIdx.x != 0) {
-        return;
-    }
-
-    if (NeuronProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
-
-        // Gate construction on available energy before cloning the creature. This guarantees that the host genome is already mutated.
-        if (!checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object)) {
-            return;
-        }
-
-        constructor.offspring = findOrCreateNewCreature(data, object);
-
-        if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
-            return;
-        }
-
-        auto constructionData = createConstructionData(object);
-        if (tryConstructCell(data, statistics, object, constructionData)) {
-            object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
-
-            alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
-            if (constructionData.isLastNodeOfLastConcatenation) {
-                if (constructionData.isSeparation) {
-                    ++constructor.currentOffspring;
-                    if (constructor.provideEnergy == ProvideEnergy_Free) {
-                        constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
-                    }
-                    constructor.offspring = nullptr;
-
-                    // HACK for preview mode: Do not construct more than one offspring + move seed away
-                    if (isPreview) {
-                        object->pos.y += toFloat(PREVIEW_HEIGHT / 3);
-                    }
-                }
-            }
-        } else {
-            object->typeData.cell.signal.channels[Channels::ConstructorSuccess] = 0;  // Failed
-        }
-    }
 }
 
 __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, Object* object)
@@ -628,7 +641,7 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         return true;
     }
 
-    // Energy required to construct the next cell, derived from the host's own (already mutated) genome
+    // Energy required to construct the next cell, derived from the host's own genome
     auto requiredEnergy = cudaSimulationParameters.normalCellEnergy.value[hostObject->color];
     auto const& genome = hostCell.creature->genome;
     if (constructor.geneIndex < genome->numGenes) {
