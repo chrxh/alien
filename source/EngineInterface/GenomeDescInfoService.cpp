@@ -147,12 +147,23 @@ auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome
         result.emplace_back(geneIndices);
     }
 
-    return dropContainedSubGenomes(result);
+    return dropContainedSubGenomes(genome, result);
 }
 
-auto GenomeDescInfoService::dropContainedSubGenomes(std::vector<GeneIndicesForSubGenome> const& subGenomes) const -> std::vector<GeneIndicesForSubGenome>
+auto GenomeDescInfoService::dropContainedSubGenomes(GenomeDesc const& genome, std::vector<GeneIndicesForSubGenome> const& subGenomes) const
+    -> std::vector<GeneIndicesForSubGenome>
 {
-    // Drop sub-genomes whose genes are fully contained in another sub-genome (but always keep the root sub-genome)
+    // Sub-genomes that are kept even when fully contained in another: the root sub-genome and any sub-genome whose
+    // start gene is separatingly referenced by some node (such a reference starts a new creature).
+    std::set<int> separatinglyReferencedGenes;
+    for (auto const& gene : genome._genes) {
+        for (auto const& node : gene._nodes) {
+            if (node._constructor.has_value() && node._constructor->_separation) {
+                separatinglyReferencedGenes.insert(node._constructor->_geneIndex);
+            }
+        }
+    }
+
     std::vector<std::set<int>> geneSets;
     for (auto const& geneIndices : subGenomes) {
         geneSets.emplace_back(geneIndices.begin(), geneIndices.end());
@@ -160,8 +171,11 @@ auto GenomeDescInfoService::dropContainedSubGenomes(std::vector<GeneIndicesForSu
 
     std::vector<GeneIndicesForSubGenome> result;
     for (int i = 0, size = toInt(subGenomes.size()); i < size; ++i) {
+        auto startGeneIndex = subGenomes[i].front();
+        bool keepAlways = startGeneIndex == 0 || separatinglyReferencedGenes.contains(startGeneIndex);
+
         bool containedInOther = false;
-        if (subGenomes[i].front() != 0) {
+        if (!keepAlways) {
             for (int j = 0; j < size; ++j) {
                 if (i != j && geneSets[i].size() < geneSets[j].size()
                     && std::includes(geneSets[j].begin(), geneSets[j].end(), geneSets[i].begin(), geneSets[i].end())) {

@@ -30,5 +30,5 @@ private:
         std::vector<int> separatingGeneIndices;
     };
     ReferencedGenes getReferencedGenesInNonSeparatingGeneHull(GenomeDesc const& genome, int startGeneIndex) const;
-    std::vector<GeneIndicesForSubGenome> dropContainedSubGenomes(std::vector<GeneIndicesForSubGenome> const& subGenomes) const;
+    std::vector<GeneIndicesForSubGenome> dropContainedSubGenomes(GenomeDesc const& genome, std::vector<GeneIndicesForSubGenome> const& subGenomes) const;
 };
