@@ -137,57 +137,57 @@ auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome
     while (!nonInspectedGeneIndices.empty()) {
         auto startGeneIndex = *nonInspectedGeneIndices.begin();
 
-        auto genesForPart = getGeneIndicesForSubGenomes(genome, nonInspectedGeneIndices, startGeneIndex);
-        for (auto const& geneIndices : genesForPart) {
-            for (auto const& geneIndex : geneIndices) {
-                nonInspectedGeneIndices.erase(geneIndex);
-            }
+        ReferencedGenes referenced = getReferencedGenesInNonSeparatingGeneHull(genome, startGeneIndex);
+        GeneIndicesForSubGenome geneIndices = referenced.nonSeparatingGeneIndices;
+        geneIndices.insert(geneIndices.begin(), startGeneIndex);
+
+        for (auto const& geneIndex : geneIndices) {
+            nonInspectedGeneIndices.erase(geneIndex);
         }
-        result.insert(result.end(), genesForPart.begin(), genesForPart.end());
+        result.emplace_back(geneIndices);
     }
 
-    return result;
+    return dropContainedSubGenomes(genome, result);
 }
 
-auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome, std::set<int> const& nonInspectedGeneIndices, int startGeneIndex) const
+auto GenomeDescInfoService::dropContainedSubGenomes(GenomeDesc const& genome, std::vector<GeneIndicesForSubGenome> const& subGenomes) const
     -> std::vector<GeneIndicesForSubGenome>
 {
-    CHECK(!genome._genes.empty());
-    CHECK(startGeneIndex >= 0 && startGeneIndex < genome._genes.size());
+    // Sub-genomes that are kept even when fully contained in another: the root sub-genome and any sub-genome whose
+    // start gene is separatingly referenced by some node (such a reference starts a new creature).
+    std::set<int> separatinglyReferencedGenes;
+    for (auto const& gene : genome._genes) {
+        for (auto const& node : gene._nodes) {
+            if (node._constructor.has_value() && node._constructor->_separation) {
+                separatinglyReferencedGenes.insert(node._constructor->_geneIndex);
+            }
+        }
+    }
+
+    std::vector<std::set<int>> geneSets;
+    for (auto const& geneIndices : subGenomes) {
+        geneSets.emplace_back(geneIndices.begin(), geneIndices.end());
+    }
 
     std::vector<GeneIndicesForSubGenome> result;
+    for (int i = 0, size = toInt(subGenomes.size()); i < size; ++i) {
+        auto startGeneIndex = subGenomes[i].front();
+        bool keepAlways = startGeneIndex == 0 || separatinglyReferencedGenes.contains(startGeneIndex);
 
-    std::set<int> alreadyInspectedGeneIndices;
-    std::set<int> toInspectedGeneIndices = {startGeneIndex};
-    do {
-        alreadyInspectedGeneIndices.insert(toInspectedGeneIndices.begin(), toInspectedGeneIndices.end());
-
-        std::set<int> newGeneIndices;
-        for (auto const& geneIndex : toInspectedGeneIndices) {
-            if (geneIndex >= genome._genes.size()) {
-                continue;
-            }
-            ReferencedGenes referenced = getReferencedGenesInNonSeparatingGeneHull(genome, geneIndex);
-            std::vector<int> geneIndices = referenced.nonSeparatingGeneIndices;
-            geneIndices.insert(geneIndices.begin(), geneIndex);
-
-            result.emplace_back(geneIndices);
-
-            for (auto const& separatingGeneIndex : referenced.separatingGeneIndices) {
-                if (nonInspectedGeneIndices.contains(separatingGeneIndex)) {
-                    newGeneIndices.insert(separatingGeneIndex);
+        bool containedInOther = false;
+        if (!keepAlways) {
+            for (int j = 0; j < size; ++j) {
+                if (i != j && geneSets[i].size() < geneSets[j].size()
+                    && std::includes(geneSets[j].begin(), geneSets[j].end(), geneSets[i].begin(), geneSets[i].end())) {
+                    containedInOther = true;
+                    break;
                 }
             }
         }
-        toInspectedGeneIndices.clear();
-        std::set_difference(
-            newGeneIndices.begin(),
-            newGeneIndices.end(),
-            alreadyInspectedGeneIndices.begin(),
-            alreadyInspectedGeneIndices.end(),
-            std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
-
-    } while (!toInspectedGeneIndices.empty());
+        if (!containedInOther) {
+            result.emplace_back(subGenomes[i]);
+        }
+    }
 
     return result;
 }

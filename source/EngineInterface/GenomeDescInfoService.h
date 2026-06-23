@@ -24,13 +24,11 @@ public:
     std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDesc const& genome) const;
 
 private:
-    std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDesc const& genome, std::set<int> const& nonInspectedGeneIndices, int startGeneIndex)
-        const;
-
     struct ReferencedGenes
     {
         std::vector<int> nonSeparatingGeneIndices;
         std::vector<int> separatingGeneIndices;
     };
     ReferencedGenes getReferencedGenesInNonSeparatingGeneHull(GenomeDesc const& genome, int startGeneIndex) const;
+    std::vector<GeneIndicesForSubGenome> dropContainedSubGenomes(GenomeDesc const& genome, std::vector<GeneIndicesForSubGenome> const& subGenomes) const;
 };
