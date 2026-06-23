@@ -23,12 +23,11 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 if(USE_HIP)
-  # Default the arch only when unset, never as a literal in a target: a
-  # literal would override -DCMAKE_HIP_ARCHITECTURES and force every target
-  # arch to edit this file.
-  if(NOT DEFINED CMAKE_HIP_ARCHITECTURES OR CMAKE_HIP_ARCHITECTURES STREQUAL "")
-    set(CMAKE_HIP_ARCHITECTURES "gfx90a")
-  endif()
+  # No CMAKE_HIP_ARCHITECTURES pin: enable_language(HIP) below auto-detects the
+  # host GPU(s) and errors if none is found (pass -DCMAKE_HIP_ARCHITECTURES to
+  # override). It is de-duplicated right after enable_language so the custom HIP
+  # link command (which embeds --offload-arch=${CMAKE_HIP_ARCHITECTURES}) gets a
+  # clean value on multi-GCD hosts.
   set(CMAKE_HIP_STANDARD 20)
   set(CMAKE_HIP_STANDARD_REQUIRED ON)
   set(CMAKE_HIP_SEPARABLE_COMPILATION ON)
@@ -55,6 +54,7 @@ endif()
 project(alien-project LANGUAGES C CXX)
 if(USE_HIP)
   enable_language(HIP)
+  list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
 else()
   enable_language(CUDA)
 endif()
