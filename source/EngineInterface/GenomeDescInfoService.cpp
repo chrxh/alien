@@ -153,8 +153,6 @@ auto GenomeDescInfoService::getGeneIndicesForSubGenomes(GenomeDesc const& genome
 auto GenomeDescInfoService::dropContainedSubGenomes(GenomeDesc const& genome, std::vector<GeneIndicesForSubGenome> const& subGenomes) const
     -> std::vector<GeneIndicesForSubGenome>
 {
-    // Sub-genomes that are kept even when fully contained in another: the root sub-genome and any sub-genome whose
-    // start gene is separatingly referenced by some node (such a reference starts a new creature).
     std::set<int> separatinglyReferencedGenes;
     for (auto const& gene : genome._genes) {
         for (auto const& node : gene._nodes) {
@@ -172,6 +170,7 @@ auto GenomeDescInfoService::dropContainedSubGenomes(GenomeDesc const& genome, st
     std::vector<GeneIndicesForSubGenome> result;
     for (int i = 0, size = toInt(subGenomes.size()); i < size; ++i) {
         auto startGeneIndex = subGenomes[i].front();
+        // Sub-genomes whose start gene is root or is separatingly referenced should be kept
         bool keepAlways = startGeneIndex == 0 || separatinglyReferencedGenes.contains(startGeneIndex);
 
         bool containedInOther = false;
