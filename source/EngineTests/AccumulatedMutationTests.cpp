@@ -87,7 +87,7 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     }
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).prevLineageId(41), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
 
     auto parameters = _parameters;
     parameters.newLineageThreshold.value = 1.0e30f;
@@ -106,7 +106,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
 {
     auto genome = GenomeDesc();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).prevLineageId(41), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42), genome);
 
     _parameters.neuronsMetaMutationsSigma.value = 1.0f;
     _parameters.connectionsMetaMutationsSigma.value = 1.0f;
@@ -127,14 +127,13 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
     auto actualCreature = getMutatedCreature();
     EXPECT_EQ(actualCreature._accumulatedMutations, 0.0f);
     EXPECT_EQ(actualCreature._lineageId, 42);
-    EXPECT_EQ(actualCreature._prevLineageId, 41);
 }
 
 TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
 {
     auto genome = createTestGenome();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).prevLineageId(41).accumulatedMutations(11.0f), genome);
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).accumulatedMutations(11.0f), genome);
 
     _parameters.newLineageThreshold.value = 0.1f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -143,7 +142,5 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
     _simulationFacade->testOnly_mutate(1);
 
     auto actualCreature = getMutatedCreature();
-    ASSERT_TRUE(actualCreature._prevLineageId.has_value());
-    EXPECT_EQ(*actualCreature._prevLineageId, 42);
     EXPECT_GT(actualCreature._lineageId, 42);
 }

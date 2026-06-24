@@ -31,7 +31,7 @@ public:
                 .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
                 .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_Free).separation(true))),
             },
-            CreatureDesc().lineageId(0).prevLineageId(0),
+            CreatureDesc().lineageId(0),
             GenomeDesc().frontAngle(225.0f).genes(
             {
                 GeneDesc()
@@ -73,7 +73,7 @@ public:
                 .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
                 .type(CellDesc().headCell(true).constructor(ConstructorDesc().provideEnergy(ProvideEnergy_Free).separation(true))),
             },
-            CreatureDesc().lineageId(1).prevLineageId(1),
+            CreatureDesc().lineageId(1),
             GenomeDesc().frontAngle(225.0f).genes(
             {
                 GeneDesc()

@@ -1157,7 +1157,6 @@ MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, 
 
         creature->accumulatedMutations += accumulatedMutations / denominator;
         if (creature->accumulatedMutations > cudaSimulationParameters.newLineageThreshold.value) {
-            creature->prevLineageId = creature->lineageId;
             creature->lineageId = data.primaryNumberGen.createLineageId();
             creature->accumulatedMutations = 0;
         }

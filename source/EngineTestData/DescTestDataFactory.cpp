@@ -218,7 +218,6 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                         .headUpdateId(42)
                         .mutationState(MutationState_MutationInProgress)
                         .lineageId(502)
-                        .prevLineageId(501)
                         .accumulatedMutations(0.05f)
                         .genomeId(genome._id);
 

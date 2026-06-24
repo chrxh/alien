@@ -307,9 +307,6 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
     if (extendedObject.creature.has_value()) {
         auto& creature = extendedObject.creature.value();
         creature._lineageId = std::max(creature._lineageId, 0);
-        if (creature._prevLineageId.has_value()) {
-            creature._prevLineageId = std::max(creature._prevLineageId.value(), 0);
-        }
         creature._accumulatedMutations = std::max(creature._accumulatedMutations, 0.0f);
     }
 

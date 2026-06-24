@@ -610,7 +610,6 @@ __inline__ __device__ void EntityFactory::changeCreatureFromTO(CreatureTO const&
     creature->numCells = creatureTO.numCells;
     creature->mutationState = creatureTO.mutationState;
     creature->lineageId = creatureTO.lineageId;
-    creature->prevLineageId = creatureTO.prevLineageId;
     creature->accumulatedMutations = creatureTO.accumulatedMutations;
     creature->headUpdateId = creatureTO.headUpdateId;
 }
