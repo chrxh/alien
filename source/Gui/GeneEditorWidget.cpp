@@ -165,7 +165,7 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
-                    AlienGui::Text(std::to_string(row + 1));
+                    AlienGui::Text(std::to_string(row));
                     ImGui::SameLine();
                     auto selectedNode = _editData->getSelectedNodeIndex();
                     auto selected = selectedNode ? selectedNode.value() == row : false;
@@ -194,7 +194,7 @@ void _GeneEditorWidget::processNodeList()
                         std::string text;
                         if (node._constructor.has_value()) {
                             auto geneIndex = node._constructor->_geneIndex;
-                            text = "Gene " + std::to_string(geneIndex + 1);
+                            text = "Gene " + std::to_string(geneIndex);
                             auto const& genes = _editData->genome._genes;
                             if (geneIndex >= 0 && geneIndex < static_cast<int>(genes.size()) && !genes.at(geneIndex)._name.empty()) {
                                 text += ": " + genes.at(geneIndex)._name;

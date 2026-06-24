@@ -274,7 +274,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
             std::string text;
             if (_genomeEditData->showNodeIndex) {
-                text = std::to_string(object._nodeIndex + 1);
+                text = std::to_string(object._nodeIndex);
             } else {
                 text = Const::CellTypeStrings.at(object._cellType);
             }
@@ -348,7 +348,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         for (auto const& object : desc._cells) {
             if (object._constructorGeneIndex.has_value()) {
                 auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
-                auto text = std::to_string(object._constructorGeneIndex.value() + 1);
+                auto text = std::to_string(object._constructorGeneIndex.value());
                 auto textLength = toFloat(text.size());
                 auto truncatedSize = std::min(scale(30.0f), cellSize);
                 drawList->AddRectFilled(
@@ -475,9 +475,9 @@ void _CreaturePreviewWidget::processTitle()
     ImGui::SetCursorPos({scale(7.0f), scale(7.0f)});
     std::vector<std::string> geneIndexStrings;
     auto geneIndices = getGeneIndices();
-    geneIndexStrings.emplace_back(std::to_string(geneIndices.front() + 1) + " (start)");
+    geneIndexStrings.emplace_back(std::to_string(geneIndices.front()) + " (start)");
     for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
-        geneIndexStrings.emplace_back(std::to_string(geneIndex + 1));
+        geneIndexStrings.emplace_back(std::to_string(geneIndex));
     }
     auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
     if (_subGenome.trimmed) {
