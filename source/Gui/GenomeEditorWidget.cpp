@@ -56,7 +56,7 @@ _GenomeEditorWidget::_GenomeEditorWidget(GenomeTabEditData const& editData, Geno
             if (name.starts_with(prefix)) {
                 std::string numberPart = name.substr(prefix.size());
                 int number = std::stoi(numberPart);
-                _sequenceNumberForCreatedGenes = std::max(_sequenceNumberForCreatedGenes, number);
+                _sequenceNumberForCreatedGenes = std::max(_sequenceNumberForCreatedGenes, number + 1);
             }
         } catch (...) {
         }
@@ -271,7 +271,7 @@ void _GenomeEditorWidget::processGeneListButtons()
 void _GenomeEditorWidget::onAddGene()
 {
     auto& genome = _editData->genome;
-    auto name = "Gene " + std::to_string(++_sequenceNumberForCreatedGenes);
+    auto name = "Gene " + std::to_string(_sequenceNumberForCreatedGenes++);
     if (genome._genes.empty()) {
         auto newGene = GeneDesc().name(name).nodes({NodeDesc()}).shape(ConstructorShape_Segment);
         GenomeDescEditService::get().addGene(genome, 0, newGene);
