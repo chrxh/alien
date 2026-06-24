@@ -455,55 +455,68 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 }),
             ParameterGroupSpec()
-                .name("Meta-mutations")
+                .name("Mutations")
                 .parameters({
                     ParameterSpec()
-                        .name("Neuron mutations sigma")
-                        .reference(FloatSpec().member(&SimulationParameters::neuronsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Connection mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::connectionsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Cell type property mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::cellTypePropertiesMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Cell type mode mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::cellTypeModeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Cell type mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::cellTypeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Void mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::voidMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Append node mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::appendNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Add node mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::addNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Trim node mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::trimNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Delete node mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::deleteNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
-                    ParameterSpec()
-                        .name("Constructor mutations sigma")
-                        .reference(
-                            FloatSpec().member(&SimulationParameters::constructorMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                        .name("Genome mutation probability")
+                        .reference(FloatSpec().member(&SimulationParameters::genomeMutationProbability).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
                         .name("New lineage threshold")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::newLineageThreshold).min(0.0f).max(10000.0f).infinity(true).logarithmic(true).format("%.5f")),
+                            FloatSpec()
+                                .member(&SimulationParameters::newLineageThreshold)
+                                .min(0.0f)
+                                .max(10000.0f)
+                                .infinity(true)
+                                .logarithmic(true)
+                                .format("%.5f")),
+                }),
+            ParameterGroupSpec()
+                .name("Meta-mutations")
+                .parameters({
+                    ParameterSpec()
+                        .name("Neuron mutation sigma")
+                        .reference(FloatSpec().member(&SimulationParameters::neuronsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Connection mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::connectionsMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Cell type property mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::cellTypePropertiesMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Cell type mode mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::cellTypeModeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Cell type mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::cellTypeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Void mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::voidMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Append node mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::appendNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Add node mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::addNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Trim node mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::trimNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Delete node mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::deleteNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Constructor mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::constructorMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")

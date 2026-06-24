@@ -105,6 +105,10 @@ struct SimulationParameters
     // Cell constructor
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {ColorVector<float>::uniform(3.5f)};
 
+    // Mutations
+    BaseParameter<float> genomeMutationProbability = {0.5f};
+    BaseParameter<float> newLineageThreshold = {0.25f};
+
     // Meta mutations
     BaseParameter<float> neuronsMetaMutationsSigma = {0};
     BaseParameter<float> connectionsMetaMutationsSigma = {0};
@@ -117,7 +121,6 @@ struct SimulationParameters
     BaseParameter<float> trimNodeMetaMutationsSigma = {0};
     BaseParameter<float> deleteNodeMetaMutationsSigma = {0};
     BaseParameter<float> constructorMetaMutationsSigma = {0};
-    BaseParameter<float> newLineageThreshold = {1.0f};
 
     // Cell type: Attacker
     BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = ColorVector<float>::uniform(0.0f)};
