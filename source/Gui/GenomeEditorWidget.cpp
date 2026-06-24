@@ -157,7 +157,7 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
-                    AlienGui::Text(std::to_string(row + 1));
+                    AlienGui::Text(std::to_string(row));
                     if (row == 0) {
                         ImGui::SameLine();
                         AlienGui::Text(AlienGui::TextParameters().text(" (root)").style(AlienGui::TextStyle::Decent));
@@ -186,7 +186,7 @@ void _GenomeEditorWidget::processGeneList()
                     // Column 2: References
                     ImGui::TableNextColumn();
                     auto references = GenomeDescInfoService::get().getReferences(gene);
-                    auto referencesStrings = references | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
+                    auto referencesStrings = references | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex); });
                     auto referencesString = boost::algorithm::join(std::vector(referencesStrings.begin(), referencesStrings.end()), ", ");
                     AlienGui::Text(referencesString);
 
@@ -194,7 +194,7 @@ void _GenomeEditorWidget::processGeneList()
                     ImGui::TableNextColumn();
                     auto referencedBy = GenomeDescInfoService::get().getReferencedBy(genome, row);
                     if (!referencedBy.empty()) {
-                        auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
+                        auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex); });
                         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
                         AlienGui::Text(referencedByString);
                     } else {
@@ -308,7 +308,7 @@ void _GenomeEditorWidget::onRemoveGene()
 {
     auto referencedBy = GenomeDescInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGeneIndex.value());
     if (!referencedBy.empty()) {
-        auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
+        auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex); });
         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
         auto text = referencedBy.size() == 1 ? "This gene could not be removed since it is still used by gene "
                                              : "This gene could not be removed since it is still used by genes ";
