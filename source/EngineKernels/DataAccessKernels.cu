@@ -291,7 +291,6 @@ namespace
             creatureTO.numCells = creature->numCells;
             creatureTO.mutationState = creature->mutationState;
             creatureTO.lineageId = creature->lineageId;
-            creatureTO.prevLineageId = creature->prevLineageId;
             creatureTO.accumulatedMutations = creature->accumulatedMutations;
             creatureTO.headUpdateId = creature->headUpdateId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;

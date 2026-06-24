@@ -1055,7 +1055,6 @@ namespace
     auto constexpr Id_Creature_GenomeId = 6;
     auto constexpr Id_Creature_MutationState = 7;
     auto constexpr Id_Creature_LineageId = 3;
-    auto constexpr Id_Creature_PrevLineageId = 8;
     auto constexpr Id_Creature_AccumulatedMutations = 9;
 
     auto constexpr Id_Solid_Energy = 0;
@@ -1787,7 +1786,6 @@ namespace cereal
         scope.addMember(Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
         scope.addMember(Id_Creature_MutationState, data._mutationState, defaultObject._mutationState);
         scope.addMember(Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
-        scope.addMember(Id_Creature_PrevLineageId, data._prevLineageId, defaultObject._prevLineageId);
         scope.addMember(Id_Creature_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
     }
     SPLIT_SERIALIZATION(CreatureDesc)

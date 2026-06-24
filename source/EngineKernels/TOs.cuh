@@ -497,7 +497,6 @@ struct CreatureTO
     MutationState mutationState;
 
     uint32_t lineageId;
-    uint32_t prevLineageId;
     float accumulatedMutations;
 
     // Process data

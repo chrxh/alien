@@ -589,7 +589,6 @@ struct CreatureDesc
     MEMBER(CreatureDesc, uint64_t, genomeId, 0);
     MEMBER(CreatureDesc, MutationState, mutationState, MutationState_Mutated);
     MEMBER(CreatureDesc, int, lineageId, 0);
-    MEMBER(CreatureDesc, std::optional<int>, prevLineageId, std::nullopt);
     MEMBER(CreatureDesc, float, accumulatedMutations, 0.0f);
 
     // Process data
