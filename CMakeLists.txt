@@ -1,6 +1,13 @@
 
 cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
 
+# Some vcpkg ports (e.g. glad) still declare cmake_minimum_required(VERSION <3.5),
+# which CMake 4.x rejects. Raise the minimum policy version for the child CMake
+# processes that vcpkg spawns to build those ports so configuration succeeds.
+if(NOT DEFINED ENV{CMAKE_POLICY_VERSION_MINIMUM})
+    set(ENV{CMAKE_POLICY_VERSION_MINIMUM} 3.5)
+endif()
+
 # Using the vcpkg submodule
 set(CMAKE_TOOLCHAIN_FILE external/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "")
 
