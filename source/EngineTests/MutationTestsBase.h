@@ -15,7 +15,10 @@ class MutationTestsBase : public IntegrationTestFramework
 public:
     MutationTestsBase()
         : IntegrationTestFramework()
-    {}
+    {
+        _parameters.genomeMutationProbability.value = 1.0f;
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
 
     ~MutationTestsBase() = default;
 
