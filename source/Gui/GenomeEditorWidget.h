@@ -27,7 +27,7 @@ private:
 
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
-    int _sequenceNumberForCreatedGenes = 0;
+    int _sequenceNumberForCreatedGenes = -1;
 
     std::optional<int> _selectedGeneFromPreviousFrame;
     bool _geneSelectedFromTable = false;
