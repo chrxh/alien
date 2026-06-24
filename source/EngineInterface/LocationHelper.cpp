@@ -100,7 +100,7 @@ std::string LocationHelper::generateLayerName(SimulationParameters const& parame
     std::string result;
     do {
         alreadyUsed = false;
-        result = "Layer " + std::to_string(++counter);
+        result = "Layer " + std::to_string(counter++);
         for (int i = 0; i < parameters.numLayers; ++i) {
             auto name = std::string(parameters.layerName.layerValues[i]);
             if (result == name) {
@@ -120,7 +120,7 @@ std::string LocationHelper::generateSourceName(SimulationParameters const& param
     std::string result;
     do {
         alreadyUsed = false;
-        result = "Radiation " + std::to_string(++counter);
+        result = "Radiation " + std::to_string(counter++);
         for (int i = 0; i < parameters.numSources; ++i) {
             auto name = std::string(parameters.sourceName.sourceValues[i]);
             if (result == name) {
