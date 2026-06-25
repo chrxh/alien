@@ -16,6 +16,7 @@ public:
     MutationTestsBase()
         : IntegrationTestFramework()
     {
+        _parameters.firstOffspringUnmutated.value = false;
         _simulationFacade->setSimulationParameters(_parameters);
     }
 
