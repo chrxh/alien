@@ -458,6 +458,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .name("Mutations")
                 .parameters({
                     ParameterSpec()
+                        .name("First offspring unmutated")
+                        .reference(BoolSpec().member(&SimulationParameters::firstOffspringUnmutated)),
+                    ParameterSpec()
                         .name("New lineage threshold")
                         .reference(
                             FloatSpec()

@@ -222,7 +222,7 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
     auto& cell = object->typeData.cell;
     auto& constructor = cell.constructor;
 
-    if (constructor.currentOffspring != 1) {
+    if (cudaSimulationParameters.firstOffspringUnmutated.value && constructor.currentOffspring == 0) {
         return;
     }
 
