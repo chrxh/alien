@@ -722,7 +722,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     EXPECT_EQ(1.0f, connection._distance);
 
     auto hostConstructor = hostObject.getCellRef()._constructor.value();
-    EXPECT_EQ(0, hostConstructor._currentOffspring);
+    EXPECT_EQ(1, hostConstructor._currentOffspring);
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_1)

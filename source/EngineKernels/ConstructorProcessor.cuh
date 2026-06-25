@@ -199,7 +199,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
         if (constructionData.isLastNodeOfLastConcatenation) {
-            if (constructionData.isSeparation) {
+            if (constructionData.isSeparation || constructor.geneIndex == 0) {
                 ++constructor.currentOffspring;
                 if (constructor.provideEnergy == ProvideEnergy_Free) {
                     constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
