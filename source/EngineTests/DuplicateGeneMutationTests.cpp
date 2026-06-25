@@ -9,14 +9,7 @@
 #include "MutationTestsBase.h"
 
 class DuplicateGeneMutationTests : public MutationTestsBase
-{
-protected:
-    void alwaysMutate()
-    {
-        _parameters.genomeMutationProbability.value = 1.0f;
-        _simulationFacade->setSimulationParameters(_parameters);
-    }
-};
+{};
 
 namespace
 {
@@ -52,7 +45,6 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_duplicatesGeneReference
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    alwaysMutate();
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
 
@@ -76,7 +68,6 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_injectorReferencesCount
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    alwaysMutate();
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
 
@@ -96,7 +87,6 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_singleReferenceNoChange
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    alwaysMutate();
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
 
@@ -117,7 +107,6 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_zeroProbabilityNoChange
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    alwaysMutate();
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1);
 

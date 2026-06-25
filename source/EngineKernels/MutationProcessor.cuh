@@ -1088,7 +1088,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_duplicateGene(Simul
         for (int geneIndex = laneId; geneIndex < oldNumGenes; geneIndex += blockDim.x) {
             newGenes[geneIndex] = genome->genes[geneIndex];
         }
-        // Create the appended copies in parallel: deep-copy the nodes and repoint the chosen reference to the copy.
+        // Append an independent deep copy of each duplicated gene in parallel.
         for (int slot = laneId; slot < numDuplicates; slot += blockDim.x) {
             int newIndex = oldNumGenes + slot;
             auto& source = genome->genes[sourceGenes[slot]];
@@ -1098,12 +1098,18 @@ __inline__ __device__ void MutationProcessor::applyMutations_duplicateGene(Simul
             }
             newGenes[newIndex] = source;  // shallow copy of the gene-level attributes
             newGenes[newIndex].nodes = newNodes;
+            atomicAdd_block(&accumulatedMutations, toFloat(max(1, source.numNodes)));
+        }
+        // Repoint the chosen references only after all copies are taken, so a reference is never modified while another slot is
+        // still deep-copying the node that holds it.
+        block.sync();
+        for (int slot = laneId; slot < numDuplicates; slot += blockDim.x) {
+            int newIndex = oldNumGenes + slot;
             if (chosenIsInjector[slot]) {
                 chosenNodes[slot]->cellTypeData.injector.geneIndex = newIndex;
             } else {
                 chosenNodes[slot]->constructor.geneIndex = newIndex;
             }
-            atomicAdd_block(&accumulatedMutations, toFloat(max(1, source.numNodes)));
         }
         block.sync();
 
@@ -1118,8 +1124,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_duplicateGene(Simul
 __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     // Each gene (including the root gene) is independently deleted with probability geneProbability, so several genes can be
-    // removed in one pass. Surviving genes are compacted and their references remapped; a reference to a deleted gene turns off
-    // a referencing constructor and redirects a referencing injector to the first gene. At least one gene is always kept.
+    // removed in one pass and the genome may even become empty. Surviving genes are compacted and their references remapped; a
+    // reference to a deleted gene turns off a referencing constructor and redirects a referencing injector to the first gene.
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
     auto const& rate = genome->mutationRates.deleteGeneMutation;
@@ -1145,18 +1151,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
     block.sync();
 
     if (laneId == 0) {
-        // Keep at least one gene: if all genes are marked, retain the last one.
-        int survivors = 0;
-        for (int geneIndex = 0; geneIndex < oldNumGenes; ++geneIndex) {
-            if (newGeneIndices[geneIndex] >= 0) {
-                ++survivors;
-            }
-        }
-        if (survivors == 0 && oldNumGenes > 0) {
-            newGeneIndices[oldNumGenes - 1] = 0;
-        }
-
-        // Assign compacted indices to the survivors and account for the deleted genes.
+        // Assign compacted indices to the survivors and account for the deleted genes. A genome may end up with zero genes.
         int nextIndex = 0;
         for (int geneIndex = 0; geneIndex < oldNumGenes; ++geneIndex) {
             if (newGeneIndices[geneIndex] >= 0) {
@@ -1166,7 +1161,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
             }
         }
         newNumGenes = nextIndex;
-        newGenes = newNumGenes != oldNumGenes ? data.entities.heap.getTypedSubArray<Gene>(newNumGenes) : nullptr;
+        newGenes = newNumGenes != oldNumGenes && newNumGenes > 0 ? data.entities.heap.getTypedSubArray<Gene>(newNumGenes) : nullptr;
     }
     block.sync();
 
