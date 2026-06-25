@@ -45,14 +45,20 @@ jobs:
         # alien.exe, resources/ and imgui.ini are already laid out next to the
         # build output by the CMake POST_BUILD step, so the Release dir is the
         # complete deployment payload.
-        $sha = "${{ github.sha }}".Substring(0, 8)
         New-Item -ItemType Directory -Force -Path "deploy" | Out-Null
-        Compress-Archive -Path "build-ninja/${{ env.BUILD_TYPE }}/*" -DestinationPath "deploy/alien-develop-$sha.zip" -Force
+        Compress-Archive -Path "build-ninja/${{ env.BUILD_TYPE }}/*" -DestinationPath "deploy/alien-develop.zip" -Force
 
-    - name: Upload deployment artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: alien-develop-${{ github.sha }}
-        path: deploy/alien-develop-*.zip
-        if-no-files-found: error
-        retention-days: 30
+    - name: Upload to FTP (overwrite alien-develop.zip)
+      shell: pwsh
+      env:
+        FTP_HOST: ${{ secrets.FTP_HOST }}
+        FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+        FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        FTP_REMOTE_PATH: ${{ secrets.FTP_REMOTE_PATH }}
+      run: |
+        $url = "ftp://$($env:FTP_HOST):21/$env:FTP_REMOTE_PATH"
+        curl.exe --fail-with-body --silent --show-error `
+          --user "${env:FTP_USERNAME}:${env:FTP_PASSWORD}" `
+          --upload-file "deploy/alien-develop.zip" `
+          $url
+        if ($LASTEXITCODE -ne 0) { throw "FTP upload failed (curl exit $LASTEXITCODE)" }
