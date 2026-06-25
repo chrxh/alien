@@ -40,7 +40,7 @@ private:
         float neededDepotEnergy;
     };
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
-    __inline__ __device__ static void mutateGenome(SimulationData& data, Object* object, bool isPreview);
+    __inline__ __device__ static void mutateGenome(SimulationData& data, Object* object);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
 
@@ -179,7 +179,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     }
 
     // Important: mutate the host genome before it is cloned for the offspring.
-    mutateGenome(data, object, isPreview);
+    mutateGenome(data, object);
 
     // The actual construction runs on a single thread.
     if (threadIdx.x != 0) {
@@ -217,7 +217,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& data, Object* object, bool isPreview)
+__inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& data, Object* object)
 {
     auto& cell = object->typeData.cell;
     auto& constructor = cell.constructor;
@@ -229,7 +229,7 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
     __shared__ Genome* clonedGenome;
     if (threadIdx.x == 0) {
         clonedGenome = nullptr;
-        if (!isPreview && ConstructorHelper::createsNewCreature(constructor)) {
+        if (ConstructorHelper::createsNewCreature(constructor)) {
             auto& creature = cell.creature;
             int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
             if (origMutationState == MutationState_NotMutated) {
