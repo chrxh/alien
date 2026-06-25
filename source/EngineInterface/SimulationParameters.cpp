@@ -458,9 +458,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .name("Mutations")
                 .parameters({
                     ParameterSpec()
-                        .name("Genome mutation probability")
-                        .reference(FloatSpec().member(&SimulationParameters::genomeMutationProbability).min(0.0f).max(1.0f).format("%.4f")),
-                    ParameterSpec()
                         .name("New lineage threshold")
                         .reference(
                             FloatSpec()

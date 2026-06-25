@@ -199,7 +199,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         alienAtomicAdd32(&constructionData.creature->numCells, static_cast<uint32_t>(1));
         if (constructionData.isLastNodeOfLastConcatenation) {
-            if (constructionData.isSeparation || constructor.geneIndex == 0) {
+            if (ConstructorHelper::createsNewCreature(constructor)) {
                 ++constructor.currentOffspring;
                 if (constructor.provideEnergy == ProvideEnergy_Free) {
                     constructor.provideEnergy = ProvideEnergy_ReduceCellEnergy;
@@ -222,10 +222,14 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
     auto& cell = object->typeData.cell;
     auto& constructor = cell.constructor;
 
+    if (constructor.currentOffspring != 1) {
+        return;
+    }
+
     __shared__ Genome* clonedGenome;
     if (threadIdx.x == 0) {
         clonedGenome = nullptr;
-        if (!isPreview && (constructor.geneIndex == 0 || constructor.separation)) {
+        if (!isPreview && ConstructorHelper::createsNewCreature(constructor)) {
             auto& creature = cell.creature;
             int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
             if (origMutationState == MutationState_NotMutated) {
@@ -257,7 +261,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     // No separation for non-root genes => same creature
     auto& genome = object->typeData.cell.creature->genome;
     if (constructor.geneIndex < genome->numGenes) {
-        if (!constructor.separation && constructor.geneIndex != 0) {
+        if (!ConstructorHelper::createsNewCreature(constructor)) {
             return object->typeData.cell.creature;
         }
     }
@@ -739,7 +743,7 @@ __inline__ __device__ void ConstructorProcessor::setHeadCellOnFirstNode(Object* 
     auto const& constructor = hostObject->typeData.cell.constructor;
 
     // Head cell should be first (=> connections[0] points to nodeIndex=1 in each concatenation)
-    if (constructionData.isFirstNode && (constructionData.isSeparation || constructor.geneIndex == 0)) {
+    if (constructionData.isFirstNode && ConstructorHelper::createsNewCreature(constructor)) {
         newObject->typeData.cell.headCell = true;
     }
 }

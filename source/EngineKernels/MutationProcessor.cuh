@@ -63,17 +63,11 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     __shared__ float accumulatedMutations;
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
-    __shared__ bool shouldMutate;
 
     if (laneId == 0) {
         accumulatedMutations = 0.0f;
-        shouldMutate = data.primaryNumberGen.random() < cudaSimulationParameters.genomeMutationProbability.value;
     }
     block.sync();
-
-    if (!shouldMutate) {
-        return;
-    }
 
     // applyMetaMutations is uniform across the block, so the conditional call does not diverge cooperative-group syncs
     if (genome->applyMetaMutations) {

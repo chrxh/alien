@@ -7,6 +7,7 @@ class ConstructorHelper
 {
 public:
     __inline__ __device__ static bool isFinished(Object* constructorCell, Genome const& genome);
+    __inline__ __device__ static bool createsNewCreature(Constructor const& constructor);
     __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
     template <typename ConstructorType>
     __inline__ __device__ static bool hasInfiniteConcatenations(ConstructorType const& constructor);
@@ -45,6 +46,11 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Object* constructorCell
         return false;
     }
     return currentBranch >= constructor.numBranches;
+}
+
+__inline__ __device__ bool ConstructorHelper::createsNewCreature(Constructor const& constructor)
+{
+    return constructor.separation || constructor.geneIndex == 0;
 }
 
 __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const& constructor, Genome const& genome)
