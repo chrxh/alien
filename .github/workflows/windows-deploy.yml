@@ -1,8 +1,8 @@
 name: windows-deploy
 
 on:
-  push:
-    branches: [ develop ]
+  schedule:
+    - cron: '0 3 * * *'
   workflow_dispatch:
 
 
