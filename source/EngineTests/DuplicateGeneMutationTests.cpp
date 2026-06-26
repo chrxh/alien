@@ -50,8 +50,8 @@ TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_duplicatesGeneReference
 
     auto actualGenome = getMutatedGenome();
     ASSERT_EQ(3, actualGenome._genes.size());
-    EXPECT_EQ(1, actualGenome._genes.at(2)._nodes.size());  // copy of gene 1
-    EXPECT_EQ(1, countReferencesToGene(actualGenome, 2));   // exactly one reference moved to the copy
+    EXPECT_EQ(genome._genes.at(1)._nodes, actualGenome._genes.at(2)._nodes);  // copy has the same nodes as gene 1
+    EXPECT_EQ(1, countReferencesToGene(actualGenome, 2));                     // exactly one reference moved to the copy
 }
 
 TEST_F(DuplicateGeneMutationTests, duplicateGeneMutation_injectorReferencesCount)
