@@ -1098,7 +1098,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_duplicateGene(Simul
             }
             newGenes[newIndex] = source;  // shallow copy of the gene-level attributes
             newGenes[newIndex].nodes = newNodes;
-            atomicAdd_block(&accumulatedMutations, toFloat(max(1, source.numNodes)));
+            atomicAdd_block(&accumulatedMutations, toFloat(source.numNodes));
         }
         // Repoint the chosen references only after all copies are taken, so a reference is never modified while another slot is
         // still deep-copying the node that holds it.
@@ -1157,7 +1157,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
             if (newGeneIndices[geneIndex] >= 0) {
                 newGeneIndices[geneIndex] = nextIndex++;
             } else {
-                atomicAdd_block(&accumulatedMutations, toFloat(max(1, genome->genes[geneIndex].numNodes)));
+                atomicAdd_block(&accumulatedMutations, toFloat(genome->genes[geneIndex].numNodes));
             }
         }
         newNumGenes = nextIndex;
