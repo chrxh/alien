@@ -106,7 +106,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {ColorVector<float>::uniform(3.5f)};
 
     // Mutations
-    BaseParameter<bool> firstOffspringUnmutated = {true};
     BaseParameter<float> newLineageThreshold = {0.25f};
 
     // Meta mutations

@@ -222,10 +222,6 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
     auto& cell = object->typeData.cell;
     auto& constructor = cell.constructor;
 
-    if (cudaSimulationParameters.firstOffspringUnmutated.value && constructor.currentOffspring == 0) {
-        return;
-    }
-
     __shared__ Genome* clonedGenome;
     if (threadIdx.x == 0) {
         clonedGenome = nullptr;
