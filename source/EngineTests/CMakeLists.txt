@@ -17,10 +17,12 @@ PUBLIC
     CreatureTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
+    DeleteGeneMutationTests.cpp
     DeleteNodeMutationTests.cpp
     DepotTests.cpp
     DescriptionEditTests.cpp
     DetonatorTests.cpp
+    DuplicateGeneMutationTests.cpp
     EditTests.cpp
     DigestorTests.cpp
     EnergyFlowTests.cpp

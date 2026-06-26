@@ -511,6 +511,14 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::deleteNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
+                        .name("Duplicate gene mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::duplicateGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
+                        .name("Delete gene mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::deleteGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
                         .name("Constructor mutation sigma")
                         .reference(
                             FloatSpec().member(&SimulationParameters::constructorMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),

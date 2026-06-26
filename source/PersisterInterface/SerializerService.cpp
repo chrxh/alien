@@ -313,6 +313,10 @@ namespace
 
     auto constexpr Id_DeleteNodeMutation_GeneProbability = 0;
 
+    auto constexpr Id_DuplicateGeneMutation_GeneProbability = 0;
+
+    auto constexpr Id_DeleteGeneMutation_GeneProbability = 0;
+
     auto constexpr Id_ConstructorMutation_NodeProbability = 0;
     auto constexpr Id_ConstructorMutation_ValueChangeSigma = 1;
     auto constexpr Id_ConstructorMutation_EnumChangeProbability = 2;
@@ -449,6 +453,8 @@ namespace
     auto constexpr Id_MutationRates_AddNodeMutation = 13;
     auto constexpr Id_MutationRates_TrimNodeMutation = 14;
     auto constexpr Id_MutationRates_DeleteNodeMutation = 15;
+    auto constexpr Id_MutationRates_DuplicateGeneMutation = 16;
+    auto constexpr Id_MutationRates_DeleteGeneMutation = 17;
 
     auto constexpr Id_Genome_Genes = 6;
     auto constexpr Id_Genome_MutationRates = 7;
@@ -986,6 +992,24 @@ namespace cereal
     SPLIT_SERIALIZATION(DeleteNodeMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DuplicateGeneMutationDesc& data)
+    {
+        DuplicateGeneMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_DuplicateGeneMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(DuplicateGeneMutationDesc)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DeleteGeneMutationDesc& data)
+    {
+        DeleteGeneMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_DeleteGeneMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(DeleteGeneMutationDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConstructorMutationDesc& data)
     {
         ConstructorMutationDesc defaultObject;
@@ -1015,6 +1039,8 @@ namespace cereal
         scope.addDesc(Id_MutationRates_AddNodeMutation, data._addNodeMutation);
         scope.addDesc(Id_MutationRates_TrimNodeMutation, data._trimNodeMutation);
         scope.addDesc(Id_MutationRates_DeleteNodeMutation, data._deleteNodeMutation);
+        scope.addDesc(Id_MutationRates_DuplicateGeneMutation, data._duplicateGeneMutation);
+        scope.addDesc(Id_MutationRates_DeleteGeneMutation, data._deleteGeneMutation);
         scope.addDesc(Id_MutationRates_ConstructorMutation1, data._constructorMutations[0]);
         scope.addDesc(Id_MutationRates_ConstructorMutation2, data._constructorMutations[1]);
     }

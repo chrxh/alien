@@ -892,6 +892,8 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
     result._mutationRates._addNodeMutation._geneProbability = genomeTO.mutationRates.addNodeMutation.geneProbability;
     result._mutationRates._trimNodeMutation._geneProbability = genomeTO.mutationRates.trimNodeMutation.geneProbability;
     result._mutationRates._deleteNodeMutation._geneProbability = genomeTO.mutationRates.deleteNodeMutation.geneProbability;
+    result._mutationRates._duplicateGeneMutation._geneProbability = genomeTO.mutationRates.duplicateGeneMutation.geneProbability;
+    result._mutationRates._deleteGeneMutation._geneProbability = genomeTO.mutationRates.deleteGeneMutation.geneProbability;
     result._genes.reserve(genomeTO.numGenes);
 
     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
@@ -994,6 +996,8 @@ void DescConverterService::convertGenomeToTO(
     genomeTO.mutationRates.addNodeMutation = {genome._mutationRates._addNodeMutation._geneProbability};
     genomeTO.mutationRates.trimNodeMutation = {genome._mutationRates._trimNodeMutation._geneProbability};
     genomeTO.mutationRates.deleteNodeMutation = {genome._mutationRates._deleteNodeMutation._geneProbability};
+    genomeTO.mutationRates.duplicateGeneMutation = {genome._mutationRates._duplicateGeneMutation._geneProbability};
+    genomeTO.mutationRates.deleteGeneMutation = {genome._mutationRates._deleteGeneMutation._geneProbability};
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
     genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;
