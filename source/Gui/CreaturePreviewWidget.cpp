@@ -59,7 +59,7 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, Ge
         processSignalEditor(phenotypeChanged, phenotype, conversionResult);
         processActionButtons();
         processScrollbars();
-        processTitle();
+        processTitle(conversionResult);
     }
     ImGui::EndChild();
 
@@ -470,7 +470,7 @@ void _CreaturePreviewWidget::processScrollbars()
     _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
 }
 
-void _CreaturePreviewWidget::processTitle()
+void _CreaturePreviewWidget::processTitle(ConversionResult const& conversionResult)
 {
     ImGui::SetCursorPos({scale(7.0f), scale(7.0f)});
     std::vector<std::string> geneIndexStrings;
@@ -479,7 +479,9 @@ void _CreaturePreviewWidget::processTitle()
     for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
         geneIndexStrings.emplace_back(std::to_string(geneIndex));
     }
-    auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
+    auto subGenomeType = _subGenome.startIndex == 0 ? "Primary" : "Secondary";
+    auto numCells = conversionResult.description._cells.size();
+    auto title = std::string(subGenomeType) + ": " + std::to_string(numCells) + " cells, " + boost::join(geneIndexStrings, ", ");
     if (_subGenome.trimmed) {
         title += "  -- trimmed";
     }
