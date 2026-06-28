@@ -493,7 +493,7 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
             auto& constructor = cell._constructor.value();
             if (constructor._autoTriggerInterval.has_value()) {
                 auto& value = constructor._autoTriggerInterval.value();
-                value = std::max(value, 0);
+                value = std::max(value, Const::ConstructorAutoTriggerInterval_Min);
             }
             constructor._geneIndex = std::max(constructor._geneIndex, 0);
             constructor._constructionActivationTime = std::clamp(
