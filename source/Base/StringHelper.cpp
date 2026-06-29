@@ -1,6 +1,7 @@
 #include "StringHelper.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iomanip>
 #include <sstream>
 
@@ -29,13 +30,13 @@ std::string StringHelper::format(float v, int fracPartDecimals)
         result = "-";
         v = -v;
     }
-    result += format(static_cast<uint64_t>(v));
+    auto const scale = static_cast<uint64_t>(std::llround(std::pow(10.0, fracPartDecimals)));
+    auto const scaled = static_cast<uint64_t>(std::llround(static_cast<double>(v) * scale));
+    result += format(scaled / scale);
     if (fracPartDecimals > 0) {
         result += ".";
-    }
-    while (fracPartDecimals-- > 0) {
-        v *= 10;
-        result += std::to_string(static_cast<uint64_t>(v) % 10);
+        auto const fracPart = std::to_string(scaled % scale);
+        result += std::string(fracPartDecimals - static_cast<int>(fracPart.length()), '0') + fracPart;
     }
     return result;
 }
