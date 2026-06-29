@@ -1124,8 +1124,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_duplicateGene(Simul
 __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     // Each gene (including the root gene) is independently deleted with probability geneProbability, so several genes can be
-    // removed in one pass and the genome may even become empty. Surviving genes are compacted and their references remapped; a
-    // reference to a deleted gene turns off a referencing constructor and redirects a referencing injector to the first gene.
+    // removed in one pass. At least one gene is always kept, so the genome never becomes empty: if every gene is marked for
+    // deletion, the root gene survives. Surviving genes are compacted and their references remapped; a reference to a deleted
+    // gene turns off a referencing constructor and redirects a referencing injector to the first gene.
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
     auto const& rate = genome->mutationRates.deleteGeneMutation;
@@ -1151,7 +1152,19 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
     block.sync();
 
     if (laneId == 0) {
-        // Assign compacted indices to the survivors and account for the deleted genes. A genome may end up with zero genes.
+        // Keep at least one gene: if every gene is marked for deletion, let the root gene survive so the genome stays non-empty.
+        bool anySurvivor = false;
+        for (int geneIndex = 0; geneIndex < oldNumGenes; ++geneIndex) {
+            if (newGeneIndices[geneIndex] >= 0) {
+                anySurvivor = true;
+                break;
+            }
+        }
+        if (!anySurvivor && oldNumGenes > 0) {
+            newGeneIndices[0] = 0;
+        }
+
+        // Assign compacted indices to the survivors and account for the deleted genes.
         int nextIndex = 0;
         for (int geneIndex = 0; geneIndex < oldNumGenes; ++geneIndex) {
             if (newGeneIndices[geneIndex] >= 0) {

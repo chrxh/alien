@@ -9,9 +9,9 @@
 class DeleteGeneMutationTests : public MutationTestsBase
 {};
 
-TEST_F(DeleteGeneMutationTests, deleteGeneMutation_deletesAllGenesIncludingRoot)
+TEST_F(DeleteGeneMutationTests, deleteGeneMutation_keepsAtLeastOneGene)
 {
-    // With a probability of 1 every gene (including the root gene) is deleted, leaving an empty genome.
+    // Even with a probability of 1, at least one gene must survive so the genome never becomes empty.
     auto genome = GenomeDesc().genes({
         GeneDesc().nodes({NodeDesc()}),
         GeneDesc().nodes({NodeDesc()}),
@@ -22,10 +22,12 @@ TEST_F(DeleteGeneMutationTests, deleteGeneMutation_deletesAllGenesIncludingRoot)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1);
+    for (int i = 0; i < 5; ++i) {
+        _simulationFacade->testOnly_mutate(1);
+    }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(0, actualGenome._genes.size());
+    EXPECT_EQ(1, actualGenome._genes.size());
 }
 
 TEST_F(DeleteGeneMutationTests, deleteGeneMutation_zeroProbabilityNoChange)
