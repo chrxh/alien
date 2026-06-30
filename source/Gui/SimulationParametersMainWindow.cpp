@@ -641,7 +641,7 @@ void SimulationParametersMainWindow::updateLocations()
     _locations = std::vector<Location>(1 + parameters.numLayers + parameters.numSources);
     auto radiationStrength = ParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = radiationStrength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
-    _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(radiationStrength.values.front() * 100 + 0.05f, 1) + "%"};
+    _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(radiationStrength.values.front() * 100, 1) + "%"};
     for (int i = 0; i < parameters.numLayers; ++i) {
         auto position = "(" + StringHelper::format(parameters.layerPosition.layerValues[i].x, 0) + ", "
             + StringHelper::format(parameters.layerPosition.layerValues[i].y, 0) + ")";
@@ -649,7 +649,7 @@ void SimulationParametersMainWindow::updateLocations()
             .name = parameters.layerName.layerValues[i],
             .type = LocationType::Layer,
             .position = position,
-            .strength = " " + StringHelper::format(parameters.layerOpacity.layerValues[i] * 100 + 0.05f, 1) + "%"};
+            .strength = " " + StringHelper::format(parameters.layerOpacity.layerValues[i] * 100, 1) + "%"};
     }
     for (int i = 0; i < parameters.numSources; ++i) {
         auto position = "(" + StringHelper::format(parameters.sourcePosition.sourceValues[i].x, 0) + ", "
@@ -659,7 +659,7 @@ void SimulationParametersMainWindow::updateLocations()
             parameters.sourceName.sourceValues[i],
             LocationType::Source,
             position,
-            pinnedString + StringHelper::format(radiationStrength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
+            pinnedString + StringHelper::format(radiationStrength.values.at(i + 1) * 100, 1) + "%"};
     }
 }
 
