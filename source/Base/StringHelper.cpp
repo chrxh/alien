@@ -30,12 +30,12 @@ std::string StringHelper::format(float v, int fracPartDecimals)
         result = "-";
         v = -v;
     }
-    auto const scale = static_cast<uint64_t>(std::llround(std::pow(10.0, fracPartDecimals)));
-    auto const scaled = static_cast<uint64_t>(std::llround(static_cast<double>(v) * scale));
+    auto scale = static_cast<uint64_t>(std::llround(std::pow(10.0, fracPartDecimals)));
+    auto scaled = static_cast<uint64_t>(std::llround(static_cast<double>(v) * scale));
     result += format(scaled / scale);
     if (fracPartDecimals > 0) {
         result += ".";
-        auto const fracPart = std::to_string(scaled % scale);
+        auto fracPart = std::to_string(scaled % scale);
         result += std::string(fracPartDecimals - static_cast<int>(fracPart.length()), '0') + fracPart;
     }
     return result;
