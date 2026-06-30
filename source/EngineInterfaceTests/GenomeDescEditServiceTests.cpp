@@ -617,6 +617,32 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLi
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
 
+TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_multipleReferencesWithInfiniteConcatenations)
+{
+    // Gene referenced twice, one reference with infinite concatenations - both references must be capped
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(1)),
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numConcatenations(std::numeric_limits<int>::max())),
+        }),
+        GeneDesc().nodes({
+            NodeDesc(),
+            NodeDesc(),
+        }),
+    });
+
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
+
+    ASSERT_EQ(1, subGenomes.size());
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    auto const& subGenome = subGenomes.at(0).genome;
+
+    auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_NE(-1, resultingCells);  // Must no longer be infinite
+    EXPECT_GE(resultingCells, 0);
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
+}
+
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_nodes)
 {
     // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many nodes

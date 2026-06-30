@@ -186,9 +186,10 @@ namespace
             totalNodesNeeded += static_cast<int64_t>(gene._nodes.size()) * geneInfo.numBranches * truncatedNumConcatenations;
         }
 
-        // If we're under the limit, no trimming needed
-        if (totalNodesNeeded <= nodeLimit) {
-            nodeCounter = static_cast<int>(totalNodesNeeded);
+        // Use the exact cell count: the estimate above misses genes referenced more than once
+        auto resultingCells = GenomeDescInfoService::get().getNumberOfResultingCells(genome, startGeneIndex);
+        if (resultingCells != -1 && resultingCells <= nodeLimit) {
+            nodeCounter = resultingCells;
             return false;
         }
 
@@ -242,6 +243,17 @@ namespace
             }
         }
 
+        // All references to a gene must be capped, not just the one found by the breadth-first walk
+        std::map<int, std::vector<std::pair<int, int>>> geneReferences;  // gene index -> referencing (gene index, node index)
+        for (int geneIndex = 0, numGenes = toInt(genome._genes.size()); geneIndex < numGenes; ++geneIndex) {
+            auto const& gene = genome._genes.at(geneIndex);
+            for (auto const& [nodeIndex, node] : gene._nodes | boost::adaptors::indexed(0)) {
+                if (node._constructor.has_value() && node._constructor->_geneIndex < numGenes) {
+                    geneReferences[node._constructor->_geneIndex].emplace_back(geneIndex, toInt(nodeIndex));
+                }
+            }
+        }
+
         // Apply the budget to each gene
         for (auto const& geneInfo : genesInBFS) {
             if (geneInfo.geneIndex >= genome._genes.size()) {
@@ -263,15 +275,18 @@ namespace
                 continue;
             }
 
-            // Calculate how many concatenations we can afford
+            auto const& references = geneReferences[geneInfo.geneIndex];
+            int numRefs = std::max(1, toInt(references.size()));
+
+            // Affordable concatenations per reference (budget is shared across references)
             auto nodesPerConcatenation = nodesPerCopy * geneInfo.numBranches;
-            auto affordableConcatenations = budget / nodesPerConcatenation;
+            auto affordableConcatenations = budget / (nodesPerConcatenation * numRefs);
 
             // If we can't afford even one full copy, trim nodes
             if (affordableConcatenations == 0) {
-                gene._nodes.resize(budget / geneInfo.numBranches);
-                if (geneInfo.parentGeneIndex != -1) {
-                    genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations = 1;
+                gene._nodes.resize(budget / (geneInfo.numBranches * numRefs));
+                for (auto const& [refGeneIndex, refNodeIndex] : references) {
+                    genome._genes.at(refGeneIndex)._nodes.at(refNodeIndex)._constructor->_numConcatenations = 1;
                 }
                 trimmed = true;
 
@@ -282,18 +297,18 @@ namespace
                         constructor._geneIndex = toInt(genome._genes.size());
                     }
                 }
-            } else if (
-                geneInfo.parentGeneIndex != -1
-                && affordableConcatenations < genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations) {
-                // Reduce concatenations to fit budget
-                genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations = affordableConcatenations;
-                trimmed = true;
+            } else {
+                // Cap every reference to fit the budget
+                for (auto const& [refGeneIndex, refNodeIndex] : references) {
+                    auto& constructor = genome._genes.at(refGeneIndex)._nodes.at(refNodeIndex)._constructor.value();
+                    if (constructor._geneIndex == geneInfo.geneIndex && affordableConcatenations < constructor._numConcatenations) {
+                        constructor._numConcatenations = affordableConcatenations;
+                        trimmed = true;
+                    }
+                }
             }
 
-            auto actualNumConcatenations = geneInfo.parentGeneIndex == -1
-                ? geneInfo.numConcatenations
-                : genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations;
-            nodeCounter += toInt(gene._nodes.size()) * geneInfo.numBranches * actualNumConcatenations;
+            nodeCounter += toInt(gene._nodes.size()) * geneInfo.numBranches * std::max(1, numRefs * affordableConcatenations);
         }
 
         return trimmed;
