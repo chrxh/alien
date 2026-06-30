@@ -4,7 +4,6 @@
 #include <ranges>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/range/adaptor/sliced.hpp>
 
 #include <imgui.h>
 
@@ -475,13 +474,12 @@ void _CreaturePreviewWidget::processTitle(ConversionResult const& conversionResu
     ImGui::SetCursorPos({scale(7.0f), scale(7.0f)});
     std::vector<std::string> geneIndexStrings;
     auto geneIndices = getGeneIndices();
-    geneIndexStrings.emplace_back(std::to_string(geneIndices.front()) + " (start)");
-    for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
+    for (auto const& geneIndex : geneIndices) {
         geneIndexStrings.emplace_back(std::to_string(geneIndex));
     }
     auto subGenomeType = _subGenome.startIndex == 0 ? "Primary" : "Secondary";
     auto numCells = std::ranges::count_if(conversionResult.description._cells, [](auto const& cell) { return cell._cellType != CellType_Void; });
-    auto title = std::string(subGenomeType) + ": " + std::to_string(numCells) + " cells, Genes: " + boost::join(geneIndexStrings, ", ");
+    auto title = std::string(subGenomeType) + ": " + std::to_string(numCells) + " cells, Gene indices: " + boost::join(geneIndexStrings, ", ");
     if (_subGenome.trimmed) {
         title += "  -- trimmed";
     }
