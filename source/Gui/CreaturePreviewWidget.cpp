@@ -480,8 +480,8 @@ void _CreaturePreviewWidget::processTitle(ConversionResult const& conversionResu
         geneIndexStrings.emplace_back(std::to_string(geneIndex));
     }
     auto subGenomeType = _subGenome.startIndex == 0 ? "Primary" : "Secondary";
-    auto numCells = conversionResult.description._cells.size();
-    auto title = std::string(subGenomeType) + ": " + std::to_string(numCells) + " cells, " + boost::join(geneIndexStrings, ", ");
+    auto numCells = std::ranges::count_if(conversionResult.description._cells, [](auto const& cell) { return cell._cellType != CellType_Void; });
+    auto title = std::string(subGenomeType) + ": " + std::to_string(numCells) + " cells, Genes: " + boost::join(geneIndexStrings, ", ");
     if (_subGenome.trimmed) {
         title += "  -- trimmed";
     }
