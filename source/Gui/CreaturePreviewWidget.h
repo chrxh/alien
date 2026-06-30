@@ -32,7 +32,7 @@ private:
     void processSignalEditor(bool& phenotypeChanged, Desc& phenotype, ConversionResult const& conversionResult);
     void processActionButtons();
     void processScrollbars();
-    void processTitle();
+    void processTitle(ConversionResult const& conversionResult);
 
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;

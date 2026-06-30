@@ -4,7 +4,6 @@
 #include <ranges>
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/range/adaptor/sliced.hpp>
 
 #include <imgui.h>
 
@@ -56,10 +55,10 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, Ge
     if (ImGui::BeginChild("CellGraphWidget", ImVec2(width, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
         processMouseNavigation();
         processCellGraphAndSelection(conversionResult);
+        processTitle(conversionResult);
         processSignalEditor(phenotypeChanged, phenotype, conversionResult);
         processActionButtons();
         processScrollbars();
-        processTitle();
     }
     ImGui::EndChild();
 
@@ -470,19 +469,18 @@ void _CreaturePreviewWidget::processScrollbars()
     _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
 }
 
-void _CreaturePreviewWidget::processTitle()
+void _CreaturePreviewWidget::processTitle(ConversionResult const& conversionResult)
 {
     ImGui::SetCursorPos({scale(7.0f), scale(7.0f)});
     std::vector<std::string> geneIndexStrings;
     auto geneIndices = getGeneIndices();
-    geneIndexStrings.emplace_back(std::to_string(geneIndices.front()) + " (start)");
-    for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
+    for (auto const& geneIndex : geneIndices) {
         geneIndexStrings.emplace_back(std::to_string(geneIndex));
     }
-    auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
-    if (_subGenome.trimmed) {
-        title += "  -- trimmed";
-    }
+    auto subGenomeType = _subGenome.startIndex == 0 ? "Primary" : "Secondary";
+    auto numCells = std::ranges::count_if(conversionResult.description._cells, [](auto const& cell) { return cell._cellType != CellType_Void; });
+    auto cellCountText = std::to_string(numCells) + " cells" + (_subGenome.trimmed ? " (trimmed)" : "");
+    auto title = std::string(subGenomeType) + ": " + cellCountText + ", Gene indices: " + boost::join(geneIndexStrings, ", ");
     AlienGui::Text(title.c_str());
 }
 
