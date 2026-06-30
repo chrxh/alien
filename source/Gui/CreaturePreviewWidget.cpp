@@ -55,10 +55,10 @@ void _CreaturePreviewWidget::process(bool& phenotypeChanged, Desc& phenotype, Ge
     if (ImGui::BeginChild("CellGraphWidget", ImVec2(width, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
         processMouseNavigation();
         processCellGraphAndSelection(conversionResult);
+        processTitle(conversionResult);
         processSignalEditor(phenotypeChanged, phenotype, conversionResult);
         processActionButtons();
         processScrollbars();
-        processTitle(conversionResult);
     }
     ImGui::EndChild();
 
