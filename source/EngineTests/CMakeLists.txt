@@ -14,6 +14,7 @@ PUBLIC
     ConnectionMutationTests.cpp
     ConstructorMutationTests.cpp
     ConstructorTests.cpp
+    CopyNodeSectionMutationTests.cpp
     CreatureTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp

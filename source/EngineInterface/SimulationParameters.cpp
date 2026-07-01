@@ -519,6 +519,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::deleteGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
+                        .name("Copy node section mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::copyNodeSectionMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
                         .name("Constructor mutation sigma")
                         .reference(
                             FloatSpec().member(&SimulationParameters::constructorMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
