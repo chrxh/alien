@@ -431,9 +431,9 @@ struct MutationRates
     AddNodeMutation addNodeMutation;
     TrimNodeMutation trimNodeMutation;
     DeleteNodeMutation deleteNodeMutation;
+    CopyNodeSectionMutation copyNodeSectionMutation;
     DuplicateGeneMutation duplicateGeneMutation;
     DeleteGeneMutation deleteGeneMutation;
-    CopyNodeSectionMutation copyNodeSectionMutation;
     ConstructorMutation constructorMutations[2];
 };
 
