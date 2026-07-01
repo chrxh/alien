@@ -2772,10 +2772,13 @@ int AlienGui::DynamicTableLayout::calcNumColumns(float tableWidth, float columnW
     return std::max(toInt(tableWidth / scale(columnWidth)), 1);
 }
 
-AlienGui::DynamicTableLayout::DynamicTableLayout(float columnWidth)
+AlienGui::DynamicTableLayout::DynamicTableLayout(float columnWidth, int maxColumns)
     : _columnWidth(columnWidth)
 {
     _numColumns = calcNumColumns(ImGui::GetContentRegionAvail().x, columnWidth);
+    if (maxColumns > 0) {
+        _numColumns = std::min(_numColumns, maxColumns);
+    }
 }
 
 bool AlienGui::DynamicTableLayout::begin()
