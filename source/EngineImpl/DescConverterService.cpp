@@ -879,6 +879,9 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
         result._mutationRates._cellTypePropertiesMutations[i]._valueChangeSigma = genomeTO.mutationRates.cellTypePropertiesMutations[i].valueChangeSigma;
         result._mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability =
             genomeTO.mutationRates.cellTypePropertiesMutations[i].enumChangeProbability;
+        result._mutationRates._geometryMutations[i]._nodeProbability = genomeTO.mutationRates.geometryMutations[i].nodeProbability;
+        result._mutationRates._geometryMutations[i]._valueChangeSigma = genomeTO.mutationRates.geometryMutations[i].valueChangeSigma;
+        result._mutationRates._geometryMutations[i]._enumChangeProbability = genomeTO.mutationRates.geometryMutations[i].enumChangeProbability;
         result._mutationRates._constructorMutations[i]._nodeProbability = genomeTO.mutationRates.constructorMutations[i].nodeProbability;
         result._mutationRates._constructorMutations[i]._valueChangeSigma = genomeTO.mutationRates.constructorMutations[i].valueChangeSigma;
         result._mutationRates._constructorMutations[i]._enumChangeProbability = genomeTO.mutationRates.constructorMutations[i].enumChangeProbability;
@@ -985,6 +988,10 @@ void DescConverterService::convertGenomeToTO(
             genome._mutationRates._cellTypePropertiesMutations[i]._nodeProbability,
             genome._mutationRates._cellTypePropertiesMutations[i]._valueChangeSigma,
             genome._mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability};
+        genomeTO.mutationRates.geometryMutations[i] = {
+            genome._mutationRates._geometryMutations[i]._nodeProbability,
+            genome._mutationRates._geometryMutations[i]._valueChangeSigma,
+            genome._mutationRates._geometryMutations[i]._enumChangeProbability};
         genomeTO.mutationRates.constructorMutations[i] = {
             genome._mutationRates._constructorMutations[i]._nodeProbability,
             genome._mutationRates._constructorMutations[i]._valueChangeSigma,

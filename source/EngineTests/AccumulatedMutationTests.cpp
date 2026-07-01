@@ -14,6 +14,7 @@ enum class MutationType
     Neuron,
     Connection,
     CellTypeProperties,
+    Geometry,
     CellTypeMode,
     CellType,
     Void,
@@ -37,6 +38,7 @@ INSTANTIATE_TEST_SUITE_P(
         MutationType::Neuron,
         MutationType::Connection,
         MutationType::CellTypeProperties,
+        MutationType::Geometry,
         MutationType::CellTypeMode,
         MutationType::CellType,
         MutationType::Void,
@@ -59,6 +61,9 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         break;
     case MutationType::CellTypeProperties:
         genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
+        break;
+    case MutationType::Geometry:
+        genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
         break;
     case MutationType::CellTypeMode:
         genome._mutationRates._cellTypeModeMutation = CellTypeModeMutationDesc().nodeProbability(1.0f);

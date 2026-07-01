@@ -361,6 +361,13 @@ struct CellTypePropertiesMutation
     float enumChangeProbability;
 };
 
+struct GeometryMutation
+{
+    float nodeProbability;
+    float valueChangeSigma;
+    float enumChangeProbability;
+};
+
 struct CellTypeModeMutation
 {
     float nodeProbability;
@@ -429,6 +436,7 @@ struct MutationRates
     NeuronMutation neuronMutations[2];
     ConnectionMutation connectionMutations[2];
     CellTypePropertiesMutation cellTypePropertiesMutations[2];
+    GeometryMutation geometryMutations[2];
     CellTypeModeMutation cellTypeModeMutation;
     CellTypeMutation cellTypeMutation;
     VoidMutation voidMutation;
