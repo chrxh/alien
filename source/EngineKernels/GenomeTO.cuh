@@ -441,10 +441,10 @@ struct MutationRatesTO
     AddNodeMutationTO addNodeMutation;
     TrimNodeMutationTO trimNodeMutation;
     DeleteNodeMutationTO deleteNodeMutation;
-    DuplicateGeneMutationTO duplicateGeneMutation;
-    DeleteGeneMutationTO deleteGeneMutation;
     CopyNodeSectionMutationTO copyNodeSectionMutation;
     MoveNodeSectionMutationTO moveNodeSectionMutation;
+    DuplicateGeneMutationTO duplicateGeneMutation;
+    DeleteGeneMutationTO deleteGeneMutation;
     ConstructorMutationTO constructorMutations[2];
 };
 
