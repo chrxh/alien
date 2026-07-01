@@ -1649,6 +1649,14 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             }
         }
 
+        float geometrySigma = cudaSimulationParameters.geometryMetaMutationsSigma.value;
+        if (geometrySigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * geometrySigma)); };
+            for (int i = 0; i < 2; ++i) {
+                mutateFloat(genome->mutationRates.geometryMutations[i].nodeProbability);
+            }
+        }
+
         float cellTypeModeSigma = cudaSimulationParameters.cellTypeModeMetaMutationsSigma.value;
         if (cellTypeModeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * cellTypeModeSigma)); };

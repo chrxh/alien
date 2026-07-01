@@ -483,6 +483,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::cellTypePropertiesMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
+                        .name("Geometry mutation sigma")
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::geometryMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                    ParameterSpec()
                         .name("Cell type mode mutation sigma")
                         .reference(
                             FloatSpec().member(&SimulationParameters::cellTypeModeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
