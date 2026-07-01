@@ -116,6 +116,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
     _parameters.neuronsMetaMutationsSigma.value = 1.0f;
     _parameters.connectionsMetaMutationsSigma.value = 1.0f;
     _parameters.cellTypePropertiesMetaMutationsSigma.value = 1.0f;
+    _parameters.geometryMetaMutationsSigma.value = 1.0f;
     _parameters.cellTypeModeMetaMutationsSigma.value = 1.0f;
     _parameters.cellTypeMetaMutationsSigma.value = 1.0f;
     _parameters.voidMetaMutationsSigma.value = 1.0f;
