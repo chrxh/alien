@@ -37,6 +37,7 @@ private:
     __inline__ __device__ static void applyMutations_deleteNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_duplicateGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_deleteGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_copyNodeSection(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static int getNumGeneReferences(Genome* genome, int geneIndex);
     __inline__ __device__ static Node* findNthGeneReference(Genome* genome, int geneIndex, int referenceIndex, bool& isInjector);
     __inline__ __device__ static void applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations);
@@ -94,6 +95,14 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
         applyMutations_addNode(data, genome, accumulatedMutations);
         applyMutations_trimNode(data, genome, accumulatedMutations);
         applyMutations_deleteNode(data, genome, accumulatedMutations);
+        block.sync();
+        correctGenome(data, genome);
+    }
+
+    // sync since the copy-node-section mutation reads whole genes and rebuilds target genes (changing gene->nodes and numNodes)
+    block.sync();
+    if (nodeRates.copyNodeSectionMutation.geneProbability > 0) {
+        applyMutations_copyNodeSection(data, genome, accumulatedMutations);
         block.sync();
         correctGenome(data, genome);
     }
@@ -1214,6 +1223,114 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
     block.sync();
 }
 
+__inline__ __device__ void MutationProcessor::applyMutations_copyNodeSection(SimulationData& data, Genome* genome, float& accumulatedMutations)
+{
+    // Each gene is independently a source candidate with probability geneProbability, so several genes can copy a section in one
+    // pass. A triggered gene picks a contiguous section of its nodes (length in [1, numNodes]) and a random insertion slot of a
+    // random target gene (possibly itself, possibly another gene); the section is spliced in there. Multiple sections may target
+    // the same gene, so each target gene is rebuilt exactly once. Void nodes that end up at a gene boundary are turned into a
+    // non-void type by the correctGenome() call that follows this mutation.
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+    auto const& rate = genome->mutationRates.copyNodeSectionMutation;
+    if (rate.geneProbability <= 0) {  // uniform across the block, so the early return does not desync the cooperative group
+        return;
+    }
+
+    __shared__ int numGenes;
+    __shared__ int numOps;
+    __shared__ Node** opSourceNodes;  // captured pre-mutation node array of the source gene (never overwritten in place)
+    __shared__ int* opSectionStart;
+    __shared__ int* opSectionLength;
+    __shared__ int* opTargetGene;
+    __shared__ int* opTargetPos;
+    __shared__ bool* opAccepted;
+
+    if (laneId == 0) {
+        numGenes = genome->numGenes;
+        numOps = 0;
+        // At most one section per gene, so numGenes slots are always sufficient.
+        opSourceNodes = numGenes > 0 ? data.entities.heap.getTypedSubArray<Node*>(numGenes) : nullptr;
+        opSectionStart = numGenes > 0 ? data.entities.heap.getTypedSubArray<int>(numGenes) : nullptr;
+        opSectionLength = numGenes > 0 ? data.entities.heap.getTypedSubArray<int>(numGenes) : nullptr;
+        opTargetGene = numGenes > 0 ? data.entities.heap.getTypedSubArray<int>(numGenes) : nullptr;
+        opTargetPos = numGenes > 0 ? data.entities.heap.getTypedSubArray<int>(numGenes) : nullptr;
+        opAccepted = numGenes > 0 ? data.entities.heap.getTypedSubArray<bool>(numGenes) : nullptr;
+    }
+    block.sync();
+
+    // Phase 1 (parallel per source gene): decide which genes copy a section and where it is inserted. Only reads happen here, so
+    // the genome is not modified yet and every target gene still has its original node count.
+    for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
+        auto& gene = genome->genes[geneIndex];
+        if (gene.numNodes <= 0 || data.primaryNumberGen.random() >= rate.geneProbability) {
+            continue;
+        }
+        int sectionLength = data.primaryNumberGen.random(gene.numNodes - 1) + 1;           // [1, numNodes]
+        int sectionStart = data.primaryNumberGen.random(gene.numNodes - sectionLength);    // [0, numNodes - sectionLength]
+        int targetGene = data.primaryNumberGen.random(numGenes - 1);                       // [0, numGenes - 1]
+        int targetPos = data.primaryNumberGen.random(genome->genes[targetGene].numNodes);  // [0, numNodes] => any insertion slot
+
+        int slot = atomicAdd_block(&numOps, 1);
+        opSourceNodes[slot] = gene.nodes;
+        opSectionStart[slot] = sectionStart;
+        opSectionLength[slot] = sectionLength;
+        opTargetGene[slot] = targetGene;
+        opTargetPos[slot] = targetPos;
+    }
+    block.sync();
+
+    // Phase 2 (parallel per target gene): rebuild each target gene once, splicing in all sections destined for it. Sections are
+    // read from the captured pre-mutation source pointers, so a gene that is both a source and a target still contributes its
+    // original nodes. Only the thread owning a gene swaps that gene's node pointer, and the old arrays are never overwritten, so
+    // no thread reads an array that another thread is replacing.
+    for (int targetIndex = laneId; targetIndex < numGenes; targetIndex += blockDim.x) {
+        auto& gene = genome->genes[targetIndex];
+        auto const oldNumNodes = gene.numNodes;
+
+        // Sizing pass (op order): accept sections while the per-gene cap allows and record the decision so the emit pass matches.
+        int addedNodes = 0;
+        for (int op = 0; op < numOps; ++op) {
+            if (opTargetGene[op] != targetIndex) {
+                continue;
+            }
+            bool fits = oldNumNodes + addedNodes + opSectionLength[op] <= MaxNodesPerGene;
+            opAccepted[op] = fits;
+            if (fits) {
+                addedNodes += opSectionLength[op];
+            }
+        }
+        if (addedNodes == 0) {
+            continue;
+        }
+
+        auto const newNumNodes = oldNumNodes + addedNodes;
+        auto newNodes = data.entities.heap.getTypedSubArray<Node>(newNumNodes);
+
+        // Emit pass: walk the insertion slots [0, oldNumNodes]; at each slot emit the accepted sections targeting it, then the
+        // original node. Ordering by slot keeps the target gene's node order intact.
+        int writeIndex = 0;
+        for (int slot = 0; slot <= oldNumNodes; ++slot) {
+            for (int op = 0; op < numOps; ++op) {
+                if (opTargetGene[op] != targetIndex || opTargetPos[op] != slot || !opAccepted[op]) {
+                    continue;
+                }
+                for (int k = 0; k < opSectionLength[op]; ++k) {
+                    newNodes[writeIndex++] = opSourceNodes[op][opSectionStart[op] + k];
+                }
+            }
+            if (slot < oldNumNodes) {
+                newNodes[writeIndex++] = gene.nodes[slot];
+            }
+        }
+
+        gene.nodes = newNodes;
+        gene.numNodes = newNumNodes;
+        atomicAdd_block(&accumulatedMutations, toFloat(addedNodes));
+    }
+    block.sync();
+}
+
 __inline__ __device__ void MutationProcessor::applyMutations_constructor(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto block = cg_mutation::this_thread_block();
@@ -1387,6 +1504,12 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (deleteGeneSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * deleteGeneSigma)); };
             mutateFloat(genome->mutationRates.deleteGeneMutation.geneProbability);
+        }
+
+        float copyNodeSectionSigma = cudaSimulationParameters.copyNodeSectionMetaMutationsSigma.value;
+        if (copyNodeSectionSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * copyNodeSectionSigma)); };
+            mutateFloat(genome->mutationRates.copyNodeSectionMutation.geneProbability);
         }
 
         float constructorSigma = cudaSimulationParameters.constructorMetaMutationsSigma.value;
