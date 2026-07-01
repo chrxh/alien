@@ -27,7 +27,7 @@ public:
 
 protected:
     // Helper to create a sender creature with 2 cells (sender + helper for signal)
-    Desc createSenderCreature(uint64_t creatureId, RealVector2D pos, int range = 50, int maxTimesSent = 4, int color = 0)
+    Desc createSenderCreature(uint64_t creatureId, RealVector2D pos, int range = 50, int color = 0)
     {
         auto data = Desc().addCreature(
             {
@@ -37,7 +37,7 @@ protected:
                     .color(color)
                     .type(CellDesc()
                               .neuralNetwork(NeuralNetDesc().biases({1.0f, 0.5f, 2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
-                              .cellType(CommunicatorDesc().mode(SenderDesc().range(range).maxTimesSent(maxTimesSent)))),
+                              .cellType(CommunicatorDesc().mode(SenderDesc().range(range)))),
                 ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
             },
             CreatureDesc().id(creatureId));
@@ -127,7 +127,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().signal({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(2).pos({110.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc()))),
         },
         CreatureDesc().id(1));
@@ -166,36 +166,10 @@ TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
     }
 }
 
-TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
-{
-    // Create sender in creature 1 with signal that has numTimesSent = 2 (equal to maxTimesSent)
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(2)))),
-            ObjectDesc()
-                .id(101)
-                .pos({101.0f, 100.0f})
-                .type(CellDesc().signal(SignalDesc().numTimesSent(2).channels({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
-        },
-        CreatureDesc().id(1));
-    data.addConnection(100, 101);
-
-    // Create receiver
-    data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(200);
-
-    // Receiver should NOT have received the signal (maxTimesSent exceeded)
-}
-
 TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
 {
     // Create sender with color 2
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 2);
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 2);
 
     // Create receiver that only accepts color 2
     data.add(createReceiverCreature(2, {110.0f, 100.0f}, 1 << 2), false);
@@ -213,7 +187,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
 TEST_F(CommunicatorTests, sender_receiverColorRestriction_mismatchingColor)
 {
     // Create sender with color 3
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 3);
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 3);
 
     // Create receiver that only accepts color 2
     data.add(createReceiverCreature(2, {110.0f, 100.0f}, 1 << 2), false);
@@ -233,7 +207,7 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
     // Create sender without active signal
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             // No signalAndState set, so signal is not active
             ObjectDesc().id(101).pos({101.0f, 100.0f}),
         },
@@ -286,47 +260,6 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
 }
 
-TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
-{
-    // Create first sender with numTimesSent = 3
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(10)))),
-            ObjectDesc()
-                .id(101)
-                .pos({101.0f, 100.0f})
-                .type(CellDesc().signal(SignalDesc().numTimesSent(3).channels({1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
-        },
-        CreatureDesc().id(1));
-    data.addConnection(100, 101);
-
-    // Create second sender with numTimesSent = 1 (higher priority)
-    data.addCreature(
-        {
-            ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(10)))),
-            ObjectDesc()
-                .id(201)
-                .pos({101.0f, 120.0f})
-                .type(CellDesc().signal(SignalDesc().numTimesSent(1).channels({-1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
-        },
-        CreatureDesc().id(2));
-    data.addConnection(200, 201);
-
-    // Create receiver
-    data.add(createReceiverCreature(3, {100.0f, 110.0f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getObjectRef(300);
-
-    // Receiver should have received the signal
-    // The numTimesSent should be the lower one + 1 = 2
-    EXPECT_EQ(receiver.getCellRef()._signal._numTimesSent, 2);
-    EXPECT_EQ(receiver.getCellRef()._signal._channels[0], -1.0f);
-}
-
 /**
  * Parameterized test for angle translation with different reference direction differences.
  * Parameter: receiverRefAngleDiff - the difference in degrees between sender and receiver reference directions.
@@ -351,7 +284,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc()
                 .id(101)
                 .pos({101.0f, 100.0f})
@@ -419,7 +352,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50).maxTimesSent(4)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1).lineageId(senderLineageId),

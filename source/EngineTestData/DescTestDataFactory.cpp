@@ -78,7 +78,7 @@ ObjectDesc DescTestDataFactory::createNonDefaultObjectDesc(ObjectParameter objec
                       .headUpdateId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}).numTimesSent(42))
+                      .signal(SignalDesc().channels({1, 0, 0.6f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
                       .constructor(ConstructorDesc()
                                        .autoTriggerInterval(55)
                                        .geneIndex(1)
@@ -625,9 +625,6 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             if (sender._range != nodeSender._range) {
                 return false;
             }
-            if (sender._maxTimesSent != nodeSender._maxTimesSent) {
-                return false;
-            }
         } break;
         case CommunicatorMode_Receiver: {
             auto const& receiver = std::get<ReceiverDesc>(communicator._mode);
@@ -830,7 +827,7 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
         CommunicatorModeDesc communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderDesc().range(150).maxTimesSent(6);
+            communicatorModeDesc = SenderDesc().range(150);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverDesc().restrictToColors(1 << 2).restrictToLineage(LineageRestriction_UnrelatedLineage);
@@ -996,7 +993,7 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
         CommunicatorModeGenomeDesc communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderGenomeDesc().range(200).maxTimesSent(8);
+            communicatorModeDesc = SenderGenomeDesc().range(200);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverGenomeDesc().restrictToColors(1 << 5).restrictToLineage(LineageRestriction_RelatedLineage);

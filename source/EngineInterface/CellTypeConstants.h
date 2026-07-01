@@ -482,8 +482,6 @@ namespace Const
     auto constexpr CommunicatorRange_Min = 0;
     auto constexpr CommunicatorRange_Max = 20;
     auto constexpr CommunicatorRange_Default = 15;
-    auto constexpr CommunicatorMaxTimesSent_Min = 0;
-    auto constexpr CommunicatorMaxTimesSent_Default = 4;
 }
 
 using CommunicatorMode = int;

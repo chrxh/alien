@@ -276,7 +276,6 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 if (communicatorMode == CommunicatorMode_Sender) {
                     auto& sender = std::get<SenderGenomeDesc>(communicator._mode);
                     sender._range = std::clamp(sender._range, Const::CommunicatorRange_Min, Const::CommunicatorRange_Max);
-                    sender._maxTimesSent = std::clamp(sender._maxTimesSent, Const::CommunicatorMaxTimesSent_Min, 10);
                 } else if (communicatorMode == CommunicatorMode_Receiver) {
                     auto& receiver = std::get<ReceiverGenomeDesc>(communicator._mode);
                     receiver._restrictToColors =
@@ -490,7 +489,6 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
             if (communicatorMode == CommunicatorMode_Sender) {
                 auto& sender = std::get<SenderDesc>(communicator._mode);
                 sender._range = std::clamp(sender._range, 0, 20);
-                sender._maxTimesSent = std::max(sender._maxTimesSent, 0);
             } else if (communicatorMode == CommunicatorMode_Receiver) {
                 auto& receiver = std::get<ReceiverDesc>(communicator._mode);
                 receiver._restrictToColors &= (1 << MAX_COLORS) - 1;

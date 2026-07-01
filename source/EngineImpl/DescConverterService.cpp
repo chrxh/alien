@@ -570,7 +570,6 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             if (communicatorTO.mode == CommunicatorMode_Sender) {
                 SenderDesc sender;
                 sender._range = communicatorTO.modeData.sender.range;
-                sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
                 communicator._mode = sender;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 ReceiverDesc receiver;
@@ -612,7 +611,6 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
         for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
-        cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
         cellDesc._activationTime = objectTO.typeData.cell.activationTime;
         result._type = cellDesc;
 
@@ -823,7 +821,6 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         if (communicatorTO.mode == CommunicatorMode_Sender) {
             SenderGenomeDesc sender;
             sender._range = communicatorTO.modeData.sender.range;
-            sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
             communicatorDesc._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverGenomeDesc receiver;
@@ -1210,7 +1207,6 @@ void DescConverterService::convertGenomeToTO(
                 if (communicatorTO.mode == CommunicatorMode_Sender) {
                     auto const& senderDesc = std::get<SenderGenomeDesc>(communicatorDesc._mode);
                     communicatorTO.modeData.sender.range = static_cast<uint8_t>(senderDesc._range);
-                    communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
                 } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                     auto const& receiverDesc = std::get<ReceiverGenomeDesc>(communicatorDesc._mode);
                     communicatorTO.modeData.receiver.restrictToColors = static_cast<uint16_t>(receiverDesc._restrictToColors);
@@ -1537,7 +1533,6 @@ void DescConverterService::convertObjectToTO(
             if (communicatorTO.mode == CommunicatorMode_Sender) {
                 auto const& senderDesc = std::get<SenderDesc>(communicatorDesc._mode);
                 communicatorTO.modeData.sender.range = static_cast<uint8_t>(senderDesc._range);
-                communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 auto const& receiverDesc = std::get<ReceiverDesc>(communicatorDesc._mode);
                 communicatorTO.modeData.receiver.restrictToColors = static_cast<uint16_t>(receiverDesc._restrictToColors);
@@ -1570,7 +1565,6 @@ void DescConverterService::convertObjectToTO(
         for (int i = 0; i < NEURONS_PER_CELL && i < numChannels; ++i) {
             objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
         }
-        objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
     } else {
         CHECK(false);
     }

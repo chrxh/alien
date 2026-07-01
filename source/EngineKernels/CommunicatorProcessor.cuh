@@ -14,7 +14,7 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static void tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent);
+    __inline__ __device__ static void tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject);
 };
 
 /************************************************************************/
@@ -52,25 +52,14 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     __shared__ int range;
-    __shared__ int maxTimesSent;
-    __shared__ int currentNumTimesSent;
     __shared__ float2 senderPos;
 
     if (threadIdx.x == 0) {
         auto& sender = object->typeData.cell.cellTypeData.communicator.modeData.sender;
         range = sender.range;
-        maxTimesSent = sender.maxTimesSent;
-        currentNumTimesSent = object->typeData.cell.signal.numTimesSent;
         senderPos = object->pos;
     }
     __syncthreads();
-
-    // Check if signal can still be forwarded
-    if (currentNumTimesSent >= maxTimesSent) {
-        return;
-    }
-
-    auto const newNumTimesSent = currentNumTimesSent + 1;
 
     // Matching lambda to check if a cell is a valid receiver
     auto isMatch = [&object](Object* otherObject) {
@@ -136,20 +125,19 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
             auto const& otherRecord = records[otherIndex];
             auto otherObject = otherRecord.self;
             if (isMatch(otherObject)) {
-                tryTransmitSignal(data, object, otherObject, newNumTimesSent);
+                tryTransmitSignal(data, object, otherObject);
             }
             otherIndex = otherRecord.nextObjectIndex;
         }
     }
 }
 
-__inline__ __device__ void CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent)
+__inline__ __device__ void CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject)
 {
     receiverObject->getLock();
 
-    // Copy signal to receiver with incremented numTimesSent
+    // Copy signal to receiver
     copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
-    receiverObject->typeData.cell.signal.numTimesSent = newNumTimesSent;
 
     // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
     // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
