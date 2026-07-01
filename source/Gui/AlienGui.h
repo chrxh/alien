@@ -508,7 +508,7 @@ public:
     public:
         static int calcNumColumns(float tableWidth, float columnWidth);
 
-        DynamicTableLayout(float columnWidth);
+        DynamicTableLayout(float columnWidth, int maxColumns = 0);
 
         bool begin();
         void end();
