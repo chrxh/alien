@@ -409,7 +409,6 @@ struct SenderDesc
     auto operator<=>(SenderDesc const&) const = default;
 
     MEMBER(SenderDesc, int, range, Const::CommunicatorRange_Default);
-    MEMBER(SenderDesc, int, maxTimesSent, Const::CommunicatorMaxTimesSent_Default);
 };
 
 struct ReceiverDesc
@@ -459,8 +458,6 @@ struct SignalDesc
 
     SignalDesc& channels(std::vector<float> const& value);
     std::vector<float> _channels;
-
-    MEMBER(SignalDesc, int, numTimesSent, 0);
 };
 
 struct SolidDesc

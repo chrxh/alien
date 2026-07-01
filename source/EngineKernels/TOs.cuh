@@ -353,7 +353,6 @@ struct MemoryTO
 struct SenderTO
 {
     uint8_t range;
-    int maxTimesSent;
 };
 
 struct ReceiverTO
@@ -395,7 +394,6 @@ union CellTypeDataTO
 struct SignalTO
 {
     float channels[NEURONS_PER_CELL];
-    int numTimesSent;
 };
 
 struct SolidTO

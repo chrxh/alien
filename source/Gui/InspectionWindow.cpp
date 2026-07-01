@@ -859,7 +859,6 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
             if (mode == CommunicatorMode_Sender) {
                 auto& m = std::get<SenderDesc>(communicator._mode);
                 AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Range").min(0).max(20).textWidth(TextWidth), &m._range);
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Max times sent").textWidth(TextWidth), m._maxTimesSent);
             } else if (mode == CommunicatorMode_Receiver) {
                 auto& m = std::get<ReceiverDesc>(communicator._mode);
                 AlienGui::ColorCheckboxes(
