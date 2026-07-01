@@ -480,7 +480,7 @@ void _CreaturePreviewWidget::processTitle(ConversionResult const& conversionResu
     auto subGenomeType = _subGenome.startIndex == 0 ? "Primary" : "Secondary";
     auto numCells = std::ranges::count_if(conversionResult.description._cells, [](auto const& cell) { return cell._cellType != CellType_Void; });
     auto cellCountText = std::to_string(numCells) + " cells" + (_subGenome.trimmed ? " (trimmed)" : "");
-    auto title = std::string(subGenomeType) + ": " + cellCountText + ", Gene indices: " + boost::join(geneIndexStrings, ", ");
+    auto title = std::string(subGenomeType) + ": " + cellCountText + ", gene indices: " + boost::join(geneIndexStrings, ", ");
     AlienGui::Text(title.c_str());
 }
 
