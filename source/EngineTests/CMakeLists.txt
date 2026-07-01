@@ -38,6 +38,7 @@ PUBLIC
     LayerParameterTests.cpp
     MemoryTests.cpp
     MetaMutationTests.cpp
+    MoveNodeSectionMutationTests.cpp
     MuscleTests.cpp
     MutationTestsBase.h
     NeuronMutationTests.cpp
