@@ -54,6 +54,7 @@ namespace
         addActiveMutationType(activeMutations, "Duplicate gene mutations", {mutationRates._duplicateGeneMutation._geneProbability});
         addActiveMutationType(activeMutations, "Delete gene mutations", {mutationRates._deleteGeneMutation._geneProbability});
         addActiveMutationType(activeMutations, "Copy node section mutations", {mutationRates._copyNodeSectionMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Move node section mutations", {mutationRates._moveNodeSectionMutation._geneProbability});
         addActiveMutationType(
             activeMutations, "Constructor", {mutationRates._constructorMutations[0]._nodeProbability, mutationRates._constructorMutations[1]._nodeProbability});
         return activeMutations;

@@ -319,6 +319,8 @@ namespace
 
     auto constexpr Id_CopyNodeSectionMutation_GeneProbability = 0;
 
+    auto constexpr Id_MoveNodeSectionMutation_GeneProbability = 0;
+
     auto constexpr Id_ConstructorMutation_NodeProbability = 0;
     auto constexpr Id_ConstructorMutation_ValueChangeSigma = 1;
     auto constexpr Id_ConstructorMutation_EnumChangeProbability = 2;
@@ -458,6 +460,7 @@ namespace
     auto constexpr Id_MutationRates_DuplicateGeneMutation = 16;
     auto constexpr Id_MutationRates_DeleteGeneMutation = 17;
     auto constexpr Id_MutationRates_CopyNodeSectionMutation = 18;
+    auto constexpr Id_MutationRates_MoveNodeSectionMutation = 19;
 
     auto constexpr Id_Genome_Genes = 6;
     auto constexpr Id_Genome_MutationRates = 7;
@@ -1022,6 +1025,15 @@ namespace cereal
     SPLIT_SERIALIZATION(CopyNodeSectionMutationDesc)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, MoveNodeSectionMutationDesc& data)
+    {
+        MoveNodeSectionMutationDesc defaultObject;
+        auto scope = getSerializationScope(task, ar);
+        scope.addMember(Id_MoveNodeSectionMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+    }
+    SPLIT_SERIALIZATION(MoveNodeSectionMutationDesc)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConstructorMutationDesc& data)
     {
         ConstructorMutationDesc defaultObject;
@@ -1054,6 +1066,7 @@ namespace cereal
         scope.addDesc(Id_MutationRates_DuplicateGeneMutation, data._duplicateGeneMutation);
         scope.addDesc(Id_MutationRates_DeleteGeneMutation, data._deleteGeneMutation);
         scope.addDesc(Id_MutationRates_CopyNodeSectionMutation, data._copyNodeSectionMutation);
+        scope.addDesc(Id_MutationRates_MoveNodeSectionMutation, data._moveNodeSectionMutation);
         scope.addDesc(Id_MutationRates_ConstructorMutation1, data._constructorMutations[0]);
         scope.addDesc(Id_MutationRates_ConstructorMutation2, data._constructorMutations[1]);
     }

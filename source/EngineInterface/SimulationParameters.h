@@ -122,6 +122,7 @@ struct SimulationParameters
     BaseParameter<float> duplicateGeneMetaMutationsSigma = {0};
     BaseParameter<float> deleteGeneMetaMutationsSigma = {0};
     BaseParameter<float> copyNodeSectionMetaMutationsSigma = {0};
+    BaseParameter<float> moveNodeSectionMetaMutationsSigma = {0};
     BaseParameter<float> constructorMetaMutationsSigma = {0};
 
     // Cell type: Attacker

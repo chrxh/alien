@@ -416,6 +416,11 @@ struct CopyNodeSectionMutationTO
     float geneProbability;
 };
 
+struct MoveNodeSectionMutationTO
+{
+    float geneProbability;
+};
+
 struct ConstructorMutationTO
 {
     float nodeProbability;
@@ -439,6 +444,7 @@ struct MutationRatesTO
     DuplicateGeneMutationTO duplicateGeneMutation;
     DeleteGeneMutationTO deleteGeneMutation;
     CopyNodeSectionMutationTO copyNodeSectionMutation;
+    MoveNodeSectionMutationTO moveNodeSectionMutation;
     ConstructorMutationTO constructorMutations[2];
 };
 
