@@ -276,6 +276,8 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
         settings.getValue(settingsPrefix + "duplicate gene mutation.gene probability", mutationRates._duplicateGeneMutation._geneProbability);
     mutationRates._deleteGeneMutation._geneProbability =
         settings.getValue(settingsPrefix + "delete gene mutation.gene probability", mutationRates._deleteGeneMutation._geneProbability);
+    mutationRates._copyNodeSectionMutation._geneProbability =
+        settings.getValue(settingsPrefix + "copy node section mutation.gene probability", mutationRates._copyNodeSectionMutation._geneProbability);
 
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
@@ -329,6 +331,7 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
     settings.setValue(settingsPrefix + "delete node mutation.gene probability", mutationRates._deleteNodeMutation._geneProbability);
     settings.setValue(settingsPrefix + "duplicate gene mutation.gene probability", mutationRates._duplicateGeneMutation._geneProbability);
     settings.setValue(settingsPrefix + "delete gene mutation.gene probability", mutationRates._deleteGeneMutation._geneProbability);
+    settings.setValue(settingsPrefix + "copy node section mutation.gene probability", mutationRates._copyNodeSectionMutation._geneProbability);
 
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
@@ -457,6 +460,15 @@ void MutationRatesDialog::processIntern()
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Delete gene mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
                     processGeneProbabilityMutationRate("Mutation rate", "DLGM", _mutation._deleteGeneMutation, RightColumnWidth);
+                    table.next();
+                });
+            }
+            AlienGui::EndTreeNode();
+            sectionTable.next();
+
+            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Copy node section mutations").rank(AlienGui::TreeNodeRank::High))) {
+                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                    processGeneProbabilityMutationRate("Mutation rate", "CNSM", _mutation._copyNodeSectionMutation, RightColumnWidth);
                     table.next();
                 });
             }

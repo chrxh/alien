@@ -61,6 +61,7 @@ namespace
             genomeTO.mutationRates.deleteNodeMutation = {genome->mutationRates.deleteNodeMutation.geneProbability};
             genomeTO.mutationRates.duplicateGeneMutation = {genome->mutationRates.duplicateGeneMutation.geneProbability};
             genomeTO.mutationRates.deleteGeneMutation = {genome->mutationRates.deleteGeneMutation.geneProbability};
+            genomeTO.mutationRates.copyNodeSectionMutation = {genome->mutationRates.copyNodeSectionMutation.geneProbability};
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];
