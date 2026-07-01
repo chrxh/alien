@@ -7,19 +7,17 @@
 #include "MutationTestsBase.h"
 
 class CopyNodeSectionMutationTests : public MutationTestsBase
-{};
-
-namespace
 {
-    int countNodes(GenomeDesc const& genome)
+protected:
+    int countNodes(GenomeDesc const& genome) const
     {
         int result = 0;
         for (auto const& gene : genome._genes) {
-            result += static_cast<int>(gene._nodes.size());
+            result += toInt(gene._nodes.size());
         }
         return result;
     }
-}
+};
 
 TEST_F(CopyNodeSectionMutationTests, copyNodeSectionMutation_zeroProbabilityNoChange)
 {
