@@ -299,7 +299,7 @@ namespace
     auto constexpr Id_CellTypePropertiesMutation_ValueChangeSigma = 1;
     auto constexpr Id_CellTypePropertiesMutation_EnumChangeProbability = 2;
 
-    auto constexpr Id_GeometryMutation_NodeProbability = 0;
+    auto constexpr Id_GeometryMutation_GeneProbability = 0;
     auto constexpr Id_GeometryMutation_ValueChangeSigma = 1;
     auto constexpr Id_GeometryMutation_EnumChangeProbability = 2;
 
@@ -945,7 +945,7 @@ namespace cereal
     {
         GeometryMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_GeometryMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
+        scope.addMember(Id_GeometryMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
         scope.addMember(Id_GeometryMutation_ValueChangeSigma, data._valueChangeSigma, defaultObject._valueChangeSigma);
         scope.addMember(Id_GeometryMutation_EnumChangeProbability, data._enumChangeProbability, defaultObject._enumChangeProbability);
     }

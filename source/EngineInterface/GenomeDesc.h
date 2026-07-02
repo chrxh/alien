@@ -443,7 +443,7 @@ struct GeometryMutationDesc
 {
     auto operator<=>(GeometryMutationDesc const&) const = default;
 
-    MEMBER(GeometryMutationDesc, float, nodeProbability, 0.0f);
+    MEMBER(GeometryMutationDesc, float, geneProbability, 0.0f);
     MEMBER(GeometryMutationDesc, float, valueChangeSigma, 0.0f);
     MEMBER(GeometryMutationDesc, float, enumChangeProbability, 0.0f);
 };

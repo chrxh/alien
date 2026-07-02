@@ -496,13 +496,13 @@ __inline__ __device__ void MutationProcessor::applyMutations_geometry(Simulation
 
     for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
         auto const& rate = rates[rateIndex];
-        if (rate.nodeProbability <= 0 || (rate.valueChangeSigma <= 0 && rate.enumChangeProbability <= 0)) {
+        if (rate.geneProbability <= 0 || (rate.valueChangeSigma <= 0 && rate.enumChangeProbability <= 0)) {
             continue;
         }
 
         // Genes are independent, so each thread mutates whole genes on its own.
         for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
-            if (data.primaryNumberGen.random() >= rate.nodeProbability) {
+            if (data.primaryNumberGen.random() >= rate.geneProbability) {
                 continue;
             }
             auto& gene = genome->genes[geneIndex];
@@ -1653,7 +1653,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         if (geometrySigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * geometrySigma)); };
             for (int i = 0; i < 2; ++i) {
-                mutateFloat(genome->mutationRates.geometryMutations[i].nodeProbability);
+                mutateFloat(genome->mutationRates.geometryMutations[i].geneProbability);
             }
         }
 

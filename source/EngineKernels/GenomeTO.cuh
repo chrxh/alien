@@ -368,7 +368,7 @@ struct CellTypePropertiesMutationTO
 
 struct GeometryMutationTO
 {
-    float nodeProbability;
+    float geneProbability;
     float valueChangeSigma;
     float enumChangeProbability;
 };

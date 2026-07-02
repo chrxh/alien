@@ -101,14 +101,14 @@ namespace
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
-                    .name("Node probability")
+                    .name("Gene probability")
                     .id(id)
                     .min(0.0f)
                     .max(1.0f)
                     .logarithmic(true)
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
-                &mutation._nodeProbability);
+                &mutation._geneProbability);
             AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters().name("Value change sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
                 &mutation._valueChangeSigma);
@@ -291,8 +291,8 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
 
-        mutationRates._geometryMutations[i]._nodeProbability = settings.getValue(
-            settingsPrefix + "geometry mutation " + indexSuffix + ".node probability", mutationRates._geometryMutations[i]._nodeProbability);
+        mutationRates._geometryMutations[i]._geneProbability = settings.getValue(
+            settingsPrefix + "geometry mutation " + indexSuffix + ".gene probability", mutationRates._geometryMutations[i]._geneProbability);
         mutationRates._geometryMutations[i]._valueChangeSigma =
             settings.getValue(settingsPrefix + "geometry mutation " + indexSuffix + ".sigma", mutationRates._geometryMutations[i]._valueChangeSigma);
         mutationRates._geometryMutations[i]._enumChangeProbability = settings.getValue(
@@ -368,7 +368,7 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
     for (auto i = 0; i < 2; ++i) {
         auto const indexSuffix = i == 0 ? "1" : "2";
 
-        settings.setValue(settingsPrefix + "geometry mutation " + indexSuffix + ".node probability", mutationRates._geometryMutations[i]._nodeProbability);
+        settings.setValue(settingsPrefix + "geometry mutation " + indexSuffix + ".gene probability", mutationRates._geometryMutations[i]._geneProbability);
         settings.setValue(settingsPrefix + "geometry mutation " + indexSuffix + ".sigma", mutationRates._geometryMutations[i]._valueChangeSigma);
         settings.setValue(
             settingsPrefix + "geometry mutation " + indexSuffix + ".discrete change probability", mutationRates._geometryMutations[i]._enumChangeProbability);
