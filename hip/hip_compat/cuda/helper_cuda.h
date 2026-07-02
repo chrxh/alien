@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <EngineKernels/cuda_to_hip.h>
+#include <cuda_to_hip.h>
 
 template <typename T>
 inline void check(T result, char const* func, char const* file, int line)

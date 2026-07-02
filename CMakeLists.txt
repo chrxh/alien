@@ -66,8 +66,8 @@ if(USE_HIP)
     # clang-cl does not accept -ffast-math; use the pass-through form.
     set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} /clang:-ffast-math")
     # Force-include: clang-cl requires /FI<path> (no space, MSVC style).
-    set(_HIP_FORCE_INCLUDE "/FI${CMAKE_CURRENT_SOURCE_DIR}/source/EngineKernels/cuda_to_hip.h")
-    set(_CXX_FORCE_INCLUDE "/FI${CMAKE_CURRENT_SOURCE_DIR}/source/EngineKernels/cuda_to_hip.h")
+    set(_HIP_FORCE_INCLUDE "/FI${CMAKE_CURRENT_SOURCE_DIR}/hip/cuda_to_hip.h")
+    set(_CXX_FORCE_INCLUDE "/FI${CMAKE_CURRENT_SOURCE_DIR}/hip/cuda_to_hip.h")
     if(WIN32)
       # On Windows, clang-cl -fgpu-rdc invokes clang-offload-bundler with the
       # same path as both bundler input and output (the /Fo<path> the driver
@@ -103,8 +103,8 @@ if(USE_HIP)
     endif()
   else()
     set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -ffast-math")
-    set(_HIP_FORCE_INCLUDE "-include${CMAKE_CURRENT_SOURCE_DIR}/source/EngineKernels/cuda_to_hip.h")
-    set(_CXX_FORCE_INCLUDE "-include${CMAKE_CURRENT_SOURCE_DIR}/source/EngineKernels/cuda_to_hip.h")
+    set(_HIP_FORCE_INCLUDE "-include${CMAKE_CURRENT_SOURCE_DIR}/hip/cuda_to_hip.h")
+    set(_CXX_FORCE_INCLUDE "-include${CMAKE_CURRENT_SOURCE_DIR}/hip/cuda_to_hip.h")
     if(WIN32)
       # CMake injects -fuse-ld=lld-link (Windows-Clang platform default) into
       # <LINK_FLAGS>; this flag conflicts with --hip-link (HIP device-link mode)
@@ -128,11 +128,15 @@ if(USE_HIP)
     find_package(hip REQUIRED)
 
     # ROCm ships no CUDA-named toolkit headers; the forwarding shims in
-    # source/hip_compat (cuda_runtime.h, cooperative_groups.h, ...) stand in for
+    # hip/hip_compat (cuda_runtime.h, cooperative_groups.h, ...) stand in for
     # them on the HIP build only. Prepend the shim dir (BEFORE) so its
     # cuda/helper_cuda.h shadows the project's vendored external/cuda/helper_cuda.h,
     # which does not parse under hipcc. The CUDA include resolution is unchanged.
-    include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/source/hip_compat)
+    # The parent hip/ dir is also prepended so the shims resolve the force-included
+    # header as <cuda_to_hip.h>. All HIP-only sources live under hip/, never source/.
+    include_directories(BEFORE
+        ${CMAKE_CURRENT_SOURCE_DIR}/hip/hip_compat
+        ${CMAKE_CURRENT_SOURCE_DIR}/hip)
 
     # The HIP runtime headers (pulled by the force-included compat header) must
     # be on the path for host C++ TUs too, which do not link hip::host.
