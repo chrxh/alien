@@ -46,16 +46,13 @@ namespace
                     genome->mutationRates.cellTypePropertiesMutations[i].nodeProbability,
                     genome->mutationRates.cellTypePropertiesMutations[i].valueChangeSigma,
                     genome->mutationRates.cellTypePropertiesMutations[i].enumChangeProbability};
-                genomeTO.mutationRates.geometryMutations[i] = {
-                    genome->mutationRates.geometryMutations[i].nodeProbability,
-                    genome->mutationRates.geometryMutations[i].valueChangeSigma,
-                    genome->mutationRates.geometryMutations[i].enumChangeProbability};
                 genomeTO.mutationRates.constructorMutations[i] = {
                     genome->mutationRates.constructorMutations[i].nodeProbability,
                     genome->mutationRates.constructorMutations[i].valueChangeSigma,
                     genome->mutationRates.constructorMutations[i].enumChangeProbability,
                     genome->mutationRates.constructorMutations[i].constructorToggleProbability};
             }
+            genomeTO.mutationRates.geometryMutation = {genome->mutationRates.geometryMutation.nodeProbability};
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.nodeProbability};
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.nodeProbability};
             genomeTO.mutationRates.voidMutation = {genome->mutationRates.voidMutation.nodeProbability};

@@ -109,19 +109,6 @@ namespace
                     .format("%.5f")
                     .textWidth(rightColumnWidth),
                 &mutation._nodeProbability);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Value change sigma").id(id).min(0.0f).max(1.0f).logarithmic(true).format("%.3f").textWidth(rightColumnWidth),
-                &mutation._valueChangeSigma);
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Enum change probability")
-                    .id(id)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &mutation._enumChangeProbability);
         }
         AlienGui::EndTreeNode();
     }
@@ -288,16 +275,8 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
             settingsPrefix + "cell type property mutation" + indexSuffix + ".discrete change probability", mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability);
     }
 
-    for (auto i = 0; i < 2; ++i) {
-        auto const indexSuffix = i == 0 ? "1" : "2";
-
-        mutationRates._geometryMutations[i]._nodeProbability = settings.getValue(
-            settingsPrefix + "geometry mutation " + indexSuffix + ".node probability", mutationRates._geometryMutations[i]._nodeProbability);
-        mutationRates._geometryMutations[i]._valueChangeSigma =
-            settings.getValue(settingsPrefix + "geometry mutation " + indexSuffix + ".sigma", mutationRates._geometryMutations[i]._valueChangeSigma);
-        mutationRates._geometryMutations[i]._enumChangeProbability = settings.getValue(
-            settingsPrefix + "geometry mutation " + indexSuffix + ".discrete change probability", mutationRates._geometryMutations[i]._enumChangeProbability);
-    }
+    mutationRates._geometryMutation._nodeProbability =
+        settings.getValue(settingsPrefix + "geometry mutation.node probability", mutationRates._geometryMutation._nodeProbability);
 
     mutationRates._cellTypeModeMutation._nodeProbability =
         settings.getValue(settingsPrefix + "cell type mode mutation.node probability", mutationRates._cellTypeModeMutation._nodeProbability);
@@ -365,14 +344,7 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
             settingsPrefix + "cell type property mutation " + indexSuffix + ".discrete change probability", mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability);
     }
 
-    for (auto i = 0; i < 2; ++i) {
-        auto const indexSuffix = i == 0 ? "1" : "2";
-
-        settings.setValue(settingsPrefix + "geometry mutation " + indexSuffix + ".node probability", mutationRates._geometryMutations[i]._nodeProbability);
-        settings.setValue(settingsPrefix + "geometry mutation " + indexSuffix + ".sigma", mutationRates._geometryMutations[i]._valueChangeSigma);
-        settings.setValue(
-            settingsPrefix + "geometry mutation " + indexSuffix + ".discrete change probability", mutationRates._geometryMutations[i]._enumChangeProbability);
-    }
+    settings.setValue(settingsPrefix + "geometry mutation.node probability", mutationRates._geometryMutation._nodeProbability);
 
     settings.setValue(settingsPrefix + "cell type mode mutation.node probability", mutationRates._cellTypeModeMutation._nodeProbability);
     settings.setValue(settingsPrefix + "cell type mutation.node probability", mutationRates._cellTypeMutation._nodeProbability);
@@ -439,10 +411,8 @@ void MutationRatesDialog::processIntern()
             sectionTable.next();
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Geometry mutations").rank(AlienGui::TreeNodeRank::High))) {
-                processConcreteMutationRates(2, [&](AlienGui::DynamicTableLayout& table) {
-                    processGeometryMutationRate("Mutation rate 1", "GEOM1", _mutation._geometryMutations[0], RightColumnWidth);
-                    table.next();
-                    processGeometryMutationRate("Mutation rate 2", "GEOM2", _mutation._geometryMutations[1], RightColumnWidth);
+                processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
+                    processGeometryMutationRate("Mutation rate", "GEOM", _mutation._geometryMutation, RightColumnWidth);
                     table.next();
                 });
             }
