@@ -20,7 +20,7 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
         mutation._enumChangeProbability = std::clamp(mutation._enumChangeProbability, 0.0f, 1.0f);
     };
     auto validateGeometryMutation = [](GeometryMutationDesc& mutation) {
-        mutation._nodeProbability = std::clamp(mutation._nodeProbability, 0.0f, 1.0f);
+        mutation._geneProbability = std::clamp(mutation._geneProbability, 0.0f, 1.0f);
         mutation._valueChangeSigma = std::clamp(mutation._valueChangeSigma, 0.0f, 1.0f);
         mutation._enumChangeProbability = std::clamp(mutation._enumChangeProbability, 0.0f, 1.0f);
     };

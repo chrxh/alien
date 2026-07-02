@@ -183,8 +183,8 @@ std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatur
                             {CellTypePropertiesMutationDesc().nodeProbability(0.45f).valueChangeSigma(0.55f).enumChangeProbability(0.65f),
                              CellTypePropertiesMutationDesc().nodeProbability(0.75f).valueChangeSigma(0.85f).enumChangeProbability(0.95f)})
                         .geometryMutations(
-                            {GeometryMutationDesc().nodeProbability(0.51f).valueChangeSigma(0.52f).enumChangeProbability(0.53f),
-                             GeometryMutationDesc().nodeProbability(0.56f).valueChangeSigma(0.57f).enumChangeProbability(0.58f)})
+                            {GeometryMutationDesc().geneProbability(0.51f).valueChangeSigma(0.52f).enumChangeProbability(0.53f),
+                             GeometryMutationDesc().geneProbability(0.56f).valueChangeSigma(0.57f).enumChangeProbability(0.58f)})
                         .cellTypeModeMutation(CellTypeModeMutationDesc().nodeProbability(0.33f))
                         .cellTypeMutation(CellTypeMutationDesc().nodeProbability(0.22f))
                         .voidMutation(VoidMutationDesc().nodeProbability(0.11f))
