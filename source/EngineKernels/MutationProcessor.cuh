@@ -492,24 +492,45 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
 __inline__ __device__ void MutationProcessor::applyMutations_geometry(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
-    auto const& rate = genome->mutationRates.geometryMutation;
-    if (rate.geneProbability <= 0) {
-        return;
-    }
+    GeometryMutation rates[2] = {genome->mutationRates.geometryMutations[0], genome->mutationRates.geometryMutations[1]};
 
-    // Genes are independent, so each thread mutates whole genes on its own.
-    for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
-        if (data.primaryNumberGen.random() >= rate.geneProbability) {
+    for (int rateIndex = 0; rateIndex < 2; ++rateIndex) {
+        auto const& rate = rates[rateIndex];
+        if (rate.nodeProbability <= 0 || (rate.valueChangeSigma <= 0 && rate.enumChangeProbability <= 0)) {
             continue;
         }
-        auto& gene = genome->genes[geneIndex];
 
-        // Re-roll all 3 attributes uniformly within their valid range.
-        gene.shape = data.primaryNumberGen.random(ConstructorShape_Count - 1);
-        gene.stiffness = Const::GeneStiffness_Min + data.primaryNumberGen.random() * (Const::GeneStiffness_Max - Const::GeneStiffness_Min);
-        gene.connectionDistance = Const::GeneConnectionDistance_Min
-            + data.primaryNumberGen.random() * (Const::GeneConnectionDistance_Max - Const::GeneConnectionDistance_Min);
-        atomicAdd_block(&accumulatedMutations, 3.0f);
+        // Genes are independent, so each thread mutates whole genes on its own.
+        for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
+            if (data.primaryNumberGen.random() >= rate.nodeProbability) {
+                continue;
+            }
+            auto& gene = genome->genes[geneIndex];
+
+            auto mutateNumber = [&](auto& value, auto minValue, auto maxValue) {
+                using ValueType = std::decay_t<decltype(value)>;
+                if (rate.valueChangeSigma <= 0) {
+                    return;
+                }
+                auto relDelta = generateGaussian(data) * rate.valueChangeSigma;
+                auto delta = relDelta * (maxValue - minValue);
+                value = max(static_cast<ValueType>(minValue), min(static_cast<ValueType>(maxValue), value + delta));
+                atomicAdd_block(&accumulatedMutations, std::abs(relDelta) * 4);
+            };
+
+            if (rate.enumChangeProbability > 0 && data.primaryNumberGen.random() < rate.enumChangeProbability) {
+                auto currentValue = gene.shape;
+                auto newValue = data.primaryNumberGen.random(ConstructorShape_Count - 2);
+                if (newValue >= currentValue) {
+                    ++newValue;
+                }
+                gene.shape = newValue;
+                atomicAdd_block(&accumulatedMutations, 1.0f);
+            }
+
+            mutateNumber(gene.stiffness, Const::GeneStiffness_Min, Const::GeneStiffness_Max);
+            mutateNumber(gene.connectionDistance, Const::GeneConnectionDistance_Min, Const::GeneConnectionDistance_Max);
+        }
     }
 }
 
@@ -1631,7 +1652,9 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         float geometrySigma = cudaSimulationParameters.geometryMetaMutationsSigma.value;
         if (geometrySigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * geometrySigma)); };
-            mutateFloat(genome->mutationRates.geometryMutation.geneProbability);
+            for (int i = 0; i < 2; ++i) {
+                mutateFloat(genome->mutationRates.geometryMutations[i].nodeProbability);
+            }
         }
 
         float cellTypeModeSigma = cudaSimulationParameters.cellTypeModeMetaMutationsSigma.value;

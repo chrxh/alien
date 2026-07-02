@@ -190,7 +190,8 @@ TEST_F(MetaMutationTests, metaMutation_cellTypePropertyRatesZeroSigmaNoChange)
 TEST_F(MetaMutationTests, metaMutation_geometryRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._geometryMutation = GeometryMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().nodeProbability(0.5f).valueChangeSigma(0.5f).enumChangeProbability(0.5f);
+    genome._mutationRates._geometryMutations[1] = GeometryMutationDesc().nodeProbability(0.4f).valueChangeSigma(0.4f).enumChangeProbability(0.4f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -203,15 +204,23 @@ TEST_F(MetaMutationTests, metaMutation_geometryRatesActuallyChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_NE(actualGenome._mutationRates._geometryMutation._geneProbability, 0.5f);
-    EXPECT_GE(actualGenome._mutationRates._geometryMutation._geneProbability, 0.0f);
-    EXPECT_LE(actualGenome._mutationRates._geometryMutation._geneProbability, 1.0f);
+
+    bool nodeProbabilityChanged =
+        actualGenome._mutationRates._geometryMutations[0]._nodeProbability != 0.5f || actualGenome._mutationRates._geometryMutations[1]._nodeProbability != 0.4f;
+    EXPECT_TRUE(nodeProbabilityChanged);
+    EXPECT_GE(actualGenome._mutationRates._geometryMutations[0]._nodeProbability, 0.0f);
+    EXPECT_GE(actualGenome._mutationRates._geometryMutations[1]._nodeProbability, 0.0f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[0]._valueChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[0]._enumChangeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[1]._valueChangeSigma, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[1]._enumChangeProbability, 0.4f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_geometryRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._geometryMutation = GeometryMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().nodeProbability(0.5f).valueChangeSigma(0.5f).enumChangeProbability(0.5f);
+    genome._mutationRates._geometryMutations[1] = GeometryMutationDesc().nodeProbability(0.4f).valueChangeSigma(0.4f).enumChangeProbability(0.4f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -224,7 +233,12 @@ TEST_F(MetaMutationTests, metaMutation_geometryRatesZeroSigmaNoChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome._mutationRates._geometryMutation._geneProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[0]._nodeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[0]._valueChangeSigma, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[0]._enumChangeProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[1]._nodeProbability, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[1]._valueChangeSigma, 0.4f);
+    EXPECT_EQ(actualGenome._mutationRates._geometryMutations[1]._enumChangeProbability, 0.4f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_cellTypeModeRatesActuallyChange)

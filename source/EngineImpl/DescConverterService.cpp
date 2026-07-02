@@ -879,13 +879,15 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
         result._mutationRates._cellTypePropertiesMutations[i]._valueChangeSigma = genomeTO.mutationRates.cellTypePropertiesMutations[i].valueChangeSigma;
         result._mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability =
             genomeTO.mutationRates.cellTypePropertiesMutations[i].enumChangeProbability;
+        result._mutationRates._geometryMutations[i]._nodeProbability = genomeTO.mutationRates.geometryMutations[i].nodeProbability;
+        result._mutationRates._geometryMutations[i]._valueChangeSigma = genomeTO.mutationRates.geometryMutations[i].valueChangeSigma;
+        result._mutationRates._geometryMutations[i]._enumChangeProbability = genomeTO.mutationRates.geometryMutations[i].enumChangeProbability;
         result._mutationRates._constructorMutations[i]._nodeProbability = genomeTO.mutationRates.constructorMutations[i].nodeProbability;
         result._mutationRates._constructorMutations[i]._valueChangeSigma = genomeTO.mutationRates.constructorMutations[i].valueChangeSigma;
         result._mutationRates._constructorMutations[i]._enumChangeProbability = genomeTO.mutationRates.constructorMutations[i].enumChangeProbability;
         result._mutationRates._constructorMutations[i]._constructorToggleProbability =
             genomeTO.mutationRates.constructorMutations[i].constructorToggleProbability;
     }
-    result._mutationRates._geometryMutation._geneProbability = genomeTO.mutationRates.geometryMutation.geneProbability;
     result._mutationRates._cellTypeModeMutation._nodeProbability = genomeTO.mutationRates.cellTypeModeMutation.nodeProbability;
     result._mutationRates._cellTypeMutation._nodeProbability = genomeTO.mutationRates.cellTypeMutation.nodeProbability;
     result._mutationRates._voidMutation._nodeProbability = genomeTO.mutationRates.voidMutation.nodeProbability;
@@ -986,13 +988,16 @@ void DescConverterService::convertGenomeToTO(
             genome._mutationRates._cellTypePropertiesMutations[i]._nodeProbability,
             genome._mutationRates._cellTypePropertiesMutations[i]._valueChangeSigma,
             genome._mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability};
+        genomeTO.mutationRates.geometryMutations[i] = {
+            genome._mutationRates._geometryMutations[i]._nodeProbability,
+            genome._mutationRates._geometryMutations[i]._valueChangeSigma,
+            genome._mutationRates._geometryMutations[i]._enumChangeProbability};
         genomeTO.mutationRates.constructorMutations[i] = {
             genome._mutationRates._constructorMutations[i]._nodeProbability,
             genome._mutationRates._constructorMutations[i]._valueChangeSigma,
             genome._mutationRates._constructorMutations[i]._enumChangeProbability,
             genome._mutationRates._constructorMutations[i]._constructorToggleProbability};
     }
-    genomeTO.mutationRates.geometryMutation = {genome._mutationRates._geometryMutation._geneProbability};
     genomeTO.mutationRates.cellTypeModeMutation = {genome._mutationRates._cellTypeModeMutation._nodeProbability};
     genomeTO.mutationRates.cellTypeMutation = {genome._mutationRates._cellTypeMutation._nodeProbability};
     genomeTO.mutationRates.voidMutation = {genome._mutationRates._voidMutation._nodeProbability};

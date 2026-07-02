@@ -299,7 +299,9 @@ namespace
     auto constexpr Id_CellTypePropertiesMutation_ValueChangeSigma = 1;
     auto constexpr Id_CellTypePropertiesMutation_EnumChangeProbability = 2;
 
-    auto constexpr Id_GeometryMutation_GeneProbability = 0;
+    auto constexpr Id_GeometryMutation_NodeProbability = 0;
+    auto constexpr Id_GeometryMutation_ValueChangeSigma = 1;
+    auto constexpr Id_GeometryMutation_EnumChangeProbability = 2;
 
     auto constexpr Id_CellTypeModeMutation_NodeProbability = 0;
 
@@ -463,7 +465,8 @@ namespace
     auto constexpr Id_MutationRates_DeleteGeneMutation = 17;
     auto constexpr Id_MutationRates_CopyNodeSectionMutation = 18;
     auto constexpr Id_MutationRates_MoveNodeSectionMutation = 19;
-    auto constexpr Id_MutationRates_GeometryMutation = 20;
+    auto constexpr Id_MutationRates_GeometryMutation1 = 20;
+    auto constexpr Id_MutationRates_GeometryMutation2 = 21;
 
     auto constexpr Id_Genome_Genes = 6;
     auto constexpr Id_Genome_MutationRates = 7;
@@ -942,7 +945,9 @@ namespace cereal
     {
         GeometryMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_GeometryMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+        scope.addMember(Id_GeometryMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
+        scope.addMember(Id_GeometryMutation_ValueChangeSigma, data._valueChangeSigma, defaultObject._valueChangeSigma);
+        scope.addMember(Id_GeometryMutation_EnumChangeProbability, data._enumChangeProbability, defaultObject._enumChangeProbability);
     }
     SPLIT_SERIALIZATION(GeometryMutationDesc)
 
@@ -1068,7 +1073,8 @@ namespace cereal
         scope.addDesc(Id_MutationRates_ConnectionMutation2, data._connectionMutations[1]);
         scope.addDesc(Id_MutationRates_CellTypePropertiesMutation1, data._cellTypePropertiesMutations[0]);
         scope.addDesc(Id_MutationRates_CellTypePropertiesMutation2, data._cellTypePropertiesMutations[1]);
-        scope.addDesc(Id_MutationRates_GeometryMutation, data._geometryMutation);
+        scope.addDesc(Id_MutationRates_GeometryMutation1, data._geometryMutations[0]);
+        scope.addDesc(Id_MutationRates_GeometryMutation2, data._geometryMutations[1]);
         scope.addDesc(Id_MutationRates_CellTypeModeMutation, data._cellTypeModeMutation);
         scope.addDesc(Id_MutationRates_CellTypeMutation, data._cellTypeMutation);
         scope.addDesc(Id_MutationRates_VoidMutation, data._voidMutation);
