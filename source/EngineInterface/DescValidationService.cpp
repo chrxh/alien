@@ -39,7 +39,7 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
         validateCellTypePropertiesMutation(genome._mutationRates._cellTypePropertiesMutations[i]);
         validateConstructorMutation(genome._mutationRates._constructorMutations[i]);
     }
-    genome._mutationRates._geometryMutation._nodeProbability = std::clamp(genome._mutationRates._geometryMutation._nodeProbability, 0.0f, 1.0f);
+    genome._mutationRates._geometryMutation._geneProbability = std::clamp(genome._mutationRates._geometryMutation._geneProbability, 0.0f, 1.0f);
     genome._mutationRates._cellTypeModeMutation._nodeProbability =
         std::clamp(genome._mutationRates._cellTypeModeMutation._nodeProbability, 0.0f, 1.0f);
     genome._mutationRates._cellTypeMutation._nodeProbability =

@@ -493,13 +493,13 @@ __inline__ __device__ void MutationProcessor::applyMutations_geometry(Simulation
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.geometryMutation;
-    if (rate.nodeProbability <= 0) {
+    if (rate.geneProbability <= 0) {
         return;
     }
 
     // Genes are independent, so each thread mutates whole genes on its own.
     for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
-        if (data.primaryNumberGen.random() >= rate.nodeProbability) {
+        if (data.primaryNumberGen.random() >= rate.geneProbability) {
             continue;
         }
         auto& gene = genome->genes[geneIndex];
@@ -1631,7 +1631,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         float geometrySigma = cudaSimulationParameters.geometryMetaMutationsSigma.value;
         if (geometrySigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * geometrySigma)); };
-            mutateFloat(genome->mutationRates.geometryMutation.nodeProbability);
+            mutateFloat(genome->mutationRates.geometryMutation.geneProbability);
         }
 
         float cellTypeModeSigma = cudaSimulationParameters.cellTypeModeMetaMutationsSigma.value;

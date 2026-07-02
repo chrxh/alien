@@ -885,7 +885,7 @@ GenomeDesc DescConverterService::createGenomeDesc(TOs const& to, int genomeIndex
         result._mutationRates._constructorMutations[i]._constructorToggleProbability =
             genomeTO.mutationRates.constructorMutations[i].constructorToggleProbability;
     }
-    result._mutationRates._geometryMutation._nodeProbability = genomeTO.mutationRates.geometryMutation.nodeProbability;
+    result._mutationRates._geometryMutation._geneProbability = genomeTO.mutationRates.geometryMutation.geneProbability;
     result._mutationRates._cellTypeModeMutation._nodeProbability = genomeTO.mutationRates.cellTypeModeMutation.nodeProbability;
     result._mutationRates._cellTypeMutation._nodeProbability = genomeTO.mutationRates.cellTypeMutation.nodeProbability;
     result._mutationRates._voidMutation._nodeProbability = genomeTO.mutationRates.voidMutation.nodeProbability;
@@ -992,7 +992,7 @@ void DescConverterService::convertGenomeToTO(
             genome._mutationRates._constructorMutations[i]._enumChangeProbability,
             genome._mutationRates._constructorMutations[i]._constructorToggleProbability};
     }
-    genomeTO.mutationRates.geometryMutation = {genome._mutationRates._geometryMutation._nodeProbability};
+    genomeTO.mutationRates.geometryMutation = {genome._mutationRates._geometryMutation._geneProbability};
     genomeTO.mutationRates.cellTypeModeMutation = {genome._mutationRates._cellTypeModeMutation._nodeProbability};
     genomeTO.mutationRates.cellTypeMutation = {genome._mutationRates._cellTypeMutation._nodeProbability};
     genomeTO.mutationRates.voidMutation = {genome._mutationRates._voidMutation._nodeProbability};
