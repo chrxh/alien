@@ -19,11 +19,6 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
         mutation._valueChangeSigma = std::clamp(mutation._valueChangeSigma, 0.0f, 1.0f);
         mutation._enumChangeProbability = std::clamp(mutation._enumChangeProbability, 0.0f, 1.0f);
     };
-    auto validateGeometryMutation = [](GeometryMutationDesc& mutation) {
-        mutation._nodeProbability = std::clamp(mutation._nodeProbability, 0.0f, 1.0f);
-        mutation._valueChangeSigma = std::clamp(mutation._valueChangeSigma, 0.0f, 1.0f);
-        mutation._enumChangeProbability = std::clamp(mutation._enumChangeProbability, 0.0f, 1.0f);
-    };
     auto validateConstructorMutation = [](ConstructorMutationDesc& mutation) {
         mutation._nodeProbability = std::clamp(mutation._nodeProbability, 0.0f, 1.0f);
         mutation._valueChangeSigma = std::clamp(mutation._valueChangeSigma, 0.0f, 1.0f);
@@ -42,9 +37,9 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
         connectionMutation._valueChangeSigma = std::max(connectionMutation._valueChangeSigma, 0.0f);
 
         validateCellTypePropertiesMutation(genome._mutationRates._cellTypePropertiesMutations[i]);
-        validateGeometryMutation(genome._mutationRates._geometryMutations[i]);
         validateConstructorMutation(genome._mutationRates._constructorMutations[i]);
     }
+    genome._mutationRates._geometryMutation._nodeProbability = std::clamp(genome._mutationRates._geometryMutation._nodeProbability, 0.0f, 1.0f);
     genome._mutationRates._cellTypeModeMutation._nodeProbability =
         std::clamp(genome._mutationRates._cellTypeModeMutation._nodeProbability, 0.0f, 1.0f);
     genome._mutationRates._cellTypeMutation._nodeProbability =
