@@ -46,6 +46,8 @@ target_link_libraries(EngineImpl cudart)
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
 set_property(TARGET EngineImpl PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
+alien_mark_hip_target(EngineImpl)
+
 target_precompile_headers(EngineImpl PRIVATE
     "$<$<COMPILE_LANGUAGE:CXX>:<algorithm$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<memory$<ANGLE-R>>"

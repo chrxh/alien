@@ -55,7 +55,7 @@ struct FluidParticleVertexData;
 
 struct ParametersFilter;
 
-#if defined(__CUDACC__)
+#if defined(__CUDACC__) || defined(__HIPCC__)
 #define HOST_DEVICE __host__ __device__ __inline__
 #else
 #define HOST_DEVICE inline

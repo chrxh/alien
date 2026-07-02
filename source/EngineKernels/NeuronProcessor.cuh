@@ -92,7 +92,7 @@ __inline__ __device__ bool NeuronProcessor::isAutoTriggered(SimulationData& data
 {
     DEVICE_CHECK(object->type == ObjectType_Cell);
 
-    auto triggerInterval = max(TIMESTEPS_PER_CELL_FUNCTION, autoTriggerInterval);
+    uint64_t triggerInterval = max(static_cast<uint64_t>(TIMESTEPS_PER_CELL_FUNCTION), static_cast<uint64_t>(autoTriggerInterval));
     if (isPreview) {
         return *data.timestep % triggerInterval < TIMESTEPS_PER_CELL_FUNCTION;
     } else {
