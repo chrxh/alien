@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <optional>
+
 #include <Base/Math.h>
 
 #include <EngineInterface/Desc.h>
@@ -26,8 +28,17 @@ public:
     ~CommunicatorTests() = default;
 
 protected:
-    // Helper to create a sender creature with 2 cells (sender + helper for signal)
-    Desc createSenderCreature(uint64_t creatureId, RealVector2D pos, int range = 50, int color = 0)
+    // Helper to create a sender creature with 2 cells (sender + helper for reference direction).
+    // The sender is connected to a helper cell to the east, so its reference direction is (1, 0).
+    // With frontAngle and the encoded angle in signal.channels[CommunicatorAngle] (= angleChannel), the
+    // absolute facing direction defaults to south (0, +1): refAngle(90) + frontAngle(0) + angleChannel(0.5) * 180 = 180.
+    Desc createSenderCreature(
+        uint64_t creatureId,
+        RealVector2D pos,
+        int range = 50,
+        int color = 0,
+        std::optional<float> frontAngle = 0.0f,
+        float angleChannel = 0.5f)
     {
         auto data = Desc().addCreature(
             {
@@ -36,7 +47,8 @@ protected:
                     .pos(pos)
                     .color(color)
                     .type(CellDesc()
-                              .neuralNetwork(NeuralNetDesc().biases({1.0f, 0.5f, 2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
+                              .frontAngle(frontAngle)
+                              .neuralNetwork(NeuralNetDesc().biases({1.0f, angleChannel, 2.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))
                               .cellType(CommunicatorDesc().mode(SenderDesc().range(range)))),
                 ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
             },
@@ -45,13 +57,14 @@ protected:
         return data;
     }
 
-    // Helper to create a receiver creature with 2 cells
+    // Helper to create a receiver creature with 2 cells (receiver + helper for reference direction).
     Desc createReceiverCreature(
         uint64_t creatureId,
         RealVector2D pos,
         int restrictToColors = 0x3ff,
         LineageRestriction restrictToLineage = LineageRestriction_No,
-        int color = 0)
+        int color = 0,
+        std::optional<float> frontAngle = 0.0f)
     {
         auto data = Desc().addCreature(
             {
@@ -59,7 +72,9 @@ protected:
                     .id(creatureId * 100)
                     .pos(pos)
                     .color(color)
-                    .type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToColors(restrictToColors).restrictToLineage(restrictToLineage)))),
+                    .type(CellDesc()
+                              .frontAngle(frontAngle)
+                              .cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToColors(restrictToColors).restrictToLineage(restrictToLineage)))),
                 ObjectDesc().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
             },
             CreatureDesc().id(creatureId));
@@ -85,11 +100,11 @@ TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
 
 TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
 {
-    // Create sender in creature 1
+    // Create sender in creature 1 (facing south)
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
 
-    // Create receiver in creature 2, within range
-    data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
+    // Create receiver in creature 2, within range and in the opposite half-plane (north of the sender)
+    data.add(createReceiverCreature(2, {100.0f, 90.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -97,9 +112,10 @@ TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
 
-    // Receiver should have received the signal
+    // Receiver should have received the signal. Sender and receiver share the same absolute front direction,
+    // so the encoded angle is transmitted unchanged.
     EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[0], 1.0f);
-    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
+    EXPECT_NEAR(receiver.getCellRef()._signal._channels[Channels::CommunicatorAngle], 0.5f, 1e-4f);
     EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[2], 2.0f);
 }
 
@@ -108,8 +124,8 @@ TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
     // Create sender in creature 1 with small range
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 10.0f);
 
-    // Create receiver in creature 2, out of range
-    data.add(createReceiverCreature(2, {115.0f, 100.0f}), false);
+    // Create receiver in creature 2, out of range (north but too far away)
+    data.add(createReceiverCreature(2, {100.0f, 85.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -127,8 +143,8 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     auto data = Desc().addCreature(
         {
             ObjectDesc().id(0).pos({99.0f, 100.0f}).type(CellDesc().signal({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})),
-            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc().id(2).pos({110.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc()))),
+            ObjectDesc().id(1).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
+            ObjectDesc().id(2).pos({100.0f, 90.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(ReceiverDesc()))),
         },
         CreatureDesc().id(1));
     data.addConnection(0, 1);
@@ -146,13 +162,13 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
 
 TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
 {
-    // Create sender in creature 1
+    // Create sender in creature 1 (facing south)
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
 
-    // Create multiple receivers in different creatures
-    data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
-    data.add(createReceiverCreature(3, {100.0f, 110.0f}), false);
-    data.add(createReceiverCreature(4, {90.0f, 100.0f}), false);
+    // Create multiple receivers in the opposite half-plane (north, north-east, north-west)
+    data.add(createReceiverCreature(2, {110.0f, 90.0f}), false);
+    data.add(createReceiverCreature(3, {100.0f, 90.0f}), false);
+    data.add(createReceiverCreature(4, {90.0f, 90.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -162,7 +178,7 @@ TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
     // All receivers should have received the signal
     for (uint64_t id : {200, 300, 400}) {
         auto receiver = result.getObjectRef(id);
-        EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
+        EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
     }
 }
 
@@ -172,7 +188,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 2);
 
     // Create receiver that only accepts color 2
-    data.add(createReceiverCreature(2, {110.0f, 100.0f}, 1 << 2), false);
+    data.add(createReceiverCreature(2, {100.0f, 90.0f}, 1 << 2), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -190,7 +206,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_mismatchingColor)
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 3);
 
     // Create receiver that only accepts color 2
-    data.add(createReceiverCreature(2, {110.0f, 100.0f}, 1 << 2), false);
+    data.add(createReceiverCreature(2, {100.0f, 90.0f}, 1 << 2), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -207,15 +223,15 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
     // Create sender without active signal
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            // No signalAndState set, so signal is not active
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
+            // No signal set, so signal is not active
             ObjectDesc().id(101).pos({101.0f, 100.0f}),
         },
         CreatureDesc().id(1));
     data.addConnection(100, 101);
 
     // Create receiver
-    data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
+    data.add(createReceiverCreature(2, {100.0f, 90.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -229,25 +245,25 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
 
 TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
 {
-    // Create first sender with signal = 1.0
+    // Create two senders (both facing south) and a receiver between them; only the sender for which the receiver
+    // lies in the opposite half-plane should transmit.
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1));
     data.addConnection(100, 101);
 
-    // Create second sender with signal = -1.0
     data.addCreature(
         {
-            ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
+            ObjectDesc().id(200).pos({100.0f, 120.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(201).pos({101.0f, 120.0f}).type(CellDesc().signal(SignalDesc().channels({-1.0f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(2));
     data.addConnection(200, 201);
 
-    // Create receiver
+    // Receiver between both senders; it lies north of sender 2 (opposite half-plane) but south of sender 1.
     data.add(createReceiverCreature(3, {100.0f, 110.0f}), false);
 
     _simulationFacade->setSimulationData(data);
@@ -256,50 +272,115 @@ TEST_F(CommunicatorTests, sender_signalPriority_signalReceived)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(300);
 
-    // Receiver should have received a signal (from one of the senders)
-    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
+    // Receiver should have received the signal from sender 2
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[0], -1.0f);
 }
 
 /**
- * Parameterized test for angle translation with different reference direction differences.
- * Parameter: receiverRefAngleDiff - the difference in degrees between sender and receiver reference directions.
+ * Directional gating: the sender only transmits to receivers that lie in the half-plane opposite to the encoded
+ * facing direction, i.e. where dot(receiverDirection, facing) <= 0.
+ */
+TEST_F(CommunicatorTests, sender_receiverInFacingHalfPlane_noSignalTransmitted)
+{
+    // Sender faces south; the receiver is placed south of the sender (same half-plane as the facing direction)
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
+    data.add(createReceiverCreature(2, {100.0f, 110.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getObjectRef(200);
+
+    // Receiver in the facing half-plane should NOT receive the signal
+    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+}
+
+TEST_F(CommunicatorTests, sender_frontAngleFlipsDirection)
+{
+    // Rotating the sender's front by 180 degrees flips the facing direction to north, so now a southern receiver
+    // (in the opposite half-plane) receives, while a northern receiver is blocked.
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, 180.0f);
+    data.add(createReceiverCreature(2, {100.0f, 110.0f}), false);  // south -> should receive
+    data.add(createReceiverCreature(3, {100.0f, 90.0f}), false);   // north -> should be blocked
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto result = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(result.getObjectRef(200).getCellRef()._signal._channels[0] != 0.0f);
+    EXPECT_TRUE(result.getObjectRef(300).getCellRef()._signal._channels[0] == 0.0f);
+}
+
+TEST_F(CommunicatorTests, sender_encodedAngleChangesDirection)
+{
+    // With an encoded angle of 0, the facing direction equals the absolute front (east). A western receiver is then
+    // in the opposite half-plane and receives, while an eastern receiver is blocked.
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, 0.0f, 0.0f);
+    data.add(createReceiverCreature(2, {90.0f, 100.0f}), false);   // west -> should receive
+    data.add(createReceiverCreature(3, {110.0f, 100.0f}), false);  // east -> should be blocked
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto result = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(result.getObjectRef(200).getCellRef()._signal._channels[0] != 0.0f);
+    EXPECT_TRUE(result.getObjectRef(300).getCellRef()._signal._channels[0] == 0.0f);
+}
+
+TEST_F(CommunicatorTests, sender_frontAngleNotInitialized_noSignalTransmitted)
+{
+    // Sender without an initialized front direction must not transmit
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, std::nullopt);
+    data.add(createReceiverCreature(2, {100.0f, 90.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getObjectRef(200);
+
+    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+}
+
+TEST_F(CommunicatorTests, receiver_frontAngleNotInitialized_noSignalTransmitted)
+{
+    // Receiver without an initialized front direction must not receive
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
+    data.add(createReceiverCreature(2, {100.0f, 90.0f}, 0x3ff, LineageRestriction_No, 0, std::nullopt), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getObjectRef(200);
+
+    EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
+}
+
+/**
+ * Parameterized test for angle translation. The encoded angle is relative to the absolute front direction
+ * (reference direction rotated by frontAngle). The receiver's stored angle must be adjusted by the difference
+ * of the sender's and receiver's absolute front angles.
  */
 class CommunicatorTests_AngleTranslation
     : public CommunicatorTests
     , public testing::WithParamInterface<float>
 {};
 
-INSTANTIATE_TEST_SUITE_P(CommunicatorTests_AngleTranslation, CommunicatorTests_AngleTranslation, ::testing::Values(0.0f, 90.0f, 180.0f, 270.0f));
+INSTANTIATE_TEST_SUITE_P(CommunicatorTests_AngleTranslation, CommunicatorTests_AngleTranslation, ::testing::Values(0.0f, 90.0f, -90.0f, 180.0f));
 
 TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 {
-    // The sender is at (100, 100) with connected cell at (101, 100) -> reference direction (1, 0) -> 90 degrees
-    // The receiver's connected cell position is calculated based on the angle difference parameter
-    auto receiverRefAngleDiff = GetParam();
+    auto receiverFrontAngle = GetParam();
 
-    // Calculate the receiver's connected cell position based on the angle difference
-    // Sender reference angle is 90 degrees (pointing right), receiver will be at 90 + receiverRefAngleDiff
-    auto receiverRefAngle = 90.0f + receiverRefAngleDiff;
-    auto receiverConnectedObjectOffset = Math::unitVectorOfAngle(receiverRefAngle);
+    // Sender: reference direction east (refAngle 90), frontAngle 0, encoded angle 0.5 -> faces south.
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
 
-    auto data = Desc().addCreature(
-        {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
-            ObjectDesc()
-                .id(101)
-                .pos({101.0f, 100.0f})
-                .type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),  // channel[1] = 0.5 = 90 degrees
-        },
-        CreatureDesc().id(1));
-    data.addConnection(100, 101);
-
-    data.addCreature(
-        {
-            ObjectDesc().id(200).pos({120.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc()))),
-            ObjectDesc().id(201).pos({120.0f + receiverConnectedObjectOffset.x, 100.0f + receiverConnectedObjectOffset.y}),
-        },
-        CreatureDesc().id(2));
-    data.addConnection(200, 201);
+    // Receiver: north of the sender (opposite half-plane), reference direction east, variable frontAngle.
+    data.add(createReceiverCreature(2, {100.0f, 90.0f}, 0x3ff, LineageRestriction_No, 0, receiverFrontAngle), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(TIMESTEPS_PER_CELL_FUNCTION);
@@ -309,12 +390,10 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 
     EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
 
-    // The angle translation formula: translatedAngle = senderAngle + (senderRefAngle - receiverRefAngle) / 180
-    // senderAngle = 0.5 (90 degrees), senderRefAngle = 90 degrees, receiverRefAngle = 90 + receiverRefAngleDiff
-    // angleDiff = 90 - (90 + receiverRefAngleDiff) = -receiverRefAngleDiff
-    // translatedAngle = 0.5 + (-receiverRefAngleDiff) / 180
-    auto expectedAngle = Math::getNormalizedAngle(0.5f * 180.0f - receiverRefAngleDiff, -180.0f) / 180.0f;
-    EXPECT_NEAR(receiver.getCellRef()._signal._channels[1], expectedAngle, 0.001f);
+    // senderAbsFront = 90 + 0, receiverAbsFront = 90 + receiverFrontAngle, angleDiff = -receiverFrontAngle
+    // translatedAngle = encodedAngle(0.5) + angleDiff / 180, normalized to [-1, 1]
+    auto expectedAngle = Math::getNormalizedAngle(0.5f * 180.0f - receiverFrontAngle, -180.0f) / 180.0f;
+    EXPECT_NEAR(receiver.getCellRef()._signal._channels[Channels::CommunicatorAngle], expectedAngle, 0.001f);
 }
 
 /**
@@ -352,17 +431,21 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
 
     auto data = Desc().addCreature(
         {
-            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
+            ObjectDesc().id(100).pos({100.0f, 100.0f}).type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(SenderDesc().range(50)))),
             ObjectDesc().id(101).pos({101.0f, 100.0f}).type(CellDesc().signal(SignalDesc().channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}))),
         },
         CreatureDesc().id(1).lineageId(senderLineageId),
         GenomeDesc());
     data.addConnection(100, 101);
 
+    // Receiver north of the sender (opposite half-plane)
     data.addCreature(
         {
-            ObjectDesc().id(200).pos({120.0f, 100.0f}).type(CellDesc().cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToLineage(params.restriction)))),
-            ObjectDesc().id(201).pos({121.0f, 100.0f}),
+            ObjectDesc()
+                .id(200)
+                .pos({100.0f, 80.0f})
+                .type(CellDesc().frontAngle(0.0f).cellType(CommunicatorDesc().mode(ReceiverDesc().restrictToLineage(params.restriction)))),
+            ObjectDesc().id(201).pos({101.0f, 80.0f}),
         },
         CreatureDesc().id(2).lineageId(receiverLineageId),
         GenomeDesc());
@@ -376,7 +459,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
 
     if (params.expectedAccept) {
         EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
-        EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
+        EXPECT_NEAR(receiver.getCellRef()._signal._channels[Channels::CommunicatorAngle], 0.5f, 1e-4f);
     } else {
         EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] == 0.0f);
     }
