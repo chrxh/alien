@@ -52,7 +52,7 @@ namespace
                     genome->mutationRates.constructorMutations[i].enumChangeProbability,
                     genome->mutationRates.constructorMutations[i].constructorToggleProbability};
             }
-            genomeTO.mutationRates.geometryMutation = {genome->mutationRates.geometryMutation.nodeProbability};
+            genomeTO.mutationRates.geometryMutation = {genome->mutationRates.geometryMutation.geneProbability};
             genomeTO.mutationRates.cellTypeModeMutation = {genome->mutationRates.cellTypeModeMutation.nodeProbability};
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.nodeProbability};
             genomeTO.mutationRates.voidMutation = {genome->mutationRates.voidMutation.nodeProbability};

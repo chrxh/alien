@@ -13,7 +13,7 @@ class GeometryMutationTests : public MutationTestsBase
 TEST_F(GeometryMutationTests, geometryMutation_changesShapeStiffnessAndConnectionDistance)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._geometryMutation = GeometryMutationDesc().nodeProbability(1.0f);
+    genome._mutationRates._geometryMutation = GeometryMutationDesc().geneProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -47,7 +47,7 @@ TEST_F(GeometryMutationTests, geometryMutation_changesShapeStiffnessAndConnectio
 TEST_F(GeometryMutationTests, geometryMutation_respectsBounds)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._geometryMutation = GeometryMutationDesc().nodeProbability(1.0f);
+    genome._mutationRates._geometryMutation = GeometryMutationDesc().geneProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -71,7 +71,7 @@ TEST_F(GeometryMutationTests, geometryMutation_respectsBounds)
 TEST_F(GeometryMutationTests, geometryMutation_doesNotChangeNodes)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._geometryMutation = GeometryMutationDesc().nodeProbability(1.0f);
+    genome._mutationRates._geometryMutation = GeometryMutationDesc().geneProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

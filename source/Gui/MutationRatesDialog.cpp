@@ -96,23 +96,6 @@ namespace
         AlienGui::EndTreeNode();
     }
 
-    void processGeometryMutationRate(std::string const& name, std::string const& id, GeometryMutationDesc& mutation, float rightColumnWidth)
-    {
-        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
-            AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters()
-                    .name("Node probability")
-                    .id(id)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .logarithmic(true)
-                    .format("%.5f")
-                    .textWidth(rightColumnWidth),
-                &mutation._nodeProbability);
-        }
-        AlienGui::EndTreeNode();
-    }
-
     void processCellTypeModeMutationRate(std::string const& name, std::string const& id, CellTypeModeMutationDesc& mutation, float rightColumnWidth)
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
@@ -275,8 +258,8 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
             settingsPrefix + "cell type property mutation" + indexSuffix + ".discrete change probability", mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability);
     }
 
-    mutationRates._geometryMutation._nodeProbability =
-        settings.getValue(settingsPrefix + "geometry mutation.node probability", mutationRates._geometryMutation._nodeProbability);
+    mutationRates._geometryMutation._geneProbability =
+        settings.getValue(settingsPrefix + "geometry mutation.gene probability", mutationRates._geometryMutation._geneProbability);
 
     mutationRates._cellTypeModeMutation._nodeProbability =
         settings.getValue(settingsPrefix + "cell type mode mutation.node probability", mutationRates._cellTypeModeMutation._nodeProbability);
@@ -344,7 +327,7 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
             settingsPrefix + "cell type property mutation " + indexSuffix + ".discrete change probability", mutationRates._cellTypePropertiesMutations[i]._enumChangeProbability);
     }
 
-    settings.setValue(settingsPrefix + "geometry mutation.node probability", mutationRates._geometryMutation._nodeProbability);
+    settings.setValue(settingsPrefix + "geometry mutation.gene probability", mutationRates._geometryMutation._geneProbability);
 
     settings.setValue(settingsPrefix + "cell type mode mutation.node probability", mutationRates._cellTypeModeMutation._nodeProbability);
     settings.setValue(settingsPrefix + "cell type mutation.node probability", mutationRates._cellTypeMutation._nodeProbability);
@@ -412,7 +395,7 @@ void MutationRatesDialog::processIntern()
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Geometry mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
-                    processGeometryMutationRate("Mutation rate", "GEOM", _mutation._geometryMutation, RightColumnWidth);
+                    processGeneProbabilityMutationRate("Mutation rate", "GEOM", _mutation._geometryMutation, RightColumnWidth);
                     table.next();
                 });
             }
