@@ -177,7 +177,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     auto targetAngle = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.f;
     auto targetAngleRelToConnection0 = Math::getNormalizedAngle(targetAngle + object->typeData.cell.frontAngle, -180.0f);
 
-    auto angleFactor = [&] {
+    auto angleFactor = [&]() -> float {
         if (isLeftSide(object)) {
             targetAngleRelToConnection0 = -targetAngleRelToConnection0;
         }
