@@ -368,7 +368,9 @@ struct CellTypePropertiesMutationTO
 
 struct GeometryMutationTO
 {
-    float geneProbability;
+    float nodeProbability;
+    float valueChangeSigma;
+    float enumChangeProbability;
 };
 
 struct CellTypeModeMutationTO
@@ -439,7 +441,7 @@ struct MutationRatesTO
     NeuronMutationTO neuronMutations[2];
     ConnectionMutationTO connectionMutations[2];
     CellTypePropertiesMutationTO cellTypePropertiesMutations[2];
-    GeometryMutationTO geometryMutation;
+    GeometryMutationTO geometryMutations[2];
     CellTypeModeMutationTO cellTypeModeMutation;
     CellTypeMutationTO cellTypeMutation;
     VoidMutationTO voidMutation;

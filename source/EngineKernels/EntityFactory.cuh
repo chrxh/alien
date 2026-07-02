@@ -102,13 +102,16 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
             genomeTO.mutationRates.cellTypePropertiesMutations[i].nodeProbability,
             genomeTO.mutationRates.cellTypePropertiesMutations[i].valueChangeSigma,
             genomeTO.mutationRates.cellTypePropertiesMutations[i].enumChangeProbability};
+        genome->mutationRates.geometryMutations[i] = {
+            genomeTO.mutationRates.geometryMutations[i].nodeProbability,
+            genomeTO.mutationRates.geometryMutations[i].valueChangeSigma,
+            genomeTO.mutationRates.geometryMutations[i].enumChangeProbability};
         genome->mutationRates.constructorMutations[i] = {
             genomeTO.mutationRates.constructorMutations[i].nodeProbability,
             genomeTO.mutationRates.constructorMutations[i].valueChangeSigma,
             genomeTO.mutationRates.constructorMutations[i].enumChangeProbability,
             genomeTO.mutationRates.constructorMutations[i].constructorToggleProbability};
     }
-    genome->mutationRates.geometryMutation = {genomeTO.mutationRates.geometryMutation.geneProbability};
     genome->mutationRates.cellTypeModeMutation = {genomeTO.mutationRates.cellTypeModeMutation.nodeProbability};
     genome->mutationRates.cellTypeMutation = {genomeTO.mutationRates.cellTypeMutation.nodeProbability};
     genome->mutationRates.voidMutation = {genomeTO.mutationRates.voidMutation.nodeProbability};

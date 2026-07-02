@@ -443,7 +443,9 @@ struct GeometryMutationDesc
 {
     auto operator<=>(GeometryMutationDesc const&) const = default;
 
-    MEMBER(GeometryMutationDesc, float, geneProbability, 0.0f);
+    MEMBER(GeometryMutationDesc, float, nodeProbability, 0.0f);
+    MEMBER(GeometryMutationDesc, float, valueChangeSigma, 0.0f);
+    MEMBER(GeometryMutationDesc, float, enumChangeProbability, 0.0f);
 };
 
 struct CellTypeModeMutationDesc
@@ -538,6 +540,7 @@ struct MutationRatesDesc
     using NeuronMutationArray = std::array<NeuronMutationDesc, 2>;
     using ConnectionMutationArray = std::array<ConnectionMutationDesc, 2>;
     using CellTypePropertiesMutationArray = std::array<CellTypePropertiesMutationDesc, 2>;
+    using GeometryMutationArray = std::array<GeometryMutationDesc, 2>;
     using ConstructorMutationArray = std::array<ConstructorMutationDesc, 2>;
 
     auto operator<=>(MutationRatesDesc const&) const = default;
@@ -561,7 +564,13 @@ struct MutationRatesDesc
         (CellTypePropertiesMutationArray{
             {CellTypePropertiesMutationDesc().valueChangeSigma(0.05f).enumChangeProbability(0.05f),
              CellTypePropertiesMutationDesc().valueChangeSigma(0.5f).enumChangeProbability(0.5f)}}));
-    MEMBER(MutationRatesDesc, GeometryMutationDesc, geometryMutation, GeometryMutationDesc());
+    MEMBER(
+        MutationRatesDesc,
+        GeometryMutationArray,
+        geometryMutations,
+        (GeometryMutationArray{
+            {GeometryMutationDesc().valueChangeSigma(0.05f).enumChangeProbability(0.05f),
+             GeometryMutationDesc().valueChangeSigma(0.5f).enumChangeProbability(0.5f)}}));
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());

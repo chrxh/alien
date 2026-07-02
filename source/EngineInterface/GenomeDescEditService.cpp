@@ -498,7 +498,8 @@ namespace
         genome._mutationRates._connectionMutations[1] = ConnectionMutationDesc();
         genome._mutationRates._cellTypePropertiesMutations[0] = CellTypePropertiesMutationDesc();
         genome._mutationRates._cellTypePropertiesMutations[1] = CellTypePropertiesMutationDesc();
-        genome._mutationRates._geometryMutation = GeometryMutationDesc();
+        genome._mutationRates._geometryMutations[0] = GeometryMutationDesc();
+        genome._mutationRates._geometryMutations[1] = GeometryMutationDesc();
         for (auto& gene : genome._genes) {
             gene._homogeneousCellType = false;
             for (auto& node : gene._nodes) {
