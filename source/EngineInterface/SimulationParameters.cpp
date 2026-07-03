@@ -507,9 +507,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::addNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
-                        .name("Trim node mutation sigma")
+                        .name("Trim gene mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::trimNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::trimGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
                         .name("Delete node mutation sigma")
                         .reference(

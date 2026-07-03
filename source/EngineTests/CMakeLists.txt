@@ -52,7 +52,7 @@ PUBLIC
     SimulationControlTests.cpp
     StatisticsTests.cpp
     Testsuite.cpp
-    TrimNodeMutationTests.cpp
+    TrimGeneMutationTests.cpp
     VoidMutationTests.cpp
     VoidTests.cpp)
 
