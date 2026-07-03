@@ -118,7 +118,7 @@ struct SimulationParameters
     BaseParameter<float> voidMetaMutationsSigma = {0};
     BaseParameter<float> extendGeneMetaMutationsSigma = {0};
     BaseParameter<float> addNodeMetaMutationsSigma = {0};
-    BaseParameter<float> trimNodeMetaMutationsSigma = {0};
+    BaseParameter<float> trimGeneMetaMutationsSigma = {0};
     BaseParameter<float> deleteNodeMetaMutationsSigma = {0};
     BaseParameter<float> duplicateGeneMetaMutationsSigma = {0};
     BaseParameter<float> deleteGeneMetaMutationsSigma = {0};

@@ -393,7 +393,7 @@ struct AddNodeMutation
     float nodeProbability;
 };
 
-struct TrimNodeMutation
+struct TrimGeneMutation
 {
     float geneProbability;
 };
@@ -442,7 +442,7 @@ struct MutationRates
     VoidMutation voidMutation;
     ExtendGeneMutation extendGeneMutation;
     AddNodeMutation addNodeMutation;
-    TrimNodeMutation trimNodeMutation;
+    TrimGeneMutation trimGeneMutation;
     DeleteNodeMutation deleteNodeMutation;
     CopyNodeSectionMutation copyNodeSectionMutation;
     MoveNodeSectionMutation moveNodeSectionMutation;
