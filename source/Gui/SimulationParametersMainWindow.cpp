@@ -1,5 +1,6 @@
 #include "SimulationParametersMainWindow.h"
 
+#include <imgui_internal.h>
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/StringHelper.h>
@@ -258,9 +259,7 @@ void SimulationParametersMainWindow::processDetailWidget()
             //AlienGui::ResetFilterText();
 
             ImGui::Spacing();
-            if (shouldStartFilterTyping()) {
-                ImGui::SetKeyboardFocusHere();
-            }
+            startFilterTypingIfNeeded();
             AlienGui::InputFilter(AlienGui::InputFilterParameters().width(250.0f), _filter);
         }
         AlienGui::EndTreeNode();
@@ -274,17 +273,26 @@ void SimulationParametersMainWindow::processDetailWidget()
     }
 }
 
-bool SimulationParametersMainWindow::shouldStartFilterTyping() const
+void SimulationParametersMainWindow::startFilterTypingIfNeeded()
 {
     if (ImGui::IsAnyItemActive() || !ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
-        return false;
+        return;
     }
+
+    // SetKeyboardFocusHere() only takes effect one frame later, so the character that
+    // triggered it would otherwise be lost. Append it to the filter directly instead.
+    auto startedTyping = false;
     for (auto const& c : ImGui::GetIO().InputQueueCharacters) {
         if (c >= 32 && c != 127) {
-            return true;
+            char utf8[5];
+            ImTextCharToUtf8(utf8, c);
+            _filter += utf8;
+            startedTyping = true;
         }
     }
-    return false;
+    if (startedTyping) {
+        ImGui::SetKeyboardFocusHere();
+    }
 }
 
 void SimulationParametersMainWindow::processExpertWidget()
