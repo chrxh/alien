@@ -32,7 +32,7 @@ private:
     __inline__ __device__ static void applyMutations_cellTypeMode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_cellType(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_void(SimulationData& data, Genome* genome, float& accumulatedMutations);
-    __inline__ __device__ static void applyMutations_appendNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
+    __inline__ __device__ static void applyMutations_extendGene(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_addNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_trimNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
     __inline__ __device__ static void applyMutations_deleteNode(SimulationData& data, Genome* genome, float& accumulatedMutations);
@@ -91,10 +91,10 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     // sync since following mutations may change entire genes
     block.sync();
     auto const& nodeRates = genome->mutationRates;
-    bool anyNodeMutation = nodeRates.appendNodeMutation.geneProbability > 0 || nodeRates.addNodeMutation.nodeProbability > 0
+    bool anyNodeMutation = nodeRates.extendGeneMutation.geneProbability > 0 || nodeRates.addNodeMutation.nodeProbability > 0
         || nodeRates.trimNodeMutation.geneProbability > 0 || nodeRates.deleteNodeMutation.nodeProbability > 0;
     if (anyNodeMutation) {
-        applyMutations_appendNode(data, genome, accumulatedMutations);
+        applyMutations_extendGene(data, genome, accumulatedMutations);
         applyMutations_addNode(data, genome, accumulatedMutations);
         applyMutations_trimNode(data, genome, accumulatedMutations);
         applyMutations_deleteNode(data, genome, accumulatedMutations);
@@ -951,10 +951,10 @@ __inline__ __device__ void MutationProcessor::removeNode(SimulationData& data, G
     gene.numNodes = newNumNodes;
 }
 
-__inline__ __device__ void MutationProcessor::applyMutations_appendNode(SimulationData& data, Genome* genome, float& accumulatedMutations)
+__inline__ __device__ void MutationProcessor::applyMutations_extendGene(SimulationData& data, Genome* genome, float& accumulatedMutations)
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
-    auto const& rate = genome->mutationRates.appendNodeMutation;
+    auto const& rate = genome->mutationRates.extendGeneMutation;
     if (rate.geneProbability <= 0) {
         return;
     }
@@ -1687,10 +1687,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
             mutateFloat(genome->mutationRates.voidMutation.nodeProbability);
         }
 
-        float appendNodeSigma = cudaSimulationParameters.appendNodeMetaMutationsSigma.value;
-        if (appendNodeSigma > 0) {
-            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * appendNodeSigma)); };
-            mutateFloat(genome->mutationRates.appendNodeMutation.geneProbability);
+        float extendGeneSigma = cudaSimulationParameters.extendGeneMetaMutationsSigma.value;
+        if (extendGeneSigma > 0) {
+            auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * extendGeneSigma)); };
+            mutateFloat(genome->mutationRates.extendGeneMutation.geneProbability);
         }
 
         float addNodeSigma = cudaSimulationParameters.addNodeMetaMutationsSigma.value;

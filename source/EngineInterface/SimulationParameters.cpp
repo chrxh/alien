@@ -499,9 +499,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::voidMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
-                        .name("Append node mutation sigma")
+                        .name("Extend gene mutation sigma")
                         .reference(
-                            FloatSpec().member(&SimulationParameters::appendNodeMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
+                            FloatSpec().member(&SimulationParameters::extendGeneMetaMutationsSigma).min(0.0f).max(1.0f).logarithmic(true).format("%.5f")),
                     ParameterSpec()
                         .name("Add node mutation sigma")
                         .reference(

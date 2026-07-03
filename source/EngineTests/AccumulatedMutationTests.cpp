@@ -18,7 +18,7 @@ enum class MutationType
     CellTypeMode,
     CellType,
     Void,
-    AppendNode,
+    ExtendGene,
     AddNode,
     TrimNode,
     DeleteNode,
@@ -42,7 +42,7 @@ INSTANTIATE_TEST_SUITE_P(
         MutationType::CellTypeMode,
         MutationType::CellType,
         MutationType::Void,
-        MutationType::AppendNode,
+        MutationType::ExtendGene,
         MutationType::AddNode,
         MutationType::TrimNode,
         MutationType::DeleteNode,
@@ -74,8 +74,8 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
     case MutationType::Void:
         genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
         break;
-    case MutationType::AppendNode:
-        genome._mutationRates._appendNodeMutation = AppendNodeMutationDesc().geneProbability(1.0f);
+    case MutationType::ExtendGene:
+        genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(1.0f);
         break;
     case MutationType::AddNode:
         // Per-node probability: inserting before every node compounds the genome each pass, so a full probability would
@@ -122,7 +122,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
     _parameters.cellTypeModeMetaMutationsSigma.value = 1.0f;
     _parameters.cellTypeMetaMutationsSigma.value = 1.0f;
     _parameters.voidMetaMutationsSigma.value = 1.0f;
-    _parameters.appendNodeMetaMutationsSigma.value = 1.0f;
+    _parameters.extendGeneMetaMutationsSigma.value = 1.0f;
     _parameters.addNodeMetaMutationsSigma.value = 1.0f;
     _parameters.trimNodeMetaMutationsSigma.value = 1.0f;
     _parameters.deleteNodeMetaMutationsSigma.value = 1.0f;
