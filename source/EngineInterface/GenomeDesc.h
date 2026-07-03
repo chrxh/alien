@@ -469,11 +469,11 @@ struct VoidMutationDesc
     MEMBER(VoidMutationDesc, float, nodeProbability, 0.0f);
 };
 
-struct AppendNodeMutationDesc
+struct ExtendGeneMutationDesc
 {
-    auto operator<=>(AppendNodeMutationDesc const&) const = default;
+    auto operator<=>(ExtendGeneMutationDesc const&) const = default;
 
-    MEMBER(AppendNodeMutationDesc, float, geneProbability, 0.0f);
+    MEMBER(ExtendGeneMutationDesc, float, geneProbability, 0.0f);
 };
 
 struct AddNodeMutationDesc
@@ -483,11 +483,11 @@ struct AddNodeMutationDesc
     MEMBER(AddNodeMutationDesc, float, nodeProbability, 0.0f);
 };
 
-struct TrimNodeMutationDesc
+struct TrimGeneMutationDesc
 {
-    auto operator<=>(TrimNodeMutationDesc const&) const = default;
+    auto operator<=>(TrimGeneMutationDesc const&) const = default;
 
-    MEMBER(TrimNodeMutationDesc, float, geneProbability, 0.0f);
+    MEMBER(TrimGeneMutationDesc, float, geneProbability, 0.0f);
 };
 
 struct DeleteNodeMutationDesc
@@ -574,9 +574,9 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());
-    MEMBER(MutationRatesDesc, AppendNodeMutationDesc, appendNodeMutation, AppendNodeMutationDesc());
+    MEMBER(MutationRatesDesc, ExtendGeneMutationDesc, extendGeneMutation, ExtendGeneMutationDesc());
     MEMBER(MutationRatesDesc, AddNodeMutationDesc, addNodeMutation, AddNodeMutationDesc());
-    MEMBER(MutationRatesDesc, TrimNodeMutationDesc, trimNodeMutation, TrimNodeMutationDesc());
+    MEMBER(MutationRatesDesc, TrimGeneMutationDesc, trimGeneMutation, TrimGeneMutationDesc());
     MEMBER(MutationRatesDesc, DeleteNodeMutationDesc, deleteNodeMutation, DeleteNodeMutationDesc());
     MEMBER(MutationRatesDesc, CopyNodeSectionMutationDesc, copyNodeSectionMutation, CopyNodeSectionMutationDesc());
     MEMBER(MutationRatesDesc, MoveNodeSectionMutationDesc, moveNodeSectionMutation, MoveNodeSectionMutationDesc());
