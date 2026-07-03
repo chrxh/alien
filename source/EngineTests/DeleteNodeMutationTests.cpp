@@ -25,22 +25,6 @@ TEST_F(DeleteNodeMutationTests, deleteNodeMutation_deletesEveryNodeButOne)
     EXPECT_EQ(1, actualGenome._genes.at(0)._nodes.size());
 }
 
-TEST_F(DeleteNodeMutationTests, deleteNodeMutation_keepsAtLeastOneNode)
-{
-    auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
-    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(1.0f);
-
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
-
-    _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 5; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
-
-    auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(1, actualGenome._genes.at(0)._nodes.size());
-}
-
 TEST_F(DeleteNodeMutationTests, deleteNodeMutation_keepsFirstAndLastNonVoid)
 {
     // Deleting a boundary node can expose the interior void node; it must be corrected to a non-void cell type.
