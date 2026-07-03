@@ -529,7 +529,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_geometry(Simulation
             }
 
             mutateNumber(gene.stiffness, Const::GeneStiffness_Min, Const::GeneStiffness_Max);
-            mutateNumber(gene.connectionDistance, Const::GeneConnectionDistance_Min, Const::GeneConnectionDistance_Max);
+            // Do not mutate connectionDistance
+            //mutateNumber(gene.connectionDistance, Const::GeneConnectionDistance_Min, Const::GeneConnectionDistance_Max);
         }
     }
 }
