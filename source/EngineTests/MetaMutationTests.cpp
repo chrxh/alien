@@ -443,14 +443,14 @@ TEST_F(MetaMutationTests, metaMutation_addNodeRatesZeroSigmaNoChange)
     EXPECT_EQ(actualGenome._mutationRates._addNodeMutation._nodeProbability, 0.5f);
 }
 
-TEST_F(MetaMutationTests, metaMutation_trimNodeRatesActuallyChange)
+TEST_F(MetaMutationTests, metaMutation_trimGeneRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    _parameters.trimNodeMetaMutationsSigma.value = 1.0f;
+    _parameters.trimGeneMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
@@ -459,19 +459,19 @@ TEST_F(MetaMutationTests, metaMutation_trimNodeRatesActuallyChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._trimNodeMutation._geneProbability, 0.5f));
-    EXPECT_GE(actualGenome._mutationRates._trimNodeMutation._geneProbability, 0.0f);
-    EXPECT_LE(actualGenome._mutationRates._trimNodeMutation._geneProbability, 1.0f);
+    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._trimGeneMutation._geneProbability, 0.5f));
+    EXPECT_GE(actualGenome._mutationRates._trimGeneMutation._geneProbability, 0.0f);
+    EXPECT_LE(actualGenome._mutationRates._trimGeneMutation._geneProbability, 1.0f);
 }
 
-TEST_F(MetaMutationTests, metaMutation_trimNodeRatesZeroSigmaNoChange)
+TEST_F(MetaMutationTests, metaMutation_trimGeneRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
-    _parameters.trimNodeMetaMutationsSigma.value = 0.0f;
+    _parameters.trimGeneMetaMutationsSigma.value = 0.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
@@ -480,7 +480,7 @@ TEST_F(MetaMutationTests, metaMutation_trimNodeRatesZeroSigmaNoChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome._mutationRates._trimNodeMutation._geneProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._trimGeneMutation._geneProbability, 0.5f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_deleteNodeRatesActuallyChange)
