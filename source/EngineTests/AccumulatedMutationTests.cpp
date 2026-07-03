@@ -78,13 +78,15 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
         genome._mutationRates._appendNodeMutation = AppendNodeMutationDesc().geneProbability(1.0f);
         break;
     case MutationType::AddNode:
-        genome._mutationRates._addNodeMutation = AddNodeMutationDesc().geneProbability(1.0f);
+        // Per-node probability: inserting before every node compounds the genome each pass, so a full probability would
+        // exhaust the genome heap over the 100 passes below. A small probability still accumulates mutations reliably.
+        genome._mutationRates._addNodeMutation = AddNodeMutationDesc().nodeProbability(0.02f);
         break;
     case MutationType::TrimNode:
         genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(1.0f);
         break;
     case MutationType::DeleteNode:
-        genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(1.0f);
+        genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(1.0f);
         break;
     case MutationType::Constructor:
         genome._mutationRates._constructorMutations[0] =

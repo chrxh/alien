@@ -402,7 +402,7 @@ TEST_F(MetaMutationTests, metaMutation_appendNodeRatesZeroSigmaNoChange)
 TEST_F(MetaMutationTests, metaMutation_addNodeRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._addNodeMutation = AddNodeMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._addNodeMutation = AddNodeMutationDesc().nodeProbability(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -410,20 +410,22 @@ TEST_F(MetaMutationTests, metaMutation_addNodeRatesActuallyChange)
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
+    // The add-node mutation inserts before every node, so its per-node probability grows the genome quickly; keep the pass
+    // count low so the genome stays small while the meta-mutation still changes the rate.
+    for (int i = 0; i < 5; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._addNodeMutation._geneProbability, 0.5f));
-    EXPECT_GE(actualGenome._mutationRates._addNodeMutation._geneProbability, 0.0f);
-    EXPECT_LE(actualGenome._mutationRates._addNodeMutation._geneProbability, 1.0f);
+    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._addNodeMutation._nodeProbability, 0.5f));
+    EXPECT_GE(actualGenome._mutationRates._addNodeMutation._nodeProbability, 0.0f);
+    EXPECT_LE(actualGenome._mutationRates._addNodeMutation._nodeProbability, 1.0f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_addNodeRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._addNodeMutation = AddNodeMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._addNodeMutation = AddNodeMutationDesc().nodeProbability(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -431,12 +433,14 @@ TEST_F(MetaMutationTests, metaMutation_addNodeRatesZeroSigmaNoChange)
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 100; ++i) {
+    // The add-node mutation inserts before every node, so its per-node probability grows the genome quickly; keep the pass
+    // count low so the genome stays small (the rate itself must not change here).
+    for (int i = 0; i < 5; ++i) {
         _simulationFacade->testOnly_mutate(1);
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome._mutationRates._addNodeMutation._geneProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._addNodeMutation._nodeProbability, 0.5f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_trimNodeRatesActuallyChange)
@@ -482,7 +486,7 @@ TEST_F(MetaMutationTests, metaMutation_trimNodeRatesZeroSigmaNoChange)
 TEST_F(MetaMutationTests, metaMutation_deleteNodeRatesActuallyChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -495,15 +499,15 @@ TEST_F(MetaMutationTests, metaMutation_deleteNodeRatesActuallyChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._deleteNodeMutation._geneProbability, 0.5f));
-    EXPECT_GE(actualGenome._mutationRates._deleteNodeMutation._geneProbability, 0.0f);
-    EXPECT_LE(actualGenome._mutationRates._deleteNodeMutation._geneProbability, 1.0f);
+    EXPECT_FALSE(approxCompare(actualGenome._mutationRates._deleteNodeMutation._nodeProbability, 0.5f));
+    EXPECT_GE(actualGenome._mutationRates._deleteNodeMutation._nodeProbability, 0.0f);
+    EXPECT_LE(actualGenome._mutationRates._deleteNodeMutation._nodeProbability, 1.0f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_deleteNodeRatesZeroSigmaNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(0.5f);
+    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(0.5f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -516,7 +520,7 @@ TEST_F(MetaMutationTests, metaMutation_deleteNodeRatesZeroSigmaNoChange)
     }
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(actualGenome._mutationRates._deleteNodeMutation._geneProbability, 0.5f);
+    EXPECT_EQ(actualGenome._mutationRates._deleteNodeMutation._nodeProbability, 0.5f);
 }
 
 TEST_F(MetaMutationTests, metaMutation_constructorRatesActuallyChange)
