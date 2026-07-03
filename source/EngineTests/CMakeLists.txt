@@ -31,6 +31,7 @@ PUBLIC
     HeadUpdateTests.cpp
     GarbageCollectorTests.cpp
     GeneratorTests.cpp
+    GeometryMutationTests.cpp
     GeometryTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp

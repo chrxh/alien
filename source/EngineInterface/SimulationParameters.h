@@ -112,6 +112,7 @@ struct SimulationParameters
     BaseParameter<float> neuronsMetaMutationsSigma = {0};
     BaseParameter<float> connectionsMetaMutationsSigma = {0};
     BaseParameter<float> cellTypePropertiesMetaMutationsSigma = {0};
+    BaseParameter<float> geometryMetaMutationsSigma = {0};
     BaseParameter<float> cellTypeModeMetaMutationsSigma = {0};
     BaseParameter<float> cellTypeMetaMutationsSigma = {0};
     BaseParameter<float> voidMetaMutationsSigma = {0};
