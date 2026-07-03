@@ -50,9 +50,9 @@ namespace
         addActiveMutationType(activeMutations, "Cell type mutations", {mutationRates._cellTypeMutation._nodeProbability});
         addActiveMutationType(activeMutations, "Void mutations", {mutationRates._voidMutation._nodeProbability});
         addActiveMutationType(activeMutations, "Append node mutations", {mutationRates._appendNodeMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Add node mutations", {mutationRates._addNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Add node mutations", {mutationRates._addNodeMutation._nodeProbability});
         addActiveMutationType(activeMutations, "Trim node mutations", {mutationRates._trimNodeMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Delete node mutations", {mutationRates._deleteNodeMutation._geneProbability});
+        addActiveMutationType(activeMutations, "Delete node mutations", {mutationRates._deleteNodeMutation._nodeProbability});
         addActiveMutationType(activeMutations, "Duplicate gene mutations", {mutationRates._duplicateGeneMutation._geneProbability});
         addActiveMutationType(activeMutations, "Delete gene mutations", {mutationRates._deleteGeneMutation._geneProbability});
         addActiveMutationType(activeMutations, "Copy node section mutations", {mutationRates._copyNodeSectionMutation._geneProbability});

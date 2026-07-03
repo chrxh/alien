@@ -91,8 +91,8 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
     // sync since following mutations may change entire genes
     block.sync();
     auto const& nodeRates = genome->mutationRates;
-    bool anyNodeMutation = nodeRates.appendNodeMutation.geneProbability > 0 || nodeRates.addNodeMutation.geneProbability > 0
-        || nodeRates.trimNodeMutation.geneProbability > 0 || nodeRates.deleteNodeMutation.geneProbability > 0;
+    bool anyNodeMutation = nodeRates.appendNodeMutation.geneProbability > 0 || nodeRates.addNodeMutation.nodeProbability > 0
+        || nodeRates.trimNodeMutation.geneProbability > 0 || nodeRates.deleteNodeMutation.nodeProbability > 0;
     if (anyNodeMutation) {
         applyMutations_appendNode(data, genome, accumulatedMutations);
         applyMutations_addNode(data, genome, accumulatedMutations);
@@ -975,18 +975,24 @@ __inline__ __device__ void MutationProcessor::applyMutations_addNode(SimulationD
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.addNodeMutation;
-    if (rate.geneProbability <= 0) {
+    if (rate.nodeProbability <= 0) {
         return;
     }
 
     for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
         auto& gene = genome->genes[geneIndex];
-        if (gene.numNodes >= MaxNodesPerGene || data.primaryNumberGen.random() >= rate.geneProbability) {
-            continue;
+
+        // Decide independently for each of the numNodes + 1 insertion slots [0, numNodes] whether to insert a new node before
+        // that slot (position == numNodes appends at the end). Iterate from high to low so an insertion does not shift slots
+        // that have not been visited yet.
+        auto const oldNumNodes = gene.numNodes;
+        for (int position = oldNumNodes; position >= 0; --position) {
+            if (gene.numNodes >= MaxNodesPerGene || data.primaryNumberGen.random() >= rate.nodeProbability) {
+                continue;
+            }
+            insertNode(data, genome, gene, position);
+            atomicAdd_block(&accumulatedMutations, 1.0f);
         }
-        auto position = data.primaryNumberGen.random(gene.numNodes);  // [0, numNodes] => any insertion slot, incl. start/end
-        insertNode(data, genome, gene, position);
-        atomicAdd_block(&accumulatedMutations, 1.0f);
     }
 }
 
@@ -1013,18 +1019,23 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteNode(Simulati
 {
     auto laneId = cg_mutation::this_thread_block().thread_rank();
     auto const& rate = genome->mutationRates.deleteNodeMutation;
-    if (rate.geneProbability <= 0) {
+    if (rate.nodeProbability <= 0) {
         return;
     }
 
     for (int geneIndex = laneId; geneIndex < genome->numGenes; geneIndex += blockDim.x) {
         auto& gene = genome->genes[geneIndex];
-        if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.geneProbability) {  // keep at least one node
-            continue;
+
+        // Decide independently for each node whether to delete it, but keep at least one node in the gene. Iterate from high to
+        // low so a deletion does not shift nodes that have not been visited yet.
+        auto const oldNumNodes = gene.numNodes;
+        for (int position = oldNumNodes - 1; position >= 0; --position) {
+            if (gene.numNodes <= 1 || data.primaryNumberGen.random() >= rate.nodeProbability) {  // keep at least one node
+                continue;
+            }
+            removeNode(data, gene, position);
+            atomicAdd_block(&accumulatedMutations, 1.0f);
         }
-        auto position = data.primaryNumberGen.random(gene.numNodes - 1);  // [0, numNodes - 1] => any node
-        removeNode(data, gene, position);
-        atomicAdd_block(&accumulatedMutations, 1.0f);
     }
 }
 
@@ -1685,7 +1696,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         float addNodeSigma = cudaSimulationParameters.addNodeMetaMutationsSigma.value;
         if (addNodeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * addNodeSigma)); };
-            mutateFloat(genome->mutationRates.addNodeMutation.geneProbability);
+            mutateFloat(genome->mutationRates.addNodeMutation.nodeProbability);
         }
 
         float trimNodeSigma = cudaSimulationParameters.trimNodeMetaMutationsSigma.value;
@@ -1697,7 +1708,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_meta(SimulationData
         float deleteNodeSigma = cudaSimulationParameters.deleteNodeMetaMutationsSigma.value;
         if (deleteNodeSigma > 0) {
             auto mutateFloat = [&](float& val) { val = min(1.0f, max(0.0f, val + generateGaussian(data) * deleteNodeSigma)); };
-            mutateFloat(genome->mutationRates.deleteNodeMutation.geneProbability);
+            mutateFloat(genome->mutationRates.deleteNodeMutation.nodeProbability);
         }
 
         float duplicateGeneSigma = cudaSimulationParameters.duplicateGeneMetaMutationsSigma.value;

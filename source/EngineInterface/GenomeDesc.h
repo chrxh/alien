@@ -480,7 +480,7 @@ struct AddNodeMutationDesc
 {
     auto operator<=>(AddNodeMutationDesc const&) const = default;
 
-    MEMBER(AddNodeMutationDesc, float, geneProbability, 0.0f);
+    MEMBER(AddNodeMutationDesc, float, nodeProbability, 0.0f);
 };
 
 struct TrimNodeMutationDesc
@@ -494,7 +494,7 @@ struct DeleteNodeMutationDesc
 {
     auto operator<=>(DeleteNodeMutationDesc const&) const = default;
 
-    MEMBER(DeleteNodeMutationDesc, float, geneProbability, 0.0f);
+    MEMBER(DeleteNodeMutationDesc, float, nodeProbability, 0.0f);
 };
 
 struct DuplicateGeneMutationDesc
