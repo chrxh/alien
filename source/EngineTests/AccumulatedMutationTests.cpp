@@ -18,9 +18,9 @@ enum class MutationType
     CellTypeMode,
     CellType,
     Void,
-    AppendNode,
+    ExtendGene,
     AddNode,
-    TrimNode,
+    TrimGene,
     DeleteNode,
     Constructor
 };
@@ -42,9 +42,9 @@ INSTANTIATE_TEST_SUITE_P(
         MutationType::CellTypeMode,
         MutationType::CellType,
         MutationType::Void,
-        MutationType::AppendNode,
+        MutationType::ExtendGene,
         MutationType::AddNode,
-        MutationType::TrimNode,
+        MutationType::TrimGene,
         MutationType::DeleteNode,
         MutationType::Constructor));
 
@@ -74,16 +74,16 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
     case MutationType::Void:
         genome._mutationRates._voidMutation = VoidMutationDesc().nodeProbability(1.0f);
         break;
-    case MutationType::AppendNode:
-        genome._mutationRates._appendNodeMutation = AppendNodeMutationDesc().geneProbability(1.0f);
+    case MutationType::ExtendGene:
+        genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(1.0f);
         break;
     case MutationType::AddNode:
         // Per-node probability: inserting before every node compounds the genome each pass, so a full probability would
         // exhaust the genome heap over the 100 passes below. A small probability still accumulates mutations reliably.
         genome._mutationRates._addNodeMutation = AddNodeMutationDesc().nodeProbability(0.02f);
         break;
-    case MutationType::TrimNode:
-        genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(1.0f);
+    case MutationType::TrimGene:
+        genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(1.0f);
         break;
     case MutationType::DeleteNode:
         genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(1.0f);
@@ -122,9 +122,9 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
     _parameters.cellTypeModeMetaMutationsSigma.value = 1.0f;
     _parameters.cellTypeMetaMutationsSigma.value = 1.0f;
     _parameters.voidMetaMutationsSigma.value = 1.0f;
-    _parameters.appendNodeMetaMutationsSigma.value = 1.0f;
+    _parameters.extendGeneMetaMutationsSigma.value = 1.0f;
     _parameters.addNodeMetaMutationsSigma.value = 1.0f;
-    _parameters.trimNodeMetaMutationsSigma.value = 1.0f;
+    _parameters.trimGeneMetaMutationsSigma.value = 1.0f;
     _parameters.deleteNodeMetaMutationsSigma.value = 1.0f;
     _parameters.constructorMetaMutationsSigma.value = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);

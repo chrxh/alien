@@ -6,13 +6,13 @@
 
 #include "MutationTestsBase.h"
 
-class AppendNodeMutationTests : public MutationTestsBase
+class ExtendGeneMutationTests : public MutationTestsBase
 {};
 
-TEST_F(AppendNodeMutationTests, appendNodeMutation_addsExactlyOneNodePerPass)
+TEST_F(ExtendGeneMutationTests, extendGeneMutation_addsExactlyOneNodePerPass)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
-    genome._mutationRates._appendNodeMutation = AppendNodeMutationDesc().geneProbability(1.0f);
+    genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -30,10 +30,10 @@ TEST_F(AppendNodeMutationTests, appendNodeMutation_addsExactlyOneNodePerPass)
     }
 }
 
-TEST_F(AppendNodeMutationTests, appendNodeMutation_newNodeInheritsNeighborColor)
+TEST_F(ExtendGeneMutationTests, extendGeneMutation_newNodeInheritsNeighborColor)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().color(3), NodeDesc().color(3)})});
-    genome._mutationRates._appendNodeMutation = AppendNodeMutationDesc().geneProbability(1.0f);
+    genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -48,10 +48,10 @@ TEST_F(AppendNodeMutationTests, appendNodeMutation_newNodeInheritsNeighborColor)
     }
 }
 
-TEST_F(AppendNodeMutationTests, appendNodeMutation_zeroProbabilityNoChange)
+TEST_F(ExtendGeneMutationTests, extendGeneMutation_zeroProbabilityNoChange)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
-    genome._mutationRates._appendNodeMutation = AppendNodeMutationDesc().geneProbability(0.0f);
+    genome._mutationRates._extendGeneMutation = ExtendGeneMutationDesc().geneProbability(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

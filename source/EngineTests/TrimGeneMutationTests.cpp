@@ -6,13 +6,13 @@
 
 #include "MutationTestsBase.h"
 
-class TrimNodeMutationTests : public MutationTestsBase
+class TrimGeneMutationTests : public MutationTestsBase
 {};
 
-TEST_F(TrimNodeMutationTests, trimNodeMutation_removesExactlyOneNodePerPass)
+TEST_F(TrimGeneMutationTests, trimGeneMutation_removesExactlyOneNodePerPass)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()})});
-    genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(1.0f);
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -23,10 +23,10 @@ TEST_F(TrimNodeMutationTests, trimNodeMutation_removesExactlyOneNodePerPass)
     EXPECT_EQ(2, actualGenome._genes.at(0)._nodes.size());
 }
 
-TEST_F(TrimNodeMutationTests, trimNodeMutation_keepsAtLeastOneNode)
+TEST_F(TrimGeneMutationTests, trimGeneMutation_keepsAtLeastOneNode)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
-    genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(1.0f);
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -39,11 +39,11 @@ TEST_F(TrimNodeMutationTests, trimNodeMutation_keepsAtLeastOneNode)
     EXPECT_EQ(1, actualGenome._genes.at(0)._nodes.size());
 }
 
-TEST_F(TrimNodeMutationTests, trimNodeMutation_keepsFirstAndLastNonVoid)
+TEST_F(TrimGeneMutationTests, trimGeneMutation_keepsFirstAndLastNonVoid)
 {
     // Trimming a boundary node exposes the interior void node; it must be corrected to a non-void cell type.
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc().cellType(VoidGenomeDesc()), NodeDesc()})});
-    genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(1.0f);
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -56,10 +56,10 @@ TEST_F(TrimNodeMutationTests, trimNodeMutation_keepsFirstAndLastNonVoid)
     EXPECT_NE(CellType_Void, nodes.back().getCellType());
 }
 
-TEST_F(TrimNodeMutationTests, trimNodeMutation_zeroProbabilityNoChange)
+TEST_F(TrimGeneMutationTests, trimGeneMutation_zeroProbabilityNoChange)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()})});
-    genome._mutationRates._trimNodeMutation = TrimNodeMutationDesc().geneProbability(0.0f);
+    genome._mutationRates._trimGeneMutation = TrimGeneMutationDesc().geneProbability(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
