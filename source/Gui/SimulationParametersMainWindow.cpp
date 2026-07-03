@@ -1,6 +1,5 @@
 #include "SimulationParametersMainWindow.h"
 
-#include <imgui_internal.h>
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/StringHelper.h>
@@ -34,6 +33,20 @@ namespace
 
     auto constexpr ExpertWidgetHeight = 130.0f;
     auto constexpr ExpertWidgetMinHeight = 60.0f;
+
+    void appendAsUtf8(std::string& target, ImWchar c)
+    {
+        if (c < 0x80) {
+            target += static_cast<char>(c);
+        } else if (c < 0x800) {
+            target += static_cast<char>(0xC0 | (c >> 6));
+            target += static_cast<char>(0x80 | (c & 0x3F));
+        } else {
+            target += static_cast<char>(0xE0 | (c >> 12));
+            target += static_cast<char>(0x80 | ((c >> 6) & 0x3F));
+            target += static_cast<char>(0x80 | (c & 0x3F));
+        }
+    }
 }
 
 SimulationParametersMainWindow::SimulationParametersMainWindow()
@@ -284,9 +297,10 @@ void SimulationParametersMainWindow::startFilterTypingIfNeeded()
     auto startedTyping = false;
     for (auto const& c : ImGui::GetIO().InputQueueCharacters) {
         if (c >= 32 && c != 127) {
-            char utf8[5];
-            ImTextCharToUtf8(utf8, c);
-            _filter += utf8;
+            if (!startedTyping) {
+                _filter.clear();
+            }
+            appendAsUtf8(_filter, c);
             startedTyping = true;
         }
     }
