@@ -1,3 +1,5 @@
+#include <ranges>
+
 #include <gtest/gtest.h>
 
 #include <EngineInterface/CellTypeConstants.h>
@@ -18,37 +20,30 @@ TEST_F(GeometryMutationTests, geometryMutation_changesShapeStiffnessAndConnectio
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 20; ++i) {
-        _simulationFacade->testOnly_mutate(1);
-    }
+    _simulationFacade->testOnly_mutate(1);
 
     auto actualGenome = getMutatedGenome();
 
     ASSERT_EQ(genome._genes.size(), actualGenome._genes.size());
-    bool shapeChanged = false;
-    bool stiffnessChanged = false;
-    bool connectionDistanceChanged = false;
-    for (size_t i = 0; i < genome._genes.size(); ++i) {
-        if (genome._genes[i]._shape != actualGenome._genes[i]._shape) {
-            shapeChanged = true;
-        }
-        if (genome._genes[i]._stiffness != actualGenome._genes[i]._stiffness) {
-            stiffnessChanged = true;
-        }
-        if (genome._genes[i]._connectionDistance != actualGenome._genes[i]._connectionDistance) {
-            connectionDistanceChanged = true;
-        }
+    for (auto const& [expectedGene, actualGene] : std::views::zip(genome._genes, actualGenome._genes)) {
+        EXPECT_NE(expectedGene._shape, actualGene._shape);
+        EXPECT_NE(expectedGene._stiffness, actualGene._stiffness);
+        EXPECT_NE(expectedGene._connectionDistance, actualGene._connectionDistance);
+
+        EXPECT_GE(actualGene._stiffness, Const::GeneStiffness_Min);
+        EXPECT_LE(actualGene._stiffness, Const::GeneStiffness_Max);
+        EXPECT_GE(actualGene._connectionDistance, Const::GeneConnectionDistance_Min);
+        EXPECT_LE(actualGene._connectionDistance, Const::GeneConnectionDistance_Max);
+        EXPECT_GE(actualGene._shape, 0);
+        EXPECT_LT(actualGene._shape, ConstructorShape_Count);
     }
-    EXPECT_TRUE(shapeChanged);
-    EXPECT_TRUE(stiffnessChanged);
-    EXPECT_TRUE(connectionDistanceChanged);
 }
 
-TEST_F(GeometryMutationTests, geometryMutation_respectsBounds)
+TEST_F(GeometryMutationTests, geometryMutation_zeroProbabilityNoChange)
 {
     auto genome = createTestGenome();
-    genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().geneProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
-    genome._mutationRates._geometryMutations[1] = GeometryMutationDesc().geneProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
+    genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().geneProbability(0.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
+    genome._mutationRates._geometryMutations[1] = GeometryMutationDesc().geneProbability(0.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -59,13 +54,11 @@ TEST_F(GeometryMutationTests, geometryMutation_respectsBounds)
 
     auto actualGenome = getMutatedGenome();
 
-    for (auto const& gene : actualGenome._genes) {
-        EXPECT_GE(gene._stiffness, Const::GeneStiffness_Min);
-        EXPECT_LE(gene._stiffness, Const::GeneStiffness_Max);
-        EXPECT_GE(gene._connectionDistance, Const::GeneConnectionDistance_Min);
-        EXPECT_LE(gene._connectionDistance, Const::GeneConnectionDistance_Max);
-        EXPECT_GE(gene._shape, 0);
-        EXPECT_LT(gene._shape, ConstructorShape_Count);
+    ASSERT_EQ(genome._genes.size(), actualGenome._genes.size());
+    for (auto const& [expectedGene, actualGene] : std::views::zip(genome._genes, actualGenome._genes)) {
+        EXPECT_EQ(expectedGene._shape, actualGene._shape);
+        EXPECT_EQ(expectedGene._stiffness, actualGene._stiffness);
+        EXPECT_EQ(expectedGene._connectionDistance, actualGene._connectionDistance);
     }
 }
 
@@ -85,9 +78,9 @@ TEST_F(GeometryMutationTests, geometryMutation_doesNotChangeNodes)
     auto actualGenome = getMutatedGenome();
 
     ASSERT_EQ(genome._genes.size(), actualGenome._genes.size());
-    for (size_t i = 0; i < genome._genes.size(); ++i) {
-        EXPECT_EQ(genome._genes[i]._nodes, actualGenome._genes[i]._nodes);
-        EXPECT_EQ(genome._genes[i]._name, actualGenome._genes[i]._name);
-        EXPECT_EQ(genome._genes[i]._homogeneousCellType, actualGenome._genes[i]._homogeneousCellType);
+    for (auto const& [expectedGene, actualGene] : std::views::zip(genome._genes, actualGenome._genes)) {
+        EXPECT_EQ(expectedGene._nodes, actualGene._nodes);
+        EXPECT_EQ(expectedGene._name, actualGene._name);
+        EXPECT_EQ(expectedGene._homogeneousCellType, actualGene._homogeneousCellType);
     }
 }

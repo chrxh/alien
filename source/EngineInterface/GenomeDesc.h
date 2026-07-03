@@ -569,8 +569,8 @@ struct MutationRatesDesc
         GeometryMutationArray,
         geometryMutations,
         (GeometryMutationArray{
-            {GeometryMutationDesc().valueChangeSigma(0.05f).enumChangeProbability(0.05f),
-             GeometryMutationDesc().valueChangeSigma(0.5f).enumChangeProbability(0.5f)}}));
+            {GeometryMutationDesc().valueChangeSigma(0.2f).enumChangeProbability(0.2f),
+             GeometryMutationDesc().valueChangeSigma(1.0f).enumChangeProbability(0.5f)}}));
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());

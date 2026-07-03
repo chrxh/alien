@@ -525,7 +525,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_geometry(Simulation
                     ++newValue;
                 }
                 gene.shape = newValue;
-                atomicAdd_block(&accumulatedMutations, 1.0f);
+                atomicAdd_block(&accumulatedMutations, toFloat(gene.numNodes));
             }
 
             mutateNumber(gene.stiffness, Const::GeneStiffness_Min, Const::GeneStiffness_Max);
