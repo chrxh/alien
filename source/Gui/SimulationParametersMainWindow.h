@@ -26,7 +26,7 @@ private:
     void processExpertWidget();
     void processStatusBar();
 
-    bool shouldStartFilterTyping() const;
+    void startFilterTypingIfNeeded();
 
     struct Location
     {
@@ -89,4 +89,5 @@ private:
     std::string _fileDialogPath;
 
     std::string _filter;
+    std::vector<unsigned int> _pendingFilterChars;
 };

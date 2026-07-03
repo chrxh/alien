@@ -553,6 +553,10 @@ bool AlienGui::InputFilter(InputFilterParameters const& parameters, std::string&
 {
     auto result = AlienGui::InputText(
         AlienGui::InputTextParameters().hint("Filter (case insensitive)").bold(!filter.empty()).textWidth(0).width(parameters._width - 28.0f), filter);
+    if (ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        filter.clear();
+        result = true;
+    }
     ImGui::SameLine();
 
     ImGui::BeginDisabled(filter.empty());

@@ -258,9 +258,7 @@ void SimulationParametersMainWindow::processDetailWidget()
             //AlienGui::ResetFilterText();
 
             ImGui::Spacing();
-            if (shouldStartFilterTyping()) {
-                ImGui::SetKeyboardFocusHere();
-            }
+            startFilterTypingIfNeeded();
             AlienGui::InputFilter(AlienGui::InputFilterParameters().width(250.0f), _filter);
         }
         AlienGui::EndTreeNode();
@@ -274,17 +272,33 @@ void SimulationParametersMainWindow::processDetailWidget()
     }
 }
 
-bool SimulationParametersMainWindow::shouldStartFilterTyping() const
+void SimulationParametersMainWindow::startFilterTypingIfNeeded()
 {
-    if (ImGui::IsAnyItemActive() || !ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
-        return false;
+    // SetKeyboardFocusHere() takes effect only on the next frame. Characters typed on the
+    // triggering frame are queued here and replayed into ImGui's input queue on the frame the
+    // filter field actually becomes active, so ImGui's own selection/insertion logic handles
+    // them (e.g. correctly replacing a pre-existing filter instead of us splicing text in and
+    // fighting the auto-select-on-focus behavior).
+    if (!_pendingFilterChars.empty()) {
+        for (auto c : _pendingFilterChars) {
+            ImGui::GetIO().AddInputCharacter(c);
+        }
+        _pendingFilterChars.clear();
+        return;
     }
+
+    if (ImGui::IsAnyItemActive() || !ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
+        return;
+    }
+
     for (auto const& c : ImGui::GetIO().InputQueueCharacters) {
         if (c >= 32 && c != 127) {
-            return true;
+            _pendingFilterChars.push_back(c);
         }
     }
-    return false;
+    if (!_pendingFilterChars.empty()) {
+        ImGui::SetKeyboardFocusHere();
+    }
 }
 
 void SimulationParametersMainWindow::processExpertWidget()
