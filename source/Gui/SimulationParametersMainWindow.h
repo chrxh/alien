@@ -26,6 +26,8 @@ private:
     void processExpertWidget();
     void processStatusBar();
 
+    bool shouldStartFilterTyping() const;
+
     struct Location
     {
         std::string name;

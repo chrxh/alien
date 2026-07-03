@@ -258,6 +258,9 @@ void SimulationParametersMainWindow::processDetailWidget()
             //AlienGui::ResetFilterText();
 
             ImGui::Spacing();
+            if (shouldStartFilterTyping()) {
+                ImGui::SetKeyboardFocusHere();
+            }
             AlienGui::InputFilter(AlienGui::InputFilterParameters().width(250.0f), _filter);
         }
         AlienGui::EndTreeNode();
@@ -269,6 +272,19 @@ void SimulationParametersMainWindow::processDetailWidget()
         AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _expertWidgetHeight);
         ImGui::PopID();
     }
+}
+
+bool SimulationParametersMainWindow::shouldStartFilterTyping() const
+{
+    if (ImGui::IsAnyItemActive() || !ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
+        return false;
+    }
+    for (auto const& c : ImGui::GetIO().InputQueueCharacters) {
+        if (c >= 32 && c != 127) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void SimulationParametersMainWindow::processExpertWidget()
