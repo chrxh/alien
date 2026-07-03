@@ -159,6 +159,17 @@ namespace Const
     std::vector<std::string> const ProvideEnergyStrings = {"Reduce cell energy", "Free"};
 }
 
+//******************
+//* Gene constants *
+//******************
+namespace Const
+{
+    auto constexpr GeneStiffness_Min = 0.05f;
+    auto constexpr GeneStiffness_Max = 1.0f;
+    auto constexpr GeneConnectionDistance_Min = 0.5f;
+    auto constexpr GeneConnectionDistance_Max = 1.5f;
+}
+
 //**********************
 //* Mutation constants *
 //**********************

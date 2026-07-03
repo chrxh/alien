@@ -44,6 +44,8 @@ namespace
             activeMutations,
             "Cell type property mut.",
             {mutationRates._cellTypePropertiesMutations[0]._nodeProbability, mutationRates._cellTypePropertiesMutations[1]._nodeProbability});
+        addActiveMutationType(
+            activeMutations, "Geometry mutations", {mutationRates._geometryMutations[0]._geneProbability, mutationRates._geometryMutations[1]._geneProbability});
         addActiveMutationType(activeMutations, "Cell type mode mut.", {mutationRates._cellTypeModeMutation._nodeProbability});
         addActiveMutationType(activeMutations, "Cell type mutations", {mutationRates._cellTypeMutation._nodeProbability});
         addActiveMutationType(activeMutations, "Void mutations", {mutationRates._voidMutation._nodeProbability});
