@@ -60,9 +60,9 @@ namespace
             genomeTO.mutationRates.cellTypeMutation = {genome->mutationRates.cellTypeMutation.nodeProbability};
             genomeTO.mutationRates.voidMutation = {genome->mutationRates.voidMutation.nodeProbability};
             genomeTO.mutationRates.appendNodeMutation = {genome->mutationRates.appendNodeMutation.geneProbability};
-            genomeTO.mutationRates.addNodeMutation = {genome->mutationRates.addNodeMutation.geneProbability};
+            genomeTO.mutationRates.addNodeMutation = {genome->mutationRates.addNodeMutation.nodeProbability};
             genomeTO.mutationRates.trimNodeMutation = {genome->mutationRates.trimNodeMutation.geneProbability};
-            genomeTO.mutationRates.deleteNodeMutation = {genome->mutationRates.deleteNodeMutation.geneProbability};
+            genomeTO.mutationRates.deleteNodeMutation = {genome->mutationRates.deleteNodeMutation.nodeProbability};
             genomeTO.mutationRates.duplicateGeneMutation = {genome->mutationRates.duplicateGeneMutation.geneProbability};
             genomeTO.mutationRates.deleteGeneMutation = {genome->mutationRates.deleteGeneMutation.geneProbability};
             genomeTO.mutationRates.copyNodeSectionMutation = {genome->mutationRates.copyNodeSectionMutation.geneProbability};

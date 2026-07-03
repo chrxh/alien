@@ -9,10 +9,12 @@
 class DeleteNodeMutationTests : public MutationTestsBase
 {};
 
-TEST_F(DeleteNodeMutationTests, deleteNodeMutation_removesExactlyOneNodePerPass)
+TEST_F(DeleteNodeMutationTests, deleteNodeMutation_deletesEveryNodeButOne)
 {
+    // With node probability 1, each node is deleted, but the gene must keep at least one node, so a 3-node gene shrinks to a
+    // single node in one pass.
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()})});
-    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(1.0f);
+    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -20,13 +22,13 @@ TEST_F(DeleteNodeMutationTests, deleteNodeMutation_removesExactlyOneNodePerPass)
     _simulationFacade->testOnly_mutate(1);
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(2, actualGenome._genes.at(0)._nodes.size());
+    EXPECT_EQ(1, actualGenome._genes.at(0)._nodes.size());
 }
 
 TEST_F(DeleteNodeMutationTests, deleteNodeMutation_keepsAtLeastOneNode)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc()})});
-    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(1.0f);
+    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -43,7 +45,7 @@ TEST_F(DeleteNodeMutationTests, deleteNodeMutation_keepsFirstAndLastNonVoid)
 {
     // Deleting a boundary node can expose the interior void node; it must be corrected to a non-void cell type.
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc().cellType(VoidGenomeDesc()), NodeDesc()})});
-    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(1.0f);
+    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
@@ -61,7 +63,7 @@ TEST_F(DeleteNodeMutationTests, deleteNodeMutation_keepsFirstAndLastNonVoid)
 TEST_F(DeleteNodeMutationTests, deleteNodeMutation_zeroProbabilityNoChange)
 {
     auto genome = GenomeDesc().genes({GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()})});
-    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().geneProbability(0.0f);
+    genome._mutationRates._deleteNodeMutation = DeleteNodeMutationDesc().nodeProbability(0.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 

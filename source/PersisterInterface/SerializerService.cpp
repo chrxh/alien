@@ -311,11 +311,11 @@ namespace
 
     auto constexpr Id_AppendNodeMutation_GeneProbability = 0;
 
-    auto constexpr Id_AddNodeMutation_GeneProbability = 0;
+    auto constexpr Id_AddNodeMutation_NodeProbability = 0;
 
     auto constexpr Id_TrimNodeMutation_GeneProbability = 0;
 
-    auto constexpr Id_DeleteNodeMutation_GeneProbability = 0;
+    auto constexpr Id_DeleteNodeMutation_NodeProbability = 0;
 
     auto constexpr Id_DuplicateGeneMutation_GeneProbability = 0;
 
@@ -992,7 +992,7 @@ namespace cereal
     {
         AddNodeMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_AddNodeMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+        scope.addMember(Id_AddNodeMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
     }
     SPLIT_SERIALIZATION(AddNodeMutationDesc)
 
@@ -1010,7 +1010,7 @@ namespace cereal
     {
         DeleteNodeMutationDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
-        scope.addMember(Id_DeleteNodeMutation_GeneProbability, data._geneProbability, defaultObject._geneProbability);
+        scope.addMember(Id_DeleteNodeMutation_NodeProbability, data._nodeProbability, defaultObject._nodeProbability);
     }
     SPLIT_SERIALIZATION(DeleteNodeMutationDesc)
 
