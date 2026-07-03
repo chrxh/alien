@@ -33,20 +33,6 @@ namespace
 
     auto constexpr ExpertWidgetHeight = 130.0f;
     auto constexpr ExpertWidgetMinHeight = 60.0f;
-
-    void appendAsUtf8(std::string& target, ImWchar c)
-    {
-        if (c < 0x80) {
-            target += static_cast<char>(c);
-        } else if (c < 0x800) {
-            target += static_cast<char>(0xC0 | (c >> 6));
-            target += static_cast<char>(0x80 | (c & 0x3F));
-        } else {
-            target += static_cast<char>(0xE0 | (c >> 12));
-            target += static_cast<char>(0x80 | ((c >> 6) & 0x3F));
-            target += static_cast<char>(0x80 | (c & 0x3F));
-        }
-    }
 }
 
 SimulationParametersMainWindow::SimulationParametersMainWindow()
@@ -288,23 +274,29 @@ void SimulationParametersMainWindow::processDetailWidget()
 
 void SimulationParametersMainWindow::startFilterTypingIfNeeded()
 {
+    // SetKeyboardFocusHere() takes effect only on the next frame. Characters typed on the
+    // triggering frame are queued here and replayed into ImGui's input queue on the frame the
+    // filter field actually becomes active, so ImGui's own selection/insertion logic handles
+    // them (e.g. correctly replacing a pre-existing filter instead of us splicing text in and
+    // fighting the auto-select-on-focus behavior).
+    if (!_pendingFilterChars.empty()) {
+        for (auto c : _pendingFilterChars) {
+            ImGui::GetIO().AddInputCharacter(c);
+        }
+        _pendingFilterChars.clear();
+        return;
+    }
+
     if (ImGui::IsAnyItemActive() || !ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows)) {
         return;
     }
 
-    // SetKeyboardFocusHere() only takes effect one frame later, so the character that
-    // triggered it would otherwise be lost. Append it to the filter directly instead.
-    auto startedTyping = false;
     for (auto const& c : ImGui::GetIO().InputQueueCharacters) {
         if (c >= 32 && c != 127) {
-            if (!startedTyping) {
-                _filter.clear();
-            }
-            appendAsUtf8(_filter, c);
-            startedTyping = true;
+            _pendingFilterChars.push_back(c);
         }
     }
-    if (startedTyping) {
+    if (!_pendingFilterChars.empty()) {
         ImGui::SetKeyboardFocusHere();
     }
 }

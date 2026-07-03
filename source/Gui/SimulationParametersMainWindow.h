@@ -89,4 +89,5 @@ private:
     std::string _fileDialogPath;
 
     std::string _filter;
+    std::vector<unsigned int> _pendingFilterChars;
 };
