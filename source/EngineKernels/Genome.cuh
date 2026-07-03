@@ -390,7 +390,7 @@ struct AppendNodeMutation
 
 struct AddNodeMutation
 {
-    float geneProbability;
+    float nodeProbability;
 };
 
 struct TrimNodeMutation
@@ -400,7 +400,7 @@ struct TrimNodeMutation
 
 struct DeleteNodeMutation
 {
-    float geneProbability;
+    float nodeProbability;
 };
 
 struct DuplicateGeneMutation

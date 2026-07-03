@@ -195,6 +195,24 @@ namespace
         AlienGui::EndTreeNode();
     }
 
+    template <typename MutationDesc>
+    void processNodeProbabilityMutationRate(std::string const& name, std::string const& id, MutationDesc& mutation, float rightColumnWidth)
+    {
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
+                    .name("Node probability")
+                    .id(id)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .logarithmic(true)
+                    .format("%.5f")
+                    .textWidth(rightColumnWidth),
+                &mutation._nodeProbability);
+        }
+        AlienGui::EndTreeNode();
+    }
+
     void processConstructorMutationRate(std::string const& name, std::string const& id, ConstructorMutationDesc& mutation, float rightColumnWidth)
     {
         if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).rank(AlienGui::TreeNodeRank::Default))) {
@@ -307,12 +325,12 @@ void MutationRatesDialog::loadSettings(MutationRatesDesc& mutationRates, std::st
         settings.getValue(settingsPrefix + "void mutation.node probability", mutationRates._voidMutation._nodeProbability);
     mutationRates._appendNodeMutation._geneProbability =
         settings.getValue(settingsPrefix + "append node mutation.gene probability", mutationRates._appendNodeMutation._geneProbability);
-    mutationRates._addNodeMutation._geneProbability =
-        settings.getValue(settingsPrefix + "add node mutation.gene probability", mutationRates._addNodeMutation._geneProbability);
+    mutationRates._addNodeMutation._nodeProbability =
+        settings.getValue(settingsPrefix + "add node mutation.node probability", mutationRates._addNodeMutation._nodeProbability);
     mutationRates._trimNodeMutation._geneProbability =
         settings.getValue(settingsPrefix + "trim node mutation.gene probability", mutationRates._trimNodeMutation._geneProbability);
-    mutationRates._deleteNodeMutation._geneProbability =
-        settings.getValue(settingsPrefix + "delete node mutation.gene probability", mutationRates._deleteNodeMutation._geneProbability);
+    mutationRates._deleteNodeMutation._nodeProbability =
+        settings.getValue(settingsPrefix + "delete node mutation.node probability", mutationRates._deleteNodeMutation._nodeProbability);
     mutationRates._duplicateGeneMutation._geneProbability =
         settings.getValue(settingsPrefix + "duplicate gene mutation.gene probability", mutationRates._duplicateGeneMutation._geneProbability);
     mutationRates._deleteGeneMutation._geneProbability =
@@ -378,9 +396,9 @@ void MutationRatesDialog::saveSettings(MutationRatesDesc const& mutationRates, s
     settings.setValue(settingsPrefix + "cell type mutation.node probability", mutationRates._cellTypeMutation._nodeProbability);
     settings.setValue(settingsPrefix + "void mutation.node probability", mutationRates._voidMutation._nodeProbability);
     settings.setValue(settingsPrefix + "append node mutation.gene probability", mutationRates._appendNodeMutation._geneProbability);
-    settings.setValue(settingsPrefix + "add node mutation.gene probability", mutationRates._addNodeMutation._geneProbability);
+    settings.setValue(settingsPrefix + "add node mutation.node probability", mutationRates._addNodeMutation._nodeProbability);
     settings.setValue(settingsPrefix + "trim node mutation.gene probability", mutationRates._trimNodeMutation._geneProbability);
-    settings.setValue(settingsPrefix + "delete node mutation.gene probability", mutationRates._deleteNodeMutation._geneProbability);
+    settings.setValue(settingsPrefix + "delete node mutation.node probability", mutationRates._deleteNodeMutation._nodeProbability);
     settings.setValue(settingsPrefix + "duplicate gene mutation.gene probability", mutationRates._duplicateGeneMutation._geneProbability);
     settings.setValue(settingsPrefix + "delete gene mutation.gene probability", mutationRates._deleteGeneMutation._geneProbability);
     settings.setValue(settingsPrefix + "copy node section mutation.gene probability", mutationRates._copyNodeSectionMutation._geneProbability);
@@ -487,7 +505,7 @@ void MutationRatesDialog::processIntern()
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Add node mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
-                    processGeneProbabilityMutationRate("Mutation rate", "ADNM", _mutation._addNodeMutation, RightColumnWidth);
+                    processNodeProbabilityMutationRate("Mutation rate", "ADNM", _mutation._addNodeMutation, RightColumnWidth);
                     table.next();
                 });
             }
@@ -505,7 +523,7 @@ void MutationRatesDialog::processIntern()
 
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Delete node mutations").rank(AlienGui::TreeNodeRank::High))) {
                 processConcreteMutationRates(1, [&](AlienGui::DynamicTableLayout& table) {
-                    processGeneProbabilityMutationRate("Mutation rate", "DLNM", _mutation._deleteNodeMutation, RightColumnWidth);
+                    processNodeProbabilityMutationRate("Mutation rate", "DLNM", _mutation._deleteNodeMutation, RightColumnWidth);
                     table.next();
                 });
             }
