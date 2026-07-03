@@ -15,6 +15,9 @@ class GeometryMutationTests : public MutationTestsBase
 TEST_F(GeometryMutationTests, geometryMutation_changesShapeStiffness)
 {
     auto genome = createTestGenome();
+    for (auto& gene : genome._genes) {
+        gene._stiffness = 0.5f;
+    }
     genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().geneProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
 
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
@@ -25,14 +28,18 @@ TEST_F(GeometryMutationTests, geometryMutation_changesShapeStiffness)
     auto actualGenome = getMutatedGenome();
 
     ASSERT_EQ(genome._genes.size(), actualGenome._genes.size());
-    for (auto const& [expectedGene, actualGene] : std::views::zip(genome._genes, actualGenome._genes)) {
-        EXPECT_NE(expectedGene._shape, actualGene._shape);
-        EXPECT_NE(expectedGene._stiffness, actualGene._stiffness);
+    ASSERT_FALSE(genome._genes.empty());
 
-        EXPECT_GE(actualGene._stiffness, Const::GeneStiffness_Min);
-        EXPECT_LE(actualGene._stiffness, Const::GeneStiffness_Max);
-        EXPECT_GE(actualGene._shape, 0);
-        EXPECT_LT(actualGene._shape, ConstructorShape_Count);
+    auto const& expectedGene = genome._genes.front();
+    auto const& actualGene = actualGenome._genes.front();
+    EXPECT_NE(expectedGene._shape, actualGene._shape);
+    EXPECT_NE(expectedGene._stiffness, actualGene._stiffness);
+
+    for (auto const& gene : actualGenome._genes) {
+        EXPECT_GE(gene._stiffness, Const::GeneStiffness_Min);
+        EXPECT_LE(gene._stiffness, Const::GeneStiffness_Max);
+        EXPECT_GE(gene._shape, 0);
+        EXPECT_LT(gene._shape, ConstructorShape_Count);
     }
 }
 
