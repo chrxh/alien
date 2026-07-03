@@ -1,0 +1,100 @@
+name: hip-nightly-build
+
+# Nightly build of ALIEN through the ROCm/HIP path (-DUSE_HIP=ON) to catch
+# regressions in the HIP compatibility layer that the default CUDA CI cannot see.
+# The GitHub-hosted runner has no AMD GPU, so this is an offline compile
+# (CMAKE_HIP_ARCHITECTURES is pinned explicitly) plus host-only smoke tests;
+# the GPU-bound EngineTests are not run here.
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  # No AMD GPU on the runner, so enable_language(HIP) cannot auto-detect an arch;
+  # pin one explicitly. gfx1100 = RDNA3. Overridable via workflow_dispatch edit.
+  HIP_ARCH: gfx1100
+
+jobs:
+  hip-nightly-build:
+    runs-on: [self-hosted, Linux]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        clean: false
+        fetch-depth: 0
+
+    - name: Check for recent changes
+      id: recent_changes
+      run: |
+        if [ -n "$(git log --since='24 hours ago' --oneline -n 1)" ]; then
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "should_run=false" >> "$GITHUB_OUTPUT"
+          echo "No commits in the last 24 hours. Skipping HIP build."
+        fi
+
+    - name: Unshallow vcpkg submodule
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        cd external/vcpkg
+        git fetch --unshallow || true
+        cd ../..
+
+    - name: Install build dependencies
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends \
+          ninja-build \
+          libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev \
+          libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+
+    - name: Install ROCm/HIP
+      if: steps.recent_changes.outputs.should_run == 'true'
+      # Matches the README requirement (ROCm 7.2+). rocm-hip-runtime-dev pulls in
+      # the HIP compiler (amdclang++/hipcc), HIP headers and device libraries,
+      # which is all the offline compile needs -- no GPU driver required.
+      run: |
+        sudo mkdir -p /etc/apt/keyrings
+        wget -qO- https://repo.radeon.com/rocm/rocm.gpg.key \
+          | gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
+        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/latest noble main" \
+          | sudo tee /etc/apt/sources.list.d/rocm.list
+        printf 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600\n' \
+          | sudo tee /etc/apt/preferences.d/rocm-pin-600
+        sudo apt-get update -qq
+        sudo apt-get install -y rocm-hip-runtime-dev
+        echo "/opt/rocm/bin" >> "$GITHUB_PATH"
+        echo "ROCM_PATH=/opt/rocm" >> "$GITHUB_ENV"
+
+    - name: Bootstrap vcpkg
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: |
+        pushd external/vcpkg
+        ./bootstrap-vcpkg.sh -disableMetrics
+        popd
+
+    - name: Configure CMake (HIP)
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: >
+        cmake --preset ninja
+        -DUSE_HIP=ON
+        -DCMAKE_HIP_ARCHITECTURES=${{ env.HIP_ARCH }}
+        -DCMAKE_PREFIX_PATH=/opt/rocm
+
+    - name: Build (HIP)
+      if: steps.recent_changes.outputs.should_run == 'true'
+      run: cmake --build build-ninja --config ${{ env.BUILD_TYPE }} -j "$(nproc)"
+
+    - name: Run host-side tests
+      if: steps.recent_changes.outputs.should_run == 'true'
+      # GPU-free suites only; EngineTests needs an AMD GPU and is skipped here.
+      run: |
+        cd build-ninja/${{ env.BUILD_TYPE }}
+        ./EngineInterfaceTests
+        ./NetworkTests
