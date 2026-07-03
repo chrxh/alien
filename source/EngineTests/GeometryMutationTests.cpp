@@ -12,7 +12,7 @@ class GeometryMutationTests : public MutationTestsBase
 {
 };
 
-TEST_F(GeometryMutationTests, geometryMutation_changesShapeStiffnessAndConnectionDistance)
+TEST_F(GeometryMutationTests, geometryMutation_changesShapeStiffness)
 {
     auto genome = createTestGenome();
     genome._mutationRates._geometryMutations[0] = GeometryMutationDesc().geneProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f);
@@ -28,12 +28,9 @@ TEST_F(GeometryMutationTests, geometryMutation_changesShapeStiffnessAndConnectio
     for (auto const& [expectedGene, actualGene] : std::views::zip(genome._genes, actualGenome._genes)) {
         EXPECT_NE(expectedGene._shape, actualGene._shape);
         EXPECT_NE(expectedGene._stiffness, actualGene._stiffness);
-        EXPECT_NE(expectedGene._connectionDistance, actualGene._connectionDistance);
 
         EXPECT_GE(actualGene._stiffness, Const::GeneStiffness_Min);
         EXPECT_LE(actualGene._stiffness, Const::GeneStiffness_Max);
-        EXPECT_GE(actualGene._connectionDistance, Const::GeneConnectionDistance_Min);
-        EXPECT_LE(actualGene._connectionDistance, Const::GeneConnectionDistance_Max);
         EXPECT_GE(actualGene._shape, 0);
         EXPECT_LT(actualGene._shape, ConstructorShape_Count);
     }
@@ -58,7 +55,6 @@ TEST_F(GeometryMutationTests, geometryMutation_zeroProbabilityNoChange)
     for (auto const& [expectedGene, actualGene] : std::views::zip(genome._genes, actualGenome._genes)) {
         EXPECT_EQ(expectedGene._shape, actualGene._shape);
         EXPECT_EQ(expectedGene._stiffness, actualGene._stiffness);
-        EXPECT_EQ(expectedGene._connectionDistance, actualGene._connectionDistance);
     }
 }
 
