@@ -2,7 +2,7 @@ target_sources(EngineTests
 PUBLIC
     AccumulatedMutationTests.cpp
     AddNodeMutationTests.cpp
-    AppendNodeMutationTests.cpp
+    ExtendGeneMutationTests.cpp
     AttackerTests.cpp
     BalanceTests.cpp
     CellStateTransitionTests.cpp

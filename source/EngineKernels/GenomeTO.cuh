@@ -388,7 +388,7 @@ struct VoidMutationTO
     float nodeProbability;
 };
 
-struct AppendNodeMutationTO
+struct ExtendGeneMutationTO
 {
     float geneProbability;
 };
@@ -445,7 +445,7 @@ struct MutationRatesTO
     CellTypeModeMutationTO cellTypeModeMutation;
     CellTypeMutationTO cellTypeMutation;
     VoidMutationTO voidMutation;
-    AppendNodeMutationTO appendNodeMutation;
+    ExtendGeneMutationTO extendGeneMutation;
     AddNodeMutationTO addNodeMutation;
     TrimNodeMutationTO trimNodeMutation;
     DeleteNodeMutationTO deleteNodeMutation;

@@ -469,11 +469,11 @@ struct VoidMutationDesc
     MEMBER(VoidMutationDesc, float, nodeProbability, 0.0f);
 };
 
-struct AppendNodeMutationDesc
+struct ExtendGeneMutationDesc
 {
-    auto operator<=>(AppendNodeMutationDesc const&) const = default;
+    auto operator<=>(ExtendGeneMutationDesc const&) const = default;
 
-    MEMBER(AppendNodeMutationDesc, float, geneProbability, 0.0f);
+    MEMBER(ExtendGeneMutationDesc, float, geneProbability, 0.0f);
 };
 
 struct AddNodeMutationDesc
@@ -574,7 +574,7 @@ struct MutationRatesDesc
     MEMBER(MutationRatesDesc, CellTypeModeMutationDesc, cellTypeModeMutation, CellTypeModeMutationDesc());
     MEMBER(MutationRatesDesc, CellTypeMutationDesc, cellTypeMutation, CellTypeMutationDesc());
     MEMBER(MutationRatesDesc, VoidMutationDesc, voidMutation, VoidMutationDesc());
-    MEMBER(MutationRatesDesc, AppendNodeMutationDesc, appendNodeMutation, AppendNodeMutationDesc());
+    MEMBER(MutationRatesDesc, ExtendGeneMutationDesc, extendGeneMutation, ExtendGeneMutationDesc());
     MEMBER(MutationRatesDesc, AddNodeMutationDesc, addNodeMutation, AddNodeMutationDesc());
     MEMBER(MutationRatesDesc, TrimNodeMutationDesc, trimNodeMutation, TrimNodeMutationDesc());
     MEMBER(MutationRatesDesc, DeleteNodeMutationDesc, deleteNodeMutation, DeleteNodeMutationDesc());
