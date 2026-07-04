@@ -172,21 +172,22 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         if (readyToConstruct) {
             readyToConstruct = checkHostEnergyAndRequestExternalEnergyIfNeeded(data, object);
         }
+        if (readyToConstruct) {
+            constructor.offspring = findOrCreateNewCreature(data, object);
+        }
     }
     __syncthreads();
     if (!readyToConstruct) {
         return;
     }
 
-    // Important: mutate the host genome before it is cloned for the offspring.
+    // Mutate the freshly cloned genome of the first offspring, leaving the host genome untouched.
     mutateGenome(data, object);
 
     // The actual construction runs on a single thread.
     if (threadIdx.x != 0) {
         return;
     }
-
-    constructor.offspring = findOrCreateNewCreature(data, object);
 
     // Check again after cloning the creature, because the offspring genome may diverge from the host genome.
     if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
@@ -219,29 +220,24 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
 __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& data, Object* object)
 {
-    auto& cell = object->typeData.cell;
-    auto& constructor = cell.constructor;
+    auto& constructor = object->typeData.cell.constructor;
+    auto offspring = constructor.offspring;
 
-    __shared__ Genome* clonedGenome;
+    __shared__ Genome* genomeToMutate;
     if (threadIdx.x == 0) {
-        clonedGenome = nullptr;
-        if (ConstructorHelper::createsNewCreature(constructor)) {
-            auto& creature = cell.creature;
-            int origMutationState = atomicExch(&creature->mutationState, MutationState_Mutated);
+        genomeToMutate = nullptr;
+        // Only the first offspring is mutated; its genome was cloned for it in findOrCreateNewCreature.
+        if (constructor.currentOffspring == 0 && ConstructorHelper::createsNewCreature(constructor)) {
+            int origMutationState = atomicExch(&offspring->mutationState, MutationState_Mutated);
             if (origMutationState == MutationState_NotMutated) {
-                EntityFactory factory;
-                factory.init(&data);
-                clonedGenome = factory.cloneGenome(creature->genome);
+                genomeToMutate = offspring->genome;
             }
         }
     }
     __syncthreads();
 
-    if (clonedGenome != nullptr) {
-        MutationProcessor::applyMutations(data, cell.creature, clonedGenome);
-        if (threadIdx.x == 0) {
-            cell.creature->genome = clonedGenome;
-        }
+    if (genomeToMutate != nullptr) {
+        MutationProcessor::applyMutations(data, offspring, genomeToMutate);
     }
     __syncthreads();
 }
@@ -273,6 +269,11 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     factory.init(&data);
     auto result = factory.cloneCreature(object->typeData.cell.creature);
     result->numCells = 0;
+
+    // Give the first offspring its own genome copy so it can be mutated without affecting the host
+    if (constructor.currentOffspring == 0) {
+        result->genome = factory.cloneGenome(object->typeData.cell.creature->genome);
+    }
 
     return result;
 }
