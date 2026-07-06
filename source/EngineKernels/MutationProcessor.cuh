@@ -20,8 +20,8 @@ class MutationProcessor
 {
 public:
     // Both functions return the new index of the reference gene (unchanged if no genes were removed).
-    __inline__ __device__ static int applyMutations(SimulationData& data, Creature* creature, Genome* genome, int referenceGeneIndex);
-    __inline__ __device__ static int removeUnusedGenes(SimulationData& data, Genome* genome, int referenceGeneIndex);
+    __inline__ __device__ static void applyMutations(SimulationData& data, Creature* creature, Genome* genome);
+    __inline__ __device__ static void removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome);
 
 private:
     // Upper bound to avoid heap exhaustion.
@@ -67,7 +67,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ int MutationProcessor::applyMutations(SimulationData& data, Creature* creature, Genome* genome, int referenceGeneIndex)
+__inline__ __device__ void MutationProcessor::applyMutations(SimulationData& data, Creature* creature, Genome* genome)
 {
     __shared__ float accumulatedMutations;
     auto block = cg_mutation::this_thread_block();
@@ -130,12 +130,10 @@ __inline__ __device__ int MutationProcessor::applyMutations(SimulationData& data
 
     // sync since the preceding mutations may repoint gene references; genes that became unreachable are removed afterwards
     block.sync();
-    auto newReferenceGeneIndex = removeUnusedGenes(data, genome, referenceGeneIndex);
+    removeUnreachableGenesFromRoot(data, genome);
 
     block.sync();
     updateAccumulatedMutationsAndLineageId(data, creature, genome, accumulatedMutations);
-
-    return newReferenceGeneIndex;
 }
 
 __inline__ __device__ void MutationProcessor::applyMutations_neurons(SimulationData& data, Genome* genome, float& accumulatedMutations)
@@ -1299,13 +1297,8 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
     block.sync();
 }
 
-__inline__ __device__ int MutationProcessor::removeUnusedGenes(SimulationData& data, Genome* genome, int referenceGeneIndex)
+__inline__ __device__ void MutationProcessor::removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome)
 {
-    // Removes all genes that are not reachable from the reference gene (the gene the cell's constructor builds) by following
-    // constructor and injector references. The survivors are compacted within the existing gene array (the genome only
-    // shrinks, so no new gene or node memory is needed) and their references are remapped. A negative or out-of-range
-    // reference gene index disables the removal. Returns the new index of the reference gene so that the calling cell's
-    // constructor can be repointed.
     auto block = cg_mutation::this_thread_block();
     auto laneId = block.thread_rank();
 
@@ -1319,17 +1312,13 @@ __inline__ __device__ int MutationProcessor::removeUnusedGenes(SimulationData& d
     }
     block.sync();
 
-    if (referenceGeneIndex < 0 || referenceGeneIndex >= numGenes) {  // uniform across the block, so the early return does not desync the cooperative group
-        return referenceGeneIndex;
-    }
-
     if (laneId == 0) {
         newGeneIndices = data.entities.heap.getTypedSubArray<int>(numGenes);
     }
     block.sync();
 
     for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
-        newGeneIndices[geneIndex] = geneIndex == referenceGeneIndex ? 1 : -1;
+        newGeneIndices[geneIndex] = geneIndex == 0 ? 1 : -1;
     }
     block.sync();
 
@@ -1351,7 +1340,7 @@ __inline__ __device__ int MutationProcessor::removeUnusedGenes(SimulationData& d
             auto& gene = genome->genes[geneIndex];
             for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
                 auto& node = gene.nodes[nodeIndex];
-                if (node.constructorAvailable && newGeneIndices[node.constructor.geneIndex] == -1) {
+                if (node.cellType != CellType_Void && node.constructorAvailable && newGeneIndices[node.constructor.geneIndex] == -1) {
                     newGeneIndices[node.constructor.geneIndex] = 1;
                 }
                 if (node.cellType == CellType_Injector && newGeneIndices[node.cellTypeData.injector.geneIndex] == -1) {
@@ -1419,8 +1408,6 @@ __inline__ __device__ int MutationProcessor::removeUnusedGenes(SimulationData& d
         }
     }
     block.sync();
-
-    return newGeneIndices[referenceGeneIndex];  // the reference gene is reachable by definition, so its new index is valid
 }
 
 __inline__ __device__ void MutationProcessor::applyMutations_copyNodeSection(SimulationData& data, Genome* genome, float& accumulatedMutations)

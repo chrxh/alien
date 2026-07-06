@@ -120,8 +120,8 @@ public:
     //****************
     //* Only for tests
     //****************
-    virtual void testOnly_mutate(uint64_t objectId, int referenceGeneIndex = -1) = 0;  // referenceGeneIndex < 0 = do not remove unused genes
-    virtual void testOnly_removeUnusedGenes(uint64_t objectId, int referenceGeneIndex) = 0;
+    virtual void testOnly_mutate(uint64_t objectId) = 0;
+    virtual void testOnly_removeUnusedGenes(uint64_t objectId) = 0;
     virtual void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) = 0;
     virtual void
     testOnly_createConnectionWithAbsAngle(uint64_t objectId1, uint64_t objectId2, float desiredDistance, float desiredAbsAngle1, float desiredAbsAngle2) = 0;

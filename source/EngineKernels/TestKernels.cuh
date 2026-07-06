@@ -5,8 +5,8 @@
 
 #include "SimulationData.cuh"
 
-__global__ void cudaTestMutate(SimulationData data, uint64_t objectId, int referenceGeneIndex);
-__global__ void cudaTestRemoveUnusedGenes(SimulationData data, uint64_t objectId, int referenceGeneIndex);
+__global__ void cudaTestMutate(SimulationData data, uint64_t objectId);
+__global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint64_t objectId);
 __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1, uint64_t objectId2);
 __global__ void cudaTestCreateConnectionWithAbsAngle(
     SimulationData data,

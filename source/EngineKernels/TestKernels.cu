@@ -4,7 +4,7 @@
 #include "ObjectConnectionProcessor.cuh"
 #include "TestKernels.cuh"
 
-__global__ void cudaTestMutate(SimulationData data, uint64_t objectId, int referenceGeneIndex)
+__global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
 {
     DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
 
@@ -25,13 +25,13 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId, int refer
         block.sync();
 
         if (shouldMutate) {
-            MutationProcessor::applyMutations(data, object->typeData.cell.creature, object->typeData.cell.creature->genome, referenceGeneIndex);
+            MutationProcessor::applyMutations(data, object->typeData.cell.creature, object->typeData.cell.creature->genome);
         }
         block.sync();
     }
 }
 
-__global__ void cudaTestRemoveUnusedGenes(SimulationData data, uint64_t objectId, int referenceGeneIndex)
+__global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint64_t objectId)
 {
     DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
 
@@ -52,7 +52,7 @@ __global__ void cudaTestRemoveUnusedGenes(SimulationData data, uint64_t objectId
         block.sync();
 
         if (shouldProcess) {
-            MutationProcessor::removeUnusedGenes(data, object->typeData.cell.creature->genome, referenceGeneIndex);
+            MutationProcessor::removeUnreachableGenesFromRoot(data, object->typeData.cell.creature->genome);
         }
         block.sync();
     }
