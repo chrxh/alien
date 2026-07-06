@@ -238,9 +238,11 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
     __syncthreads();
 
     if (clonedGenome != nullptr) {
-        MutationProcessor::applyMutations(data, cell.creature, clonedGenome);
+        // The mutations may remove genes that became unused, so the constructor is repointed to the new index of its gene.
+        auto newGeneIndex = MutationProcessor::applyMutations(data, cell.creature, clonedGenome, constructor.geneIndex);
         if (threadIdx.x == 0) {
             cell.creature->genome = clonedGenome;
+            constructor.geneIndex = static_cast<uint16_t>(newGeneIndex);
         }
     }
     __syncthreads();

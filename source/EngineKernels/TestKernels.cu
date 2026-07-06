@@ -4,7 +4,7 @@
 #include "ObjectConnectionProcessor.cuh"
 #include "TestKernels.cuh"
 
-__global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
+__global__ void cudaTestMutate(SimulationData data, uint64_t objectId, int referenceGeneIndex)
 {
     DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
 
@@ -25,7 +25,34 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
         block.sync();
 
         if (shouldMutate) {
-            MutationProcessor::applyMutations(data, object->typeData.cell.creature, object->typeData.cell.creature->genome);
+            MutationProcessor::applyMutations(data, object->typeData.cell.creature, object->typeData.cell.creature->genome, referenceGeneIndex);
+        }
+        block.sync();
+    }
+}
+
+__global__ void cudaTestRemoveUnusedGenes(SimulationData data, uint64_t objectId, int referenceGeneIndex)
+{
+    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
+
+    auto block = cooperative_groups::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    auto& objects = data.entities.objects;
+    auto partition = calcBlockPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& object = objects.at(index);
+
+        __shared__ bool shouldProcess;
+        if (laneId == 0) {
+            DEVICE_CHECK(object->type == ObjectType_Cell);
+            shouldProcess = (object->id == objectId);
+        }
+        block.sync();
+
+        if (shouldProcess) {
+            MutationProcessor::removeUnusedGenes(data, object->typeData.cell.creature->genome, referenceGeneIndex);
         }
         block.sync();
     }

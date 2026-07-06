@@ -579,13 +579,20 @@ TOs _SimulationCudaFacade::getPreviewData()
     return to;
 }
 
-void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
+void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId, int referenceGeneIndex)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId, referenceGeneIndex);
     syncAndCheck();
 
     resizeArraysIfNecessary();
+}
+
+void _SimulationCudaFacade::testOnly_removeUnusedGenes(uint64_t objectId, int referenceGeneIndex)
+{
+    checkAndProcessSimulationParameterChanges();
+    TestKernelsService::get().testOnly_removeUnusedGenes(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId, referenceGeneIndex);
+    syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
