@@ -21,9 +21,8 @@ protected:
 
 TEST_F(MoveNodeSectionMutationTests, moveNodeSectionMutation_zeroProbabilityNoChange)
 {
-    // Gene 0's first node links to gene 1 so that gene 1 stays reachable from the root gene and is not removed as unused.
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)), NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
         GeneDesc().nodes({NodeDesc()}),
     });
     genome._mutationRates._moveNodeSectionMutation = MoveNodeSectionMutationDesc().geneProbability(0.0f);
@@ -60,14 +59,9 @@ TEST_F(MoveNodeSectionMutationTests, moveNodeSectionMutation_repeatedMutationCon
 {
     // Repeated move-node-section mutations keep the total node count constant, never remove genes, never leave a gene empty and
     // never produce void boundary nodes.
-    // Every single node (in both genes) links to gene 1. A move can shuffle nodes arbitrarily between the two genes, but it can
-    // never empty out gene 0 completely (at least one node always stays behind in the source gene, and a gene that shrinks to one
-    // node is never picked as a source again). Since every node carries the same link, whichever node ends up staying in gene 0
-    // keeps gene 1 reachable from the root gene - this holds regardless of how the nodes get shuffled around.
-    auto const linkedNode = NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1));
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({linkedNode, linkedNode, linkedNode, linkedNode}),
-        GeneDesc().nodes({linkedNode, linkedNode, linkedNode}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
     });
     genome._mutationRates._moveNodeSectionMutation = MoveNodeSectionMutationDesc().geneProbability(1.0f);
 
