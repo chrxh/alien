@@ -1340,7 +1340,7 @@ __inline__ __device__ void MutationProcessor::removeUnreachableGenesFromRoot(Sim
             auto& gene = genome->genes[geneIndex];
             for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
                 auto& node = gene.nodes[nodeIndex];
-                if (node.cellType != CellType_Void && node.constructorAvailable && newGeneIndices[node.constructor.geneIndex] == -1) {
+                if (node.constructorAvailable && newGeneIndices[node.constructor.geneIndex] == -1) {
                     newGeneIndices[node.constructor.geneIndex] = 1;
                 }
                 if (node.cellType == CellType_Injector && newGeneIndices[node.cellTypeData.injector.geneIndex] == -1) {
