@@ -53,6 +53,7 @@ PUBLIC
     StatisticsTests.cpp
     Testsuite.cpp
     TrimGeneMutationTests.cpp
+    UnusedGeneRemovalTests.cpp
     VoidMutationTests.cpp
     VoidTests.cpp)
 

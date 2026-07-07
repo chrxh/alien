@@ -588,6 +588,13 @@ void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
     resizeArraysIfNecessary();
 }
 
+void _SimulationCudaFacade::testOnly_removeUnusedGenes(uint64_t objectId)
+{
+    checkAndProcessSimulationParameterChanges();
+    TestKernelsService::get().testOnly_removeUnusedGenes(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    syncAndCheck();
+}
+
 void _SimulationCudaFacade::testOnly_createConnection(uint64_t objectId1, uint64_t objectId2)
 {
     checkAndProcessSimulationParameterChanges();

@@ -31,6 +31,33 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
     }
 }
 
+__global__ void cudaTestRemoveUnreachableGenesFromRoot(SimulationData data, uint64_t objectId)
+{
+    DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
+
+    auto block = cooperative_groups::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    auto& objects = data.entities.objects;
+    auto partition = calcBlockPartition(objects.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& object = objects.at(index);
+
+        __shared__ bool shouldProcess;
+        if (laneId == 0) {
+            DEVICE_CHECK(object->type == ObjectType_Cell);
+            shouldProcess = (object->id == objectId);
+        }
+        block.sync();
+
+        if (shouldProcess) {
+            MutationProcessor::removeUnreachableGenesFromRoot(data, object->typeData.cell.creature->genome);
+        }
+        block.sync();
+    }
+}
+
 __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1, uint64_t objectId2)
 {
     DEVICE_CHECK(blockDim.x == 1 && gridDim.x == 1);
