@@ -21,8 +21,9 @@ protected:
 
 TEST_F(CopyNodeSectionMutationTests, copyNodeSectionMutation_zeroProbabilityNoChange)
 {
+    // Gene 0's first node links to gene 1 so that gene 1 stays reachable from the root gene and is not removed as unused.
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)), NodeDesc(), NodeDesc()}),
         GeneDesc().nodes({NodeDesc()}),
     });
     genome._mutationRates._copyNodeSectionMutation = CopyNodeSectionMutationDesc().geneProbability(0.0f);
@@ -60,8 +61,9 @@ TEST_F(CopyNodeSectionMutationTests, copyNodeSectionMutation_insertsSectionIntoS
 TEST_F(CopyNodeSectionMutationTests, copyNodeSectionMutation_repeatedMutationGrowsGenome)
 {
     // Repeated copy-node-section mutations keep growing the genome without ever removing genes or producing void boundary nodes.
+    // Gene 0's first node links to gene 1 so that gene 1 stays reachable from the root gene and is not removed as unused.
     auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({NodeDesc(), NodeDesc(), NodeDesc()}),
+        GeneDesc().nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1)), NodeDesc(), NodeDesc()}),
         GeneDesc().nodes({NodeDesc(), NodeDesc()}),
     });
     genome._mutationRates._copyNodeSectionMutation = CopyNodeSectionMutationDesc().geneProbability(1.0f);

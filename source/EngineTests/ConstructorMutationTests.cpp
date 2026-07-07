@@ -131,6 +131,13 @@ TEST_F(ConstructorMutationTests, constructorMutation_zeroProbabilityNoChange)
 TEST_F(ConstructorMutationTests, constructorMutation_keepOtherAttributesUnchanged)
 {
     auto genome = createTestGenome();
+
+    // The constructor mutation under test randomly rewires/toggles every node's constructor (including the constructor-based
+    // gene chain from createTestGenome()), so genes need an independent injector-based chain to stay reachable from the root.
+    for (size_t geneIndex = 0; geneIndex + 1 < genome._genes.size(); ++geneIndex) {
+        genome._genes.at(geneIndex)._nodes.push_back(NodeDesc().cellType(InjectorGenomeDesc().geneIndex(static_cast<int>(geneIndex + 1))));
+    }
+
     genome._mutationRates._constructorMutations[0] =
         ConstructorMutationDesc().nodeProbability(1.0f).valueChangeSigma(1.0f).enumChangeProbability(1.0f).constructorToggleProbability(1.0f);
     genome._mutationRates._constructorMutations[1] =
