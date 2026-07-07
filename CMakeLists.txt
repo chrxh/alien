@@ -96,10 +96,10 @@ if(USE_HIP)
       #
       # The GCC-driver clang.exe does not accept bare MSVC-style linker flags
       # (/machine:x64, /subsystem:console, etc.) -- it treats them as file
-      # paths. cmake/hip_link_win.py wraps them with -Xlinker automatically.
+      # paths. external/hip/hip_link_win.py wraps them with -Xlinker automatically.
       get_filename_component(_HIP_BIN_DIR "${CMAKE_HIP_COMPILER}" DIRECTORY)
       set(_CLANG_GCC "${_HIP_BIN_DIR}/clang.exe")
-      set(_HIP_LINK_WRAP "${CMAKE_CURRENT_SOURCE_DIR}/cmake/hip_link_win.py")
+      set(_HIP_LINK_WRAP "${CMAKE_CURRENT_SOURCE_DIR}/external/hip/hip_link_win.py")
       # ROCm 7.13 amd_hip_cooperative_groups.h defines this_cluster() as a
       # non-inline __device__ function -- each TU that includes the header
       # gets a definition, causing duplicate-symbol errors in the -fgpu-rdc
@@ -120,7 +120,7 @@ if(USE_HIP)
       # Override CMAKE_HIP_LINK_EXECUTABLE to route through hip_link_win.py
       # (which strips -fuse-ld=lld-link and wraps MSVC flags / .lib names) and
       # add --allow-multiple-definition for the ROCm 7.13 this_cluster() issue.
-      set(_HIP_LINK_WRAP "${CMAKE_CURRENT_SOURCE_DIR}/cmake/hip_link_win.py")
+      set(_HIP_LINK_WRAP "${CMAKE_CURRENT_SOURCE_DIR}/external/hip/hip_link_win.py")
       set(CMAKE_HIP_LINK_EXECUTABLE
         "python3 ${_HIP_LINK_WRAP} ${CMAKE_HIP_COMPILER} --offload-arch=${CMAKE_HIP_ARCHITECTURES} <OBJECTS> -fgpu-rdc --hip-link -Xoffload-linker --allow-multiple-definition -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES>")
     endif()
