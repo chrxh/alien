@@ -39,6 +39,16 @@ protected:
             genes.emplace_back(GeneDesc().nodes(nodes));
         }
 
+        // Chain the genes via the first node's constructor (gene i -> gene i+1) so that every gene stays reachable
+        // from the root gene (gene 0) and is not removed as unused by MutationProcessor::removeUnreachableGenesFromRoot.
+        for (size_t geneIndex = 0; geneIndex + 1 < genes.size(); ++geneIndex) {
+            auto& constructor = genes.at(geneIndex)._nodes.at(0)._constructor;
+            if (!constructor.has_value()) {
+                constructor = ConstructorGenomeDesc();
+            }
+            constructor->_geneIndex = static_cast<int>(geneIndex + 1);
+        }
+
         return GenomeDesc().genes(genes);
     }
 

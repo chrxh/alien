@@ -8,8 +8,9 @@
 class UnusedGeneRemovalTests : public MutationTestsBase
 {
 protected:
-    // Gene 0 references gene 0, gene 1 references gene 2 and gene 2 references gene 1 (via node constructors).
-    GenomeDesc createCyclicTestGenome() const
+    // Gene 0 references itself, gene 1 references gene 2 and gene 2 references gene 1 (via node constructors).
+    // Gene 1 and gene 2 are not reachable from the root gene (gene 0).
+    GenomeDesc createUnreachableCyclicTestGenome() const
     {
         return GenomeDesc().genes({
             GeneDesc().name("gene0").nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0))}),
@@ -17,14 +18,24 @@ protected:
             GeneDesc().name("gene2").nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
         });
     }
+
+    // Gene 0 references gene 1, gene 1 references gene 2 and gene 2 references back to gene 1: a cycle, but reachable from root.
+    GenomeDesc createReachableCyclicTestGenome() const
+    {
+        return GenomeDesc().genes({
+            GeneDesc().name("gene0").nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
+            GeneDesc().name("gene1").nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2))}),
+            GeneDesc().name("gene2").nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
+        });
+    }
 };
 
-TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_referenceGene0_removesUnreachableGenes)
+TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_removesGenesUnreachableFromRoot)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), createCyclicTestGenome());
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), createUnreachableCyclicTestGenome());
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_removeUnusedGenes(1, 0);
+    _simulationFacade->testOnly_removeUnusedGenes(1);
 
     auto actualGenome = getMutatedGenome();
     ASSERT_EQ(1, actualGenome._genes.size());
@@ -33,23 +44,19 @@ TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_referenceGene0_removesUnreachab
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
-TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_referenceGene1_keepsCyclicallyReferencedGenes)
+TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsCyclicallyReferencedGenesReachableFromRoot)
 {
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), createCyclicTestGenome());
+    auto genome = createReachableCyclicTestGenome();
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_removeUnusedGenes(1, 1);
+    _simulationFacade->testOnly_removeUnusedGenes(1);
 
     auto actualGenome = getMutatedGenome();
-    ASSERT_EQ(2, actualGenome._genes.size());
-    EXPECT_EQ("gene1", actualGenome._genes.at(0)._name);
-    EXPECT_EQ("gene2", actualGenome._genes.at(1)._name);
-    EXPECT_EQ(1, actualGenome._genes.at(0)._nodes.at(0)._constructor->_geneIndex);
-    EXPECT_EQ(0, actualGenome._genes.at(1)._nodes.at(0)._constructor->_geneIndex);
-    EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
+    EXPECT_EQ(genome, actualGenome);
 }
 
-TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_allGenesReachable_noChange)
+TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_allGenesReachable_noChange)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().name("gene0").nodes({NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1))}),
@@ -59,13 +66,13 @@ TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_allGenesReachable_noChange)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_removeUnusedGenes(1, 0);
+    _simulationFacade->testOnly_removeUnusedGenes(1);
 
     auto actualGenome = getMutatedGenome();
     EXPECT_EQ(genome, actualGenome);
 }
 
-TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_keepsGeneReferencedByInjector)
+TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReferencedByInjector)
 {
     auto genome = GenomeDesc().genes({
         GeneDesc().name("gene0").nodes({NodeDesc().cellType(InjectorGenomeDesc().geneIndex(2))}),
@@ -75,7 +82,7 @@ TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_keepsGeneReferencedByInjector)
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_removeUnusedGenes(1, 0);
+    _simulationFacade->testOnly_removeUnusedGenes(1);
 
     auto actualGenome = getMutatedGenome();
     ASSERT_EQ(2, actualGenome._genes.size());
@@ -85,37 +92,41 @@ TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_keepsGeneReferencedByInjector)
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
-TEST_F(UnusedGeneRemovalTests, removeUnusedGenes_invalidReferenceGeneIndex_noChange)
+TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_ignoresConstructorOnVoidNode)
 {
-    auto genome = createCyclicTestGenome();
+    // A void node's constructor data is considered stale and must not keep its target gene alive.
+    auto genome = GenomeDesc().genes({
+        GeneDesc().name("gene0").nodes({NodeDesc().cellType(VoidGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(1)), NodeDesc()}),
+        GeneDesc().name("gene1").nodes({NodeDesc()}),
+    });
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_removeUnusedGenes(1, -1);
-    _simulationFacade->testOnly_removeUnusedGenes(1, 3);
+    _simulationFacade->testOnly_removeUnusedGenes(1);
 
     auto actualGenome = getMutatedGenome();
-    EXPECT_EQ(genome, actualGenome);
-}
-
-TEST_F(UnusedGeneRemovalTests, applyMutations_removesUnusedGenes)
-{
-    // All mutation rates are zero, so applying mutations only removes the genes that are unreachable from the reference gene.
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), createCyclicTestGenome());
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1, 1);
-
-    auto actualGenome = getMutatedGenome();
-    ASSERT_EQ(2, actualGenome._genes.size());
-    EXPECT_EQ("gene1", actualGenome._genes.at(0)._name);
-    EXPECT_EQ("gene2", actualGenome._genes.at(1)._name);
+    ASSERT_EQ(1, actualGenome._genes.size());
+    EXPECT_EQ("gene0", actualGenome._genes.at(0)._name);
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
-TEST_F(UnusedGeneRemovalTests, applyMutations_negativeReferenceGeneIndex_keepsUnusedGenes)
+TEST_F(UnusedGeneRemovalTests, applyMutations_removesGenesUnreachableFromRoot)
 {
-    auto genome = createCyclicTestGenome();
+    // All mutation rates are zero, so applying mutations only removes the genes unreachable from the root gene.
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), createUnreachableCyclicTestGenome());
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutate(1);
+
+    auto actualGenome = getMutatedGenome();
+    ASSERT_EQ(1, actualGenome._genes.size());
+    EXPECT_EQ("gene0", actualGenome._genes.at(0)._name);
+    EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
+}
+
+TEST_F(UnusedGeneRemovalTests, applyMutations_allGenesReachableFromRoot_noChange)
+{
+    auto genome = createReachableCyclicTestGenome();
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
