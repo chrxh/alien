@@ -20,6 +20,7 @@ class MutationProcessor
 {
 public:
     __inline__ __device__ static void applyMutations(SimulationData& data, Creature* creature, Genome* genome);
+    __inline__ __device__ static void removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome);
 
 private:
     // Upper bound to avoid heap exhaustion.
@@ -1285,6 +1286,119 @@ __inline__ __device__ void MutationProcessor::applyMutations_deleteGene(Simulati
 
         if (laneId == 0) {
             genome->genes = newGenes;
+            genome->numGenes = newNumGenes;
+        }
+    }
+    block.sync();
+}
+
+__inline__ __device__ void MutationProcessor::removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome)
+{
+    auto block = cg_mutation::this_thread_block();
+    auto laneId = block.thread_rank();
+
+    __shared__ int numGenes;
+    __shared__ int newNumGenes;
+    __shared__ int* newGeneIndices;  // during marking: -1 = unreachable, 1 = reachable but not scanned yet, 2 = scanned
+    __shared__ bool anyGeneScanned;
+
+    if (laneId == 0) {
+        numGenes = genome->numGenes;
+    }
+    block.sync();
+
+    if (laneId == 0) {
+        newGeneIndices = data.entities.heap.getTypedSubArray<int>(numGenes);
+    }
+    block.sync();
+
+    for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
+        newGeneIndices[geneIndex] = geneIndex == 0 ? 1 : -1;
+    }
+    block.sync();
+
+    // Compute the reachable set in parallel: each sweep scans the reachable genes found so far and marks the genes they
+    // reference. The barrier between sweeps makes all marks visible; sweeps continue until a sweep scans no gene anymore.
+    // Concurrent marking within a sweep is benign: a gene is scanned at least once and a redundant re-mark only costs an
+    // extra sweep.
+    do {
+        if (laneId == 0) {
+            anyGeneScanned = false;
+        }
+        block.sync();
+        for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
+            if (newGeneIndices[geneIndex] != 1) {
+                continue;
+            }
+            newGeneIndices[geneIndex] = 2;
+            anyGeneScanned = true;
+            auto& gene = genome->genes[geneIndex];
+            for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                auto& node = gene.nodes[nodeIndex];
+                if (node.constructorAvailable && newGeneIndices[node.constructor.geneIndex] == -1) {
+                    newGeneIndices[node.constructor.geneIndex] = 1;
+                }
+                if (node.cellType == CellType_Injector && newGeneIndices[node.cellTypeData.injector.geneIndex] == -1) {
+                    newGeneIndices[node.cellTypeData.injector.geneIndex] = 1;
+                }
+            }
+        }
+        block.sync();
+    } while (anyGeneScanned);
+
+    // Assign compacted indices to the reachable genes.
+    if (laneId == 0) {
+        int nextIndex = 0;
+        for (int geneIndex = 0; geneIndex < numGenes; ++geneIndex) {
+            newGeneIndices[geneIndex] = newGeneIndices[geneIndex] >= 0 ? nextIndex++ : -1;
+        }
+        newNumGenes = nextIndex;
+    }
+    block.sync();
+
+    if (newNumGenes != numGenes) {
+        // Remap the references of the surviving genes in parallel; the reachable set is closed under references, so every
+        // reference of a survivor maps to a survivor.
+        for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
+            if (newGeneIndices[geneIndex] < 0) {
+                continue;
+            }
+            auto& gene = genome->genes[geneIndex];
+            for (int nodeIndex = 0; nodeIndex < gene.numNodes; ++nodeIndex) {
+                auto& node = gene.nodes[nodeIndex];
+                if (node.constructorAvailable) {
+                    node.constructor.geneIndex = newGeneIndices[node.constructor.geneIndex];
+                }
+                if (node.cellType == CellType_Injector) {
+                    node.cellTypeData.injector.geneIndex = newGeneIndices[node.cellTypeData.injector.geneIndex];
+                }
+            }
+        }
+        block.sync();
+
+        // Compact the survivors within the existing gene array in parallel. A survivor only moves towards a smaller index and
+        // the genes are processed in windows of blockDim.x with a barrier between reading and writing, so a gene is never
+        // overwritten before it was read.
+        for (int windowStart = 0; windowStart < numGenes; windowStart += blockDim.x) {
+            auto geneIndex = windowStart + laneId;
+            Gene movedGene;
+            int targetIndex = -1;
+            if (geneIndex < numGenes) {
+                targetIndex = newGeneIndices[geneIndex];
+                if (targetIndex == geneIndex) {
+                    targetIndex = -1;  // already in place
+                } else if (targetIndex >= 0) {
+                    movedGene = genome->genes[geneIndex];
+                }
+            }
+            block.sync();
+            if (targetIndex >= 0) {
+                genome->genes[targetIndex] = movedGene;
+            }
+            block.sync();
+        }
+
+        if (laneId == 0) {
             genome->numGenes = newNumGenes;
         }
     }
