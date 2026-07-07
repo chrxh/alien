@@ -239,6 +239,7 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
 
     if (clonedGenome != nullptr) {
         MutationProcessor::applyMutations(data, cell.creature, clonedGenome);
+        MutationProcessor::removeUnreachableGenesFromRoot(data, clonedGenome);
         if (threadIdx.x == 0) {
             cell.creature->genome = clonedGenome;
         }

@@ -19,7 +19,6 @@ namespace cg_mutation = cooperative_groups;
 class MutationProcessor
 {
 public:
-    // Both functions return the new index of the reference gene (unchanged if no genes were removed).
     __inline__ __device__ static void applyMutations(SimulationData& data, Creature* creature, Genome* genome);
     __inline__ __device__ static void removeUnreachableGenesFromRoot(SimulationData& data, Genome* genome);
 
@@ -127,10 +126,6 @@ __inline__ __device__ void MutationProcessor::applyMutations(SimulationData& dat
         applyMutations_duplicateGene(data, genome, accumulatedMutations);
         applyMutations_deleteGene(data, genome, accumulatedMutations);
     }
-
-    // sync since the preceding mutations may repoint gene references; genes that became unreachable are removed afterwards
-    block.sync();
-    removeUnreachableGenesFromRoot(data, genome);
 
     block.sync();
     updateAccumulatedMutationsAndLineageId(data, creature, genome, accumulatedMutations);

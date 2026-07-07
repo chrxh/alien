@@ -109,23 +109,12 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReference
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
-TEST_F(UnusedGeneRemovalTests, applyMutations_removesGenesUnreachableFromRoot)
+TEST_F(UnusedGeneRemovalTests, applyMutations_doesNotRemoveUnreachableGenes)
 {
-    // All mutation rates are zero, so applying mutations only removes the genes unreachable from the root gene.
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), createUnreachableCyclicTestGenome());
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->testOnly_mutate(1);
-
-    auto actualGenome = getMutatedGenome();
-    ASSERT_EQ(1, actualGenome._genes.size());
-    EXPECT_EQ("gene0", actualGenome._genes.at(0)._name);
-    EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
-}
-
-TEST_F(UnusedGeneRemovalTests, applyMutations_allGenesReachableFromRoot_noChange)
-{
-    auto genome = createReachableCyclicTestGenome();
+    // applyMutations() no longer removes unreachable genes itself; that is a separate step the caller (ConstructorProcessor)
+    // performs afterwards. With all mutation rates at zero, the genome must therefore come back unchanged, even though it
+    // contains genes unreachable from the root gene.
+    auto genome = createUnreachableCyclicTestGenome();
     auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
 
     _simulationFacade->setSimulationData(data);
