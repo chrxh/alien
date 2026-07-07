@@ -92,9 +92,9 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReference
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
-TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_ignoresConstructorOnVoidNode)
+TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReferencedByConstructorOnVoidNode)
 {
-    // A void node's constructor data is considered stale and must not keep its target gene alive.
+    // A void node's constructor data still counts as a reference and keeps its target gene alive.
     auto genome = GenomeDesc().genes({
         GeneDesc().name("gene0").nodes({NodeDesc().cellType(VoidGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(1)), NodeDesc()}),
         GeneDesc().name("gene1").nodes({NodeDesc()}),
@@ -105,8 +105,7 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_ignoresConstructor
     _simulationFacade->testOnly_removeUnusedGenes(1);
 
     auto actualGenome = getMutatedGenome();
-    ASSERT_EQ(1, actualGenome._genes.size());
-    EXPECT_EQ("gene0", actualGenome._genes.at(0)._name);
+    EXPECT_EQ(genome, actualGenome);
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
