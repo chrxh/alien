@@ -353,6 +353,7 @@ struct MemoryTO
 struct SenderTO
 {
     uint8_t range;
+    bool oneway;
 };
 
 struct ReceiverTO

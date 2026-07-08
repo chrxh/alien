@@ -474,6 +474,7 @@ __inline__ __device__ void MutationProcessor::applyMutations_cellTypeProperties(
                     switch (node.cellTypeData.communicator.mode) {
                     case CommunicatorMode_Sender:
                         mutateNumber(node.cellTypeData.communicator.modeData.sender.range, Const::CommunicatorRange_Min, Const::CommunicatorRange_Max);
+                        mutateBoolField(node.cellTypeData.communicator.modeData.sender.oneway);
                         break;
                     case CommunicatorMode_Receiver:
                         mutateBitset(node.cellTypeData.communicator.modeData.receiver.restrictToColors, Const::RestrictToColors_Max);
@@ -640,7 +641,7 @@ __inline__ __device__ void MutationProcessor::resetCellTypeModeToDefault(Node& n
         auto& communicator = node.cellTypeData.communicator;
         switch (communicator.mode) {
         case CommunicatorMode_Sender:
-            communicator.modeData.sender = {Const::CommunicatorRange_Default};
+            communicator.modeData.sender = {Const::CommunicatorRange_Default, Const::CommunicatorOneway_Default};
             break;
         case CommunicatorMode_Receiver:
             communicator.modeData.receiver = {Const::RestrictToColors_Default, LineageRestriction_No};

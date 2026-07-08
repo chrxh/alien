@@ -570,6 +570,7 @@ ObjectDesc DescConverterService::createObjectDesc(TOs const& to, int objectIndex
             if (communicatorTO.mode == CommunicatorMode_Sender) {
                 SenderDesc sender;
                 sender._range = communicatorTO.modeData.sender.range;
+                sender._oneway = communicatorTO.modeData.sender.oneway;
                 communicator._mode = sender;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 ReceiverDesc receiver;
@@ -821,6 +822,7 @@ NodeDesc DescConverterService::createNodeDesc(TOs const& to, NodeTO const* nodeT
         if (communicatorTO.mode == CommunicatorMode_Sender) {
             SenderGenomeDesc sender;
             sender._range = communicatorTO.modeData.sender.range;
+            sender._oneway = communicatorTO.modeData.sender.oneway;
             communicatorDesc._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverGenomeDesc receiver;
@@ -1207,6 +1209,7 @@ void DescConverterService::convertGenomeToTO(
                 if (communicatorTO.mode == CommunicatorMode_Sender) {
                     auto const& senderDesc = std::get<SenderGenomeDesc>(communicatorDesc._mode);
                     communicatorTO.modeData.sender.range = static_cast<uint8_t>(senderDesc._range);
+                    communicatorTO.modeData.sender.oneway = senderDesc._oneway;
                 } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                     auto const& receiverDesc = std::get<ReceiverGenomeDesc>(communicatorDesc._mode);
                     communicatorTO.modeData.receiver.restrictToColors = static_cast<uint16_t>(receiverDesc._restrictToColors);
@@ -1533,6 +1536,7 @@ void DescConverterService::convertObjectToTO(
             if (communicatorTO.mode == CommunicatorMode_Sender) {
                 auto const& senderDesc = std::get<SenderDesc>(communicatorDesc._mode);
                 communicatorTO.modeData.sender.range = static_cast<uint8_t>(senderDesc._range);
+                communicatorTO.modeData.sender.oneway = senderDesc._oneway;
             } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                 auto const& receiverDesc = std::get<ReceiverDesc>(communicatorDesc._mode);
                 communicatorTO.modeData.receiver.restrictToColors = static_cast<uint16_t>(receiverDesc._restrictToColors);

@@ -625,6 +625,9 @@ bool DescTestDataFactory::compare(ObjectDesc const& object, NodeDesc const& node
             if (sender._range != nodeSender._range) {
                 return false;
             }
+            if (sender._oneway != nodeSender._oneway) {
+                return false;
+            }
         } break;
         case CommunicatorMode_Receiver: {
             auto const& receiver = std::get<ReceiverDesc>(communicator._mode);
@@ -827,7 +830,7 @@ CellTypeDesc DescTestDataFactory::createNonDefaultCellTypeDesc(ObjectParameter o
         CommunicatorModeDesc communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderDesc().range(150);
+            communicatorModeDesc = SenderDesc().range(150).oneway(false);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverDesc().restrictToColors(1 << 2).restrictToLineage(LineageRestriction_UnrelatedLineage);
@@ -993,7 +996,7 @@ CellTypeGenomeDesc DescTestDataFactory::createNonDefaultCellTypeGenomeDesc(NodeP
         CommunicatorModeGenomeDesc communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderGenomeDesc().range(200);
+            communicatorModeDesc = SenderGenomeDesc().range(200).oneway(false);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverGenomeDesc().restrictToColors(1 << 5).restrictToLineage(LineageRestriction_RelatedLineage);

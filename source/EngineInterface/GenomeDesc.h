@@ -343,6 +343,7 @@ struct SenderGenomeDesc
     auto operator<=>(SenderGenomeDesc const&) const = default;
 
     MEMBER(SenderGenomeDesc, int, range, Const::CommunicatorRange_Default);
+    MEMBER(SenderGenomeDesc, bool, oneway, Const::CommunicatorOneway_Default);
 };
 
 struct ReceiverGenomeDesc
