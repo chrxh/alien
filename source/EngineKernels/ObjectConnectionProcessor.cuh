@@ -46,12 +46,7 @@ public:
     __inline__ __device__ static bool existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject);
 
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Object* object);
-
-    // Converts an angle encoded in a signal channel (value in [-1, 1]) to an absolute direction:
-    // calcReferenceDirection rotated by (frontAngle of the cell + angleSignal * 180 deg).
     __inline__ __device__ static float2 convertAngleSignalToAbsoluteDirection(SimulationData& data, Object* object, float const& angleSignal);
-
-    // Reverse of convertAngleSignalToAbsoluteDirection: absolute direction to the encoded signal angle in [-1, 1].
     __inline__ __device__ static float convertAbsoluteDirectionToAngleSignal(SimulationData& data, Object* object, float2 const& direction);
 
     static int constexpr MaxOperationsPerCell = 50;

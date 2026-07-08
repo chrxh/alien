@@ -211,6 +211,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                         energyToTransfer *= (1.0f - cudaSimulationParameters.attackerRelatedLineageProtection.value[object->color]);
                     }
 
+                    energyToTransfer *= max(0.03f, powf((toFloat(cell->creature->numCells) + 5.0f) / (toFloat(otherCell->creature->numCells) + 5.0f), 1.0f));
+
                     if (energyToTransfer > NEAR_ZERO) {
 
                         // Notify attacked cell
