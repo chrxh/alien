@@ -109,12 +109,9 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
         // 1000 -> 0.5
         object->typeData.cell.signal.channels[Channels::SensorTelemetryCellEnergy] = 1.0f - 1.0f / powf(object->typeData.cell.usableEnergy + 1.0f, 0.1f);
 
-        // Measure cell velocity with respect to front angle
-        auto refAngle = Math::angleOfVector(ObjectConnectionProcessor::calcReferenceDirection(data, object));
-        auto absFrontAngle = refAngle + object->typeData.cell.frontAngle;
-        auto velAngle = Math::angleOfVector(object->vel);
+        // Measure cell velocity with respect to front angle. Angle: between -1.0 and 1.0
         object->typeData.cell.signal.channels[Channels::SensorTelemetryCellVelAngle] =
-            Math::getNormalizedAngle(velAngle - absFrontAngle, -180.0f) / 180.0f;  // Angle: between -1.0 and 1.0
+            ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, object, object->vel);
 
         // Measure cell velocity with
         auto vel = Math::length(object->vel);
