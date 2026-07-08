@@ -63,9 +63,8 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         senderPos = object->pos;
         senderFrontValid = cell.frontAngle != VALUE_NOT_SET_FLOAT;
         if (senderFrontValid) {
-            auto refAngle = Math::angleOfVector(ObjectConnectionProcessor::calcReferenceDirection(data, object));
             auto encodedAngle = cell.signal.channels[Channels::CommunicatorAngle];
-            senderFacing = Math::unitVectorOfAngle(refAngle + cell.frontAngle + encodedAngle * 180.0f);
+            senderFacing = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, object, encodedAngle);
         }
     }
     __syncthreads();
@@ -160,22 +159,12 @@ __inline__ __device__ void CommunicatorProcessor::tryTransmitSignal(SimulationDa
     // Copy signal to receiver
     copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
 
-    // Translate angle in channel[1] from the sender's absolute front direction to the receiver's absolute front direction
-    // The angle is encoded as value/180 degrees relative to the front direction, where 1.0 = 180 deg and -1.0 = -180 deg
-    // We need to maintain the absolute direction: senderFront rotated by senderAngle = receiverFront rotated by receiverAngle
-    // Therefore: receiverAngle = senderAngle + (senderFrontAngle - receiverFrontAngle)
-    auto senderRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, senderObject);
-    auto receiverRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, receiverObject);
-    auto senderRefAngle = Math::angleOfVector(senderRefDir) + senderObject->typeData.cell.frontAngle;
-    auto receiverRefAngle = Math::angleOfVector(receiverRefDir) + receiverObject->typeData.cell.frontAngle;
-    auto angleDiff = senderRefAngle - receiverRefAngle;
-
-    // The signal angle is encoded as angle/180, so the diff must also be scaled
+    // The encoded angle is relative to each cell's absolute front direction. Convert it to an absolute direction using
+    // the sender's frame and back into the receiver's frame so the absolute direction is preserved across the transfer.
     auto senderAngle = senderObject->typeData.cell.signal.channels[Channels::CommunicatorAngle];
-    auto translatedAngle = senderAngle + angleDiff / 180.0f;
-    // Normalize to [-1, 1] range (representing [-180, 180] degrees)
-    translatedAngle = Math::getNormalizedAngle(translatedAngle * 180.0f, -180.0f) / 180.0f;
-    receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = translatedAngle;
+    auto absoluteDirection = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, senderObject, senderAngle);
+    auto receiverAngle = ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, absoluteDirection);
+    receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = receiverAngle;
 
     receiverObject->releaseLock();
 }
