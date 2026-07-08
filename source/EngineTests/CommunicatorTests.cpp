@@ -375,11 +375,14 @@ INSTANTIATE_TEST_SUITE_P(CommunicatorTests_AngleTranslation, CommunicatorTests_A
 TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 {
     auto receiverFrontAngle = GetParam();
+    auto senderFrontAngle = 30.0f;
 
-    // Sender: reference direction east (refAngle 90), frontAngle 0, encoded angle 0.5 -> faces south.
-    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
+    // Sender: reference direction east (refAngle 90), non-trivial frontAngle, encoded angle 0.5.
+    // Absolute encoded direction = 90 + senderFrontAngle + 0.5 * 180 = 210 + senderFrontAngle, still pointing into the
+    // southern half-plane, so the northern receiver passes the directional gate.
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 0, senderFrontAngle);
 
-    // Receiver: north of the sender (opposite half-plane), reference direction east, variable frontAngle.
+    // Receiver: north of the sender (opposite half-plane), reference direction east, variable non-trivial frontAngle.
     data.add(createReceiverCreature(2, {100.0f, 90.0f}, 0x3ff, LineageRestriction_No, 0, receiverFrontAngle), false);
 
     _simulationFacade->setSimulationData(data);
@@ -390,9 +393,10 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 
     EXPECT_TRUE(receiver.getCellRef()._signal._channels[0] != 0.0f);
 
-    // senderAbsFront = 90 + 0, receiverAbsFront = 90 + receiverFrontAngle, angleDiff = -receiverFrontAngle
-    // translatedAngle = encodedAngle(0.5) + angleDiff / 180, normalized to [-1, 1]
-    auto expectedAngle = Math::getNormalizedAngle(0.5f * 180.0f - receiverFrontAngle, -180.0f) / 180.0f;
+    // Absolute encoded angle = senderRefAngle(90) + senderFrontAngle + encodedAngle(0.5) * 180.
+    // Receiver angle = absolute angle - receiverRefAngle(90) - receiverFrontAngle, normalized to [-1, 1].
+    auto absoluteAngle = 90.0f + senderFrontAngle + 0.5f * 180.0f;
+    auto expectedAngle = Math::getNormalizedAngle(absoluteAngle - 90.0f - receiverFrontAngle, -180.0f) / 180.0f;
     EXPECT_NEAR(receiver.getCellRef()._signal._channels[Channels::CommunicatorAngle], expectedAngle, 0.001f);
 }
 
