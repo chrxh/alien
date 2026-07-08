@@ -14,7 +14,7 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject);
+    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, float2 const& senderFacing);
 };
 
 /************************************************************************/
@@ -141,7 +141,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
                 // Direction gating: only send if the receiver lies in the half-plane opposite to the encoded facing direction
                 auto toReceiver = data.objectMap.getCorrectedDirection(otherObject->pos - senderPos);
                 if (Math::dot(toReceiver, senderFacing) <= 0) {
-                    tryTransmitSignal(data, object, otherObject);
+                    tryTransmitSignal(data, object, otherObject, senderFacing);
                 }
             }
             otherIndex = otherRecord.nextObjectIndex;
@@ -149,7 +149,8 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     }
 }
 
-__inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject)
+__inline__ __device__ bool
+CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, float2 const& senderFacing)
 {
     // The receiver must have an initialized front direction
     if (receiverObject->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
@@ -161,11 +162,9 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
     // Copy signal to receiver
     copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
 
-    // The encoded angle is relative to each cell's absolute front direction. Convert it to an absolute direction using
-    // the sender's frame and back into the receiver's frame so the absolute direction is preserved across the transfer.
-    auto senderAngle = senderObject->typeData.cell.signal.channels[Channels::CommunicatorAngle];
-    auto absoluteDirection = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, senderObject, senderAngle);
-    auto receiverAngle = ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, absoluteDirection);
+    // The encoded angle is relative to each cell's absolute front direction. senderFacing is the sender's absolute
+    // encoded direction; convert it back into the receiver's frame so the absolute direction is preserved.
+    auto receiverAngle = ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, senderFacing);
     receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = receiverAngle;
 
     receiverObject->releaseLock();
