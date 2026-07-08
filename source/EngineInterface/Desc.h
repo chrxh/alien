@@ -409,6 +409,7 @@ struct SenderDesc
     auto operator<=>(SenderDesc const&) const = default;
 
     MEMBER(SenderDesc, int, range, Const::CommunicatorRange_Default);
+    MEMBER(SenderDesc, bool, oneway, Const::CommunicatorOneway_Default);
 };
 
 struct ReceiverDesc

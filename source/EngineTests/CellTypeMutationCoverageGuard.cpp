@@ -79,7 +79,7 @@ ALIEN_MUTATION_FIELD_COUNT(SignalStorageGenomeDesc, 1);
 ALIEN_MUTATION_FIELD_COUNT(SignalIntegratorGenomeDesc, 1);
 
 // --- Communicator modes (switch (node.cellTypeData.communicator.mode)) ---
-ALIEN_MUTATION_FIELD_COUNT(SenderGenomeDesc, 1);
+ALIEN_MUTATION_FIELD_COUNT(SenderGenomeDesc, 2);
 ALIEN_MUTATION_FIELD_COUNT(ReceiverGenomeDesc, 2);
 
 // --- Number of modes per cell type ---

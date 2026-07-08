@@ -138,11 +138,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
             auto const& otherRecord = records[otherIndex];
             auto otherObject = otherRecord.self;
             if (isMatch(otherObject)) {
-                // Direction gating: only send if the receiver lies in the half-plane opposite to the encoded facing direction
-                auto toReceiver = data.objectMap.getCorrectedDirection(otherObject->pos - senderPos);
-                if (Math::dot(toReceiver, senderFacing) <= 0) {
-                    tryTransmitSignal(data, object, otherObject, senderFacing);
-                }
+                tryTransmitSignal(data, object, otherObject, senderFacing);
             }
             otherIndex = otherRecord.nextObjectIndex;
         }
@@ -152,6 +148,15 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
 __inline__ __device__ bool
 CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, float2 const& senderFacing)
 {
+    auto const& sender = senderObject->typeData.cell.cellTypeData.communicator.modeData.sender;
+    if (sender.oneway) {
+        // Direction gating: only send if the receiver lies in the half-plane opposite to the encoded facing direction
+        auto toReceiver = data.objectMap.getCorrectedDirection(receiverObject->pos - senderObject->pos);
+        if (Math::dot(toReceiver, senderFacing) > 0) {
+            return false;
+        }
+    }
+
     // The receiver must have an initialized front direction
     if (receiverObject->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
         return false;

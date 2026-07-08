@@ -277,6 +277,7 @@ struct MemoryGenome
 struct SenderGenome
 {
     uint8_t range;
+    bool oneway;
 };
 
 struct ReceiverGenome
