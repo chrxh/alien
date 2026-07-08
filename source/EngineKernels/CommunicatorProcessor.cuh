@@ -14,7 +14,7 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static void tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent);
+    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, float2 const& senderFacing);
 };
 
 /************************************************************************/
@@ -52,25 +52,27 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     __shared__ int range;
-    __shared__ int maxTimesSent;
-    __shared__ int currentNumTimesSent;
     __shared__ float2 senderPos;
+    __shared__ bool senderFrontValid;
+    __shared__ float2 senderFacing;  // Absolute direction encoded by the signal angle relative to the front direction
 
     if (threadIdx.x == 0) {
-        auto& sender = object->typeData.cell.cellTypeData.communicator.modeData.sender;
+        auto& cell = object->typeData.cell;
+        auto& sender = cell.cellTypeData.communicator.modeData.sender;
         range = sender.range;
-        maxTimesSent = sender.maxTimesSent;
-        currentNumTimesSent = object->typeData.cell.signal.numTimesSent;
         senderPos = object->pos;
+        senderFrontValid = cell.frontAngle != VALUE_NOT_SET_FLOAT;
+        if (senderFrontValid) {
+            auto encodedAngle = cell.signal.channels[Channels::CommunicatorAngle];
+            senderFacing = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, object, encodedAngle);
+        }
     }
     __syncthreads();
 
-    // Check if signal can still be forwarded
-    if (currentNumTimesSent >= maxTimesSent) {
+    // The sender must have an initialized front direction
+    if (!senderFrontValid) {
         return;
     }
-
-    auto const newNumTimesSent = currentNumTimesSent + 1;
 
     // Matching lambda to check if a cell is a valid receiver
     auto isMatch = [&object](Object* otherObject) {
@@ -136,37 +138,35 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
             auto const& otherRecord = records[otherIndex];
             auto otherObject = otherRecord.self;
             if (isMatch(otherObject)) {
-                tryTransmitSignal(data, object, otherObject, newNumTimesSent);
+                // Direction gating: only send if the receiver lies in the half-plane opposite to the encoded facing direction
+                auto toReceiver = data.objectMap.getCorrectedDirection(otherObject->pos - senderPos);
+                if (Math::dot(toReceiver, senderFacing) <= 0) {
+                    tryTransmitSignal(data, object, otherObject, senderFacing);
+                }
             }
             otherIndex = otherRecord.nextObjectIndex;
         }
     }
 }
 
-__inline__ __device__ void CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, int newNumTimesSent)
+__inline__ __device__ bool
+CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject, float2 const& senderFacing)
 {
+    // The receiver must have an initialized front direction
+    if (receiverObject->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
+        return false;
+    }
+
     receiverObject->getLock();
 
-    // Copy signal to receiver with incremented numTimesSent
+    // Copy signal to receiver
     copyChannels(receiverObject->typeData.cell.signal.channels, senderObject->typeData.cell.signal.channels);
-    receiverObject->typeData.cell.signal.numTimesSent = newNumTimesSent;
 
-    // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
-    // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
-    // We need to maintain the absolute direction: senderRefDir rotated by senderAngle = receiverRefDir rotated by receiverAngle
-    // Therefore: receiverAngle = senderAngle + (senderRefAngle - receiverRefAngle)
-    auto senderRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, senderObject);
-    auto receiverRefDir = ObjectConnectionProcessor::calcReferenceDirection(data, receiverObject);
-    auto senderRefAngle = Math::angleOfVector(senderRefDir);
-    auto receiverRefAngle = Math::angleOfVector(receiverRefDir);
-    auto angleDiff = senderRefAngle - receiverRefAngle;
-
-    // The signal angle is encoded as angle/180, so the diff must also be scaled
-    auto senderAngle = senderObject->typeData.cell.signal.channels[Channels::CommunicatorAngle];
-    auto translatedAngle = senderAngle + angleDiff / 180.0f;
-    // Normalize to [-1, 1] range (representing [-180, 180] degrees)
-    translatedAngle = Math::getNormalizedAngle(translatedAngle * 180.0f, -180.0f) / 180.0f;
-    receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = translatedAngle;
+    // The encoded angle is relative to each cell's absolute front direction. senderFacing is the sender's absolute
+    // encoded direction; convert it back into the receiver's frame so the absolute direction is preserved.
+    auto receiverAngle = ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(data, receiverObject, senderFacing);
+    receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = receiverAngle;
 
     receiverObject->releaseLock();
+    return true;
 }

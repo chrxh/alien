@@ -46,6 +46,8 @@ public:
     __inline__ __device__ static bool existsOwnIntersectingObjectInBetween(SimulationData& data, Object* object, Object* otherObject);
 
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Object* object);
+    __inline__ __device__ static float2 convertAngleSignalToAbsoluteDirection(SimulationData& data, Object* object, float const& angleSignal);
+    __inline__ __device__ static float convertAbsoluteDirectionToAngleSignal(SimulationData& data, Object* object, float2 const& direction);
 
     static int constexpr MaxOperationsPerCell = 50;
 
@@ -647,4 +649,19 @@ __inline__ __device__ float2 ObjectConnectionProcessor::calcReferenceDirection(S
         return float2{0.0f, -1.0f};
     }
     return Math::getNormalized(data.objectMap.getCorrectedDirection(object->connections[0].object->pos - object->pos));
+}
+
+__inline__ __device__ float2 ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(SimulationData& data, Object* object, float const& angleSignal)
+{
+    auto referenceDirection = calcReferenceDirection(data, object);
+    auto frontAngle = object->typeData.cell.frontAngle;
+    return Math::rotateClockwise(referenceDirection, frontAngle + angleSignal * 180.0f);
+}
+
+__inline__ __device__ float ObjectConnectionProcessor::convertAbsoluteDirectionToAngleSignal(SimulationData& data, Object* object, float2 const& direction)
+{
+    auto referenceAngle = Math::angleOfVector(calcReferenceDirection(data, object));
+    auto frontAngle = object->typeData.cell.frontAngle;
+    auto angle = Math::angleOfVector(direction) - referenceAngle - frontAngle;
+    return Math::getNormalizedAngle(angle, -180.0f) / 180.0f;
 }

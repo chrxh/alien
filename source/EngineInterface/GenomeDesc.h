@@ -343,7 +343,6 @@ struct SenderGenomeDesc
     auto operator<=>(SenderGenomeDesc const&) const = default;
 
     MEMBER(SenderGenomeDesc, int, range, Const::CommunicatorRange_Default);
-    MEMBER(SenderGenomeDesc, int, maxTimesSent, Const::CommunicatorMaxTimesSent_Default);
 };
 
 struct ReceiverGenomeDesc

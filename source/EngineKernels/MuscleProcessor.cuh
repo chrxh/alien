@@ -535,10 +535,8 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
     if (object->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
     }
-    auto direction = ObjectConnectionProcessor::calcReferenceDirection(data, object);
-    auto angle = Math::getNormalizedAngle(
-        object->typeData.cell.frontAngle + max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
-    direction = Math::rotateClockwise(direction, angle);
+    auto angleSignal = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::MuscleAngle]));
+    auto direction = ObjectConnectionProcessor::convertAngleSignalToAbsoluteDirection(data, object, angleSignal);
 
     auto activation = max(-1.0f, min(1.0f, object->typeData.cell.signal.channels[Channels::CellTypeActivation]));
     direction = direction * cudaSimulationParameters.muscleMovementAcceleration.value[object->color] * activation * 0.0001f * TIMESTEPS_PER_CELL_FUNCTION;

@@ -382,7 +382,6 @@ struct Memory
 struct Sender
 {
     uint8_t range;
-    int maxTimesSent;
 };
 
 struct Receiver
@@ -424,7 +423,6 @@ union CellTypeData
 struct __align__(16) Signal
 {
     float channels[NEURONS_PER_CELL];
-    int numTimesSent;
 };
 
 struct uint32_float

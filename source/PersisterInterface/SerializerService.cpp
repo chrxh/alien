@@ -434,7 +434,6 @@ namespace
     auto constexpr Id_MemoryGenome_ChannelBitMask = 0;
 
     auto constexpr Id_SenderGenome_Range = 0;
-    auto constexpr Id_SenderGenome_MaxTimesSent = 1;
 
     auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
     auto constexpr Id_ReceiverGenome_RestrictToLineage = 2;
@@ -850,7 +849,6 @@ namespace cereal
         SenderGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SenderGenome_Range, data._range, defaultObject._range);
-        scope.addMember(Id_SenderGenome_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
     }
     SPLIT_SERIALIZATION(SenderGenomeDesc)
 
@@ -1166,7 +1164,6 @@ namespace
     auto constexpr Id_Object_Sticky = 17;
 
     auto constexpr Id_Signal_Channels = 0;
-    auto constexpr Id_Signal_NumTimesSent = 1;
 
     auto constexpr Id_Connection_ObjectId = 0;
     auto constexpr Id_Connection_Distance = 1;
@@ -1284,7 +1281,6 @@ namespace
     auto constexpr Id_Memory_ChannelBitMask = 0;
 
     auto constexpr Id_Sender_Range = 0;
-    auto constexpr Id_Sender_MaxTimesSent = 1;
 
     auto constexpr Id_Receiver_RestrictToColor = 1;
     auto constexpr Id_Receiver_RestrictToLineage = 2;
@@ -1335,7 +1331,6 @@ namespace cereal
         SignalDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Signal_Channels, data._channels, defaultObject._channels);
-        scope.addMember(Id_Signal_NumTimesSent, data._numTimesSent, defaultObject._numTimesSent);
     }
     SPLIT_SERIALIZATION(SignalDesc)
 
@@ -1737,7 +1732,6 @@ namespace cereal
         SenderDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Sender_Range, data._range, defaultObject._range);
-        scope.addMember(Id_Sender_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
     }
     SPLIT_SERIALIZATION(SenderDesc)
 

@@ -672,7 +672,6 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
                     auto& sender = std::get<SenderGenomeDesc>(communicator._mode);
                     AlienGui::SliderInt(AlienGui::SliderIntParameters().name("Range").min(0).max(20).textWidth(rightColumnWidth), &sender._range);
-                    AlienGui::InputInt(AlienGui::InputIntParameters().name("Max times sent").textWidth(rightColumnWidth), sender._maxTimesSent);
                     AlienGui::EndIndent();
                 } else if (mode == CommunicatorMode_Receiver) {
                     AlienGui::BeginIndent();

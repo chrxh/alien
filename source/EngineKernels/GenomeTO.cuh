@@ -282,7 +282,6 @@ struct MemoryGenomeTO
 struct SenderGenomeTO
 {
     uint8_t range;
-    int maxTimesSent;
 };
 
 struct ReceiverGenomeTO

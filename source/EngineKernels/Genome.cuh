@@ -277,7 +277,6 @@ struct MemoryGenome
 struct SenderGenome
 {
     uint8_t range;
-    int maxTimesSent;
 };
 
 struct ReceiverGenome
