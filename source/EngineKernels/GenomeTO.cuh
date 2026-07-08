@@ -282,6 +282,7 @@ struct MemoryGenomeTO
 struct SenderGenomeTO
 {
     uint8_t range;
+    bool oneway;
 };
 
 struct ReceiverGenomeTO

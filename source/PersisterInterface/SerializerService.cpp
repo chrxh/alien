@@ -434,6 +434,7 @@ namespace
     auto constexpr Id_MemoryGenome_ChannelBitMask = 0;
 
     auto constexpr Id_SenderGenome_Range = 0;
+    auto constexpr Id_SenderGenome_Oneway = 1;
 
     auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
     auto constexpr Id_ReceiverGenome_RestrictToLineage = 2;
@@ -849,6 +850,7 @@ namespace cereal
         SenderGenomeDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_SenderGenome_Range, data._range, defaultObject._range);
+        scope.addMember(Id_SenderGenome_Oneway, data._oneway, defaultObject._oneway);
     }
     SPLIT_SERIALIZATION(SenderGenomeDesc)
 
@@ -1281,6 +1283,7 @@ namespace
     auto constexpr Id_Memory_ChannelBitMask = 0;
 
     auto constexpr Id_Sender_Range = 0;
+    auto constexpr Id_Sender_Oneway = 1;
 
     auto constexpr Id_Receiver_RestrictToColor = 1;
     auto constexpr Id_Receiver_RestrictToLineage = 2;
@@ -1732,6 +1735,7 @@ namespace cereal
         SenderDesc defaultObject;
         auto scope = getSerializationScope(task, ar);
         scope.addMember(Id_Sender_Range, data._range, defaultObject._range);
+        scope.addMember(Id_Sender_Oneway, data._oneway, defaultObject._oneway);
     }
     SPLIT_SERIALIZATION(SenderDesc)
 
