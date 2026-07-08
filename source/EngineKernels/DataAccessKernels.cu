@@ -245,6 +245,7 @@ namespace
                         nodeTO.cellTypeData.communicator.mode = node.cellTypeData.communicator.mode;
                         if (node.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                             nodeTO.cellTypeData.communicator.modeData.sender.range = node.cellTypeData.communicator.modeData.sender.range;
+                            nodeTO.cellTypeData.communicator.modeData.sender.oneway = node.cellTypeData.communicator.modeData.sender.oneway;
                         } else if (node.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                             nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColors =
                                 node.cellTypeData.communicator.modeData.receiver.restrictToColors;
@@ -543,6 +544,7 @@ namespace
                 cellTO.cellTypeData.communicator.mode = cell.cellTypeData.communicator.mode;
                 if (cell.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                     cellTO.cellTypeData.communicator.modeData.sender.range = cell.cellTypeData.communicator.modeData.sender.range;
+                    cellTO.cellTypeData.communicator.modeData.sender.oneway = cell.cellTypeData.communicator.modeData.sender.oneway;
                 } else if (cell.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToColors = cell.cellTypeData.communicator.modeData.receiver.restrictToColors;
                     cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = cell.cellTypeData.communicator.modeData.receiver.restrictToLineage;

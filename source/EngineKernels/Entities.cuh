@@ -382,6 +382,7 @@ struct Memory
 struct Sender
 {
     uint8_t range;
+    bool oneway;
 };
 
 struct Receiver

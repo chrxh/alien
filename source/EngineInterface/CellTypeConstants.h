@@ -482,6 +482,7 @@ namespace Const
     auto constexpr CommunicatorRange_Min = 0;
     auto constexpr CommunicatorRange_Max = 20;
     auto constexpr CommunicatorRange_Default = 15;
+    auto constexpr CommunicatorOneway_Default = true;
 }
 
 using CommunicatorMode = int;
