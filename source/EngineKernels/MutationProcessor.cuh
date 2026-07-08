@@ -1338,9 +1338,6 @@ __inline__ __device__ void MutationProcessor::removeUnreachableGenesFromRoot(Sim
                 if (node.constructorAvailable && newGeneIndices[node.constructor.geneIndex] == -1) {
                     newGeneIndices[node.constructor.geneIndex] = 1;
                 }
-                if (node.cellType == CellType_Injector && newGeneIndices[node.cellTypeData.injector.geneIndex] == -1) {
-                    newGeneIndices[node.cellTypeData.injector.geneIndex] = 1;
-                }
             }
         }
         block.sync();
@@ -1357,8 +1354,9 @@ __inline__ __device__ void MutationProcessor::removeUnreachableGenesFromRoot(Sim
     block.sync();
 
     if (newNumGenes != numGenes) {
-        // Remap the references of the surviving genes in parallel; the reachable set is closed under references, so every
-        // reference of a survivor maps to a survivor.
+        // Remap the references of the surviving genes in parallel; the reachable set is closed under constructor references, so
+        // every constructor reference of a survivor maps to a survivor. Injector references are not part of the reachability
+        // closure, so an injector may point at a removed gene; fall back to gene 0 in that case.
         for (int geneIndex = laneId; geneIndex < numGenes; geneIndex += blockDim.x) {
             if (newGeneIndices[geneIndex] < 0) {
                 continue;
@@ -1370,7 +1368,8 @@ __inline__ __device__ void MutationProcessor::removeUnreachableGenesFromRoot(Sim
                     node.constructor.geneIndex = newGeneIndices[node.constructor.geneIndex];
                 }
                 if (node.cellType == CellType_Injector) {
-                    node.cellTypeData.injector.geneIndex = newGeneIndices[node.cellTypeData.injector.geneIndex];
+                    int mapped = newGeneIndices[node.cellTypeData.injector.geneIndex];
+                    node.cellTypeData.injector.geneIndex = mapped < 0 ? 0 : mapped;
                 }
             }
         }

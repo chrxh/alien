@@ -72,10 +72,32 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_allGenesReachable_
     EXPECT_EQ(genome, actualGenome);
 }
 
-TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReferencedByInjector)
+TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_removesGeneOnlyReferencedByInjector)
 {
+    // An injector's gene reference is a payload for a foreign creature, not part of this creature's own construction
+    // graph, so it must not keep the referenced gene alive.
     auto genome = GenomeDesc().genes({
         GeneDesc().name("gene0").nodes({NodeDesc().cellType(InjectorGenomeDesc().geneIndex(2))}),
+        GeneDesc().name("gene1").nodes({NodeDesc()}),
+        GeneDesc().name("gene2").nodes({NodeDesc()}),
+    });
+    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc(), genome);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_removeUnusedGenes(1);
+
+    auto actualGenome = getMutatedGenome();
+    ASSERT_EQ(1, actualGenome._genes.size());
+    EXPECT_EQ("gene0", actualGenome._genes.at(0)._name);
+    EXPECT_EQ(0, std::get<InjectorGenomeDesc>(actualGenome._genes.at(0)._nodes.at(0)._cellType)._geneIndex);
+    EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
+}
+
+TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReferencedByInjectorAndConstructor)
+{
+    // gene2 is targeted by both an injector and a constructor reference; the constructor reference alone must keep it alive.
+    auto genome = GenomeDesc().genes({
+        GeneDesc().name("gene0").nodes({NodeDesc().cellType(InjectorGenomeDesc().geneIndex(2)).constructor(ConstructorGenomeDesc().geneIndex(2))}),
         GeneDesc().name("gene1").nodes({NodeDesc()}),
         GeneDesc().name("gene2").nodes({NodeDesc()}),
     });
@@ -88,7 +110,6 @@ TEST_F(UnusedGeneRemovalTests, removeUnreachableGenesFromRoot_keepsGeneReference
     ASSERT_EQ(2, actualGenome._genes.size());
     EXPECT_EQ("gene0", actualGenome._genes.at(0)._name);
     EXPECT_EQ("gene2", actualGenome._genes.at(1)._name);
-    EXPECT_EQ(1, std::get<InjectorGenomeDesc>(actualGenome._genes.at(0)._nodes.at(0)._cellType)._geneIndex);
     EXPECT_TRUE(_simulationFacade->testOnly_isDataValid());
 }
 
