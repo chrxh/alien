@@ -14,7 +14,7 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static void tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject);
+    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject);
 };
 
 /************************************************************************/
@@ -138,13 +138,10 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
             auto const& otherRecord = records[otherIndex];
             auto otherObject = otherRecord.self;
             if (isMatch(otherObject)) {
-                // The receiver must have an initialized front direction
-                if (otherObject->typeData.cell.frontAngle != VALUE_NOT_SET_FLOAT) {
-                    // Direction gating: only send if the receiver lies in the half-plane opposite to the encoded facing direction
-                    auto toReceiver = data.objectMap.getCorrectedDirection(otherObject->pos - senderPos);
-                    if (Math::dot(toReceiver, senderFacing) <= 0) {
-                        tryTransmitSignal(data, object, otherObject);
-                    }
+                // Direction gating: only send if the receiver lies in the half-plane opposite to the encoded facing direction
+                auto toReceiver = data.objectMap.getCorrectedDirection(otherObject->pos - senderPos);
+                if (Math::dot(toReceiver, senderFacing) <= 0) {
+                    tryTransmitSignal(data, object, otherObject);
                 }
             }
             otherIndex = otherRecord.nextObjectIndex;
@@ -152,8 +149,13 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     }
 }
 
-__inline__ __device__ void CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject)
+__inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderObject, Object* receiverObject)
 {
+    // The receiver must have an initialized front direction
+    if (receiverObject->typeData.cell.frontAngle == VALUE_NOT_SET_FLOAT) {
+        return false;
+    }
+
     receiverObject->getLock();
 
     // Copy signal to receiver
@@ -167,4 +169,5 @@ __inline__ __device__ void CommunicatorProcessor::tryTransmitSignal(SimulationDa
     receiverObject->typeData.cell.signal.channels[Channels::CommunicatorAngle] = receiverAngle;
 
     receiverObject->releaseLock();
+    return true;
 }
