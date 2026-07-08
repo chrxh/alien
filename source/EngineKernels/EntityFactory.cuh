@@ -298,7 +298,6 @@ __inline__ __device__ Genome* EntityFactory::createGenomeFromTO(TOs const& to, i
                 node.cellTypeData.communicator.mode = nodeTO.cellTypeData.communicator.mode;
                 if (nodeTO.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                     node.cellTypeData.communicator.modeData.sender.range = nodeTO.cellTypeData.communicator.modeData.sender.range;
-                    node.cellTypeData.communicator.modeData.sender.maxTimesSent = nodeTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
                 } else if (nodeTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                     node.cellTypeData.communicator.modeData.receiver.restrictToColors = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColors;
                     node.cellTypeData.communicator.modeData.receiver.restrictToLineage = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
@@ -417,7 +416,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
         for (int i = 0; i < NEURONS_PER_CELL; ++i) {
             cell->signal.channels[i] = cellTO.signal.channels[i];
         }
-        cell->signal.numTimesSent = cellTO.signal.numTimesSent;
         cell->signalChanges = cellTO.signalChanges;
 
         cell->cellType = cellTO.cellType;
@@ -582,7 +580,6 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TOs const& to, Obje
             cell->cellTypeData.communicator.mode = cellTO.cellTypeData.communicator.mode;
             if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                 cell->cellTypeData.communicator.modeData.sender.range = cellTO.cellTypeData.communicator.modeData.sender.range;
-                cell->cellTypeData.communicator.modeData.sender.maxTimesSent = cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
             } else if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                 cell->cellTypeData.communicator.modeData.receiver.restrictToColors = cellTO.cellTypeData.communicator.modeData.receiver.restrictToColors;
                 cell->cellTypeData.communicator.modeData.receiver.restrictToLineage = cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
@@ -772,7 +769,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         cell.signal.channels[i] = 0.0f;
     }
-    cell.signal.numTimesSent = 0;
     cell.signalChanges = 0;
 
     cell.neuralNetwork = _data->entities.heap.getTypedSubArray<NeuralNet>(1);
@@ -968,7 +964,6 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         communicator.mode = nodeCommunicator.mode;
         if (nodeCommunicator.mode == CommunicatorMode_Sender) {
             communicator.modeData.sender.range = nodeCommunicator.modeData.sender.range;
-            communicator.modeData.sender.maxTimesSent = nodeCommunicator.modeData.sender.maxTimesSent;
         } else if (nodeCommunicator.mode == CommunicatorMode_Receiver) {
             communicator.modeData.receiver.restrictToColors = nodeCommunicator.modeData.receiver.restrictToColors;
             communicator.modeData.receiver.restrictToLineage = nodeCommunicator.modeData.receiver.restrictToLineage;

@@ -68,11 +68,10 @@ TEST_F(NeuronTests, forwardSignalByDefault)
     auto signal1 = getExampleSignal1();
     auto signal2 = getExampleSignal2();
 
-    // Set different numTimesSent values on input signals
     auto data = Desc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal2).numTimesSent(3))),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(SignalDesc().channels(signal1).numTimesSent(7))),
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal2))),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(SignalDesc().channels(signal1))),
                     })
                     .addConnection(1, 2);
 
@@ -83,11 +82,6 @@ TEST_F(NeuronTests, forwardSignalByDefault)
 
     EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(2).getCellRef()._signal._channels));
-
-    // Check numTimesSent: cell 1 receives from cell 2 (numTimesSent=7), so its numTimesSent should be 7
-    // Cell 2 receives from cell 1 (numTimesSent=3), so its numTimesSent should be 3
-    EXPECT_EQ(actualData.getObjectRef(1).getCellRef()._signal._numTimesSent, 7);
-    EXPECT_EQ(actualData.getObjectRef(2).getCellRef()._signal._numTimesSent, 3);
 }
 
 TEST_F(NeuronTests, forwardSignalByDefault_preview)
@@ -95,11 +89,10 @@ TEST_F(NeuronTests, forwardSignalByDefault_preview)
     auto signal1 = getExampleSignal1();
     auto signal2 = getExampleSignal2();
 
-    // Set different numTimesSent values on input signals
     auto data = Desc()
                     .addCreature({
-                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal2).numTimesSent(2))),
-                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(SignalDesc().channels(signal1).numTimesSent(5))),
+                        ObjectDesc().id(1).pos({0, 0}).type(CellDesc().signal(SignalDesc().channels(signal2))),
+                        ObjectDesc().id(2).pos({0, 1}).type(CellDesc().signal(SignalDesc().channels(signal1))),
                     })
                     .addConnection(1, 2);
 
@@ -109,11 +102,6 @@ TEST_F(NeuronTests, forwardSignalByDefault_preview)
 
     EXPECT_TRUE(approxCompare(signal1, actualData.getObjectRef(1).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(2).getCellRef()._signal._channels));
-
-    // Check numTimesSent: cell 1 receives from cell 2 (numTimesSent=5), so its numTimesSent should be 5
-    // Cell 2 receives from cell 1 (numTimesSent=2), so its numTimesSent should be 2
-    EXPECT_EQ(actualData.getObjectRef(1).getCellRef()._signal._numTimesSent, 5);
-    EXPECT_EQ(actualData.getObjectRef(2).getCellRef()._signal._numTimesSent, 2);
 }
 
 TEST_F(NeuronTests, emptySignalForZeroConnectionWeight)
@@ -141,11 +129,10 @@ TEST_F(NeuronTests, forkSignal)
 {
     auto signal = getExampleSignal1();
 
-    // Set numTimesSent on the source signal
     auto data = Desc()
                     .addCreature({
                         ObjectDesc().id(1).pos({1, 2}),
-                        ObjectDesc().id(2).pos({2, 2}).type(CellDesc().signal(SignalDesc().channels(signal).numTimesSent(4))),
+                        ObjectDesc().id(2).pos({2, 2}).type(CellDesc().signal(SignalDesc().channels(signal))),
                         ObjectDesc().id(3).pos({3, 2}),
                         ObjectDesc().id(4).pos({2, 3}),
                         ObjectDesc().id(5).pos({2, 1}).type(CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),
@@ -169,11 +156,6 @@ TEST_F(NeuronTests, forkSignal)
     EXPECT_TRUE(approxCompare(signal, actualData.getObjectRef(4).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(5).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(6).getCellRef()._signal._channels));
-
-    // Check numTimesSent: cells 1, 3, 4 receive the signal from cell 2 (numTimesSent=4)
-    EXPECT_EQ(actualData.getObjectRef(1).getCellRef()._signal._numTimesSent, 4);
-    EXPECT_EQ(actualData.getObjectRef(3).getCellRef()._signal._numTimesSent, 4);
-    EXPECT_EQ(actualData.getObjectRef(4).getCellRef()._signal._numTimesSent, 4);
 }
 
 TEST_F(NeuronTests, mergeSignal)
@@ -181,20 +163,16 @@ TEST_F(NeuronTests, mergeSignal)
     auto signal1 = getExampleSignal1();
     auto signal2 = getExampleSignal2();
 
-    // Use different numTimesSent values: signal1 has numTimesSent=3, signal2 has numTimesSent=5, signal2 in cell 4 has numTimesSent=2
-    // Cell 2 receives from cells 1 (numTimesSent=3), 3 (numTimesSent=5), 4 (numTimesSent=2)
-    // The resulting numTimesSent should be min(3, 5, 2) = 2
-
     auto data =
         Desc()
             .addCreature({
-                ObjectDesc().id(1).pos({1, 2}).type(CellDesc().signal(SignalDesc().channels(signal1).numTimesSent(3))),  // Gets input from cell 2
+                ObjectDesc().id(1).pos({1, 2}).type(CellDesc().signal(SignalDesc().channels(signal1))),  // Gets input from cell 2
                 ObjectDesc().id(2).pos({2, 2}).type(
-                    CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({1, 0, 1, 1, 0, 0}))),  // Gets input from cell 1, 3, 4 and not cell 5
-                ObjectDesc().id(3).pos({3, 2}).type(CellDesc().signal(SignalDesc().channels(signal2).numTimesSent(5))),  // Gets input from cell 2
-                ObjectDesc().id(4).pos({2, 3}).type(CellDesc().signal(SignalDesc().channels(signal2).numTimesSent(2))),  // Gets input from cell 2
+                    CellDesc().neuralNetwork(NeuralNetDesc().connectionWeights({1, 0, 1, 1, 0, 0}))),    // Gets input from cell 1, 3, 4 and not cell 5
+                ObjectDesc().id(3).pos({3, 2}).type(CellDesc().signal(SignalDesc().channels(signal2))),  // Gets input from cell 2
+                ObjectDesc().id(4).pos({2, 3}).type(CellDesc().signal(SignalDesc().channels(signal2))),  // Gets input from cell 2
                 ObjectDesc().id(5).pos({2, 1}).type(CellDesc()
-                                                        .signal(SignalDesc().channels(signal2).numTimesSent(4))
+                                                        .signal(SignalDesc().channels(signal2))
                                                         .neuralNetwork(NeuralNetDesc().connectionWeights({0, 1, 0, 0, 0, 0}))),  // Gets input from cell 6
                 ObjectDesc().id(6).pos({2, 0}),                                                                                  // Gets input from cell 5
             })
@@ -218,14 +196,6 @@ TEST_F(NeuronTests, mergeSignal)
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(4).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(emptySignal, actualData.getObjectRef(5).getCellRef()._signal._channels));
     EXPECT_TRUE(approxCompare(signal2, actualData.getObjectRef(6).getCellRef()._signal._channels));
-
-    // Check numTimesSent on the merged signal
-    // Cell 2 receives from cells 1 (numTimesSent=3), 3 (numTimesSent=5), 4 (numTimesSent=2)
-    // The resulting numTimesSent should be min(3, 5, 2) = 2
-    EXPECT_EQ(actualData.getObjectRef(2).getCellRef()._signal._numTimesSent, 2);
-
-    // Cell 6 receives only from cell 5 (numTimesSent=4), so numTimesSent should be 4
-    EXPECT_EQ(actualData.getObjectRef(6).getCellRef()._signal._numTimesSent, 4);
 }
 
 struct ApplyNeuralNetParameter

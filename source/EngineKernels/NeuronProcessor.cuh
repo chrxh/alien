@@ -76,7 +76,6 @@ __inline__ __device__ void NeuronProcessor::setSignal(SimulationData& data)
         cell.signalChanges = static_cast<uint8_t>(min(255.0f, channelDeviations * 255 / 2));
 
         copyChannels(cell.signal.channels, cell.futureSignal.channels);
-        cell.signal.numTimesSent = cell.futureSignal.numTimesSent;
     }
 }
 
@@ -85,7 +84,6 @@ __inline__ __device__ void NeuronProcessor::clearSignal(Object* object)
     for (int i = 0; i < NEURONS_PER_CELL; ++i) {
         object->typeData.cell.signal.channels[i] = 0;
     }
-    object->typeData.cell.signal.numTimesSent = 0;
 }
 
 __inline__ __device__ bool NeuronProcessor::isAutoTriggered(SimulationData& data, Object* object, uint32_t autoTriggerInterval, bool isPreview)
@@ -139,14 +137,10 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
     int numConnections = object->numConnections;
 
     __shared__ __align__(16) float sharedAccumulatedInput[NEURONS_PER_CELL];
-    __shared__ int sharedMinNumTimesSent;
 
     // Init variables
     if (laneId < NEURONS_PER_CELL) {
         sharedAccumulatedInput[laneId] = 0.0f;
-    }
-    if (laneId == 0) {
-        sharedMinNumTimesSent = (numConnections > 0) ? INT_MAX : 0;
     }
     block.sync();
 
@@ -160,10 +154,6 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         auto& connectedCell = connectedObject->typeData.cell;
         if (connectedCell.cellState == CellState_Constructing) {
             continue;
-        }
-
-        if (laneId == 0) {
-            sharedMinNumTimesSent = min(sharedMinNumTimesSent, connectedCell.signal.numTimesSent);
         }
 
         if (laneId < NEURONS_PER_CELL) {
@@ -196,10 +186,6 @@ __inline__ __device__ void NeuronProcessor::processCell(Object* object, bool ini
         result = max(-2.0f, min(2.0f, result));
 
         cell.futureSignal.channels[row] = result;
-    }
-
-    if (laneId == 0) {
-        cell.futureSignal.numTimesSent = sharedMinNumTimesSent;
     }
 }
 
