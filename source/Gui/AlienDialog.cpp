@@ -1,9 +1,11 @@
 #include "AlienDialog.h"
 
+#include <Fonts/IconsFontAwesome5.h>
 
-AlienDialog::AlienDialog(std::string const& title, RealVector2D const& defaultSize)
+AlienDialog::AlienDialog(std::string const& title, RealVector2D const& defaultSize, bool maximizable)
     : _title(title)
     , _defaultSize(defaultSize)
+    , _isMaximizable(maximizable)
 {}
 
 void AlienDialog::init()
@@ -63,13 +65,22 @@ void AlienDialog::processDialog()
         ImGui::SetNextWindowSize({scale(_defaultSize.x), scale(_defaultSize.y)}, ImGuiCond_FirstUseEver);
         ImGui::OpenPopup(_title.c_str());
         _state = DialogState::Open;
+        _windowState = DialogWindowState::Normal;
     }
     auto& style = ImGui::GetStyle();
     auto origWindowMinSize = style.WindowMinSize;
     style.WindowMinSize.x = scale(350.0f);
     style.WindowMinSize.y = scale(150.0f);
 
-    if (ImGui::BeginPopupModal(_title.c_str(), NULL, 0)) {
+    ImGuiWindowFlags flags = ImGuiWindowFlags_None;
+    if (_isMaximizable && _windowState == DialogWindowState::Maximized) {
+        auto viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos, ImGuiCond_Always);
+        ImGui::SetNextWindowSize(viewport->Size, ImGuiCond_Always);
+        flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    }
+
+    if (ImGui::BeginPopupModal(_title.c_str(), NULL, flags)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
             auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
@@ -77,6 +88,9 @@ void AlienDialog::processDialog()
             _sizeInitialized = true;
         }
 
+        if (_isMaximizable) {
+            processMaximizeButton();
+        }
 
         ImGui::PushID(_title.c_str());
         processIntern();
@@ -86,6 +100,46 @@ void AlienDialog::processDialog()
     }
 
     style.WindowMinSize = origWindowMinSize;
+}
+
+void AlienDialog::processMaximizeButton()
+{
+    auto titlebarHeight = ImGui::GetFrameHeight();
+    auto windowPos = ImGui::GetWindowPos();
+    auto windowSize = ImGui::GetWindowSize();
+    auto iconSize = ImGui::GetFontSize();
+    auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f);
+    auto iconCenter = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
+
+    ImGui::SetCursorScreenPos(iconPos);
+    if (ImGui::InvisibleButton("MaximizeButton", ImVec2(iconSize, iconSize))) {
+        if (_windowState == DialogWindowState::Maximized) {
+            ImGui::SetWindowPos(_savedPos);
+            ImGui::SetWindowSize(_savedSize);
+            _windowState = DialogWindowState::Normal;
+        } else {
+            _savedPos = windowPos;
+            _savedSize = windowSize;
+            _windowState = DialogWindowState::Maximized;
+        }
+    }
+
+    auto pressed = ImGui::IsItemActive();
+    auto hovered = ImGui::IsItemHovered();
+    auto drawList = ImGui::GetWindowDrawList();
+    if (hovered || pressed) {
+        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+        auto radius = iconSize * 0.6f;
+        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
+    }
+
+    auto icon = _windowState == DialogWindowState::Maximized ? ICON_FA_COMPRESS_ARROWS_ALT : ICON_FA_EXPAND_ARROWS_ALT;
+    drawList->AddText(
+        StyleRepository::get().getIconFont(),
+        iconSize * 0.7f,
+        ImVec2(iconCenter.x - iconSize * 0.31f, iconCenter.y - iconSize * 0.22f),
+        ImGui::GetColorU32(ImGuiCol_Text),
+        icon);
 }
 
 void AlienDialog::shutdown()
