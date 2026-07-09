@@ -12,7 +12,7 @@
 class AlienDialog : public MainLoopEntity
 {
 public:
-    AlienDialog(std::string const& title, RealVector2D const& defaultSize = RealVector2D(450.0f, 150.0f));
+    AlienDialog(std::string const& title, RealVector2D const& defaultSize = RealVector2D(450.0f, 150.0f), bool maximizable = false);
 
     virtual void open();
     void processNested();
@@ -32,6 +32,7 @@ private:
     void init() override;
     void process() override;
     void processDialog();
+    void processMaximizeButton();
     void shutdown() override;
 
     bool _sizeInitialized = false;
@@ -45,4 +46,14 @@ private:
     DialogState _state = DialogState::Closed;
     std::string _title;
     RealVector2D _defaultSize;
+
+    bool _isMaximizable = false;
+    enum class DialogWindowState
+    {
+        Normal,
+        Maximized
+    };
+    DialogWindowState _windowState = DialogWindowState::Normal;
+    ImVec2 _savedPos;
+    ImVec2 _savedSize;
 };
