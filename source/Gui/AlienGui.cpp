@@ -1921,6 +1921,33 @@ bool AlienGui::CollapseButton(bool collapsed)
     return result;
 }
 
+bool AlienGui::TitlebarMaximizeButton(ImVec2 const& pos, float iconSize, bool maximized)
+{
+    auto iconCenter = ImVec2(pos.x + iconSize * 0.5f, pos.y + iconSize * 0.5f);
+
+    ImGui::SetCursorScreenPos(pos);
+    auto clicked = ImGui::InvisibleButton("MaximizeButton", ImVec2(iconSize, iconSize));
+
+    auto pressed = ImGui::IsItemActive();
+    auto hovered = ImGui::IsItemHovered();
+    auto drawList = ImGui::GetWindowDrawList();
+    if (hovered || pressed) {
+        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+        auto radius = iconSize * 0.6f;
+        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
+    }
+
+    auto icon = maximized ? ICON_FA_COMPRESS_ARROWS_ALT : ICON_FA_EXPAND_ARROWS_ALT;
+    drawList->AddText(
+        StyleRepository::get().getIconFont(),
+        iconSize * 0.7f,
+        ImVec2(iconCenter.x - iconSize * 0.31f, iconCenter.y - iconSize * 0.22f),
+        ImGui::GetColorU32(ImGuiCol_Text),
+        icon);
+
+    return clicked;
+}
+
 bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
     auto id = ImGui::GetID(parameters._name.c_str());
