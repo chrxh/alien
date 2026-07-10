@@ -510,10 +510,7 @@ namespace
                         node._cellType = BaseGenomeDesc();
                     }
                 }
-                // Void cells cannot have a constructor (a node hidden behind a homogeneous cell type may still carry stale constructor data)
-                if (node.getCellType() == CellType_Void) {
-                    node._constructor = std::nullopt;
-                } else if (node._constructor.has_value()) {
+                if (node._constructor.has_value()) {
                     auto& constructor = node._constructor.value();
                     constructor._autoTriggerInterval = 50;
                     constructor._constructionActivationTime = 10;

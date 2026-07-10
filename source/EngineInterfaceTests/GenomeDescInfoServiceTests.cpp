@@ -345,44 +345,6 @@ TEST_F(GenomeDescInfoServiceTests, getReferencedBy)
     EXPECT_EQ(2, result.at(2));
 }
 
-TEST_F(GenomeDescInfoServiceTests, getReferences_ignoresVoidCells)
-{
-    auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({
-            NodeDesc().cellType(VoidGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(1).separation(true)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(true)),
-        }),
-        GeneDesc().nodes({
-            NodeDesc(),
-        }),
-        GeneDesc().nodes({
-            NodeDesc(),
-        }),
-    });
-    auto result = _genomeDescriptionInfoService.getReferences(genome._genes.at(0));
-
-    ASSERT_EQ(1, result.size());
-    EXPECT_EQ(2, result.at(0));
-}
-
-TEST_F(GenomeDescInfoServiceTests, getReferencedBy_ignoresVoidCells)
-{
-    auto genome = GenomeDesc().genes({
-        GeneDesc().nodes({
-            NodeDesc(),
-            NodeDesc(),
-        }),
-        GeneDesc().nodes({
-            NodeDesc().cellType(VoidGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
-            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(0).separation(true)),
-        }),
-    });
-    auto result = _genomeDescriptionInfoService.getReferencedBy(genome, 0);
-
-    ASSERT_EQ(1, result.size());
-    EXPECT_EQ(1, result.at(0));
-}
-
 TEST_F(GenomeDescInfoServiceTests, getGeneIndicesForSubGenomes_empty)
 {
     auto genome = GenomeDesc();

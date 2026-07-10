@@ -61,9 +61,7 @@ std::vector<int> GenomeDescInfoService::getReferences(GeneDesc const& gene) cons
 {
     std::vector<int> result;
     for (auto const& node : gene._nodes) {
-        // With homogeneous cell type the effective cell type is taken from the gene's first node (see EntityFactory::createCellFromNode)
-        auto const& cellTypeNode = gene._homogeneousCellType ? gene._nodes.front() : node;
-        if (node._constructor.has_value() && cellTypeNode.getCellType() != CellType_Void) {
+        if (node._constructor.has_value()) {
             auto const& constructor = node._constructor.value();
             result.emplace_back(constructor._geneIndex);
         }
@@ -77,8 +75,7 @@ std::vector<int> GenomeDescInfoService::getReferencedBy(GenomeDesc const& genome
     for (int i = 0; i < genome._genes.size(); ++i) {
         auto const& gene = genome._genes[i];
         for (auto const& node : gene._nodes) {
-            auto const& cellTypeNode = gene._homogeneousCellType ? gene._nodes.front() : node;
-            if (node._constructor.has_value() && cellTypeNode.getCellType() != CellType_Void) {
+            if (node._constructor.has_value()) {
                 auto const& constructor = node._constructor.value();
                 if (constructor._geneIndex == geneIndex) {
                     result.emplace_back(i);

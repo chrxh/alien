@@ -337,30 +337,6 @@ TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstru
     EXPECT_EQ(NeuralNetGenomeDesc(), gene0._nodes.front()._neuralNetwork);
 }
 
-TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_clearsConstructorOnVoidNodeExposedByDroppingHomogeneity)
-{
-    // Under a homogeneous cell type, a non-first node's own cell type is irrelevant for the phenotype (the first
-    // node's type is used instead), so a void-typed node there may still carry constructor data. Preview conversion
-    // drops the homogeneous flag, which makes the node's own (void) cell type authoritative again, so its
-    // constructor must be cleared to keep the "void cells cannot have a constructor" invariant.
-    auto genome = GenomeDesc().genes({
-        GeneDesc().homogeneousCellType(true).nodes({
-            NodeDesc().cellType(MuscleGenomeDesc()),
-            NodeDesc().cellType(VoidGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
-            NodeDesc(),
-        }),
-    });
-
-    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
-
-    ASSERT_EQ(1, subGenomes.size());
-    auto const& subGenome = subGenomes.at(0).genome;
-    auto const& gene0 = subGenome._genes.at(0);
-    ASSERT_EQ(3, gene0._nodes.size());
-    EXPECT_EQ(CellType_Void, gene0._nodes.at(1).getCellType());
-    EXPECT_FALSE(gene0._nodes.at(1)._constructor.has_value());
-}
-
 TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_complexCycles)
 {
     auto genome = createGenome_complexCycles();
