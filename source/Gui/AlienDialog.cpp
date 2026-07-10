@@ -110,7 +110,13 @@ void AlienDialog::processMaximizeButton()
     auto iconSize = ImGui::GetFontSize();
     auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f);
 
-    if (AlienGui::MaximizeButton(iconPos, iconSize, _windowState == DialogWindowState::Maximized)) {
+    // BeginPopupModal() clips widgets to the area below its native titlebar, so widen the clip rect
+    // to make the button visible and clickable inside that titlebar strip.
+    ImGui::PushClipRect(windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + titlebarHeight), false);
+    auto clicked = AlienGui::MaximizeButton(iconPos, iconSize, _windowState == DialogWindowState::Maximized);
+    ImGui::PopClipRect();
+
+    if (clicked) {
         if (_windowState == DialogWindowState::Maximized) {
             ImGui::SetWindowPos(_savedPos);
             ImGui::SetWindowSize(_savedSize);
