@@ -140,6 +140,41 @@ TEST_F(PreviewDescConverterServiceTests, convertTwoCellCreature_marksConnectionI
     EXPECT_TRUE(result.description._connections.at(0)._inactive);
 }
 
+TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature_voidCellHasNoConstructorGeneIndex)
+{
+    // The first and last node of a gene cannot be void, so the void node is placed in the middle.
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc().color(2),
+            NodeDesc().cellType(VoidGenomeDesc()).constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+            NodeDesc().color(3).constructor(ConstructorGenomeDesc().geneIndex(0).separation(false)),
+        }),
+    });
+
+    Desc input;
+    input.addCreature(
+        {
+            ObjectDesc().id(1).pos({10.0f, 9.0f}).type(CellDesc().geneIndex(0).nodeIndex(0)),
+            ObjectDesc().id(2).pos({10.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(1)),
+            ObjectDesc().id(3).pos({11.0f, 10.0f}).type(CellDesc().geneIndex(0).nodeIndex(2)),
+        },
+        CreatureDesc(),
+        genome);
+    input.addConnection(1, 2);
+    input.addConnection(2, 3);
+
+    auto result = PreviewDescConverterService::get().convertToPreviewDesc(genome, 0, std::move(input));
+
+    ASSERT_EQ(3, result.description._cells.size());
+
+    auto voidObject = getPreviewCell(result.description, 0, 1);
+    auto nonVoidObject = getPreviewCell(result.description, 0, 2);
+
+    EXPECT_FALSE(voidObject._constructorGeneIndex.has_value());
+    ASSERT_TRUE(nonVoidObject._constructorGeneIndex.has_value());
+    EXPECT_EQ(0, nonVoidObject._constructorGeneIndex.value());
+}
+
 TEST_F(PreviewDescConverterServiceTests, convertThreeCellCreature_homogeneousCellTypeKeepsVoidCellActive)
 {
     // The first and last node of a gene cannot be void, so the void node is placed in the middle.

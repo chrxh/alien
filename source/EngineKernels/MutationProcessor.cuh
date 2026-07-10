@@ -814,6 +814,11 @@ __inline__ __device__ void MutationProcessor::applyMutations_void(SimulationData
             // Toggle the node between void and non-void; the new cell type is reset to its default attribute values.
             node.cellType = node.cellType == CellType_Void ? chooseRandomCellTypeExceptVoid(data) : CellType_Void;
             resetCellTypeToDefault(node);
+            // With homogeneous cell type the effective cell type is taken from the gene's first node, so a non-first
+            // node toggled to void here is not actually void and may keep its constructor (see EntityFactory::createCellFromNode).
+            if (!gene.homogeneousCellType && node.cellType == CellType_Void) {
+                node.constructorAvailable = false;
+            }
             atomicAdd_block(&accumulatedMutations, 1.0f);
         }
     }
@@ -1727,7 +1732,10 @@ __inline__ __device__ void MutationProcessor::applyMutations_constructor(Simulat
                 }
 
                 // Mutate whether the node has a constructor at all; enabling one initializes it with default values.
-                if (data.primaryNumberGen.random() < rate.constructorToggleProbability) {
+                // Void cells cannot have a constructor, so the toggle is skipped for them. With homogeneous cell type
+                // the effective cell type is taken from the gene's first node (see EntityFactory::createCellFromNode).
+                auto const& cellTypeNode = gene.homogeneousCellType ? gene.nodes[0] : node;
+                if (cellTypeNode.cellType != CellType_Void && data.primaryNumberGen.random() < rate.constructorToggleProbability) {
                     node.constructorAvailable = !node.constructorAvailable;
                     if (node.constructorAvailable) {
                         constructor = {};
