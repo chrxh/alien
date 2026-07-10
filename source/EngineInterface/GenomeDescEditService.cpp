@@ -267,10 +267,14 @@ namespace
             auto nodesPerConcatenation = nodesPerCopy * geneInfo.numBranches;
             auto affordableConcatenations = budget / nodesPerConcatenation;
 
+            // Guard: parent node may have been trimmed away earlier in this loop
+            auto const parentNodeValid = geneInfo.parentGeneIndex != -1
+                && geneInfo.parentNodeIndex < toInt(genome._genes.at(geneInfo.parentGeneIndex)._nodes.size());
+
             // If we can't afford even one full copy, trim nodes
             if (affordableConcatenations == 0) {
                 gene._nodes.resize(budget / geneInfo.numBranches);
-                if (geneInfo.parentGeneIndex != -1) {
+                if (parentNodeValid) {
                     genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations = 1;
                 }
                 trimmed = true;
@@ -283,7 +287,7 @@ namespace
                     }
                 }
             } else if (
-                geneInfo.parentGeneIndex != -1
+                parentNodeValid
                 && affordableConcatenations < genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations) {
                 // Reduce concatenations to fit budget
                 genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations = affordableConcatenations;
@@ -292,7 +296,7 @@ namespace
 
             auto actualNumConcatenations = geneInfo.parentGeneIndex == -1
                 ? geneInfo.numConcatenations
-                : genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations;
+                : (parentNodeValid ? genome._genes.at(geneInfo.parentGeneIndex)._nodes.at(geneInfo.parentNodeIndex)._constructor->_numConcatenations : 0);
             nodeCounter += toInt(gene._nodes.size()) * geneInfo.numBranches * actualNumConcatenations;
         }
 

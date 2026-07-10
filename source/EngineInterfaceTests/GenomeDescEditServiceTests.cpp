@@ -1417,6 +1417,40 @@ TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_singleSeed_withO
     EXPECT_TRUE(cellCreatureIds.contains(offspringId));
 }
 
+TEST_F(GenomeDescEditServiceTests, createSubGenomesForPreview_trimming_parentNodeIndexOutOfBounds)
+{
+    // Gene 0→1 (numBranches=6), gene 1→2 via node 18. Total 721 > PREVIEW_MAX_CELLS=500.
+    // Trimming resizes gene 1 to 13 nodes, making parentNodeIndex=18 of gene 2 out of bounds.
+    std::vector<NodeDesc> gene1Nodes;
+    for (int i = 0; i < 20; ++i) {
+        if (i == 18) {
+            gene1Nodes.emplace_back(NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(2).separation(false)));
+        } else {
+            gene1Nodes.emplace_back(NodeDesc());
+        }
+    }
+    std::vector<NodeDesc> gene2Nodes(100, NodeDesc());
+    auto genome = GenomeDesc().genes({
+        GeneDesc().nodes({
+            NodeDesc().constructor(ConstructorGenomeDesc().geneIndex(1).separation(false).numBranches(6)),
+        }),
+        GeneDesc().nodes(gene1Nodes),
+        GeneDesc().nodes(gene2Nodes),
+    });
+
+    auto geneIndicesForSubGenomes = GenomeDescInfoService::get().getGeneIndicesForSubGenomes(genome);
+    auto subGenomes = GenomeDescEditService::get().createSubGenomesForPreview(genome, geneIndicesForSubGenomes, false);
+
+    ASSERT_EQ(1, subGenomes.size());
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
+    auto const& subGenome = subGenomes.at(0).genome;
+    ASSERT_EQ(3, subGenome._genes.size());
+    EXPECT_LT(subGenome._genes.at(1)._nodes.size(), 20);
+    EXPECT_LT(subGenome._genes.at(2)._nodes.size(), 100);
+    EXPECT_LE(GenomeDescInfoService::get().getNumberOfResultingCells(subGenome), PREVIEW_MAX_CELLS);
+}
+
 TEST_F(GenomeDescEditServiceTests, extractPhenotypesFromPreview_multipleSeeds_withOffspring)
 {
     // Create preview with multiple seeds and their offspring
