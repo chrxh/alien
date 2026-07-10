@@ -1,5 +1,7 @@
 #include "AlienWindow.h"
 
+#include "AlienGui.h"
+
 AlienWindow::AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn, bool maximizable, RealVector2D const& minSize)
     : _title(title)
     , _settingsNode(settingsNode)
@@ -220,47 +222,14 @@ void AlienWindow::processMaximizeButton()
     auto windowSize = ImGui::GetWindowSize();
     auto iconSize = ImGui::GetFontSize();
     auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f) * 2, windowPos.y + (titlebarHeight - iconSize) * 0.5f);
-    auto iconCenter = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
 
-    // Process interaction field
-    ImGui::SetCursorScreenPos(iconPos);
-    if (ImGui::InvisibleButton("MaximizeButton", ImVec2(iconSize, iconSize))) {
+    if (AlienGui::TitlebarMaximizeButton(iconPos, iconSize, _state == WindowState::Maximized)) {
         if (_state == WindowState::Maximized) {
             ImGui::SetWindowPos(_savedPos);
             ImGui::SetWindowSize(_savedSize);
             _state = WindowState::Normal;
         } else {
             _state = WindowState::Maximized;
-        }
-    }
-
-    // Draw background circle
-    auto pressed = ImGui::IsItemActive();
-    bool hovered = ImGui::IsItemHovered();
-    auto drawList = ImGui::GetWindowDrawList();
-    auto center = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
-    if (hovered || pressed) {
-        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-        auto radius = iconSize * 0.6f;
-        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
-    }
-
-    // Draw icon
-    {
-        if (_state == WindowState::Maximized) {
-            drawList->AddText(
-                StyleRepository::get().getIconFont(),
-                iconSize * 0.7f,
-                ImVec2(center.x - iconSize * 0.31f, center.y - iconSize * 0.22f),
-                ImGui::GetColorU32(ImGuiCol_Text),
-                ICON_FA_COMPRESS_ARROWS_ALT);
-        } else {
-            drawList->AddText(
-                StyleRepository::get().getIconFont(),
-                iconSize * 0.7f,
-                ImVec2(center.x - iconSize * 0.31f, center.y - iconSize * 0.22f),
-                ImGui::GetColorU32(ImGuiCol_Text),
-                ICON_FA_EXPAND_ARROWS_ALT);
         }
     }
 }

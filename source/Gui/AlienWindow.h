@@ -2,8 +2,6 @@
 
 #include <imgui.h>
 
-#include <Fonts/IconsFontAwesome5.h>
-
 #include <Base/GlobalSettings.h>
 
 #include "Definitions.h"

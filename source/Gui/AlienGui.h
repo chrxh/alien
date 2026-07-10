@@ -440,6 +440,7 @@ public:
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
+    static bool TitlebarMaximizeButton(ImVec2 const& pos, float iconSize, bool maximized);
 
     enum class TreeNodeRank
     {

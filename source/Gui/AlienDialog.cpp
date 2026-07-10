@@ -1,6 +1,6 @@
 #include "AlienDialog.h"
 
-#include <Fonts/IconsFontAwesome5.h>
+#include "AlienGui.h"
 
 AlienDialog::AlienDialog(std::string const& title, RealVector2D const& defaultSize, bool maximizable)
     : _title(title)
@@ -109,10 +109,8 @@ void AlienDialog::processMaximizeButton()
     auto windowSize = ImGui::GetWindowSize();
     auto iconSize = ImGui::GetFontSize();
     auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f);
-    auto iconCenter = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
 
-    ImGui::SetCursorScreenPos(iconPos);
-    if (ImGui::InvisibleButton("MaximizeButton", ImVec2(iconSize, iconSize))) {
+    if (AlienGui::TitlebarMaximizeButton(iconPos, iconSize, _windowState == DialogWindowState::Maximized)) {
         if (_windowState == DialogWindowState::Maximized) {
             ImGui::SetWindowPos(_savedPos);
             ImGui::SetWindowSize(_savedSize);
@@ -123,23 +121,6 @@ void AlienDialog::processMaximizeButton()
             _windowState = DialogWindowState::Maximized;
         }
     }
-
-    auto pressed = ImGui::IsItemActive();
-    auto hovered = ImGui::IsItemHovered();
-    auto drawList = ImGui::GetWindowDrawList();
-    if (hovered || pressed) {
-        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-        auto radius = iconSize * 0.6f;
-        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
-    }
-
-    auto icon = _windowState == DialogWindowState::Maximized ? ICON_FA_COMPRESS_ARROWS_ALT : ICON_FA_EXPAND_ARROWS_ALT;
-    drawList->AddText(
-        StyleRepository::get().getIconFont(),
-        iconSize * 0.7f,
-        ImVec2(iconCenter.x - iconSize * 0.31f, iconCenter.y - iconSize * 0.22f),
-        ImGui::GetColorU32(ImGuiCol_Text),
-        icon);
 }
 
 void AlienDialog::shutdown()
