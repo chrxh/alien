@@ -977,8 +977,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     } break;
     }
 
-    cell.constructorAvailable = node->constructorAvailable;
-    if (node->constructorAvailable) {
+    cell.constructorAvailable = node->constructorAvailable && cellTypeNode->cellType != CellType_Void;
+    if (cell.constructorAvailable) {
         auto const& nodeConstructor = node->constructor;
         auto& constructor = cell.constructor;
         constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;

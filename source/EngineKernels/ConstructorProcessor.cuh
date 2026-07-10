@@ -297,8 +297,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(constructor);
     result.lastConstructionObject = ConstructorHelper::getLastConstructedCell(object);
     result.neededUsableEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-    result.neededReservedEnergy = result.node->constructorAvailable ? result.node->constructor.reservedEnergy : 0.0f;
     auto cellTypeNode = result.gene->homogeneousCellType ? &result.gene->nodes[0] : result.node;
+    result.neededReservedEnergy = result.node->constructorAvailable && cellTypeNode->cellType != CellType_Void ? result.node->constructor.reservedEnergy : 0.0f;
     result.neededDepotEnergy = cellTypeNode->cellType == CellType_Depot ? cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
 
     ShapeGenerator shapeGenerator;
@@ -662,8 +662,8 @@ __inline__ __device__ bool ConstructorProcessor::checkHostEnergyAndRequestExtern
         auto gene = ConstructorHelper::getCurrentGene(constructor, *genome);
         if (currentNodeIndex < gene->numNodes) {
             auto node = &gene->nodes[currentNodeIndex];
-            requiredEnergy += node->constructorAvailable ? node->constructor.reservedEnergy : 0.0f;
             auto cellTypeNode = gene->homogeneousCellType ? &gene->nodes[0] : node;
+            requiredEnergy += node->constructorAvailable && cellTypeNode->cellType != CellType_Void ? node->constructor.reservedEnergy : 0.0f;
             requiredEnergy += cellTypeNode->cellType == CellType_Depot ? cellTypeNode->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
         }
     }

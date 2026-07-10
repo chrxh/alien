@@ -154,21 +154,22 @@ NodeDesc DescTestDataFactory::createNonDefaultNodeDesc(NodeParameter nodeParamet
     nn._connectionWeights.at(1) = 0.6f;
     nn._connectionWeights.at(3) = -0.4f;
 
-    return NodeDesc()
-        .neuralNetwork(nn)
-        .cellType(createNonDefaultCellTypeGenomeDesc(nodeParameter))
-        .constructor(ConstructorGenomeDesc()
-                         .autoTriggerInterval(55)
-                         .geneIndex(1)
-                         .constructionActivationTime(95)
-                         .constructionAngle(25.0f)
-                         .provideEnergy(ProvideEnergy_Free)
-                         .reservedEnergy(7.0f)
-                         .separation(true)
-                         .numBranches(3)
-                         .numConcatenations(5))
-        .color(4)
-        .referenceAngle(90.0f);
+    auto result = NodeDesc().neuralNetwork(nn).cellType(createNonDefaultCellTypeGenomeDesc(nodeParameter)).color(4).referenceAngle(90.0f);
+
+    // Void cells cannot have a constructor
+    if (nodeParameter.cellTypeGenome != CellType_Void) {
+        result.constructor(ConstructorGenomeDesc()
+                               .autoTriggerInterval(55)
+                               .geneIndex(1)
+                               .constructionActivationTime(95)
+                               .constructionAngle(25.0f)
+                               .provideEnergy(ProvideEnergy_Free)
+                               .reservedEnergy(7.0f)
+                               .separation(true)
+                               .numBranches(3)
+                               .numConcatenations(5));
+    }
+    return result;
 }
 
 std::pair<CreatureDesc, GenomeDesc> DescTestDataFactory::createNonDefaultCreatureDesc(NodeParameter nodeParameter) const
