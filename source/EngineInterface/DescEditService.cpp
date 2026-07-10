@@ -516,7 +516,7 @@ void DescEditService::randomizeCountdowns(Desc& description, int minValue, int m
 void DescEditService::randomizeLineageIds(Desc& description) const
 {
     for (auto& creature : description._creatures) {
-        creature._lineageId = NumberGenerator::get().getRandomInt();
+        creature._lineageId = toInt(NumberGenerator::get().createLineageId());
     }
 }
 

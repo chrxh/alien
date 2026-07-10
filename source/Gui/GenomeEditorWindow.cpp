@@ -9,6 +9,7 @@
 #include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
+#include <EngineInterface/DescEditService.h>
 #include <EngineInterface/GenomeDescInfoService.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
@@ -320,6 +321,7 @@ void GenomeEditorWindow::onCreateSeed(bool provideEnergy)
                                                              .separation(true)))},
         CreatureDesc(),
         genome);
+    DescEditService::get().randomizeLineageIds(seed);
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(seed));
     EditorModel::get().update();
