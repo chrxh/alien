@@ -223,7 +223,7 @@ void AlienWindow::processMaximizeButton()
     auto iconSize = ImGui::GetFontSize();
     auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f) * 2, windowPos.y + (titlebarHeight - iconSize) * 0.5f);
 
-    if (AlienGui::TitlebarMaximizeButton(iconPos, iconSize, _state == WindowState::Maximized)) {
+    if (AlienGui::MaximizeButton(iconPos, iconSize, _state == WindowState::Maximized)) {
         if (_state == WindowState::Maximized) {
             ImGui::SetWindowPos(_savedPos);
             ImGui::SetWindowSize(_savedSize);

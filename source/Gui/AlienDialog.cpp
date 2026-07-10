@@ -110,7 +110,7 @@ void AlienDialog::processMaximizeButton()
     auto iconSize = ImGui::GetFontSize();
     auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f);
 
-    if (AlienGui::TitlebarMaximizeButton(iconPos, iconSize, _windowState == DialogWindowState::Maximized)) {
+    if (AlienGui::MaximizeButton(iconPos, iconSize, _windowState == DialogWindowState::Maximized)) {
         if (_windowState == DialogWindowState::Maximized) {
             ImGui::SetWindowPos(_savedPos);
             ImGui::SetWindowSize(_savedSize);
