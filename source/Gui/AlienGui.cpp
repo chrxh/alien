@@ -1921,7 +1921,7 @@ bool AlienGui::CollapseButton(bool collapsed)
     return result;
 }
 
-bool AlienGui::TitlebarMaximizeButton(ImVec2 const& pos, float iconSize, bool maximized)
+bool AlienGui::MaximizeButton(ImVec2 const& pos, float iconSize, bool maximized)
 {
     auto iconCenter = ImVec2(pos.x + iconSize * 0.5f, pos.y + iconSize * 0.5f);
 
