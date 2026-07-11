@@ -35,6 +35,8 @@ PUBLIC
     EditorModel.h
     EditSimulationDialog.cpp
     EditSimulationDialog.h
+    EvolutionDashboardWindow.cpp
+    EvolutionDashboardWindow.h
     ExitDialog.cpp
     ExitDialog.h
     FileTransferController.cpp
