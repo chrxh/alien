@@ -1,3 +1,12 @@
+#pragma once
+
+#include <string>
+
+namespace Const
+{
+    // Default ImGui window/layout state used on first run when GlobalSettings has no stored
+    // "gui.imgui settings" yet. Persisted from then on via GlobalSettings (no imgui.ini file).
+    inline std::string const DefaultImguiSettings = R"DEFAULT(
 [Window][Debug##Default]
 Pos=201,395
 Size=400,400
@@ -485,3 +494,5 @@ Column 5  Width=-1
 [Table][0x62DF81D2,2]
 Column 0  Sort=0v
 
+)DEFAULT";
+}
