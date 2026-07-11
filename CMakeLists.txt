@@ -307,7 +307,7 @@ alien_link_hip_rdc(cli)
 alien_link_hip_rdc(EngineTests)
 alien_link_hip_rdc(PersisterTests)
 
-# Copy resources and imgui.ini next to the build output so that ALIEN finds them
+# Copy resources next to the build output so that ALIEN finds them
 add_custom_command(
     TARGET alien POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -316,12 +316,3 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/resources
         $<TARGET_FILE_DIR:alien>/resources)
-
-add_custom_command(
-    TARGET alien POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_SOURCE_DIR}/imgui.ini
-        ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_SOURCE_DIR}/imgui.ini
-        $<TARGET_FILE_DIR:alien>)
