@@ -517,20 +517,26 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
             cellTypeParams.name("Cell type").textWidth(TextWidth).values(Const::CellTypeStrings);
             if (AlienGui::Combo(cellTypeParams, cellType)) {
                 cell._cellType = createCellTypeDesc(cellType);
+                if (cellType == CellType_Void) {
+                    cell._constructor = std::nullopt;
+                }
             }
 
-            bool hasConstructor = cell._constructor.has_value();
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(TextWidth), hasConstructor);
-            if (hasConstructor && !cell._constructor.has_value()) {
-                cell._constructor = ConstructorDesc();
-            } else if (!hasConstructor && cell._constructor.has_value()) {
-                cell._constructor = std::nullopt;
+            // Void cells cannot have a constructor
+            if (cellType != CellType_Void) {
+                bool hasConstructor = cell._constructor.has_value();
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Has constructor").textWidth(TextWidth), hasConstructor);
+                if (hasConstructor && !cell._constructor.has_value()) {
+                    cell._constructor = ConstructorDesc();
+                } else if (!hasConstructor && cell._constructor.has_value()) {
+                    cell._constructor = std::nullopt;
+                }
             }
         });
 
         processCellTypeNode(cell);
 
-        if (cell._constructor.has_value()) {
+        if (cell.getCellType() != CellType_Void && cell._constructor.has_value()) {
             processConstructorNode(cell._constructor.value());
         }
 

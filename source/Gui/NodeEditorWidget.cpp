@@ -244,74 +244,81 @@ void _NodeEditorWidget::processNodeAttributes()
                     showMessage("Error", "The last node cannot be void.");
                 } else {
                     cellTypeNode._cellType = createCellTypeGenomeDesc(nodeType);
-                }
-            }
-
-            // Construction gene combo
-            std::vector<std::string> genes;
-            genes.emplace_back("None");
-            for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
-                auto text = std::to_string(index) + ": " + gene._name;
-                if (index == 0) {
-                    text += " (root)";
-                }
-                genes.emplace_back(text);
-            }
-            int constructionGeneIndex = node._constructor.has_value() ? node._constructor.value()._geneIndex + 1 : 0;
-            if (AlienGui::Combo(AlienGui::ComboParameters().name("Construction").values(genes).textWidth(rightColumnWidth), constructionGeneIndex)) {
-                if (constructionGeneIndex == 0) {
-                    node._constructor = std::nullopt;
-                } else {
-                    if (!node._constructor.has_value()) {
-                        node._constructor = ConstructorGenomeDesc();
+                    if (nodeType == CellType_Void) {
+                        node._constructor = std::nullopt;
                     }
-                    node._constructor.value()._geneIndex = constructionGeneIndex - 1;
                 }
             }
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Construction properties"));
+            // Void cells cannot have a constructor
+            if (nodeType != CellType_Void) {
 
-            if (node._constructor.has_value()) {
-                ImGui::PushID("Constructor");
-                AlienGui::BeginIndent();
-                auto& constructor = node._constructor.value();
-
-                // Auto activation interval
-                AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
-
-                // Construction activation time
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Offspring trigger time").textWidth(rightColumnWidth), constructor._constructionActivationTime);
-
-                // Construction angle
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
-
-                // Reserved energy
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Reserved energy").textWidth(rightColumnWidth).format("%.1f"), constructor._reservedEnergy);
-
-                // Separation
-                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), constructor._separation);
-
-                // Number of branches
-                AlienGui::BeginIndent();
-                if (!constructor._separation) {
-                    auto numBranches = constructor._numBranches - 1;
-                    AlienGui::Switcher(
-                        AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth),
-                        &numBranches);
-                    constructor._numBranches = numBranches + 1;
+                // Construction gene combo
+                std::vector<std::string> genes;
+                genes.emplace_back("None");
+                for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
+                    auto text = std::to_string(index) + ": " + gene._name;
+                    if (index == 0) {
+                        text += " (root)";
+                    }
+                    genes.emplace_back(text);
                 }
-                AlienGui::EndIndent();
+                int constructionGeneIndex = node._constructor.has_value() ? node._constructor.value()._geneIndex + 1 : 0;
+                if (AlienGui::Combo(AlienGui::ComboParameters().name("Construction").values(genes).textWidth(rightColumnWidth), constructionGeneIndex)) {
+                    if (constructionGeneIndex == 0) {
+                        node._constructor = std::nullopt;
+                    } else {
+                        if (!node._constructor.has_value()) {
+                            node._constructor = ConstructorGenomeDesc();
+                        }
+                        node._constructor.value()._geneIndex = constructionGeneIndex - 1;
+                    }
+                }
 
-                // Concatenations
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), constructor._numConcatenations);
+                AlienGui::Group(AlienGui::GroupParameters().text("Construction properties"));
 
-                AlienGui::EndIndent();
-                ImGui::PopID();
+                if (node._constructor.has_value()) {
+                    ImGui::PushID("Constructor");
+                    AlienGui::BeginIndent();
+                    auto& constructor = node._constructor.value();
+
+                    // Auto activation interval
+                    AlienGui::InputOptionalInt(
+                        AlienGui::InputIntParameters().name("Auto trigger interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
+
+                    // Construction activation time
+                    AlienGui::InputInt(
+                        AlienGui::InputIntParameters().name("Offspring trigger time").textWidth(rightColumnWidth), constructor._constructionActivationTime);
+
+                    // Construction angle
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
+
+                    // Reserved energy
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Reserved energy").textWidth(rightColumnWidth).format("%.1f"), constructor._reservedEnergy);
+
+                    // Separation
+                    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), constructor._separation);
+
+                    // Number of branches
+                    AlienGui::BeginIndent();
+                    if (!constructor._separation) {
+                        auto numBranches = constructor._numBranches - 1;
+                        AlienGui::Switcher(
+                            AlienGui::SwitcherParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth),
+                            &numBranches);
+                        constructor._numBranches = numBranches + 1;
+                    }
+                    AlienGui::EndIndent();
+
+                    // Concatenations
+                    AlienGui::InputInt(
+                        AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), constructor._numConcatenations);
+
+                    AlienGui::EndIndent();
+                    ImGui::PopID();
+                }
             }
 
             table.next();

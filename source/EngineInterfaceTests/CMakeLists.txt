@@ -1,6 +1,7 @@
 target_sources(EngineInterfaceTests
 PUBLIC
     DescEditServiceTests.cpp
+    DescValidationServiceTests.cpp
     GenomeDescEditServiceTests.cpp
     GenomeDescInfoServiceTests.cpp
     ParametersEditServiceTests.cpp
