@@ -180,6 +180,26 @@ namespace
             std::filesystem::create_directories(configPath);
         }
     }
+
+    void saveLinuxSettings(boost::property_tree::ptree const& tree)
+    {
+        try {
+            ensureLinuxConfigDirectoryExists();
+
+            std::stringstream ss;
+            boost::property_tree::json_parser::write_json(ss, tree);
+            auto data = ss.str();
+
+            auto settingsPath = getLinuxSettingsFilePath();
+            std::ofstream stream(settingsPath, std::ios::binary);
+            if (stream) {
+                stream << data;
+                stream.close();
+            }
+        } catch (...) {
+            //do nothing
+        }
+    }
 }
 #endif
 
@@ -234,6 +254,7 @@ void GlobalSettings::setValue(std::string const& key, bool value)
     setBoolToWinReg(key, value);
 #else
     JsonParser::encodeDecode(_impl->_tree, value, false, key, ParserTask::Encode);
+    saveLinuxSettings(_impl->_tree);
 #endif
 }
 
@@ -254,6 +275,7 @@ void GlobalSettings::setValue(std::string const& key, int value)
     setIntToWinReg(key, value);
 #else
     JsonParser::encodeDecode(_impl->_tree, value, 0, key, ParserTask::Encode);
+    saveLinuxSettings(_impl->_tree);
 #endif
 }
 
@@ -274,6 +296,7 @@ void GlobalSettings::setValue(std::string const& key, float value)
     setFloatToWinReg(key, value);
 #else
     JsonParser::encodeDecode(_impl->_tree, value, 0.0f, key, ParserTask::Encode);
+    saveLinuxSettings(_impl->_tree);
 #endif
 }
 
@@ -294,6 +317,7 @@ void GlobalSettings::setValue(std::string const& key, std::string value)
     setStringToWinReg(key, value);
 #else
     JsonParser::encodeDecode(_impl->_tree, value, std::string(), key, ParserTask::Encode);
+    saveLinuxSettings(_impl->_tree);
 #endif
 }
 
@@ -335,21 +359,6 @@ GlobalSettings::GlobalSettings()
 GlobalSettings::~GlobalSettings()
 {
 #ifndef _WIN32
-    try {
-        ensureLinuxConfigDirectoryExists();
-
-        std::stringstream ss;
-        boost::property_tree::json_parser::write_json(ss, _impl->_tree);
-        auto data = ss.str();
-
-        auto settingsPath = getLinuxSettingsFilePath();
-        std::ofstream stream(settingsPath, std::ios::binary);
-        if (stream) {
-            stream << data;
-            stream.close();
-        }
-    } catch (...) {
-        //do nothing
-    }
+    saveLinuxSettings(_impl->_tree);
 #endif
 }
