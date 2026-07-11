@@ -284,8 +284,10 @@ void DescValidationService::validateAndCorrect(GenomeDesc& genome)
                 }
             }
 
-            // Validate optional constructor field
-            if (node._constructor.has_value()) {
+            // Validate optional constructor field (void cells cannot have a constructor)
+            if (nodeType == CellType_Void) {
+                node._constructor = std::nullopt;
+            } else if (node._constructor.has_value()) {
                 auto& constructor = node._constructor.value();
                 if (constructor._autoTriggerInterval.has_value()) {
                     auto& value = constructor._autoTriggerInterval.value();
@@ -496,8 +498,10 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
             }
         }
 
-        // Validate optional constructor field
-        if (cell._constructor.has_value()) {
+        // Validate optional constructor field (void cells cannot have a constructor)
+        if (cellType == CellType_Void) {
+            cell._constructor = std::nullopt;
+        } else if (cell._constructor.has_value()) {
             auto& constructor = cell._constructor.value();
             if (constructor._autoTriggerInterval.has_value()) {
                 auto& value = constructor._autoTriggerInterval.value();
