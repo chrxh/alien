@@ -265,7 +265,7 @@ namespace
 }
 
 MutationRatesDialog::MutationRatesDialog()
-    : AlienDialog("Mutation rates", {800.0f, 400.0f})
+    : AlienDialog("Mutation rates", {800.0f, 400.0f}, true)
 {}
 
 void MutationRatesDialog::initIntern() {}
