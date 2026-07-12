@@ -323,6 +323,7 @@ void DescValidationService::validateAndCorrect(ExtendedObjectDesc& extendedObjec
         auto& creature = extendedObject.creature.value();
         creature._lineageId = std::max(creature._lineageId, 0);
         creature._accumulatedMutations = std::max(creature._accumulatedMutations, 0.0f);
+        creature._accumulatedMutationsInLineage = std::max(creature._accumulatedMutationsInLineage, 0.0f);
     }
 
     if (object.getObjectType() == ObjectType_Cell) {
