@@ -1857,9 +1857,7 @@ namespace cereal
         scope.addMember(Id_Creature_MutationState, data._mutationState, defaultObject._mutationState);
         scope.addMember(Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
         scope.addMember(Id_Creature_AccumulatedMutations, data._accumulatedMutations, defaultObject._accumulatedMutations);
-
-        // Migration: files saved before this field existed used `accumulatedMutations` for the in-lineage value
-        scope.addMember(Id_Creature_AccumulatedMutationsInLineage, data._accumulatedMutationsInLineage, data._accumulatedMutations);
+        scope.addMember(Id_Creature_AccumulatedMutationsInLineage, data._accumulatedMutationsInLineage, defaultObject._accumulatedMutationsInLineage);
     }
     SPLIT_SERIALIZATION(CreatureDesc)
 
