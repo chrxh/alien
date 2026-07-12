@@ -12,6 +12,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include "../../source/Gui/TranslationService.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -1252,18 +1254,18 @@ namespace ifd {
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("Cancel")) {
+			if (ImGui::Button(_("Cancel"))) {
 				m_newEntryBuffer[0] = 0;
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();
 		}
-		if (ImGui::BeginPopupModal("Enter directory name##newdir")) {
+		if (ImGui::BeginPopupModal((std::string(_("Enter directory name")) + "##newdir").c_str())) {
 			ImGui::PushItemWidth(250.0f);
-			ImGui::InputText("##newfilename", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
+			ImGui::InputText("##newfilename", m_newEntryBuffer, 1024);
 			ImGui::PopItemWidth();
 
-			if (ImGui::Button("OK")) {
+			if (ImGui::Button(_("OK"))) {
 				std::error_code ec;
 				std::filesystem::create_directory(m_currentDirectory / std::string(m_newEntryBuffer), ec);
 				m_setDirectory(m_currentDirectory, false); // refresh
@@ -1271,7 +1273,7 @@ namespace ifd {
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("Cancel")) {
+			if (ImGui::Button(_("Cancel"))) {
 				ImGui::CloseCurrentPopup();
 				m_newEntryBuffer[0] = 0;
 			}
@@ -1385,7 +1387,7 @@ namespace ifd {
 		// buttons
 
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 250);
-		if (ImGui::Button(m_type == IFD_DIALOG_SAVE ? "Save" : "Open", ImVec2(250 / 2 - ImGui::GetStyle().ItemSpacing.x, 0.0f))) {
+		if (ImGui::Button(m_type == IFD_DIALOG_SAVE ? _("Save") : _("Open"), ImVec2(250 / 2 - ImGui::GetStyle().ItemSpacing.x, 0.0f))) {
 			std::u8string filename(m_inputTextbox);
 			bool success = false;
 			if (!filename.empty() || m_type == IFD_DIALOG_DIRECTORY)
@@ -1396,7 +1398,7 @@ namespace ifd {
 #endif
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(-FLT_MIN, 0.0f)))
+		if (ImGui::Button(_("Cancel"), ImVec2(-FLT_MIN, 0.0f)))
 			m_finalize();
 	}
 }
