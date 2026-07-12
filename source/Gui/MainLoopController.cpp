@@ -124,6 +124,10 @@ void MainLoopController::process()
 void MainLoopController::shutdown()
 {
     GlobalSettings::get().setValue("controllers.main loop.save on exit", _saveOnExit);
+
+    size_t size = 0;
+    auto data = ImGui::SaveIniSettingsToMemory(&size);  //flush pending ImGui changes not yet caught by the dirty timer
+    GlobalSettings::get().setValue("gui.imgui settings", std::string(data, size));
 }
 
 void MainLoopController::scheduleClosing()
