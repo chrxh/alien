@@ -261,17 +261,23 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
         for (int i = 0; i < 5; ++i) {
-            EXPECT_TRUE(approxCompareAngles(0.0f, body.at(i).getCellRef()._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(0.0f, body.at(i).getCellRef()._frontAngle.value()))
+                << "body " << i << ": " << body.at(i).getCellRef()._frontAngle.value();
         }
-        EXPECT_TRUE(approxCompareAngles(-180.0f, body.at(5).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(-180.0f, body.at(5).getCellRef()._frontAngle.value())) << "body 5: " << body.at(5).getCellRef()._frontAngle.value();
 
         for (int i = 0; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(90.0f, leg.at(i).getCellRef()._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(90.0f, leg.at(i).getCellRef()._frontAngle.value()))
+                << "leg " << i << ": " << leg.at(i).getCellRef()._frontAngle.value();
         }
-        EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(0).getCellRef()._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(1).getCellRef()._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(180.0f, spikes2.at(0).getCellRef()._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(180.0f, spikes2.at(1).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(0).getCellRef()._frontAngle.value()))
+            << "spikes1 0: " << spikes1.at(0).getCellRef()._frontAngle.value();
+        EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(1).getCellRef()._frontAngle.value()))
+            << "spikes1 1: " << spikes1.at(1).getCellRef()._frontAngle.value();
+        EXPECT_TRUE(approxCompareAngles(180.0f, spikes2.at(0).getCellRef()._frontAngle.value()))
+            << "spikes2 0: " << spikes2.at(0).getCellRef()._frontAngle.value();
+        EXPECT_TRUE(approxCompareAngles(180.0f, spikes2.at(1).getCellRef()._frontAngle.value()))
+            << "spikes2 1: " << spikes2.at(1).getCellRef()._frontAngle.value();
     }
 
     // Check angles without muscle distortions
@@ -290,21 +296,26 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     // Check angles for first cell leg
     ASSERT_EQ(1, leg.at(0)._connections.size());
 
-    // Check angles for second cell leg
+    // Check angles for second cell leg (the initial angle of a connection is stored in the connected muscle)
     ASSERT_EQ(4, leg.at(1)._connections.size());
-    EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(0))));  // initial angle connection is stored in connected muscle
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(0)._angleFromPrevious));
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(1)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(0)))) << "initialAngle leg 0: " << getInitialAngle(leg.at(0));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(0)._angleFromPrevious))
+        << "leg 1 conn 0: " << leg.at(1)._connections.at(0)._angleFromPrevious;
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(1)._connections.at(1)._angleFromPrevious))
+        << "leg 1 conn 1: " << leg.at(1)._connections.at(1)._angleFromPrevious;
 
     // Check angles for third cell leg
     ASSERT_EQ(2, leg.at(2)._connections.size());
-    EXPECT_TRUE(approxCompareAngles(180.0, leg.at(2)._connections.at(0)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(180.0, leg.at(2)._connections.at(0)._angleFromPrevious))
+        << "leg 2 conn 0: " << leg.at(2)._connections.at(0)._angleFromPrevious;
 
-    // Check angles for forth cell leg
+    // Check angles for forth cell leg (the initial angle of a connection is stored in the connected muscle)
     ASSERT_EQ(4, leg.at(3)._connections.size());
-    EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(2))));  // initial angle connection is stored in connected muscle
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(0)._angleFromPrevious));
-    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(1)._angleFromPrevious));
+    EXPECT_TRUE(approxCompareAngles(90.0f, getInitialAngle(leg.at(2)))) << "initialAngle leg 2: " << getInitialAngle(leg.at(2));
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(0)._angleFromPrevious))
+        << "leg 3 conn 0: " << leg.at(3)._connections.at(0)._angleFromPrevious;
+    EXPECT_TRUE(approxCompareAngles(90.0, leg.at(3)._connections.at(1)._angleFromPrevious))
+        << "leg 3 conn 1: " << leg.at(3)._connections.at(1)._angleFromPrevious;
 }
 
 // Regression test for issue where muscles connected to void were not constructed with the correct angles
