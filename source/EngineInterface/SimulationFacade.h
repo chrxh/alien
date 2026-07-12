@@ -4,6 +4,8 @@
 #include "DataPointCollection.h"
 #include "Definitions.h"
 #include "GeometryBuffers.h"
+#include "LineageHistory.h"
+#include "LineageStatistics.h"
 #include "PreviewDesc.h"
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
@@ -106,6 +108,8 @@ public:
     virtual StatisticsRawData getStatisticsRawData() const = 0;
     virtual StatisticsHistory const& getStatisticsHistory() const = 0;
     virtual void setStatisticsHistory(StatisticsHistoryData const& data) = 0;
+    virtual RawLineageStatistics getRawLineageStatistics() const = 0;
+    virtual LineageHistory const& getLineageHistory() const = 0;
 
     //********************
     //* Preview simulation

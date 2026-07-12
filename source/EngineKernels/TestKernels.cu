@@ -4,7 +4,7 @@
 #include "ObjectConnectionProcessor.cuh"
 #include "TestKernels.cuh"
 
-__global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
+__global__ void cudaTestMutate(SimulationData data, SimulationStatistics statistics, uint64_t objectId)
 {
     DEVICE_CHECK(blockDim.x == NEURONS_PER_CELL);
 
@@ -25,7 +25,7 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId)
         block.sync();
 
         if (shouldMutate) {
-            MutationProcessor::applyMutations(data, object->typeData.cell.creature, object->typeData.cell.creature->genome);
+            MutationProcessor::applyMutations(data, statistics, object->typeData.cell.creature, object->typeData.cell.creature->genome);
         }
         block.sync();
     }

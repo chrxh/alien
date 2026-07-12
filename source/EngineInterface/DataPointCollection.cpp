@@ -50,6 +50,18 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.numReconnectorCreated = numReconnectorCreated + other.numReconnectorCreated;
     result.numReconnectorRemoved = numReconnectorRemoved + other.numReconnectorRemoved;
     result.numDetonations = numDetonations + other.numDetonations;
+    result.numCreatures = numCreatures + other.numCreatures;
+    result.averageCreatureCells = averageCreatureCells + other.averageCreatureCells;
+    result.averageGenomeNodes = averageGenomeNodes + other.averageGenomeNodes;
+    result.creatureEnergy = creatureEnergy + other.creatureEnergy;
+    result.averageMutationRate = averageMutationRate + other.averageMutationRate;
+    result.averageGeneration = averageGeneration + other.averageGeneration;
+    result.numLineages = numLineages + other.numLineages;
+    result.numSolidObjects = numSolidObjects + other.numSolidObjects;
+    result.numFluidObjects = numFluidObjects + other.numFluidObjects;
+    result.numCellObjects = numCellObjects + other.numCellObjects;
+    result.accumCreatedCreatures = accumCreatedCreatures + other.accumCreatedCreatures;
+    result.accumMutations = accumMutations + other.accumMutations;
     return result;
 }
 
@@ -83,5 +95,17 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numReconnectorCreated = numReconnectorCreated / divisor;
     result.numReconnectorRemoved = numReconnectorRemoved / divisor;
     result.numDetonations = numDetonations / divisor;
+    result.numCreatures = numCreatures / divisor;
+    result.averageCreatureCells = averageCreatureCells / divisor;
+    result.averageGenomeNodes = averageGenomeNodes / divisor;
+    result.creatureEnergy = creatureEnergy / divisor;
+    result.averageMutationRate = averageMutationRate / divisor;
+    result.averageGeneration = averageGeneration / divisor;
+    result.numLineages = numLineages / divisor;
+    result.numSolidObjects = numSolidObjects / divisor;
+    result.numFluidObjects = numFluidObjects / divisor;
+    result.numCellObjects = numCellObjects / divisor;
+    result.accumCreatedCreatures = accumCreatedCreatures / divisor;
+    result.accumMutations = accumMutations / divisor;
     return result;
 }
