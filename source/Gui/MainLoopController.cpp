@@ -118,7 +118,7 @@ void MainLoopController::process()
 void MainLoopController::shutdown()
 {
     GlobalSettings::get().setValue("controllers.main loop.save on exit", _saveOnExit);
-    GlobalSettings::get().flushImGuiSettings();
+    GlobalSettings::get().saveImGuiSettings();
 }
 
 void MainLoopController::scheduleClosing()

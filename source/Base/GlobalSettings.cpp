@@ -354,12 +354,12 @@ void GlobalSettings::saveImGuiSettingsIfDirty()
 {
     auto& io = ImGui::GetIO();
     if (io.WantSaveIniSettings) {
-        flushImGuiSettings();
+        saveImGuiSettings();
         io.WantSaveIniSettings = false;  //IniFilename is null, so we must clear the flag ourselves
     }
 }
 
-void GlobalSettings::flushImGuiSettings()
+void GlobalSettings::saveImGuiSettings()
 {
     size_t size = 0;
     auto data = ImGui::SaveIniSettingsToMemory(&size);
