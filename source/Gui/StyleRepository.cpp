@@ -1,6 +1,7 @@
 #include "StyleRepository.h"
 
 #include <stdexcept>
+#include <unistd.h>
 
 #include <ImFileDialog.h>
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
@@ -31,6 +32,13 @@ void StyleRepository::setup()
     configMerge.MergeMode = true;
     configMerge.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
 
+    ImFontConfig configCJK;
+    configCJK.MergeMode = true;
+    configCJK.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
+    configCJK.FontNo = 0;
+    auto const* cjkFontPath = "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc";
+    auto cjkFontAvailable = (access(cjkFontPath, R_OK) == 0);
+
     ImGuiIO& io = ImGui::GetIO();
 
     //default font (small with icons)
@@ -40,18 +48,33 @@ void StyleRepository::setup()
         io.Fonts->AddFontFromMemoryCompressedTTF(
             FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 16.0f * scaleFactor, &configMerge, rangesIcons);
     }
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath, 16.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //small bold font
     _smallBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 16.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath, 16.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //medium bold font
     _mediumBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 24.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath, 24.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //medium font
     _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath, 24.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //large font
     _largeFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 48.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath, 48.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //icon font
     _iconFont = io.Fonts->AddFontFromMemoryCompressedTTF(AlienIconFont_compressed_data, AlienIconFont_compressed_size, 24.0f * scaleFactor);

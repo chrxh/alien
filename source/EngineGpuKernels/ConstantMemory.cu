@@ -1,4 +1,4 @@
 ﻿#include "ConstantMemory.cuh"
 
 __constant__ GpuSettings cudaThreadSettings;
-__constant__ SimulationParameters cudaSimulationParameters;
+__device__ char cudaSimulationParametersData[sizeof(SimulationParameters)];
