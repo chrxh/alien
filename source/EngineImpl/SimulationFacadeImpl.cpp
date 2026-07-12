@@ -335,6 +335,16 @@ void _SimulationFacadeImpl::setStatisticsHistory(StatisticsHistoryData const& da
     _worker.setStatisticsHistory(data);
 }
 
+RawLineageStatistics _SimulationFacadeImpl::getRawLineageStatistics() const
+{
+    return _worker.getRawLineageStatistics();
+}
+
+LineageHistory const& _SimulationFacadeImpl::getLineageHistory() const
+{
+    return _worker.getLineageHistory();
+}
+
 std::optional<int> _SimulationFacadeImpl::getTpsRestriction() const
 {
     auto result = _worker.getTpsRestriction();

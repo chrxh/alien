@@ -43,6 +43,20 @@ struct DataPointCollection
     DataPoint numReconnectorRemoved;
     DataPoint numDetonations;
 
+    // Evolution dashboard values (not color-resolved)
+    double numCreatures = 0;
+    double averageCreatureCells = 0;
+    double averageGenomeNodes = 0;
+    double creatureEnergy = 0;
+    double averageMutationRate = 0;
+    double averageGeneration = 0;
+    double numLineages = 0;
+    double numSolidObjects = 0;
+    double numFluidObjects = 0;
+    double numCellObjects = 0;
+    double accumCreatedCreatures = 0;  // Raw accumulated value; rates are derived GUI-side
+    double accumMutations = 0;         // Raw accumulated value; rates are derived GUI-side
+
     DataPointCollection operator+(DataPointCollection const& other) const;
     DataPointCollection operator/(double divisor) const;
 };

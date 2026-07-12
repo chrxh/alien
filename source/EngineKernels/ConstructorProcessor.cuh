@@ -40,8 +40,8 @@ private:
         float neededDepotEnergy;
     };
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
-    __inline__ __device__ static void mutateGenome(SimulationData& data, Object* object);
-    __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
+    __inline__ __device__ static void mutateGenome(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static ConstructionData createConstructionData(Object* object);
 
     __inline__ __device__ static Object*
@@ -179,14 +179,14 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     }
 
     // Important: mutate the host genome before it is cloned for the offspring.
-    mutateGenome(data, object);
+    mutateGenome(data, statistics, object);
 
     // The actual construction runs on a single thread.
     if (threadIdx.x != 0) {
         return;
     }
 
-    constructor.offspring = findOrCreateNewCreature(data, object);
+    constructor.offspring = findOrCreateNewCreature(data, statistics, object);
 
     // Check again after cloning the creature, because the offspring genome may diverge from the host genome.
     if (ConstructorHelper::isFinished(object, *constructor.offspring->genome)) {
@@ -217,7 +217,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& data, Object* object)
+__inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& cell = object->typeData.cell;
     auto& constructor = cell.constructor;
@@ -238,7 +238,7 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
     __syncthreads();
 
     if (clonedGenome != nullptr) {
-        MutationProcessor::applyMutations(data, cell.creature, clonedGenome);
+        MutationProcessor::applyMutations(data, statistics, cell.creature, clonedGenome);
         MutationProcessor::removeUnreachableGenesFromRoot(data, clonedGenome);
         if (threadIdx.x == 0) {
             cell.creature->genome = clonedGenome;
@@ -247,7 +247,7 @@ __inline__ __device__ void ConstructorProcessor::mutateGenome(SimulationData& da
     __syncthreads();
 }
 
-__inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, Object* object)
+__inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& constructor = object->typeData.cell.constructor;
 
@@ -274,6 +274,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     factory.init(&data);
     auto result = factory.cloneCreature(object->typeData.cell.creature);
     result->numCells = 0;
+    statistics.incCreatedCreature(result->lineageId);
 
     return result;
 }

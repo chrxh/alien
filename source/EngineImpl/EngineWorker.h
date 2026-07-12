@@ -14,6 +14,8 @@
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/LineageHistory.h>
+#include <EngineInterface/LineageStatistics.h>
 #include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
@@ -58,6 +60,8 @@ public:
     StatisticsRawData getStatisticsRawData() const;
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
+    RawLineageStatistics getRawLineageStatistics() const;
+    LineageHistory const& getLineageHistory() const;
 
     void addAndSelectSimulationData(Desc&& dataToUpdate);
     void setSimulationData(Desc const& dataToUpdate);

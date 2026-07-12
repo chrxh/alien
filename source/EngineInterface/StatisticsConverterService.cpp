@@ -100,6 +100,20 @@ DataPointCollection StatisticsConverterService::convert(
     result.averageNumCells = getDataPointByAveraging(data.timestep.numObjects, data.timestep.numSelfReplicators);
     result.totalEnergy = getDataPointBySummation(data.timestep.totalEnergy);
 
+    auto const& evolution = data.timestep.evolution;
+    result.numCreatures = toDouble(evolution.numCreatures);
+    result.averageCreatureCells = evolution.numCreatures > 0 ? toDouble(evolution.sumCreatureCells) / evolution.numCreatures : 0.0;
+    result.averageGeneration = evolution.numCreatures > 0 ? toDouble(evolution.sumCreatureGenerations) / evolution.numCreatures : 0.0;
+    result.averageGenomeNodes = evolution.numGenomes > 0 ? toDouble(evolution.sumGenomeNodes) / evolution.numGenomes : 0.0;
+    result.averageMutationRate = evolution.numGenomes > 0 ? toDouble(evolution.sumMutationRates) / evolution.numGenomes : 0.0;
+    result.creatureEnergy = toDouble(evolution.sumCreatureEnergy);
+    result.numLineages = toDouble(evolution.numActiveLineages);
+    result.numSolidObjects = toDouble(evolution.numSolidObjects);
+    result.numFluidObjects = toDouble(evolution.numFluidObjects);
+    result.numCellObjects = toDouble(evolution.numCellObjects);
+    result.accumCreatedCreatures = toDouble(data.accumulated.numCreatedCreatures);
+    result.accumMutations = data.accumulated.totalMutations;
+
     auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;
     if (deltaTimesteps < NEAR_ZERO) {
         deltaTimesteps = 1.0;
