@@ -61,6 +61,8 @@ void NewSimulationDialog::processIntern()
 
 void NewSimulationDialog::openIntern()
 {
+    strncpy(_projectName, _("<unnamed simulation>"), sizeof(_projectName) - 1);
+    _projectName[sizeof(_projectName) - 1] = '\0';
     auto worldSize = _SimulationFacade::get()->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;

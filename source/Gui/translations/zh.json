@@ -1195,5 +1195,7 @@
   "private": "私有",
   "alien-project": "alien-project",
   "simulations": "仿真",
-  "Server: ": "服务器："
+  "Server: ": "服务器：",
+  "Adopt parameters": "应用参数",
+  "<unnamed simulation>": "<未命名仿真>"
 }
