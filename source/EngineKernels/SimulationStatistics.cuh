@@ -152,7 +152,6 @@ public:
         slot.numGenomes = 0;
         slot.sumCreatureCells = 0;
         slot.sumCreatureGenerations = 0;
-        slot.sumAccumulatedMutations = 0;
         slot.sumGenomeNodes = 0;
         slot.sumMutationRates = 0;
         slot.sumCreatureEnergy = 0;
@@ -189,26 +188,25 @@ public:
         }
         return -1;
     }
-    __inline__ __device__ void addLineageCreatureData(int slotIndex, uint32_t numCells, uint32_t generation, float accumulatedMutations)
+    __inline__ __device__ void addLineageCreatureData(int slotIndex, uint32_t numCells, uint32_t generation)
     {
         auto& slot = _lineageMap[slotIndex];
         atomicAdd(&slot.numCreatures, 1u);
         atomicAdd(&slot.sumCreatureCells, toFloat(numCells));
         atomicAdd(&slot.sumCreatureGenerations, toFloat(generation));
-        atomicAdd(&slot.sumAccumulatedMutations, accumulatedMutations);
     }
-    __inline__ __device__ void addLineageGenomeData(int slotIndex, float numNodes, float meanMutationRate)
+    __inline__ __device__ void addLineageGenomeData(int slotIndex, float numNodes, float meanMutationRate, uint32_t nodeColorBitset)
     {
         auto& slot = _lineageMap[slotIndex];
         atomicAdd(&slot.numGenomes, 1u);
         atomicAdd(&slot.sumGenomeNodes, numNodes);
         atomicAdd(&slot.sumMutationRates, meanMutationRate);
+        atomicOr(&slot.colorBitset, nodeColorBitset);
     }
-    __inline__ __device__ void addLineageCellData(int slotIndex, float energy, int color)
+    __inline__ __device__ void addLineageEnergy(int slotIndex, float energy)
     {
         auto& slot = _lineageMap[slotIndex];
         atomicAdd(&slot.sumCreatureEnergy, energy);
-        atomicOr(&slot.colorBitset, 1u << color);
     }
     __inline__ __device__ void compactLineageSlot(int index)
     {
@@ -224,7 +222,6 @@ public:
         entry.numGenomes = slot.numGenomes;
         entry.sumCreatureCells = slot.sumCreatureCells;
         entry.sumCreatureGenerations = slot.sumCreatureGenerations;
-        entry.sumAccumulatedMutations = slot.sumAccumulatedMutations;
         entry.sumGenomeNodes = slot.sumGenomeNodes;
         entry.sumMutationRates = slot.sumMutationRates;
         entry.sumCreatureEnergy = slot.sumCreatureEnergy;
@@ -343,7 +340,6 @@ private:
         uint32_t numGenomes;
         float sumCreatureCells;
         float sumCreatureGenerations;
-        float sumAccumulatedMutations;
         float sumGenomeNodes;
         float sumMutationRates;
         float sumCreatureEnergy;
