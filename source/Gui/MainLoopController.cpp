@@ -306,9 +306,9 @@ void MainLoopController::drawLoadingScreen()
     ImColor textColor = Const::ProgramVersionTextColor;
     textColor.Value.w *= ImGui::GetStyle().Alpha;
 
-    drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(175), bottom - scale(200)}, textColor, "Artificial Life Environment");
+    drawList->AddText(styleRep.getReefLargeFont(), scale(48.0f), {center.x - scale(175), bottom - scale(200)}, textColor, _("Artificial Life Environment"));
 
-    auto versionString = "Version " + Const::ProgramVersion;
+    auto versionString = std::string(_("Version ")) + Const::ProgramVersion;
     drawList->AddText(
         styleRep.getReefMediumFont(),
         scale(24.0f),
