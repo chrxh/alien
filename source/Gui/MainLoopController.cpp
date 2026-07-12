@@ -25,6 +25,7 @@
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "CreatorWindow.h"
+#include "DefaultImguiSettings.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
@@ -72,6 +73,7 @@ namespace
 
 void MainLoopController::setup()
 {
+    GlobalSettings::get().loadImGuiSettings(Const::DefaultImguiSettings);
 
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);
@@ -112,18 +114,13 @@ void MainLoopController::process()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(WindowController::get().getWindowData().window);
 
-    auto& io = ImGui::GetIO();
-    if (io.WantSaveIniSettings) {
-        size_t size = 0;
-        auto data = ImGui::SaveIniSettingsToMemory(&size);
-        GlobalSettings::get().setValue("gui.imgui settings", std::string(data, size));
-        io.WantSaveIniSettings = false;  //IniFilename is null, so we must clear the flag ourselves
-    }
+    GlobalSettings::get().saveImGuiSettingsIfDirty();
 }
 
 void MainLoopController::shutdown()
 {
     GlobalSettings::get().setValue("controllers.main loop.save on exit", _saveOnExit);
+    GlobalSettings::get().saveImGuiSettings();
 }
 
 void MainLoopController::scheduleClosing()
