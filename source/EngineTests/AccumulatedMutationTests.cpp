@@ -142,6 +142,8 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
 TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
 {
     auto genome = createTestGenome();
+    genome._mutationRates._neuronMutations[0] =
+        NeuronMutationDesc().nodeProbability(1.0f).weightChangeSigma(1.0f).biasChangeSigma(1.0f).actfnChangeProbability(1.0f);
 
     auto data =
         Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).accumulatedMutations(11.0f).accumulatedMutationsInLineage(11.0f), genome);
