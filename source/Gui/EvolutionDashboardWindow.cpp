@@ -126,7 +126,7 @@ namespace
 }
 
 EvolutionDashboardWindow::EvolutionDashboardWindow()
-    : AlienWindow("Evolution Dashboard", "windows.evolution dashboard", false)
+    : AlienWindow("Evolution Dashboard", "windows.evolution dashboard", false, true)
 {}
 
 void EvolutionDashboardWindow::initIntern()
@@ -277,7 +277,7 @@ void EvolutionDashboardWindow::processFilterBar()
 {
     ImGui::Spacing();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
-    AlienGui::Text("CELL COLORS");
+    AlienGui::Text("Filter by colors");
     ImGui::PopStyleColor();
     ImGui::SameLine(0, scale(12.0f));
 
@@ -296,7 +296,7 @@ void EvolutionDashboardWindow::processFilterBar()
             drawList->AddRect(
                 {pos.x - scale(1.5f), pos.y - scale(1.5f)},
                 {pos.x + chipSize + scale(1.5f), pos.y + chipSize + scale(1.5f)},
-                ImColor(255, 255, 255, 150),
+                ImColor(255, 255, 255, 255),
                 scale(6.0f),
                 0,
                 scale(1.5f));
