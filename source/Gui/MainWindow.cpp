@@ -237,11 +237,7 @@ void _MainWindow::initGlfwAndOpenGL()
     ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends
     ImGui_ImplOpenGL3_Init(glslVersion);
 
-    ImGui::GetIO().IniFilename = nullptr;  //no imgui.ini file; persist window/dock settings via GlobalSettings instead
-    auto imguiSettings = GlobalSettings::get().getValue("gui.imgui settings", Const::DefaultImguiSettings);
-    if (!imguiSettings.empty()) {
-        ImGui::LoadIniSettingsFromMemory(imguiSettings.c_str(), imguiSettings.size());
-    }
+    GlobalSettings::get().loadImGuiSettings(Const::DefaultImguiSettings);
 }
 
 void _MainWindow::initGlad()

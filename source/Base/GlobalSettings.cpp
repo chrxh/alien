@@ -5,6 +5,8 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
+#include <imgui.h>
+
 #ifdef _WIN32
 #include "WinReg/WinReg.hpp"
 #else
@@ -332,6 +334,36 @@ std::vector<std::string> GlobalSettings::getValue(std::string const& key, std::v
 void GlobalSettings::setValue(std::string const& key, std::vector<std::string> value)
 {
     setValue(key, boost::join(value, "\\"));
+}
+
+namespace
+{
+    std::string const ImGuiSettingsKey = "gui.imgui settings";
+}
+
+void GlobalSettings::loadImGuiSettings(std::string const& defaultSettings)
+{
+    ImGui::GetIO().IniFilename = nullptr;  //no imgui.ini file; the state is persisted here instead
+    auto settings = getValue(ImGuiSettingsKey, defaultSettings);
+    if (!settings.empty()) {
+        ImGui::LoadIniSettingsFromMemory(settings.c_str(), settings.size());
+    }
+}
+
+void GlobalSettings::saveImGuiSettingsIfDirty()
+{
+    auto& io = ImGui::GetIO();
+    if (io.WantSaveIniSettings) {
+        flushImGuiSettings();
+        io.WantSaveIniSettings = false;  //IniFilename is null, so we must clear the flag ourselves
+    }
+}
+
+void GlobalSettings::flushImGuiSettings()
+{
+    size_t size = 0;
+    auto data = ImGui::SaveIniSettingsToMemory(&size);
+    setValue(ImGuiSettingsKey, std::string(data, size));
 }
 
 GlobalSettings::GlobalSettings()
