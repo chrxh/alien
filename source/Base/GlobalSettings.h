@@ -34,6 +34,10 @@ public:
     std::vector<std::string> getValue(std::string const& key, std::vector<std::string> const& defaultValue);
     void setValue(std::string const& key, std::vector<std::string> value);
 
+    void loadImGuiSettings(std::string const& defaultSettings);
+    void saveImGuiSettingsIfDirty();                             // Call once per frame; persists only when ImGui marked its state dirty
+    void saveImGuiSettings();
+
 private:
     GlobalSettings();
     ~GlobalSettings();
