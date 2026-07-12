@@ -71,6 +71,10 @@
     {
       "name": "implot",
       "version>=": "0.16"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.2"
     }
   ],
   "builtin-baseline": "f7423ee180c4b7f40d43402c2feb3859161ef625"
