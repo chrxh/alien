@@ -28,6 +28,7 @@
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
+#include "EvolutionDashboardWindow.h"
 #include "ExitDialog.h"
 #include "FileTransferController.h"
 #include "FpsController.h"
@@ -425,6 +426,14 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_6).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
+    AlienGui::MenuItem(
+        AlienGui::MenuItemParameters()
+            .name("Evolution dashboard")
+            .keyAlt(true)
+            .key(ImGuiKey_7)
+            .selected(EvolutionDashboardWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { EvolutionDashboardWindow::get().setOn(!EvolutionDashboardWindow::get().isOn()); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuOpened);
