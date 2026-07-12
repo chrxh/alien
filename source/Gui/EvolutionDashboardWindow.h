@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <set>
 #include <vector>
 
@@ -26,9 +27,10 @@ private:
     void shutdownIntern() override;
     void processIntern() override;
 
+    void updateCellColors();
     void processHeader();
-    void processKpiCard(std::string const& label, std::string const& value, float delta, int sparklineIndex, float width);
-    void processEntitiesCard(float width);
+    void processKpiCard(std::string const& label, std::string const& value, float delta, int sparklineIndex, float width, float height);
+    void processEntitiesCard(float width, float height);
     void processFilterBar();
     void processLineageTable();
     void processTimelineSection();
@@ -51,6 +53,8 @@ private:
     DummyLineage _allLineages;
     std::vector<double> _timePoints;
     std::array<std::vector<double>, 4> _headerSparklines = {};
+
+    std::array<uint32_t, MAX_COLORS> _cellColors = {};
 
     std::set<int> _selectedLineageIds;
     int _colorFilter = 0x3ff;  //bitset for MAX_COLORS cell colors
