@@ -93,7 +93,7 @@ TEST_F(ConstructorMutationTests, mutatesCreatureWhileConstructingOffspring)
 
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 1000.0f;
-    _parameters.newLineageThreshold.value = 100.0f;  // keep accumulatedMutations from resetting
+    _parameters.newLineageThreshold.value = 100.0f;  // keep accumulatedMutationsInLineage from resetting
     _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
