@@ -1099,7 +1099,7 @@ namespace ifd {
 		if (m_zoom == 1.0f) {
 			if (ImGui::BeginTable("##contentTable", 3, /*ImGuiTableFlags_Resizable |*/ ImGuiTableFlags_Sortable, ImVec2(0, -FLT_MIN))) {
 				// header
-				ImGui::TableSetupColumn("Name##filename", ImGuiTableColumnFlags_WidthStretch, 0.0f -1.0f, 0);
+				ImGui::TableSetupColumn((std::string(_("Name")) + "##filename").c_str(), ImGuiTableColumnFlags_WidthStretch, 0.0f -1.0f, 0);
 				ImGui::TableSetupColumn("Date modified##filedate", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 0.0f, 1);
 				ImGui::TableSetupColumn("Size##filesize", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 0.0f, 2);
                 ImGui::TableSetupScrollFreeze(0, 1);
@@ -1217,7 +1217,7 @@ namespace ifd {
 		if (openAreYouSureDlg)
 			ImGui::OpenPopup("Are you sure?##delete");
 		if (openNewFileDlg)
-			ImGui::OpenPopup("Enter file name##newfile");
+			ImGui::OpenPopup((std::string(_("Enter file name")) + "##newfile").c_str());
 		if (openNewDirectoryDlg)
 			ImGui::OpenPopup("Enter directory name##newdir");
 		if (ImGui::BeginPopupModal("Are you sure?##delete")) {
@@ -1238,7 +1238,7 @@ namespace ifd {
 			}
 			ImGui::EndPopup();
 		}
-		if (ImGui::BeginPopupModal("Enter file name##newfile")) {
+		if (ImGui::BeginPopupModal((std::string(_("Enter file name")) + "##newfile").c_str())) {
 			ImGui::PushItemWidth(250.0f);
 			ImGui::InputText("##newfilename", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
 			ImGui::PopItemWidth();
@@ -1327,7 +1327,7 @@ namespace ifd {
 		ImGui::SameLine();
 		ImGui::PopStyleColor();
 
-		if (ImGui::InputTextEx("##searchTB", "Search", m_searchBuffer, 128, ImVec2(-FLT_MIN, GUI_ELEMENT_SIZE), 0)) // TODO: no hardcoded literals
+		if (ImGui::InputTextEx("##searchTB", _("Search"), m_searchBuffer, 128, ImVec2(-FLT_MIN, GUI_ELEMENT_SIZE), 0)) // TODO: no hardcoded literals
 			m_setDirectory(m_currentDirectory, false); // refresh
 
 
@@ -1369,9 +1369,9 @@ namespace ifd {
 		
 		/***** BOTTOM BAR *****/
 		if (m_type != IFD_DIALOG_DIRECTORY) {
-			ImGui::Text("File name:");
+			ImGui::Text("%s", _("File name:"));
 			ImGui::SameLine();
-			if (ImGui::InputTextEx("##file_input", "Filename", reinterpret_cast<char*>(m_inputTextbox), 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
+			if (ImGui::InputTextEx("##file_input", _("Filename"), reinterpret_cast<char*>(m_inputTextbox), 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
 				bool success = m_finalize(std::u8string(m_inputTextbox));
 #ifdef _WIN32
 				if (!success)

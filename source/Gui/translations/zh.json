@@ -1205,5 +1205,9 @@
   "Failed to load simulation.": "Failed to load simulation.",
   "Open genome from file": "从文件打开基因组",
   "Save genome to file": "将基因组保存到文件",
-  "Enter directory name": "输入目录名称"
+  "Enter directory name": "输入目录名称",
+  "Enter file name": "输入文件名",
+  "File name:": "文件名：",
+  "Filename": "文件名",
+  "Search": "搜索"
 }
