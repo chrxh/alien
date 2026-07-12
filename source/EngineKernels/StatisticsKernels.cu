@@ -156,7 +156,7 @@ __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, Simu
             statistics.addCreatureStatistics(creature->numCells, creature->generation, creature->accumulatedMutations);
             auto slotIndex = statistics.insertOrFindLineageSlot(creature->lineageId);
             if (slotIndex >= 0) {
-                statistics.addLineageCreatureData(slotIndex, creature->numCells, creature->generation, creature->accumulatedMutations);
+                statistics.addLineageCreatureData(slotIndex, creature->numCells, creature->generation);
                 alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(slotIndex) + 1);
             }
         }
@@ -183,20 +183,25 @@ __global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, Simu
         auto origGenomeIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));
         if (origGenomeIndex == VALUE_NOT_SET_UINT64) {
             auto numNodes = 0;
+            auto nodeColorBitset = 0u;
             for (int i = 0; i < genome->numGenes; ++i) {
-                numNodes += genome->genes[i].numNodes;
+                auto const& gene = genome->genes[i];
+                numNodes += gene.numNodes;
+                for (int j = 0; j < gene.numNodes; ++j) {
+                    nodeColorBitset |= 1u << gene.nodes[j].color;
+                }
             }
             auto meanMutationRate = calcMeanMutationRate(genome->mutationRates);
             statistics.addGenomeStatistics(toFloat(numNodes), meanMutationRate);
             if (slotIndex >= 0) {
-                statistics.addLineageGenomeData(slotIndex, toFloat(numNodes), meanMutationRate);
+                statistics.addLineageGenomeData(slotIndex, toFloat(numNodes), meanMutationRate, nodeColorBitset);
             }
         }
 
         auto energy = object->getEnergy();
         statistics.addCreatureEnergy(energy);
         if (slotIndex >= 0) {
-            statistics.addLineageCellData(slotIndex, energy, object->color);
+            statistics.addLineageEnergy(slotIndex, energy);
         }
     }
 }
