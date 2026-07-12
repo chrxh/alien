@@ -111,6 +111,14 @@ void MainLoopController::process()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(WindowController::get().getWindowData().window);
+
+    auto& io = ImGui::GetIO();
+    if (io.WantSaveIniSettings) {
+        size_t size = 0;
+        auto data = ImGui::SaveIniSettingsToMemory(&size);
+        GlobalSettings::get().setValue("gui.imgui settings", std::string(data, size));
+        io.WantSaveIniSettings = false;  //IniFilename is null, so we must clear the flag ourselves
+    }
 }
 
 void MainLoopController::shutdown()
