@@ -145,7 +145,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
             std::lock_guard lock(_mutexForSimulationParameters);
             if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, _maxAgeBalancer, simulationData, statistics)) {
                 CHECK_FOR_CUDA_ERROR(
-                    cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+                    cudaMemcpyToSymbol(cudaSimulationParametersData, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
         }
         auto now = std::chrono::steady_clock::now();
@@ -489,7 +489,7 @@ void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutati
         if (_newSimulationParameters) {
             _settings.simulationParameters = *_newSimulationParameters;
             CHECK_FOR_CUDA_ERROR(
-                cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+                cudaMemcpyToSymbol(cudaSimulationParametersData, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             _newSimulationParameters.reset();
         }
     }
@@ -506,7 +506,7 @@ void _SimulationCudaFacade::testOnly_mutationCheck(uint64_t cellId)
         if (_newSimulationParameters) {
             _settings.simulationParameters = *_newSimulationParameters;
             CHECK_FOR_CUDA_ERROR(
-                cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+                cudaMemcpyToSymbol(cudaSimulationParametersData, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             _newSimulationParameters.reset();
         }
     }
@@ -661,7 +661,7 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
         _settings.simulationParameters =
             SimulationParametersUpdateService::get().integrateChanges(_settings.simulationParameters, *_newSimulationParameters, _simulationParametersUpdateConfig);
         CHECK_FOR_CUDA_ERROR(
-            cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+            cudaMemcpyToSymbol(cudaSimulationParametersData, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         _newSimulationParameters.reset();
 
         if (_cudaSimulationData) {
