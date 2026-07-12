@@ -144,7 +144,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
     auto genome = createTestGenome();
 
     auto data =
-        Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).accumulatedMutations(11.0f).accumulatedMutationsInLineage(11.0f), genome);
+        Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).accumulatedMutations(12.0f).accumulatedMutationsInLineage(12.0f), genome);
 
     _parameters.newLineageThreshold.value = 0.1f;
     _simulationFacade->setSimulationParameters(_parameters);
