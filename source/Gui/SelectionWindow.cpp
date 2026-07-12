@@ -15,7 +15,7 @@ namespace
 }
 
 SelectionWindow::SelectionWindow()
-    : AlienWindow("Selection", "windows.selection", true, false, {scale(100), scale(100.0f)})
+    : AlienWindow(_("Selection"), "windows.selection", true, false, {scale(100), scale(100.0f)})
 {}
 
 void SelectionWindow::processIntern()
@@ -24,7 +24,7 @@ void SelectionWindow::processIntern()
     if (table.begin()) {
 
         auto selection = EditorModel::get().getSelectionShallowData();
-        ImGui::Text("Cells");
+        ImGui::Text("%s", _("Cells"));
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::TextUnformatted(StringHelper::format(selection.numObjects).c_str());
@@ -32,7 +32,7 @@ void SelectionWindow::processIntern()
         ImGui::PopFont();
         table.next();
 
-        ImGui::Text("Connected cells");
+        ImGui::Text("%s", _("Connected cells"));
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::TextUnformatted(StringHelper::format(selection.numClusterCells).c_str());
@@ -40,7 +40,7 @@ void SelectionWindow::processIntern()
         ImGui::PopFont();
         table.next();
 
-        ImGui::Text("Creatures");
+        ImGui::Text("%s", _("Creatures"));
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::TextUnformatted(StringHelper::format(selection.numCreatures).c_str());
@@ -48,7 +48,7 @@ void SelectionWindow::processIntern()
         ImGui::PopFont();
         table.next();
 
-        ImGui::Text("Energy particles");
+        ImGui::Text("%s", _("Energy particles"));
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         ImGui::TextUnformatted(StringHelper::format(selection.numEnergyParticles).c_str());

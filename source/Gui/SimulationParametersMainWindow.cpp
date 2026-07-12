@@ -36,7 +36,7 @@ namespace
 }
 
 SimulationParametersMainWindow::SimulationParametersMainWindow()
-    : AlienWindow("Simulation parameters", "windows.simulation parameters", false, true)
+    : AlienWindow(_("Simulation parameters"), "windows.simulation parameters", false, true)
 {}
 
 void SimulationParametersMainWindow::initIntern()
@@ -101,12 +101,12 @@ void SimulationParametersMainWindow::shutdownIntern()
 
 void SimulationParametersMainWindow::processToolbar()
 {
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open simulation parameters from file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip(_("Open simulation parameters from file")))) {
         onOpenParameters();
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save simulation parameters to file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip(_("Save simulation parameters to file")))) {
         onSaveParameters();
     }
 
@@ -114,17 +114,17 @@ void SimulationParametersMainWindow::processToolbar()
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy simulation parameters to clipboard"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip(_("Copy simulation parameters to clipboard")))) {
         _copiedParameters = _SimulationFacade::get()->getSimulationParameters();
-        printOverlayMessage("Simulation parameters copied");
+        printOverlayMessage(_("Simulation parameters copied"));
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste simulation parameters from clipboard").disabled(!_copiedParameters))) {
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip(_("Paste simulation parameters from clipboard")).disabled(!_copiedParameters))) {
         _SimulationFacade::get()->setSimulationParameters(*_copiedParameters);
         _SimulationFacade::get()->setOriginalSimulationParameters(*_copiedParameters);
-        printOverlayMessage("Simulation parameters pasted");
+        printOverlayMessage(_("Simulation parameters pasted"));
     }
 
     ImGui::SameLine();
@@ -139,7 +139,7 @@ void SimulationParametersMainWindow::processToolbar()
         auto parameters = _SimulationFacade::get()->getSimulationParameters();
         if (_copiedParameters->numLayers == parameters.numLayers && _copiedParameters->numSources == parameters.numSources) {
             _SimulationFacade::get()->setOriginalSimulationParameters(*_copiedParameters);
-            printOverlayMessage("Reference simulation parameters replaced");
+            printOverlayMessage(_("Reference simulation parameters replaced"));
         } else {
             GenericMessageDialog::get().information(
                 "Error", "The number of layers and radiation sources of the current simulation parameters must match with those from the clipboard.");
@@ -150,12 +150,12 @@ void SimulationParametersMainWindow::processToolbar()
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter layer"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip(_("Add parameter layer")))) {
         onInsertDefaultLayer();
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip(_("Add radiation source")))) {
         onInsertDefaultSource();
     }
 
@@ -164,13 +164,13 @@ void SimulationParametersMainWindow::processToolbar()
                                     .text(ICON_FA_PLUS)
                                     .secondText(ICON_FA_CLONE)
                                     .disabled(_selectedOrderNumber == 0)
-                                    .tooltip("Clone selected layer/radiation source"))) {
+                                    .tooltip(_("Clone selected layer/radiation source")))) {
         onCloneLocation();
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedOrderNumber == 0).tooltip("Delete selected layer/radiation source"))) {
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedOrderNumber == 0).tooltip(_("Delete selected layer/radiation source")))) {
         onDeleteLocation();
     }
 
@@ -181,14 +181,14 @@ void SimulationParametersMainWindow::processToolbar()
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                     .text(ICON_FA_CHEVRON_UP)
                                     .disabled(_selectedOrderNumber <= 1)
-                                    .tooltip("Move selected layer/radiation source upward"))) {
+                                    .tooltip(_("Move selected layer/radiation source upward")))) {
         onDecreaseOrderNumber();
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                     .text(ICON_FA_CHEVRON_DOWN)
-                                    .tooltip("Move selected layer/radiation source downward")
+                                    .tooltip(_("Move selected layer/radiation source downward"))
                                     .disabled(_selectedOrderNumber >= _locations.size() - 1 || _selectedOrderNumber == 0))) {
         onIncreaseOrderNumber();
     }
@@ -199,7 +199,7 @@ void SimulationParametersMainWindow::processToolbar()
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                     .text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT)
-                                    .tooltip("Open parameters for selected layer/radiation source in a new window"))) {
+                                    .tooltip(_("Open parameters for selected layer/radiation source in a new window")))) {
         onOpenInLocationWindow();
     }
 
@@ -211,7 +211,7 @@ void SimulationParametersMainWindow::processMasterWidget()
     if (ImGui::BeginChild("##master", {0, getMasterWidgetHeight()})) {
 
         if (_masterWidgetOpen =
-                AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Overview").rank(AlienGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
+                AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(_("Overview")).rank(AlienGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##master2", {0, -ImGui::GetStyle().FramePadding.y})) {
                 processLocationTable();
@@ -305,7 +305,7 @@ void SimulationParametersMainWindow::processExpertWidget()
 {
     if (ImGui::BeginChild("##expert", {0, 0})) {
         if (_expertWidgetOpen = AlienGui::BeginTreeNode(
-                AlienGui::TreeNodeParameters().name("Expert settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
+                AlienGui::TreeNodeParameters().name(_("Expert settings")).rank(AlienGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
             if (ImGui::BeginChild("##expert2", {0, 0}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
                 processExpertSettings();
             }
@@ -331,11 +331,11 @@ void SimulationParametersMainWindow::processLocationTable()
 
     if (ImGui::BeginTable("Locations", 5, flags, ImVec2(-1, -1), 0)) {
 
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-        ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(115.0f));
-        ImGui::TableSetupColumn("Strength", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-        ImGui::TableSetupColumn("Opacity", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+        ImGui::TableSetupColumn(_("Name"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn(_("Type"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn(_("Position"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(115.0f));
+        ImGui::TableSetupColumn(_("Strength"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+        ImGui::TableSetupColumn(_("Opacity"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -374,11 +374,11 @@ void SimulationParametersMainWindow::processLocationTable()
                 // Column: Type
                 ImGui::TableNextColumn();
                 if (entry.type == LocationType::Base) {
-                    AlienGui::Text("Base parameters");
+                    AlienGui::Text(_("Base parameters"));
                 } else if (entry.type == LocationType::Layer) {
-                    AlienGui::Text("Layer");
+                    AlienGui::Text(_("Layer"));
                 } else if (entry.type == LocationType::Source) {
-                    AlienGui::Text("Radiation");
+                    AlienGui::Text(_("Radiation"));
                 }
 
                 // Column: Position
@@ -397,7 +397,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 if (entry.type == LocationType::Base || entry.type == LocationType::Source) {
                     AlienGui::Text(entry.strength);
                 } else {
-                    AlienGui::Text("-");
+                    AlienGui::Text(_("-"));
                 }
 
                 // Column: Opacity
@@ -405,7 +405,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 if (entry.type == LocationType::Layer) {
                     AlienGui::Text(entry.strength);
                 } else {
-                    AlienGui::Text("-");
+                    AlienGui::Text(_("-"));
                 }
 
                 ImGui::PopID();

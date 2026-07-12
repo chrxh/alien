@@ -25,7 +25,7 @@ void ResizeWorldDialog::open()
 }
 
 ResizeWorldDialog::ResizeWorldDialog()
-    : AlienDialog("Resize world")
+    : AlienDialog(_("Resize world"))
 {}
 
 void ResizeWorldDialog::processIntern()
@@ -41,7 +41,7 @@ void ResizeWorldDialog::processIntern()
         ImGui::PopItemWidth();
 
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("Width");
+        ImGui::Text("%s", _("Width"));
 
         //height
         ImGui::TableNextRow();
@@ -51,22 +51,22 @@ void ResizeWorldDialog::processIntern()
         ImGui::PopItemWidth();
 
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("Height");
+        ImGui::Text("%s", _("Height"));
 
         ImGui::EndTable();
     }
-    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Scale content"), _scaleContent);
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name(_("Scale content")), _scaleContent);
 
     AlienGui::Separator();
 
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         onResizing();
         close();
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 

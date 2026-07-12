@@ -61,7 +61,7 @@ GenomeDesc GenomeEditorWindow::getCurrentGenome() const
 }
 
 GenomeEditorWindow::GenomeEditorWindow()
-    : AlienWindow("Genome editor", "windows.genome editor", false, true, {500.0f, 300.0f})
+    : AlienWindow(_("Genome editor"), "windows.genome editor", false, true, {500.0f, 300.0f})
 {}
 
 void GenomeEditorWindow::initIntern()

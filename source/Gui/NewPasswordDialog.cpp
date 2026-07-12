@@ -25,27 +25,27 @@ void NewPasswordDialog::open(std::string const& userName, UserInfo const& userIn
 }
 
 NewPasswordDialog::NewPasswordDialog()
-    : AlienDialog("New password")
+    : AlienDialog(_("New password"))
 {}
 
 void NewPasswordDialog::processIntern()
 {
-    AlienGui::Text("Security information");
+    AlienGui::Text(_("Security information"));
     AlienGui::HelpMarker(
         "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
         "value in the database.");
 
     AlienGui::Separator();
 
-    AlienGui::Text("Please enter a new password and the confirmation code\nsent to your email address.");
+    AlienGui::Text(_("Please enter a new password and the confirmation code\nsent to your email address."));
     AlienGui::Separator();
-    AlienGui::InputText(AlienGui::InputTextParameters().hint("New password").password(true).textWidth(0), _newPassword);
-    AlienGui::InputText(AlienGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);
+    AlienGui::InputText(AlienGui::InputTextParameters().hint(_("New password")).password(true).textWidth(0), _newPassword);
+    AlienGui::InputText(AlienGui::InputTextParameters().hint(_("Code (case sensitive)")).textWidth(0), _confirmationCode);
 
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_confirmationCode.empty());
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         close();
         onNewPassword();
     }
@@ -53,7 +53,7 @@ void NewPasswordDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 }

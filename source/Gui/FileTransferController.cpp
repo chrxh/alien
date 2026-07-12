@@ -28,7 +28,7 @@ void FileTransferController::onOpenSimulationDialog()
 
 void FileTransferController::onOpenSimulation(std::filesystem::path const& filename)
 {
-    printOverlayMessage("Loading ...");
+    printOverlayMessage(_("Loading ..."));
 
     _openSimulationProcessor->executeTask(
         [&](auto const& senderId) {
@@ -54,7 +54,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
             } catch (AlienException const& exception) {
                 errorMessage = exception.what();
             } catch (...) {
-                errorMessage = "Failed to load simulation.";
+                errorMessage = _("Failed to load simulation.");
             }
 
             if (errorMessage) {
@@ -81,7 +81,7 @@ void FileTransferController::onSaveSimulationDialog()
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _referencePath = firstFilenameCopy.remove_filename().string();
-        printOverlayMessage("Saving ...");
+        printOverlayMessage(_("Saving ..."));
         _saveSimulationProcessor->executeTask(
             [&, firstFilename = firstFilename](auto const& senderId) {
                 auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true};

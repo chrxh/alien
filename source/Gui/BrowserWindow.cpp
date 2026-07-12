@@ -61,7 +61,7 @@ namespace
 }
 
 BrowserWindow::BrowserWindow()
-    : AlienWindow("Browser", "windows.browser", true, true)
+    : AlienWindow(_("Browser"), "windows.browser", true, true)
 {}
 
 namespace
@@ -235,7 +235,7 @@ void BrowserWindow::processToolbar()
         onRefresh();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Refresh");
+    AlienGui::Tooltip(_("Refresh"));
 
     //login button
     ImGui::SameLine();
@@ -244,7 +244,7 @@ void BrowserWindow::processToolbar()
         LoginDialog::get().open();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Login or register");
+    AlienGui::Tooltip(_("Login or register"));
 
     //logout button
     ImGui::SameLine();
@@ -254,7 +254,7 @@ void BrowserWindow::processToolbar()
         onRefresh();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Logout");
+    AlienGui::Tooltip(_("Logout"));
 
     //separator
     ImGui::SameLine();
@@ -284,7 +284,7 @@ void BrowserWindow::processToolbar()
         onEditResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Change name or description");
+    AlienGui::Tooltip(_("Change name or description"));
 
     //replace button
     ImGui::SameLine();
@@ -323,14 +323,14 @@ void BrowserWindow::processToolbar()
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EXPAND_ARROWS_ALT))) {
         onExpandFolders();
     }
-    AlienGui::Tooltip("Expand all folders");
+    AlienGui::Tooltip(_("Expand all folders"));
 
     //collapse button
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COMPRESS_ARROWS_ALT))) {
         onCollapseFolders();
     }
-    AlienGui::Tooltip("Collapse all folders");
+    AlienGui::Tooltip(_("Collapse all folders"));
 
 #ifdef _WIN32
     //separator
@@ -342,7 +342,7 @@ void BrowserWindow::processToolbar()
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COMMENTS))) {
         openWeblink(Const::DiscordURL);
     }
-    AlienGui::Tooltip("Open ALIEN Discord server");
+    AlienGui::Tooltip(_("Open ALIEN Discord server"));
 #endif
 
     AlienGui::Separator();
@@ -357,7 +357,7 @@ void BrowserWindow::processWorkspace()
             false,
             ImGuiWindowFlags_HorizontalScrollbar)) {
         if (ImGui::BeginTabBar("##Type", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-            if (ImGui::BeginTabItem("Simulations", nullptr, ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem(_("Simulations"), nullptr, ImGuiTabItemFlags_None)) {
                 if (_currentWorkspace.resourceType != NetworkResourceType_Simulation) {
                     _currentWorkspace.resourceType = NetworkResourceType_Simulation;
                     _selectedTreeTO = nullptr;
@@ -365,7 +365,7 @@ void BrowserWindow::processWorkspace()
                 processSimulationList();
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Genomes", nullptr, ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem(_("Genomes"), nullptr, ImGuiTabItemFlags_None)) {
                 if (_currentWorkspace.resourceType != NetworkResourceType_Genome) {
                     _currentWorkspace.resourceType = NetworkResourceType_Genome;
                     _selectedTreeTO = nullptr;
@@ -396,7 +396,7 @@ void BrowserWindow::processWorkspaceSelectionAndFilter()
                 AlienGui::SwitcherParameters()
                     .textWidth(48.0f)
                     .tooltip(Const::BrowserWorkspaceTooltip)
-                    .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
+                    .values({privateWorkspaceString, _("alien-project's workspace"), _("Public workspace")}),
                 &workspaceType_reordered)) {
             _selectedTreeTO = nullptr;
         }
@@ -440,22 +440,22 @@ void BrowserWindow::processUserList()
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         if (ImGui::BeginTabBar("##Simulators", ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-            if (ImGui::BeginTabItem("Simulators", nullptr, ImGuiTabItemFlags_None)) {
+            if (ImGui::BeginTabItem(_("Simulators"), nullptr, ImGuiTabItemFlags_None)) {
 
                 if (ImGui::BeginTable("Browser", 5, flags, ImVec2(-1, -1), 0.0f)) {
-                    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+                    ImGui::TableSetupColumn(_("Name"), ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
                     auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
                     ImGui::TableSetupColumn(
-                        isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
+                        isLoggedIn ? _("GPU model") : _("GPU (visible if logged in)"),
                         ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
                         styleRepository.scale(200.0f));
-                    ImGui::TableSetupColumn("Time spent", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
+                    ImGui::TableSetupColumn(_("Time spent"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(80.0f));
                     ImGui::TableSetupColumn(
-                        "Reactions received",
+                        _("Reactions received"),
                         ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
                         scale(120.0f));
                     ImGui::TableSetupColumn(
-                        "Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
+                        _("Reactions given"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
                     ImGui::TableSetupScrollFreeze(0, 1);
                     ImGui::TableHeadersRow();
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -551,7 +551,7 @@ void BrowserWindow::processStatusBar()
     statusItems.emplace_back("Server: " + NetworkService::get().getServerAddress());
 
     if (!NetworkService::get().getLoggedInUserName()) {
-        statusItems.emplace_back("In order to share and upvote simulations you need to log in.");
+        statusItems.emplace_back(_("In order to share and upvote simulations you need to log in."));
     }
 
     AlienGui::StatusBar(statusItems);
@@ -565,21 +565,21 @@ void BrowserWindow::processSimulationList()
         | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Browser", 11, flags, ImVec2(-1, -scale(WorkspaceBottomSpace)), 0.0f)) {
-        ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
-        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Desc);
-        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(140.0f), NetworkResourceColumnId_Likes);
+        ImGui::TableSetupColumn(_("Simulation"), ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
+        ImGui::TableSetupColumn(_("Description"), ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Desc);
+        ImGui::TableSetupColumn(_("Reactions"), ImGuiTableColumnFlags_WidthFixed, scale(140.0f), NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
-            "Timestamp",
+            _("Timestamp"),
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
             NetworkResourceColumnId_Timestamp);
-        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_UserName);
-        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
-        ImGui::TableSetupColumn("Width", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Width);
-        ImGui::TableSetupColumn("Height", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Height);
-        ImGui::TableSetupColumn("Objects", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
-        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
-        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
+        ImGui::TableSetupColumn(_("User name"), ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_UserName);
+        ImGui::TableSetupColumn(_("Downloads"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
+        ImGui::TableSetupColumn(_("Width"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Width);
+        ImGui::TableSetupColumn(_("Height"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Height);
+        ImGui::TableSetupColumn(_("Objects"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
+        ImGui::TableSetupColumn(_("File size"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
+        ImGui::TableSetupColumn(_("Version"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -673,19 +673,19 @@ void BrowserWindow::processGenomeList()
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Browser", 9, flags, ImVec2(0, -scale(WorkspaceBottomSpace)), 0.0f)) {
-        ImGui::TableSetupColumn("Genome", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
-        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Desc);
-        ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(140.0f), NetworkResourceColumnId_Likes);
+        ImGui::TableSetupColumn(_("Genome"), ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
+        ImGui::TableSetupColumn(_("Description"), ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Desc);
+        ImGui::TableSetupColumn(_("Reactions"), ImGuiTableColumnFlags_WidthFixed, scale(140.0f), NetworkResourceColumnId_Likes);
         ImGui::TableSetupColumn(
-            "Timestamp",
+            _("Timestamp"),
             ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_PreferSortDescending,
             scale(135.0f),
             NetworkResourceColumnId_Timestamp);
-        ImGui::TableSetupColumn("User name", ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_UserName);
-        ImGui::TableSetupColumn("Downloads", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
-        ImGui::TableSetupColumn("Cells", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
-        ImGui::TableSetupColumn("File size", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
-        ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
+        ImGui::TableSetupColumn(_("User name"), ImGuiTableColumnFlags_WidthFixed, scale(120.0f), NetworkResourceColumnId_UserName);
+        ImGui::TableSetupColumn(_("Downloads"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_NumDownloads);
+        ImGui::TableSetupColumn(_("Cells"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Particles);
+        ImGui::TableSetupColumn(_("File size"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_FileSize);
+        ImGui::TableSetupColumn(_("Version"), ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -779,7 +779,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         ImGui::SameLine();
         if (_currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType == WorkspaceType_Public) {
             AlienGui::Text(ICON_FA_SHARE_ALT);
-            AlienGui::Tooltip("Visible in the public workspace");
+            AlienGui::Tooltip(_("Visible in the public workspace"));
         }
         ImGui::SameLine();
 
@@ -789,7 +789,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
             font->Scale *= 0.65f;
             ImGui::PushFont(font);
             ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserResourceNewTextColor.Value);
-            AlienGui::Text("NEW");
+            AlienGui::Text(_("NEW"));
             ImGui::PopStyleColor();
             font->Scale = origSize;
             ImGui::PopFont();
@@ -807,9 +807,9 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         std::string resourceTypeString = [&] {
             if (treeTO->type == NetworkResourceType_Simulation) {
-                return folder.numLeafs == 1 ? "sim" : "sims";
+                return folder.numLeafs == 1 ? _("sim") : _("sims");
             } else {
-                return folder.numLeafs == 1 ? "genome" : "genomes";
+                return folder.numLeafs == 1 ? _("genome") : _("genomes");
             }
         }();
         AlienGui::Text("(" + std::to_string(folder.numLeafs) + " " + resourceTypeString + ")");
@@ -832,7 +832,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
         auto& leaf = treeTO->getLeaf();
 
         auto isAddReaction = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS));
-        AlienGui::Tooltip("Add a reaction", false);
+        AlienGui::Tooltip(_("Add a reaction"), false);
         if (isAddReaction) {
             _activateEmojiPopup = true;
             _emojiPopupTO = treeTO;
@@ -1062,7 +1062,7 @@ void BrowserWindow::processEmojiWindow()
         _activateEmojiPopup = false;
     }
     if (ImGui::BeginPopup("emoji")) {
-        ImGui::Text("Choose a reaction");
+        ImGui::Text("%s", _("Choose a reaction"));
         ImGui::Spacing();
         ImGui::Spacing();
         if (_showAllEmojis) {
@@ -1090,7 +1090,7 @@ void BrowserWindow::processEmojiWindow()
                 }
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
 
-                if (AlienGui::Button("More", ImGui::GetContentRegionAvail().x)) {
+                if (AlienGui::Button(_("More"), ImGui::GetContentRegionAvail().x)) {
                     _showAllEmojis = true;
                 }
             }
@@ -1134,7 +1134,7 @@ void BrowserWindow::processEmojiButton(int emojiType)
 void BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
 {
     auto isDownload = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
-    AlienGui::Tooltip("Download", false);
+    AlienGui::Tooltip(_("Download"), false);
     if (isDownload) {
         onDownloadResource(leaf);
     }

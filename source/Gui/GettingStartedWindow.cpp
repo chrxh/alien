@@ -18,7 +18,7 @@ void GettingStartedWindow::initIntern()
 
 
 GettingStartedWindow::GettingStartedWindow()
-    : AlienWindow("Getting started", "windows.getting started", true)
+    : AlienWindow(_("Getting started"), "windows.getting started", true)
 {}
 
 void GettingStartedWindow::shutdownIntern()
@@ -38,7 +38,7 @@ void GettingStartedWindow::processIntern()
          */
         drawHeading1("Introduction");
 
-        ImGui::Text("ALIEN is an artificial life and physics simulation tool based on a CUDA-powered 2D particle engine for soft bodies and fluids.");
+        ImGui::Text("%s", _("ALIEN is an artificial life and physics simulation tool based on a CUDA-powered 2D particle engine for soft bodies and fluids."));
         ImGui::Text(
             "Each particle can be equipped with higher-level functions including sensors, muscles, neurons, constructors, etc. that allow to "
             "mimic certain functionalities of biological cells or of robotic components. Multi-cellular organisms are simulated as networks of "
@@ -150,7 +150,7 @@ void GettingStartedWindow::processIntern()
 
         ImGui::Spacing();
         drawHeading2("World");
-        ImGui::Text("An ALIEN world is two-dimensional rectangular domain with periodic boundary conditions. The space is modeled as a continuum.");
+        ImGui::Text("%s", _("An ALIEN world is two-dimensional rectangular domain with periodic boundary conditions. The space is modeled as a continuum."));
 
         ImGui::Spacing();
         drawHeading2("Cell");
@@ -408,7 +408,7 @@ void GettingStartedWindow::processIntern()
     ImGui::EndChild();
 
     AlienGui::Separator();
-    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name(_("Show after startup")), _showAfterStartup);
 }
 
 void GettingStartedWindow::drawTitle()
@@ -416,46 +416,46 @@ void GettingStartedWindow::drawTitle()
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
 
     ImGui::PushFont(StyleRepository::get().getMediumFont());
-    ImGui::Text("What is ");
+    ImGui::Text("%s", _("What is "));
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
-    ImGui::Text("A");
+    ImGui::Text("%s", _("A"));
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienGui::MoveTickLeft();
     AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
-    ImGui::Text("rtificial ");
+    ImGui::Text("%s", _("rtificial "));
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
-    ImGui::Text("LI");
+    ImGui::Text("%s", _("LI"));
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienGui::MoveTickLeft();
     AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
-    ImGui::Text("fe ");
+    ImGui::Text("%s", _("fe "));
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
-    ImGui::Text("EN");
+    ImGui::Text("%s", _("EN"));
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienGui::MoveTickLeft();
     AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
-    ImGui::Text("vironment ?");
+    ImGui::Text("%s", _("vironment ?"));
     ImGui::PopFont();
 
     ImGui::PopStyleColor();

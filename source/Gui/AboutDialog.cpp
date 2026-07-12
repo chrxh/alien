@@ -8,19 +8,19 @@
 #include "StyleRepository.h"
 
 AboutDialog::AboutDialog()
-    : AlienDialog("About")
+    : AlienDialog(_("About"))
 {}
 
 void AboutDialog::processIntern()
 {
     ImGui::Text(
-        "Artificial Life Environment, version %s\n\nis an open source project initiated and maintained by\nChristian Heinemann.",
+        _("Artificial Life Environment, version %s\n\nis an open source project initiated and maintained by\nChristian Heinemann."),
         Const::ProgramVersion.c_str());
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         close();
     }
     ImGui::SetItemDefaultFocus();

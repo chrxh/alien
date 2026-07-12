@@ -53,7 +53,7 @@ void PatternEditorWindow::processIntern()
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
         onOpenPattern();
     }
-    AlienGui::Tooltip("Open pattern");
+    AlienGui::Tooltip(_("Open pattern"));
 
     //save button
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
@@ -62,7 +62,7 @@ void PatternEditorWindow::processIntern()
         onSavePattern();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Save pattern");
+    AlienGui::Tooltip(_("Save pattern"));
 
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
@@ -74,7 +74,7 @@ void PatternEditorWindow::processIntern()
         onCopy();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Copy pattern");
+    AlienGui::Tooltip(_("Copy pattern"));
 
     //paste button
     ImGui::SameLine();
@@ -83,7 +83,7 @@ void PatternEditorWindow::processIntern()
         onPaste();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Paste pattern");
+    AlienGui::Tooltip(_("Paste pattern"));
 
     //delete button
     ImGui::SameLine();
@@ -92,7 +92,7 @@ void PatternEditorWindow::processIntern()
         onDelete();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Delete Pattern");
+    AlienGui::Tooltip(_("Delete Pattern"));
 
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
@@ -104,7 +104,7 @@ void PatternEditorWindow::processIntern()
         EditorController::get().onInspectSelectedObjects();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Inspect Objects");
+    AlienGui::Tooltip(_("Inspect Objects"));
 
     //inspect genomes button
     ImGui::SameLine();
@@ -113,7 +113,7 @@ void PatternEditorWindow::processIntern()
         EditorController::get().onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Inspect genomes");
+    AlienGui::Tooltip(_("Inspect genomes"));
 
     //inspect creatures button
     ImGui::SameLine();
@@ -122,7 +122,7 @@ void PatternEditorWindow::processIntern()
         EditorController::get().onInspectSelectedCreatures();
     }
     ImGui::EndDisabled();
-    AlienGui::Tooltip("Inspect creatures");
+    AlienGui::Tooltip(_("Inspect creatures"));
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
@@ -133,25 +133,25 @@ void PatternEditorWindow::processIntern()
 
         auto centerPosX = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterPosX : selectionData.centerPosX;
         auto origCenterPosX = centerPosX;
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position X").textWidth(RightColumnWidth).format("%.3f"), centerPosX);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Position X")).textWidth(RightColumnWidth).format("%.3f"), centerPosX);
 
         auto centerPosY = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterPosY : selectionData.centerPosY;
         auto origCenterPosY = centerPosY;
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position Y").textWidth(RightColumnWidth).format("%.3f"), centerPosY);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Position Y")).textWidth(RightColumnWidth).format("%.3f"), centerPosY);
 
         auto centerVelX = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterVelX : selectionData.centerVelX;
         auto origCenterVelX = centerVelX;
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Velocity X").textWidth(RightColumnWidth).step(0.1f).format("%.3f"), centerVelX);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Velocity X")).textWidth(RightColumnWidth).step(0.1f).format("%.3f"), centerVelX);
 
         auto centerVelY = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterVelY : selectionData.centerVelY;
         auto origCenterVelY = centerVelY;
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Velocity Y").textWidth(RightColumnWidth).step(0.1f).format("%.3f"), centerVelY);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Velocity Y")).textWidth(RightColumnWidth).step(0.1f).format("%.3f"), centerVelY);
 
         AlienGui::Group(AlienGui::GroupParameters().text("Center rotation"));
         auto origAngle = _angle;
         AlienGui::SliderInputFloat(
             AlienGui::SliderInputFloatParameters()
-                .name("Angle")
+                .name(_("Angle"))
                 .textWidth(RightColumnWidth)
                 .inputWidth(StyleRepository::get().scale(50.0f))
                 .min(-180.0f)
@@ -160,7 +160,7 @@ void PatternEditorWindow::processIntern()
             _angle);
 
         auto origAngularVel = _angularVel;
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angular velocity").textWidth(RightColumnWidth).step(0.01f).format("%.2f"), _angularVel);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Angular velocity")).textWidth(RightColumnWidth).step(0.01f).format("%.2f"), _angularVel);
 
         if (centerPosX != origCenterPosX || centerPosY != origCenterPosY) {
             ShallowUpdateSelectionData updateData;
@@ -215,38 +215,38 @@ void PatternEditorWindow::processIntern()
             _SimulationFacade::get()->uniformVelocitiesForSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
         ImGui::EndDisabled();
-        AlienGui::Tooltip("Make uniform velocities");
+        AlienGui::Tooltip(_("Make uniform velocities"));
 
         ImGui::SameLine();
         ImGui::BeginDisabled(EditorModel::get().isCellSelectionEmpty());
         if (ImGui::Button(ICON_FA_BALANCE_SCALE)) {
             _SimulationFacade::get()->relaxSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
-        AlienGui::Tooltip("Release stresses");
+        AlienGui::Tooltip(_("Release stresses"));
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_TINT)) {
             onMakeSticky();
         }
-        AlienGui::Tooltip("Make sticky");
+        AlienGui::Tooltip(_("Make sticky"));
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_TINT_SLASH)) {
             onRemoveStickiness();
         }
-        AlienGui::Tooltip("Make unsticky");
+        AlienGui::Tooltip(_("Make unsticky"));
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_LINK)) {
             onSetBarrier(true);
         }
-        AlienGui::Tooltip("Fix");
+        AlienGui::Tooltip(_("Fix"));
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_UNLINK)) {
             onSetBarrier(false);
         }
-        AlienGui::Tooltip("Unfix");
+        AlienGui::Tooltip(_("Unfix"));
         ImGui::EndDisabled();
 
         _lastSelection = selection;
@@ -255,7 +255,7 @@ void PatternEditorWindow::processIntern()
 
     AlienGui::Separator();
     auto rolloutToClusters = EditorModel::get().isRolloutToClusters();
-    if (AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Roll out changes to cell networks"), rolloutToClusters)) {
+    if (AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name(_("Roll out changes to cell networks")), rolloutToClusters)) {
         EditorModel::get().setRolloutToClusters(rolloutToClusters);
         _angle = 0;
         _angularVel = 0;
@@ -355,7 +355,7 @@ void PatternEditorWindow::onDelete()
 }
 
 PatternEditorWindow::PatternEditorWindow()
-    : AlienWindow("Pattern editor", "editors.pattern editor", true)
+    : AlienWindow(_("Pattern editor"), "editors.pattern editor", true)
 {}
 
 void PatternEditorWindow::shutdownIntern()
