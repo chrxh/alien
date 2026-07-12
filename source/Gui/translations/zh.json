@@ -1194,5 +1194,6 @@
   "public": "公开",
   "private": "私有",
   "alien-project": "alien-project",
-  "simulations": "仿真"
+  "simulations": "仿真",
+  "Server: ": "服务器："
 }
