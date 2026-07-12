@@ -2,6 +2,8 @@ target_sources(alien
 PUBLIC
     AboutDialog.cpp
     AboutDialog.h
+    TranslationService.cpp
+    TranslationService.h
     ActivateUserDialog.cpp
     ActivateUserDialog.h
     AlienDialog.cpp
