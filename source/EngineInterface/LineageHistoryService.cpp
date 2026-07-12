@@ -61,7 +61,6 @@ LineageSample LineageHistoryService::mergeSamples(LineageSample const& earlierSa
         result.numGenomes = (lhs.numGenomes + rhs.numGenomes) / 2;
         result.sumCreatureCells = (lhs.sumCreatureCells + rhs.sumCreatureCells) / 2;
         result.sumCreatureGenerations = (lhs.sumCreatureGenerations + rhs.sumCreatureGenerations) / 2;
-        result.sumAccumulatedMutations = (lhs.sumAccumulatedMutations + rhs.sumAccumulatedMutations) / 2;
         result.sumGenomeNodes = (lhs.sumGenomeNodes + rhs.sumGenomeNodes) / 2;
         result.sumMutationRates = (lhs.sumMutationRates + rhs.sumMutationRates) / 2;
         result.sumCreatureEnergy = (lhs.sumCreatureEnergy + rhs.sumCreatureEnergy) / 2;

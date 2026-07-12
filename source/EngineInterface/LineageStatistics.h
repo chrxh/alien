@@ -11,7 +11,6 @@ struct LineageStatisticsEntry
     uint32_t numGenomes = 0;
     float sumCreatureCells = 0;
     float sumCreatureGenerations = 0;
-    float sumAccumulatedMutations = 0;
     float sumGenomeNodes = 0;
     float sumMutationRates = 0;
     float sumCreatureEnergy = 0;

@@ -11,8 +11,9 @@ class EvolutionStatisticsTests : public MutationTestsBase
 
 TEST_F(EvolutionStatisticsTests, basicCounts)
 {
+    auto genome42 = GenomeDesc().genes({GeneDesc().nodes({NodeDesc().color(2), NodeDesc().color(5)})});
     auto data = Desc()
-                    .addCreature({ObjectDesc().id(1), ObjectDesc().id(2).pos({1.0f, 0.0f})}, CreatureDesc().lineageId(42).generation(3), GenomeDesc())
+                    .addCreature({ObjectDesc().id(1), ObjectDesc().id(2).pos({1.0f, 0.0f})}, CreatureDesc().lineageId(42).generation(3), genome42)
                     .addCreature({ObjectDesc().id(3).pos({10.0f, 10.0f})}, CreatureDesc().lineageId(43).generation(5), GenomeDesc());
 
     _simulationFacade->setSimulationData(data);
@@ -47,7 +48,7 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
     EXPECT_FLOAT_EQ(2.0f, entry42->sumCreatureCells);
     EXPECT_FLOAT_EQ(3.0f, entry42->sumCreatureGenerations);
     EXPECT_GT(entry42->sumCreatureEnergy, 0.0f);
-    EXPECT_NE(0, entry42->colorBitset);
+    EXPECT_EQ((1u << 2) | (1u << 5), entry42->colorBitset);  //derived from genome node colors, not cell colors
 
     auto const* entry43 = findEntry(43);
     ASSERT_TRUE(entry43 != nullptr);

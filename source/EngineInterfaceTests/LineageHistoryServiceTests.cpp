@@ -51,7 +51,6 @@ TEST_F(LineageHistoryServiceTests, mergeSamples_commonIds)
     entry1.numGenomes = 8;
     entry1.sumCreatureCells = 100;
     entry1.sumCreatureGenerations = 50;
-    entry1.sumAccumulatedMutations = 20;
     entry1.sumGenomeNodes = 300;
     entry1.sumMutationRates = 4;
     entry1.sumCreatureEnergy = 1000;
@@ -64,7 +63,6 @@ TEST_F(LineageHistoryServiceTests, mergeSamples_commonIds)
     entry2.numGenomes = 12;
     entry2.sumCreatureCells = 200;
     entry2.sumCreatureGenerations = 70;
-    entry2.sumAccumulatedMutations = 40;
     entry2.sumGenomeNodes = 500;
     entry2.sumMutationRates = 6;
     entry2.sumCreatureEnergy = 3000;
@@ -91,7 +89,6 @@ TEST_F(LineageHistoryServiceTests, mergeSamples_commonIds)
     EXPECT_EQ(10, merged.numGenomes);
     EXPECT_FLOAT_EQ(150, merged.sumCreatureCells);
     EXPECT_FLOAT_EQ(60, merged.sumCreatureGenerations);
-    EXPECT_FLOAT_EQ(30, merged.sumAccumulatedMutations);
     EXPECT_FLOAT_EQ(400, merged.sumGenomeNodes);
     EXPECT_FLOAT_EQ(5, merged.sumMutationRates);
     EXPECT_FLOAT_EQ(2000, merged.sumCreatureEnergy);
