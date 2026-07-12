@@ -413,32 +413,32 @@ void GettingStartedWindow::drawTitle()
     ImGui::Text("%s", _("What is "));
     ImGui::PopFont();
 
-    ImGui::SameLine();
+    ImGui::SameLine(0, 0);
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("%s", _("A"));
     ImGui::PopFont();
 
-    ImGui::SameLine();
+    ImGui::SameLine(0, 0);
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("%s", _("rtificial "));
     ImGui::PopFont();
 
-    ImGui::SameLine();
+    ImGui::SameLine(0, 0);
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("%s", _("LI"));
     ImGui::PopFont();
 
-    ImGui::SameLine();
+    ImGui::SameLine(0, 0);
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("%s", _("fe "));
     ImGui::PopFont();
 
-    ImGui::SameLine();
+    ImGui::SameLine(0, 0);
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("%s", _("EN"));
     ImGui::PopFont();
 
-    ImGui::SameLine();
+    ImGui::SameLine(0, 0);
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("%s", _("vironment ?"));
     ImGui::PopFont();
