@@ -34,10 +34,9 @@ public:
     std::vector<std::string> getValue(std::string const& key, std::vector<std::string> const& defaultValue);
     void setValue(std::string const& key, std::vector<std::string> value);
 
-    //ImGui window/layout state persistence (stored as a single value, no imgui.ini file)
-    void loadImGuiSettings(std::string const& defaultSettings);  //disables the imgui.ini file and loads the stored state
-    void saveImGuiSettingsIfDirty();                             //call once per frame; persists only when ImGui marked its state dirty
-    void flushImGuiSettings();                                   //call on shutdown; persists the current state unconditionally
+    void loadImGuiSettings(std::string const& defaultSettings);
+    void saveImGuiSettingsIfDirty();                             // Call once per frame; persists only when ImGui marked its state dirty
+    void saveImGuiSettings();
 
 private:
     GlobalSettings();
