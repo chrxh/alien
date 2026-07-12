@@ -12,17 +12,18 @@
 #include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
-#include <EngineInterface/Colors.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
 #include "StyleRepository.h"
 
 namespace
 {
-    auto constexpr HeaderCardHeight = 112.0f;
     auto constexpr SparklineWidth = 90.0f;
     auto constexpr SparklineHeight = 26.0f;
     auto constexpr ColorChipSize = 22.0f;
+    auto constexpr SwatchSize = 11.0f;
+    auto constexpr SwatchGap = 3.0f;
     auto constexpr PlotLabelColumnWidth = 150.0f;
     auto constexpr PlotHeight = 60.0f;
     auto constexpr PlotHeightWithAxis = 80.0f;
@@ -94,16 +95,15 @@ namespace
         return 0;
     }
 
-    float drawColorSwatches(ImDrawList* drawList, ImVec2 const& pos, int colorBitset, float lineHeight)
+    float drawColorSwatches(ImDrawList* drawList, ImVec2 const& pos, int colorBitset, float lineHeight, std::array<uint32_t, MAX_COLORS> const& cellColors)
     {
-        auto swatchSize = scale(11.0f);
-        auto gap = scale(3.0f);
+        auto swatchSize = scale(SwatchSize);
+        auto gap = scale(SwatchGap);
         auto offsetY = (lineHeight - swatchSize) / 2;
         auto x = pos.x;
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (colorBitset & (1 << i)) {
-                drawList->AddRectFilled(
-                    {x, pos.y + offsetY}, {x + swatchSize, pos.y + offsetY + swatchSize}, toImColor(Const::DefaultCustomizationColors[i]), scale(3.0f));
+                drawList->AddRectFilled({x, pos.y + offsetY}, {x + swatchSize, pos.y + offsetY + swatchSize}, toImColor(cellColors.at(i)), scale(3.0f));
                 x += swatchSize + gap;
             }
         }
@@ -152,6 +152,7 @@ void EvolutionDashboardWindow::shutdownIntern()
 
 void EvolutionDashboardWindow::processIntern()
 {
+    updateCellColors();
     processHeader();
     processFilterBar();
 
@@ -168,29 +169,38 @@ void EvolutionDashboardWindow::processIntern()
     ImGui::EndChild();
 }
 
-void EvolutionDashboardWindow::processHeader()
+void EvolutionDashboardWindow::updateCellColors()
 {
-    auto spacing = ImGui::GetStyle().ItemSpacing.x;
-    auto cardWidth = (ImGui::GetContentRegionAvail().x - 4 * spacing) / 6;
-
-    processKpiCard("SUM ENERGY", "1.24 M", 0.8f, 0, cardWidth);
-    ImGui::SameLine();
-    processKpiCard("EXTERNAL ENERGY", "356 K", -1.2f, 1, cardWidth);
-    ImGui::SameLine();
-    processEntitiesCard(cardWidth * 2);
-    ImGui::SameLine();
-    processKpiCard("LINEAGES", StringHelper::format(toFloat(_lineages.size()), 0), 2.4f, 2, cardWidth);
-    ImGui::SameLine();
-    processKpiCard("CREATURES", formatMetricValue(_allLineages.currentValues.at(0), 0), 0.5f, 3, cardWidth);
+    auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        _cellColors.at(i) = customizationColors.values[i].toRgbColor();
+    }
 }
 
-void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::string const& value, float delta, int sparklineIndex, float width)
+void EvolutionDashboardWindow::processHeader()
+{
+    auto const& style = ImGui::GetStyle();
+    auto cardWidth = (ImGui::GetContentRegionAvail().x - 4 * style.ItemSpacing.x) / 6;
+    auto cardHeight =
+        style.WindowPadding.y * 2 + ImGui::GetTextLineHeight() * 3 + StyleRepository::get().getLargeFont()->FontSize + style.ItemSpacing.y * 3 + scale(6.0f);
+
+    processEntitiesCard(cardWidth * 2, cardHeight);
+    ImGui::SameLine();
+    processKpiCard("SUM ENERGY", "1.24 M", 0.8f, 0, cardWidth, cardHeight);
+    ImGui::SameLine();
+    processKpiCard("EXTERNAL ENERGY", "356 K", -1.2f, 1, cardWidth, cardHeight);
+    ImGui::SameLine();
+    processKpiCard("LINEAGES", StringHelper::format(toFloat(_lineages.size()), 0), 2.4f, 2, cardWidth, cardHeight);
+    ImGui::SameLine();
+    processKpiCard("CREATURES", formatMetricValue(_allLineages.currentValues.at(0), 0), 0.5f, 3, cardWidth, cardHeight);
+}
+
+void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::string const& value, float delta, int sparklineIndex, float width, float height)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)CardBackgroundColor);
     ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)CardBorderColor);
-    if (ImGui::BeginChild(
-            ("##card" + label).c_str(), {width, scale(HeaderCardHeight)}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+    if (ImGui::BeginChild(("##card" + label).c_str(), {width, height}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text(label);
         ImGui::PopStyleColor();
@@ -206,7 +216,7 @@ void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::str
         ImGui::PopStyleColor();
 
         auto const& sparkline = _headerSparklines.at(sparklineIndex);
-        ImGui::SetCursorPos({width - scale(SparklineWidth + 12.0f), scale(HeaderCardHeight - SparklineHeight - 12.0f)});
+        ImGui::SetCursorPos({width - scale(SparklineWidth + 12.0f), height - scale(SparklineHeight + 12.0f)});
         ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
         ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0, 0, 0, 0));
         ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0, 0, 0, 0));
@@ -228,12 +238,12 @@ void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::str
     ImGui::PopStyleVar();
 }
 
-void EvolutionDashboardWindow::processEntitiesCard(float width)
+void EvolutionDashboardWindow::processEntitiesCard(float width, float height)
 {
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)CardBackgroundColor);
     ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)CardBorderColor);
-    if (ImGui::BeginChild("##cardEntities", {width, scale(HeaderCardHeight)}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+    if (ImGui::BeginChild("##cardEntities", {width, height}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text("ENTITIES");
         ImGui::PopStyleColor();
@@ -280,7 +290,7 @@ void EvolutionDashboardWindow::processFilterBar()
             _colorFilter ^= 1 << i;
         }
         auto active = (_colorFilter & (1 << i)) != 0;
-        auto color = toImColor(Const::DefaultCustomizationColors[i], active ? 1.0f : 0.2f);
+        auto color = toImColor(_cellColors.at(i), active ? 1.0f : 0.2f);
         drawList->AddRectFilled(pos, {pos.x + chipSize, pos.y + chipSize}, color, scale(5.0f));
         if (active) {
             drawList->AddRect(
@@ -310,7 +320,16 @@ void EvolutionDashboardWindow::processLineageTable()
         for (auto const& metric : Metrics) {
             ImGui::TableSetupColumn(metric.tableHeader, ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
         }
-        ImGui::TableHeadersRow();
+
+        //header row with centered labels
+        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+        for (int column = 0; column < NumMetrics + 1; ++column) {
+            ImGui::TableSetColumnIndex(column);
+            auto columnName = ImGui::TableGetColumnName(column);
+            auto textWidth = ImGui::CalcTextSize(columnName).x;
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.0f, (ImGui::GetContentRegionAvail().x - textWidth) / 2));
+            ImGui::TextUnformatted(columnName);
+        }
 
         //summary row
         ImGui::TableNextRow();
@@ -329,6 +348,13 @@ void EvolutionDashboardWindow::processLineageTable()
 
         //lineage rows
         auto drawList = ImGui::GetWindowDrawList();
+        auto maxNumColors = 1;
+        for (auto const& lineage : _lineages) {
+            if (_colorFilter & lineage.colorBitset) {
+                maxNumColors = std::max(maxNumColors, std::popcount(static_cast<unsigned>(lineage.colorBitset)));
+            }
+        }
+        auto swatchSlotWidth = toFloat(maxNumColors) * (scale(SwatchSize) + scale(SwatchGap));
         for (auto const& lineage : _lineages) {
             if ((_colorFilter & lineage.colorBitset) == 0) {
                 continue;
@@ -350,8 +376,8 @@ void EvolutionDashboardWindow::processLineageTable()
                 }
             }
             ImGui::SameLine(0, 0);
-            auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight());
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth + scale(4.0f));
+            drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchSlotWidth + scale(4.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
             for (int i = 0; i < NumMetrics; ++i) {
                 ImGui::TableSetColumnIndex(i + 1);
@@ -376,12 +402,17 @@ void EvolutionDashboardWindow::processTimelineHeader()
 {
     ImGui::Spacing();
     AlienGui::Switcher(
-        AlienGui::SwitcherParameters().name("Mode").textWidth(scale(120.0f)).values({"Real-time", "Entire history", "Last X steps"}), &_timelineMode);
+        AlienGui::SwitcherParameters().name("Mode").width(260.0f).textWidth(45.0f).values({"Real-time", "Entire history", "Last X steps"}), &_timelineMode);
+    ImGui::SameLine(0, scale(20.0f));
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Scale").width(220.0f).textWidth(45.0f).values({"Linear", "Logarithmic"}), &_plotScale);
     if (_timelineMode == TimelineMode_LastSteps) {
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Steps").textWidth(scale(120.0f)), _lastSteps);
-        validateAndCorrect();
+        ImGui::SameLine(0, scale(20.0f));
+        if (ImGui::BeginChild("##lastSteps", {scale(200.0f), ImGui::GetFrameHeight()})) {
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Steps").textWidth(45.0f), _lastSteps);
+            validateAndCorrect();
+        }
+        ImGui::EndChild();
     }
-    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Scale").textWidth(scale(120.0f)).values({"Linear", "Logarithmic"}), &_plotScale);
 
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
     AlienGui::Text("TIMELINE FILTER");
@@ -395,7 +426,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
             if (!_selectedLineageIds.contains(lineage.id)) {
                 continue;
             }
-            auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight());
+            auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth + scale(4.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
             ImGui::SameLine(0, scale(14.0f));
@@ -484,7 +515,7 @@ void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTim
         }
         for (auto const* lineage : plottedLineages) {
             ImGui::PushID(lineage->id + 1);
-            auto color = lineage->id == -1 ? SumSeriesColor : toImColor(Const::DefaultCustomizationColors[getFirstColor(lineage->colorBitset)]);
+            auto color = lineage->id == -1 ? SumSeriesColor : toImColor(_cellColors.at(getFirstColor(lineage->colorBitset)));
             auto const& series = lineage->series.at(metricIndex);
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
             ImPlot::PlotLine("##line", _timePoints.data() + offset, series.data() + offset, count);
