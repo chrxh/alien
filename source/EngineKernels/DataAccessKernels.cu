@@ -300,6 +300,7 @@ namespace
             creatureTO.mutationState = creature->mutationState;
             creatureTO.lineageId = creature->lineageId;
             creatureTO.accumulatedMutations = creature->accumulatedMutations;
+            creatureTO.accumulatedMutationsInLineage = creature->accumulatedMutationsInLineage;
             creatureTO.headUpdateId = creature->headUpdateId;
             creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
 
