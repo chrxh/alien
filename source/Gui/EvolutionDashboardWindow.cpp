@@ -1,6 +1,7 @@
 #include "EvolutionDashboardWindow.h"
 
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <random>
 #include <cstdio>
@@ -18,7 +19,7 @@
 
 namespace
 {
-    auto constexpr HeaderCardHeight = 92.0f;
+    auto constexpr HeaderCardHeight = 112.0f;
     auto constexpr SparklineWidth = 90.0f;
     auto constexpr SparklineHeight = 26.0f;
     auto constexpr ColorChipSize = 22.0f;
@@ -81,6 +82,32 @@ namespace
     {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(text.c_str()).x);
         ImGui::TextUnformatted(text.c_str());
+    }
+
+    int getFirstColor(int colorBitset)
+    {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (colorBitset & (1 << i)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    float drawColorSwatches(ImDrawList* drawList, ImVec2 const& pos, int colorBitset, float lineHeight)
+    {
+        auto swatchSize = scale(11.0f);
+        auto gap = scale(3.0f);
+        auto offsetY = (lineHeight - swatchSize) / 2;
+        auto x = pos.x;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            if (colorBitset & (1 << i)) {
+                drawList->AddRectFilled(
+                    {x, pos.y + offsetY}, {x + swatchSize, pos.y + offsetY + swatchSize}, toImColor(Const::DefaultCustomizationColors[i]), scale(3.0f));
+                x += swatchSize + gap;
+            }
+        }
+        return x - pos.x;
     }
 
     std::vector<double> createRandomWalk(std::mt19937& rng, int count, double baseValue, double volatility, double trend)
@@ -162,7 +189,8 @@ void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::str
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)CardBackgroundColor);
     ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)CardBorderColor);
-    if (ImGui::BeginChild(("##card" + label).c_str(), {width, scale(HeaderCardHeight)}, true)) {
+    if (ImGui::BeginChild(
+            ("##card" + label).c_str(), {width, scale(HeaderCardHeight)}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text(label);
         ImGui::PopStyleColor();
@@ -205,7 +233,7 @@ void EvolutionDashboardWindow::processEntitiesCard(float width)
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)CardBackgroundColor);
     ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)CardBorderColor);
-    if (ImGui::BeginChild("##cardEntities", {width, scale(HeaderCardHeight)}, true)) {
+    if (ImGui::BeginChild("##cardEntities", {width, scale(HeaderCardHeight)}, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text("ENTITIES");
         ImGui::PopStyleColor();
@@ -275,12 +303,12 @@ void EvolutionDashboardWindow::processFilterBar()
 
 void EvolutionDashboardWindow::processLineageTable()
 {
-    auto flags = ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg;
+    auto flags = ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable;
     if (ImGui::BeginTable("##lineages", NumMetrics + 1, flags)) {
-        ImGui::TableSetupScrollFreeze(0, 2);
-        ImGui::TableSetupColumn("Lineage", ImGuiTableColumnFlags_WidthFixed, scale(130.0f));
+        ImGui::TableSetupScrollFreeze(1, 2);
+        ImGui::TableSetupColumn("Lineage", ImGuiTableColumnFlags_WidthFixed, scale(150.0f));
         for (auto const& metric : Metrics) {
-            ImGui::TableSetupColumn(metric.tableHeader);
+            ImGui::TableSetupColumn(metric.tableHeader, ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
         }
         ImGui::TableHeadersRow();
 
@@ -302,7 +330,7 @@ void EvolutionDashboardWindow::processLineageTable()
         //lineage rows
         auto drawList = ImGui::GetWindowDrawList();
         for (auto const& lineage : _lineages) {
-            if ((_colorFilter & (1 << lineage.color)) == 0) {
+            if ((_colorFilter & lineage.colorBitset) == 0) {
                 continue;
             }
             ImGui::PushID(lineage.id);
@@ -322,15 +350,8 @@ void EvolutionDashboardWindow::processLineageTable()
                 }
             }
             ImGui::SameLine(0, 0);
-            auto pos = ImGui::GetCursorScreenPos();
-            auto swatchSize = scale(11.0f);
-            auto offsetY = (ImGui::GetTextLineHeight() - swatchSize) / 2;
-            drawList->AddRectFilled(
-                {pos.x, pos.y + offsetY},
-                {pos.x + swatchSize, pos.y + offsetY + swatchSize},
-                toImColor(Const::DefaultCustomizationColors[lineage.color]),
-                scale(3.0f));
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchSize + scale(7.0f));
+            auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight());
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth + scale(4.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
             for (int i = 0; i < NumMetrics; ++i) {
                 ImGui::TableSetColumnIndex(i + 1);
@@ -374,15 +395,8 @@ void EvolutionDashboardWindow::processTimelineHeader()
             if (!_selectedLineageIds.contains(lineage.id)) {
                 continue;
             }
-            auto pos = ImGui::GetCursorScreenPos();
-            auto swatchSize = scale(10.0f);
-            auto offsetY = (ImGui::GetTextLineHeight() - swatchSize) / 2;
-            drawList->AddRectFilled(
-                {pos.x, pos.y + offsetY},
-                {pos.x + swatchSize, pos.y + offsetY + swatchSize},
-                toImColor(Const::DefaultCustomizationColors[lineage.color]),
-                scale(3.0f));
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchSize + scale(5.0f));
+            auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight());
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth + scale(4.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
             ImGui::SameLine(0, scale(14.0f));
         }
@@ -470,7 +484,7 @@ void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTim
         }
         for (auto const* lineage : plottedLineages) {
             ImGui::PushID(lineage->id + 1);
-            auto color = lineage->id == -1 ? SumSeriesColor : toImColor(Const::DefaultCustomizationColors[lineage->color]);
+            auto color = lineage->id == -1 ? SumSeriesColor : toImColor(Const::DefaultCustomizationColors[getFirstColor(lineage->colorBitset)]);
             auto const& series = lineage->series.at(metricIndex);
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
             ImPlot::PlotLine("##line", _timePoints.data() + offset, series.data() + offset, count);
@@ -503,6 +517,7 @@ void EvolutionDashboardWindow::generateDummyData()
 {
     std::mt19937 rng(20260711);
     std::uniform_int_distribution<int> colorDistribution(0, MAX_COLORS - 1);
+    std::uniform_int_distribution<int> numColorsDistribution(1, 3);
     std::uniform_real_distribution<double> trendDistribution(-0.002, 0.004);
 
     _timePoints.clear();
@@ -515,7 +530,10 @@ void EvolutionDashboardWindow::generateDummyData()
     for (auto id : lineageIds) {
         DummyLineage lineage;
         lineage.id = id;
-        lineage.color = colorDistribution(rng);
+        auto numColors = numColorsDistribution(rng);
+        while (std::popcount(static_cast<unsigned>(lineage.colorBitset)) < numColors) {
+            lineage.colorBitset |= 1 << colorDistribution(rng);
+        }
         for (int i = 0; i < NumMetrics; ++i) {
             lineage.series.at(i) = createRandomWalk(rng, NumTimePoints, Metrics[i].baseValue, 0.015, trendDistribution(rng));
             lineage.currentValues.at(i) = lineage.series.at(i).back();
