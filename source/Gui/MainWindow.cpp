@@ -20,7 +20,6 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/AlienExceptions.h>
-#include <Base/GlobalSettings.h>
 #include <Base/Resources.h>
 
 #include <Network/NetworkService.h>
@@ -37,7 +36,6 @@
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
 #include "CreatorWindow.h"
-#include "DefaultImguiSettings.h"
 #include "DelayedExecutionController.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
@@ -236,8 +234,6 @@ void _MainWindow::initGlfwAndOpenGL()
     ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends
     ImGui_ImplOpenGL3_Init(glslVersion);
-
-    GlobalSettings::get().loadImGuiSettings(Const::DefaultImguiSettings);
 }
 
 void _MainWindow::initGlad()
