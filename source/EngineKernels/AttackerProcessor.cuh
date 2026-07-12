@@ -211,6 +211,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                         energyToTransfer *= (1.0f - cudaSimulationParameters.attackerRelatedLineageProtection.value[object->color]);
                     }
 
+                    // There is a slight systematic disadvantage for smaller creatures. This factor balances that out.
+                    if (otherCell->creature->numCells > cell->creature->numCells) {
+                        energyToTransfer *= 0.7f;
+                    }
+
                     if (energyToTransfer > NEAR_ZERO) {
 
                         // Notify attacked cell
