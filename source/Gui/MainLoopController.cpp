@@ -347,7 +347,7 @@ void MainLoopController::processMenubar()
     AlienGui::MenuShutdownButton([&] { ExitDialog::get().open(); });
     ImGui::Dummy(ImVec2(scale(10.0f), 0.0f));
 
-    AlienGui::BeginMenu(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuOpened);
+    AlienGui::BeginMenu(std::string(" " ICON_FA_GAMEPAD "  ") + _("Simulation"), _simulationMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name(_("New")).keyCtrl(true).key(ImGuiKey_N), [&] { NewSimulationDialog::get().open(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name(_("Open")).keyCtrl(true).key(ImGuiKey_O), [&] { FileTransferController::get().onOpenSimulationDialog(); });
@@ -365,7 +365,7 @@ void MainLoopController::processMenubar()
     });
     AlienGui::EndMenu();
 
-    AlienGui::BeginMenu(" " ICON_FA_GLOBE "  Network ", _networkMenuOpened);
+    AlienGui::BeginMenu(std::string(" " ICON_FA_GLOBE "  ") + _("Network"), _networkMenuOpened);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name(_("Browser")).keyAlt(true).key(ImGuiKey_W).closeMenuWhenItemClicked(false).selected(BrowserWindow::get().isOn()),
         [&] { BrowserWindow::get().setOn(!BrowserWindow::get().isOn()); });
@@ -391,7 +391,7 @@ void MainLoopController::processMenubar()
     });
     AlienGui::EndMenu();
 
-    AlienGui::BeginMenu(" " ICON_FA_WINDOW_RESTORE "  Windows ", _windowMenuOpened);
+    AlienGui::BeginMenu(std::string(" " ICON_FA_WINDOW_RESTORE "  ") + _("Windows"), _windowMenuOpened);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name(_("Temporal control"))
@@ -427,7 +427,7 @@ void MainLoopController::processMenubar()
         [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
     AlienGui::EndMenu();
 
-    AlienGui::BeginMenu(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuOpened);
+    AlienGui::BeginMenu(std::string(" " ICON_FA_PEN_ALT "  ") + _("Editor"), _editorMenuOpened);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name(_("Genome editor"))
@@ -532,7 +532,7 @@ void MainLoopController::processMenubar()
         [&] { EditorController::get().onDelete(); });
     AlienGui::EndMenu();
 
-    AlienGui::BeginMenu(" " ICON_FA_EYE "  View ", _viewMenuOpened);
+    AlienGui::BeginMenu(std::string(" " ICON_FA_EYE "  ") + _("View"), _viewMenuOpened);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name(_("Cell info overlay"))
@@ -562,12 +562,12 @@ void MainLoopController::processMenubar()
         [&] { SimulationView::get().setRenderSimulation(!SimulationView::get().isRenderSimulation()); });
     AlienGui::EndMenu();
 
-    AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
+    AlienGui::BeginMenu(std::string(" " ICON_FA_TOOLS "  ") + _("Tools"), _toolsMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name(_("Mass operations")).keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name(_("Image converter")).keyAlt(true).key(ImGuiKey_C), [&] { ImageToPatternDialog::get().show(); });
     AlienGui::EndMenu();
 
-    AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);
+    AlienGui::BeginMenu(std::string(" " ICON_FA_COG "  ") + _("Settings"), _settingsMenuOpened, false);
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name(_("Save on exit")).selected(_saveOnExit).closeMenuWhenItemClicked(false), [&] { _saveOnExit = !_saveOnExit; });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name(_("CUDA settings")), [&] { GpuSettingsDialog::get().open(); });
@@ -575,7 +575,7 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name(_("Network settings")).keyAlt(true).key(ImGuiKey_K), [&] { NetworkSettingsDialog::get().open(); });
     AlienGui::EndMenu();
 
-    AlienGui::BeginMenu(" " ICON_FA_LIFE_RING "  Help ", _helpMenuOpened);
+    AlienGui::BeginMenu(std::string(" " ICON_FA_LIFE_RING "  ") + _("Help"), _helpMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name(_("About")), [&] { AboutDialog::get().open(); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name(_("Getting started")).selected(GettingStartedWindow::get().isOn()).closeMenuWhenItemClicked(false),

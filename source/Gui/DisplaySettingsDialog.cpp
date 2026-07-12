@@ -82,7 +82,6 @@ void DisplaySettingsDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    ImGui::SameLine();
     if (AlienGui::Button(_("Cancel"))) {
         close();
         TranslationService::get().load(LanguageCodes[_origLanguageIndex]);
