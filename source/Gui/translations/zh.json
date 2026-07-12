@@ -1197,5 +1197,10 @@
   "simulations": "仿真",
   "Server: ": "服务器：",
   "Adopt parameters": "应用参数",
-  "<unnamed simulation>": "<未命名仿真>"
+  "<unnamed simulation>": "<未命名仿真>",
+  "Open simulation": "Open simulation",
+  "Save simulation": "Save simulation",
+  "Open genome": "Open genome",
+  "Save genome": "Save genome",
+  "Failed to load simulation.": "Failed to load simulation."
 }

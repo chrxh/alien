@@ -142,7 +142,7 @@ void SimulationParametersMainWindow::processToolbar()
             printOverlayMessage(_("Reference simulation parameters replaced"));
         } else {
             GenericMessageDialog::get().information(
-                "Error", "The number of layers and radiation sources of the current simulation parameters must match with those from the clipboard.");
+                _("Error"), _("The number of layers and radiation sources of the current simulation parameters must match with those from the clipboard."));
         }
     }
 
@@ -431,14 +431,14 @@ void SimulationParametersMainWindow::processExpertSettings()
 void SimulationParametersMainWindow::onOpenParameters()
 {
     GenericFileDialog::get().showOpenFileDialog(
-        "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
+        _("Open simulation parameters"), "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _fileDialogPath = firstFilenameCopy.remove_filename().string();
 
             SimulationParameters parameters;
             if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
-                GenericMessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
+                GenericMessageDialog::get().information(_("Open simulation parameters"), _("The selected file could not be opened."));
             } else {
                 _SimulationFacade::get()->setSimulationParameters(parameters);
                 _SimulationFacade::get()->setOriginalSimulationParameters(parameters);
@@ -449,14 +449,14 @@ void SimulationParametersMainWindow::onOpenParameters()
 void SimulationParametersMainWindow::onSaveParameters()
 {
     GenericFileDialog::get().showSaveFileDialog(
-        "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
+        _("Save simulation parameters"), "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _fileDialogPath = firstFilenameCopy.remove_filename().string();
 
             auto parameters = _SimulationFacade::get()->getSimulationParameters();
             if (!SerializerService::get().serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
-                GenericMessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
+                GenericMessageDialog::get().information(_("Save simulation parameters"), _("The selected file could not be saved."));
             }
         });
 }
@@ -706,7 +706,7 @@ void SimulationParametersMainWindow::correctLayout(float origMasterHeight, float
 bool SimulationParametersMainWindow::checkNumLayers(SimulationParameters const& parameters)
 {
     if (parameters.numLayers == MAX_LAYERS) {
-        showMessage("Error", "The maximum number of layers has been reached.");
+        showMessage(_("Error"), _("The maximum number of layers has been reached."));
         return false;
     }
     return true;
@@ -715,7 +715,7 @@ bool SimulationParametersMainWindow::checkNumLayers(SimulationParameters const& 
 bool SimulationParametersMainWindow::checkNumSources(SimulationParameters const& parameters)
 {
     if (parameters.numSources == MAX_SOURCES) {
-        showMessage("Error", "The maximum number of radiation sources has been reached.");
+        showMessage(_("Error"), _("The maximum number of radiation sources has been reached."));
         return false;
     }
     return true;

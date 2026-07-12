@@ -19,7 +19,7 @@
 void FileTransferController::onOpenSimulationDialog()
 {
     GenericFileDialog::get().showOpenFileDialog(
-        "Open simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& filename) {
+        _("Open simulation"), "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& filename) {
             auto filenameCopy = filename;
             _referencePath = filenameCopy.remove_filename().string();
             onOpenSimulation(filename);
@@ -58,7 +58,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
             }
 
             if (errorMessage) {
-                showMessage("Error", *errorMessage);
+                showMessage(_("Error"), *errorMessage);
                 _SimulationFacade::get()->closeSimulation();
                 _SimulationFacade::get()->newSimulation(
                     data.deserializedSimulation.auxiliaryData.timestep,
@@ -77,7 +77,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
 
 void FileTransferController::onSaveSimulationDialog()
 {
-    GenericFileDialog::get().showSaveFileDialog("Save simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& path) {
+    GenericFileDialog::get().showSaveFileDialog(_("Save simulation"), "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _referencePath = firstFilenameCopy.remove_filename().string();
@@ -89,14 +89,14 @@ void FileTransferController::onSaveSimulationDialog()
                 return _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, readData);
             },
             [](auto const&) {},
-            [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
+        [](auto const& criticalErrors) { GenericMessageDialog::get().information(_("Error"), criticalErrors); });
     });
 }
 
 void FileTransferController::onOpenGenomeDialog(std::function<void(GenomeDesc const&)> const& openFunc)
 {
     GenericFileDialog::get().showOpenFileDialog(
-        "Open genome",
+        _("Open genome"),
         "Genome (*.genome){.genome},.*",
         _referencePath,
         [&, openFunc = openFunc](std::filesystem::path const& path) {
@@ -105,7 +105,7 @@ void FileTransferController::onOpenGenomeDialog(std::function<void(GenomeDesc co
             _referencePath = firstFilenameCopy.remove_filename().string();
             GenomeDesc genome;
             if (!SerializerService::get().deserializeGenomeFromFile(genome, firstFilename.string())) {
-                GenericMessageDialog::get().information("Open genome", "The selected file could not be opened.");
+                GenericMessageDialog::get().information(_("Open genome"), _("The selected file could not be opened."));
             } else {
                 openFunc(genome);
             }
@@ -115,12 +115,12 @@ void FileTransferController::onOpenGenomeDialog(std::function<void(GenomeDesc co
 void FileTransferController::onSaveGenomeDialog(GenomeDesc const& genome, std::function<void()> const& afterSaveFunc)
 {
     GenericFileDialog::get().showSaveFileDialog(
-        "Save genome", "Genome (*.genome){.genome},.*", _referencePath, [&, genome = genome, afterSaveFunc = afterSaveFunc](std::filesystem::path const& path) {
+        _("Save genome"), "Genome (*.genome){.genome},.*", _referencePath, [&, genome = genome, afterSaveFunc = afterSaveFunc](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _referencePath = firstFilenameCopy.remove_filename().string();
             if (!SerializerService::get().serializeGenomeToFile(firstFilename.string(), genome)) {
-                GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
+                GenericMessageDialog::get().information(_("Save genome"), _("The selected file could not be saved."));
             } else if (afterSaveFunc) {
                 afterSaveFunc();
             }
