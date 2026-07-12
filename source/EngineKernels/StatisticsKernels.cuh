@@ -10,6 +10,16 @@ __global__ void cudaUpdateTimestepStatistics_substep1(SimulationData data, Simul
 __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, SimulationStatistics statistics);
 
+__global__ void cudaUpdateEvolutionStatistics_substep1(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaUpdateEvolutionStatistics_substep3(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaUpdateEvolutionStatistics_substep4(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaUpdateEvolutionStatistics_substep5(SimulationData data, SimulationStatistics statistics);
+
+__global__ void cudaPrepareLineageAccumulatorGC(SimulationStatistics statistics);
+__global__ void cudaLineageAccumulatorGC(SimulationStatistics statistics);
+__global__ void cudaFinishLineageAccumulatorGC(SimulationStatistics statistics);
+
 __global__ void cudaUpdateHistogramData_substep1(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaUpdateHistogramData_substep2(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaUpdateHistogramData_substep3(SimulationData data, SimulationStatistics statistics);
