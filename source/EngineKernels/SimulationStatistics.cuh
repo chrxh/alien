@@ -74,7 +74,11 @@ public:
     __inline__ __device__ void resetTimestepData()
     {
         if (threadIdx.x == 0 && blockIdx.x == 0) {
+            // Evolution statistics are collected at deterministic timesteps (separate kernel sequence)
+            // and must survive the wall-clock-throttled timestep statistics updates.
+            auto evolution = _data->timeline.timestep.evolution;
             _data->timeline.timestep = TimestepStatistics();
+            _data->timeline.timestep.evolution = evolution;
         }
         auto partition = calcSystemThreadPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
@@ -121,6 +125,7 @@ public:
     }
 
     //evolution statistics (timestep)
+    __inline__ __device__ void resetEvolutionStatistics() { _data->timeline.timestep.evolution = EvolutionStatistics(); }
     __inline__ __device__ void incNumSolidObjects() { atomicAdd(&_data->timeline.timestep.evolution.numSolidObjects, 1); }
     __inline__ __device__ void incNumFluidObjects() { atomicAdd(&_data->timeline.timestep.evolution.numFluidObjects, 1); }
     __inline__ __device__ void incNumCellObjects() { atomicAdd(&_data->timeline.timestep.evolution.numCellObjects, 1); }

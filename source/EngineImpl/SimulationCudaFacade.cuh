@@ -126,6 +126,9 @@ public:
 private:
     void initCuda();
 
+    void updateTimestepStatistics();
+    void updateEvolutionStatistics();
+
     void syncAndCheck();
     void copyDataTOtoGpu(TOs const& cudaTO, TOs const& to);
     void copyDataTOtoHost(TOs const& to, TOs const& cudaTO);
