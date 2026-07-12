@@ -17,12 +17,6 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             statistics.addEnergy(object->color, object->getEnergy());
             if (object->type == ObjectType_FreeCell) {
                 statistics.incNumFreeCells(object->color);
-            } else if (object->type == ObjectType_Solid) {
-                statistics.incNumSolidObjects();
-            } else if (object->type == ObjectType_Fluid) {
-                statistics.incNumFluidObjects();
-            } else if (object->type == ObjectType_Cell) {
-                statistics.incNumCellObjects();
             }
             //if (object->typeData.cell.cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(object->typeData.cell.cellTypeData.constructor)) {
             //    statistics.incNumReplicator(object->color);
@@ -111,6 +105,7 @@ namespace
 __global__ void cudaUpdateEvolutionStatistics_substep1(SimulationData data, SimulationStatistics statistics)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
+        statistics.resetEvolutionStatistics();
         statistics.resetCompactLineageCounter();
     }
     {
@@ -144,6 +139,13 @@ __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, Simu
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->type == ObjectType_Solid) {
+            statistics.incNumSolidObjects();
+        } else if (object->type == ObjectType_Fluid) {
+            statistics.incNumFluidObjects();
+        } else if (object->type == ObjectType_Cell) {
+            statistics.incNumCellObjects();
+        }
         if (object->type != ObjectType_Cell) {
             continue;
         }
@@ -159,6 +161,9 @@ __global__ void cudaUpdateEvolutionStatistics_substep2(SimulationData data, Simu
                 statistics.addLineageCreatureData(slotIndex, creature->numCells, creature->generation);
                 alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(slotIndex) + 1);
             }
+        } else if (origCreatureIndex != 0) {
+            // Another thread already finished the initialization; restore its value (see DataAccessKernels)
+            alienAtomicExch64(&creature->creatureIndex, origCreatureIndex);
         }
     }
 }

@@ -51,6 +51,11 @@
 namespace
 {
     std::chrono::milliseconds const StatisticsUpdate(30);
+
+    // The evolution statistics kernels are heavy; running them at wall-clock-throttled (i.e. run-to-run varying)
+    // timesteps perturbs the simulation's GPU execution timing and makes simulation runs non-reproducible.
+    // They are therefore scheduled at deterministic timestep intervals instead.
+    auto constexpr EvolutionStatisticsUpdateInterval = 10;
     auto constexpr PreviewLineageMapCapacity = 1 << 12;
     ArraySizesForGpuEntities const PreviewCapacityGpu{10000, 10000, 10000000};
     ArraySizesForTOs const PreviewCapacityTO{1000, 1000, 1000, 10000, 10000, 10000, 10000000};
@@ -444,16 +449,32 @@ StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()
 
 void _SimulationCudaFacade::updateStatistics()
 {
+    updateEvolutionStatistics();
+    updateTimestepStatistics();
+}
+
+void _SimulationCudaFacade::updateTimestepStatistics()
+{
     StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
+    syncAndCheck();
+
+    {
+        std::lock_guard lock(_mutexForStatistics);
+        _statisticsData = _cudaSimulationStatistics->getStatistics();
+    }
+    StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
+}
+
+void _SimulationCudaFacade::updateEvolutionStatistics()
+{
+    StatisticsKernelsService::get().updateEvolutionStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
     auto lineageStatistics = _cudaSimulationStatistics->getLineageStatistics();
     {
         std::lock_guard lock(_mutexForStatistics);
-        _statisticsData = _cudaSimulationStatistics->getStatistics();
         _lineageStatisticsData = lineageStatistics;
     }
-    StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
     _lineageHistoryService.addSample(_lineageHistory, lineageStatistics, getCurrentTimestep());
 }
 
@@ -840,10 +861,14 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
         }
+        if (getCurrentTimestep() % EvolutionStatisticsUpdateInterval == 0) {
+            updateEvolutionStatistics();
+        }
+
         auto now = std::chrono::steady_clock::now();
         if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
             _lastStatisticsUpdateTime = now;
-            updateStatistics();
+            updateTimestepStatistics();
         }
     }
     if (forceUpdateStatistics) {

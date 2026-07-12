@@ -18,6 +18,10 @@ public:
 
     void updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);
 
+    // Runs at deterministic timesteps (not wall-clock throttled): heavy kernels here would otherwise
+    // perturb the simulation's execution timing at run-to-run varying timesteps.
+    void updateEvolutionStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);
+
 private:
     StatisticsKernelsService() = default;
 };
