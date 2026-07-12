@@ -32,6 +32,7 @@ add_library(Base
     VersionParserService.h)
 
 target_link_libraries(Base Boost::boost)
+target_link_libraries(Base imgui::imgui)
 
 if (WIN32)
     target_link_libraries(Base dbghelp)
