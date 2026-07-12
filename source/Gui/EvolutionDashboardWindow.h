@@ -42,7 +42,7 @@ private:
     struct DummyLineage
     {
         int id = 0;
-        int color = 0;
+        int colorBitset = 0;  //at least one of the MAX_COLORS cell colors
         std::array<double, NumMetrics> currentValues = {};
         std::array<std::vector<double>, NumMetrics> series = {};
     };
