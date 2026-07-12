@@ -94,12 +94,12 @@ bool GenomeEditorWindow::isShown()
 
 void GenomeEditorWindow::processToolbar()
 {
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open genome from file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip(_("Open genome from file")))) {
         onOpenGenome();
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save genome to file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip(_("Save genome to file")))) {
         onSaveGenome();
     }
 

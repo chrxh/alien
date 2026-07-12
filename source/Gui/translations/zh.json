@@ -1198,9 +1198,11 @@
   "Server: ": "服务器：",
   "Adopt parameters": "应用参数",
   "<unnamed simulation>": "<未命名仿真>",
-  "Open simulation": "Open simulation",
-  "Save simulation": "Save simulation",
-  "Open genome": "Open genome",
-  "Save genome": "Save genome",
-  "Failed to load simulation.": "Failed to load simulation."
+  "Open simulation": "打开仿真",
+  "Save simulation": "保存仿真",
+  "Open genome": "打开基因组",
+  "Save genome": "保存基因组",
+  "Failed to load simulation.": "Failed to load simulation.",
+  "Open genome from file": "从文件打开基因组",
+  "Save genome to file": "将基因组保存到文件"
 }

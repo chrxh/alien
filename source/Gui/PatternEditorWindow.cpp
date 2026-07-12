@@ -274,7 +274,7 @@ bool PatternEditorWindow::isShown()
 
 void PatternEditorWindow::onOpenPattern()
 {
-    GenericFileDialog::get().showOpenFileDialog("Open pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+    GenericFileDialog::get().showOpenFileDialog(_("Open pattern"), "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
@@ -285,7 +285,7 @@ void PatternEditorWindow::onOpenPattern()
             _SimulationFacade::get()->addAndSelectSimulationData(Desc(content));
             EditorModel::get().update();
         } else {
-            GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
+            GenericMessageDialog::get().information(_("Open pattern"), _("The selected file could not be opened."));
         }
     });
 }
