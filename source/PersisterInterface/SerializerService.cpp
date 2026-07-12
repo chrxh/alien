@@ -2292,7 +2292,19 @@ namespace
         {"Genome complexity average", true},
         {"Genome complexity Maximum", true},
         {"Genome complexity variance", true},
-        {"System clock", false}};
+        {"System clock", false},
+        {"Creature count", false},
+        {"Average creature cells", false},
+        {"Average genome nodes", false},
+        {"Creature energy", false},
+        {"Average mutation rate", false},
+        {"Average generation", false},
+        {"Lineage count", false},
+        {"Solid objects", false},
+        {"Fluid objects", false},
+        {"Cell objects", false},
+        {"Accumulated created creatures", false},
+        {"Accumulated mutations", false}};
 
     std::variant<DataPoint*, double*> getDataRef(int colIndex, DataPointCollection& dataPoints)
     {
@@ -2350,6 +2362,30 @@ namespace
             return &dataPoints.varianceNumCells;
         } else if (colIndex == 26) {
             return &dataPoints.systemClock;
+        } else if (colIndex == 27) {
+            return &dataPoints.numCreatures;
+        } else if (colIndex == 28) {
+            return &dataPoints.averageCreatureCells;
+        } else if (colIndex == 29) {
+            return &dataPoints.averageGenomeNodes;
+        } else if (colIndex == 30) {
+            return &dataPoints.creatureEnergy;
+        } else if (colIndex == 31) {
+            return &dataPoints.averageMutationRate;
+        } else if (colIndex == 32) {
+            return &dataPoints.averageGeneration;
+        } else if (colIndex == 33) {
+            return &dataPoints.numLineages;
+        } else if (colIndex == 34) {
+            return &dataPoints.numSolidObjects;
+        } else if (colIndex == 35) {
+            return &dataPoints.numFluidObjects;
+        } else if (colIndex == 36) {
+            return &dataPoints.numCellObjects;
+        } else if (colIndex == 37) {
+            return &dataPoints.accumCreatedCreatures;
+        } else if (colIndex == 38) {
+            return &dataPoints.accumMutations;
         }
         THROW_NOT_IMPLEMENTED();
     }
