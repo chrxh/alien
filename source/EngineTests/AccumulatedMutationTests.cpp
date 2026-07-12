@@ -107,6 +107,7 @@ TEST_P(AccumulatedMutationTests_AllTypes, accumulatedMutations_increases)
 
     auto actualCreature = getMutatedCreature();
     EXPECT_GT(actualCreature._accumulatedMutations, 0.0f);
+    EXPECT_GT(actualCreature._accumulatedMutationsInLineage, 0.0f);
 }
 
 TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount)
@@ -134,6 +135,7 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_metaMutationDoesNotAccount
 
     auto actualCreature = getMutatedCreature();
     EXPECT_EQ(actualCreature._accumulatedMutations, 0.0f);
+    EXPECT_EQ(actualCreature._accumulatedMutationsInLineage, 0.0f);
     EXPECT_EQ(actualCreature._lineageId, 42);
 }
 
@@ -141,7 +143,8 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
 {
     auto genome = createTestGenome();
 
-    auto data = Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).accumulatedMutations(11.0f), genome);
+    auto data =
+        Desc().addCreature({ObjectDesc().id(1)}, CreatureDesc().lineageId(42).accumulatedMutations(11.0f).accumulatedMutationsInLineage(11.0f), genome);
 
     _parameters.newLineageThreshold.value = 0.1f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -151,4 +154,6 @@ TEST_F(AccumulatedMutationTests, accumulatedMutations_createsNewLineageId)
 
     auto actualCreature = getMutatedCreature();
     EXPECT_GT(actualCreature._lineageId, 42);
+    EXPECT_EQ(actualCreature._accumulatedMutationsInLineage, 0.0f);
+    EXPECT_GT(actualCreature._accumulatedMutations, 11.0f);
 }

@@ -1874,11 +1874,12 @@ MutationProcessor::updateAccumulatedMutationsAndLineageId(SimulationData& data, 
         auto numberOfNodes = getNumberOfNodes(genome);
         auto denominator = numberOfNodes > 0 ? toFloat(numberOfNodes) : 1.0f;
 
-
-        creature->accumulatedMutations += accumulatedMutations / denominator;
-        if (creature->accumulatedMutations > cudaSimulationParameters.newLineageThreshold.value) {
+        auto delta = accumulatedMutations / denominator;
+        creature->accumulatedMutations += delta;
+        creature->accumulatedMutationsInLineage += delta;
+        if (creature->accumulatedMutationsInLineage > cudaSimulationParameters.newLineageThreshold.value) {
             creature->lineageId = data.primaryNumberGen.createLineageId();
-            creature->accumulatedMutations = 0;
+            creature->accumulatedMutationsInLineage = 0;
         }
     }
 }

@@ -588,6 +588,7 @@ struct CreatureDesc
     MEMBER(CreatureDesc, MutationState, mutationState, MutationState_Mutated);
     MEMBER(CreatureDesc, int, lineageId, 0);
     MEMBER(CreatureDesc, float, accumulatedMutations, 0.0f);
+    MEMBER(CreatureDesc, float, accumulatedMutationsInLineage, 0.0f);
 
     // Process data
     MEMBER(CreatureDesc, int, headUpdateId, 0);
