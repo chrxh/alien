@@ -581,7 +581,8 @@ void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedOb
     inspectorText("Generation", std::to_string(creature._generation));
     inspectorText("Num cells", std::to_string(creature._numCells));
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Lineage id").textWidth(TextWidth), creature._lineageId);
-    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Accumulated mutations").format("%.5f").textWidth(TextWidth), creature._accumulatedMutations);
+    inspectorText("Mutations (lineage)", std::to_string(creature._accumulatedMutationsInLineage));
+    inspectorText("Mutations (total)", std::to_string(creature._accumulatedMutations));
     auto& genome = extendedObject.genome.value();
     inspectorText("Genome name", genome._name);
     inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
