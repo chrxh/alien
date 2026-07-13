@@ -18,8 +18,8 @@ struct OverallStatisticsEntry
     uint32_t numCellObjects = 0;
     uint32_t numActiveLineages = 0;
 
-    uint64_t numCreatedCreatures = 0;  // Accumulated, never reset
-    float totalMutations = 0;          // Accumulated, never reset
+    unsigned long long numCreatedCreatures = 0;  // Accumulated, never reset
+    float totalMutations = 0;                    // Accumulated, never reset
 };
 
 struct LineageStatisticsEntry
