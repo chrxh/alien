@@ -98,6 +98,7 @@ struct SimulationParameters
 
     // Cell life cycle
     BaseParameter<ColorVector<int>> maxCellAge = {ColorVector<int>::uniform(Infinity<int>::value)};
+    BaseParameter<ColorVector<int>> freeCellMaxAge = {ColorVector<int>::uniform(Infinity<int>::value)};
     BaseLayerParameter<ColorVector<float>> minCellEnergy = {.baseValue = ColorVector<float>::uniform(50.0f)};
     BaseParameter<ColorVector<float>> normalCellEnergy = {ColorVector<float>::uniform(100.0f)};
     BaseLayerParameter<ColorVector<float>> cellDeathProbability = {.baseValue = ColorVector<float>::uniform(0.001f)};
@@ -175,12 +176,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {ColorVector<float>::uniform(0.0f)};
     BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {ColorVector<float>::uniform(0.0f)};
     BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = ColorVector<float>::uniform(0.0f)};
-
-    // Expert settings: Cell age limiter
-    ExpertToggle cellAgeLimiterToggle = {false};
-    BaseParameter<ColorVector<int>> freeCellMaxAge = {ColorVector<int>::uniform(Infinity<int>::value)};
-    BaseParameter<bool> resetCellAgeAfterActivation = {false};  // Candidate for deletion
-    EnableableBaseParameter<int> maxCellAgeBalancerInterval = {.value = 10000, .enabled = false};
 
     // Expert settings: Cell color transition rules
     ExpertToggle colorTransitionRulesToggle = {false};

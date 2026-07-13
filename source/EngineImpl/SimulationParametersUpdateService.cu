@@ -6,7 +6,6 @@
 #include <EngineInterface/SpaceCalculator.h>
 
 #include <EngineKernels/Base.cuh>
-#include <EngineKernels/MaxAgeBalancer.cuh>
 #include <EngineKernels/SimulationData.cuh>
 
 SimulationParameters SimulationParametersUpdateService::integrateChanges(
@@ -42,10 +41,8 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
 
 bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     SettingsForSimulation& settings,
-    MaxAgeBalancer const& maxAgeBalancer,
     SimulationData const& simulationData,
-    uint64_t timestep,
-    TimelineStatistics const& statistics)
+    uint64_t timestep)
 {
     auto result = false;
 
@@ -91,8 +88,6 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
         settings.simulationParameters.externalEnergy.value = toFloat(temp);
         result = true;
     }
-
-    result |= maxAgeBalancer->balance(settings.simulationParameters, statistics, timestep);
 
     return result;
 }

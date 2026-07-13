@@ -28,8 +28,6 @@ add_library(EngineInterface
     InspectedEntityIds.h
     LineageHistory.cpp
     LineageHistory.h
-    LineageHistoryService.cpp
-    LineageHistoryService.h
     LineageStatistics.h
     LocationHelper.cpp
     LocationHelper.h
@@ -66,8 +64,7 @@ add_library(EngineInterface
     StatisticsConverterService.cpp
     StatisticsConverterService.h
     StatisticsHistory.cpp
-    StatisticsHistory.h
-    TimelineStatistics.h)
+    StatisticsHistory.h)
 
 target_link_libraries(EngineInterface Base)
 

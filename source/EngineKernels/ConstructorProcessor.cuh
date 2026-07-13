@@ -638,8 +638,6 @@ __inline__ __device__ Object* ConstructorProcessor::constructCellIntern(
         }
     }
 
-    statistics.incNumCreatedCells(hostObject->color);
-
     return result;
 }
 

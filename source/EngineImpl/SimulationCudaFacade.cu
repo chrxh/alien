@@ -29,7 +29,6 @@
 #include <EngineKernels/GarbageCollectorKernels.cuh>
 #include <EngineKernels/GeometryKernels.cuh>
 #include <EngineKernels/Map.cuh>
-#include <EngineKernels/MaxAgeBalancer.cuh>
 #include <EngineKernels/SelectionResult.cuh>
 #include <EngineKernels/SimulationData.cuh>
 #include <EngineKernels/SimulationStatistics.cuh>
@@ -50,8 +49,6 @@
 
 namespace
 {
-    std::chrono::milliseconds const StatisticsUpdate(30);
-
     // The evolution statistics kernels are heavy; running them at wall-clock-throttled (i.e. run-to-run varying)
     // timesteps perturbs the simulation's GPU execution timing and makes simulation runs non-reproducible.
     // They are therefore scheduled at deterministic timestep intervals instead.
@@ -81,7 +78,6 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _cudaTOProvider = std::make_shared<_CudaTOProvider>();
     _cudaSimulationStatistics = std::make_shared<SimulationStatistics>();
     _cudaPreviewStatistics = std::make_shared<SimulationStatistics>();
-    _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 
     _simulationTimestep = timestep;
     _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
@@ -436,34 +432,9 @@ ArraySizesForTOs _SimulationCudaFacade::estimateCapacityNeededForTO() const
     return DataAccessKernelsService::get().estimateCapacityNeededForTO(_settings.cudaSettings, getSimulationDataPtrCopy());
 }
 
-TimelineStatistics _SimulationCudaFacade::getTimelineStatistics()
-{
-    std::lock_guard lock(_mutexForStatistics);
-    if (_statisticsData) {
-        return *_statisticsData;
-    } else {
-        return TimelineStatistics();
-    }
-}
-
 void _SimulationCudaFacade::updateStatistics()
 {
     updateEvolutionStatistics();
-    updateTimestepStatistics();
-}
-
-void _SimulationCudaFacade::updateTimestepStatistics()
-{
-    StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
-    syncAndCheck();
-
-    OverallStatisticsEntry overallStatistics;
-    {
-        std::lock_guard lock(_mutexForStatistics);
-        _statisticsData = _cudaSimulationStatistics->getStatistics();
-        overallStatistics = _overallStatisticsData.value_or(OverallStatisticsEntry());
-    }
-    StatisticsService::get().addDataPoint(_statisticsHistory, *_statisticsData, overallStatistics, getCurrentTimestep());
 }
 
 void _SimulationCudaFacade::updateEvolutionStatistics()
@@ -478,7 +449,8 @@ void _SimulationCudaFacade::updateEvolutionStatistics()
         _lineageStatisticsData = lineageStatistics;
         _overallStatisticsData = overallStatistics;
     }
-    _lineageHistoryService.addSample(_lineageHistory, lineageStatistics, getCurrentTimestep());
+    StatisticsService::get().addSample(_lineageHistory, lineageStatistics, getCurrentTimestep());
+    StatisticsService::get().addDataPoint(_statisticsHistory, overallStatistics, getCurrentTimestep());
 }
 
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
@@ -514,11 +486,6 @@ LineageHistory const& _SimulationCudaFacade::getLineageHistory() const
 void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
 {
     StatisticsService::get().rewriteHistory(_statisticsHistory, data, getCurrentTimestep());
-}
-
-void _SimulationCudaFacade::resetTimeIntervalStatistics()
-{
-    _cudaSimulationStatistics->resetAccumulatedStatistics();
 }
 
 uint64_t _SimulationCudaFacade::getCurrentTimestep() const
@@ -865,23 +832,15 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
             resizeArraysIfNecessary();
         }
 
-        auto statistics = getTimelineStatistics();
         {
             std::lock_guard lock(_mutexForSimulationParameters);
-            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(
-                    _settings, _maxAgeBalancer, simulationData, getCurrentTimestep(), statistics)) {
+            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, simulationData, getCurrentTimestep())) {
                 CHECK_FOR_DEVICE_ERRORS(
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
         }
         if (getCurrentTimestep() % EvolutionStatisticsUpdateInterval == 0) {
             updateEvolutionStatistics();
-        }
-
-        auto now = std::chrono::steady_clock::now();
-        if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
-            _lastStatisticsUpdateTime = now;
-            updateTimestepStatistics();
         }
     }
     if (forceUpdateStatistics) {

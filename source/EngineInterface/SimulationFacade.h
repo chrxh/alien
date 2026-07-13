@@ -13,7 +13,6 @@
 #include "ShallowUpdateSelectionData.h"
 #include "SimulationParametersUpdateConfig.h"
 #include "StatisticsHistory.h"
-#include "TimelineStatistics.h"
 
 class _SimulationFacade
 {
@@ -107,7 +106,6 @@ public:
     //************
     //* Statistics
     //************
-    virtual TimelineStatistics getTimelineStatistics() const = 0;
     virtual StatisticsHistory const& getStatisticsHistory() const = 0;
     virtual void setStatisticsHistory(StatisticsHistoryData const& data) = 0;
     virtual LineageStatistics getLineageStatistics() const = 0;

@@ -24,7 +24,6 @@
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
 #include <EngineInterface/StatisticsHistory.h>
-#include <EngineInterface/TimelineStatistics.h>
 
 #include <EngineKernels/Definitions.h>
 
@@ -58,7 +57,6 @@ public:
     Desc getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     Desc getSelectedSimulationData(bool includeClusters);
     Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds);
-    TimelineStatistics getTimelineStatistics() const;
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
     LineageStatistics getLineageStatistics() const;
@@ -138,7 +136,6 @@ public:
     void testOnly_syncNumberGenerator();
 
 private:
-    void resetTimeIntervalStatistics();
     void processJobs();
 
     void syncSimulationWithRenderingIfDesired();

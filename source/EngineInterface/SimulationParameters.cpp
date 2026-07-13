@@ -417,6 +417,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(IntSpec().member(&SimulationParameters::maxCellAge).min(1).max(1e7).logarithmic(true).infinity(true))
                         .description("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                     ParameterSpec()
+                        .name("Maximum free cell age")
+                        .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
+                        .description("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
+                    ParameterSpec()
                         .name("Minimum energy")
                         .reference(FloatSpec().member(&SimulationParameters::minCellEnergy).min(10.0f).max(200.0f).format("%.1f"))
                         .description("Minimum energy a cell needs to exist."),
@@ -681,28 +685,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Low velocity penalty")
                         .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowVelocityPenalty).min(0.0f).max(1.0f).format("%.2f"))
                         .description("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
-                }),
-            ParameterGroupSpec()
-                .name("Cell age limiter")
-                .expertToggle(&SimulationParameters::cellAgeLimiterToggle)
-                .parameters({
-                    ParameterSpec()
-                        .name("Maximum free cell age")
-                        .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
-                        .description("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
-                    ParameterSpec()
-                        .name("Reset age after construction")
-                        .reference(BoolSpec().member(&SimulationParameters::resetCellAgeAfterActivation))
-                        .description(
-                            "If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
-                            "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
-                            "'Maximum inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
-                            "completion if their construction takes a long time."),
-                    ParameterSpec()
-                        .name("Maximum age balancing")
-                        .reference(IntSpec().member(&SimulationParameters::maxCellAgeBalancerInterval).min(1e3).max(1e6).logarithmic(true))
-                        .description("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
-                                     "replicators exist. Conversely, the maximum age is decreased for the cell color with the most replicators."),
                 }),
             ParameterGroupSpec()
                 .name("Cell color transition rules")

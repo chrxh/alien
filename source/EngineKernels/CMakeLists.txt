@@ -51,8 +51,6 @@ add_library(EngineKernels
     Map.cuh
     MapSectionCollector.cuh
     Math.cuh
-    MaxAgeBalancer.cu
-    MaxAgeBalancer.cuh
     MemoryProcessor.cuh
     MuscleProcessor.cuh
     MutationProcessor.cuh

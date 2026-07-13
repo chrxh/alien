@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 
-#include <EngineInterface/LineageHistoryService.h>
+#include "StatisticsService.cuh"
 
 class LineageHistoryServiceTests : public ::testing::Test
 {
 protected:
+    void SetUp() override { StatisticsService::get().reset(); }
+
     static LineageStatisticsEntry createEntry(uint32_t lineageId)
     {
         LineageStatisticsEntry result;
@@ -32,7 +34,7 @@ TEST_F(LineageHistoryServiceTests, mergeSamples_disjointIds)
     laterSample.systemClock = 20;
     laterSample.entries = {createEntry(2), createEntry(4)};
 
-    auto result = LineageHistoryService::mergeSamples(earlierSample, laterSample);
+    auto result = StatisticsService::mergeSamples(earlierSample, laterSample);
 
     EXPECT_EQ(100, result.time);
     EXPECT_EQ(15, result.systemClock);
@@ -79,7 +81,7 @@ TEST_F(LineageHistoryServiceTests, mergeSamples_commonIds)
     laterSample.systemClock = 20;
     laterSample.entries = {entry2};
 
-    auto result = LineageHistoryService::mergeSamples(earlierSample, laterSample);
+    auto result = StatisticsService::mergeSamples(earlierSample, laterSample);
 
     ASSERT_EQ(1, result.entries.size());
     auto const& merged = result.entries.front();
@@ -92,16 +94,15 @@ TEST_F(LineageHistoryServiceTests, mergeSamples_commonIds)
     EXPECT_FLOAT_EQ(400, merged.sumGenomeNodes);
     EXPECT_FLOAT_EQ(5, merged.sumMutationRates);
     EXPECT_FLOAT_EQ(2000, merged.sumCreatureEnergy);
-    EXPECT_EQ(60, merged.numCreatedCreatures);  //accumulated values are maximized
+    EXPECT_EQ(60, merged.numCreatedCreatures);
     EXPECT_FLOAT_EQ(9, merged.totalMutations);
 }
 
 TEST_F(LineageHistoryServiceTests, addSample_sortsEntriesById)
 {
-    LineageHistoryService service;
     LineageHistory history;
 
-    service.addSample(history, createRawStatistics({createEntry(5), createEntry(1), createEntry(3)}), 100);
+    StatisticsService::get().addSample(history, createRawStatistics({createEntry(5), createEntry(1), createEntry(3)}), 100);
 
     auto data = history.getCopiedData();
     ASSERT_EQ(1, data.size());
@@ -113,12 +114,11 @@ TEST_F(LineageHistoryServiceTests, addSample_sortsEntriesById)
 
 TEST_F(LineageHistoryServiceTests, addSample_skipsSamplesBelowCadence)
 {
-    LineageHistoryService service;
     LineageHistory history;
 
-    service.addSample(history, createRawStatistics({createEntry(1)}), 100);
-    service.addSample(history, createRawStatistics({createEntry(2)}), 105);  //below the default cadence of 10 timesteps
-    service.addSample(history, createRawStatistics({createEntry(3)}), 120);
+    StatisticsService::get().addSample(history, createRawStatistics({createEntry(1)}), 100);
+    StatisticsService::get().addSample(history, createRawStatistics({createEntry(2)}), 105);  //below the default cadence of 10 timesteps
+    StatisticsService::get().addSample(history, createRawStatistics({createEntry(3)}), 120);
 
     auto data = history.getCopiedData();
     ASSERT_EQ(2, data.size());
@@ -128,11 +128,10 @@ TEST_F(LineageHistoryServiceTests, addSample_skipsSamplesBelowCadence)
 
 TEST_F(LineageHistoryServiceTests, addSample_clearsHistoryOnTimeRegression)
 {
-    LineageHistoryService service;
     LineageHistory history;
 
-    service.addSample(history, createRawStatistics({createEntry(1)}), 1000);
-    service.addSample(history, createRawStatistics({createEntry(2)}), 100);
+    StatisticsService::get().addSample(history, createRawStatistics({createEntry(1)}), 1000);
+    StatisticsService::get().addSample(history, createRawStatistics({createEntry(2)}), 100);
 
     auto data = history.getCopiedData();
     ASSERT_EQ(1, data.size());
@@ -143,12 +142,11 @@ TEST_F(LineageHistoryServiceTests, addSample_clearsHistoryOnTimeRegression)
 
 TEST_F(LineageHistoryServiceTests, addSample_compressesHistory)
 {
-    LineageHistoryService service;
     LineageHistory history;
 
     auto timestep = uint64_t(0);
     for (int i = 0; i < 1100; ++i) {
-        service.addSample(history, createRawStatistics({createEntry(1)}), timestep);
+        StatisticsService::get().addSample(history, createRawStatistics({createEntry(1)}), timestep);
         timestep += 10;
     }
 

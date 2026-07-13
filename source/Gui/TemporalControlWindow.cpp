@@ -251,11 +251,6 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     }
 
     parameters.externalEnergy = origParameters.externalEnergy;
-    if (parameters.maxCellAgeBalancerInterval.enabled || origParameters.maxCellAgeBalancerInterval.enabled) {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            parameters.maxCellAge.value[i] = origParameters.maxCellAge.value[i];
-        }
-    }
     auto simRunning = _SimulationFacade::get()->isSimulationRunning();
     if (simRunning) {
         _SimulationFacade::get()->pauseSimulation();

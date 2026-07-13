@@ -88,7 +88,6 @@ public:
     bool updateSelectionIfNecessary() override;
 
     IntVector2D getWorldSize() const override;
-    TimelineStatistics getTimelineStatistics() const override;
     StatisticsHistory const& getStatisticsHistory() const override;
     void setStatisticsHistory(StatisticsHistoryData const& data) override;
     LineageStatistics getLineageStatistics() const override;
