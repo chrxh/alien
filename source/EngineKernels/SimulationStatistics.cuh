@@ -10,29 +10,26 @@
 class SimulationStatistics
 {
 public:
-    static auto constexpr DefaultLineageMapCapacity = 1 << 18;  // Power of two
-    static auto constexpr LineageIdEmpty = 0xffffffffu;
-
-    __host__ void init(int lineageMapCapacity = DefaultLineageMapCapacity)
+    __host__ void init()
     {
-        _lineageMapCapacity = lineageMapCapacity;
+        _lineageArrayCapacity = 1 << 18;
         CudaMemoryManager::getInstance().acquireMemory<StatisticsRawData>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<OverallStatisticsEntry>(1, _overallStatisticsEntry);
-        CudaMemoryManager::getInstance().acquireMemory<LineageMapSlot>(_lineageMapCapacity, _lineageMap);
-        CudaMemoryManager::getInstance().acquireMemory<LineageStatisticsEntry>(_lineageMapCapacity, _lineageCompactData);
-        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageMapCapacity, _lineageAccumulatorMaps[0]);
-        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageMapCapacity, _lineageAccumulatorMaps[1]);
-        CudaMemoryManager::getInstance().acquireMemory<LineageMapControl>(1, _lineageMapControl);
+        CudaMemoryManager::getInstance().acquireMemory<LineageMapSlot>(_lineageArrayCapacity, _lineageMap);
+        CudaMemoryManager::getInstance().acquireMemory<LineageStatisticsEntry>(_lineageArrayCapacity, _lineageStatisticsEntries);
+        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageArrayCapacity, _lineageAccumulatorMaps[0]);
+        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageArrayCapacity, _lineageAccumulatorMaps[1]);
+        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapControl>(1, _lineageAccumulatorMapControl);
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_data, 0, sizeof(StatisticsRawData)));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_overallStatisticsEntry, 0, sizeof(OverallStatisticsEntry)));
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageMapControl, 0, sizeof(LineageMapControl)));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMapControl, 0, sizeof(LineageAccumulatorMapControl)));
 
         // Values must start at zero; the lineageId key column (first member) is set to LineageIdEmpty
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageMap, 0, sizeof(LineageMapSlot) * _lineageMapCapacity));
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageMap, sizeof(LineageMapSlot), 0xff, sizeof(uint32_t), _lineageMapCapacity));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageMap, 0, sizeof(LineageMapSlot) * _lineageArrayCapacity));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageMap, sizeof(LineageMapSlot), 0xff, sizeof(uint32_t), _lineageArrayCapacity));
         for (int i = 0; i < 2; ++i) {
-            CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMaps[i], 0, sizeof(LineageAccumulatorMapSlot) * _lineageMapCapacity));
-            CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageAccumulatorMaps[i], sizeof(LineageAccumulatorMapSlot), 0xff, sizeof(uint32_t), _lineageMapCapacity));
+            CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMaps[i], 0, sizeof(LineageAccumulatorMapSlot) * _lineageArrayCapacity));
+            CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageAccumulatorMaps[i], sizeof(LineageAccumulatorMapSlot), 0xff, sizeof(uint32_t), _lineageArrayCapacity));
         }
     }
 
@@ -41,10 +38,10 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_data);
         CudaMemoryManager::getInstance().freeMemory(_overallStatisticsEntry);
         CudaMemoryManager::getInstance().freeMemory(_lineageMap);
-        CudaMemoryManager::getInstance().freeMemory(_lineageCompactData);
+        CudaMemoryManager::getInstance().freeMemory(_lineageStatisticsEntries);
         CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMaps[0]);
         CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMaps[1]);
-        CudaMemoryManager::getInstance().freeMemory(_lineageMapControl);
+        CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMapControl);
     }
 
     __host__ StatisticsRawData getStatistics()
@@ -68,7 +65,7 @@ public:
         result.entries.resize(control.numCompactEntries);
         if (control.numCompactEntries > 0) {
             CHECK_FOR_DEVICE_ERRORS(
-                cudaMemcpy(result.entries.data(), _lineageCompactData, sizeof(LineageStatisticsEntry) * control.numCompactEntries, cudaMemcpyDeviceToHost));
+                cudaMemcpy(result.entries.data(), _lineageStatisticsEntries, sizeof(LineageStatisticsEntry) * control.numCompactEntries, cudaMemcpyDeviceToHost));
         }
         return result;
     }
@@ -76,7 +73,7 @@ public:
     __host__ bool isLineageAccumulatorGCNeeded() const
     {
         auto control = getLineageMapControl();
-        return control.numUsedAccumulatorSlots[control.activeAccumulatorBuffer] > static_cast<uint32_t>(_lineageMapCapacity) / 2;
+        return control.numUsedAccumulatorSlots[control.activeAccumulatorBuffer] > static_cast<uint32_t>(_lineageArrayCapacity) / 2;
     }
 
     //timestep statistics
@@ -157,7 +154,7 @@ public:
     __inline__ __device__ void addCreatureEnergy(float value) { atomicAdd(&_overallStatisticsEntry->sumCreatureEnergy, value); }
 
     //lineage statistics
-    __inline__ __device__ int getLineageMapCapacity() const { return _lineageMapCapacity; }
+    __inline__ __device__ int getLineageMapCapacity() const { return _lineageArrayCapacity; }
     __inline__ __device__ void resetLineageMapSlot(int index)
     {
         auto& slot = _lineageMap[index];
@@ -171,13 +168,13 @@ public:
         slot.sumMutationRates = 0;
         slot.sumCreatureEnergy = 0;
     }
-    __inline__ __device__ void resetCompactLineageCounter() { _lineageMapControl->numCompactEntries = 0; }
+    __inline__ __device__ void resetCompactLineageCounter() { _lineageAccumulatorMapControl->numCompactEntries = 0; }
 
     __inline__ __device__ int insertOrFindLineageSlot(uint32_t lineageId)
     {
-        auto mask = _lineageMapCapacity - 1;
+        auto mask = _lineageArrayCapacity - 1;
         auto index = toInt((lineageId * 2654435761u) & mask);
-        for (int i = 0; i < _lineageMapCapacity; ++i) {
+        for (int i = 0; i < _lineageArrayCapacity; ++i) {
             auto origLineageId = atomicCAS(&_lineageMap[index].lineageId, LineageIdEmpty, lineageId);
             if (origLineageId == LineageIdEmpty || origLineageId == lineageId) {
                 return index;
@@ -189,9 +186,9 @@ public:
     }
     __inline__ __device__ int findLineageSlot(uint32_t lineageId) const
     {
-        auto mask = _lineageMapCapacity - 1;
+        auto mask = _lineageArrayCapacity - 1;
         auto index = toInt((lineageId * 2654435761u) & mask);
-        for (int i = 0; i < _lineageMapCapacity; ++i) {
+        for (int i = 0; i < _lineageArrayCapacity; ++i) {
             auto slotLineageId = _lineageMap[index].lineageId;
             if (slotLineageId == lineageId) {
                 return index;
@@ -229,8 +226,8 @@ public:
         if (slot.lineageId == LineageIdEmpty || slot.numCreatures == 0) {
             return;
         }
-        auto entryIndex = atomicAdd(&_lineageMapControl->numCompactEntries, 1u);
-        auto& entry = _lineageCompactData[entryIndex];
+        auto entryIndex = atomicAdd(&_lineageAccumulatorMapControl->numCompactEntries, 1u);
+        auto& entry = _lineageStatisticsEntries[entryIndex];
         entry.lineageId = slot.lineageId;
         entry.colorBitset = slot.colorBitset;
         entry.numCreatures = slot.numCreatures;
@@ -249,22 +246,22 @@ public:
             entry.totalMutations = accumulatorSlot.totalMutations;
         }
     }
-    __inline__ __device__ void finalizeLineageStatistics() { _overallStatisticsEntry->numActiveLineages = _lineageMapControl->numCompactEntries; }
+    __inline__ __device__ void finalizeLineageStatistics() { _overallStatisticsEntry->numActiveLineages = _lineageAccumulatorMapControl->numCompactEntries; }
 
     //lineage accumulator map (persistent, garbage-collected occasionally)
     __inline__ __device__ void resetInactiveAccumulatorSlot(int index)
     {
-        auto& slot = _lineageAccumulatorMaps[1 - _lineageMapControl->activeAccumulatorBuffer][index];
+        auto& slot = _lineageAccumulatorMaps[1 - _lineageAccumulatorMapControl->activeAccumulatorBuffer][index];
         slot.lineageId = LineageIdEmpty;
         slot.numCreatedCreatures = 0;
         slot.totalMutations = 0;
         if (index == 0) {
-            _lineageMapControl->numUsedAccumulatorSlots[1 - _lineageMapControl->activeAccumulatorBuffer] = 0;
+            _lineageAccumulatorMapControl->numUsedAccumulatorSlots[1 - _lineageAccumulatorMapControl->activeAccumulatorBuffer] = 0;
         }
     }
     __inline__ __device__ void migrateActiveAccumulatorSlot(int index)
     {
-        auto activeBuffer = _lineageMapControl->activeAccumulatorBuffer;
+        auto activeBuffer = _lineageAccumulatorMapControl->activeAccumulatorBuffer;
         auto const& slot = _lineageAccumulatorMaps[activeBuffer][index];
         if (slot.lineageId == LineageIdEmpty) {
             return;
@@ -279,7 +276,7 @@ public:
             targetSlot.totalMutations = slot.totalMutations;
         }
     }
-    __inline__ __device__ void flipAccumulatorBuffers() { _lineageMapControl->activeAccumulatorBuffer = 1 - _lineageMapControl->activeAccumulatorBuffer; }
+    __inline__ __device__ void flipAccumulatorBuffers() { _lineageAccumulatorMapControl->activeAccumulatorBuffer = 1 - _lineageAccumulatorMapControl->activeAccumulatorBuffer; }
 
     //accumulated statistics
     __host__ void resetAccumulatedStatistics()
@@ -344,6 +341,8 @@ public:
     __inline__ __device__ int getMaxAge() const { return _data->histogram.maxAge; }
 
 private:
+    static auto constexpr LineageIdEmpty = 0xffffffffu;
+
     struct LineageMapSlot
     {
         uint32_t lineageId;  // LineageIdEmpty = slot is unused
@@ -362,31 +361,31 @@ private:
         uint32_t numCreatedCreatures;
         float totalMutations;
     };
-    struct LineageMapControl
+    struct LineageAccumulatorMapControl
     {
         uint32_t numCompactEntries;
         uint32_t activeAccumulatorBuffer;
         uint32_t numUsedAccumulatorSlots[2];
     };
 
-    __host__ LineageMapControl getLineageMapControl() const
+    __host__ LineageAccumulatorMapControl getLineageMapControl() const
     {
-        LineageMapControl result;
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result, _lineageMapControl, sizeof(LineageMapControl), cudaMemcpyDeviceToHost));
+        LineageAccumulatorMapControl result;
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result, _lineageAccumulatorMapControl, sizeof(LineageAccumulatorMapControl), cudaMemcpyDeviceToHost));
         return result;
     }
 
-    __inline__ __device__ LineageAccumulatorMapSlot* getActiveAccumulatorMap() { return _lineageAccumulatorMaps[_lineageMapControl->activeAccumulatorBuffer]; }
+    __inline__ __device__ LineageAccumulatorMapSlot* getActiveAccumulatorMap() { return _lineageAccumulatorMaps[_lineageAccumulatorMapControl->activeAccumulatorBuffer]; }
 
     __inline__ __device__ int insertAccumulatorSlot(uint32_t bufferIndex, uint32_t lineageId)
     {
         auto map = _lineageAccumulatorMaps[bufferIndex];
-        auto mask = _lineageMapCapacity - 1;
+        auto mask = _lineageArrayCapacity - 1;
         auto index = toInt((lineageId * 2654435761u) & mask);
-        for (int i = 0; i < _lineageMapCapacity; ++i) {
+        for (int i = 0; i < _lineageArrayCapacity; ++i) {
             auto origLineageId = atomicCAS(&map[index].lineageId, LineageIdEmpty, lineageId);
             if (origLineageId == LineageIdEmpty) {
-                atomicAdd(&_lineageMapControl->numUsedAccumulatorSlots[bufferIndex], 1u);
+                atomicAdd(&_lineageAccumulatorMapControl->numUsedAccumulatorSlots[bufferIndex], 1u);
                 return index;
             }
             if (origLineageId == lineageId) {
@@ -398,14 +397,14 @@ private:
     }
     __inline__ __device__ int findOrInsertAccumulatorSlot(uint32_t lineageId)
     {
-        return insertAccumulatorSlot(_lineageMapControl->activeAccumulatorBuffer, lineageId);
+        return insertAccumulatorSlot(_lineageAccumulatorMapControl->activeAccumulatorBuffer, lineageId);
     }
     __inline__ __device__ int findAccumulatorSlot(uint32_t lineageId)
     {
         auto map = getActiveAccumulatorMap();
-        auto mask = _lineageMapCapacity - 1;
+        auto mask = _lineageArrayCapacity - 1;
         auto index = toInt((lineageId * 2654435761u) & mask);
-        for (int i = 0; i < _lineageMapCapacity; ++i) {
+        for (int i = 0; i < _lineageArrayCapacity; ++i) {
             auto slotLineageId = map[index].lineageId;
             if (slotLineageId == lineageId) {
                 return index;
@@ -419,12 +418,16 @@ private:
     }
 
     StatisticsRawData* _data;
+
+    int _lineageArrayCapacity;
+
     OverallStatisticsEntry* _overallStatisticsEntry;
-    int _lineageMapCapacity;
+    LineageStatisticsEntry* _lineageStatisticsEntries;
 
+    // Lineage map for timestep values
     LineageMapSlot* _lineageMap;
-    LineageAccumulatorMapSlot* _lineageAccumulatorMaps[2];
 
-    LineageMapControl* _lineageMapControl;
-    LineageStatisticsEntry* _lineageCompactData;
+    // Lineage map for accumulated values (with history => needs migration)
+    LineageAccumulatorMapControl* _lineageAccumulatorMapControl;
+    LineageAccumulatorMapSlot* _lineageAccumulatorMaps[2];
 };
