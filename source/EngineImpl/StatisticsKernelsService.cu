@@ -6,7 +6,7 @@ void StatisticsKernelsService::init() {}
 
 void StatisticsKernelsService::shutdown() {}
 
-void StatisticsKernelsService::updateEvolutionStatistics(
+void StatisticsKernelsService::updateStatistics(
     CudaSettings const& gpuSettings,
     SimulationData const& data,
     SimulationStatistics const& simulationStatistics)
