@@ -70,8 +70,6 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     if (isTriggered) {
-        statistics.incNumSensorActivities(object->color);
-
         if (object->typeData.cell.cellTypeData.sensor.mode != SensorMode_Telemetry) {
             processDetection(data, statistics, object);
         } else {
@@ -228,7 +226,6 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             auto refAngle = Math::angleOfVector(ObjectConnectionProcessor::calcReferenceDirection(data, object));
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - object->typeData.cell.frontAngle, -180.0f);
             writeSignal(object->typeData.cell.signal, relAngle, density, distance);
-            statistics.incNumSensorMatches(object->color);
 
             auto matchPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
             data.objectMap.correctPosition(matchPos);
@@ -324,7 +321,6 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - object->typeData.cell.frontAngle, -180.0f);
             writeSignal(object->typeData.cell.signal, relAngle, density, distance);
 
-            statistics.incNumSensorMatches(object->color);
 
             object->typeData.cell.cellTypeData.sensor.lastMatchAvailable = true;
             object->typeData.cell.cellTypeData.sensor.lastMatch.creatureIdPart = creatureIdPart;

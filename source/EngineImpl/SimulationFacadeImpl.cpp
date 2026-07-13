@@ -320,11 +320,6 @@ IntVector2D _SimulationFacadeImpl::getWorldSize() const
     return _worldSize;
 }
 
-TimelineStatistics _SimulationFacadeImpl::getTimelineStatistics() const
-{
-    return _worker.getTimelineStatistics();
-}
-
 StatisticsHistory const& _SimulationFacadeImpl::getStatisticsHistory() const
 {
     return _worker.getStatisticsHistory();

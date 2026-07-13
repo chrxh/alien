@@ -4,7 +4,6 @@ PUBLIC
     DescValidationServiceTests.cpp
     GenomeDescEditServiceTests.cpp
     GenomeDescInfoServiceTests.cpp
-    LineageHistoryServiceTests.cpp
     ParametersEditServiceTests.cpp
     PreviewDescConverterServiceTests.cpp
     SpecificationFilterServiceTests.cpp

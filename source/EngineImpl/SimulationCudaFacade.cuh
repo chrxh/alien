@@ -14,7 +14,6 @@
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/LineageHistory.h>
-#include <EngineInterface/LineageHistoryService.h>
 #include <EngineInterface/LineageStatistics.h>
 #include <EngineInterface/OverallStatistics.h>
 #include <EngineInterface/SelectionShallowData.h>
@@ -22,7 +21,6 @@
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
 #include <EngineInterface/StatisticsHistory.h>
-#include <EngineInterface/TimelineStatistics.h>
 
 #include <EngineKernels/Definitions.cuh>
 #include <EngineKernels/TOs.cuh>
@@ -87,7 +85,6 @@ public:
 
     ArraySizesForTOs estimateCapacityNeededForTO() const;
 
-    TimelineStatistics getTimelineStatistics();
     void updateStatistics();
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
@@ -95,7 +92,6 @@ public:
     OverallStatisticsEntry getOverallStatistics();
     LineageHistory const& getLineageHistory() const;
 
-    void resetTimeIntervalStatistics();
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t timestep);
 
@@ -128,7 +124,6 @@ public:
 private:
     void initCuda();
 
-    void updateTimestepStatistics();
     void updateEvolutionStatistics();
 
     void syncAndCheck();
@@ -163,14 +158,10 @@ private:
     TOProvider _collectionTOProvider;
 
     mutable std::mutex _mutexForStatistics;
-    std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
-    std::optional<TimelineStatistics> _statisticsData;
     StatisticsHistory _statisticsHistory;
     std::optional<LineageStatistics> _lineageStatisticsData;
     std::optional<OverallStatisticsEntry> _overallStatisticsData;
     LineageHistory _lineageHistory;
-    LineageHistoryService _lineageHistoryService;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
-    MaxAgeBalancer _maxAgeBalancer;
 };

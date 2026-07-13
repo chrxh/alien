@@ -236,7 +236,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             cell->event = CellEvent_Attacking;
             cell->eventCounter = 6;
-            statistics.incNumAttacks(object->color);
         }
 
         // Radiation
@@ -304,7 +303,6 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
         }
         if (connectedObject->typeData.cell.cellType == CellType_Defender
             && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
-            statistics.incNumDefenderActivities(connectedObject->color);
             ++result;
         }
     }

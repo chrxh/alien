@@ -121,9 +121,6 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
         } else {
             if (origCellState == CellState_Activating) {
                 cellState = CellState_Ready;
-                if (cudaSimulationParameters.cellAgeLimiterToggle.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
-                    atomicExch(&object->typeData.cell.age, 0);
-                }
             } else if (origCellState == CellState_Constructing) {
                 if (isNeighborActivating) {
                     cellState = CellState_Activating;
@@ -455,10 +452,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data, bool isPre
             }
 
             // Free cell age radiation
-            auto cellMaxAge = Infinity<int>::value;
-            if (object->type == ObjectType_FreeCell && cudaSimulationParameters.cellAgeLimiterToggle.value) {
-                cellMaxAge = cudaSimulationParameters.freeCellMaxAge.value[object->color];
-            }
+            auto cellMaxAge = cudaSimulationParameters.freeCellMaxAge.value[object->color];
             if (cellMaxAge > 0 && object->typeData.freeCell.age > cellMaxAge) {
                 objectDestruction = true;
             }

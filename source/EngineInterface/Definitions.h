@@ -28,8 +28,6 @@ struct SettingsForSimulation;
 class _SimulationFacade;
 using SimulationFacade = std::shared_ptr<_SimulationFacade>;
 
-struct TimelineStatistics;
-
 class SpaceCalculator;
 
 class ShapeGenerator;

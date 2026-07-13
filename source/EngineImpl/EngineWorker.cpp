@@ -99,11 +99,6 @@ Desc EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
     return DescConverterService::get().convertTOtoDescription(dataTO);
 }
 
-TimelineStatistics EngineWorker::getTimelineStatistics() const
-{
-    return _simulationCudaFacade->getTimelineStatistics();
-}
-
 StatisticsHistory const& EngineWorker::getStatisticsHistory() const
 {
     return _simulationCudaFacade->getStatisticsHistory();
@@ -278,7 +273,6 @@ void EngineWorker::setCurrentTimestep(uint64_t value)
 {
     EngineWorkerGuard access(this);
     _simulationCudaFacade->setCurrentTimestep(value);
-    resetTimeIntervalStatistics();
 }
 
 SimulationParameters EngineWorker::getSimulationParameters() const
@@ -553,10 +547,6 @@ void EngineWorker::testOnly_syncNumberGenerator()
     NumberGenerator::get().adaptMaxIds(maxIds);
 }
 
-void EngineWorker::resetTimeIntervalStatistics()
-{
-    _simulationCudaFacade->resetTimeIntervalStatistics();
-}
 
 void EngineWorker::processJobs()
 {

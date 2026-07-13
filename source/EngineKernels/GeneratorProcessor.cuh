@@ -64,7 +64,5 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
         if (generator.numPulses >= period) {
             generator.numPulses -= period;
         }
-
-        statistics.incNumGeneratorPulses(object->color);
     }
 }

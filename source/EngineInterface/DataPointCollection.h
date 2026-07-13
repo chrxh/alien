@@ -1,49 +1,11 @@
 #pragma once
 
-#include <EngineInterface/TimelineStatistics.h>
-
-struct DataPoint
-{
-    double values[MAX_COLORS] = {0, 0, 0, 0, 0, 0, 0};
-    double summedValues = 0;
-
-    DataPoint operator+(DataPoint const& other) const;
-    DataPoint operator/(double divisor) const;
-};
-
 struct DataPointCollection
 {
-    double time;  //could be a time step or real-time
+    double time = 0;
     double systemClock = 0;
 
-    DataPoint numObjects;
-    DataPoint numSelfReplicators;
-    DataPoint numColonies;
-    DataPoint numViruses;
-    DataPoint numFreeCells;
-    DataPoint numEnergyParticles;
-    DataPoint averageGenomeCells;
-    DataPoint averageNumCells;
-    DataPoint varianceNumCells;
-    DataPoint maxNumCellsOfColonies;
-    DataPoint totalEnergy;
-
-    DataPoint numCreatedCells;
-    DataPoint numAttacks;
-    DataPoint numMuscleActivities;
-    DataPoint numDefenderActivities;
-    DataPoint numDepotActivities;
-    DataPoint numInjectionActivities;
-    DataPoint numCompletedInjections;
-    DataPoint numGeneratorPulses;
-    DataPoint numNeuronActivities;
-    DataPoint numSensorActivities;
-    DataPoint numSensorMatches;
-    DataPoint numReconnectorCreated;
-    DataPoint numReconnectorRemoved;
-    DataPoint numDetonations;
-
-    // Evolution dashboard values (not color-resolved)
+    // Evolution dashboard values
     double numCreatures = 0;
     double averageCreatureCells = 0;
     double averageGenomeNodes = 0;
