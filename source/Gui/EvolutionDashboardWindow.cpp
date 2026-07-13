@@ -39,8 +39,6 @@ namespace
     ImColor const PositiveDeltaColor = ImColor(0.19f, 0.77f, 0.55f, 1.0f);
     ImColor const NegativeDeltaColor = ImColor(0.94f, 0.32f, 0.32f, 1.0f);
     ImColor const SumSeriesColor = ImColor(0.78f, 0.78f, 0.78f, 1.0f);
-    ImColor const OverflowWarningColor = ImColor(0.94f, 0.62f, 0.22f, 1.0f);
-
     struct MetricDef
     {
         char const* tableHeader;
@@ -241,7 +239,6 @@ void EvolutionDashboardWindow::processBackground()
     auto rawStatistics = _SimulationFacade::get()->getStatisticsRawData();
     auto overallStatistics = _SimulationFacade::get()->getOverallStatistics();
     _timelineLiveStatistics.update(rawStatistics.timeline, overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
-    _lineageMapOverflow = overallStatistics.lineageMapOverflow != 0;
 
     auto rawLineageStatistics = _SimulationFacade::get()->getRawLineageStatistics();
     LineageSample sample;
@@ -593,12 +590,6 @@ void EvolutionDashboardWindow::processFilterBar()
         drawList->AddText({pos.x + (chipSize - labelSize.x) / 2, pos.y + (chipSize - labelSize.y) / 2}, ImColor(0, 0, 0, active ? 220 : 120), label.c_str());
         ImGui::PopID();
         ImGui::SameLine(0, scale(5.0f));
-    }
-    if (_lineageMapOverflow) {
-        ImGui::SameLine(0, scale(20.0f));
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)OverflowWarningColor);
-        AlienGui::Text("Too many lineages: some are not tracked");
-        ImGui::PopStyleColor();
     }
     ImGui::NewLine();
     ImGui::Spacing();

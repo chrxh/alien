@@ -14,8 +14,9 @@ struct LineageStatisticsEntry
     float sumGenomeNodes = 0;
     float sumMutationRates = 0;
     float sumCreatureEnergy = 0;
-    uint32_t numCreatedCreatures = 0;  // Accumulated, never reset
-    float totalMutations = 0;          // Accumulated, never reset
+
+    uint64_t numCreatedCreatures = 0;  // Accumulated, never reset
+    double totalMutations = 0;          // Accumulated, never reset
 };
 
 struct RawLineageStatistics
