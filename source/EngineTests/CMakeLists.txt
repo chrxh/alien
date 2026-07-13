@@ -25,6 +25,7 @@ PUBLIC
     DetonatorTests.cpp
     DuplicateGeneMutationTests.cpp
     EditTests.cpp
+    EvolutionStatisticsTests.cpp
     DigestorTests.cpp
     EnergyFlowTests.cpp
     EnergyParticleTests.cpp
@@ -55,9 +56,7 @@ PUBLIC
     TrimGeneMutationTests.cpp
     UnusedGeneRemovalTests.cpp
     VoidMutationTests.cpp
-    VoidTests.cpp
-    # Runs last: consumes GPU RNG state, which would otherwise shift the mutation sequences of subsequent suites
-    EvolutionStatisticsTests.cpp)
+    VoidTests.cpp)
 
 target_link_libraries(EngineTests Base)
 target_link_libraries(EngineTests EngineKernels)
