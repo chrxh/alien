@@ -330,19 +330,9 @@ void _SimulationFacadeImpl::setStatisticsHistory(StatisticsHistoryData const& da
     _worker.setStatisticsHistory(data);
 }
 
-LineageStatistics _SimulationFacadeImpl::getLineageStatistics() const
-{
-    return _worker.getLineageStatistics();
-}
-
-OverallStatisticsEntry _SimulationFacadeImpl::getOverallStatistics() const
+StatisticsEntry _SimulationFacadeImpl::getStatisticsEntry() const
 {
     return _worker.getOverallStatistics();
-}
-
-LineageHistory const& _SimulationFacadeImpl::getLineageHistory() const
-{
-    return _worker.getLineageHistory();
 }
 
 std::optional<int> _SimulationFacadeImpl::getTpsRestriction() const

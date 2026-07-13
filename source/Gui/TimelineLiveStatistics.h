@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <EngineInterface/DataPointCollection.h>
-#include <EngineInterface/OverallStatistics.h>
+#include <EngineInterface/StatisticsEntry.h>
 
 class TimelineLiveStatistics
 {
@@ -13,7 +13,7 @@ public:
     static auto constexpr MaxLiveHistory = 240.0f;  //in seconds
 
     std::vector<DataPointCollection> const& getDataPointCollectionHistory() const;
-    void update(OverallStatisticsEntry const& overallStatistics, uint64_t timestep);
+    void update(StatisticsEntry const& overallStatistics, uint64_t timestep);
 
 private:
     void truncate();

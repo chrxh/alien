@@ -14,9 +14,7 @@
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
-#include <EngineInterface/LineageHistory.h>
-#include <EngineInterface/LineageStatistics.h>
-#include <EngineInterface/OverallStatistics.h>
+#include <EngineInterface/StatisticsEntry.h>
 #include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
@@ -59,9 +57,7 @@ public:
     Desc getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
-    LineageStatistics getLineageStatistics() const;
-    OverallStatisticsEntry getOverallStatistics() const;
-    LineageHistory const& getLineageHistory() const;
+    StatisticsEntry getOverallStatistics() const;
 
     void addAndSelectSimulationData(Desc&& dataToUpdate);
     void setSimulationData(Desc const& dataToUpdate);

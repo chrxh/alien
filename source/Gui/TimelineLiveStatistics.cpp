@@ -13,7 +13,7 @@ std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointColl
     return _dataPointCollectionHistory;
 }
 
-void TimelineLiveStatistics::update(OverallStatisticsEntry const& overallStatistics, uint64_t timestep)
+void TimelineLiveStatistics::update(StatisticsEntry const& overallStatistics, uint64_t timestep)
 {
     truncate();
 

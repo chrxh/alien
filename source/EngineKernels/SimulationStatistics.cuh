@@ -1,7 +1,8 @@
 #pragma once
 
-#include <EngineInterface/LineageStatistics.h>
-#include <EngineInterface/OverallStatistics.h>
+#include <algorithm>
+
+#include <EngineInterface/StatisticsEntry.h>
 
 #include "Base.cuh"
 #include "CudaMemoryManager.cuh"
@@ -35,7 +36,7 @@ public:
 
     __host__ void free()
     {
-        CudaMemoryManager::getInstance().freeMemory(_overallStatisticsEntry);
+        CudaMemoryManager::getInstance().freeMemory<OverallStatisticsEntry>(_overallStatisticsEntry);
         CudaMemoryManager::getInstance().freeMemory(_lineageStatisticsEntries);
 
         CudaMemoryManager::getInstance().freeMemory(_lineageMap);
@@ -45,22 +46,18 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMaps[1]);
     }
 
-    __host__ OverallStatisticsEntry getOverallStatistics()
+    __host__ StatisticsEntry getStatisticsEntry()
     {
-        OverallStatisticsEntry result;
-        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result, _overallStatisticsEntry, sizeof(OverallStatisticsEntry), cudaMemcpyDeviceToHost));
-        return result;
-    }
+        StatisticsEntry result;
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result.overallEntry, _overallStatisticsEntry, sizeof(OverallStatisticsEntry), cudaMemcpyDeviceToHost));
 
-    __host__ LineageStatistics getLineageStatistics()
-    {
         auto control = getLineageMapControl();
-        LineageStatistics result;
         result.entries.resize(control.numCompactEntries);
         if (control.numCompactEntries > 0) {
             CHECK_FOR_DEVICE_ERRORS(
                 cudaMemcpy(result.entries.data(), _lineageStatisticsEntries, sizeof(LineageStatisticsEntry) * control.numCompactEntries, cudaMemcpyDeviceToHost));
         }
+        std::sort(result.entries.begin(), result.entries.end(), [](auto const& lhs, auto const& rhs) { return lhs.lineageId < rhs.lineageId; });
         return result;
     }
 

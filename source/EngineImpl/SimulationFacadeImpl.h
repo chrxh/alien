@@ -90,9 +90,7 @@ public:
     IntVector2D getWorldSize() const override;
     StatisticsHistory const& getStatisticsHistory() const override;
     void setStatisticsHistory(StatisticsHistoryData const& data) override;
-    LineageStatistics getLineageStatistics() const override;
-    OverallStatisticsEntry getOverallStatistics() const override;
-    LineageHistory const& getLineageHistory() const override;
+    StatisticsEntry getStatisticsEntry() const override;
 
     std::optional<int> getTpsRestriction() const override;
     void setTpsRestriction(std::optional<int> const& value) override;

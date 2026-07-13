@@ -3,12 +3,12 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/DataPointCollection.h>
-#include <EngineInterface/OverallStatistics.h>
+#include <EngineInterface/StatisticsEntry.h>
 
 class StatisticsConverterService
 {
     MAKE_SINGLETON(StatisticsConverterService);
 
 public:
-    DataPointCollection convert(OverallStatisticsEntry const& overallStatistics, uint64_t timestep, double time);
+    DataPointCollection convert(StatisticsEntry const& overallStatistics, uint64_t timestep, double time);
 };
