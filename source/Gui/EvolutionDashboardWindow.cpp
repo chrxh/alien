@@ -175,11 +175,11 @@ namespace
         }
     }
 
-    LineageStatisticsEntry const* findLineageEntry(LineageSample const& sample, uint32_t lineageId)
+    LineageStatisticsEntry const* findLineageEntry(DataPointCollection const& sample, uint32_t lineageId)
     {
-        auto it =
-            std::lower_bound(sample.entries.begin(), sample.entries.end(), lineageId, [](auto const& entry, uint32_t id) { return entry.lineageId < id; });
-        if (it != sample.entries.end() && it->lineageId == lineageId) {
+        auto it = std::lower_bound(
+            sample.lineageEntries.begin(), sample.lineageEntries.end(), lineageId, [](auto const& entry, uint32_t id) { return entry.lineageId < id; });
+        if (it != sample.lineageEntries.end() && it->lineageId == lineageId) {
             return &*it;
         }
         return nullptr;
@@ -236,19 +236,8 @@ void EvolutionDashboardWindow::processBackground()
     _lastTimepoint = timepoint;
     _timeSinceSimStart += toDouble(duration) / 1000;
 
-    auto overallStatistics = _SimulationFacade::get()->getOverallStatistics();
+    auto overallStatistics = _SimulationFacade::get()->getStatisticsEntry();
     _timelineLiveStatistics.update(overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
-
-    auto rawLineageStatistics = _SimulationFacade::get()->getLineageStatistics();
-    LineageSample sample;
-    sample.time = _timeSinceSimStart;
-    sample.systemClock = _timeSinceSimStart;
-    sample.entries = std::move(rawLineageStatistics.entries);
-    std::sort(sample.entries.begin(), sample.entries.end(), [](auto const& lhs, auto const& rhs) { return lhs.lineageId < rhs.lineageId; });
-    _liveLineageHistory.emplace_back(std::move(sample));
-    while (!_liveLineageHistory.empty() && _liveLineageHistory.back().time - _liveLineageHistory.front().time > MaxLiveHistory + 1.0) {
-        _liveLineageHistory.erase(_liveLineageHistory.begin());
-    }
 
     _externalEnergySeries.emplace_back(toDouble(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
     auto maxExternalEnergyValues = toInt(std::lround(MaxLiveHistory * 1000 / LiveStatisticsDeltaTime));
@@ -288,7 +277,8 @@ void EvolutionDashboardWindow::updateCellColors()
 void EvolutionDashboardWindow::updateDisplayData()
 {
     //rebuild only when the underlying data or view settings have changed
-    auto liveBackTime = !_liveLineageHistory.empty() ? _liveLineageHistory.back().time : -1.0;
+    auto const& liveHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
+    auto liveBackTime = !liveHistory.empty() ? liveHistory.back().time : -1.0;
     auto historyBackTime = -1.0;
     if (_timelineMode != TimelineMode_RealTime) {
         auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
@@ -305,10 +295,10 @@ void EvolutionDashboardWindow::updateDisplayData()
 
     //table rows from the latest live sample
     _lineages.clear();
-    if (!_liveLineageHistory.empty()) {
-        auto const& lastSample = _liveLineageHistory.back();
-        auto const* previousSample = _liveLineageHistory.size() >= 2 ? &_liveLineageHistory.at(_liveLineageHistory.size() - 2) : nullptr;
-        for (auto const& entry : lastSample.entries) {
+    if (!liveHistory.empty()) {
+        auto const& lastSample = liveHistory.back();
+        auto const* previousSample = liveHistory.size() >= 2 ? &liveHistory.at(liveHistory.size() - 2) : nullptr;
+        for (auto const& entry : lastSample.lineageEntries) {
             LineageDisplayData lineage;
             lineage.id = toInt(entry.lineageId);
             lineage.colorBitset = toInt(entry.colorBitset);
@@ -323,18 +313,18 @@ void EvolutionDashboardWindow::updateDisplayData()
 
     //data source for the timeline plots
     auto useTimeAsClock = _timelineMode == TimelineMode_RealTime;
-    std::vector<DataPointCollection> globalSource;
-    LineageHistoryData lineageSource;
+    StatisticsHistoryData globalSource;
+    StatisticsHistoryData lineageSource;
     if (_timelineMode == TimelineMode_RealTime) {
         globalSource = _timelineLiveStatistics.getDataPointCollectionHistory();
-        lineageSource = _liveLineageHistory;
+        lineageSource = globalSource;
     } else {
         auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
         {
             std::lock_guard lock(statisticsHistory.getMutex());
             globalSource = statisticsHistory.getDataRef();
         }
-        lineageSource = _SimulationFacade::get()->getLineageHistory().getCopiedData();
+        lineageSource = globalSource;
         if (_timelineMode == TimelineMode_LastSteps && !globalSource.empty()) {
             auto startTime = globalSource.back().time - toDouble(_lastSteps);
             std::erase_if(globalSource, [&](auto const& dataPoints) { return dataPoints.time < startTime; });
@@ -375,7 +365,7 @@ void EvolutionDashboardWindow::updateDisplayData()
         for (auto const& selectedId : _selectedLineageIds) {
             LineageDisplayData lineage;
             lineage.id = selectedId;
-            LineageSample const* lastSampleWithEntry = nullptr;
+            DataPointCollection const* lastSampleWithEntry = nullptr;
             LineageStatisticsEntry const* lastEntry = nullptr;
             for (auto const& sample : lineageSource) {
                 auto const* entry = findLineageEntry(sample, toUInt32(selectedId));

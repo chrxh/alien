@@ -17,6 +17,7 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.numCellObjects = numCellObjects + other.numCellObjects;
     result.accumCreatedCreatures = accumCreatedCreatures + other.accumCreatedCreatures;
     result.accumMutations = accumMutations + other.accumMutations;
+    result.lineageEntries = other.lineageEntries;  // take the later snapshot
     return result;
 }
 
@@ -37,5 +38,6 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numCellObjects = numCellObjects / divisor;
     result.accumCreatedCreatures = accumCreatedCreatures / divisor;
     result.accumMutations = accumMutations / divisor;
+    result.lineageEntries = lineageEntries;  // pass through unchanged
     return result;
 }

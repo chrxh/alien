@@ -10,8 +10,7 @@
 #include <Base/Singleton.h>
 
 #include <EngineInterface/EngineConstants.h>
-#include <EngineInterface/LineageHistory.h>
-#include <EngineInterface/LineageStatistics.h>
+#include <EngineInterface/StatisticsHistory.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -99,9 +98,8 @@ private:
     };
     std::optional<RebuildKey> _lastRebuildKey;
 
-    //live statistics
+    // Live statistics
     TimelineLiveStatistics _timelineLiveStatistics;
-    LineageHistoryData _liveLineageHistory;
     std::vector<double> _externalEnergySeries;
     double _timeSinceSimStart = 0;  //in seconds
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;

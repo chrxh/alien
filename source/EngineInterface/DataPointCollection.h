@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+
+#include "StatisticsEntry.h"
+
 struct DataPointCollection
 {
     double time = 0;
@@ -18,6 +22,8 @@ struct DataPointCollection
     double numCellObjects = 0;
     double accumCreatedCreatures = 0;  // Raw accumulated value; rates are derived GUI-side
     double accumMutations = 0;         // Raw accumulated value; rates are derived GUI-side
+
+    std::vector<LineageStatisticsEntry> lineageEntries;  // Per-lineage statistics, sorted by lineageId
 
     DataPointCollection operator+(DataPointCollection const& other) const;
     DataPointCollection operator/(double divisor) const;
