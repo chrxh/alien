@@ -95,7 +95,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     SimulationKernelsService::get().init();
 
     // Default array sizes for empty simulation (will be resized later if not sufficient)
-    _cudaSimulationData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
+    _cudaSimulationData->resizeObjectsAndTempObjects({50000, 50000, 5000000});
     _cudaPreviewData->resizeObjectsAndTempObjects(PreviewCapacityGpu);
 
     auto memory = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
@@ -157,8 +157,10 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
         _cudaGeometryBuffers->copyToOpenGL(geometryBuffers, numRenderObjects);
     }
 
-    GeometryKernelsService::get().restorePositions(_settings, simulationData);
-    syncAndCheck();
+    if (_settings.simulationParameters.borderlessRendering.value) {
+        GeometryKernelsService::get().restorePositions(_settings, simulationData);
+        syncAndCheck();
+    }
 }
 
 void _SimulationCudaFacade::calcTimesteps(uint64_t timesteps, bool forceUpdateStatistics)
@@ -680,6 +682,11 @@ void _SimulationCudaFacade::initCuda()
     CudaContextState::get().reset();
 
     log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
+    size_t freeMem, totalMem;
+    if (cudaMemGetInfo(&freeMem, &totalMem) == cudaSuccess) {
+        log(Priority::Important, "GPU memory: " + std::to_string(totalMem / (1024 * 1024)) + " MB total, "
+            + std::to_string(freeMem / (1024 * 1024)) + " MB free");
+    }
 }
 
 auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo

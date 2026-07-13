@@ -10,7 +10,7 @@
 namespace Const
 {
     constexpr float ArrayFillPercentage = 2.0f / 4.0f;
-    constexpr float ArrayResizePercentage = 3.0f;
+    constexpr float ArrayResizePercentage = 2.0f;
 }
 
 template <typename T>

@@ -70,50 +70,38 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
     float2 const visibleBottomRight{visibleWorldRect.bottomRight.x, visibleWorldRect.bottomRight.y};
     GeometryExtractionContext const context{visibleTopLeft, visibleBottomRight, computeCullingMargin(settings)};
 
-    NumRenderObjects result;
     setValueToDevice(_numObjects, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractObjectData, data, nullptr, _numObjects, context);
-    cudaDeviceSynchronize();
-    result.objects = copyToHost(_numObjects);
-
     setValueToDevice(_numFluidParticles, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractFluidParticleData, data, nullptr, _numFluidParticles, context);
-    cudaDeviceSynchronize();
-    result.fluidParticles = copyToHost(_numFluidParticles);
-
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
+    setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
+    setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
+    setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
+    setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
+    setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
+    setValueToDevice(_numLocations, static_cast<uint64_t>(0));
+
+    KERNEL_CALL(cudaExtractObjectData, data, nullptr, _numObjects, context);
+    KERNEL_CALL(cudaExtractFluidParticleData, data, nullptr, _numFluidParticles, context);
     KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects, context);
     cudaDeviceSynchronize();
-    result.selectedObjects = copyToHost(_numSelectedObjects);
 
-    setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices, context);
-    cudaDeviceSynchronize();
-    result.lineIndices = copyToHost(_numLineIndices);
-
-    setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractTriangleIndices, data, nullptr, _numTriangleIndices, context);
-    cudaDeviceSynchronize();
-    result.triangleIndices = copyToHost(_numTriangleIndices);
-
-    setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedConnectionData, data, nullptr, _numSelectedConnectionVertices, context);
-    cudaDeviceSynchronize();
-    result.connectionArrowVertices = copyToHost(_numSelectedConnectionVertices);
-
-    setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractAttackEventData, data, nullptr, _numAttackEventVertices, context);
-    cudaDeviceSynchronize();
-    result.attackEventVertices = copyToHost(_numAttackEventVertices);
-
-    setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractDetonationEventData, data, nullptr, _numDetonationEventVertices, context);
-    cudaDeviceSynchronize();
-    result.detonationEventVertices = copyToHost(_numDetonationEventVertices);
-
-    setValueToDevice(_numLocations, static_cast<uint64_t>(0));
     KERNEL_CALL_1_1(cudaExtractLocationData, data, nullptr, _numLocations, visibleTopLeft);
     cudaDeviceSynchronize();
+
+    NumRenderObjects result;
+    result.objects = copyToHost(_numObjects);
+    result.fluidParticles = copyToHost(_numFluidParticles);
+    result.selectedObjects = copyToHost(_numSelectedObjects);
+    result.lineIndices = copyToHost(_numLineIndices);
+    result.triangleIndices = copyToHost(_numTriangleIndices);
+    result.connectionArrowVertices = copyToHost(_numSelectedConnectionVertices);
+    result.attackEventVertices = copyToHost(_numAttackEventVertices);
+    result.detonationEventVertices = copyToHost(_numDetonationEventVertices);
     result.locations = copyToHost(_numLocations);
 
     return result;
