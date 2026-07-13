@@ -56,7 +56,6 @@ namespace
     // timesteps perturbs the simulation's GPU execution timing and makes simulation runs non-reproducible.
     // They are therefore scheduled at deterministic timestep intervals instead.
     auto constexpr EvolutionStatisticsUpdateInterval = 10;
-    auto constexpr PreviewLineageMapCapacity = 1 << 12;
     ArraySizesForGpuEntities const PreviewCapacityGpu{10000, 10000, 10000000};
     ArraySizesForTOs const PreviewCapacityTO{1000, 1000, 1000, 10000, 10000, 10000, 10000000};
 }
@@ -88,7 +87,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
     _cudaPreviewData->init({_settingsForPreview.worldSizeX, _settingsForPreview.worldSizeY}, 0);
     _cudaSimulationStatistics->init();
-    _cudaPreviewStatistics->init(PreviewLineageMapCapacity);
+    _cudaPreviewStatistics->init();
     _cudaSelectionResult->init();
 
     GarbageCollectorKernelsService::get().init();
