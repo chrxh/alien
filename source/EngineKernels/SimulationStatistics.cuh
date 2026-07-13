@@ -1,6 +1,7 @@
 #pragma once
 
 #include <EngineInterface/LineageStatistics.h>
+#include <EngineInterface/OverallStatistics.h>
 #include <EngineInterface/StatisticsRawData.h>
 
 #include "Base.cuh"
@@ -16,13 +17,14 @@ public:
     {
         _lineageMapCapacity = lineageMapCapacity;
         CudaMemoryManager::getInstance().acquireMemory<StatisticsRawData>(1, _data);
-        CudaMemoryManager::getInstance().acquireMemory<MutantStatistics>(MutantToColorCountMapSize, _mutantToMutantStatisticsMap);
+        CudaMemoryManager::getInstance().acquireMemory<OverallStatisticsEntry>(1, _overallStatisticsEntry);
         CudaMemoryManager::getInstance().acquireMemory<LineageMapSlot>(_lineageMapCapacity, _lineageMap);
         CudaMemoryManager::getInstance().acquireMemory<LineageStatisticsEntry>(_lineageMapCapacity, _lineageCompactData);
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageMapCapacity, _lineageAccumulatorMaps[0]);
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageMapCapacity, _lineageAccumulatorMaps[1]);
         CudaMemoryManager::getInstance().acquireMemory<LineageMapControl>(1, _lineageMapControl);
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_data, 0, sizeof(StatisticsRawData)));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_overallStatisticsEntry, 0, sizeof(OverallStatisticsEntry)));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageMapControl, 0, sizeof(LineageMapControl)));
 
         // Values must start at zero; the lineageId key column (first member) is set to LineageIdEmpty
@@ -37,7 +39,7 @@ public:
     __host__ void free()
     {
         CudaMemoryManager::getInstance().freeMemory(_data);
-        CudaMemoryManager::getInstance().freeMemory(_mutantToMutantStatisticsMap);
+        CudaMemoryManager::getInstance().freeMemory(_overallStatisticsEntry);
         CudaMemoryManager::getInstance().freeMemory(_lineageMap);
         CudaMemoryManager::getInstance().freeMemory(_lineageCompactData);
         CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMaps[0]);
@@ -49,6 +51,13 @@ public:
     {
         StatisticsRawData result;
         CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
+        return result;
+    }
+
+    __host__ OverallStatisticsEntry getOverallStatistics()
+    {
+        OverallStatisticsEntry result;
+        CHECK_FOR_DEVICE_ERRORS(cudaMemcpy(&result, _overallStatisticsEntry, sizeof(OverallStatisticsEntry), cudaMemcpyDeviceToHost));
         return result;
     }
 
@@ -74,17 +83,7 @@ public:
     __inline__ __device__ void resetTimestepData()
     {
         if (threadIdx.x == 0 && blockIdx.x == 0) {
-            // Evolution statistics are collected at deterministic timesteps (separate kernel sequence)
-            // and must survive the wall-clock-throttled timestep statistics updates.
-            auto evolution = _data->timeline.timestep.evolution;
             _data->timeline.timestep = TimestepStatistics();
-            _data->timeline.timestep.evolution = evolution;
-        }
-        auto partition = calcSystemThreadPartition(MutantToColorCountMapSize);
-        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-            _mutantToMutantStatisticsMap[index].count = 0;
-            _mutantToMutantStatisticsMap[index].numObjects = 0;
-            _mutantToMutantStatisticsMap[index].color = 0;
         }
     }
 
@@ -111,12 +110,6 @@ public:
         }
         return result;
     }
-    __inline__ __device__ void incMutant(int color, uint32_t lineageId, float numCells)
-    {
-        atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].count, 1);
-        atomicMax(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].color, color);
-        atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].numObjects, numCells);
-    }
     __inline__ __device__ void halveNumConnections()
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -125,26 +118,43 @@ public:
     }
 
     //evolution statistics (timestep)
-    __inline__ __device__ void resetEvolutionStatistics() { _data->timeline.timestep.evolution = EvolutionStatistics(); }
-    __inline__ __device__ void incNumSolidObjects() { atomicAdd(&_data->timeline.timestep.evolution.numSolidObjects, 1); }
-    __inline__ __device__ void incNumFluidObjects() { atomicAdd(&_data->timeline.timestep.evolution.numFluidObjects, 1); }
-    __inline__ __device__ void incNumCellObjects() { atomicAdd(&_data->timeline.timestep.evolution.numCellObjects, 1); }
+    __inline__ __device__ void resetEvolutionStatistics()
+    {
+        // numCreatedCreatures and totalMutations are accumulated, never reset here
+        auto& overall = *_overallStatisticsEntry;
+        overall.numCreatures = 0;
+        overall.numGenomes = 0;
+        overall.sumCreatureCells = 0;
+        overall.sumCreatureGenerations = 0;
+        overall.sumGenomeNodes = 0;
+        overall.sumMutationRates = 0;
+        overall.sumCreatureEnergy = 0;
+        overall.sumAccumulatedMutations = 0;
+        overall.numSolidObjects = 0;
+        overall.numFluidObjects = 0;
+        overall.numCellObjects = 0;
+        overall.numActiveLineages = 0;
+        overall.lineageMapOverflow = 0;
+    }
+    __inline__ __device__ void incNumSolidObjects() { atomicAdd(&_overallStatisticsEntry->numSolidObjects, 1u); }
+    __inline__ __device__ void incNumFluidObjects() { atomicAdd(&_overallStatisticsEntry->numFluidObjects, 1u); }
+    __inline__ __device__ void incNumCellObjects() { atomicAdd(&_overallStatisticsEntry->numCellObjects, 1u); }
     __inline__ __device__ void addCreatureStatistics(uint32_t numCells, uint32_t generation, float accumulatedMutations)
     {
-        auto& evolution = _data->timeline.timestep.evolution;
-        atomicAdd(&evolution.numCreatures, 1);
-        atomicAdd(&evolution.sumCreatureCells, toFloat(numCells));
-        atomicAdd(&evolution.sumCreatureGenerations, toFloat(generation));
-        atomicAdd(&evolution.sumAccumulatedMutations, accumulatedMutations);
+        auto& overall = *_overallStatisticsEntry;
+        atomicAdd(&overall.numCreatures, 1u);
+        atomicAdd(&overall.sumCreatureCells, toFloat(numCells));
+        atomicAdd(&overall.sumCreatureGenerations, toFloat(generation));
+        atomicAdd(&overall.sumAccumulatedMutations, accumulatedMutations);
     }
     __inline__ __device__ void addGenomeStatistics(float numNodes, float meanMutationRate)
     {
-        auto& evolution = _data->timeline.timestep.evolution;
-        atomicAdd(&evolution.numGenomes, 1);
-        atomicAdd(&evolution.sumGenomeNodes, numNodes);
-        atomicAdd(&evolution.sumMutationRates, meanMutationRate);
+        auto& overall = *_overallStatisticsEntry;
+        atomicAdd(&overall.numGenomes, 1u);
+        atomicAdd(&overall.sumGenomeNodes, numNodes);
+        atomicAdd(&overall.sumMutationRates, meanMutationRate);
     }
-    __inline__ __device__ void addCreatureEnergy(float value) { atomicAdd(&_data->timeline.timestep.evolution.sumCreatureEnergy, value); }
+    __inline__ __device__ void addCreatureEnergy(float value) { atomicAdd(&_overallStatisticsEntry->sumCreatureEnergy, value); }
 
     //lineage statistics
     __inline__ __device__ int getLineageMapCapacity() const { return _lineageMapCapacity; }
@@ -174,7 +184,7 @@ public:
             }
             index = (index + 1) & mask;
         }
-        _data->timeline.timestep.evolution.lineageMapOverflow = 1;
+        _overallStatisticsEntry->lineageMapOverflow = 1;
         return -1;
     }
     __inline__ __device__ int findLineageSlot(uint32_t lineageId) const
@@ -239,10 +249,7 @@ public:
             entry.totalMutations = accumulatorSlot.totalMutations;
         }
     }
-    __inline__ __device__ void finalizeLineageStatistics()
-    {
-        _data->timeline.timestep.evolution.numActiveLineages = toInt(_lineageMapControl->numCompactEntries);
-    }
+    __inline__ __device__ void finalizeLineageStatistics() { _overallStatisticsEntry->numActiveLineages = _lineageMapControl->numCompactEntries; }
 
     //lineage accumulator map (persistent, garbage-collected occasionally)
     __inline__ __device__ void resetInactiveAccumulatorSlot(int index)
@@ -307,7 +314,7 @@ public:
 
     __inline__ __device__ void incCreatedCreature(uint32_t lineageId)
     {
-        alienAtomicAdd64(&_data->timeline.accumulated.numCreatedCreatures, uint64_t(1));
+        atomicAdd(&_overallStatisticsEntry->numCreatedCreatures, 1u);
         auto slotIndex = findOrInsertAccumulatorSlot(lineageId);
         if (slotIndex >= 0) {
             atomicAdd(&getActiveAccumulatorMap()[slotIndex].numCreatedCreatures, 1u);
@@ -315,7 +322,7 @@ public:
     }
     __inline__ __device__ void addMutations(uint32_t lineageId, float value)
     {
-        atomicAdd(&_data->timeline.accumulated.totalMutations, toDouble(value));
+        atomicAdd(&_overallStatisticsEntry->totalMutations, value);
         auto slotIndex = findOrInsertAccumulatorSlot(lineageId);
         if (slotIndex >= 0) {
             atomicAdd(&getActiveAccumulatorMap()[slotIndex].totalMutations, value);
@@ -412,6 +419,7 @@ private:
     }
 
     StatisticsRawData* _data;
+    OverallStatisticsEntry* _overallStatisticsEntry;
     int _lineageMapCapacity;
 
     LineageMapSlot* _lineageMap;
@@ -419,14 +427,4 @@ private:
 
     LineageMapControl* _lineageMapControl;
     LineageStatisticsEntry* _lineageCompactData;
-
-    //for diversity calculation
-    static auto constexpr MutantToColorCountMapSize = 1 << 20;
-    struct MutantStatistics
-    {
-        uint32_t color;
-        uint32_t count;
-        float numObjects;
-    };
-    MutantStatistics* _mutantToMutantStatisticsMap;
 };

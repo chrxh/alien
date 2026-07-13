@@ -16,6 +16,7 @@
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/LineageHistory.h>
 #include <EngineInterface/LineageStatistics.h>
+#include <EngineInterface/OverallStatistics.h>
 #include <EngineInterface/PreviewDesc.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
@@ -61,6 +62,7 @@ public:
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
     RawLineageStatistics getRawLineageStatistics() const;
+    OverallStatisticsEntry getOverallStatistics() const;
     LineageHistory const& getLineageHistory() const;
 
     void addAndSelectSimulationData(Desc&& dataToUpdate);
