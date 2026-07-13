@@ -314,6 +314,14 @@ void BrowserWindow::processToolbar()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Delete selected " + resourceTypeString);
 
+    //clear download cache button
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
+        _downloadCache->clear();
+        NetworkService::get().clearDownloadCache();
+    }
+    AlienGui::Tooltip(_("Clear downloaded content cache"));
+
     //separator
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
