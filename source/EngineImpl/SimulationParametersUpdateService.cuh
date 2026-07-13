@@ -4,7 +4,6 @@
 
 #include <EngineInterface/SettingsForSimulation.h>
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
-#include <EngineInterface/TimelineStatistics.h>
 
 #include <EngineKernels/Definitions.cuh>
 
@@ -20,8 +19,6 @@ public:
 
     bool updateSimulationParametersAfterTimestep(
         SettingsForSimulation& settings,
-        MaxAgeBalancer const& maxAgeBalancer,
         SimulationData const& simulationData,
-        uint64_t timestep,
-        TimelineStatistics const& statistics);  //returns true if parameters have been changed
+        uint64_t timestep);  //returns true if parameters have been changed
 };

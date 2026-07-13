@@ -236,9 +236,8 @@ void EvolutionDashboardWindow::processBackground()
     _lastTimepoint = timepoint;
     _timeSinceSimStart += toDouble(duration) / 1000;
 
-    auto timelineStatistics = _SimulationFacade::get()->getTimelineStatistics();
     auto overallStatistics = _SimulationFacade::get()->getOverallStatistics();
-    _timelineLiveStatistics.update(timelineStatistics, overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
+    _timelineLiveStatistics.update(overallStatistics, _SimulationFacade::get()->getCurrentTimestep());
 
     auto rawLineageStatistics = _SimulationFacade::get()->getLineageStatistics();
     LineageSample sample;
@@ -407,23 +406,20 @@ void EvolutionDashboardWindow::updateDisplayData()
 
     //header sparklines and deltas from the live statistics
     auto liveWindowInSeconds = liveGlobalHistory.size() >= 2 ? liveGlobalHistory.back().time - liveGlobalHistory.front().time : 0.0;
-    for (int cardIndex = 0; cardIndex < 4; ++cardIndex) {
+    for (int cardIndex = 0; cardIndex < 3; ++cardIndex) {
         auto& sparkline = _headerSparklines.at(cardIndex);
         sparkline.clear();
         std::vector<double> fullSeries;
-        if (cardIndex == 1) {
+        if (cardIndex == 0) {
             fullSeries = _externalEnergySeries;
         } else {
             fullSeries.reserve(liveGlobalHistory.size());
             for (auto const& dataPoints : liveGlobalHistory) {
                 switch (cardIndex) {
-                case 0:
-                    fullSeries.emplace_back(dataPoints.totalEnergy.summedValues);
-                    break;
-                case 2:
+                case 1:
                     fullSeries.emplace_back(dataPoints.numLineages);
                     break;
-                case 3:
+                case 2:
                     fullSeries.emplace_back(dataPoints.numCreatures);
                     break;
                 }
@@ -440,7 +436,7 @@ void EvolutionDashboardWindow::updateDisplayData()
 void EvolutionDashboardWindow::processHeader()
 {
     auto const& style = ImGui::GetStyle();
-    auto cardWidth = (ImGui::GetContentRegionAvail().x - 4 * style.ItemSpacing.x) / 6;
+    auto cardWidth = (ImGui::GetContentRegionAvail().x - 3 * style.ItemSpacing.x) / 5;
     auto cardHeight =
         style.WindowPadding.y * 2 + ImGui::GetTextLineHeight() * 3 + StyleRepository::get().getLargeFont()->FontSize + style.ItemSpacing.y * 3 + scale(6.0f);
 
@@ -449,16 +445,13 @@ void EvolutionDashboardWindow::processHeader()
 
     processEntitiesCard(cardWidth * 2, cardHeight);
     ImGui::SameLine();
-    auto sumEnergy = lastDataPoints ? lastDataPoints->totalEnergy.summedValues : 0.0;
-    processKpiCard("SUM ENERGY", formatMetricValue(sumEnergy, 0), toFloat(_headerDeltas.at(0)), 0, cardWidth, cardHeight);
-    ImGui::SameLine();
     auto externalEnergy = !_externalEnergySeries.empty() ? _externalEnergySeries.back() : 0.0;
-    processKpiCard("EXTERNAL ENERGY", formatMetricValue(externalEnergy, 0), toFloat(_headerDeltas.at(1)), 1, cardWidth, cardHeight);
+    processKpiCard("EXTERNAL ENERGY", formatMetricValue(externalEnergy, 0), toFloat(_headerDeltas.at(0)), 0, cardWidth, cardHeight);
     ImGui::SameLine();
     auto numLineages = lastDataPoints ? lastDataPoints->numLineages : 0.0;
-    processKpiCard("LINEAGES", formatMetricValue(numLineages, 0), toFloat(_headerDeltas.at(2)), 2, cardWidth, cardHeight);
+    processKpiCard("LINEAGES", formatMetricValue(numLineages, 0), toFloat(_headerDeltas.at(1)), 1, cardWidth, cardHeight);
     ImGui::SameLine();
-    processKpiCard("CREATURES", formatMetricValue(_allLineages.currentValues.at(0), 0), toFloat(_headerDeltas.at(3)), 3, cardWidth, cardHeight);
+    processKpiCard("CREATURES", formatMetricValue(_allLineages.currentValues.at(0), 0), toFloat(_headerDeltas.at(2)), 2, cardWidth, cardHeight);
 }
 
 void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::string const& value, float delta, int sparklineIndex, float width, float height)
@@ -513,15 +506,13 @@ void EvolutionDashboardWindow::processEntitiesCard(float width, float height)
     auto solids = 0.0;
     auto fluids = 0.0;
     auto cells = 0.0;
-    auto energyParticles = 0.0;
     auto total = 0.0;
     if (!liveGlobalHistory.empty()) {
         auto const& dataPoints = liveGlobalHistory.back();
         solids = dataPoints.numSolidObjects;
         fluids = dataPoints.numFluidObjects;
         cells = dataPoints.numCellObjects;
-        energyParticles = dataPoints.numEnergyParticles.summedValues;
-        total = dataPoints.numObjects.summedValues + energyParticles;
+        total = solids + fluids + cells;
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
@@ -540,7 +531,6 @@ void EvolutionDashboardWindow::processEntitiesCard(float width, float height)
             {"Solids", solids},
             {"Fluid particles", fluids},
             {"Cells", cells},
-            {"Energy particles", energyParticles},
         };
         for (auto const& [subLabel, subValue] : subValues) {
             ImGui::BeginGroup();

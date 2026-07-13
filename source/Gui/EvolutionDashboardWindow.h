@@ -59,8 +59,8 @@ private:
     std::vector<LineageDisplayData> _plottedLineages;
     LineageDisplayData _allLineages;
     std::array<double, NumMetrics> _metricWindowDeltas = {};
-    std::array<std::vector<double>, 4> _headerSparklines = {};
-    std::array<double, 4> _headerDeltas = {};
+    std::array<std::vector<double>, 3> _headerSparklines = {};
+    std::array<double, 3> _headerDeltas = {};
 
     std::array<uint32_t, MAX_COLORS> _cellColors = {};
 

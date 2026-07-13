@@ -34,9 +34,6 @@ class SelectionKernelsService;
 class StatisticsKernelsService;
 class TestKernelsService;
 
-class _MaxAgeBalancer;
-using MaxAgeBalancer = std::shared_ptr<_MaxAgeBalancer>;
-
 class _CudaTOProvider;
 using CudaTOProvider = std::shared_ptr<_CudaTOProvider>;
 

@@ -93,7 +93,6 @@ __inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatis
         auto connectedObject = object->connections[i].object;
         if (connectedObject->typeData.cell.cellType == CellType_Defender
             && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
-            statistics.incNumDefenderActivities(connectedObject->color);
             ++result;
         }
     }

@@ -6,13 +6,6 @@ void StatisticsKernelsService::init() {}
 
 void StatisticsKernelsService::shutdown() {}
 
-void StatisticsKernelsService::updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics)
-{
-    KERNEL_CALL(cudaUpdateTimestepStatistics_substep1, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateTimestepStatistics_substep2, data, simulationStatistics);
-    KERNEL_CALL(cudaUpdateTimestepStatistics_substep3, data, simulationStatistics);
-}
-
 void StatisticsKernelsService::updateEvolutionStatistics(
     CudaSettings const& gpuSettings,
     SimulationData const& data,
