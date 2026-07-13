@@ -19,8 +19,8 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<MutantStatistics>(MutantToColorCountMapSize, _mutantToMutantStatisticsMap);
         CudaMemoryManager::getInstance().acquireMemory<LineageMapSlot>(_lineageMapCapacity, _lineageMap);
         CudaMemoryManager::getInstance().acquireMemory<LineageStatisticsEntry>(_lineageMapCapacity, _lineageCompactData);
-        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorSlot>(_lineageMapCapacity, _lineageAccumulatorMaps[0]);
-        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorSlot>(_lineageMapCapacity, _lineageAccumulatorMaps[1]);
+        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageMapCapacity, _lineageAccumulatorMaps[0]);
+        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageMapCapacity, _lineageAccumulatorMaps[1]);
         CudaMemoryManager::getInstance().acquireMemory<LineageMapControl>(1, _lineageMapControl);
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_data, 0, sizeof(StatisticsRawData)));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageMapControl, 0, sizeof(LineageMapControl)));
@@ -29,8 +29,8 @@ public:
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageMap, 0, sizeof(LineageMapSlot) * _lineageMapCapacity));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageMap, sizeof(LineageMapSlot), 0xff, sizeof(uint32_t), _lineageMapCapacity));
         for (int i = 0; i < 2; ++i) {
-            CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMaps[i], 0, sizeof(LineageAccumulatorSlot) * _lineageMapCapacity));
-            CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageAccumulatorMaps[i], sizeof(LineageAccumulatorSlot), 0xff, sizeof(uint32_t), _lineageMapCapacity));
+            CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMaps[i], 0, sizeof(LineageAccumulatorMapSlot) * _lineageMapCapacity));
+            CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageAccumulatorMaps[i], sizeof(LineageAccumulatorMapSlot), 0xff, sizeof(uint32_t), _lineageMapCapacity));
         }
     }
 
@@ -349,7 +349,7 @@ private:
         float sumMutationRates;
         float sumCreatureEnergy;
     };
-    struct LineageAccumulatorSlot
+    struct LineageAccumulatorMapSlot
     {
         uint32_t lineageId;  // LineageIdEmpty = slot is unused
         uint32_t numCreatedCreatures;
@@ -369,7 +369,7 @@ private:
         return result;
     }
 
-    __inline__ __device__ LineageAccumulatorSlot* getActiveAccumulatorMap() { return _lineageAccumulatorMaps[_lineageMapControl->activeAccumulatorBuffer]; }
+    __inline__ __device__ LineageAccumulatorMapSlot* getActiveAccumulatorMap() { return _lineageAccumulatorMaps[_lineageMapControl->activeAccumulatorBuffer]; }
 
     __inline__ __device__ int insertAccumulatorSlot(uint32_t bufferIndex, uint32_t lineageId)
     {
@@ -415,9 +415,10 @@ private:
     int _lineageMapCapacity;
 
     LineageMapSlot* _lineageMap;
-    LineageStatisticsEntry* _lineageCompactData;
-    LineageAccumulatorSlot* _lineageAccumulatorMaps[2];
+    LineageAccumulatorMapSlot* _lineageAccumulatorMaps[2];
+
     LineageMapControl* _lineageMapControl;
+    LineageStatisticsEntry* _lineageCompactData;
 
     //for diversity calculation
     static auto constexpr MutantToColorCountMapSize = 1 << 20;
