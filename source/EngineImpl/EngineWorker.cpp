@@ -109,19 +109,9 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
     _simulationCudaFacade->setStatisticsHistory(data);
 }
 
-LineageStatistics EngineWorker::getLineageStatistics() const
+StatisticsEntry EngineWorker::getOverallStatistics() const
 {
-    return _simulationCudaFacade->getLineageStatistics();
-}
-
-OverallStatisticsEntry EngineWorker::getOverallStatistics() const
-{
-    return _simulationCudaFacade->getOverallStatistics();
-}
-
-LineageHistory const& EngineWorker::getLineageHistory() const
-{
-    return _simulationCudaFacade->getLineageHistory();
+    return _simulationCudaFacade->getStatisticsEntry();
 }
 
 void EngineWorker::addAndSelectSimulationData(Desc&& dataToUpdate)

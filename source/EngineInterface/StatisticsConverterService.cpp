@@ -5,7 +5,7 @@
 #include <Base/Definitions.h>
 
 DataPointCollection StatisticsConverterService::convert(
-    OverallStatisticsEntry const& overallStatistics,
+    StatisticsEntry const& overallStatistics,
     uint64_t timestep,
     double time)
 {
@@ -16,7 +16,7 @@ DataPointCollection StatisticsConverterService::convert(
     auto unixEpoch = std::chrono::time_point<std::chrono::system_clock>();
     result.systemClock = toDouble(std::chrono::duration_cast<std::chrono::seconds>(now - unixEpoch).count());
 
-    auto const& overall = overallStatistics;
+    auto const& overall = overallStatistics.overallEntry;
     result.numCreatures = toDouble(overall.numCreatures);
     result.averageCreatureCells = overall.numCreatures > 0 ? toDouble(overall.sumCreatureCells) / overall.numCreatures : 0.0;
     result.averageGeneration = overall.numCreatures > 0 ? toDouble(overall.sumCreatureGenerations) / overall.numCreatures : 0.0;
@@ -29,6 +29,8 @@ DataPointCollection StatisticsConverterService::convert(
     result.numCellObjects = toDouble(overall.numCellObjects);
     result.accumCreatedCreatures = toDouble(overall.numCreatedCreatures);
     result.accumMutations = toDouble(overall.totalMutations);
+
+    result.lineageEntries = overallStatistics.entries;
 
     return result;
 }

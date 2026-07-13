@@ -26,15 +26,12 @@ add_library(EngineInterface
     GeometryBuffers.h
     Ids.h
     InspectedEntityIds.h
-    LineageHistory.cpp
-    LineageHistory.h
-    LineageStatistics.h
     LocationHelper.cpp
     LocationHelper.h
     NeuralNetWeight.h
     NumberGenerator.cpp
     NumberGenerator.h
-    OverallStatistics.h
+    StatisticsEntry.h
     ParametersEditService.cpp
     ParametersEditService.h
     ParametersFilter.h

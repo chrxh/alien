@@ -38,7 +38,6 @@ PUBLIC
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     LayerParameterTests.cpp
-    LineageHistoryServiceTests.cu
     MemoryTests.cpp
     MetaMutationTests.cpp
     MoveNodeSectionMutationTests.cpp

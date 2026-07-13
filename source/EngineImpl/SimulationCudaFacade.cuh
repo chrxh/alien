@@ -13,9 +13,7 @@
 #include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
-#include <EngineInterface/LineageHistory.h>
-#include <EngineInterface/LineageStatistics.h>
-#include <EngineInterface/OverallStatistics.h>
+#include <EngineInterface/StatisticsEntry.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
@@ -88,9 +86,7 @@ public:
     void updateStatistics();
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
-    LineageStatistics getLineageStatistics();
-    OverallStatisticsEntry getOverallStatistics();
-    LineageHistory const& getLineageHistory() const;
+    StatisticsEntry getStatisticsEntry();
 
     uint64_t getCurrentTimestep() const;
     void setCurrentTimestep(uint64_t timestep);
@@ -159,9 +155,7 @@ private:
 
     mutable std::mutex _mutexForStatistics;
     StatisticsHistory _statisticsHistory;
-    std::optional<LineageStatistics> _lineageStatisticsData;
-    std::optional<OverallStatisticsEntry> _overallStatisticsData;
-    LineageHistory _lineageHistory;
+    std::optional<StatisticsEntry> _overallStatisticsData;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
 };
