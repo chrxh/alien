@@ -25,6 +25,7 @@ PUBLIC
     DetonatorTests.cpp
     DuplicateGeneMutationTests.cpp
     EditTests.cpp
+    EvolutionStatisticsTests.cpp
     DigestorTests.cpp
     EnergyFlowTests.cpp
     EnergyParticleTests.cpp

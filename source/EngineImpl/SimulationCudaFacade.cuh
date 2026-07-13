@@ -13,6 +13,9 @@
 #include <EngineInterface/ArraySizesForTOs.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/LineageHistory.h>
+#include <EngineInterface/LineageHistoryService.h>
+#include <EngineInterface/LineageStatistics.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
@@ -87,6 +90,8 @@ public:
     void updateStatistics();
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
+    RawLineageStatistics getRawLineageStatistics();
+    LineageHistory const& getLineageHistory() const;
 
     void resetTimeIntervalStatistics();
     uint64_t getCurrentTimestep() const;
@@ -120,6 +125,9 @@ public:
 
 private:
     void initCuda();
+
+    void updateTimestepStatistics();
+    void updateEvolutionStatistics();
 
     void syncAndCheck();
     void copyDataTOtoGpu(TOs const& cudaTO, TOs const& to);
@@ -156,6 +164,9 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
     std::optional<StatisticsRawData> _statisticsData;
     StatisticsHistory _statisticsHistory;
+    std::optional<RawLineageStatistics> _lineageStatisticsData;
+    LineageHistory _lineageHistory;
+    LineageHistoryService _lineageHistoryService;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
     MaxAgeBalancer _maxAgeBalancer;

@@ -3,12 +3,13 @@
 #include <algorithm>
 #include <bit>
 #include <cmath>
-#include <random>
+#include <limits>
 #include <cstdio>
 
 #include <imgui.h>
 #include <implot.h>
 
+#include <Base/Definitions.h>
 #include <Base/GlobalSettings.h>
 #include <Base/StringHelper.h>
 
@@ -19,6 +20,10 @@
 
 namespace
 {
+    auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
+    auto constexpr MaxLiveHistory = 240.0;        //in seconds
+    auto constexpr NumSparklinePoints = 40;
+
     auto constexpr SparklineWidth = 90.0f;
     auto constexpr SparklineHeight = 26.0f;
     auto constexpr ColorChipSize = 22.0f;
@@ -28,35 +33,31 @@ namespace
     auto constexpr PlotHeight = 60.0f;
     auto constexpr PlotHeightWithAxis = 80.0f;
     auto constexpr DefaultTimelinesHeight = 380.0f;
-    auto constexpr TimeSpan = 1250000.0;
 
     ImColor const CardBackgroundColor = ImColor(0.095f, 0.117f, 0.165f, 1.0f);
     ImColor const CardBorderColor = ImColor(0.165f, 0.196f, 0.270f, 1.0f);
     ImColor const PositiveDeltaColor = ImColor(0.19f, 0.77f, 0.55f, 1.0f);
     ImColor const NegativeDeltaColor = ImColor(0.94f, 0.32f, 0.32f, 1.0f);
     ImColor const SumSeriesColor = ImColor(0.78f, 0.78f, 0.78f, 1.0f);
+    ImColor const OverflowWarningColor = ImColor(0.94f, 0.62f, 0.22f, 1.0f);
 
     struct MetricDef
     {
         char const* tableHeader;
         char const* plotName;
-        double baseValue;
         int decimals;  //-1: scientific notation
     };
 
     MetricDef const Metrics[EvolutionDashboardWindow::NumMetrics] = {
-        {"Creatures", "Creatures", 1500.0, 0},
-        {"Avg size", "Avg creature size", 15.0, 1},
-        {"Avg cells", "Avg cells", 40.0, 1},
-        {"Avg nodes", "Avg nodes", 60.0, 1},
-        {"Sum energy", "Sum energy", 150000.0, 0},
-        {"Avg mut. rate", "Avg mutation rate", 2.0e-4, -1},
-        {"Avg age (gen)", "Avg age (generations)", 200.0, 0},
-        {"Created /s", "Created creatures / s", 3.0, 1},
-        {"Mutations /s", "Mutations / s", 1.0, 1},
+        {"Creatures", "Creatures", 0},
+        {"Avg cells", "Avg cells", 1},
+        {"Avg nodes", "Avg nodes", 1},
+        {"Sum energy", "Sum energy", 0},
+        {"Avg mut. rate", "Avg mutation rate", -1},
+        {"Avg age (gen)", "Avg age (generations)", 0},
+        {"Created /s", "Created creatures / s", 2},
+        {"Mutations /s", "Mutations / s", 1},
     };
-
-    float const MetricDeltas[EvolutionDashboardWindow::NumMetrics] = {4.1f, 0.6f, 1.2f, 0.0f, -0.4f, -2.3f, 5.0f, 1.1f, -0.8f};
 
     ImColor toImColor(uint32_t rgb, float alpha = 1.0f)
     {
@@ -110,18 +111,96 @@ namespace
         return x - pos.x;
     }
 
-    std::vector<double> createRandomWalk(std::mt19937& rng, int count, double baseValue, double volatility, double trend)
+    double calcRate(double accumValue, double lastAccumValue, double clock, double lastClock)
     {
-        std::uniform_real_distribution<double> distribution(-1.0, 1.0);
-        std::vector<double> result;
-        result.reserve(count);
-        auto value = baseValue * (0.4 + 0.4 * (distribution(rng) + 1.0) / 2);
-        for (int i = 0; i < count; ++i) {
-            value += baseValue * (distribution(rng) * volatility + trend);
-            value = std::max(baseValue * 0.05, value);
-            result.emplace_back(value);
+        auto deltaClock = clock - lastClock;
+        if (deltaClock <= 0) {
+            return 0.0;
         }
-        return result;
+        return std::max(0.0, (accumValue - lastAccumValue) / deltaClock);  //negative deltas occur after accumulated statistics have been reset
+    }
+
+    double getGlobalMetricValue(DataPointCollection const& dataPoints, DataPointCollection const* lastDataPoints, bool clockFromTime, int metricIndex)
+    {
+        switch (metricIndex) {
+        case 0:
+            return dataPoints.numCreatures;
+        case 1:
+            return dataPoints.averageCreatureCells;
+        case 2:
+            return dataPoints.averageGenomeNodes;
+        case 3:
+            return dataPoints.creatureEnergy;
+        case 4:
+            return dataPoints.averageMutationRate;
+        case 5:
+            return dataPoints.averageGeneration;
+        case 6:
+        case 7: {
+            if (!lastDataPoints) {
+                return 0.0;
+            }
+            auto clock = clockFromTime ? dataPoints.time : dataPoints.systemClock;
+            auto lastClock = clockFromTime ? lastDataPoints->time : lastDataPoints->systemClock;
+            if (metricIndex == 6) {
+                return calcRate(dataPoints.accumCreatedCreatures, lastDataPoints->accumCreatedCreatures, clock, lastClock);
+            } else {
+                return calcRate(dataPoints.accumMutations, lastDataPoints->accumMutations, clock, lastClock);
+            }
+        }
+        default:
+            return 0.0;
+        }
+    }
+
+    double getLineageMetricValue(LineageStatisticsEntry const& entry, LineageStatisticsEntry const* lastEntry, double clock, double lastClock, int metricIndex)
+    {
+        switch (metricIndex) {
+        case 0:
+            return toDouble(entry.numCreatures);
+        case 1:
+            return entry.numCreatures > 0 ? toDouble(entry.sumCreatureCells) / entry.numCreatures : 0.0;
+        case 2:
+            return entry.numGenomes > 0 ? toDouble(entry.sumGenomeNodes) / entry.numGenomes : 0.0;
+        case 3:
+            return toDouble(entry.sumCreatureEnergy);
+        case 4:
+            return entry.numGenomes > 0 ? toDouble(entry.sumMutationRates) / entry.numGenomes : 0.0;
+        case 5:
+            return entry.numCreatures > 0 ? toDouble(entry.sumCreatureGenerations) / entry.numCreatures : 0.0;
+        case 6:
+            return lastEntry ? calcRate(toDouble(entry.numCreatedCreatures), toDouble(lastEntry->numCreatedCreatures), clock, lastClock) : 0.0;
+        case 7:
+            return lastEntry ? calcRate(toDouble(entry.totalMutations), toDouble(lastEntry->totalMutations), clock, lastClock) : 0.0;
+        default:
+            return 0.0;
+        }
+    }
+
+    LineageStatisticsEntry const* findLineageEntry(LineageSample const& sample, uint32_t lineageId)
+    {
+        auto it =
+            std::lower_bound(sample.entries.begin(), sample.entries.end(), lineageId, [](auto const& entry, uint32_t id) { return entry.lineageId < id; });
+        if (it != sample.entries.end() && it->lineageId == lineageId) {
+            return &*it;
+        }
+        return nullptr;
+    }
+
+    double calcWindowDeltaPercent(std::vector<double> const& series)
+    {
+        if (series.size() < 2 || std::abs(series.front()) < NEAR_ZERO) {
+            return 0.0;
+        }
+        return (series.back() / series.front() - 1.0) * 100;
+    }
+
+    double calcDeltaPercentPerMinute(std::vector<double> const& series, double windowInSeconds)
+    {
+        if (windowInSeconds < NEAR_ZERO) {
+            return 0.0;
+        }
+        return calcWindowDeltaPercent(series) / (windowInSeconds / 60);
     }
 }
 
@@ -137,8 +216,6 @@ void EvolutionDashboardWindow::initIntern()
     _lastSteps = GlobalSettings::get().getValue("windows.evolution dashboard.last steps", _lastSteps);
     _colorFilter = GlobalSettings::get().getValue("windows.evolution dashboard.color filter", _colorFilter);
     validateAndCorrect();
-
-    generateDummyData();
 }
 
 void EvolutionDashboardWindow::shutdownIntern()
@@ -150,9 +227,43 @@ void EvolutionDashboardWindow::shutdownIntern()
     GlobalSettings::get().setValue("windows.evolution dashboard.color filter", _colorFilter);
 }
 
+void EvolutionDashboardWindow::processBackground()
+{
+    auto timepoint = std::chrono::steady_clock::now();
+    auto duration =
+        _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
+    if (_lastTimepoint && duration <= LiveStatisticsDeltaTime) {
+        return;
+    }
+    _lastTimepoint = timepoint;
+    _timeSinceSimStart += toDouble(duration) / 1000;
+
+    auto rawStatistics = _SimulationFacade::get()->getStatisticsRawData();
+    _timelineLiveStatistics.update(rawStatistics.timeline, _SimulationFacade::get()->getCurrentTimestep());
+    _lineageMapOverflow = rawStatistics.timeline.timestep.evolution.lineageMapOverflow != 0;
+
+    auto rawLineageStatistics = _SimulationFacade::get()->getRawLineageStatistics();
+    LineageSample sample;
+    sample.time = _timeSinceSimStart;
+    sample.systemClock = _timeSinceSimStart;
+    sample.entries = std::move(rawLineageStatistics.entries);
+    std::sort(sample.entries.begin(), sample.entries.end(), [](auto const& lhs, auto const& rhs) { return lhs.lineageId < rhs.lineageId; });
+    _liveLineageHistory.emplace_back(std::move(sample));
+    while (!_liveLineageHistory.empty() && _liveLineageHistory.back().time - _liveLineageHistory.front().time > MaxLiveHistory + 1.0) {
+        _liveLineageHistory.erase(_liveLineageHistory.begin());
+    }
+
+    _externalEnergySeries.emplace_back(toDouble(_SimulationFacade::get()->getSimulationParameters().externalEnergy.value));
+    auto maxExternalEnergyValues = toInt(std::lround(MaxLiveHistory * 1000 / LiveStatisticsDeltaTime));
+    while (toInt(_externalEnergySeries.size()) > maxExternalEnergyValues) {
+        _externalEnergySeries.erase(_externalEnergySeries.begin());
+    }
+}
+
 void EvolutionDashboardWindow::processIntern()
 {
     updateCellColors();
+    updateDisplayData();
     processHeader();
     processFilterBar();
 
@@ -177,6 +288,157 @@ void EvolutionDashboardWindow::updateCellColors()
     }
 }
 
+void EvolutionDashboardWindow::updateDisplayData()
+{
+    //rebuild only when the underlying data or view settings have changed
+    auto liveBackTime = !_liveLineageHistory.empty() ? _liveLineageHistory.back().time : -1.0;
+    auto historyBackTime = -1.0;
+    if (_timelineMode != TimelineMode_RealTime) {
+        auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
+        std::lock_guard lock(statisticsHistory.getMutex());
+        if (!statisticsHistory.getDataRef().empty()) {
+            historyBackTime = statisticsHistory.getDataRef().back().time;
+        }
+    }
+    RebuildKey key{_timelineMode, _lastSteps, liveBackTime, historyBackTime, _selectedLineageIds};
+    if (_lastRebuildKey && *_lastRebuildKey == key) {
+        return;
+    }
+    _lastRebuildKey = std::move(key);
+
+    //table rows from the latest live sample
+    _lineages.clear();
+    if (!_liveLineageHistory.empty()) {
+        auto const& lastSample = _liveLineageHistory.back();
+        auto const* previousSample = _liveLineageHistory.size() >= 2 ? &_liveLineageHistory.at(_liveLineageHistory.size() - 2) : nullptr;
+        for (auto const& entry : lastSample.entries) {
+            LineageDisplayData lineage;
+            lineage.id = toInt(entry.lineageId);
+            lineage.colorBitset = toInt(entry.colorBitset);
+            auto const* previousEntry = previousSample ? findLineageEntry(*previousSample, entry.lineageId) : nullptr;
+            for (int i = 0; i < NumMetrics; ++i) {
+                lineage.currentValues.at(i) = getLineageMetricValue(entry, previousEntry, lastSample.time, previousSample ? previousSample->time : 0.0, i);
+            }
+            _lineages.emplace_back(std::move(lineage));
+        }
+        std::sort(_lineages.begin(), _lineages.end(), [](auto const& lhs, auto const& rhs) { return lhs.currentValues.at(0) > rhs.currentValues.at(0); });
+    }
+
+    //data source for the timeline plots
+    auto useTimeAsClock = _timelineMode == TimelineMode_RealTime;
+    std::vector<DataPointCollection> globalSource;
+    LineageHistoryData lineageSource;
+    if (_timelineMode == TimelineMode_RealTime) {
+        globalSource = _timelineLiveStatistics.getDataPointCollectionHistory();
+        lineageSource = _liveLineageHistory;
+    } else {
+        auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
+        {
+            std::lock_guard lock(statisticsHistory.getMutex());
+            globalSource = statisticsHistory.getDataRef();
+        }
+        lineageSource = _SimulationFacade::get()->getLineageHistory().getCopiedData();
+        if (_timelineMode == TimelineMode_LastSteps && !globalSource.empty()) {
+            auto startTime = globalSource.back().time - toDouble(_lastSteps);
+            std::erase_if(globalSource, [&](auto const& dataPoints) { return dataPoints.time < startTime; });
+            std::erase_if(lineageSource, [&](auto const& sample) { return sample.time < startTime; });
+        }
+    }
+
+    //"all lineages" series
+    _allLineages.id = -1;
+    _allLineages.colorBitset = 0;
+    _allLineages.timePoints.clear();
+    for (int i = 0; i < NumMetrics; ++i) {
+        _allLineages.series.at(i).clear();
+    }
+    for (size_t sampleIndex = 0; sampleIndex < globalSource.size(); ++sampleIndex) {
+        auto const& dataPoints = globalSource.at(sampleIndex);
+        auto const* lastDataPoints = sampleIndex > 0 ? &globalSource.at(sampleIndex - 1) : nullptr;
+        _allLineages.timePoints.emplace_back(dataPoints.time);
+        for (int i = 0; i < NumMetrics; ++i) {
+            _allLineages.series.at(i).emplace_back(getGlobalMetricValue(dataPoints, lastDataPoints, useTimeAsClock, i));
+        }
+    }
+    auto const& liveGlobalHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
+    if (!liveGlobalHistory.empty()) {
+        auto const& lastDataPoints = liveGlobalHistory.back();
+        auto const* previousDataPoints = liveGlobalHistory.size() >= 2 ? &liveGlobalHistory.at(liveGlobalHistory.size() - 2) : nullptr;
+        for (int i = 0; i < NumMetrics; ++i) {
+            _allLineages.currentValues.at(i) = getGlobalMetricValue(lastDataPoints, previousDataPoints, true, i);
+        }
+    }
+    for (int i = 0; i < NumMetrics; ++i) {
+        _metricWindowDeltas.at(i) = calcWindowDeltaPercent(_allLineages.series.at(i));
+    }
+
+    //per-lineage series for the selected lineages
+    _plottedLineages.clear();
+    if (!_selectedLineageIds.empty()) {
+        for (auto const& selectedId : _selectedLineageIds) {
+            LineageDisplayData lineage;
+            lineage.id = selectedId;
+            LineageSample const* lastSampleWithEntry = nullptr;
+            LineageStatisticsEntry const* lastEntry = nullptr;
+            for (auto const& sample : lineageSource) {
+                auto const* entry = findLineageEntry(sample, toUInt32(selectedId));
+                if (!entry) {
+                    continue;
+                }
+                lineage.colorBitset = toInt(entry->colorBitset);
+                lineage.timePoints.emplace_back(sample.time);
+                auto clock = useTimeAsClock ? sample.time : sample.systemClock;
+                auto lastClock = lastSampleWithEntry ? (useTimeAsClock ? lastSampleWithEntry->time : lastSampleWithEntry->systemClock) : 0.0;
+                for (int i = 0; i < NumMetrics; ++i) {
+                    lineage.series.at(i).emplace_back(getLineageMetricValue(*entry, lastEntry, clock, lastClock, i));
+                }
+                lastSampleWithEntry = &sample;
+                lastEntry = entry;
+            }
+            for (auto const& tableLineage : _lineages) {
+                if (tableLineage.id == selectedId) {
+                    lineage.currentValues = tableLineage.currentValues;
+                    if (lineage.colorBitset == 0) {
+                        lineage.colorBitset = tableLineage.colorBitset;
+                    }
+                }
+            }
+            _plottedLineages.emplace_back(std::move(lineage));
+        }
+    }
+
+    //header sparklines and deltas from the live statistics
+    auto liveWindowInSeconds = liveGlobalHistory.size() >= 2 ? liveGlobalHistory.back().time - liveGlobalHistory.front().time : 0.0;
+    for (int cardIndex = 0; cardIndex < 4; ++cardIndex) {
+        auto& sparkline = _headerSparklines.at(cardIndex);
+        sparkline.clear();
+        std::vector<double> fullSeries;
+        if (cardIndex == 1) {
+            fullSeries = _externalEnergySeries;
+        } else {
+            fullSeries.reserve(liveGlobalHistory.size());
+            for (auto const& dataPoints : liveGlobalHistory) {
+                switch (cardIndex) {
+                case 0:
+                    fullSeries.emplace_back(dataPoints.totalEnergy.summedValues);
+                    break;
+                case 2:
+                    fullSeries.emplace_back(dataPoints.numLineages);
+                    break;
+                case 3:
+                    fullSeries.emplace_back(dataPoints.numCreatures);
+                    break;
+                }
+            }
+        }
+        _headerDeltas.at(cardIndex) = calcDeltaPercentPerMinute(fullSeries, liveWindowInSeconds);
+        auto stride = std::max(size_t(1), fullSeries.size() / NumSparklinePoints);
+        for (size_t i = 0; i < fullSeries.size(); i += stride) {
+            sparkline.emplace_back(fullSeries.at(i));
+        }
+    }
+}
+
 void EvolutionDashboardWindow::processHeader()
 {
     auto const& style = ImGui::GetStyle();
@@ -184,15 +446,21 @@ void EvolutionDashboardWindow::processHeader()
     auto cardHeight =
         style.WindowPadding.y * 2 + ImGui::GetTextLineHeight() * 3 + StyleRepository::get().getLargeFont()->FontSize + style.ItemSpacing.y * 3 + scale(6.0f);
 
+    auto const& liveGlobalHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
+    auto const* lastDataPoints = !liveGlobalHistory.empty() ? &liveGlobalHistory.back() : nullptr;
+
     processEntitiesCard(cardWidth * 2, cardHeight);
     ImGui::SameLine();
-    processKpiCard("SUM ENERGY", "1.24 M", 0.8f, 0, cardWidth, cardHeight);
+    auto sumEnergy = lastDataPoints ? lastDataPoints->totalEnergy.summedValues : 0.0;
+    processKpiCard("SUM ENERGY", formatMetricValue(sumEnergy, 0), toFloat(_headerDeltas.at(0)), 0, cardWidth, cardHeight);
     ImGui::SameLine();
-    processKpiCard("EXTERNAL ENERGY", "356 K", -1.2f, 1, cardWidth, cardHeight);
+    auto externalEnergy = !_externalEnergySeries.empty() ? _externalEnergySeries.back() : 0.0;
+    processKpiCard("EXTERNAL ENERGY", formatMetricValue(externalEnergy, 0), toFloat(_headerDeltas.at(1)), 1, cardWidth, cardHeight);
     ImGui::SameLine();
-    processKpiCard("LINEAGES", StringHelper::format(toFloat(_lineages.size()), 0), 2.4f, 2, cardWidth, cardHeight);
+    auto numLineages = lastDataPoints ? lastDataPoints->numLineages : 0.0;
+    processKpiCard("LINEAGES", formatMetricValue(numLineages, 0), toFloat(_headerDeltas.at(2)), 2, cardWidth, cardHeight);
     ImGui::SameLine();
-    processKpiCard("CREATURES", formatMetricValue(_allLineages.currentValues.at(0), 0), 0.5f, 3, cardWidth, cardHeight);
+    processKpiCard("CREATURES", formatMetricValue(_allLineages.currentValues.at(0), 0), toFloat(_headerDeltas.at(3)), 3, cardWidth, cardHeight);
 }
 
 void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::string const& value, float delta, int sparklineIndex, float width, float height)
@@ -216,22 +484,25 @@ void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::str
         ImGui::PopStyleColor();
 
         auto const& sparkline = _headerSparklines.at(sparklineIndex);
-        ImGui::SetCursorPos({width - scale(SparklineWidth + 12.0f), height - scale(SparklineHeight + 12.0f)});
-        ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-        ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0, 0, 0, 0));
-        ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0, 0, 0, 0));
-        ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0, 0, 0, 0));
-        if (ImPlot::BeginPlot(("##spark" + label).c_str(), {scale(SparklineWidth), scale(SparklineHeight)}, ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
-            ImPlot::SetupAxes(nullptr, nullptr, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations);
-            auto [minIt, maxIt] = std::minmax_element(sparkline.begin(), sparkline.end());
-            ImPlot::SetupAxesLimits(0, toDouble(sparkline.size() - 1), *minIt * 0.9, *maxIt * 1.1, ImGuiCond_Always);
-            ImPlot::PushStyleColor(ImPlotCol_Line, delta >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
-            ImPlot::PlotLine("##", sparkline.data(), toInt(sparkline.size()));
-            ImPlot::PopStyleColor();
-            ImPlot::EndPlot();
+        if (sparkline.size() >= 2) {
+            ImGui::SetCursorPos({width - scale(SparklineWidth + 12.0f), height - scale(SparklineHeight + 12.0f)});
+            ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
+            ImPlot::PushStyleColor(ImPlotCol_FrameBg, (ImU32)ImColor(0, 0, 0, 0));
+            ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0, 0, 0, 0));
+            ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0, 0, 0, 0));
+            if (ImPlot::BeginPlot(
+                    ("##spark" + label).c_str(), {scale(SparklineWidth), scale(SparklineHeight)}, ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
+                ImPlot::SetupAxes(nullptr, nullptr, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations);
+                auto [minIt, maxIt] = std::minmax_element(sparkline.begin(), sparkline.end());
+                ImPlot::SetupAxesLimits(0, toDouble(sparkline.size() - 1), *minIt * 0.9, *maxIt * 1.1 + NEAR_ZERO, ImGuiCond_Always);
+                ImPlot::PushStyleColor(ImPlotCol_Line, delta >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
+                ImPlot::PlotLine("##", sparkline.data(), toInt(sparkline.size()));
+                ImPlot::PopStyleColor();
+                ImPlot::EndPlot();
+            }
+            ImPlot::PopStyleColor(3);
+            ImPlot::PopStyleVar();
         }
-        ImPlot::PopStyleColor(3);
-        ImPlot::PopStyleVar();
     }
     ImGui::EndChild();
     ImGui::PopStyleColor(2);
@@ -240,6 +511,21 @@ void EvolutionDashboardWindow::processKpiCard(std::string const& label, std::str
 
 void EvolutionDashboardWindow::processEntitiesCard(float width, float height)
 {
+    auto const& liveGlobalHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
+    auto solids = 0.0;
+    auto fluids = 0.0;
+    auto cells = 0.0;
+    auto energyParticles = 0.0;
+    auto total = 0.0;
+    if (!liveGlobalHistory.empty()) {
+        auto const& dataPoints = liveGlobalHistory.back();
+        solids = dataPoints.numSolidObjects;
+        fluids = dataPoints.numFluidObjects;
+        cells = dataPoints.numCellObjects;
+        energyParticles = dataPoints.numEnergyParticles.summedValues;
+        total = dataPoints.numObjects.summedValues + energyParticles;
+    }
+
     ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, scale(6.0f));
     ImGui::PushStyleColor(ImGuiCol_ChildBg, (ImU32)CardBackgroundColor);
     ImGui::PushStyleColor(ImGuiCol_Border, (ImU32)CardBorderColor);
@@ -249,21 +535,21 @@ void EvolutionDashboardWindow::processEntitiesCard(float width, float height)
         ImGui::PopStyleColor();
 
         ImGui::PushFont(StyleRepository::get().getLargeFont());
-        AlienGui::Text("486,120");
+        AlienGui::Text(formatMetricValue(total, 0));
         ImGui::PopFont();
 
-        std::pair<char const*, char const*> const subValues[] = {
-            {"Solids", "12,410"},
-            {"Fluid particles", "213,880"},
-            {"Cells", "245,230"},
-            {"Energy particles", "14,600"},
+        std::pair<char const*, double> const subValues[] = {
+            {"Solids", solids},
+            {"Fluid particles", fluids},
+            {"Cells", cells},
+            {"Energy particles", energyParticles},
         };
         for (auto const& [subLabel, subValue] : subValues) {
             ImGui::BeginGroup();
             ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
             AlienGui::Text(subLabel);
             ImGui::PopStyleColor();
-            AlienGui::Text(subValue);
+            AlienGui::Text(formatMetricValue(subValue, 0));
             ImGui::EndGroup();
             ImGui::SameLine(0, scale(18.0f));
         }
@@ -306,6 +592,12 @@ void EvolutionDashboardWindow::processFilterBar()
         drawList->AddText({pos.x + (chipSize - labelSize.x) / 2, pos.y + (chipSize - labelSize.y) / 2}, ImColor(0, 0, 0, active ? 220 : 120), label.c_str());
         ImGui::PopID();
         ImGui::SameLine(0, scale(5.0f));
+    }
+    if (_lineageMapOverflow) {
+        ImGui::SameLine(0, scale(20.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)OverflowWarningColor);
+        AlienGui::Text("Too many lineages: some are not tracked");
+        ImGui::PopStyleColor();
     }
     ImGui::NewLine();
     ImGui::Spacing();
@@ -359,7 +651,7 @@ void EvolutionDashboardWindow::processLineageTable()
             if ((_colorFilter & lineage.colorBitset) == 0) {
                 continue;
             }
-            ImGui::PushID(lineage.id);
+            ImGui::PushID(toInt(lineage.id));
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
             auto selected = _selectedLineageIds.contains(lineage.id);
@@ -422,10 +714,7 @@ void EvolutionDashboardWindow::processTimelineHeader()
         AlienGui::Text("All lineages");
     } else {
         auto drawList = ImGui::GetWindowDrawList();
-        for (auto const& lineage : _lineages) {
-            if (!_selectedLineageIds.contains(lineage.id)) {
-                continue;
-            }
+        for (auto const& lineage : _plottedLineages) {
             auto swatchesWidth = drawColorSwatches(drawList, ImGui::GetCursorScreenPos(), lineage.colorBitset, ImGui::GetTextLineHeight(), _cellColors);
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + swatchesWidth + scale(4.0f));
             AlienGui::Text("Lineage #" + std::to_string(lineage.id));
@@ -450,8 +739,8 @@ void EvolutionDashboardWindow::processTimelinePlots()
             AlienGui::Text(formatMetricValue(_allLineages.currentValues.at(i), Metrics[i].decimals));
             ImGui::PopFont();
             char deltaText[32];
-            snprintf(deltaText, sizeof(deltaText), "%+.1f %%", MetricDeltas[i]);
-            ImGui::PushStyleColor(ImGuiCol_Text, MetricDeltas[i] >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
+            snprintf(deltaText, sizeof(deltaText), "%+.1f %%", _metricWindowDeltas.at(i));
+            ImGui::PushStyleColor(ImGuiCol_Text, _metricWindowDeltas.at(i) >= 0 ? (ImU32)PositiveDeltaColor : (ImU32)NegativeDeltaColor);
             AlienGui::Text(deltaText);
             ImGui::PopStyleColor();
 
@@ -464,33 +753,35 @@ void EvolutionDashboardWindow::processTimelinePlots()
 
 void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTimeAxis)
 {
-    auto count = toInt(_timePoints.size());
-    auto offset = 0;
-    if (_timelineMode == TimelineMode_RealTime) {
-        offset = count * 9 / 10;
-    } else if (_timelineMode == TimelineMode_LastSteps) {
-        auto numPoints = toInt(std::lround(toDouble(_lastSteps) / TimeSpan * count));
-        offset = std::max(0, count - std::max(2, numPoints));
-    }
-    count -= offset;
-
-    std::vector<DummyLineage const*> plottedLineages;
+    std::vector<LineageDisplayData const*> plottedLineages;
     if (_selectedLineageIds.empty()) {
         plottedLineages.emplace_back(&_allLineages);
     } else {
-        for (auto const& lineage : _lineages) {
-            if (_selectedLineageIds.contains(lineage.id)) {
-                plottedLineages.emplace_back(&lineage);
-            }
+        for (auto const& lineage : _plottedLineages) {
+            plottedLineages.emplace_back(&lineage);
         }
     }
 
     auto upperBound = 0.0;
+    auto minTime = std::numeric_limits<double>::max();
+    auto maxTime = std::numeric_limits<double>::lowest();
+    auto hasData = false;
     for (auto const* lineage : plottedLineages) {
-        auto const& series = lineage->series.at(metricIndex);
-        for (int i = offset; i < offset + count; ++i) {
-            upperBound = std::max(upperBound, series.at(i));
+        if (lineage->timePoints.size() < 2) {
+            continue;
         }
+        hasData = true;
+        minTime = std::min(minTime, lineage->timePoints.front());
+        maxTime = std::max(maxTime, lineage->timePoints.back());
+        for (auto const& value : lineage->series.at(metricIndex)) {
+            upperBound = std::max(upperBound, value);
+        }
+    }
+    if (!hasData) {
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
+        AlienGui::Text("No data");
+        ImGui::PopStyleColor();
+        return;
     }
     upperBound *= 1.35;
 
@@ -499,7 +790,7 @@ void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTim
     ImPlot::PushStyleColor(ImPlotCol_PlotBg, (ImU32)ImColor(0.0f, 0.0f, 0.0f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleColor(ImPlotCol_PlotBorder, (ImU32)ImColor(0.3f, 0.3f, 0.3f, ImGui::GetStyle().Alpha));
     ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-    ImPlot::SetNextAxesLimits(_timePoints.at(offset), _timePoints.at(offset + count - 1), 0, upperBound, ImGuiCond_Always);
+    ImPlot::SetNextAxesLimits(minTime, maxTime, 0, upperBound + NEAR_ZERO, ImGuiCond_Always);
 
     auto height = showTimeAxis ? PlotHeightWithAxis : PlotHeight;
     if (ImPlot::BeginPlot(
@@ -514,26 +805,30 @@ void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTim
                 [](double value, void* userData) { return (pow(2.0, value) - 1.0) / 1000; });
         }
         for (auto const* lineage : plottedLineages) {
-            ImGui::PushID(lineage->id + 1);
+            auto count = toInt(lineage->timePoints.size());
+            if (count < 2) {
+                continue;
+            }
+            ImGui::PushID(toInt(lineage->id) + 1);
             auto color = lineage->id == -1 ? SumSeriesColor : toImColor(_cellColors.at(getFirstColor(lineage->colorBitset)));
             auto const& series = lineage->series.at(metricIndex);
             ImPlot::PushStyleColor(ImPlotCol_Line, (ImU32)color);
-            ImPlot::PlotLine("##line", _timePoints.data() + offset, series.data() + offset, count);
+            ImPlot::PlotLine("##line", lineage->timePoints.data(), series.data(), count);
             if (_plotScale == PlotScale_Linear) {
                 ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.15f * ImGui::GetStyle().Alpha);
-                ImPlot::PlotShaded("##shaded", _timePoints.data() + offset, series.data() + offset, count);
+                ImPlot::PlotShaded("##shaded", lineage->timePoints.data(), series.data(), count);
                 ImPlot::PopStyleVar();
             }
             ImPlot::PopStyleColor();
             if (ImGui::GetStyle().Alpha == 1.0f) {
                 ImPlot::Annotation(
-                    _timePoints.at(offset + count - 1),
-                    series.at(offset + count - 1),
+                    lineage->timePoints.back(),
+                    series.back(),
                     color,
                     ImVec2(-10.0f, 10.0f),
                     true,
                     "%s",
-                    formatMetricValue(series.at(offset + count - 1), Metrics[metricIndex].decimals).c_str());
+                    formatMetricValue(series.back(), Metrics[metricIndex].decimals).c_str());
             }
             ImGui::PopID();
         }
@@ -544,63 +839,12 @@ void EvolutionDashboardWindow::processTimelinePlot(int metricIndex, bool showTim
     ImGui::PopID();
 }
 
-void EvolutionDashboardWindow::generateDummyData()
-{
-    std::mt19937 rng(20260711);
-    std::uniform_int_distribution<int> colorDistribution(0, MAX_COLORS - 1);
-    std::uniform_int_distribution<int> numColorsDistribution(1, 3);
-    std::uniform_real_distribution<double> trendDistribution(-0.002, 0.004);
-
-    _timePoints.clear();
-    for (int i = 0; i < NumTimePoints; ++i) {
-        _timePoints.emplace_back(TimeSpan * i / (NumTimePoints - 1));
-    }
-
-    _lineages.clear();
-    int const lineageIds[] = {3, 7, 12, 18, 21, 24, 29, 33, 38, 42, 47, 51};
-    for (auto id : lineageIds) {
-        DummyLineage lineage;
-        lineage.id = id;
-        auto numColors = numColorsDistribution(rng);
-        while (std::popcount(static_cast<unsigned>(lineage.colorBitset)) < numColors) {
-            lineage.colorBitset |= 1 << colorDistribution(rng);
-        }
-        for (int i = 0; i < NumMetrics; ++i) {
-            lineage.series.at(i) = createRandomWalk(rng, NumTimePoints, Metrics[i].baseValue, 0.015, trendDistribution(rng));
-            lineage.currentValues.at(i) = lineage.series.at(i).back();
-        }
-        _lineages.emplace_back(lineage);
-    }
-
-    _allLineages.id = -1;
-    for (int i = 0; i < NumMetrics; ++i) {
-        auto& sumSeries = _allLineages.series.at(i);
-        sumSeries.assign(NumTimePoints, 0.0);
-        auto isSummable = i == 0 || i == 4 || i == 7 || i == 8;  //creatures, sum energy, created/s, mutations/s
-        for (auto const& lineage : _lineages) {
-            for (int j = 0; j < NumTimePoints; ++j) {
-                sumSeries.at(j) += lineage.series.at(i).at(j);
-            }
-        }
-        if (!isSummable) {
-            for (auto& value : sumSeries) {
-                value /= toDouble(_lineages.size());
-            }
-        }
-        _allLineages.currentValues.at(i) = sumSeries.back();
-    }
-
-    for (auto& sparkline : _headerSparklines) {
-        sparkline = createRandomWalk(rng, 40, 1.0, 0.03, trendDistribution(rng));
-    }
-}
-
 void EvolutionDashboardWindow::validateAndCorrect()
 {
     _timelinesHeight = std::max(scale(100.0f), _timelinesHeight);
     _timelineMode = std::clamp(_timelineMode, static_cast<TimelineMode>(TimelineMode_RealTime), static_cast<TimelineMode>(TimelineMode_LastSteps));
     _plotScale = std::clamp(_plotScale, static_cast<PlotScale>(PlotScale_Linear), static_cast<PlotScale>(PlotScale_Logarithmic));
-    _lastSteps = std::clamp(_lastSteps, 1000, toInt(TimeSpan));
+    _lastSteps = std::clamp(_lastSteps, 1000, 1000000000);
     _colorFilter &= (1 << MAX_COLORS) - 1;
     if (_colorFilter == 0) {
         _colorFilter = (1 << MAX_COLORS) - 1;

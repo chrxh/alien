@@ -91,6 +91,8 @@ public:
     StatisticsRawData getStatisticsRawData() const override;
     StatisticsHistory const& getStatisticsHistory() const override;
     void setStatisticsHistory(StatisticsHistoryData const& data) override;
+    RawLineageStatistics getRawLineageStatistics() const override;
+    LineageHistory const& getLineageHistory() const override;
 
     std::optional<int> getTpsRestriction() const override;
     void setTpsRestriction(std::optional<int> const& value) override;

@@ -51,6 +51,12 @@
 namespace
 {
     std::chrono::milliseconds const StatisticsUpdate(30);
+
+    // The evolution statistics kernels are heavy; running them at wall-clock-throttled (i.e. run-to-run varying)
+    // timesteps perturbs the simulation's GPU execution timing and makes simulation runs non-reproducible.
+    // They are therefore scheduled at deterministic timestep intervals instead.
+    auto constexpr EvolutionStatisticsUpdateInterval = 10;
+    auto constexpr PreviewLineageMapCapacity = 1 << 12;
     ArraySizesForGpuEntities const PreviewCapacityGpu{10000, 10000, 10000000};
     ArraySizesForTOs const PreviewCapacityTO{1000, 1000, 1000, 10000, 10000, 10000, 10000000};
 }
@@ -82,7 +88,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
     _cudaPreviewData->init({_settingsForPreview.worldSizeX, _settingsForPreview.worldSizeY}, 0);
     _cudaSimulationStatistics->init();
-    _cudaPreviewStatistics->init();
+    _cudaPreviewStatistics->init(PreviewLineageMapCapacity);
     _cudaSelectionResult->init();
 
     GarbageCollectorKernelsService::get().init();
@@ -112,6 +118,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade() noexcept
             _cudaSimulationData->free();
             _cudaPreviewData->free();
             _cudaSimulationStatistics->free();
+            _cudaPreviewStatistics->free();
             _cudaSelectionResult->free();
 
             SimulationKernelsService::get().shutdown();
@@ -442,6 +449,12 @@ StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()
 
 void _SimulationCudaFacade::updateStatistics()
 {
+    updateEvolutionStatistics();
+    updateTimestepStatistics();
+}
+
+void _SimulationCudaFacade::updateTimestepStatistics()
+{
     StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
@@ -452,9 +465,37 @@ void _SimulationCudaFacade::updateStatistics()
     StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
 }
 
+void _SimulationCudaFacade::updateEvolutionStatistics()
+{
+    StatisticsKernelsService::get().updateEvolutionStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
+    syncAndCheck();
+
+    auto lineageStatistics = _cudaSimulationStatistics->getLineageStatistics();
+    {
+        std::lock_guard lock(_mutexForStatistics);
+        _lineageStatisticsData = lineageStatistics;
+    }
+    _lineageHistoryService.addSample(_lineageHistory, lineageStatistics, getCurrentTimestep());
+}
+
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
 {
     return _statisticsHistory;
+}
+
+RawLineageStatistics _SimulationCudaFacade::getRawLineageStatistics()
+{
+    std::lock_guard lock(_mutexForStatistics);
+    if (_lineageStatisticsData) {
+        return *_lineageStatisticsData;
+    } else {
+        return RawLineageStatistics();
+    }
+}
+
+LineageHistory const& _SimulationCudaFacade::getLineageHistory() const
+{
+    return _lineageHistory;
 }
 
 void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
@@ -582,7 +623,7 @@ TOs _SimulationCudaFacade::getPreviewData()
 void _SimulationCudaFacade::testOnly_mutate(uint64_t objectId)
 {
     checkAndProcessSimulationParameterChanges();
-    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), objectId);
+    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics, objectId);
     syncAndCheck();
 
     resizeArraysIfNecessary();
@@ -820,10 +861,14 @@ void _SimulationCudaFacade::calcTimestepsInternal(uint64_t timesteps, bool force
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
         }
+        if (getCurrentTimestep() % EvolutionStatisticsUpdateInterval == 0) {
+            updateEvolutionStatistics();
+        }
+
         auto now = std::chrono::steady_clock::now();
         if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
             _lastStatisticsUpdateTime = now;
-            updateStatistics();
+            updateTimestepStatistics();
         }
     }
     if (forceUpdateStatistics) {
