@@ -439,15 +439,15 @@ void _SimulationCudaFacade::updateStatistics()
 
 void _SimulationCudaFacade::updateEvolutionStatistics()
 {
-    StatisticsKernelsService::get().updateEvolutionStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
+    StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
-    auto overallStatistics = _cudaSimulationStatistics->getStatisticsEntry();
+    auto statisticsEntry = _cudaSimulationStatistics->getStatisticsEntry();
     {
         std::lock_guard lock(_mutexForStatistics);
-        _overallStatisticsData = overallStatistics;
+        _statisticsEntry = statisticsEntry;
     }
-    StatisticsService::get().addDataPoint(_statisticsHistory, overallStatistics, getCurrentTimestep());
+    StatisticsService::get().addDataPoint(_statisticsHistory, statisticsEntry, getCurrentTimestep());
 }
 
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
@@ -458,8 +458,8 @@ StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
 StatisticsEntry _SimulationCudaFacade::getStatisticsEntry()
 {
     std::lock_guard lock(_mutexForStatistics);
-    if (_overallStatisticsData) {
-        return *_overallStatisticsData;
+    if (_statisticsEntry) {
+        return *_statisticsEntry;
     } else {
         return StatisticsEntry();
     }
