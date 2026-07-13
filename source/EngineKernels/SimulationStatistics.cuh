@@ -14,22 +14,25 @@ public:
     {
         _lineageArrayCapacity = 1 << 18;
         CudaMemoryManager::getInstance().acquireMemory<StatisticsRawData>(1, _data);
+
         CudaMemoryManager::getInstance().acquireMemory<OverallStatisticsEntry>(1, _overallStatisticsEntry);
-        CudaMemoryManager::getInstance().acquireMemory<LineageMapSlot>(_lineageArrayCapacity, _lineageMap);
         CudaMemoryManager::getInstance().acquireMemory<LineageStatisticsEntry>(_lineageArrayCapacity, _lineageStatisticsEntries);
-        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageArrayCapacity, _lineageAccumulatorMaps[0]);
-        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapSlot>(_lineageArrayCapacity, _lineageAccumulatorMaps[1]);
+
+        CudaMemoryManager::getInstance().acquireMemory<LineageMapEntry>(_lineageArrayCapacity, _lineageMap);
+
         CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapControl>(1, _lineageAccumulatorMapControl);
+        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapEntry>(_lineageArrayCapacity, _lineageAccumulatorMaps[0]);
+        CudaMemoryManager::getInstance().acquireMemory<LineageAccumulatorMapEntry>(_lineageArrayCapacity, _lineageAccumulatorMaps[1]);
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_data, 0, sizeof(StatisticsRawData)));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_overallStatisticsEntry, 0, sizeof(OverallStatisticsEntry)));
         CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMapControl, 0, sizeof(LineageAccumulatorMapControl)));
 
         // Values must start at zero; the lineageId key column (first member) is set to LineageIdEmpty
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageMap, 0, sizeof(LineageMapSlot) * _lineageArrayCapacity));
-        CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageMap, sizeof(LineageMapSlot), 0xff, sizeof(uint32_t), _lineageArrayCapacity));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageMap, 0, sizeof(LineageMapEntry) * _lineageArrayCapacity));
+        CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageMap, sizeof(LineageMapEntry), 0xff, sizeof(uint32_t), _lineageArrayCapacity));
         for (int i = 0; i < 2; ++i) {
-            CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMaps[i], 0, sizeof(LineageAccumulatorMapSlot) * _lineageArrayCapacity));
-            CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageAccumulatorMaps[i], sizeof(LineageAccumulatorMapSlot), 0xff, sizeof(uint32_t), _lineageArrayCapacity));
+            CHECK_FOR_DEVICE_ERRORS(cudaMemset(_lineageAccumulatorMaps[i], 0, sizeof(LineageAccumulatorMapEntry) * _lineageArrayCapacity));
+            CHECK_FOR_DEVICE_ERRORS(cudaMemset2D(_lineageAccumulatorMaps[i], sizeof(LineageAccumulatorMapEntry), 0xff, sizeof(uint32_t), _lineageArrayCapacity));
         }
     }
 
@@ -37,11 +40,13 @@ public:
     {
         CudaMemoryManager::getInstance().freeMemory(_data);
         CudaMemoryManager::getInstance().freeMemory(_overallStatisticsEntry);
-        CudaMemoryManager::getInstance().freeMemory(_lineageMap);
         CudaMemoryManager::getInstance().freeMemory(_lineageStatisticsEntries);
+
+        CudaMemoryManager::getInstance().freeMemory(_lineageMap);
+
+        CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMapControl);
         CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMaps[0]);
         CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMaps[1]);
-        CudaMemoryManager::getInstance().freeMemory(_lineageAccumulatorMapControl);
     }
 
     __host__ StatisticsRawData getStatistics()
@@ -131,7 +136,6 @@ public:
         overall.numFluidObjects = 0;
         overall.numCellObjects = 0;
         overall.numActiveLineages = 0;
-        overall.lineageMapOverflow = 0;
     }
     __inline__ __device__ void incNumSolidObjects() { atomicAdd(&_overallStatisticsEntry->numSolidObjects, 1u); }
     __inline__ __device__ void incNumFluidObjects() { atomicAdd(&_overallStatisticsEntry->numFluidObjects, 1u); }
@@ -181,7 +185,6 @@ public:
             }
             index = (index + 1) & mask;
         }
-        _overallStatisticsEntry->lineageMapOverflow = 1;
         return -1;
     }
     __inline__ __device__ int findLineageSlot(uint32_t lineageId) const
@@ -343,7 +346,7 @@ public:
 private:
     static auto constexpr LineageIdEmpty = 0xffffffffu;
 
-    struct LineageMapSlot
+    struct LineageMapEntry
     {
         uint32_t lineageId;  // LineageIdEmpty = slot is unused
         uint32_t colorBitset;
@@ -355,11 +358,11 @@ private:
         float sumMutationRates;
         float sumCreatureEnergy;
     };
-    struct LineageAccumulatorMapSlot
+    struct LineageAccumulatorMapEntry
     {
         uint32_t lineageId;  // LineageIdEmpty = slot is unused
-        uint32_t numCreatedCreatures;
-        float totalMutations;
+        uint64_t numCreatedCreatures;
+        double totalMutations;
     };
     struct LineageAccumulatorMapControl
     {
@@ -375,7 +378,7 @@ private:
         return result;
     }
 
-    __inline__ __device__ LineageAccumulatorMapSlot* getActiveAccumulatorMap() { return _lineageAccumulatorMaps[_lineageAccumulatorMapControl->activeAccumulatorBuffer]; }
+    __inline__ __device__ LineageAccumulatorMapEntry* getActiveAccumulatorMap() { return _lineageAccumulatorMaps[_lineageAccumulatorMapControl->activeAccumulatorBuffer]; }
 
     __inline__ __device__ int insertAccumulatorSlot(uint32_t bufferIndex, uint32_t lineageId)
     {
@@ -419,15 +422,15 @@ private:
 
     StatisticsRawData* _data;
 
-    int _lineageArrayCapacity;
+    int _lineageArrayCapacity;  // Used for all lineage maps and arrays
 
     OverallStatisticsEntry* _overallStatisticsEntry;
     LineageStatisticsEntry* _lineageStatisticsEntries;
 
     // Lineage map for timestep values
-    LineageMapSlot* _lineageMap;
+    LineageMapEntry* _lineageMap;
 
     // Lineage map for accumulated values (with history => needs migration)
     LineageAccumulatorMapControl* _lineageAccumulatorMapControl;
-    LineageAccumulatorMapSlot* _lineageAccumulatorMaps[2];
+    LineageAccumulatorMapEntry* _lineageAccumulatorMaps[2];
 };

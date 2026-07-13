@@ -24,7 +24,6 @@ TEST_F(EvolutionStatisticsTests, basicCounts)
     EXPECT_EQ(3u, overall.numCellObjects);
     EXPECT_EQ(0u, overall.numSolidObjects);
     EXPECT_EQ(0u, overall.numFluidObjects);
-    EXPECT_EQ(0u, overall.lineageMapOverflow);
     EXPECT_FLOAT_EQ(3.0f, overall.sumCreatureCells);
     EXPECT_FLOAT_EQ(8.0f, overall.sumCreatureGenerations);
     EXPECT_GT(overall.sumCreatureEnergy, 0.0f);
