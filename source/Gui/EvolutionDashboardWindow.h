@@ -61,7 +61,6 @@ private:
     std::array<double, NumMetrics> _metricWindowDeltas = {};
     std::array<std::vector<double>, 4> _headerSparklines = {};
     std::array<double, 4> _headerDeltas = {};
-    bool _lineageMapOverflow = false;
 
     std::array<uint32_t, MAX_COLORS> _cellColors = {};
 
