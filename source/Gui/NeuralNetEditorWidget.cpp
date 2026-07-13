@@ -62,7 +62,7 @@ void _NeuralNetEditorWidget::process(
 void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& connectionWeights, LayoutData& layout)
 {
     pushDefaultColors();
-    ImGui::Button("Connection weights", {layout.width - 2 * ImGui::GetStyle().FramePadding.x, 0});
+    ImGui::Button(_("Connection weights"), {layout.width - 2 * ImGui::GetStyle().FramePadding.x, 0});
     popColors();
 
     auto resetButtonWidth = ImGui::CalcTextSize("x").x /* + 2 * ImGui::GetStyle().FramePadding.x*/;
@@ -98,7 +98,7 @@ void _NeuralNetEditorWidget::processConnectionWeightSliders(std::vector<float>& 
 void _NeuralNetEditorWidget::processChannelWeightSliders(std::vector<NeuralNetWeight>& weights, SelectionData& selectionData, LayoutData& layout)
 {
     pushDefaultColors();
-    ImGui::Button("Neuron weights", {layout.width - 2 * ImGui::GetStyle().FramePadding.x, 0});
+    ImGui::Button(_("Neuron weights"), {layout.width - 2 * ImGui::GetStyle().FramePadding.x, 0});
     popColors();
 
     ImGui::PushID("ChannelWeightSliders");
@@ -297,7 +297,7 @@ void _NeuralNetEditorWidget::processActionButtons(
     std::vector<ActivationFunction>& activationFunctions)
 {
     if (ImGui::BeginChild("ActionButtons", ImVec2(0, scale(50.0f)))) {
-        if (AlienGui::Button("Clear")) {
+        if (AlienGui::Button(_("Clear"))) {
             for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                 for (int j = 0; j < NEURONS_PER_CELL; ++j) {
                     weights[i * NEURONS_PER_CELL + j] = NeuralNetWeight(0);
@@ -307,7 +307,7 @@ void _NeuralNetEditorWidget::processActionButtons(
             }
         }
         ImGui::SameLine();
-        if (AlienGui::Button("Identity")) {
+        if (AlienGui::Button(_("Identity"))) {
             for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                 for (int j = 0; j < NEURONS_PER_CELL; ++j) {
                     weights[i * NEURONS_PER_CELL + j] = (i == j) ? NeuralNetWeight(1.0f) : NeuralNetWeight(0);
@@ -317,7 +317,7 @@ void _NeuralNetEditorWidget::processActionButtons(
             }
         }
         ImGui::SameLine();
-        if (AlienGui::Button("Randomize")) {
+        if (AlienGui::Button(_("Randomize"))) {
             for (int i = 0; i < NEURONS_PER_CELL; ++i) {
                 for (int j = 0; j < NEURONS_PER_CELL; ++j) {
                     weights[i * NEURONS_PER_CELL + j] = NeuralNetWeight(NumberGenerator::get().getRandomFloat(-2.0f, 2.0f));
@@ -327,13 +327,13 @@ void _NeuralNetEditorWidget::processActionButtons(
             }
         }
         ImGui::SameLine();
-        if (AlienGui::Button("Copy")) {
+        if (AlienGui::Button(_("Copy"))) {
             NetData copiedNet{weights, biases, activationFunctions};
             _copiedNet = copiedNet;
         }
         ImGui::SameLine();
         ImGui::BeginDisabled(!_copiedNet.has_value());
-        if (AlienGui::Button("Paste")) {
+        if (AlienGui::Button(_("Paste"))) {
             weights = _copiedNet->weights;
             biases = _copiedNet->biases;
             activationFunctions = _copiedNet->activationFunctions;

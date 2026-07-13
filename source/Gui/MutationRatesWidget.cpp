@@ -37,28 +37,28 @@ namespace
     {
         std::vector<std::pair<std::string, std::string>> activeMutations;
         addActiveMutationType(
-            activeMutations, "Connection mutations", {mutationRates._connectionMutations[0]._nodeProbability, mutationRates._connectionMutations[1]._nodeProbability});
+            activeMutations, _("Connection mutations"), {mutationRates._connectionMutations[0]._nodeProbability, mutationRates._connectionMutations[1]._nodeProbability});
         addActiveMutationType(
-            activeMutations, "Neuron mutations", {mutationRates._neuronMutations[0]._nodeProbability, mutationRates._neuronMutations[1]._nodeProbability});
+            activeMutations, _("Neuron mutations"), {mutationRates._neuronMutations[0]._nodeProbability, mutationRates._neuronMutations[1]._nodeProbability});
         addActiveMutationType(
             activeMutations,
-            "Cell type property mut.",
+            _("Cell type property mut."),
             {mutationRates._cellTypePropertiesMutations[0]._nodeProbability, mutationRates._cellTypePropertiesMutations[1]._nodeProbability});
         addActiveMutationType(
-            activeMutations, "Geometry mutations", {mutationRates._geometryMutations[0]._geneProbability, mutationRates._geometryMutations[1]._geneProbability});
-        addActiveMutationType(activeMutations, "Cell type mode mut.", {mutationRates._cellTypeModeMutation._nodeProbability});
-        addActiveMutationType(activeMutations, "Cell type mutations", {mutationRates._cellTypeMutation._nodeProbability});
-        addActiveMutationType(activeMutations, "Void mutations", {mutationRates._voidMutation._nodeProbability});
-        addActiveMutationType(activeMutations, "Extend gene mutations", {mutationRates._extendGeneMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Add node mutations", {mutationRates._addNodeMutation._nodeProbability});
-        addActiveMutationType(activeMutations, "Trim gene mutations", {mutationRates._trimGeneMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Delete node mutations", {mutationRates._deleteNodeMutation._nodeProbability});
-        addActiveMutationType(activeMutations, "Duplicate gene mutations", {mutationRates._duplicateGeneMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Delete gene mutations", {mutationRates._deleteGeneMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Copy node section mutations", {mutationRates._copyNodeSectionMutation._geneProbability});
-        addActiveMutationType(activeMutations, "Move node section mutations", {mutationRates._moveNodeSectionMutation._geneProbability});
+            activeMutations, _("Geometry mutations"), {mutationRates._geometryMutations[0]._geneProbability, mutationRates._geometryMutations[1]._geneProbability});
+        addActiveMutationType(activeMutations, _("Cell type mode mut."), {mutationRates._cellTypeModeMutation._nodeProbability});
+        addActiveMutationType(activeMutations, _("Cell type mutations"), {mutationRates._cellTypeMutation._nodeProbability});
+        addActiveMutationType(activeMutations, _("Void mutations"), {mutationRates._voidMutation._nodeProbability});
+        addActiveMutationType(activeMutations, _("Extend gene mutations"), {mutationRates._extendGeneMutation._geneProbability});
+        addActiveMutationType(activeMutations, _("Add node mutations"), {mutationRates._addNodeMutation._nodeProbability});
+        addActiveMutationType(activeMutations, _("Trim gene mutations"), {mutationRates._trimGeneMutation._geneProbability});
+        addActiveMutationType(activeMutations, _("Delete node mutations"), {mutationRates._deleteNodeMutation._nodeProbability});
+        addActiveMutationType(activeMutations, _("Duplicate gene mutations"), {mutationRates._duplicateGeneMutation._geneProbability});
+        addActiveMutationType(activeMutations, _("Delete gene mutations"), {mutationRates._deleteGeneMutation._geneProbability});
+        addActiveMutationType(activeMutations, _("Copy node section mutations"), {mutationRates._copyNodeSectionMutation._geneProbability});
+        addActiveMutationType(activeMutations, _("Move node section mutations"), {mutationRates._moveNodeSectionMutation._geneProbability});
         addActiveMutationType(
-            activeMutations, "Constructor", {mutationRates._constructorMutations[0]._nodeProbability, mutationRates._constructorMutations[1]._nodeProbability});
+            activeMutations, _("Constructor"), {mutationRates._constructorMutations[0]._nodeProbability, mutationRates._constructorMutations[1]._nodeProbability});
         return activeMutations;
     }
 }
@@ -67,7 +67,7 @@ void MutationRatesWidget::process(MutationRatesDesc& mutationRates, float rightC
 {
     ImGui::BeginGroup();
 
-    if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name("Click to edit").textWidth(rightColumnWidth))) {
+    if (AlienGui::Button(AlienGui::ButtonParameters().buttonText(_("Edit")).name(_("Click to edit")).textWidth(rightColumnWidth))) {
         auto onAdopt = [&mutationRates](MutationRatesDesc const& adoptedRates) { mutationRates = adoptedRates; };
         if (nested) {
             MutationRatesDialog::get().openNested(mutationRates, onAdopt);

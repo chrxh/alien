@@ -65,7 +65,7 @@ _GenomeEditorWidget::_GenomeEditorWidget(GenomeTabEditData const& editData, Geno
 
 void _GenomeEditorWidget::processHeaderData()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Genome").highlighted(true));
+    AlienGui::Group(AlienGui::GroupParameters().text(_("Genome")).highlighted(true));
 
     if (ImGui::BeginChild("GenomeHeader", ImVec2(0, -_layoutData->geneListHeight), 0)) {
 
@@ -73,29 +73,29 @@ void _GenomeEditorWidget::processHeaderData()
         if (table.begin()) {
             auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Base properties and info"));
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
+            AlienGui::Group(AlienGui::GroupParameters().text(_("Base properties and info")));
+            AlienGui::InputText(AlienGui::InputTextParameters().name(_("Genome name")).textWidth(rightColumnWidth), _editData->genome._name);
 
             auto numNodesString = std::to_string(GenomeDescInfoService::get().getNumberOfNodes(_editData->genome));
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
+            AlienGui::InputText(AlienGui::InputTextParameters().name(_("Node count")).readOnly(true).textWidth(rightColumnWidth), numNodesString);
 
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Front angle").format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth),
+                AlienGui::SliderFloatParameters().name(_("Front angle")).format("%.1f").min(-180.0f).max(180.0f).textWidth(rightColumnWidth),
                 &_editData->genome._frontAngle);
 
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters()
-                    .name("Resistance to injection")
+                    .name(_("Resistance to injection"))
                     .textWidth(rightColumnWidth),
                 _editData->genome._resistanceToInjection);
 
             table.next();
 
-            AlienGui::Group(AlienGui::GroupParameters().text("Mutation rates"));
+            AlienGui::Group(AlienGui::GroupParameters().text(_("Mutation rates")));
 
             MutationRatesWidget::process(_editData->genome._mutationRates, rightColumnWidth);
 
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Apply meta-mutations").textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name(_("Apply meta-mutations")).textWidth(rightColumnWidth), _editData->genome._applyMetaMutations);
 
             table.next();
 
@@ -123,12 +123,12 @@ void _GenomeEditorWidget::processGeneList()
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         if (ImGui::BeginTable("Gene list", 6, flags, ImVec2(-1, -1), 0.0f)) {
-            ImGui::TableSetupColumn("Gene index", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
-            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
-            ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
-            ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
-            ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(60.0f));
-            ImGui::TableSetupColumn("Nodes", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(70.0f));
+            ImGui::TableSetupColumn(_("Gene index"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
+            ImGui::TableSetupColumn(_("Name"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
+            ImGui::TableSetupColumn(_("References"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
+            ImGui::TableSetupColumn(_("Referenced by"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
+            ImGui::TableSetupColumn(_("Shape"), ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(60.0f));
+            ImGui::TableSetupColumn(_("Nodes"), ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(70.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -160,7 +160,7 @@ void _GenomeEditorWidget::processGeneList()
                     AlienGui::Text(std::to_string(row));
                     if (row == 0) {
                         ImGui::SameLine();
-                        AlienGui::Text(AlienGui::TextParameters().text(" (root)").style(AlienGui::TextStyle::Decent));
+                        AlienGui::Text(AlienGui::TextParameters().text(_(" (root)")).style(AlienGui::TextStyle::Decent));
                     }
                     ImGui::SameLine();
                     auto selected = _editData->selectedGeneIndex.has_value() ? _editData->selectedGeneIndex.value() == row : false;
@@ -180,7 +180,7 @@ void _GenomeEditorWidget::processGeneList()
                     if (!gene._name.empty()) {
                         AlienGui::Text(gene._name);
                     } else {
-                        AlienGui::Text(AlienGui::TextParameters().text("(unnamed)").style(AlienGui::TextStyle::Decent));
+                        AlienGui::Text(AlienGui::TextParameters().text(_("(unnamed)")).style(AlienGui::TextStyle::Decent));
                     }
 
                     // Column 2: References
@@ -310,15 +310,15 @@ void _GenomeEditorWidget::onRemoveGene()
     if (!referencedBy.empty()) {
         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex); });
         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
-        auto text = referencedBy.size() == 1 ? "This gene could not be removed since it is still used by gene "
-                                             : "This gene could not be removed since it is still used by genes ";
-        GenericMessageDialog::get().information("Error", text + referencedByString + ".");
+        auto text = referencedBy.size() == 1 ? _("This gene could not be removed since it is still used by gene ")
+                                             : _("This gene could not be removed since it is still used by genes ");
+        GenericMessageDialog::get().information(_("Error"), text + referencedByString + ".");
         return;
     }
     if (_editData->selectedGeneIndex.value() == 0) {
         GenericMessageDialog::get().yesNo(
-            "Delete root gene",
-            "Do you really want to delete the root gene? If you decide to do so, the following gene will become the new root gene.",
+            _("Delete root gene"),
+            _("Do you really want to delete the root gene? If you decide to do so, the following gene will become the new root gene."),
             [this] { this->removeGeneIntern(); });
         return;
     }
@@ -328,7 +328,7 @@ void _GenomeEditorWidget::onRemoveGene()
 void _GenomeEditorWidget::onMoveGeneUpward()
 {
     if (_editData->selectedGeneIndex.value() == 1) {
-        GenericMessageDialog::get().yesNo("Swap root gene", "Do you really want to swap the root gene?", [this] { this->moveGeneUpwardIntern(); });
+        GenericMessageDialog::get().yesNo(_("Swap root gene"), _("Do you really want to swap the root gene?"), [this] { this->moveGeneUpwardIntern(); });
         return;
     }
     moveGeneUpwardIntern();
@@ -337,7 +337,7 @@ void _GenomeEditorWidget::onMoveGeneUpward()
 void _GenomeEditorWidget::onMoveGeneDownward()
 {
     if (_editData->selectedGeneIndex.value() == 0) {
-        GenericMessageDialog::get().yesNo("Swap root gene", "Do you really want to swap the root gene?", [this] { this->moveGeneDownwardIntern(); });
+        GenericMessageDialog::get().yesNo(_("Swap root gene"), _("Do you really want to swap the root gene?"), [this] { this->moveGeneDownwardIntern(); });
         return;
     }
     moveGeneDownwardIntern();

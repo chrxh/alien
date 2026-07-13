@@ -133,7 +133,7 @@ namespace
 
 void _PreviewWidget::processCreaturePreviews()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
+    AlienGui::Group(AlienGui::GroupParameters().text(_("Preview")).highlighted(true));
 
     auto previewRawData = _SimulationFacade::get()->getPreviewData();
 
@@ -178,7 +178,7 @@ void _PreviewWidget::processActionBar()
     AlienGui::Separator();
     // Alternatives: ICON_FA_GEM, ICON_FA_FIRE, ICON_FA_CUDA
     if (AlienGui::SelectableButton(
-            AlienGui::SelectableButtonParameters().name(ICON_FA_DICE_D20).tooltip("Activates a more detail simulation including signals and muscles"),
+            AlienGui::SelectableButtonParameters().name(ICON_FA_DICE_D20).tooltip(_("Activates a more detail simulation including signals and muscles")),
             _editData->detailSimulation)) {
         onRestart();
     }
@@ -188,7 +188,7 @@ void _PreviewWidget::processActionBar()
         PreviewSettingsDialog::get().setEditData(_genomeEditData);
         PreviewSettingsDialog::get().open();
     }
-    AlienGui::Tooltip("Preview settings");
+    AlienGui::Tooltip(_("Preview settings"));
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);
@@ -234,7 +234,7 @@ void _PreviewWidget::processActionBar()
 
     ImGui::SameLine();
     ImGui::SetNextItemWidth(scale(90.0f));
-    ImGui::SliderInt("##TPSRestriction", &_editData->simulationSpeed, 1, 100, "%d%% speed", ImGuiSliderFlags_None);
+    ImGui::SliderInt("##TPSRestriction", &_editData->simulationSpeed, 1, 100, _("%d%% speed"), ImGuiSliderFlags_None);
     _editData->simulationSpeed = std::clamp(_editData->simulationSpeed, 1, 100);
 
     ImGui::SameLine();

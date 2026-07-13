@@ -54,7 +54,7 @@ namespace
     template <typename Func>
     void processPropertiesSubNode(std::string const& idSuffix, Func&& processWidgets)
     {
-        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Properties##" + idSuffix).rank(AlienGui::TreeNodeRank::Default).defaultOpen(true))) {
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(std::string(_("Properties")) + "##" + idSuffix).rank(AlienGui::TreeNodeRank::Default).defaultOpen(true))) {
             processWidgets();
         }
         AlienGui::EndTreeNode();
@@ -299,11 +299,11 @@ std::string _InspectionWindow::generateTitle() const
     if (_creatureMode) {
         auto entity = EditorModel::get().getInspectedEntity(_entityId);
         auto const& creature = std::get<ExtendedObjectDesc>(entity).creature;
-        ss << "Creature with id 0x" << std::hex << std::uppercase << (creature.has_value() ? creature->_id : _entityId);
+        ss << _("Creature with id 0x") << std::hex << std::uppercase << (creature.has_value() ? creature->_id : _entityId);
     } else if (isExtendedObject()) {
-        ss << "Cell with id 0x" << std::hex << std::uppercase << _entityId;
+        ss << _("Cell with id 0x") << std::hex << std::uppercase << _entityId;
     } else {
-        ss << "Energy particle with id 0x" << std::hex << std::uppercase << _entityId;
+        ss << _("Energy particle with id 0x") << std::hex << std::uppercase << _entityId;
     }
     return ss.str();
 }
@@ -413,7 +413,7 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
 {
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(_("Object")).rank(AlienGui::TreeNodeRank::High))) {
         processPropertiesSubNode("Object", [&] {
-            inspectorHexId("Object id", object._id);
+            inspectorHexId(_("Object id"), object._id);
             AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name(_("Position")).format("%.2f").textWidth(TextWidth), object._pos.x, object._pos.y);
             AlienGui::InputFloat2(AlienGui::InputFloat2Parameters().name(_("Velocity")).format("%.2f").textWidth(TextWidth), object._vel.x, object._vel.y);
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Stiffness")).format("%.2f").step(0.05f).textWidth(TextWidth), object._stiffness);
@@ -440,8 +440,8 @@ void _InspectionWindow::processObjectNode(ObjectDesc& object)
                     auto& conn = object._connections.at(i);
                     auto const connectionNumber = i + 1;
                     if (AlienGui::BeginTreeNode(
-                            AlienGui::TreeNodeParameters().name("Connection #" + std::to_string(connectionNumber)).rank(AlienGui::TreeNodeRank::Low))) {
-                        inspectorHexId("Connected id", conn._objectId);
+                            AlienGui::TreeNodeParameters().name(_("Connection #") + std::to_string(connectionNumber)).rank(AlienGui::TreeNodeRank::Low))) {
+                        inspectorHexId(_("Connected id"), conn._objectId);
                         AlienGui::InputFloat(
                             AlienGui::InputFloatParameters().name(_("Distance")).format("%.2f").textWidth(TextWidth).readOnly(true), conn._distance);
                         AlienGui::InputFloat(
@@ -500,7 +500,7 @@ void _InspectionWindow::processCellNode(ObjectDesc& object)
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Raw energy")).format("%.2f").textWidth(TextWidth), cell._rawEnergy);
             AlienGui::InputOptionalFloat(AlienGui::InputFloatParameters().name(_("Front angle")).format("%.2f").textWidth(TextWidth), cell._frontAngle);
             AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Age")).textWidth(TextWidth), cell._age);
-            static std::vector<std::string> const cellStateStrings = {"Ready", "Constructing", "Activating", "Dying", "Instant dying"};
+            static std::vector<std::string> const cellStateStrings = {_("Ready"), _("Constructing"), _("Activating"), _("Dying"), _("Instant dying")};
             AlienGui::ComboParameters stateParams;
             stateParams.name(_("Cell state")).textWidth(TextWidth).values(cellStateStrings);
             AlienGui::Combo(stateParams, cell._cellState);
@@ -577,16 +577,16 @@ void _InspectionWindow::processConstructorNode(ConstructorDesc& constructor)
 void _InspectionWindow::processCreatureProperties(ExtendedObjectDesc& extendedObject)
 {
     auto& creature = extendedObject.creature.value();
-    inspectorHexId("Creature id", creature._id);
-    inspectorText("Generation", std::to_string(creature._generation));
-    inspectorText("Num cells", std::to_string(creature._numCells));
+    inspectorHexId(_("Creature id"), creature._id);
+    inspectorText(_("Generation"), std::to_string(creature._generation));
+    inspectorText(_("Num cells"), std::to_string(creature._numCells));
     AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Lineage id")).textWidth(TextWidth), creature._lineageId);
     AlienGui::InputFloat(AlienGui::InputFloatParameters().name(_("Accumulated mutations")).format("%.5f").textWidth(TextWidth), creature._accumulatedMutations);
     auto& genome = extendedObject.genome.value();
-    inspectorText("Genome name", genome._name);
-    inspectorText("Resistance to injection", genome._resistanceToInjection ? "Yes" : "No");
-    inspectorText("Apply meta-mutations", genome._applyMetaMutations ? "Yes" : "No");
-    if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name(_("Edit genome")).textWidth(TextWidth))) {
+    inspectorText(_("Genome name"), genome._name);
+    inspectorText(_("Resistance to injection"), genome._resistanceToInjection ? _("Yes") : _("No"));
+    inspectorText(_("Apply meta-mutations"), genome._applyMetaMutations ? _("Yes") : _("No"));
+    if (AlienGui::Button(AlienGui::ButtonParameters().buttonText(_("Edit")).name(_("Edit genome")).textWidth(TextWidth))) {
         GenomeEditorWindow::get().openTab(genome, false);
     }
 }
@@ -649,7 +649,7 @@ namespace
 void _InspectionWindow::processCellTypeNode(CellDesc& cell)
 {
     auto cellType = cell.getCellType();
-    auto cellTypeName = Const::CellTypeStrings.at(cellType) + " properties";
+    auto cellTypeName = Const::CellTypeStrings.at(cellType) + " " + _("properties");
     if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(cellTypeName + "##Cell node").rank(AlienGui::TreeNodeRank::Default).defaultOpen(false))) {
         auto const& customizationColors = _SimulationFacade::get()->getSimulationParameters().customizationColors.value;
 
@@ -808,7 +808,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
             }
         } else if (cellType == CellType_Detonator) {
             auto& detonator = std::get<DetonatorDesc>(cell._cellType);
-            static std::vector<std::string> const detonatorStateStrings = {"Ready", "Activated", "Exploded"};
+            static std::vector<std::string> const detonatorStateStrings = {_("Ready"), _("Activated"), _("Exploded")};
             int state = detonator._state;
             AlienGui::ComboParameters stateParams;
             stateParams.name(_("State")).textWidth(TextWidth).values(detonatorStateStrings);
@@ -850,7 +850,7 @@ void _InspectionWindow::processCellTypeNode(CellDesc& cell)
                     AlienGui::SliderFloatParameters().name(_("New signal weight")).max(1.0f).format("%.2f").textWidth(TextWidth), &m._newSignalWeight);
             }
             processMemoryChannelBits(memory._channelBitMask);
-            if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Edit").name(_("Signal buffer")).textWidth(TextWidth))) {
+            if (AlienGui::Button(AlienGui::ButtonParameters().buttonText(_("Edit")).name(_("Signal buffer")).textWidth(TextWidth))) {
                 SignalsBufferDialog::get().open(
                     memory._signalEntries, [this](std::vector<SignalEntryDesc> const& entries) { _pendingSignalEntries = entries; });
             }
