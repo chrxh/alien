@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Base/Definitions.h>
+#include "TranslationService.h"
 
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;

@@ -16,6 +16,7 @@
 
 #include "HelpStrings.h"
 #include "MainWindow.h"
+#include "TranslationService.h"
 
 
 namespace
@@ -37,6 +38,9 @@ int main(int argc, char** argv)
     auto useInterop = hasArgument(argc, argv, "--interop");
     GlobalSettings::get().setDebugMode(inDebugMode);
     GlobalSettings::get().setInterop(useInterop);
+
+    auto language = GlobalSettings::get().getValue("settings.language", std::string("en"));
+    TranslationService::get().load(language);
 
     FileLogger fileLogger = std::make_shared<_FileLogger>();
 

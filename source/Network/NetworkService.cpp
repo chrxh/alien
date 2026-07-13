@@ -562,6 +562,11 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
     }
 }
 
+void NetworkService::clearDownloadCache()
+{
+    _downloadCache.clear();
+}
+
 void NetworkService::incDownloadCounter(std::string const& simId)
 {
     try {

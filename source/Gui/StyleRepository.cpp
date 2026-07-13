@@ -17,7 +17,28 @@
 #include <ImFileDialog.h>
 #include <implot.h>
 
+#include <filesystem>
+
 #include "WindowController.h"
+
+namespace
+{
+    std::string findCjkFont()
+    {
+        std::vector<std::string> candidates = {
+            std::string(getenv("HOME")) + "/.local/share/fonts/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        };
+        for (auto const& path : candidates) {
+            if (std::filesystem::exists(path)) {
+                return path;
+            }
+        }
+        return {};
+    }
+}
 
 void StyleRepository::setup()
 {
@@ -35,6 +56,16 @@ void StyleRepository::setup()
     configMerge.MergeMode = true;
     configMerge.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
 
+    auto cjkFontPath = findCjkFont();
+    auto cjkFontAvailable = !cjkFontPath.empty();
+
+    ImFontConfig configCJK;
+    if (cjkFontAvailable) {
+        configCJK.MergeMode = true;
+        configCJK.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
+        configCJK.FontNo = 2;
+    }
+
     ImGuiIO& io = ImGui::GetIO();
 
     //default font (small with icons)
@@ -44,18 +75,33 @@ void StyleRepository::setup()
         io.Fonts->AddFontFromMemoryCompressedTTF(
             FontAwesomeSolid_compressed_data, FontAwesomeSolid_compressed_size, 16.0f * scaleFactor, &configMerge, rangesIcons);
     }
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 16.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //small bold font
     _smallBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 16.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 16.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //medium bold font
     _mediumBoldFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSansBold_compressed_data, DroidSansBold_compressed_size, 24.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 24.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //medium font
     _mediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 24.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 24.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //large font
     _largeFont = io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 48.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 48.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 
     //icon font
     _iconFont = io.Fonts->AddFontFromMemoryCompressedTTF(AlienIconFont_compressed_data, AlienIconFont_compressed_size, 24.0f * scaleFactor);
@@ -68,12 +114,24 @@ void StyleRepository::setup()
 
     //monospace medium font
     _monospaceMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 14.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 14.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+    }
 
     //monospace large font
     _monospaceLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Cousine_Regular_compressed_data, Cousine_Regular_compressed_size, 128.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 128.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+    }
 
     _reefMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 24.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 24.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
     _reefLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 64.0f * scaleFactor);
+    if (cjkFontAvailable) {
+        io.Fonts->AddFontFromFileTTF(cjkFontPath.c_str(), 64.0f * scaleFactor, &configCJK, io.Fonts->GetGlyphRangesChineseFull());
+    }
 }
 
 ImFont* StyleRepository::getIconFont() const

@@ -14,6 +14,8 @@ public:
     std::optional<Value> find(Key const& key) const;
     Value find(Key const& key, std::function<Value()> const& valueFunc);
 
+    void clear();
+
 private:
     std::unordered_map<Key, Value> _cacheMap;
     std::list<Key> _usedKeys;
@@ -60,4 +62,11 @@ Value Cache<Key, Value, MaxEntries>::find(Key const& key, std::function<Value()>
         insertOrAssign(key, value);
         return value;
     }
+}
+
+template <typename Key, typename Value, int MaxEntries>
+void Cache<Key, Value, MaxEntries>::clear()
+{
+    _cacheMap.clear();
+    _usedKeys.clear();
 }

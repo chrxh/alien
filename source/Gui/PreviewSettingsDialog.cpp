@@ -6,7 +6,7 @@
 #include "GenomeWindowEditData.h"
 
 PreviewSettingsDialog::PreviewSettingsDialog()
-    : AlienDialog("Preview settings")
+    : AlienDialog(_("Preview settings"))
 {}
 
 void PreviewSettingsDialog::setEditData(GenomeWindowEditData const& editData)
@@ -19,7 +19,7 @@ void PreviewSettingsDialog::processIntern()
     // Convert boolean to switcher index: 0 = Node index, 1 = Cell type
     int displayMode = _showNodeIndex ? 0 : 1;
 
-    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Display mode").textWidth(scale(120.0f)).values({"Node index", "Cell type"}), &displayMode);
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name(_("Display mode")).textWidth(scale(120.0f)).values({_("Node index"), _("Cell type")}), &displayMode);
 
     // Convert switcher index back to boolean
     _showNodeIndex = (displayMode == 0);
@@ -27,14 +27,14 @@ void PreviewSettingsDialog::processIntern()
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
-    if (AlienGui::Button("Adopt")) {
+    if (AlienGui::Button(_("Adopt"))) {
         close();
         _editData->showNodeIndex = _showNodeIndex;
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 }

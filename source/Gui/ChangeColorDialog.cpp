@@ -17,17 +17,17 @@ void ChangeColorDialog::open(GenomeTabEditData const& editData)
 }
 
 ChangeColorDialog::ChangeColorDialog()
-    : AlienDialog("Change color")
+    : AlienDialog(_("Change color"))
 {}
 
 void ChangeColorDialog::processIntern()
 {
-    AlienGui::Group(AlienGui::GroupParameters().text("Filter"));
+    AlienGui::Group(AlienGui::GroupParameters().text(_("Filter")));
     ImGui::Checkbox("##restrictToSelectedGene", &_restrictToSelectedGene);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text("Restrict to selected gene");
+    AlienGui::Text(_("Restrict to selected gene"));
 
-    AlienGui::Group(AlienGui::GroupParameters().text("Color transition rule"));
+    AlienGui::Group(AlienGui::GroupParameters().text(_("Color transition rule")));
     if (ImGui::BeginTable("##", 3, ImGuiTableFlags_SizingStretchProp)) {
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 0);
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, scale(20));
@@ -63,13 +63,13 @@ void ChangeColorDialog::processIntern()
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         onChangeColor();
         close();
     }
     ImGui::SetItemDefaultFocus();
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 }

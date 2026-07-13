@@ -30,19 +30,19 @@ void NewSimulationDialog::shutdownIntern()
 }
 
 NewSimulationDialog::NewSimulationDialog()
-    : AlienDialog("New simulation")
+    : AlienDialog(_("New simulation"))
 {}
 
 void NewSimulationDialog::processIntern()
 {
-    AlienGui::InputText(AlienGui::InputTextParameters().name("Project name").textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
-    AlienGui::InputInt(AlienGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
-    AlienGui::InputInt(AlienGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
-    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Adopt parameters").textWidth(ContentTextInputWidth), _adoptSimulationParameters);
+    AlienGui::InputText(AlienGui::InputTextParameters().name(_("Project name")).textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Width")).textWidth(ContentTextInputWidth), _width);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Height")).textWidth(ContentTextInputWidth), _height);
+    AlienGui::Checkbox(AlienGui::CheckboxParameters().name(_("Adopt parameters")).textWidth(ContentTextInputWidth), _adoptSimulationParameters);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         ImGui::CloseCurrentPopup();
         onNewSimulation();
         close();
@@ -50,7 +50,7 @@ void NewSimulationDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         ImGui::CloseCurrentPopup();
         close();
     }
@@ -61,6 +61,8 @@ void NewSimulationDialog::processIntern()
 
 void NewSimulationDialog::openIntern()
 {
+    strncpy(_projectName, _("<unnamed simulation>"), sizeof(_projectName) - 1);
+    _projectName[sizeof(_projectName) - 1] = '\0';
     auto worldSize = _SimulationFacade::get()->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;

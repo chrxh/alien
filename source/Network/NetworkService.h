@@ -71,6 +71,7 @@ public:
         std::string const& statistics);
     bool downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
     void incDownloadCounter(std::string const& simId);
+    void clearDownloadCache();
     bool editResource(std::string const& simId, std::string const& newName, std::string const& newDescription);
     bool moveResource(std::string const& simId, WorkspaceType targetWorkspace);
     bool deleteResource(std::string const& simId);

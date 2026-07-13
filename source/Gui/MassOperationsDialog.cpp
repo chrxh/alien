@@ -109,7 +109,7 @@ void MassOperationsDialog::processIntern()
     AlienGui::Group(AlienGui::GroupParameters().text("Filter").highlighted(true));
     ImGui::Checkbox("##restrictToSelection", &_restrictToSelectedCreatures);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text("Restrict to selection");
+    AlienGui::Text(_("Restrict to selection"));
 
     AlienGui::Group(AlienGui::GroupParameters().text("Operations").highlighted(true));
 
@@ -156,9 +156,9 @@ void MassOperationsDialog::processIntern()
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
             auto posX = ImGui::GetCursorPos().x;
             ImGui::BeginDisabled(!_randomizeEnergies);
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.1f").name("Minimum energy").textWidth(RightColumnWidth), _minEnergy);
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.1f").name(_("Minimum energy")).textWidth(RightColumnWidth), _minEnergy);
             ImGui::SetCursorPosX(posX);
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.1f").name("Maximum energy").textWidth(RightColumnWidth), _maxEnergy);
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.1f").name(_("Maximum energy")).textWidth(RightColumnWidth), _maxEnergy);
             ImGui::EndDisabled();
 
             table.next();
@@ -168,9 +168,9 @@ void MassOperationsDialog::processIntern()
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
             posX = ImGui::GetCursorPos().x;
             ImGui::BeginDisabled(!_randomizeAges);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Minimum age").textWidth(RightColumnWidth), _minAge);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Minimum age")).textWidth(RightColumnWidth), _minAge);
             ImGui::SetCursorPosX(posX);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Maximum age").textWidth(RightColumnWidth), _maxAge);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Maximum age")).textWidth(RightColumnWidth), _maxAge);
             ImGui::EndDisabled();
 
             table.next();
@@ -180,9 +180,9 @@ void MassOperationsDialog::processIntern()
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
             posX = ImGui::GetCursorPos().x;
             ImGui::BeginDisabled(!_randomizeCountdowns);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Minimum value").textWidth(RightColumnWidth), _minCountdown);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Minimum value")).textWidth(RightColumnWidth), _minCountdown);
             ImGui::SetCursorPosX(posX);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Maximum value").textWidth(RightColumnWidth), _maxCountdown);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name(_("Maximum value")).textWidth(RightColumnWidth), _maxCountdown);
             ImGui::EndDisabled();
 
             table.next();
@@ -190,7 +190,7 @@ void MassOperationsDialog::processIntern()
             AlienGui::Group(AlienGui::GroupParameters().text("Randomize mutants"));
             ImGui::Checkbox("##lineageId", &_randomizeLineageId);
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-            AlienGui::Text("Randomize lineage ids");
+            AlienGui::Text(_("Randomize lineage ids"));
 
             table.next();
 
@@ -199,9 +199,9 @@ void MassOperationsDialog::processIntern()
             ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
             posX = ImGui::GetCursorPos().x;
             ImGui::BeginDisabled(!_randomizeGlow);
-            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").name("Minimum glow").min(0).max(1).textWidth(RightColumnWidth), &_minGlow);
+            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").name(_("Minimum glow")).min(0).max(1).textWidth(RightColumnWidth), &_minGlow);
             ImGui::SetCursorPosX(posX);
-            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").name("Maximum glow").min(0).max(1).textWidth(RightColumnWidth), &_maxGlow);
+            AlienGui::SliderFloat(AlienGui::SliderFloatParameters().format("%.2f").name(_("Maximum glow")).min(0).max(1).textWidth(RightColumnWidth), &_maxGlow);
             ImGui::EndDisabled();
 
             table.next();
@@ -223,7 +223,7 @@ void MassOperationsDialog::processIntern()
     AlienGui::Separator();
 
     ImGui::BeginDisabled(!isOkEnabled());
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         onExecute();
         close();
     }
@@ -231,7 +231,7 @@ void MassOperationsDialog::processIntern()
 
     ImGui::SameLine();
     ImGui::SetItemDefaultFocus();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 
@@ -240,7 +240,7 @@ void MassOperationsDialog::processIntern()
 }
 
 MassOperationsDialog::MassOperationsDialog()
-    : AlienDialog("Mass operations")
+    : AlienDialog(_("Mass operations"))
 {}
 
 void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)

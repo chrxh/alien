@@ -17,7 +17,7 @@
 
 void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 {
-    changeTitle("Change name or description");
+    changeTitle(_("Change name or description"));
     AlienDialog::open();
     _treeTO = treeTO;
 
@@ -28,7 +28,7 @@ void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 
 void EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs)
 {
-    changeTitle("Change folder name");
+    changeTitle(_("Change folder name"));
     AlienDialog::open();
     _treeTO = treeTO;
     _rawTOs = rawTOs;
@@ -55,20 +55,20 @@ void EditSimulationDialog::processForLeaf()
     auto& rawTO = _treeTO->getLeaf().rawTO;
     std::string resourceTypeString = rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
 
-    AlienGui::InputText(AlienGui::InputTextParameters().textWidth(0).hint("Name"), _newName);
+    AlienGui::InputText(AlienGui::InputTextParameters().textWidth(0).hint(_("Name")), _newName);
 
     AlienGui::Separator();
 
     ImGui::PushID("description");
     AlienGui::InputTextMultiline(
-        AlienGui::InputTextMultilineParameters().hint("Desc (optional)").textWidth(0).height(ImGui::GetContentRegionAvail().y - scale(50.0f)),
+        AlienGui::InputTextMultilineParameters().hint(_("Desc (optional)")).textWidth(0).height(ImGui::GetContentRegionAvail().y - scale(50.0f)),
         _newDescription);
     ImGui::PopID();
 
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_newName.empty());
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         if (NetworkValidationService::get().isStringValidForDatabase(_newName) && NetworkValidationService::get().isStringValidForDatabase(_newDescription)) {
             EditNetworkResourceRequestData::Entry entry{.resourceId = rawTO->id, .newName = _newName, .newDescription = _newDescription};
             NetworkTransferController::get().onEdit(EditNetworkResourceRequestData{.entries = std::vector{entry}});
@@ -81,7 +81,7 @@ void EditSimulationDialog::processForLeaf()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 }
@@ -89,14 +89,14 @@ void EditSimulationDialog::processForLeaf()
 void EditSimulationDialog::processForFolder()
 {
     if (ImGui::BeginChild("##Folder", {0, -scale(50.0f)})) {
-        AlienGui::InputText(AlienGui::InputTextParameters().textWidth(0).hint("Folder name"), _newName);
+        AlienGui::InputText(AlienGui::InputTextParameters().textWidth(0).hint(_("Folder name")), _newName);
     }
     ImGui::EndChild();
 
     AlienGui::Separator();
 
     ImGui::BeginDisabled(_newName.empty());
-    if (AlienGui::Button("OK")) {
+    if (AlienGui::Button(_("OK"))) {
         if (NetworkValidationService::get().isStringValidForDatabase(_newName)) {
 
             EditNetworkResourceRequestData requestData;
@@ -108,14 +108,14 @@ void EditSimulationDialog::processForFolder()
             NetworkTransferController::get().onEdit(requestData);
             close();
         } else {
-            showMessage("Error", Const::NotAllowedCharacters);
+            showMessage(_("Error"), Const::NotAllowedCharacters);
         }
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienGui::Button("Cancel")) {
+    if (AlienGui::Button(_("Cancel"))) {
         close();
     }
 }
